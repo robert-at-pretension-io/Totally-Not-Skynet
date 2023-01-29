@@ -14,15 +14,20 @@ Each of the roles has a defined "perogative" and "obligation" that they must fol
 * **System Architect** - The system architect is responsible for designing the system. The system architect's perogative is to design the system, and the system architect's obligation is to design the system in a way that is correct and follows the (project goals). They will create the design documents for the system. They will also create the API documentation for the system. They only communicate with the [Lead Developer](#lead-developer) and the [QA](#qa). They will not communicate with the [Developer](#developer). The system archtect has the final say on the design of the system. The system architect has the ability to (inspect) the system. It can (read files) within the system.
 
 # System Objects
-* **Ticket** - A ticket is a document that contains a description of the task, the expected outcome. It will also contain useful api documentation, design documents, and other information that the developer will need to complete the task. It can also contain a list of API that still need to be implemented. It will specify the language that the [developer](#developer) should use to implement the task.
+* **Ticket** - A ticket is a document that contains a description of the task, the expected outcome, as well as useful API documentation, design documents, and other information that the developer will need to complete the task. It can also contain a list of API that still need to be implemented. It will specify the language that the developer should use to implement the task.
+
+* **Design Documents** -  Design documents are documents that contain the system design and other details related to the system. The Lead Developer and System Architect will use these documents to communicate with each other.
+
+* **API Documentation** - API Documentation is information that the Developer will use to implement the task. The System Architect will create the API documentation for the system.
+
+# System Actions
+* **Merge** - A merge is when the Lead Developer takes the code from the pull request and adds it to the master branch.
+
+* **Inspect** - Inspect is when the System Architect looks at the code and design documents to make sure that it meets the project goals. 
+
+* **Read Files** - Read Files is when the System Architect reads the code and design documents to make sure that it meets the project goals.
 
 *  **Pull Request** - A pull request is a request from the developer to the QA to review their code. The pull request contains the code that the developer has written, and the QA will review the code and either approve the pull request or request changes.
-
-* **Merge** - A merge is when the [Lead Developer](#lead-developer) takes the code from the (pull request) and adds it to the (master branch).
-
-* **Inspect** - Inspect is when the [System Architect](#system-architect) looks at the code and design documents to make sure that it meets the (project goals).
-
-* **Read Files** - Read Files is when the [System Architect](#system-architect) reads the code and design documents to make sure that it meets the (project goals).
 
 # Communication Channels
 For this system to work, there must be clear lines of communication between the roles. The communication channels are as follows:
@@ -33,3 +38,6 @@ For this system to work, there must be clear lines of communication between the 
 * **Lead Developer <-> System Architect** - The lead developer and system architect will communicate through design documents and API documentation.
 
 * **QA <-> Developer** - The QA and developer will communicate through (pull requests) and request changes. The QA will provide feedback to the developer through the pull requests.
+
+## Todo:
+Make sure the system described is unambiguous and clearly defined. All of the roles, channels of communication, system objects and prerogatives should make sense and provide clear direction.
