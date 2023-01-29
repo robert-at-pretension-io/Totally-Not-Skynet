@@ -28,7 +28,7 @@ Each of the roles has a defined "perogative" and "obligation" that they must fol
 For this system to work, there must be clear lines of communication between the roles. The communication channels are as follows:
 
 
-* **Developer <-> Lead Developer** - The developer will communicate with the lead developer through the (tickets) that are assigned to them. The lead developer will provide feedback to the developer through the (tickets). Developers can request (clarification) on a ticket if they are unsure of the requirements, they should be certain that they have all of the tools and specifications needed to design the program.
+* **Developer <-> Lead Developer** - The developer will communicate with the lead developer through the (tickets) that are assigned to them. The lead developer will provide feedback to the developer through the (tickets). Developers can request clarification on a ticket if they are unsure of the requirements, they should be certain that they have all of the tools and specifications needed to design the program.
 
 * **Lead Developer <-> System Architect** - The lead developer and system architect will communicate through design documents and API documentation.
 
