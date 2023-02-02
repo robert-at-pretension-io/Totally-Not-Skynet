@@ -50,7 +50,7 @@ For this system to work, there must be clear lines of communication between the 
 # System Stages
 The system must have a starting point. A genesis. This will be formulated as a file containing project goals named "project_goals.txt". This will contain a plain english description of what the successful completion of the project will look like.
 
-1. The *system architect* will create **API Documentation**. It will detail a) the programming language that will be used for the project, the b) system objects and c) system functions that will be needed to create the functioning software system that fulfills the requirements described in the project_goals.txt file. The functions must be in terms of the system objects and basic types of the chosen programming language. If external libraries are going to be used in the function, they must be specified in the ticket. Finally, the system architect must describe the system at a high level in terms of the functions and objects. 
+1. The *system architect* will create **API Documentation**. This will be stored in a file [project_name]_api.txt.  It will detail a) the programming language that will be used for the project, the b) system objects and c) system functions that will be needed to create the functioning software system that fulfills the requirements described in the project_goals.txt file. The functions must be in terms of the system objects and basic types of the chosen programming language. If external libraries are going to be used in the function, they must be specified in the ticket. Finally, the system architect must describe the system at a high level in terms of the functions and objects. 
 
 2. For each of the functions, the *architect* will create a **Ticket**. These tickets will include a) criteria for successful completion of the ticket, b) concise and unambiguous descriptions of all of objects required to implement the function, c) the programming language that the code written, d) the relative file structure of the function in relation to the rest of the code, e) what the function should be named. The reason for this specificity is that both the *QA* and the *Developer* are reading the same ticket while having different objectives. The tickets will have the following file names: ticket_number_[ticket_number]_[function_name|object_name].txt . The ticket_number will be the order that they are implemented.
 
@@ -81,6 +81,7 @@ The system must have a starting point. A genesis. This will be formulated as a f
 
 def event_loop():
     while True:
+        create_api_docs() #Use the language model to detail the functions/objects necessary to implement the software
         ticket = create_ticket() # create a ticket
         code = write_code(ticket) # write the code
         tests = run_tests(code) # run the tests
@@ -96,5 +97,77 @@ def event_loop():
         else: # if the pull request is not approved
             continue # continue the loop
 
-# Final Thoughts
-This system is a meta-system that uses language models, specified user roles, and project goals provided as input to create/generate functioning software systems. By using this system, developers, lead developers, system architects, and QA can create software systems quickly and efficiently. It will reduce the amount of time needed for the creation of software systems and make the process more streamlined.
+The language model is invoked using the following code:
+
+import os
+import openai
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+response = openai.Completion.create(
+  model="text-davinci-003",
+  prompt="",
+  temperature=0.7,
+  max_tokens=256,
+  top_p=1,
+  frequency_penalty=0,
+  presence_penalty=0
+)
+
+Write the implementation of the create_ticket() function so that it uses the language model api, the prompt must be sent to the language model so that the response will be a ticket as described above. the create_ticket function must make a directory of all of the tickets. It should call the language model once per ticket (which corresponds to once per function).
+
+def create_ticket():
+    # create a directory to store the tickets
+    os.system('mkDIR tickets')
+
+    # get the project goals from the project_goals.txt file
+    with open('project_goals.txt', 'r') as f:
+        project_goals = f.read()
+
+    # iterate through all of the functions
+    for i in range(len(project_goals)):
+        # generate a prompt for the language model
+        prompt = 'Function {}: {}'.format(i, project_goals[i])
+
+        # call the language model
+        response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=prompt,
+            temperature=0.7,
+            max_tokens=256,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
+        )
+
+        # create a file for the ticket
+        file_name = 'tickets/ticket_number_' + str(i) + '_' + project_goals[i] + '.txt'
+        with open(file_name, 'w') as f:
+            f.write(response)
+
+
+Write the implementation for the create_api_docs() function. It should also use the language model, the prompt sent to the language model must EXACTLY specify how the language model should respond given the requirements above.
+
+def create_api_docs():
+    # generate a prompt for the language model
+    prompt = 'API Documentation: Specify the programming language that will be used for the project, the system objects and system functions that will be needed to create the functioning software system that fulfills the requirements described in the project_goals.txt file. The functions must be in terms of the system objects and basic types of the chosen programming language. If external libraries are going to be used in the function, they must be specified in the ticket. Finally, the system architect must describe the system at a high level in terms of the functions and objects.'
+
+file = read_file('project_goals.txt');
+prompt = prompt + "\nproject_goals.txt:\n" + file;
+
+project_name = generate_project_name(file)
+
+response = openai.Completion.create(
+  model="text-davinci-003",
+  prompt=prompt,
+  temperature=0.7,
+  max_tokens=256,
+  top_p=1,
+  frequency_penalty=0,
+  presence_penalty=0
+)
+
+# create a file for the api documentation
+file_name = "{project_name}_api.txt"
+with open(file_name, 'w') as f:
+    f.write(response)
