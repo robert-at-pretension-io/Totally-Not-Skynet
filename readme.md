@@ -54,4 +54,47 @@ The system must have a starting point. A genesis. This will be formulated as a f
 
 2. For each of the functions, the *architect* will create a **Ticket**. These tickets will include a) criteria for successful completion of the ticket, b) concise and unambiguous descriptions of all of objects required to implement the function, c) the programming language that the code written, d) the relative file structure of the function in relation to the rest of the code, e) what the function should be named. The reason for this specificity is that both the *QA* and the *Developer* are reading the same ticket while having different objectives. The tickets will have the following file names: ticket_number_[ticket_number]_[function_name|object_name].txt . The ticket_number will be the order that they are implemented.
 
-2. Once the all of the tickets are created, the tickets will be handled one by one. "Handling" a ticket goes like this: The QA will read the ticket and create unit tests that import the function as it is described in the ticket. Independently, the developer will write code that implements the function described in the ticket. The developer will notify the qa when the function is completed.
+3. Once the all of the tickets are created, the tickets will be handled one by one. "Handling" a ticket goes like this: The QA will read the ticket and create unit tests that import the function as it is described in the ticket. Independently, the developer will write code that implements the function described in the ticket. The developer will notify the qa when the function is completed. The QA will then run the tests on the code and report their results to the developer. If the code passes the tests, the developer will submit a pull request to the QA.
+
+4. The *QA* will review the pull request sent by the *developer*. If the code passes the tests, the QA will approve the pull request and the *lead developer* will merge it into the master branch. If the code fails the tests, the QA will request changes from the developer and the process will start again.
+
+5. Once all of the functions have been implemented, the *system architect* will inspect the system. They will make sure that the code follows the project goals and the code is well-structured and commented. If there are any issues, the system architect will re-open the tickets and the process will start again.
+
+# System implementation:
+* In order to program this meta-system, the following functions must exist:
+  * **parse_ticket()** - This function will parse the ticket into a structured data object that contains the criteria for successful completion of the ticket, a concise and unambiguous description of the objects required to implement the function, a programming language for the code to be written in and the relative file structure of the function in relation to the rest of the code.
+
+* **write_code()** - This function will take the structured data object from the parse_ticket() function and use it to write a program that implements the function described in the ticket.
+
+* **run_tests()** - This function will take the code from the write_code() function and run it against a test suite created by the QA. It will then return the results of the tests.
+
+* **submit_pull_request()** - This function will take the code from the write_code() function and submit it to the QA in the form of a pull request.
+
+* **review_pull_request()** - This function will take the code from the pull request and review it. If the code passes the tests, the QA will approve the pull request and the Lead Developer will merge it into the master branch. If the
+
+* **create_ticket()**  - This function will take the project goals from the project_goals.txt file and use them to create a ticket for the developer. It will contain a description of the task, the expected outcome, as well as useful API documentation, design documents, and other information that the developer will need to complete the task. It can also contain a list of API that still need to be implemented. It will specify the language that the developer should use to implement the task.
+
+* **inspect_system()** - This function will take the system and inspect it. It will make sure that the code follows the project goals and the code is well-structured and commented. If there are any issues, the system architect will re-open the tickets and the process will start again.
+
+# Event loop:
+* Write the event loop using the functions above, write it in python:
+
+def event_loop():
+    while True:
+        ticket = create_ticket() # create a ticket
+        code = write_code(ticket) # write the code
+        tests = run_tests(code) # run the tests
+        pull_request = submit_pull_request(code) # submit the pull request
+        review_result = review_pull_request(pull_request) # review the pull request
+        if review_result == "approved": # if the pull request is approved
+            merge_result = merge_pull_request(pull_request) # merge the pull request
+            inspect_result = inspect_system() # inspect the system
+            if inspect_result == "passed": # if the system passes inspection
+                break # break out of the loop
+            else: # if the system does not pass inspection
+                continue # continue the loop
+        else: # if the pull request is not approved
+            continue # continue the loop
+
+# Final Thoughts
+This system is a meta-system that uses language models, specified user roles, and project goals provided as input to create/generate functioning software systems. By using this system, developers, lead developers, system architects, and QA can create software systems quickly and efficiently. It will reduce the amount of time needed for the creation of software systems and make the process more streamlined.
