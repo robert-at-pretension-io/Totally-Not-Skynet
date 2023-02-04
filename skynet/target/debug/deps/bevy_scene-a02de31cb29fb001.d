@@ -1,0 +1,12 @@
+/Users/rep/Projects/skynet/skynet/target/debug/deps/bevy_scene-a02de31cb29fb001.rmeta: /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/lib.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/bundle.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/dynamic_scene.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/dynamic_scene_builder.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/scene.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/scene_loader.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/scene_spawner.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/serde.rs
+
+/Users/rep/Projects/skynet/skynet/target/debug/deps/bevy_scene-a02de31cb29fb001.d: /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/lib.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/bundle.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/dynamic_scene.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/dynamic_scene_builder.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/scene.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/scene_loader.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/scene_spawner.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/serde.rs
+
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/lib.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/bundle.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/dynamic_scene.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/dynamic_scene_builder.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/scene.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/scene_loader.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/scene_spawner.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_scene-0.9.1/src/serde.rs:

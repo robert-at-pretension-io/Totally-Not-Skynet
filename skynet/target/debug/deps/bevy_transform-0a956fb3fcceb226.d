@@ -1,0 +1,10 @@
+/Users/rep/Projects/skynet/skynet/target/debug/deps/bevy_transform-0a956fb3fcceb226.rmeta: /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/lib.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/components/mod.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/components/global_transform.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/components/transform.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/systems.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/../README.md
+
+/Users/rep/Projects/skynet/skynet/target/debug/deps/bevy_transform-0a956fb3fcceb226.d: /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/lib.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/components/mod.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/components/global_transform.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/components/transform.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/systems.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/../README.md
+
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/lib.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/components/mod.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/components/global_transform.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/components/transform.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/systems.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/bevy_transform-0.9.1/src/../README.md:

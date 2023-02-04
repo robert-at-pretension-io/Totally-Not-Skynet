@@ -1,0 +1,11 @@
+/Users/rep/Projects/skynet/skynet/target/debug/deps/gilrs_core-a0becc833078c77b.rmeta: /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/lib.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/mod.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/macos/mod.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/macos/ff.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/macos/gamepad.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/macos/io_kit.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/utils.rs
+
+/Users/rep/Projects/skynet/skynet/target/debug/deps/gilrs_core-a0becc833078c77b.d: /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/lib.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/mod.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/macos/mod.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/macos/ff.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/macos/gamepad.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/macos/io_kit.rs /Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/utils.rs
+
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/lib.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/mod.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/macos/mod.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/macos/ff.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/macos/gamepad.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/platform/macos/io_kit.rs:
+/Users/rep/.cargo/registry/src/github.com-1ecc6299db9ec823/gilrs-core-0.5.2/src/utils.rs:
