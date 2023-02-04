@@ -33,8 +33,6 @@
 
 * **Approval/Request Changes** - When a Pull Request is made, the QA will either approve the pull request or request changes. If the QA approves the pull request, the Lead Developer will review the Pull Request and either request changes or approve it. The Lead Developer is making sure the code conforms to both the ticket and the requirements of the project.
 
-# Conclusion
-The system described above is a system that uses a language model, specified user roles, and project goals provided as input to create/generate functioning software systems. The system is composed of roles, objects, and actions that are used to create, develop, and maintain the system. The roles have a defined "perogative" and "obligation" that they must follow. The roles, objects, and actions are linked together in order to create a functioning software system.
 
 # Communication Channels
 For this system to work, there must be clear lines of communication between the roles. The communication channels are as follows:
@@ -45,6 +43,13 @@ For this system to work, there must be clear lines of communication between the 
 * **Lead Developer <-> System Architect** - The lead developer and system architect will communicate through design documents and API documentation.
 
 * **QA <-> Developer** - The QA and developer will communicate through (pull requests) and request changes. The QA will provide feedback to the developer through the pull requests.
+
+# System Architecture:
+* Since we are using rust for this project, it has a highly developed ecosystem of libraries. We will use these libraries to help us build the system. We will use the following libraries:
+    * [Bevy](https://bevyengine.org/) - Game Engine
+    * [docker_api](https://docs.rs/docker-api/latest/docker_api/index.html) - Docker API
+* Use Bevy Game Engine to aid in system design prototyping rapidity. Will also allow for easy porting to other platforms.
+* Docker API will allow us to send have an isolated environment with which to run skynet... This is a safety precaution to prevent the system from taking over the world haha... :sweat:
 
 
 # System Stages
