@@ -48,8 +48,10 @@ For this system to work, there must be clear lines of communication between the 
 * Since we are using rust for this project, it has a highly developed ecosystem of libraries. We will use these libraries to help us build the system. We will use the following libraries:
     * [Bevy](https://bevyengine.org/) - Game Engine
     * [docker_api](https://docs.rs/docker-api/latest/docker_api/index.html) - Docker API
+    * [git2](https://docs.rs/git2/) - Git API
 * Use Bevy Game Engine to aid in system design prototyping rapidity. Will also allow for easy porting to other platforms.
-* Docker API will allow us to send have an isolated environment with which to run skynet... This is a safety precaution to prevent the system from taking over the world haha... :sweat:
+* Docker API will allow us to send have an isolated environment with which to run skynet... This is a safety precaution to prevent the system from taking over the world haha... :sweat: Only the *System architect* will have access to the docker API. All other roles will be working 'within' the docker container and not be aware of the docker container -- that is, they will think they are working on the local system. This allows the system to be portable and to be run on any system that has docker installed AND will prevent this software system from compromising the host system.
+* The git2 crate will allow for keeping track of changes within the system. Each 'tick' of the bevy system will be represented by a git commit. This will allow for tracking changes within the software. Also, it'll make my github commit log look cool :sunglasses:.
 
 
 # System Stages
