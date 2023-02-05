@@ -91,15 +91,29 @@ fn prepare_docker_container(mut commands: Commands, runtime: ResMut<TokioTasksRu
         let opts = ContainerListOpts::builder().all(true).build();
         let containers = docker.containers().list(&opts).await.unwrap();
 
+        let mut make_new_container_or_id : (bool, Option<String>) = (true, None);
+
         containers.iter().for_each(|container| {
-            
-            println!("\n\n---------------\n\nContainer: {:?}\n\n---------------\n\n", container);
+            match &container.names {
+                Some(names) => {
+                    &names.iter().for_each(|name| {
+                        if name.contains(&project_name) {
+                            let id = container.id.clone().unwrap().to_string();
+                            make_new_container_or_id = (false, Some(id));
+                            println!("Container already exists with name: {}", name);
+                        }
+                    });
+                    // println!("Container Name: {}", names[0]);
+                },
+                None => {}
+            }
+
 
 
         });
 
 
-
+        if(make_new_container_or_id.0) {
         let opts = ContainerCreateOpts::builder()
             .image(image)
             .name(project_name)
@@ -120,6 +134,16 @@ fn prepare_docker_container(mut commands: Commands, runtime: ResMut<TokioTasksRu
                 println!("Make sure that the 'image' has been installed. The default image is 'alpine'. Install it by running 'docker pull alpine' on the command line.")
             }
         }
+    }
+    else {
+        // open the container id container
+        ctx.run_on_main_thread(move |ctx| {
+
+            let world: &mut World = ctx.world;
+            world.get_resource_mut::<ProjectObjects>().unwrap().container_id = make_new_container_or_id.1;
+
+            }).await;
+    }
 
 
     });
