@@ -1,10 +1,11 @@
+use bevy::ecs::system::Spawn;
 use bevy::prelude::*;
-use bevy::time::FixedTimestep;
 use bevy_tokio_tasks::TokioTasksRuntime;
 use clap::Parser;
-use docker_api::models::ContainerSummary;
-use docker_api::opts::{ContainerCreateOpts, ContainerListOpts};
+use docker_api::conn::TtyChunk;
+use docker_api::opts::{ContainerCreateOpts, ContainerListOpts, ExecCreateOpts};
 use docker_api::{Docker, Result};
+use futures_lite::StreamExt;
 
 use std::time::Duration;
 use std::{fs::File, io::BufRead};
@@ -26,7 +27,6 @@ struct Args {
 #[derive(Resource)]
 struct ProjectObjects {
     goal: String,
-    docker: Result<Docker>,
     container_id: Option<String>,
 }
 
@@ -50,23 +50,11 @@ impl FromWorld for ProjectObjects {
                 println!("Make sure that the 'project_goals_file' exists and is in the same directory as the executable.The default location is 'project_goals.txt")
             }
         }
-
-        match new_docker() {
-            Ok(docker) => Self {
-                goal: goal,
-                docker: Ok(docker),
-                container_id: None,
-            },
-            Err(error) => {
-                println!("Error: {}", error);
-                println!("Make sure that Docker is installed and running.");
-                Self {
-                    goal: goal,
-                    docker: Err(error),
-                    container_id: None,
-                }
-            }
+        Self {
+            goal,
+            container_id: None,
         }
+
     }
 }
 
@@ -91,7 +79,7 @@ fn prepare_docker_container(mut commands: Commands, runtime: ResMut<TokioTasksRu
         let opts = ContainerListOpts::builder().all(true).build();
         let containers = docker.containers().list(&opts).await.unwrap();
 
-        let mut make_new_container_or_id : (bool, Option<String>) = (true, None);
+        let (mut make_new_container, mut or_id) : (bool, Option<String>) = (true, None);
 
         containers.iter().for_each(|container| {
             match &container.names {
@@ -99,7 +87,7 @@ fn prepare_docker_container(mut commands: Commands, runtime: ResMut<TokioTasksRu
                     &names.iter().for_each(|name| {
                         if name.contains(&project_name) {
                             let id = container.id.clone().unwrap().to_string();
-                            make_new_container_or_id = (false, Some(id));
+                            (make_new_container, or_id) = (false, Some(id));
                             println!("Container already exists with name: {}", name);
                         }
                     });
@@ -107,13 +95,10 @@ fn prepare_docker_container(mut commands: Commands, runtime: ResMut<TokioTasksRu
                 },
                 None => {}
             }
-
-
-
         });
 
 
-        if(make_new_container_or_id.0) {
+        if(make_new_container) {
         let opts = ContainerCreateOpts::builder()
             .image(image)
             .name(project_name)
@@ -140,13 +125,75 @@ fn prepare_docker_container(mut commands: Commands, runtime: ResMut<TokioTasksRu
         ctx.run_on_main_thread(move |ctx| {
 
             let world: &mut World = ctx.world;
-            world.get_resource_mut::<ProjectObjects>().unwrap().container_id = make_new_container_or_id.1;
+            world.get_resource_mut::<ProjectObjects>().unwrap().container_id = or_id;
 
             }).await;
     }
 
 
     });
+}
+
+#[derive(Component)]
+struct Cmd {
+    cmd: Vec<String>,
+}
+
+pub fn print_chunk(chunk: TtyChunk) {
+    match chunk {
+        TtyChunk::StdOut(bytes) => {
+            println!("Stdout: {:?}", &bytes)
+        }
+        TtyChunk::StdErr(bytes) => {
+            eprintln!("StdErr: {:?}", &bytes)
+        }
+        TtyChunk::StdIn(_) => unreachable!(),
+    }
+}
+
+fn text_input(
+    mut char_evr: EventReader<ReceivedCharacter>,
+    keys: Res<Input<KeyCode>>,
+    mut string: Local<String>,
+    mut commands: Commands,
+) {
+    for ev in char_evr.iter() {
+        println!("Got char: '{}'", ev.char);
+        string.push(ev.char);
+    }
+
+    if keys.just_pressed(KeyCode::Return) {
+        println!("Text input: {}", *string);
+        commands.spawn(Cmd{
+            cmd: vec![string.clone()],
+        });
+        string.clear();
+    }
+}
+
+fn send_command_to_container(project_object: Res<ProjectObjects>, runtime: ResMut<TokioTasksRuntime>, mut commands: Commands, query: Query<&Cmd>) {
+
+    for cmd in query.iter() {
+        let cmd = cmd.cmd.clone();
+    let id = project_object.container_id.clone().unwrap();
+    runtime.spawn_background_task(|mut ctx| async move {
+        let docker = new_docker().unwrap();
+
+    let options = ExecCreateOpts::builder()
+    .command(cmd)
+    .attach_stdout(true)
+    .attach_stderr(true)
+    .build();
+
+while let Some(exec_result) = docker.containers().get(&id).exec(&options).next().await {
+    match exec_result {
+        Ok(chunk) => print_chunk(chunk),
+        Err(e) => eprintln!("Error: {}", e),
+    }
+
+}
+    });
+}
 }
 
 fn main() {
@@ -159,6 +206,8 @@ fn main() {
         .add_startup_system(print_project_objects)
         .add_fixed_timestep(Duration::from_secs(5), "label")
         .add_fixed_timestep_system("label", 0, print_container_info)
+        .add_system(text_input)
+        .add_system(send_command_to_container)
         .run();
 }
 
@@ -166,10 +215,7 @@ fn print_project_objects(goal: Res<ProjectObjects>) {
     println!("Project Goals: \n------------------\n");
     println!("{}", goal.goal);
     println!("\n------------------\n");
-    match goal.docker {
-        Ok(_) => println!("Docker Found!"),
-        Err(_) => println!("Docker Not Found!"),
-    }
+
     match &goal.container_id {
         Some(id) => println!("Docker Container ID: {}", id),
         None => println!("Docker Container Not Created!"),
