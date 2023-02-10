@@ -7,10 +7,9 @@ use docker_api::opts::{ContainerCreateOpts, ContainerListOpts, ExecCreateOpts};
 use docker_api::{Docker, Result};
 use futures_lite::StreamExt;
 
+use iyes_loopless::prelude::*;
 use std::time::Duration;
 use std::{fs::File, io::BufRead};
-use iyes_loopless::prelude::*;
-
 
 #[derive(Parser)]
 struct Args {
@@ -54,7 +53,6 @@ impl FromWorld for ProjectObjects {
             goal,
             container_id: None,
         }
-
     }
 }
 
@@ -134,7 +132,7 @@ fn prepare_docker_container(mut commands: Commands, runtime: ResMut<TokioTasksRu
     });
 }
 
-#[derive(Component)]
+#[derive(Resource)]
 struct Cmd {
     cmd: Vec<String>,
 }
@@ -164,43 +162,63 @@ fn text_input(
 
     if keys.just_pressed(KeyCode::Return) {
         println!("Text input: {}", *string);
-        commands.spawn(Cmd{
+        commands.insert_resource(Cmd {
             cmd: vec![string.clone()],
         });
         string.clear();
     }
 }
 
-fn send_command_to_container(project_object: Res<ProjectObjects>, runtime: ResMut<TokioTasksRuntime>, mut commands: Commands, query: Query<&Cmd>) {
-
-    for cmd in query.iter() {
+fn send_command_to_container(
+    project_object: Res<ProjectObjects>,
+    runtime: ResMut<TokioTasksRuntime>,
+    mut commands: Commands,
+    cmd: ResMut<Cmd>,
+) {
+    if cmd.cmd.len() > 0 {
         let cmd = cmd.cmd.clone();
-    let id = project_object.container_id.clone().unwrap();
-    runtime.spawn_background_task(|mut ctx| async move {
-        let docker = new_docker().unwrap();
+        let id = project_object.container_id.clone().unwrap();
+        runtime.spawn_background_task(|mut ctx| async move {
+            let docker = new_docker().unwrap();
 
-    let options = ExecCreateOpts::builder()
-    .command(cmd)
-    .attach_stdout(true)
-    .attach_stderr(true)
-    .build();
+            let options = ExecCreateOpts::builder()
+                .command(cmd)
+                .attach_stdout(true)
+                .attach_stderr(true)
+                .build();
 
-while let Some(exec_result) = docker.containers().get(&id).exec(&options).next().await {
-    match exec_result {
-        Ok(chunk) => print_chunk(chunk),
-        Err(e) => eprintln!("Error: {}", e),
+            match docker.containers().get(&id).start().await {
+                Ok(_) => {
+                    println!("Container Started!");
+
+                    while let Some(result) =
+                        docker.containers().get(&id).exec(&options).next().await
+                    {
+                        match result {
+                            Ok(chunk) => {
+                                print_chunk(chunk);
+                            }
+                            Err(error) => {
+                                println!("Error: {}", error);
+                            }
+                        }
+                    }
+                }
+                Err(error) => println!("Error: {}", error),
+            }
+            // TODO: need to remove the command from the resource
+        });
+        
     }
-
-}
-    });
-}
 }
 
 fn main() {
     App::new()
-    .add_plugins(DefaultPlugins)
-
+        .add_plugins(DefaultPlugins)
         .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
+        .insert_resource(Cmd {
+            cmd: vec![],
+        })
         .init_resource::<ProjectObjects>()
         .add_startup_system(prepare_docker_container)
         .add_startup_system(print_project_objects)
@@ -222,10 +240,9 @@ fn print_project_objects(goal: Res<ProjectObjects>) {
     }
 }
 
-fn print_container_info(project_object: Res<ProjectObjects>){
+fn print_container_info(project_object: Res<ProjectObjects>) {
     match &project_object.container_id {
         Some(id) => {
-
             println!("Container Info: {:?}", &id);
         }
         None => println!("Docker Container Not Created!"),
