@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+async-openai = "0.7.0"
 bevy = "0.9.1"
 bevy-tokio-tasks = "0.9.3"
 bevy_tasks = "0.9.1"

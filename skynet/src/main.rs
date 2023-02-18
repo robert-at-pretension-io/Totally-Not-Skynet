@@ -1,5 +1,7 @@
+use async_openai::types::CreateCompletionRequestArgs;
 use bevy::ecs::system::Spawn;
 use bevy::prelude::*;
+
 use bevy_tokio_tasks::TokioTasksRuntime;
 use bollard::container::{AttachContainerOptions, Config, RemoveContainerOptions};
 use bollard::exec::{CreateExecOptions, StartExecResults};
@@ -14,6 +16,8 @@ use iyes_loopless::prelude::*;
 use std::time::Duration;
 use std::{fs::File, io::BufRead};
 
+use async_openai::Client;
+
 #[derive(Parser)]
 struct Args {
     #[clap(short, long, default_value_t = true)]
@@ -24,6 +28,11 @@ struct Args {
     image: String,
     #[clap(long, default_value = "cool_project_name")]
     project_name: String,
+    #[clap(
+        long,
+        default_value = "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"
+    )]
+    api_key: String,
 }
 
 #[derive(Resource)]
@@ -32,8 +41,38 @@ struct ProjectObjects {
 }
 
 #[derive(Resource)]
+struct Cmd {
+    cmd: Vec<String>,
+}
+
+#[derive(Resource)]
+struct OpenAIObjects {
+    client: Option<Client>,
+}
+
+#[derive(Resource)]
 struct ContainerInfo {
-    id: Option<String>
+    id: Option<String>,
+}
+
+#[derive(Resource)]
+struct Settings {
+    input_mode: InputMode,
+}
+
+impl Settings {
+    fn next_mode(&mut self) {
+        match self.input_mode {
+            InputMode::DockerCommand => self.input_mode = InputMode::OpenAI,
+            InputMode::OpenAI => self.input_mode = InputMode::DockerCommand,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+enum InputMode {
+    DockerCommand,
+    OpenAI,
 }
 
 // Implementing this trait allows us to create a resource that is accessible from all future systems that we create.
@@ -56,9 +95,7 @@ impl FromWorld for ProjectObjects {
                 println!("Make sure that the 'project_goals_file' exists and is in the same directory as the executable.The default location is 'project_goals.txt")
             }
         }
-        Self {
-            goal,
-        }
+        Self { goal }
     }
 }
 
@@ -72,7 +109,21 @@ fn new_docker() -> Result<Docker> {
     Docker::new("tcp://127.0.0.1:8080")
 }
 
-fn prepare_docker_container(mut commands: Commands, runtime: ResMut<TokioTasksRuntime>, mut project_objects: ResMut<ProjectObjects>) {
+fn setup_openai_client(mut commands: Commands) {
+    let args = Args::parse();
+    let api_key = args.api_key.clone();
+    let client = Client::new().with_api_key(api_key);
+
+    commands.insert_resource(OpenAIObjects {
+        client: Some(client),
+    });
+}
+
+fn prepare_docker_container(
+    mut commands: Commands,
+    runtime: ResMut<TokioTasksRuntime>,
+    mut project_objects: ResMut<ProjectObjects>,
+) {
     let args = Args::parse();
     let image = args.image.clone();
     let project_name = args.project_name.clone();
@@ -85,16 +136,16 @@ fn prepare_docker_container(mut commands: Commands, runtime: ResMut<TokioTasksRu
         // let containers = docker.containers().list(&opts).await.unwrap();
 
         docker
-        .create_image(
-            Some(CreateImageOptions {
-                from_image: image,
-                ..Default::default()
-            }),
-            None,
-            None,
-        )
-        .next()
-        .await;
+            .create_image(
+                Some(CreateImageOptions {
+                    from_image: image,
+                    ..Default::default()
+                }),
+                None,
+                None,
+            )
+            .next()
+            .await;
 
         let alpine_config = Config {
             image: Some(image),
@@ -106,23 +157,19 @@ fn prepare_docker_container(mut commands: Commands, runtime: ResMut<TokioTasksRu
             ..Default::default()
         };
 
-    let id = docker
-        .create_container::<&str, &str>(None, alpine_config.clone().into()).await.unwrap().id;
+        let id = docker
+            .create_container::<&str, &str>(None, alpine_config.clone().into())
+            .await
+            .unwrap()
+            .id;
 
         ctx.run_on_main_thread(move |ctx| {
             ctx.world.insert_resource(ContainerInfo {
                 id: Some(id.clone()),
             });
-        }).await;
-
-        
+        })
+        .await;
     });
-
-}
-
-#[derive(Resource)]
-struct Cmd {
-    cmd: Vec<String>,
 }
 
 fn text_input(
@@ -130,9 +177,17 @@ fn text_input(
     keys: Res<Input<KeyCode>>,
     mut string: Local<String>,
     mut commands: Commands,
+    mut settings: ResMut<Settings>,
 ) {
+    if keys.just_pressed(KeyCode::Tab) {
+        settings.next_mode();
+        println!("Input Mode: {:?}", settings.input_mode);
+        string.clear();
+        return;
+    }
+
     for ev in char_evr.iter() {
-        println!("Got char: '{}'", ev.char);
+        print!("'{}'", ev.char);
         string.push(ev.char);
     }
 
@@ -145,14 +200,35 @@ fn text_input(
     }
 }
 
-fn send_command_to_container(
+fn send_command(
     project_object: Res<ProjectObjects>,
-    container_info: Res<ContainerInfo>, 
+    container_info: Res<ContainerInfo>,
     runtime: ResMut<TokioTasksRuntime>,
     mut commands: Commands,
+    mut settings: ResMut<Settings>,
     mut cmd: ResMut<Cmd>,
+    openai: Res<OpenAIObjects>,
 ) {
-    if cmd.cmd.len() > 0 && container_info.id.is_some() {
+    if cmd.cmd.len() > 0 {
+        match settings.input_mode {
+            InputMode::DockerCommand => {
+                if container_info.id.is_some() {
+                    send_docker_command(project_object, container_info, runtime, commands, cmd);
+                }
+            }
+            InputMode::OpenAI => {
+                send_openai_command(project_object, runtime, commands, cmd, openai);
+            }
+        }
+    }
+
+    fn send_docker_command(
+        project_object: Res<ProjectObjects>,
+        container_info: Res<ContainerInfo>,
+        mut runtime: ResMut<TokioTasksRuntime>,
+        commands: Commands,
+        mut cmd: ResMut<Cmd>,
+    ) {
         let local_cmd = cmd
             .cmd
             .pop()
@@ -160,15 +236,12 @@ fn send_command_to_container(
             .split_whitespace()
             .map(|s| s.to_string())
             .collect::<Vec<String>>();
-            
-            let id = container_info.id.clone().unwrap();
 
+        let id = container_info.id.clone().unwrap();
 
         runtime.spawn_background_task(|mut ctx| async move {
-
             let docker = new_docker().unwrap();
             // println!("Docker Container: {:?}", &docker);
-
 
             docker.start_container::<String>(&id, None).await;
 
@@ -201,26 +274,65 @@ fn send_command_to_container(
     }
 }
 
-fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
-        .insert_resource(Cmd { cmd: vec![] })
-        .insert_resource(ContainerInfo { id: None })
-        .init_resource::<ProjectObjects>()
-        .add_startup_system(prepare_docker_container)
-        .add_startup_system(print_project_objects)
-        // .add_fixed_timestep(Duration::from_secs(5), "label")
-        // .add_fixed_timestep_system("label", 0, print_container_info)
-        .add_system(text_input)
-        .add_system(send_command_to_container)
-        .run();
+fn send_openai_command(
+    project_object: Res<ProjectObjects>,
+    runtime: ResMut<TokioTasksRuntime>,
+    commands: Commands,
+    mut cmd: ResMut<Cmd>,
+    openai: Res<OpenAIObjects>,
+) {
+    let local_cmd = cmd
+        .cmd
+        .pop()
+        .unwrap()
+        .split_whitespace()
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>();
+
+    let client = openai.client.clone().unwrap();
+    let prompt = local_cmd.join(" ");
+
+    runtime.spawn_background_task(| ctx| async move {
+        let request = CreateCompletionRequestArgs::default()
+            .model("text-davinci-003")
+            .prompt(prompt)
+            .max_tokens(40_u16)
+            .build()
+            .unwrap();
+
+        let response = client
+            .completions() // Get the API "group" (completions, images, etc.) from the client
+            .create(request) // Make the API call in that "group"
+            .await
+            .unwrap();
+
+        println!("Completions: {:?}", response.choices);
+    });
 }
 
 fn print_project_objects(goal: Res<ProjectObjects>) {
     println!("Project Goals: \n------------------\n");
     println!("{}", goal.goal);
     println!("\n------------------\n");
-
 }
 
+fn main() {
+    App::new()
+        .add_plugins(DefaultPlugins)
+        .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
+        .insert_resource(Cmd { cmd: vec![] })
+        .insert_resource(ContainerInfo { id: None })
+        .insert_resource(Settings {
+            input_mode: InputMode::DockerCommand,
+        })
+        .init_resource::<ProjectObjects>()
+        .add_startup_system(prepare_docker_container)
+        // .add_startup_system(setup) // will add this back in when I figure out how to load a font
+        .add_startup_system(print_project_objects)
+        .add_startup_system(setup_openai_client)
+        // .add_fixed_timestep(Duration::from_secs(5), "label")
+        // .add_fixed_timestep_system("label", 0, print_container_info)
+        .add_system(text_input)
+        .add_system(send_command)
+        .run();
+}
