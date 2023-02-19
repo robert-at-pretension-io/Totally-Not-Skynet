@@ -1,6 +1,12 @@
 use async_openai::types::CreateCompletionRequestArgs;
-use bevy::ecs::system::Spawn;
+use bevy::{ecs::system::Spawn, utils::HashMap};
 use bevy::prelude::*;
+use nom::{
+    bytes::complete::{tag, take_until, take_while1},
+    character::complete::{char, alpha1, space0},
+    sequence::{delimited, preceded},
+    IResult, branch::alt, combinator::map, multi::{many0, separated_list0},
+};
 
 use bevy_tokio_tasks::TokioTasksRuntime;
 use bollard::container::{AttachContainerOptions, Config, RemoveContainerOptions};
@@ -13,7 +19,9 @@ use futures_lite::StreamExt;
 use bollard::errors::Error;
 use bollard::Docker;
 use iyes_loopless::prelude::*;
-use std::time::Duration;
+use std::fs;
+use std::path::Path;
+use std::{time::Duration, string};
 use std::{fs::File, io::BufRead};
 
 use async_openai::Client;
@@ -73,6 +81,149 @@ impl Settings {
 enum InputMode {
     DockerCommand,
     OpenAI,
+}
+
+#[derive(Debug)]
+struct CodeFile {
+    filename: String,
+    language: String,
+    command: String,
+    code: String,
+}
+
+fn parse_code_file(input: &str) -> IResult<&str, CodeFile> {
+    let (input, filename) = delimited(
+        tag("[filename]"),
+        take_until("[/filename]"),
+        tag("[/filename]"),
+    )(input)?;
+    let (input, language) = delimited(
+        tag("[language]"),
+        take_until("[/language]"),
+        tag("[/language]"),
+    )(input)?;
+    let (input, command) = delimited(
+        tag("[command]"),
+        take_until("[/command]"),
+        tag("[/command]"),
+    )(input)?;
+    let (input, code) = delimited(tag("[code]"), take_until("[/code]"), tag("[/code]"))(input)?;
+
+    Ok((
+        input,
+        CodeFile {
+            filename: filename.to_owned(),
+            language: language.to_owned(),
+            command: command.to_owned(),
+            code: code.to_owned(),
+        },
+    ))
+}
+
+#[derive(Debug)]
+struct CodeData {
+    objects: Vec<Object>,
+    functions: Vec<FunctionSignature>,
+}
+
+#[derive(Debug)]
+struct Object {
+    name: String,
+    var_type: Type,
+}
+
+#[derive(Debug)]
+struct FunctionSignature {
+    name: String,
+    inputs: Vec<Variable>,
+    return_type: Type,
+}
+
+#[derive(Debug)]
+struct Variable {
+    name: String,
+    var_type: Type,
+}
+
+#[derive(Debug)]
+enum Type {
+    Int,
+    Float,
+    Double,
+    Bool,
+    String,
+    Other(String),
+}
+
+fn parse_object(input: &str) -> IResult<&str, Object> {
+    let (input, name) = preceded(space0, alpha1)(input)?;
+    let (input, _) = preceded(space0, char(':'))(input)?;
+    let (input, var_type) = parse_type(input)?;
+    let (input, _) = delimited(space0, char(';'), space0)(input)?;
+
+    Ok((input, Object {
+        name: name.to_owned(),
+        var_type,
+    }))
+}
+
+fn parse_objects(input: &str) -> IResult<&str, Vec<Object>> {
+    let (input, objects) = delimited(tag("[objects]"), many0(parse_object), tag("[/objects]"))(input)?;
+
+    Ok((input, objects))
+}
+
+fn parse_function_signature(input: &str) -> IResult<&str, FunctionSignature> {
+    let (input, name) = preceded(tag(" "), alpha1)(input)?;
+    let (input, _) = delimited(space0, char('('), space0)(input)?;
+    let (input, inputs) = separated_list0(tag(", "), parse_variable)(input)?;
+    let (input, _) = delimited(space0, tag(")"), space0)(input)?;
+    let (input, _) = preceded(tag(" -> "), space0)(input)?;
+    let (input, return_type) = parse_type(input)?;
+
+    Ok((input, FunctionSignature {
+        name: name.to_owned(),
+        inputs,
+        return_type,
+    }))
+}
+
+fn parse_variable(input: &str) -> IResult<&str, Variable> {
+    let (input, name) = preceded(space0, alpha1)(input)?;
+    let (input, _) = preceded(space0, char(':'))(input)?;
+    let (input, var_type) = parse_type(input)?;
+
+    Ok((input, Variable {
+        name: name.to_owned(),
+        var_type,
+    }))
+}
+
+fn parse_type(input: &str) -> IResult<&str, Type> {
+    alt((
+        map(tag("int"), |_| Type::Int),
+        map(tag("float"), |_| Type::Float),
+        map(tag("double"), |_| Type::Double),
+        map(tag("bool"), |_| Type::Bool),
+        map(tag("string"), |_| Type::String),
+        map(alpha1, |s : &str| Type::Other(s.to_owned())),
+    ))(input)
+}
+
+fn parse_functions(input: &str) -> IResult<&str, Vec<FunctionSignature>> {
+    let (input, functions) = delimited(tag("[functions]"), many0(parse_function_signature), tag("[/functions]"))(input)?;
+
+    Ok((input, functions))
+}
+
+fn parse_code_data(input: &str) -> IResult<&str, CodeData> {
+    let (input, objects) = parse_objects(input)?;
+    let (input, functions) = parse_functions(input)?;
+
+    Ok((input, CodeData {
+        objects,
+        functions,
+    }))
 }
 
 // Implementing this trait allows us to create a resource that is accessible from all future systems that we create.
@@ -274,6 +425,27 @@ fn send_command(
     }
 }
 
+fn load_prompts(directory_path: &str) -> HashMap<String, String> {
+    let mut file_map = HashMap::new();
+    let directory = Path::new(directory_path);
+
+    for entry in fs::read_dir(directory).unwrap() {
+        let entry = entry.unwrap();
+        let file_path = entry.path();
+
+        if file_path.is_file() {
+            if let Some(file_name) = file_path.clone().file_name().and_then(|n| n.to_str()) {
+                if let Some(file_stem) = Path::new(file_name).file_stem().and_then(|s| s.to_str()) {
+                    let file_contents = fs::read_to_string(file_path).unwrap();
+                    file_map.insert(file_stem.to_string(), file_contents);
+                }
+            }
+        }
+    }
+
+    file_map
+}
+
 fn send_openai_command(
     project_object: Res<ProjectObjects>,
     runtime: ResMut<TokioTasksRuntime>,
@@ -292,7 +464,7 @@ fn send_openai_command(
     let client = openai.client.clone().unwrap();
     let prompt = local_cmd.join(" ");
 
-    runtime.spawn_background_task(| ctx| async move {
+    runtime.spawn_background_task(|ctx| async move {
         let request = CreateCompletionRequestArgs::default()
             .model("text-davinci-003")
             .prompt(prompt)

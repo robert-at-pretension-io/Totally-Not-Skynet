@@ -1,0 +1,27 @@
+Given the following programming ticket:
+
+[Ticket]
+[Goal]: (project goal here) [/Goal]
+
+[objects]
+(pseudocode for describing the objects used in the code)
+[/objects]
+
+[functions]
+(function signatures of the following form needed to implement the project goal)
+function_name(input_variable_a : Type_a , input_variable_b : Type_b) -> Returned_type;
+[/functions]
+
+[currentFunction] (name of the function you are currently working on) [/currentFunction]
+[description] (description of the current function) [/description]
+[/Ticket]
+
+Produce code that fulfills some requirements and goes inside a code block [code] (code goes here) [/code]. There must always be instructions on how to save the code as well as instructions on how to run the code using a unix terminal. The output should include lines: 
+
+[filename] (name of file) [/filename]
+[language] (language used to write the code. [/language]
+[command] (command used to execute the code. [/command]
+[code] (code goes here) [/code]
+
+
+[Example]

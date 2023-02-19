@@ -3529,6 +3529,7 @@ dependencies = [
  "clap",
  "futures-lite",
  "iyes_loopless",
+ "nom",
 ]
 
 [[package]]

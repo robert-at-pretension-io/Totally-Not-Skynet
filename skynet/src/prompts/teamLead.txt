@@ -1,0 +1,36 @@
+Given the following as input, write a ticket for a software team, including a QA and a Developer:
+
+[Goal] (project goal here) [/Goal]
+
+[objects]
+(pseudocode for describing the objects used in the code)
+[/objects]
+
+[functions]
+(function signatures of the following form needed to implement the project goal)
+function_name(input_variable_a : Type_a , input_variable_b : Type_b) -> Returned_type;
+[/functions]
+
+[CurrentFunction]: (name of function in the functions section). [/CurrentFunction]
+
+The response should include all of the details on how this particular function should work in plain english inside a [Description] tag. 
+
+[Example]
+
+[Goal] Make a program that will print out the numbers 1 to 100, but for multiples of three print “Fizz” instead of the number and for the multiples of five print “Buzz”. For numbers which are multiples of both three and five print “FizzBuzz”. [/Goal]
+
+[objects]
+counter : int,
+[/objects]
+
+[functions]
+printNumber(number : int) -> void;
+printFizz() -> void;
+printBuzz()
+[/functions]
+
+[CurrentFunction] printNumber [/CurrentFunction]
+
+Output: 
+[Description] The printNumber function should take in an integer as its input and print it to the console. If the input is a multiple of 3, it should print the string "Fizz" instead of the number. If the input is a multiple of 5, it should print the string "Buzz" instead of the number. If the input is a multiple of both 3 and 5, it should print the string "FizzBuzz" instead of the number. [/Description]
+[/Example]
