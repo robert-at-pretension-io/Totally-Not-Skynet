@@ -1,27 +1,24 @@
 use async_openai::types::CreateCompletionRequestArgs;
-use bevy::{ecs::system::Spawn, utils::HashMap};
+use bevy::{utils::HashMap};
 use bevy::prelude::*;
 use nom::{
-    bytes::complete::{tag, take_until, take_while1},
+    bytes::complete::{tag, take_until},
     character::complete::{char, alpha1, space0},
     sequence::{delimited, preceded},
     IResult, branch::alt, combinator::map, multi::{many0, separated_list0},
 };
 
 use bevy_tokio_tasks::TokioTasksRuntime;
-use bollard::container::{AttachContainerOptions, Config, RemoveContainerOptions};
+use bollard::container::{Config};
 use bollard::exec::{CreateExecOptions, StartExecResults};
 use bollard::image::CreateImageOptions;
 use clap::Parser;
-
 use futures_lite::StreamExt;
 
 use bollard::errors::Error;
 use bollard::Docker;
-use iyes_loopless::prelude::*;
 use std::fs;
 use std::path::Path;
-use std::{time::Duration, string};
 use std::{fs::File, io::BufRead};
 
 use async_openai::Client;
@@ -32,8 +29,6 @@ struct Args {
     debug: bool,
     #[clap(short, long, default_value = "project_goals.txt")]
     project_goals_file: String,
-    #[clap(short, long, default_value = "alpine")]
-    image: String,
     #[clap(long, default_value = "cool_project_name")]
     project_name: String,
     #[clap(
@@ -46,6 +41,7 @@ struct Args {
 #[derive(Resource)]
 struct ProjectObjects {
     goal: String,
+    prompts: HashMap<String,String>
 }
 
 #[derive(Resource)]
@@ -246,7 +242,8 @@ impl FromWorld for ProjectObjects {
                 println!("Make sure that the 'project_goals_file' exists and is in the same directory as the executable.The default location is 'project_goals.txt")
             }
         }
-        Self { goal }
+        let prompts = load_prompts();
+        Self { goal, prompts }
     }
 }
 
@@ -271,21 +268,11 @@ fn setup_openai_client(mut commands: Commands) {
 }
 
 fn prepare_docker_container(
-    mut commands: Commands,
     runtime: ResMut<TokioTasksRuntime>,
-    mut project_objects: ResMut<ProjectObjects>,
 ) {
-    let args = Args::parse();
-    let image = args.image.clone();
-    let project_name = args.project_name.clone();
     runtime.spawn_background_task(|mut ctx| async move {
         let docker = new_docker().unwrap();
         let image = "ubuntu:latest";
-
-        // see if the container already exists with a certain name:
-        // let opts = ContainerListOpts::builder().all(true).build();
-        // let containers = docker.containers().list(&opts).await.unwrap();
-
         docker
             .create_image(
                 Some(CreateImageOptions {
@@ -298,7 +285,7 @@ fn prepare_docker_container(
             .next()
             .await;
 
-        let alpine_config = Config {
+        let image_config = Config {
             image: Some(image),
             tty: Some(true),
             attach_stdin: Some(true),
@@ -309,7 +296,7 @@ fn prepare_docker_container(
         };
 
         let id = docker
-            .create_container::<&str, &str>(None, alpine_config.clone().into())
+            .create_container::<&str, &str>(None, image_config.clone().into())
             .await
             .unwrap()
             .id;
@@ -355,9 +342,9 @@ fn send_command(
     project_object: Res<ProjectObjects>,
     container_info: Res<ContainerInfo>,
     runtime: ResMut<TokioTasksRuntime>,
-    mut commands: Commands,
-    mut settings: ResMut<Settings>,
-    mut cmd: ResMut<Cmd>,
+    commands: Commands,
+    settings: ResMut<Settings>,
+    cmd: ResMut<Cmd>,
     openai: Res<OpenAIObjects>,
 ) {
     if cmd.cmd.len() > 0 {
@@ -368,7 +355,7 @@ fn send_command(
                 }
             }
             InputMode::OpenAI => {
-                send_openai_command(project_object, runtime, commands, cmd, openai);
+                send_openai_command(project_object, runtime, cmd, openai);
             }
         }
     }
@@ -425,7 +412,8 @@ fn send_command(
     }
 }
 
-fn load_prompts(directory_path: &str) -> HashMap<String, String> {
+fn load_prompts() -> HashMap<String, String> {
+    let directory_path = "./prompts";
     let mut file_map = HashMap::new();
     let directory = Path::new(directory_path);
 
@@ -449,7 +437,6 @@ fn load_prompts(directory_path: &str) -> HashMap<String, String> {
 fn send_openai_command(
     project_object: Res<ProjectObjects>,
     runtime: ResMut<TokioTasksRuntime>,
-    commands: Commands,
     mut cmd: ResMut<Cmd>,
     openai: Res<OpenAIObjects>,
 ) {
