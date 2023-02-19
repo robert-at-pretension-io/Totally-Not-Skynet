@@ -62,6 +62,7 @@ struct ContainerInfo {
 #[derive(Resource)]
 struct Settings {
     input_mode: InputMode,
+    stage: Stage
 }
 
 impl Settings {
@@ -140,6 +141,14 @@ struct Variable {
     name: String,
     var_type: Type,
 }
+
+#[derive(Debug, Resource)]
+enum Stage {
+    Architecting,
+    Ticketting,
+    Developing
+}
+
 
 #[derive(Debug)]
 enum Type {
@@ -355,7 +364,7 @@ fn send_command(
                 }
             }
             InputMode::OpenAI => {
-                send_openai_command(project_object, runtime, cmd, openai);
+                send_openai_command(project_object, runtime, cmd, openai, settings);
             }
         }
     }
@@ -439,6 +448,7 @@ fn send_openai_command(
     runtime: ResMut<TokioTasksRuntime>,
     mut cmd: ResMut<Cmd>,
     openai: Res<OpenAIObjects>,
+    settings: ResMut<Settings>
 ) {
     let local_cmd = cmd
         .cmd
@@ -449,7 +459,22 @@ fn send_openai_command(
         .collect::<Vec<String>>();
 
     let client = openai.client.clone().unwrap();
-    let prompt = local_cmd.join(" ");
+
+    // here is where we determine the prompt based on the stage of development
+    let mut prompt = String::new();
+
+    match settings.stage {
+        Stage::Architecting => {
+            prompt = project_object.prompts.get("softwareArchitecture").unwrap().clone().to_string();
+            prompt = prompt + "[goal]" + &project_object.goal.clone() + "[/goal]";
+        }
+        Stage::Ticketting => todo!(),
+        Stage::Developing => todo!(),
+    }
+
+
+
+    // let prompt = local_cmd.join(" ");
 
     runtime.spawn_background_task(|ctx| async move {
         let request = CreateCompletionRequestArgs::default()
@@ -483,6 +508,7 @@ fn main() {
         .insert_resource(ContainerInfo { id: None })
         .insert_resource(Settings {
             input_mode: InputMode::DockerCommand,
+            stage: Stage::Architecting
         })
         .init_resource::<ProjectObjects>()
         .add_startup_system(prepare_docker_container)
