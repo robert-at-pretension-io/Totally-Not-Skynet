@@ -55,6 +55,13 @@ For this system to work, there must be clear lines of communication between the 
 
 
 # System Stages
+
+Initialization Stage:
+* Configure docker container
+* Connect to docker container
+* Initialize git repo
+
+
 The system must have a starting point. A genesis. This will be formulated as a file containing project goals named "project_goals.txt". This will contain a plain english description of what the successful completion of the project will look like.
 
 1. The *system architect* will create **API Documentation**. This will be stored in a file [project_name]_api.txt.  It will detail a) the programming language that will be used for the project, the b) system objects and c) system functions that will be needed to create the functioning software system that fulfills the requirements described in the project_goals.txt file. The functions must be in terms of the system objects and basic types of the chosen programming language. If external libraries are going to be used in the function, they must be specified in the ticket. Finally, the system architect must describe the system at a high level in terms of the functions and objects. 

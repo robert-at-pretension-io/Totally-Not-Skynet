@@ -8,7 +8,7 @@ Given the following as input, write a ticket for a software team, including a QA
 
 [functions]
 (function signatures of the following form needed to implement the project goal)
-function_name(input_variable_a : Type_a , input_variable_b : Type_b) -> Returned_type;
+function_name(input_variable_a : Type_a , input_variable_b : Type_b) : Returned_type;
 [/functions]
 
 [CurrentFunction]: (name of function in the functions section). [/CurrentFunction]
@@ -24,9 +24,9 @@ counter : int,
 [/objects]
 
 [functions]
-printNumber(number : int) -> void;
-printFizz() -> void;
-printBuzz()
+printNumber(number : int) : void;
+printFizz() : void;
+printBuzz() : void;
 [/functions]
 
 [CurrentFunction] printNumber [/CurrentFunction]

@@ -1,15 +1,22 @@
 use async_openai::types::CreateCompletionRequestArgs;
-use bevy::{utils::HashMap};
 use bevy::prelude::*;
+use bevy::utils::HashMap;
+use either::Either;
+use nom::bytes::complete::take_while;
+use nom::character::complete::{multispace0, newline};
+use nom::sequence::tuple;
 use nom::{
+    branch::alt,
     bytes::complete::{tag, take_until},
-    character::complete::{char, alpha1, space0},
+    character::complete::{alpha1, char, space0},
+    combinator::map,
+    multi::{many0, separated_list0},
     sequence::{delimited, preceded},
-    IResult, branch::alt, combinator::map, multi::{many0, separated_list0},
+    IResult,
 };
 
 use bevy_tokio_tasks::TokioTasksRuntime;
-use bollard::container::{Config};
+use bollard::container::Config;
 use bollard::exec::{CreateExecOptions, StartExecResults};
 use bollard::image::CreateImageOptions;
 use clap::Parser;
@@ -41,7 +48,7 @@ struct Args {
 #[derive(Resource)]
 struct ProjectObjects {
     goal: String,
-    prompts: HashMap<String,String>
+    prompts: HashMap<String, String>,
 }
 
 #[derive(Resource)]
@@ -62,7 +69,7 @@ struct ContainerInfo {
 #[derive(Resource)]
 struct Settings {
     input_mode: InputMode,
-    stage: Stage
+    stage: Stage,
 }
 
 impl Settings {
@@ -81,14 +88,14 @@ enum InputMode {
 }
 
 #[derive(Debug)]
-struct CodeFile {
+struct ImplementationDetails {
     filename: String,
     language: String,
     command: String,
     code: String,
 }
 
-fn parse_code_file(input: &str) -> IResult<&str, CodeFile> {
+fn parse_implementation_details(input: &str) -> IResult<&str, ImplementationDetails> {
     let (input, filename) = delimited(
         tag("[filename]"),
         take_until("[/filename]"),
@@ -108,7 +115,7 @@ fn parse_code_file(input: &str) -> IResult<&str, CodeFile> {
 
     Ok((
         input,
-        CodeFile {
+        ImplementationDetails {
             filename: filename.to_owned(),
             language: language.to_owned(),
             command: command.to_owned(),
@@ -118,7 +125,7 @@ fn parse_code_file(input: &str) -> IResult<&str, CodeFile> {
 }
 
 #[derive(Debug)]
-struct CodeData {
+struct ArchitectureData {
     objects: Vec<Object>,
     functions: Vec<FunctionSignature>,
 }
@@ -142,13 +149,12 @@ struct Variable {
     var_type: Type,
 }
 
-#[derive(Debug, Resource)]
+#[derive(Debug, Resource, Clone, Copy)]
 enum Stage {
     Architecting,
     Ticketting,
-    Developing
+    Developing,
 }
-
 
 #[derive(Debug)]
 enum Type {
@@ -161,21 +167,59 @@ enum Type {
 }
 
 fn parse_object(input: &str) -> IResult<&str, Object> {
-    let (input, name) = preceded(space0, alpha1)(input)?;
-    let (input, _) = preceded(space0, char(':'))(input)?;
-    let (input, var_type) = parse_type(input)?;
-    let (input, _) = delimited(space0, char(';'), space0)(input)?;
 
-    Ok((input, Object {
-        name: name.to_owned(),
-        var_type,
-    }))
+    let mut parser = tuple((get_encapsulated_text, char(':'), parse_type, char(';')));
+
+    let (input, (name, _, var_type, _)) = parser(input)?;
+
+    Ok((
+        input,
+        Object {
+            name: name.to_owned(),
+            var_type,
+        },
+    ))
 }
 
 fn parse_objects(input: &str) -> IResult<&str, Vec<Object>> {
-    let (input, objects) = delimited(tag("[objects]"), many0(parse_object), tag("[/objects]"))(input)?;
+    
+    let result : IResult<&str, &str> = take_until("[objects]")(input);
+    
+    println!("\n\n{:?}", result);
 
-    Ok((input, objects))
+    // let result2 : IResult<&str, &str> = take_until("[/objects]")(input);
+
+    // println!("\n\n{:?}\n\n", result2);
+    
+    let (input, _) = result?;
+
+    println!("input: {:?}\n\n", input);
+
+    let result : IResult<&str, &str> = take_until("[/objects]")(input);
+
+
+    let (the_rest, parse_these_objects) = result?;
+
+    let parse_these_objects = newline::<&str,nom::error::Error<&str>>(parse_these_objects).unwrap().0;
+
+    println!("parse_objects: {:?}\n\n", parse_these_objects);
+    print!("the_rest: {:?}\n", the_rest);
+
+    let result = preceded(tag("[objects]"), many0(parse_object))(parse_these_objects).unwrap().1;
+
+
+    print!("result: {:?}\n", result);
+    // let result = tuple((tag("[objects]"), many0(parse_object), tag("[/objects]")))(input);
+
+    // let (input, objects) =
+    //     delimited(tag("[objects]"), many0(parse_object), tag("[/objects]"))(input)?;
+
+     Ok((the_rest, result))
+}
+
+fn get_encapsulated_text(input: &str) -> IResult<&str, &str> {
+    let result : IResult<&str, &str> = take_until(":")(input);
+    return result;
 }
 
 fn parse_function_signature(input: &str) -> IResult<&str, FunctionSignature> {
@@ -186,11 +230,14 @@ fn parse_function_signature(input: &str) -> IResult<&str, FunctionSignature> {
     let (input, _) = preceded(tag(" -> "), space0)(input)?;
     let (input, return_type) = parse_type(input)?;
 
-    Ok((input, FunctionSignature {
-        name: name.to_owned(),
-        inputs,
-        return_type,
-    }))
+    Ok((
+        input,
+        FunctionSignature {
+            name: name.to_owned(),
+            inputs,
+            return_type,
+        },
+    ))
 }
 
 fn parse_variable(input: &str) -> IResult<&str, Variable> {
@@ -198,10 +245,13 @@ fn parse_variable(input: &str) -> IResult<&str, Variable> {
     let (input, _) = preceded(space0, char(':'))(input)?;
     let (input, var_type) = parse_type(input)?;
 
-    Ok((input, Variable {
-        name: name.to_owned(),
-        var_type,
-    }))
+    Ok((
+        input,
+        Variable {
+            name: name.to_owned(),
+            var_type,
+        },
+    ))
 }
 
 fn parse_type(input: &str) -> IResult<&str, Type> {
@@ -211,24 +261,25 @@ fn parse_type(input: &str) -> IResult<&str, Type> {
         map(tag("double"), |_| Type::Double),
         map(tag("bool"), |_| Type::Bool),
         map(tag("string"), |_| Type::String),
-        map(alpha1, |s : &str| Type::Other(s.to_owned())),
+        map(alpha1, |s: &str| Type::Other(s.to_owned())),
     ))(input)
 }
 
 fn parse_functions(input: &str) -> IResult<&str, Vec<FunctionSignature>> {
-    let (input, functions) = delimited(tag("[functions]"), many0(parse_function_signature), tag("[/functions]"))(input)?;
+    let (input, functions) = delimited(
+        tag("[functions]"),
+        many0(parse_function_signature),
+        tag("[/functions]"),
+    )(input)?;
 
     Ok((input, functions))
 }
 
-fn parse_code_data(input: &str) -> IResult<&str, CodeData> {
+fn parse_architecture_data(input: &str) -> IResult<&str, ArchitectureData> {
     let (input, objects) = parse_objects(input)?;
     let (input, functions) = parse_functions(input)?;
 
-    Ok((input, CodeData {
-        objects,
-        functions,
-    }))
+    Ok((input, ArchitectureData { objects, functions }))
 }
 
 // Implementing this trait allows us to create a resource that is accessible from all future systems that we create.
@@ -276,9 +327,7 @@ fn setup_openai_client(mut commands: Commands) {
     });
 }
 
-fn prepare_docker_container(
-    runtime: ResMut<TokioTasksRuntime>,
-) {
+fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>) {
     runtime.spawn_background_task(|mut ctx| async move {
         let docker = new_docker().unwrap();
         let image = "ubuntu:latest";
@@ -422,7 +471,7 @@ fn send_command(
 }
 
 fn load_prompts() -> HashMap<String, String> {
-    let directory_path = "./prompts";
+    let directory_path = "./src/prompts";
     let mut file_map = HashMap::new();
     let directory = Path::new(directory_path);
 
@@ -443,12 +492,44 @@ fn load_prompts() -> HashMap<String, String> {
     file_map
 }
 
+enum ParsingObjects {
+    Architecture(ArchitectureData),
+    Implementation(ImplementationDetails),
+}
+
+fn opt_take_until_comment(i: &str) -> nom::IResult<&str, Option<&str>> {
+    nom::combinator::opt(nom::bytes::complete::take_until("//"))(i)
+  }
+
+  fn remove_comments(i: &str) -> nom::IResult<&str, Vec<Option<&str>>> {
+    nom::multi::many0(opt_take_until_comment)(i)
+  }
+
+fn parse_text(text: &str, stage: Stage) -> Result<ParsingObjects, String> {
+
+
+
+    match stage {
+        Stage::Architecting => match parse_architecture_data(&text) {
+            Ok(architecture_data) => return Ok(ParsingObjects::Architecture(architecture_data.1)),
+            Err(e) => return Err(e.to_string()),
+        },
+        Stage::Ticketting => todo!(),
+        Stage::Developing => match parse_implementation_details(&text) {
+            Ok(implementation_details) => {
+                return Ok(ParsingObjects::Implementation(implementation_details.1))
+            }
+            Err(e) => return Err(e.to_string()),
+        },
+    }
+}
+
 fn send_openai_command(
     project_object: Res<ProjectObjects>,
     runtime: ResMut<TokioTasksRuntime>,
     mut cmd: ResMut<Cmd>,
     openai: Res<OpenAIObjects>,
-    settings: ResMut<Settings>
+    settings: ResMut<Settings>,
 ) {
     let local_cmd = cmd
         .cmd
@@ -463,34 +544,89 @@ fn send_openai_command(
     // here is where we determine the prompt based on the stage of development
     let mut prompt = String::new();
 
+    println!(
+        "project_object prompt keys: {:?}",
+        project_object.prompts.keys()
+    );
+
+    let local_setting = settings.stage.clone();
+
     match settings.stage {
         Stage::Architecting => {
-            prompt = project_object.prompts.get("softwareArchitecture").unwrap().clone().to_string();
+            prompt = project_object
+                .prompts
+                .get("softwareArchitect")
+                .unwrap()
+                .clone()
+                .to_string();
             prompt = prompt + "[goal]" + &project_object.goal.clone() + "[/goal]";
         }
-        Stage::Ticketting => todo!(),
-        Stage::Developing => todo!(),
+        Stage::Ticketting => {
+            prompt = project_object
+                .prompts
+                .get("teamLead")
+                .unwrap()
+                .clone()
+                .to_string();
+            prompt = prompt + "[goal]" + &project_object.goal.clone() + "[/goal]";
+        }
+        Stage::Developing => {
+            prompt = project_object
+                .prompts
+                .get("developers")
+                .unwrap()
+                .clone()
+                .to_string();
+            prompt = prompt + "[goal]" + &project_object.goal.clone() + "[/goal]";
+        }
     }
 
+    runtime.spawn_background_task(move |ctx| async move {
+        let mut finish_reason = Some("".to_string());
+        let mut local_string = prompt.clone();
+        let mut local_response = String::new();
 
+        while finish_reason != Some("stop".to_string()) {
+            let full_string = local_string.clone() + &local_response;
+            let request = CreateCompletionRequestArgs::default()
+                .model("text-davinci-003")
+                .prompt(&full_string)
+                .max_tokens(200_u16)
+                .build()
+                .unwrap();
 
-    // let prompt = local_cmd.join(" ");
+            let response = client
+                .completions() // Get the API "group" (completions, images, etc.) from the client
+                .create(request) // Make the API call in that "group"
+                .await
+                .unwrap();
 
-    runtime.spawn_background_task(|ctx| async move {
-        let request = CreateCompletionRequestArgs::default()
-            .model("text-davinci-003")
-            .prompt(prompt)
-            .max_tokens(40_u16)
-            .build()
-            .unwrap();
+            let resp = &response.choices.first().unwrap().text;
 
-        let response = client
-            .completions() // Get the API "group" (completions, images, etc.) from the client
-            .create(request) // Make the API call in that "group"
-            .await
-            .unwrap();
+            println!("Completions: {:?}", resp);
 
-        println!("Completions: {:?}", response.choices);
+            local_response = local_response + &resp.clone().to_string();
+            finish_reason = response.choices.first().unwrap().finish_reason.clone();
+
+            if finish_reason == Some("stop".to_string()) {
+                println!("Finished Reason: {:?}", finish_reason);
+                println!("Local response: {}", local_response);
+
+                let parsed_text = parse_text(&local_response, local_setting.clone());
+
+                match parsed_text {
+                    Ok(parsed_text) => match parsed_text {
+                        ParsingObjects::Architecture(architecture_data) => {
+                            println!("Architecture Data: {:?}", architecture_data);
+                        }
+                        ParsingObjects::Implementation(implementation_details) => {
+                            println!("Implementation Details: {:?}", implementation_details);
+                        }
+                    },
+                    Err(e) => println!("Error: {:?}", e),
+                }
+            }
+        }
     });
 }
 
@@ -508,7 +644,7 @@ fn main() {
         .insert_resource(ContainerInfo { id: None })
         .insert_resource(Settings {
             input_mode: InputMode::DockerCommand,
-            stage: Stage::Architecting
+            stage: Stage::Architecting,
         })
         .init_resource::<ProjectObjects>()
         .add_startup_system(prepare_docker_container)

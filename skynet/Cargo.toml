@@ -13,6 +13,7 @@ bevy_tasks = "0.9.1"
 bevy_time = "0.9.1"
 bollard = "0.14.0"
 clap = { version = "4.1.4", features = ["derive"] }
+either = "1.8.1"
 futures-lite = "1.12.0"
 iyes_loopless = { version = "0.9.1", features = ["fixedtimestep"] }
 nom = "7.1.3"
