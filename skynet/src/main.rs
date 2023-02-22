@@ -505,10 +505,7 @@ fn opt_take_until_comment(i: &str) -> nom::IResult<&str, Option<&str>> {
     nom::multi::many0(opt_take_until_comment)(i)
   }
 
-fn parse_text(text: &str, stage: Stage) -> Result<ParsingObjects, String> {
-
-
-
+fn parse_text(text: &str, stage: &Stage) -> Result<ParsingObjects, String> {
     match stage {
         Stage::Architecting => match parse_architecture_data(&text) {
             Ok(architecture_data) => return Ok(ParsingObjects::Architecture(architecture_data.1)),
@@ -531,13 +528,13 @@ fn send_openai_command(
     openai: Res<OpenAIObjects>,
     settings: ResMut<Settings>,
 ) {
-    let local_cmd = cmd
-        .cmd
-        .pop()
-        .unwrap()
-        .split_whitespace()
-        .map(|s| s.to_string())
-        .collect::<Vec<String>>();
+    // let local_cmd = cmd
+    //     .cmd
+    //     .pop()
+    //     .unwrap()
+    //     .split_whitespace()
+    //     .map(|s| s.to_string())
+    //     .collect::<Vec<String>>();
 
     let client = openai.client.clone().unwrap();
 
@@ -549,7 +546,7 @@ fn send_openai_command(
         project_object.prompts.keys()
     );
 
-    let local_setting = settings.stage.clone();
+    let local_setting = settings.stage;
 
     match settings.stage {
         Stage::Architecting => {
@@ -612,7 +609,7 @@ fn send_openai_command(
                 println!("Finished Reason: {:?}", finish_reason);
                 println!("Local response: {}", local_response);
 
-                let parsed_text = parse_text(&local_response, local_setting.clone());
+                let parsed_text = parse_text(&local_response, &local_setting);
 
                 match parsed_text {
                     Ok(parsed_text) => match parsed_text {

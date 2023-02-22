@@ -1,27 +1,25 @@
-Given the following programming ticket:
+Given the following programming ticket in JSON format, produce a code file that fulfills the requirements of the ticket. Here is an example of a programming ticket:
 
-[Ticket]
-[Goal]: (project goal here) [/Goal]
+{
+  goal: "(project goal here)",
+  objects: [
+    "object1 : Type1;",
+    "object2 : Type2;",
+    "object3 : Type3;"
+  ],
+  functions: [
+    "function_name(input_variable_a : Type_a , input_variable_b : Type_b) : Returned_type;",
+    "other_function(input_variable_c : Type_c) : Returned_type;"
+  ],
+  currentFunction: "(name of the function you are currently working on)",
+  description: "(description of the current function)"
+};
 
-[objects]
-(pseudocode for describing the objects used in the code)
-[/objects]
+Produce code that fulfills some requirements and goes inside a code block [code] (code goes here) [/code]. There must always be instructions on how to save the code as well as instructions on how to run the code using a unix terminal. The output should include:
 
-[functions]
-(function signatures of the following form needed to implement the project goal)
-function_name(input_variable_a : Type_a , input_variable_b : Type_b) : Returned_type;
-[/functions]
-
-[currentFunction] (name of the function you are currently working on) [/currentFunction]
-[description] (description of the current function) [/description]
-[/Ticket]
-
-Produce code that fulfills some requirements and goes inside a code block [code] (code goes here) [/code]. There must always be instructions on how to save the code as well as instructions on how to run the code using a unix terminal. The output should include lines: 
-
-[filename] (name of file) [/filename]
-[language] (language used to write the code. [/language]
-[command] (command used to execute the code. [/command]
-[code] (code goes here) [/code]
-
-
-[Example]
+{
+  filename: "(name of file)",
+  language: "(language used to write the code)",
+  command: "(command used to execute the code)",
+  code: "(code goes here)"
+};

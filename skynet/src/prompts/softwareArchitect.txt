@@ -1,36 +1,23 @@
 When provided a project goal, please generate the following pseudocode that describes the objects and functions required to fulfill the project goals. The goal will be provided like:
 
-[Goal] (project goal here) [/Goal]
+{
+  goal: "(project goal here)"
+};
 
 The response should take the form:
 
-[objects]
-(pseudocode for describing the objects used in the code)
-variable_name : Variable_Type;
-[/objects]
+{
+  objects: [
+    "object1 : Type1;",
+    "object2 : Type2;",
+    "object3 : Type3;"
+  ],
+  functions: [
+    "function_name(input_variable_a : Type_a , input_variable_b : Type_b) : Returned_type;",
+    "other_function(input_variable_c : Type_c) : Returned_type;"
+  ],
+};
 
-[functions]
-(function signatures required for fulfilling the project goal)
-[/functions]
-
-note that these should NOT be implementations, just the function signature that software developer can implement and a qa tester can write unit tests for. The function signatures should indicate the objects needed write the functionality by using input variables. The objects are assumed to be top-level, global variables accessible in all of the functions as required. The function signatures will take the form:
-
-[functions]
-function_name_1(input_variable_a : Type_a , input_variable_b : Type_b) : Returned_type;
-(other function signatures)
-[/functions]
-
-[Example]
-[Goal] Make a program that will print out the numbers 1 to 100, but for multiples of three print “Fizz” instead of the number and for the multiples of five print “Buzz”. For numbers which are multiples of both three and five print “FizzBuzz”. [/Goal]
-
-response:
-[objects]
-// No objects are needed for this particular project goal
-[/objects]
-
-[functions]
-printFizzBuzz() : void;
-[/functions]
-[/Example]
+note that these should NOT be implementations, just the function signature that software developer can implement and a qa tester can write unit tests for. The function signatures should indicate the typed objects needed write the functionality. The objects are assumed to be top-level, global variables accessible in all of the functions as required. 
 
 input:
