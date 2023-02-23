@@ -30,6 +30,45 @@ use std::{fs::File, io::BufRead};
 
 use async_openai::Client;
 
+use serde::{Deserialize, Serialize};
+// use serde_json::Result;
+
+
+
+  #[derive(Serialize, Deserialize, Debug)]
+  struct SystemContext {
+    objects: Vec<String>,
+    functions: Vec<String>,
+  }
+
+  #[derive(Resource)]
+  struct CurrentIteration {
+    current_iteration: usize,
+  }
+
+  #[derive(Serialize, Deserialize, Debug)]
+  struct TeamLeadContextInput {
+    objects: Vec<String>,
+    functions: Vec<String>,
+    current_function: String,
+  }
+
+  #[derive(Serialize, Deserialize, Debug)]
+  struct TeamLeadContextOutput {
+    objects: Vec<String>,
+    functions: Vec<String>,
+    current_function: String,
+    description: String,
+    test_cases: Vec<TestCase>,
+  }
+
+  #[derive(Serialize, Deserialize, Debug)]
+  struct TestCase {
+    input: String,
+    output: String,
+  }
+
+
 #[derive(Parser)]
 struct Args {
     #[clap(short, long, default_value_t = true)]
@@ -70,6 +109,7 @@ struct ContainerInfo {
 struct Settings {
     input_mode: InputMode,
     stage: Stage,
+    max_iterations: usize,
 }
 
 impl Settings {
@@ -124,11 +164,6 @@ fn parse_implementation_details(input: &str) -> IResult<&str, ImplementationDeta
     ))
 }
 
-#[derive(Debug)]
-struct ArchitectureData {
-    objects: Vec<Object>,
-    functions: Vec<FunctionSignature>,
-}
 
 #[derive(Debug)]
 struct Object {
@@ -152,7 +187,7 @@ struct Variable {
 #[derive(Debug, Resource, Clone, Copy)]
 enum Stage {
     Architecting,
-    Ticketting,
+    Ticketing,
     Developing,
 }
 
@@ -275,11 +310,8 @@ fn parse_functions(input: &str) -> IResult<&str, Vec<FunctionSignature>> {
     Ok((input, functions))
 }
 
-fn parse_architecture_data(input: &str) -> IResult<&str, ArchitectureData> {
-    let (input, objects) = parse_objects(input)?;
-    let (input, functions) = parse_functions(input)?;
-
-    Ok((input, ArchitectureData { objects, functions }))
+fn parse_architecture_data(input: &str) -> serde_json::Result<SystemContext> {
+    serde_json::from_str(input).map_err(|e| e.into())
 }
 
 // Implementing this trait allows us to create a resource that is accessible from all future systems that we create.
@@ -402,6 +434,7 @@ fn send_command(
     runtime: ResMut<TokioTasksRuntime>,
     commands: Commands,
     settings: ResMut<Settings>,
+    current_iteration: ResMut<CurrentIteration>,
     cmd: ResMut<Cmd>,
     openai: Res<OpenAIObjects>,
 ) {
@@ -413,7 +446,7 @@ fn send_command(
                 }
             }
             InputMode::OpenAI => {
-                send_openai_command(project_object, runtime, cmd, openai, settings);
+                send_openai_command(project_object, runtime, cmd, openai, settings, current_iteration);
             }
         }
     }
@@ -493,7 +526,9 @@ fn load_prompts() -> HashMap<String, String> {
 }
 
 enum ParsingObjects {
-    Architecture(ArchitectureData),
+    Architecture(SystemContext),
+    MakeTicket(TeamLeadContextInput),
+    CompletedTicket(TeamLeadContextOutput),
     Implementation(ImplementationDetails),
 }
 
@@ -508,16 +543,11 @@ fn opt_take_until_comment(i: &str) -> nom::IResult<&str, Option<&str>> {
 fn parse_text(text: &str, stage: &Stage) -> Result<ParsingObjects, String> {
     match stage {
         Stage::Architecting => match parse_architecture_data(&text) {
-            Ok(architecture_data) => return Ok(ParsingObjects::Architecture(architecture_data.1)),
+            Ok(architecture_data) => return Ok(ParsingObjects::Architecture(architecture_data)),
             Err(e) => return Err(e.to_string()),
         },
-        Stage::Ticketting => todo!(),
-        Stage::Developing => match parse_implementation_details(&text) {
-            Ok(implementation_details) => {
-                return Ok(ParsingObjects::Implementation(implementation_details.1))
-            }
-            Err(e) => return Err(e.to_string()),
-        },
+        Stage::Ticketing => todo!(),
+        Stage::Developing => todo!(),
     }
 }
 
@@ -527,14 +557,18 @@ fn send_openai_command(
     mut cmd: ResMut<Cmd>,
     openai: Res<OpenAIObjects>,
     settings: ResMut<Settings>,
+    mut current_iteration: ResMut<CurrentIteration>,
 ) {
-    // let local_cmd = cmd
-    //     .cmd
-    //     .pop()
-    //     .unwrap()
-    //     .split_whitespace()
-    //     .map(|s| s.to_string())
-    //     .collect::<Vec<String>>();
+    cmd
+        .cmd
+        .pop();
+
+    current_iteration.current_iteration += 1;
+
+    if current_iteration.current_iteration > settings.max_iterations {
+        println!("Max iterations reached");
+        return;
+    }
 
     let client = openai.client.clone().unwrap();
 
@@ -556,9 +590,9 @@ fn send_openai_command(
                 .unwrap()
                 .clone()
                 .to_string();
-            prompt = prompt + "[goal]" + &project_object.goal.clone() + "[/goal]";
+            prompt = prompt + "{ goal: \"" + &project_object.goal.clone() + "\"}";
         }
-        Stage::Ticketting => {
+        Stage::Ticketing => {
             prompt = project_object
                 .prompts
                 .get("teamLead")
@@ -612,14 +646,20 @@ fn send_openai_command(
                 let parsed_text = parse_text(&local_response, &local_setting);
 
                 match parsed_text {
-                    Ok(parsed_text) => match parsed_text {
-                        ParsingObjects::Architecture(architecture_data) => {
-                            println!("Architecture Data: {:?}", architecture_data);
+                    Ok(parsed) => 
+                        {
+                            match parsed {
+                                ParsingObjects::Architecture(system_context) => {
+                                    println!("System Context: {:?}", system_context);
+                                    // settings.stage = Stage::Ticketing;
+                                    todo!()
+                                    
+                                },
+                                ParsingObjects::MakeTicket(_) => todo!(),
+                                ParsingObjects::CompletedTicket(_) => todo!(),
+                                ParsingObjects::Implementation(_) => todo!(),
+                            }
                         }
-                        ParsingObjects::Implementation(implementation_details) => {
-                            println!("Implementation Details: {:?}", implementation_details);
-                        }
-                    },
                     Err(e) => println!("Error: {:?}", e),
                 }
             }
@@ -642,7 +682,9 @@ fn main() {
         .insert_resource(Settings {
             input_mode: InputMode::DockerCommand,
             stage: Stage::Architecting,
+            max_iterations: 10,
         })
+        .insert_resource(CurrentIteration { current_iteration: 0 })
         .init_resource::<ProjectObjects>()
         .add_startup_system(prepare_docker_container)
         // .add_startup_system(setup) // will add this back in when I figure out how to load a font
