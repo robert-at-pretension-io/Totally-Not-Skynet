@@ -31,42 +31,12 @@ use std::{fs::File, io::BufRead};
 use async_openai::Client;
 
 use serde::{Deserialize, Serialize};
-// use serde_json::Result;
-
-
-
-  #[derive(Serialize, Deserialize, Debug)]
-  struct SystemContext {
-    objects: Vec<String>,
-    functions: Vec<String>,
-  }
 
   #[derive(Resource)]
   struct CurrentIteration {
     current_iteration: usize,
   }
 
-  #[derive(Serialize, Deserialize, Debug)]
-  struct TeamLeadContextInput {
-    objects: Vec<String>,
-    functions: Vec<String>,
-    current_function: String,
-  }
-
-  #[derive(Serialize, Deserialize, Debug)]
-  struct TeamLeadContextOutput {
-    objects: Vec<String>,
-    functions: Vec<String>,
-    current_function: String,
-    description: String,
-    test_cases: Vec<TestCase>,
-  }
-
-  #[derive(Serialize, Deserialize, Debug)]
-  struct TestCase {
-    input: String,
-    output: String,
-  }
 
 
 #[derive(Parser)]
@@ -135,53 +105,42 @@ struct ImplementationDetails {
     code: String,
 }
 
-fn parse_implementation_details(input: &str) -> IResult<&str, ImplementationDetails> {
-    let (input, filename) = delimited(
-        tag("[filename]"),
-        take_until("[/filename]"),
-        tag("[/filename]"),
-    )(input)?;
-    let (input, language) = delimited(
-        tag("[language]"),
-        take_until("[/language]"),
-        tag("[/language]"),
-    )(input)?;
-    let (input, command) = delimited(
-        tag("[command]"),
-        take_until("[/command]"),
-        tag("[/command]"),
-    )(input)?;
-    let (input, code) = delimited(tag("[code]"), take_until("[/code]"), tag("[/code]"))(input)?;
 
-    Ok((
-        input,
-        ImplementationDetails {
-            filename: filename.to_owned(),
-            language: language.to_owned(),
-            command: command.to_owned(),
-            code: code.to_owned(),
-        },
-    ))
+#[derive(Serialize, Deserialize, Debug)]
+struct TeamLeadContextInput {
+  goal: String,
+  objects: Vec<String>,
+  functions: Vec<String>,
+  current_function: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct TeamLeadContextOutput {
+  objects: Vec<String>,
+  functions: Vec<String>,
+  current_function: String,
+  description: String,
+  test_cases: Vec<TestCase>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct SystemContext {
+  objects: Vec<String>,
+  functions: Vec<String>,
+}
+
+enum ParsingObjects {
+    Architecture(SystemContext),
+    MakeTicket(TeamLeadContextInput),
+    CompletedTicket(TeamLeadContextOutput),
+    Implementation(ImplementationDetails),
 }
 
 
-#[derive(Debug)]
-struct Object {
-    name: String,
-    var_type: Type,
-}
-
-#[derive(Debug)]
-struct FunctionSignature {
-    name: String,
-    inputs: Vec<Variable>,
-    return_type: Type,
-}
-
-#[derive(Debug)]
-struct Variable {
-    name: String,
-    var_type: Type,
+#[derive(Serialize, Deserialize, Debug)]
+struct TestCase {
+  input: String,
+  output: String,
 }
 
 #[derive(Debug, Resource, Clone, Copy)]
@@ -191,124 +150,8 @@ enum Stage {
     Developing,
 }
 
-#[derive(Debug)]
-enum Type {
-    Int,
-    Float,
-    Double,
-    Bool,
-    String,
-    Other(String),
-}
-
-fn parse_object(input: &str) -> IResult<&str, Object> {
-
-    let mut parser = tuple((get_encapsulated_text, char(':'), parse_type, char(';')));
-
-    let (input, (name, _, var_type, _)) = parser(input)?;
-
-    Ok((
-        input,
-        Object {
-            name: name.to_owned(),
-            var_type,
-        },
-    ))
-}
-
-fn parse_objects(input: &str) -> IResult<&str, Vec<Object>> {
-    
-    let result : IResult<&str, &str> = take_until("[objects]")(input);
-    
-    println!("\n\n{:?}", result);
-
-    // let result2 : IResult<&str, &str> = take_until("[/objects]")(input);
-
-    // println!("\n\n{:?}\n\n", result2);
-    
-    let (input, _) = result?;
-
-    println!("input: {:?}\n\n", input);
-
-    let result : IResult<&str, &str> = take_until("[/objects]")(input);
 
 
-    let (the_rest, parse_these_objects) = result?;
-
-    let parse_these_objects = newline::<&str,nom::error::Error<&str>>(parse_these_objects).unwrap().0;
-
-    println!("parse_objects: {:?}\n\n", parse_these_objects);
-    print!("the_rest: {:?}\n", the_rest);
-
-    let result = preceded(tag("[objects]"), many0(parse_object))(parse_these_objects).unwrap().1;
-
-
-    print!("result: {:?}\n", result);
-    // let result = tuple((tag("[objects]"), many0(parse_object), tag("[/objects]")))(input);
-
-    // let (input, objects) =
-    //     delimited(tag("[objects]"), many0(parse_object), tag("[/objects]"))(input)?;
-
-     Ok((the_rest, result))
-}
-
-fn get_encapsulated_text(input: &str) -> IResult<&str, &str> {
-    let result : IResult<&str, &str> = take_until(":")(input);
-    return result;
-}
-
-fn parse_function_signature(input: &str) -> IResult<&str, FunctionSignature> {
-    let (input, name) = preceded(tag(" "), alpha1)(input)?;
-    let (input, _) = delimited(space0, char('('), space0)(input)?;
-    let (input, inputs) = separated_list0(tag(", "), parse_variable)(input)?;
-    let (input, _) = delimited(space0, tag(")"), space0)(input)?;
-    let (input, _) = preceded(tag(" -> "), space0)(input)?;
-    let (input, return_type) = parse_type(input)?;
-
-    Ok((
-        input,
-        FunctionSignature {
-            name: name.to_owned(),
-            inputs,
-            return_type,
-        },
-    ))
-}
-
-fn parse_variable(input: &str) -> IResult<&str, Variable> {
-    let (input, name) = preceded(space0, alpha1)(input)?;
-    let (input, _) = preceded(space0, char(':'))(input)?;
-    let (input, var_type) = parse_type(input)?;
-
-    Ok((
-        input,
-        Variable {
-            name: name.to_owned(),
-            var_type,
-        },
-    ))
-}
-
-fn parse_type(input: &str) -> IResult<&str, Type> {
-    alt((
-        map(tag("int"), |_| Type::Int),
-        map(tag("float"), |_| Type::Float),
-        map(tag("double"), |_| Type::Double),
-        map(tag("bool"), |_| Type::Bool),
-        map(tag("string"), |_| Type::String),
-        map(alpha1, |s: &str| Type::Other(s.to_owned())),
-    ))(input)
-}
-
-fn parse_functions(input: &str) -> IResult<&str, Vec<FunctionSignature>> {
-    let (input, functions) = delimited(
-        tag("[functions]"),
-        many0(parse_function_signature),
-        tag("[/functions]"),
-    )(input)?;
-
-    Ok((input, functions))
-}
 
 fn parse_architecture_data(input: &str) -> serde_json::Result<SystemContext> {
     serde_json::from_str(input).map_err(|e| e.into())
@@ -525,20 +368,7 @@ fn load_prompts() -> HashMap<String, String> {
     file_map
 }
 
-enum ParsingObjects {
-    Architecture(SystemContext),
-    MakeTicket(TeamLeadContextInput),
-    CompletedTicket(TeamLeadContextOutput),
-    Implementation(ImplementationDetails),
-}
 
-fn opt_take_until_comment(i: &str) -> nom::IResult<&str, Option<&str>> {
-    nom::combinator::opt(nom::bytes::complete::take_until("//"))(i)
-  }
-
-  fn remove_comments(i: &str) -> nom::IResult<&str, Vec<Option<&str>>> {
-    nom::multi::many0(opt_take_until_comment)(i)
-  }
 
 fn parse_text(text: &str, stage: &Stage) -> Result<ParsingObjects, String> {
     match stage {
@@ -556,7 +386,7 @@ fn send_openai_command(
     runtime: ResMut<TokioTasksRuntime>,
     mut cmd: ResMut<Cmd>,
     openai: Res<OpenAIObjects>,
-    settings: ResMut<Settings>,
+    mut settings: ResMut<Settings>,
     mut current_iteration: ResMut<CurrentIteration>,
 ) {
     cmd
@@ -580,9 +410,10 @@ fn send_openai_command(
         project_object.prompts.keys()
     );
 
-    let local_setting = settings.stage;
+    let local_setting = settings.stage.clone();
+    let local_goal = project_object.goal.clone();
 
-    match settings.stage {
+    match local_setting {
         Stage::Architecting => {
             prompt = project_object
                 .prompts
@@ -652,7 +483,20 @@ fn send_openai_command(
                                 ParsingObjects::Architecture(system_context) => {
                                     println!("System Context: {:?}", system_context);
                                     // settings.stage = Stage::Ticketing;
-                                    todo!()
+                                    // loop through the functions in system_context and create tickets
+                                    // for each function
+                                    for function in &system_context.functions {
+                                        let mut ticket = TeamLeadContextInput {
+                                            goal: local_goal.clone(),
+                                            functions: system_context.functions.clone(),
+                                            current_function : function.clone(),
+                                            objects: system_context.objects.clone(),
+                                        };
+                                        // ticket.current_function = function.clone();
+                                        // ticket.functions = system_context.functions.clone();
+                                        // ticket.objects = system_context.objects.clone();
+  
+                                    }
                                     
                                 },
                                 ParsingObjects::MakeTicket(_) => todo!(),
