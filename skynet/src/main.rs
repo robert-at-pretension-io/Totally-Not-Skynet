@@ -32,12 +32,10 @@ use async_openai::Client;
 
 use serde::{Deserialize, Serialize};
 
-  #[derive(Resource)]
-  struct CurrentIteration {
+#[derive(Resource)]
+struct CurrentIteration {
     current_iteration: usize,
-  }
-
-
+}
 
 #[derive(Parser)]
 struct Args {
@@ -62,7 +60,7 @@ struct ProjectObjects {
 
 #[derive(Resource)]
 struct Cmd {
-    cmd: Vec<String>,
+    cmd: Vec<Option<ParsingObjects>>,
 }
 
 #[derive(Resource)]
@@ -78,7 +76,6 @@ struct ContainerInfo {
 #[derive(Resource)]
 struct Settings {
     input_mode: InputMode,
-    stage: Stage,
     max_iterations: usize,
 }
 
@@ -105,53 +102,48 @@ struct ImplementationDetails {
     code: String,
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
 struct TeamLeadContextInput {
-  goal: String,
-  objects: Vec<String>,
-  functions: Vec<String>,
-  current_function: String,
+    goal: String,
+    objects: Vec<String>,
+    functions: Vec<String>,
+    current_function: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 struct TeamLeadContextOutput {
-  objects: Vec<String>,
-  functions: Vec<String>,
-  current_function: String,
-  description: String,
-  test_cases: Vec<TestCase>,
+    objects: Vec<String>,
+    functions: Vec<String>,
+    current_function: String,
+    description: String,
+    test_cases: Vec<TestCase>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 struct SystemContext {
-  objects: Vec<String>,
-  functions: Vec<String>,
+    goal: String,
+    objects: Vec<String>,
+    functions: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct InitialData {
+    goal: String,
 }
 
 enum ParsingObjects {
+    SystemOrientation(InitialData),
     Architecture(SystemContext),
     MakeTicket(TeamLeadContextInput),
     CompletedTicket(TeamLeadContextOutput),
     Implementation(ImplementationDetails),
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
 struct TestCase {
-  input: String,
-  output: String,
+    input: String,
+    output: String,
 }
-
-#[derive(Debug, Resource, Clone, Copy)]
-enum Stage {
-    Architecting,
-    Ticketing,
-    Developing,
-}
-
-
-
 
 fn parse_architecture_data(input: &str) -> serde_json::Result<SystemContext> {
     serde_json::from_str(input).map_err(|e| e.into())
@@ -264,9 +256,7 @@ fn text_input(
 
     if keys.just_pressed(KeyCode::Return) {
         println!("Text input: {}", *string);
-        commands.insert_resource(Cmd {
-            cmd: vec![string.clone()],
-        });
+        commands.insert_resource(Cmd { cmd: vec![None] });
         string.clear();
     }
 }
@@ -289,7 +279,14 @@ fn send_command(
                 }
             }
             InputMode::OpenAI => {
-                send_openai_command(project_object, runtime, cmd, openai, settings, current_iteration);
+                send_openai_command(
+                    project_object,
+                    runtime,
+                    cmd,
+                    openai,
+                    settings,
+                    current_iteration,
+                );
             }
         }
     }
@@ -301,13 +298,8 @@ fn send_command(
         commands: Commands,
         mut cmd: ResMut<Cmd>,
     ) {
-        let local_cmd = cmd
-            .cmd
-            .pop()
-            .unwrap()
-            .split_whitespace()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
+        let local_cmd = cmd.cmd.pop().unwrap().unwrap();
+        let local_cmd = vec!["".to_string()];
 
         let id = container_info.id.clone().unwrap();
 
@@ -368,16 +360,16 @@ fn load_prompts() -> HashMap<String, String> {
     file_map
 }
 
-
-
-fn parse_text(text: &str, stage: &Stage) -> Result<ParsingObjects, String> {
-    match stage {
-        Stage::Architecting => match parse_architecture_data(&text) {
+fn parse_text(text: &str, current_object: &ParsingObjects) -> Result<ParsingObjects, String> {
+    match current_object {
+        ParsingObjects::SystemOrientation(_) => match parse_architecture_data(&text) {
             Ok(architecture_data) => return Ok(ParsingObjects::Architecture(architecture_data)),
             Err(e) => return Err(e.to_string()),
         },
-        Stage::Ticketing => todo!(),
-        Stage::Developing => todo!(),
+        ParsingObjects::Architecture(_) => todo!(),
+        ParsingObjects::MakeTicket(_) => todo!(),
+        ParsingObjects::CompletedTicket(_) => todo!(),
+        ParsingObjects::Implementation(_) => todo!(),
     }
 }
 
@@ -389,9 +381,7 @@ fn send_openai_command(
     mut settings: ResMut<Settings>,
     mut current_iteration: ResMut<CurrentIteration>,
 ) {
-    cmd
-        .cmd
-        .pop();
+    let local_cmd = cmd.cmd.pop().unwrap().unwrap();
 
     current_iteration.current_iteration += 1;
 
@@ -410,38 +400,40 @@ fn send_openai_command(
         project_object.prompts.keys()
     );
 
-    let local_setting = settings.stage.clone();
+    // let local_setting = settings.stage.clone();
     let local_goal = project_object.goal.clone();
 
-    match local_setting {
-        Stage::Architecting => {
+    match local_cmd {
+        ParsingObjects::SystemOrientation(initial_data) => {
             prompt = project_object
                 .prompts
                 .get("softwareArchitect")
                 .unwrap()
                 .clone()
                 .to_string();
-            prompt = prompt + "{ goal: \"" + &project_object.goal.clone() + "\"}";
+            prompt = prompt + &serde_json::to_string(&initial_data).unwrap();
         }
-        Stage::Ticketing => {
+        ParsingObjects::Architecture(system_context) => {
             prompt = project_object
                 .prompts
                 .get("teamLead")
                 .unwrap()
                 .clone()
                 .to_string();
-            prompt = prompt + "[goal]" + &project_object.goal.clone() + "[/goal]";
+            prompt = prompt + &serde_json::to_string(&system_context).unwrap();
         }
-        Stage::Developing => {
+        ParsingObjects::MakeTicket(team_lead_input) => {
             prompt = project_object
                 .prompts
                 .get("developers")
                 .unwrap()
                 .clone()
                 .to_string();
-            prompt = prompt + "[goal]" + &project_object.goal.clone() + "[/goal]";
+            prompt = prompt + &serde_json::to_string(&team_lead_input).unwrap();
         }
-    }
+        ParsingObjects::CompletedTicket(_) => todo!(),
+        ParsingObjects::Implementation(_) => todo!(),
+    };
 
     runtime.spawn_background_task(move |ctx| async move {
         let mut finish_reason = Some("".to_string());
@@ -474,36 +466,31 @@ fn send_openai_command(
                 println!("Finished Reason: {:?}", finish_reason);
                 println!("Local response: {}", local_response);
 
-                let parsed_text = parse_text(&local_response, &local_setting);
+                let parsed_text = parse_text(&local_response, &local_cmd);
 
                 match parsed_text {
-                    Ok(parsed) => 
-                        {
-                            match parsed {
-                                ParsingObjects::Architecture(system_context) => {
-                                    println!("System Context: {:?}", system_context);
-                                    // settings.stage = Stage::Ticketing;
-                                    // loop through the functions in system_context and create tickets
-                                    // for each function
-                                    for function in &system_context.functions {
-                                        let mut ticket = TeamLeadContextInput {
-                                            goal: local_goal.clone(),
-                                            functions: system_context.functions.clone(),
-                                            current_function : function.clone(),
-                                            objects: system_context.objects.clone(),
-                                        };
-                                        // ticket.current_function = function.clone();
-                                        // ticket.functions = system_context.functions.clone();
-                                        // ticket.objects = system_context.objects.clone();
-  
-                                    }
-                                    
-                                },
-                                ParsingObjects::MakeTicket(_) => todo!(),
-                                ParsingObjects::CompletedTicket(_) => todo!(),
-                                ParsingObjects::Implementation(_) => todo!(),
+                    Ok(parsed) => {
+                        match parsed {
+                            ParsingObjects::Architecture(system_context) => {
+                                println!("System Context: {:?}", system_context);
+
+                                for function in &system_context.functions {
+                                    let mut ticket = TeamLeadContextInput {
+                                        goal: local_goal.clone(),
+                                        functions: system_context.functions.clone(),
+                                        current_function: function.clone(),
+                                        objects: system_context.objects.clone(),
+                                    };
+
+                                    // cmd.cmd.push(Some(ParsingObjects::MakeTicket(ticket)));
+                                }
                             }
+                            ParsingObjects::MakeTicket(_) => todo!(),
+                            ParsingObjects::CompletedTicket(_) => todo!(),
+                            ParsingObjects::Implementation(_) => todo!(),
+                            ParsingObjects::SystemOrientation(_) => todo!(),
                         }
+                    }
                     Err(e) => println!("Error: {:?}", e),
                 }
             }
@@ -525,10 +512,11 @@ fn main() {
         .insert_resource(ContainerInfo { id: None })
         .insert_resource(Settings {
             input_mode: InputMode::DockerCommand,
-            stage: Stage::Architecting,
             max_iterations: 10,
         })
-        .insert_resource(CurrentIteration { current_iteration: 0 })
+        .insert_resource(CurrentIteration {
+            current_iteration: 0,
+        })
         .init_resource::<ProjectObjects>()
         .add_startup_system(prepare_docker_container)
         // .add_startup_system(setup) // will add this back in when I figure out how to load a font
