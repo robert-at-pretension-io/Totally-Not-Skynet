@@ -1,20 +1,6 @@
 use async_openai::types::CreateCompletionRequestArgs;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
-use either::Either;
-use nom::bytes::complete::take_while;
-use nom::character::complete::{multispace0, newline};
-use nom::sequence::tuple;
-use nom::{
-    branch::alt,
-    bytes::complete::{tag, take_until},
-    character::complete::{alpha1, char, space0},
-    combinator::map,
-    multi::{many0, separated_list0},
-    sequence::{delimited, preceded},
-    IResult,
-};
-
 use bevy_tokio_tasks::TokioTasksRuntime;
 use bollard::container::Config;
 use bollard::exec::{CreateExecOptions, StartExecResults};
@@ -58,15 +44,17 @@ struct ProjectObjects {
     prompts: HashMap<String, String>,
 }
 
-#[derive(Resource)]
-struct Cmd {
-    cmd: Vec<Option<ParsingObjects>>,
-}
 
 #[derive(Resource)]
 struct OpenAIObjects {
     client: Option<Client>,
 }
+
+#[derive(Component)]
+struct Unprocessed;
+
+#[derive(Component)]
+struct Processed;
 
 #[derive(Resource)]
 struct ContainerInfo {
@@ -94,7 +82,7 @@ enum InputMode {
     OpenAI,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct ImplementationDetails {
     filename: String,
     language: String,
@@ -102,7 +90,7 @@ struct ImplementationDetails {
     code: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct TeamLeadContextInput {
     goal: String,
     objects: Vec<String>,
@@ -110,7 +98,7 @@ struct TeamLeadContextInput {
     current_function: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct TeamLeadContextOutput {
     objects: Vec<String>,
     functions: Vec<String>,
@@ -119,27 +107,31 @@ struct TeamLeadContextOutput {
     test_cases: Vec<TestCase>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct SystemContext {
-    goal: String,
     objects: Vec<String>,
     functions: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct InitialData {
     goal: String,
 }
 
+#[derive(Clone, Debug, Component)]
 enum ParsingObjects {
     SystemOrientation(InitialData),
     Architecture(SystemContext),
-    MakeTicket(TeamLeadContextInput),
     CompletedTicket(TeamLeadContextOutput),
     Implementation(ImplementationDetails),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Debug, Component)]
+enum InputObjects {
+    MakeTicket(TeamLeadContextInput),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct TestCase {
     input: String,
     output: String,
@@ -235,107 +227,103 @@ fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>) {
     });
 }
 
-fn text_input(
-    mut char_evr: EventReader<ReceivedCharacter>,
-    keys: Res<Input<KeyCode>>,
-    mut string: Local<String>,
-    mut commands: Commands,
-    mut settings: ResMut<Settings>,
-) {
-    if keys.just_pressed(KeyCode::Tab) {
-        settings.next_mode();
-        println!("Input Mode: {:?}", settings.input_mode);
-        string.clear();
-        return;
-    }
+// fn text_input(
+//     mut char_evr: EventReader<ReceivedCharacter>,
+//     keys: Res<Input<KeyCode>>,
+//     mut string: Local<String>,
+//     mut commands: Commands,
+//     mut settings: ResMut<Settings>,
+// ) {
+//     if keys.just_pressed(KeyCode::Tab) {
+//         settings.next_mode();
+//         println!("Input Mode: {:?}", settings.input_mode);
+//         string.clear();
+//         return;
+//     }
 
-    for ev in char_evr.iter() {
-        print!("'{}'", ev.char);
-        string.push(ev.char);
-    }
+//     for ev in char_evr.iter() {
+//         print!("'{}'", ev.char);
+//         string.push(ev.char);
+//     }
 
-    if keys.just_pressed(KeyCode::Return) {
-        println!("Text input: {}", *string);
-        commands.insert_resource(Cmd { cmd: vec![None] });
-        string.clear();
-    }
-}
+//     if keys.just_pressed(KeyCode::Return) {
+//         println!("Text input: {}", *string);
+//         string.clear();
+//     }
+// }
 
-fn send_command(
+// fn send_command(
+//     project_object: Res<ProjectObjects>,
+//     container_info: Res<ContainerInfo>,
+//     runtime: ResMut<TokioTasksRuntime>,
+//     commands: Commands,
+//     settings: ResMut<Settings>,
+//     current_iteration: ResMut<CurrentIteration>,
+//     openai: Res<OpenAIObjects>,
+// ) {
+//     if cmd.cmd.len() > 0 {
+//         match settings.input_mode {
+//             InputMode::DockerCommand => {
+//                 if container_info.id.is_some() {
+//                     send_docker_command(project_object, container_info, runtime, commands, cmd);
+//                 }
+//             }
+//             InputMode::OpenAI => {
+//                 send_openai_command(
+//                     project_object,
+//                     runtime,
+//                     cmd,
+//                     openai,
+//                     settings,
+//                     current_iteration,
+//                 );
+//             }
+//         }
+//     }
+
+fn send_docker_command(
     project_object: Res<ProjectObjects>,
     container_info: Res<ContainerInfo>,
-    runtime: ResMut<TokioTasksRuntime>,
+    mut runtime: ResMut<TokioTasksRuntime>,
     commands: Commands,
-    settings: ResMut<Settings>,
-    current_iteration: ResMut<CurrentIteration>,
-    cmd: ResMut<Cmd>,
-    openai: Res<OpenAIObjects>,
+    // mut cmd: ResMut<Cmd>,
 ) {
-    if cmd.cmd.len() > 0 {
-        match settings.input_mode {
-            InputMode::DockerCommand => {
-                if container_info.id.is_some() {
-                    send_docker_command(project_object, container_info, runtime, commands, cmd);
-                }
+    let local_cmd = cmd.cmd.pop().unwrap().unwrap();
+
+    let id = container_info.id.clone().unwrap();
+
+    runtime.spawn_background_task(|mut ctx| async move {
+        let docker = new_docker().unwrap();
+        // println!("Docker Container: {:?}", &docker);
+
+        docker.start_container::<String>(&id, None).await;
+
+        let exec = docker
+            .create_exec(
+                &id,
+                CreateExecOptions {
+                    attach_stdout: Some(true),
+                    attach_stdin: Some(true),
+                    privileged: Some(true),
+                    tty: Some(true),
+                    attach_stderr: Some(true),
+                    cmd: Some(vec!["/bin/bash".to_string(), "-c".to_string()]),
+                    ..Default::default()
+                },
+            )
+            .await
+            .unwrap()
+            .id;
+        if let Ok(StartExecResults::Attached { mut output, .. }) =
+            docker.start_exec(&exec, None).await
+        {
+            while let Some(Ok(msg)) = output.next().await {
+                print!("Message: {}", msg);
             }
-            InputMode::OpenAI => {
-                send_openai_command(
-                    project_object,
-                    runtime,
-                    cmd,
-                    openai,
-                    settings,
-                    current_iteration,
-                );
-            }
+        } else {
+            unreachable!();
         }
-    }
-
-    fn send_docker_command(
-        project_object: Res<ProjectObjects>,
-        container_info: Res<ContainerInfo>,
-        mut runtime: ResMut<TokioTasksRuntime>,
-        commands: Commands,
-        mut cmd: ResMut<Cmd>,
-    ) {
-        let local_cmd = cmd.cmd.pop().unwrap().unwrap();
-        let local_cmd = vec!["".to_string()];
-
-        let id = container_info.id.clone().unwrap();
-
-        runtime.spawn_background_task(|mut ctx| async move {
-            let docker = new_docker().unwrap();
-            // println!("Docker Container: {:?}", &docker);
-
-            docker.start_container::<String>(&id, None).await;
-
-            let exec = docker
-                .create_exec(
-                    &id,
-                    CreateExecOptions {
-                        attach_stdout: Some(true),
-                        attach_stdin: Some(true),
-                        privileged: Some(true),
-                        tty: Some(true),
-                        attach_stderr: Some(true),
-                        cmd: Some(local_cmd),
-                        ..Default::default()
-                    },
-                )
-                .await
-                .unwrap()
-                .id;
-            if let Ok(StartExecResults::Attached { mut output, .. }) =
-                docker.start_exec(&exec, None).await
-            {
-                while let Some(Ok(msg)) = output.next().await {
-                    print!("Message: {}", msg);
-                }
-            } else {
-                unreachable!();
-            }
-        });
-    }
+    });
 }
 
 fn load_prompts() -> HashMap<String, String> {
@@ -360,14 +348,13 @@ fn load_prompts() -> HashMap<String, String> {
     file_map
 }
 
-fn parse_text(text: &str, current_object: &ParsingObjects) -> Result<ParsingObjects, String> {
+fn parse_text(text: &str, current_object: ParsingObjects) -> Result<ParsingObjects, String> {
     match current_object {
         ParsingObjects::SystemOrientation(_) => match parse_architecture_data(&text) {
             Ok(architecture_data) => return Ok(ParsingObjects::Architecture(architecture_data)),
             Err(e) => return Err(e.to_string()),
         },
         ParsingObjects::Architecture(_) => todo!(),
-        ParsingObjects::MakeTicket(_) => todo!(),
         ParsingObjects::CompletedTicket(_) => todo!(),
         ParsingObjects::Implementation(_) => todo!(),
     }
@@ -376,139 +363,149 @@ fn parse_text(text: &str, current_object: &ParsingObjects) -> Result<ParsingObje
 fn send_openai_command(
     project_object: Res<ProjectObjects>,
     runtime: ResMut<TokioTasksRuntime>,
-    mut cmd: ResMut<Cmd>,
     openai: Res<OpenAIObjects>,
     mut settings: ResMut<Settings>,
     mut current_iteration: ResMut<CurrentIteration>,
+    mut query: Query<(Entity, &mut ParsingObjects, &mut Unprocessed)>,
+    mut commands: Commands,
 ) {
-    let local_cmd = cmd.cmd.pop().unwrap().unwrap();
-
-    current_iteration.current_iteration += 1;
-
-    if current_iteration.current_iteration > settings.max_iterations {
-        println!("Max iterations reached");
-        return;
-    }
-
-    let client = openai.client.clone().unwrap();
-
-    // here is where we determine the prompt based on the stage of development
-    let mut prompt = String::new();
-
-    println!(
-        "project_object prompt keys: {:?}",
-        project_object.prompts.keys()
-    );
-
-    // let local_setting = settings.stage.clone();
     let local_goal = project_object.goal.clone();
 
-    match local_cmd {
-        ParsingObjects::SystemOrientation(initial_data) => {
-            prompt = project_object
-                .prompts
-                .get("softwareArchitect")
-                .unwrap()
-                .clone()
-                .to_string();
-            prompt = prompt + &serde_json::to_string(&initial_data).unwrap();
+    for (the_entity, mut object, unprocessed) in query.iter_mut() {
+        commands.entity(the_entity).remove::<Unprocessed>(); // We only want to process the entity once
+        let client = openai.client.clone().unwrap();
+
+        print!(
+            "Sending OpenAI Command: {:?}\nCurrent iteration: {:?}",
+            &object, &current_iteration.current_iteration
+        );
+
+        current_iteration.current_iteration += 1;
+
+        if current_iteration.current_iteration > settings.max_iterations {
+            println!("Max iterations reached");
+            return;
         }
-        ParsingObjects::Architecture(system_context) => {
-            prompt = project_object
-                .prompts
-                .get("teamLead")
-                .unwrap()
-                .clone()
-                .to_string();
-            prompt = prompt + &serde_json::to_string(&system_context).unwrap();
-        }
-        ParsingObjects::MakeTicket(team_lead_input) => {
-            prompt = project_object
-                .prompts
-                .get("developers")
-                .unwrap()
-                .clone()
-                .to_string();
-            prompt = prompt + &serde_json::to_string(&team_lead_input).unwrap();
-        }
-        ParsingObjects::CompletedTicket(_) => todo!(),
-        ParsingObjects::Implementation(_) => todo!(),
-    };
 
-    runtime.spawn_background_task(move |ctx| async move {
-        let mut finish_reason = Some("".to_string());
-        let mut local_string = prompt.clone();
-        let mut local_response = String::new();
+        // here is where we determine the prompt based on the stage of development
+        let mut prompt = String::new();
 
-        while finish_reason != Some("stop".to_string()) {
-            let full_string = local_string.clone() + &local_response;
-            let request = CreateCompletionRequestArgs::default()
-                .model("text-davinci-003")
-                .prompt(&full_string)
-                .max_tokens(200_u16)
-                .build()
-                .unwrap();
+        println!(
+            "project_object prompt keys: {:?}",
+            project_object.prompts.keys()
+        );
 
-            let response = client
-                .completions() // Get the API "group" (completions, images, etc.) from the client
-                .create(request) // Make the API call in that "group"
-                .await
-                .unwrap();
+        // let local_setting = settings.stage.clone();
 
-            let resp = &response.choices.first().unwrap().text;
+        match object.as_mut() {
+            ParsingObjects::SystemOrientation(initial_data) => {
+                prompt = project_object
+                    .prompts
+                    .get("softwareArchitect")
+                    .unwrap()
+                    .clone()
+                    .to_string();
+                prompt = prompt + &serde_json::to_string(&initial_data.clone()).unwrap();
+            }
+            ParsingObjects::Architecture(system_context) => {
+                prompt = project_object
+                    .prompts
+                    .get("teamLead")
+                    .unwrap()
+                    .clone()
+                    .to_string();
+                prompt = prompt + &serde_json::to_string(&system_context).unwrap();
+            }
 
-            println!("Completions: {:?}", resp);
+            ParsingObjects::CompletedTicket(_) => todo!(),
+            ParsingObjects::Implementation(_) => todo!(),
+        };
 
-            local_response = local_response + &resp.clone().to_string();
-            finish_reason = response.choices.first().unwrap().finish_reason.clone();
+        runtime.spawn_background_task(|ctx| async move {
+            let mut finish_reason = Some("".to_string());
+            let mut local_string = prompt.clone();
+            let mut local_response = String::new();
 
-            if finish_reason == Some("stop".to_string()) {
-                println!("Finished Reason: {:?}", finish_reason);
-                println!("Local response: {}", local_response);
+            while finish_reason != Some("stop".to_string()) {
+                let full_string = local_string.clone() + &local_response;
+                let request = CreateCompletionRequestArgs::default()
+                    .model("text-davinci-003")
+                    .prompt(&full_string)
+                    .max_tokens(200_u16)
+                    .build()
+                    .unwrap();
 
-                let parsed_text = parse_text(&local_response, &local_cmd);
+                let response = client
+                    .completions() // Get the API "group" (completions, images, etc.) from the client
+                    .create(request) // Make the API call in that "group"
+                    .await
+                    .unwrap();
 
-                match parsed_text {
-                    Ok(parsed) => {
-                        match parsed {
-                            ParsingObjects::Architecture(system_context) => {
-                                println!("System Context: {:?}", system_context);
+                let resp = &response.choices.first().unwrap().text;
 
-                                for function in &system_context.functions {
-                                    let mut ticket = TeamLeadContextInput {
-                                        goal: local_goal.clone(),
-                                        functions: system_context.functions.clone(),
-                                        current_function: function.clone(),
-                                        objects: system_context.objects.clone(),
-                                    };
+                println!("Completions: {:?}", resp);
 
-                                    // cmd.cmd.push(Some(ParsingObjects::MakeTicket(ticket)));
-                                }
-                            }
-                            ParsingObjects::MakeTicket(_) => todo!(),
-                            ParsingObjects::CompletedTicket(_) => todo!(),
-                            ParsingObjects::Implementation(_) => todo!(),
-                            ParsingObjects::SystemOrientation(_) => todo!(),
-                        }
-                    }
-                    Err(e) => println!("Error: {:?}", e),
+                local_response = local_response + &resp.clone().to_string();
+                finish_reason = response.choices.first().unwrap().finish_reason.clone();
+
+                if finish_reason == Some("stop".to_string()) {
+                    println!("Finished Reason: {:?}", finish_reason);
+                    println!("Local response: {}", local_response);
+
+                    // let parsed_text = parse_text(&local_response, local_cmd.clone());
+
+                    // match parsed_text {
+                    //     Ok(parsed) => {
+                    //         match parsed {
+                    //             ParsingObjects::Architecture(system_context) => {
+                    //                 println!("System Context: {:?}", system_context);
+
+                    //                 for function in &system_context.functions {
+                    //                     let mut ticket = TeamLeadContextInput {
+                    //                         goal: local_goal.clone(),
+                    //                         functions: system_context.functions.clone(),
+                    //                         current_function: function.clone(),
+                    //                         objects: system_context.objects.clone(),
+                    //                     };
+
+                    //                     // cmd.cmd.push(Some(ParsingObjects::MakeTicket(ticket)));
+                    //                 }
+                    //             }
+                    //             // ParsingObjects::MakeTicket(_) => todo!(),
+                    //             ParsingObjects::CompletedTicket(_) => todo!(),
+                    //             ParsingObjects::Implementation(_) => todo!(),
+                    //             ParsingObjects::SystemOrientation(_) => todo!(),
+                    //         }
+                    //     }
+                    //     Err(e) => println!("Error: {:?}", e),
+                    // }
                 }
             }
-        }
-    });
+        });
+    }
 }
 
-fn print_project_objects(goal: Res<ProjectObjects>) {
+fn print_project_objects(goal: Res<ProjectObjects>, mut commands: Commands) {
     println!("Project Goals: \n------------------\n");
     println!("{}", goal.goal);
     println!("\n------------------\n");
+
+    // cmd.cmd.push(Some(ParsingObjects::SystemOrientation(
+    //     InitialData { goal: goal.goal.clone() })));
+
+    commands.spawn((
+        ParsingObjects::SystemOrientation(InitialData {
+            goal: goal.goal.clone(),
+        }),
+        Unprocessed,
+    ));
 }
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
-        .insert_resource(Cmd { cmd: vec![] })
+        // .insert_resource(Cmd { cmd: vec![] })
         .insert_resource(ContainerInfo { id: None })
         .insert_resource(Settings {
             input_mode: InputMode::DockerCommand,
@@ -524,7 +521,7 @@ fn main() {
         .add_startup_system(setup_openai_client)
         // .add_fixed_timestep(Duration::from_secs(5), "label")
         // .add_fixed_timestep_system("label", 0, print_container_info)
-        .add_system(text_input)
-        .add_system(send_command)
+        // .add_system(text_input)
+        .add_system(send_openai_command)
         .run();
 }
