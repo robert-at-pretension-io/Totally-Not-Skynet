@@ -44,7 +44,6 @@ struct ProjectObjects {
     prompts: HashMap<String, String>,
 }
 
-
 #[derive(Resource)]
 struct OpenAIObjects {
     client: Option<Client>,
@@ -54,7 +53,15 @@ struct OpenAIObjects {
 struct Unprocessed;
 
 #[derive(Component)]
-struct Processed;
+struct Prompt {
+    text: String,
+}
+
+#[derive(Component)]
+struct Unparsed;
+
+#[derive(Component)]
+struct Unsent;
 
 #[derive(Resource)]
 struct ContainerInfo {
@@ -288,7 +295,7 @@ fn send_docker_command(
     commands: Commands,
     // mut cmd: ResMut<Cmd>,
 ) {
-    let local_cmd = cmd.cmd.pop().unwrap().unwrap();
+    // let local_cmd = cmd.cmd.pop().unwrap().unwrap();
 
     let id = container_info.id.clone().unwrap();
 
@@ -360,10 +367,26 @@ fn parse_text(text: &str, current_object: ParsingObjects) -> Result<ParsingObjec
     }
 }
 
-fn send_openai_command(
+
+fn initiate_project(goal: Res<ProjectObjects>, mut commands: Commands) {
+    println!("Project Goals: \n------------------\n");
+    println!("{}", goal.goal);
+    println!("\n------------------\n");
+
+    // cmd.cmd.push(Some(ParsingObjects::SystemOrientation(
+    //     InitialData { goal: goal.goal.clone() })));
+
+    commands.spawn((
+        ParsingObjects::SystemOrientation(InitialData {
+            goal: goal.goal.clone(),
+        }),
+        Unprocessed,
+    ));
+}
+
+
+fn build_prompt(
     project_object: Res<ProjectObjects>,
-    runtime: ResMut<TokioTasksRuntime>,
-    openai: Res<OpenAIObjects>,
     mut settings: ResMut<Settings>,
     mut current_iteration: ResMut<CurrentIteration>,
     mut query: Query<(Entity, &mut ParsingObjects, &mut Unprocessed)>,
@@ -373,7 +396,6 @@ fn send_openai_command(
 
     for (the_entity, mut object, unprocessed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unprocessed>(); // We only want to process the entity once
-        let client = openai.client.clone().unwrap();
 
         print!(
             "Sending OpenAI Command: {:?}\nCurrent iteration: {:?}",
@@ -421,9 +443,28 @@ fn send_openai_command(
             ParsingObjects::Implementation(_) => todo!(),
         };
 
+        commands
+            .entity(the_entity)
+            .insert(Prompt { text: prompt })
+            .insert(Unsent);
+    }
+}
+
+fn send_openai_prompt(
+    openai: Res<OpenAIObjects>,
+    runtime: ResMut<TokioTasksRuntime>,
+    mut query: Query<(Entity, &mut ParsingObjects, &mut Prompt, &mut Unsent)>,
+    mut commands: Commands,
+) {
+    for (the_entity, mut object, mut prompt, unsent) in query.iter_mut() {
+
+        commands.entity(the_entity).remove::<Unsent>(); // We only want to process the entity once
+        let client = openai.client.clone().unwrap();
+        let local_string = prompt.as_mut().text.clone();
+
         runtime.spawn_background_task(|ctx| async move {
             let mut finish_reason = Some("".to_string());
-            let mut local_string = prompt.clone();
+
             let mut local_response = String::new();
 
             while finish_reason != Some("stop".to_string()) {
@@ -485,22 +526,6 @@ fn send_openai_command(
     }
 }
 
-fn print_project_objects(goal: Res<ProjectObjects>, mut commands: Commands) {
-    println!("Project Goals: \n------------------\n");
-    println!("{}", goal.goal);
-    println!("\n------------------\n");
-
-    // cmd.cmd.push(Some(ParsingObjects::SystemOrientation(
-    //     InitialData { goal: goal.goal.clone() })));
-
-    commands.spawn((
-        ParsingObjects::SystemOrientation(InitialData {
-            goal: goal.goal.clone(),
-        }),
-        Unprocessed,
-    ));
-}
-
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
@@ -517,11 +542,12 @@ fn main() {
         .init_resource::<ProjectObjects>()
         .add_startup_system(prepare_docker_container)
         // .add_startup_system(setup) // will add this back in when I figure out how to load a font
-        .add_startup_system(print_project_objects)
+        .add_startup_system(initiate_project)
         .add_startup_system(setup_openai_client)
         // .add_fixed_timestep(Duration::from_secs(5), "label")
         // .add_fixed_timestep_system("label", 0, print_container_info)
         // .add_system(text_input)
-        .add_system(send_openai_command)
+        .add_system(build_prompt)
+        .add_system(send_openai_prompt)
         .run();
 }
