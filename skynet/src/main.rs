@@ -58,7 +58,9 @@ struct Prompt {
 }
 
 #[derive(Component)]
-struct Unparsed;
+struct Unparsed {
+    text: String,
+}
 
 #[derive(Component)]
 struct Unsent;
@@ -355,19 +357,6 @@ fn load_prompts() -> HashMap<String, String> {
     file_map
 }
 
-fn parse_text(text: &str, current_object: ParsingObjects) -> Result<ParsingObjects, String> {
-    match current_object {
-        ParsingObjects::SystemOrientation(_) => match parse_architecture_data(&text) {
-            Ok(architecture_data) => return Ok(ParsingObjects::Architecture(architecture_data)),
-            Err(e) => return Err(e.to_string()),
-        },
-        ParsingObjects::Architecture(_) => todo!(),
-        ParsingObjects::CompletedTicket(_) => todo!(),
-        ParsingObjects::Implementation(_) => todo!(),
-    }
-}
-
-
 fn initiate_project(goal: Res<ProjectObjects>, mut commands: Commands) {
     println!("Project Goals: \n------------------\n");
     println!("{}", goal.goal);
@@ -383,7 +372,6 @@ fn initiate_project(goal: Res<ProjectObjects>, mut commands: Commands) {
         Unprocessed,
     ));
 }
-
 
 fn build_prompt(
     project_object: Res<ProjectObjects>,
@@ -457,18 +445,18 @@ fn send_openai_prompt(
     mut commands: Commands,
 ) {
     for (the_entity, mut object, mut prompt, unsent) in query.iter_mut() {
-
         commands.entity(the_entity).remove::<Unsent>(); // We only want to process the entity once
         let client = openai.client.clone().unwrap();
         let local_string = prompt.as_mut().text.clone();
 
-        runtime.spawn_background_task(|ctx| async move {
+        runtime.spawn_background_task(move |mut ctx| async move {
             let mut finish_reason = Some("".to_string());
 
-            let mut local_response = String::new();
-
+            
             while finish_reason != Some("stop".to_string()) {
-                let full_string = local_string.clone() + &local_response;
+                let mut local_response = String::new();
+
+                let full_string = local_string.clone() + &local_response.clone();
                 let request = CreateCompletionRequestArgs::default()
                     .model("text-davinci-003")
                     .prompt(&full_string)
@@ -493,7 +481,12 @@ fn send_openai_prompt(
                     println!("Finished Reason: {:?}", finish_reason);
                     println!("Local response: {}", local_response);
 
-                    // let parsed_text = parse_text(&local_response, local_cmd.clone());
+                    ctx.run_on_main_thread(move |mut ctx| {
+                        ctx.world.entity_mut(the_entity.clone()).insert(Unparsed {
+                            text: local_response.clone(),
+                        });
+                    })
+                    .await;
 
                     // match parsed_text {
                     //     Ok(parsed) => {
@@ -523,6 +516,30 @@ fn send_openai_prompt(
                 }
             }
         });
+    }
+}
+
+fn parse_text(
+    text: &str,
+    current_object: ParsingObjects,
+    mut query: Query<(Entity, &mut ParsingObjects, &mut Unparsed)>,
+    mut commands: Commands,
+) {
+    for (the_entity, mut object, mut unparsed) in query.iter_mut() {
+        commands.entity(the_entity).remove::<Unparsed>(); // We only want to process the entity once
+
+        match object.as_mut() {
+            ParsingObjects::SystemOrientation(_) => match parse_architecture_data(&text) {
+                Ok(architecture_data) => {
+                    commands.spawn(( ParsingObjects::Architecture(architecture_data), Unprocessed ))
+                    // return Ok(ParsingObjects::Architecture(architecture_data))
+                }
+                Err(e) => todo!()
+            },
+            ParsingObjects::Architecture(_) => todo!(),
+            ParsingObjects::CompletedTicket(_) => todo!(),
+            ParsingObjects::Implementation(_) => todo!(),
+        };
     }
 }
 
