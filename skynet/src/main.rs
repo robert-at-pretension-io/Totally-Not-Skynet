@@ -72,24 +72,10 @@ struct ContainerInfo {
 
 #[derive(Resource)]
 struct Settings {
-    input_mode: InputMode,
     max_iterations: usize,
 }
 
-impl Settings {
-    fn next_mode(&mut self) {
-        match self.input_mode {
-            InputMode::DockerCommand => self.input_mode = InputMode::OpenAI,
-            InputMode::OpenAI => self.input_mode = InputMode::DockerCommand,
-        }
-    }
-}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum InputMode {
-    DockerCommand,
-    OpenAI,
-}
 
 #[derive(Debug, Clone)]
 struct ImplementationDetails {
@@ -131,14 +117,11 @@ struct InitialData {
 enum ParsingObjects {
     SystemOrientation(InitialData),
     Architecture(SystemContext),
+    MakeTicket(TeamLeadContextInput),
     CompletedTicket(TeamLeadContextOutput),
     Implementation(ImplementationDetails),
 }
 
-#[derive(Clone, Debug, Component)]
-enum InputObjects {
-    MakeTicket(TeamLeadContextInput),
-}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct TestCase {
@@ -147,6 +130,7 @@ struct TestCase {
 }
 
 fn parse_architecture_data(input: &str) -> serde_json::Result<SystemContext> {
+    println!("Parsing Architecture Data:\n {}", input);
     serde_json::from_str(input).map_err(|e| e.into())
 }
 
@@ -380,13 +364,12 @@ fn build_prompt(
     mut query: Query<(Entity, &mut ParsingObjects, &mut Unprocessed)>,
     mut commands: Commands,
 ) {
-    let local_goal = project_object.goal.clone();
 
-    for (the_entity, mut object, unprocessed) in query.iter_mut() {
+    for (the_entity, mut object, _unprocessed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unprocessed>(); // We only want to process the entity once
 
         print!(
-            "Sending OpenAI Command: {:?}\nCurrent iteration: {:?}",
+            "Sending OpenAI Command: {:?}\nCurrent iteration: {:?}\n",
             &object, &current_iteration.current_iteration
         );
 
@@ -426,7 +409,7 @@ fn build_prompt(
                     .to_string();
                 prompt = prompt + &serde_json::to_string(&system_context).unwrap();
             }
-
+            ParsingObjects::MakeTicket(_) => todo!(),
             ParsingObjects::CompletedTicket(_) => todo!(),
             ParsingObjects::Implementation(_) => todo!(),
         };
@@ -441,10 +424,10 @@ fn build_prompt(
 fn send_openai_prompt(
     openai: Res<OpenAIObjects>,
     runtime: ResMut<TokioTasksRuntime>,
-    mut query: Query<(Entity, &mut ParsingObjects, &mut Prompt, &mut Unsent)>,
+    mut query: Query<(Entity, &ParsingObjects, &mut Prompt, &mut Unsent)>,
     mut commands: Commands,
 ) {
-    for (the_entity, mut object, mut prompt, unsent) in query.iter_mut() {
+    for (the_entity, _object, mut prompt, _unsent) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unsent>(); // We only want to process the entity once
         let client = openai.client.clone().unwrap();
         let local_string = prompt.as_mut().text.clone();
@@ -520,16 +503,15 @@ fn send_openai_prompt(
 }
 
 fn parse_text(
-    text: &str,
-    current_object: ParsingObjects,
     mut query: Query<(Entity, &mut ParsingObjects, &mut Unparsed)>,
     mut commands: Commands,
 ) {
-    for (the_entity, mut object, mut unparsed) in query.iter_mut() {
+    for (the_entity, mut object, unparsed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unparsed>(); // We only want to process the entity once
+        
 
         match object.as_mut() {
-            ParsingObjects::SystemOrientation(_) => match parse_architecture_data(&text) {
+            ParsingObjects::SystemOrientation(_) => match parse_architecture_data(&unparsed.text) {
                 Ok(architecture_data) => {
                     commands.spawn(( ParsingObjects::Architecture(architecture_data), Unprocessed ))
                     // return Ok(ParsingObjects::Architecture(architecture_data))
@@ -537,6 +519,7 @@ fn parse_text(
                 Err(e) => todo!()
             },
             ParsingObjects::Architecture(_) => todo!(),
+            ParsingObjects::MakeTicket(_) => todo!(),
             ParsingObjects::CompletedTicket(_) => todo!(),
             ParsingObjects::Implementation(_) => todo!(),
         };
@@ -550,7 +533,6 @@ fn main() {
         // .insert_resource(Cmd { cmd: vec![] })
         .insert_resource(ContainerInfo { id: None })
         .insert_resource(Settings {
-            input_mode: InputMode::DockerCommand,
             max_iterations: 10,
         })
         .insert_resource(CurrentIteration {
@@ -566,5 +548,6 @@ fn main() {
         // .add_system(text_input)
         .add_system(build_prompt)
         .add_system(send_openai_prompt)
+        .add_system(parse_text)
         .run();
 }
