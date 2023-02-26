@@ -75,6 +75,6 @@ Example:
     ]
 }
 
-All output should be in JSON format that strictly follows the above format.
+All output should be in JSON format that strictly follows the above format. Nothing else should be in the response besides the JSON object.
 
 Input:

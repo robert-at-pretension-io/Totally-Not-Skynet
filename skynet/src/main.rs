@@ -397,15 +397,17 @@ fn build_prompt(
                 prompt = prompt + &serde_json::to_string(&initial_data.clone()).unwrap();
             }
             ParsingObjects::Architecture(system_context) => {
-                prompt = project_object
-                    .prompts
-                    .get("teamLead")
-                    .unwrap()
-                    .clone()
-                    .to_string();
-                prompt = prompt + &serde_json::to_string(&system_context).unwrap();
+                todo!()
             }
-            ParsingObjects::MakeTicket(_) => todo!(),
+            ParsingObjects::MakeTicket(ticket_context) => {
+                prompt = project_object
+                .prompts
+                .get("teamLead")
+                .unwrap()
+                .clone()
+                .to_string();
+            prompt = prompt + &serde_json::to_string(&ticket_context).unwrap();
+            }
             ParsingObjects::CompletedTicket(_) => todo!(),
             ParsingObjects::Implementation(_) => todo!(),
         };
