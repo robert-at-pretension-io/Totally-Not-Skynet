@@ -75,8 +75,6 @@ struct Settings {
     max_iterations: usize,
 }
 
-
-
 #[derive(Debug, Clone)]
 struct ImplementationDetails {
     filename: String,
@@ -121,7 +119,6 @@ enum ParsingObjects {
     CompletedTicket(TeamLeadContextOutput),
     Implementation(ImplementationDetails),
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct TestCase {
@@ -364,7 +361,6 @@ fn build_prompt(
     mut query: Query<(Entity, &mut ParsingObjects, &mut Unprocessed)>,
     mut commands: Commands,
 ) {
-
     for (the_entity, mut object, _unprocessed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unprocessed>(); // We only want to process the entity once
 
@@ -435,7 +431,6 @@ fn send_openai_prompt(
         runtime.spawn_background_task(move |mut ctx| async move {
             let mut finish_reason = Some("".to_string());
 
-            
             while finish_reason != Some("stop".to_string()) {
                 let mut local_response = String::new();
 
@@ -505,18 +500,28 @@ fn send_openai_prompt(
 fn parse_text(
     mut query: Query<(Entity, &mut ParsingObjects, &mut Unparsed)>,
     mut commands: Commands,
+    local_goal: Res<ProjectObjects>,
 ) {
     for (the_entity, mut object, unparsed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unparsed>(); // We only want to process the entity once
-        
 
         match object.as_mut() {
             ParsingObjects::SystemOrientation(_) => match parse_architecture_data(&unparsed.text) {
                 Ok(architecture_data) => {
-                    commands.spawn(( ParsingObjects::Architecture(architecture_data), Unprocessed ))
-                    // return Ok(ParsingObjects::Architecture(architecture_data))
+                    for function in &architecture_data.functions {
+                        let mut ticket = TeamLeadContextInput {
+                            goal: local_goal.goal.clone(),
+                            functions: architecture_data.functions.clone(),
+                            current_function: function.clone(),
+                            objects: architecture_data.objects.clone(),
+                        };
+
+                        commands
+                            .spawn((ParsingObjects::MakeTicket(ticket), Unprocessed));
+                        // return Ok(ParsingObjects::Architecture(architecture_data))
+                    }
                 }
-                Err(e) => todo!()
+                Err(e) => todo!(),
             },
             ParsingObjects::Architecture(_) => todo!(),
             ParsingObjects::MakeTicket(_) => todo!(),
@@ -532,9 +537,7 @@ fn main() {
         .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
         // .insert_resource(Cmd { cmd: vec![] })
         .insert_resource(ContainerInfo { id: None })
-        .insert_resource(Settings {
-            max_iterations: 10,
-        })
+        .insert_resource(Settings { max_iterations: 10 })
         .insert_resource(CurrentIteration {
             current_iteration: 0,
         })
