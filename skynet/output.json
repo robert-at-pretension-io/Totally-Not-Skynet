@@ -1,12 +1,15 @@
 {
     "objects": [
-        "counter : Num;"
+        "canvas : Canvas",
+        "fractal : Fractal",
+        "ctx : RenderingContext",
+        "style : Style"
     ],
     "functions": [
-        "fizzbuzz(num : Num) : String;",
-        "check_nums(num : Num) : String;"
+        "drawFractal(ctx : RenderingContext, fractal: Fractal, style : Style) : Void;",
+        "updateStyle(ctx : RenderingContext, style : Style) : Void;"
     ],
-    "currentFunction": "check_nums(num : Num) : String;",
+    "currentFunction": "updateStyle(ctx : RenderingContext, style : Style) : Void;",
     "description": "(description of the current function)",
     "testCases": [
         {
@@ -19,3 +22,28 @@
         }
     ]
 }
+{
+    "objects": [
+        "canvas : Canvas",
+        "fractal : Fractal",
+        "ctx : RenderingContext",
+        "style : Style"
+    ],
+    "functions": [
+        "drawFractal(ctx : RenderingContext, fractal: Fractal, style : Style) : Void;",
+        "updateStyle(ctx : RenderingContext, style : Style) : Void;"
+    ],
+    "currentFunction": "drawFractal(ctx : RenderingContext, fractal: Fractal, style : Style) : Void;",
+    "description": "The drawFractal function should take in a renderingContext, fractal, and style as input, then draw the fractal to the canvas according to the style.",
+    "testCases": [
+        {
+            "input": "{ctx : RenderingContext, fractal: Fractal1, style : Style1}",
+            "output": "Fractal1 correctly drawn to the canvas according to Style1."
+        },
+        {
+            "input": "{ctx : RenderingContext, fractal: Fractal2, style : Style2}",
+            "output": "Fractal2 correctly drawn to the canvas according to Style2."
+        }
+    ]
+}
+"\n\nfilename: drawFractal.js\nlanguage: JavaScript\ncommand: node drawFractal.js\ncode:\n// drawFractal function\nfunction drawFractal(ctx, fractal, style) {\n  // draw fractal according to the style\n  updateStyle(ctx, style);\n  ctx.draw(fractal);\n}\n\n// update style function\nfunction updateStyle(ctx, style) {\n  ctx.style(style);\n}\n\n// main function\nfunction main() {\n  var testCases = [\n    {\n      input: {\n        ctx: RenderingContext,\n        fractal: Fractal1,\n        style: Style1\n      },\n      output: \"Fractal1 correctly drawn to the canvas according to Style1.\"\n    },\n    {\n      input: {\n        ctx: RenderingContext,\n        fractal: Fractal2,\n        style: Style2\n      },\n      output: \"Fractal2 correctly drawn to the canvas according to Style2.\"\n    }\n  ];\n\n  // Run tests and print out results\n  console.log(\"Tests:\");\n  for (var i = 0; i < testCases.length; i++) {\n    var testCase = testCases[i];\n    console.log(\"Test case \" + i);\n    console.log(\"  Input: \", testCase.input);\n    drawFractal(testCase.input.ctx, testCase.input.fractal, testCase.input.style);\n    if (testCase.output === ctx.status) {\n      console.log(\"  Test passed: \", testCase.output);\n    } else {\n      console.log(\"  Test failed: \", testCase.output);\n    }\n  }\n}\n\nmain();"

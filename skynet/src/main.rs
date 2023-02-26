@@ -80,10 +80,7 @@ struct Settings {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct ImplementationDetails {
-    filename: String,
-    language: String,
-    command: String,
-    code: String,
+    
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -488,13 +485,13 @@ fn send_openai_prompt(
 
                 let resp = &response.choices.first().unwrap().text;
 
-                println!("Completions: {:?}", resp);
+                // println!("Completions: {:?}", resp);
 
                 local_response = local_response.clone() + &resp.clone().to_string();
                 finish_reason = response.choices.first().unwrap().finish_reason.clone();
 
                 if finish_reason == Some("stop".to_string()) {
-                    println!("Finished Reason: {:?}", finish_reason);
+                    // println!("Finished Reason: {:?}", finish_reason);
                     println!("Local response: {}", local_response.clone());
 
                     let super_local = local_response.clone();
@@ -540,7 +537,17 @@ fn parse_text(
                         // return Ok(ParsingObjects::Architecture(architecture_data))
                     }
                 }
-                Err(e) => println!("Error: {:?}", e)
+                Err(e) => {println!("Error: {:?}", e);
+                let mut prompt = "Given an input and an error, please output well formatted json that fixes the error.
+                ".to_string();
+                prompt = prompt + &unparsed.text.clone();
+                prompt = prompt + e.to_string().as_str();
+
+                commands
+                .entity(the_entity)
+                .insert(Prompt { text: prompt })
+                .insert(Unsent);
+            }
             },
             ParsingObjects::Architecture(_) => todo!(),
             ParsingObjects::MakeTicket(_) => {
@@ -551,19 +558,32 @@ fn parse_text(
                         commands
                             .spawn((ParsingObjects::CompletedTicket(ticket_data), Unprocessed));
                     }
-                    Err(e) => println!("Error: {:?}", e)
+                    Err(e) => {println!("Error: {:?}", e);
+                    let mut prompt = "Given an input and an error, please output well formatted json that fixes the error.
+                    ".to_string();
+                    prompt = prompt + &unparsed.text.clone();
+                    prompt = prompt + e.to_string().as_str();
+    
+                    commands
+                    .entity(the_entity)
+                    .insert(Prompt { text: prompt })
+                    .insert(Unsent);
+                }
                 }
             },
             ParsingObjects::CompletedTicket(_) => {
-                match parse_implementation_data(&unparsed.text) {
-                    Ok(implementation_data) => {
-                        append_to_file(&write_file, &implementation_data.clone());
+                
+                // match parse_implementation_data(&unparsed.text) {
+                //     Ok(implementation_data) => {
+                //         append_to_file(&write_file, &implementation_data.clone());
 
-                        commands
-                            .spawn((ParsingObjects::Implementation(implementation_data), Unprocessed));
-                    }
-                    Err(e) => println!("Error: {:?}", e),
-                }
+                //         commands
+                //             .spawn((ParsingObjects::Implementation(implementation_data), Unprocessed));
+                //     }
+                //     Err(e) => println!("Error: {:?}", e),
+                // }
+                append_to_file(&write_file, &unparsed.text.clone());
+
             },
             ParsingObjects::Implementation(_) => todo!(),
         };

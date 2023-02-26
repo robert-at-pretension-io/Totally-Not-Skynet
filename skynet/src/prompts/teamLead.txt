@@ -37,7 +37,7 @@ The output should take the form:
         "input": "(input2 for the current function)",
         "output": "(output2 for the current function)"
         }
-    ],
+    ]
 
 };
 
