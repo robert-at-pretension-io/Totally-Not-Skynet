@@ -1,0 +1,21 @@
+{
+    "objects": [
+        "counter : Num;"
+    ],
+    "functions": [
+        "fizzbuzz(num : Num) : String;",
+        "check_nums(num : Num) : String;"
+    ],
+    "currentFunction": "check_nums(num : Num) : String;",
+    "description": "(description of the current function)",
+    "testCases": [
+        {
+            "input": "(input1 for the current function)",
+            "output": "(output1 for the current function)"
+        },
+        {
+            "input": "(input2 for the current function)",
+            "output": "(output2 for the current function)"
+        }
+    ]
+}

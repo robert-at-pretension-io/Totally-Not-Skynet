@@ -1,4 +1,4 @@
-Given the following programming ticket in JSON format, produce a code file that fulfills the requirements of the ticket. Here is an example of a programming ticket:
+Given the following JSON input, produce a code file that fulfills the requirements of the ticket. Here is an example of a programming ticket:
 
 {
   "goal": "(project goal here)",
@@ -15,7 +15,7 @@ Given the following programming ticket in JSON format, produce a code file that 
   "description": "(description of the current function)"
 }
 
-Produce code that fulfills some requirements and goes inside a code block [code] (code goes here) [/code]. There must always be instructions on how to save the code as well as instructions on how to run the code using a unix terminal. The output should be well-formatted json that includes:
+Produce code that implements the 'currentFunction'. There must always be instructions on how to save the code as well as instructions on how to run the code using a unix terminal. The output should be well-formatted json that takes the form:
 
 {
   filename: "(name of file)",
@@ -23,3 +23,5 @@ Produce code that fulfills some requirements and goes inside a code block [code]
   command: "(command used to execute the code)",
   code: "(code goes here)"
 }
+
+It is of the utmost importance that the output takes the form above without exception.

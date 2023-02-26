@@ -1,1 +1,1 @@
-Make a videogame about cats and dogs.
+Write a program that will display a fractal on the screen. 

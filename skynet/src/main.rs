@@ -10,9 +10,11 @@ use futures_lite::StreamExt;
 
 use bollard::errors::Error;
 use bollard::Docker;
-use std::fs;
+use std::fs::{self, OpenOptions};
+use std::io::BufWriter;
 use std::path::Path;
 use std::{fs::File, io::BufRead};
+use std::io::Write;
 
 use async_openai::Client;
 
@@ -73,9 +75,10 @@ struct ContainerInfo {
 #[derive(Resource)]
 struct Settings {
     max_iterations: usize,
+    write_file: String
 }
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct ImplementationDetails {
     filename: String,
     language: String,
@@ -95,9 +98,9 @@ struct TeamLeadContextInput {
 struct TeamLeadContextOutput {
     objects: Vec<String>,
     functions: Vec<String>,
-    current_function: String,
+    currentFunction: String,
     description: String,
-    test_cases: Vec<TestCase>,
+    testCases: Vec<TestCase>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -129,6 +132,30 @@ struct TestCase {
 fn parse_architecture_data(input: &str) -> serde_json::Result<SystemContext> {
     println!("Parsing Architecture Data:\n {}", input);
     serde_json::from_str(input).map_err(|e| e.into())
+}
+
+fn parse_ticket_data(input: &str) -> serde_json::Result<TeamLeadContextOutput> {
+    println!("Parsing Ticket Data:\n {}", input);
+    serde_json::from_str(input).map_err(|e| e.into())
+}
+
+fn parse_implementation_data(input: &str) -> serde_json::Result<ImplementationDetails> {
+    println!("Parsing Ticket Data:\n {}", input);
+    serde_json::from_str(input).map_err(|e| e.into())
+}
+
+fn append_to_file<T: Serialize + Deserialize<'static>>(filename: &str, data: &T) -> Result<(), Box<dyn std::error::Error>> {
+    let file = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(filename)?;
+    let mut writer = BufWriter::new(file);
+
+    // Serialize data to JSON and write to file
+    let serialized_data = serde_json::to_string(data)?;
+    writeln!(writer, "{}", serialized_data)?;
+
+    Ok(())
 }
 
 // Implementing this trait allows us to create a resource that is accessible from all future systems that we create.
@@ -356,7 +383,7 @@ fn initiate_project(goal: Res<ProjectObjects>, mut commands: Commands) {
 
 fn build_prompt(
     project_object: Res<ProjectObjects>,
-    mut settings: ResMut<Settings>,
+    settings: ResMut<Settings>,
     mut current_iteration: ResMut<CurrentIteration>,
     mut query: Query<(Entity, &mut ParsingObjects, &mut Unprocessed)>,
     mut commands: Commands,
@@ -396,7 +423,7 @@ fn build_prompt(
                     .to_string();
                 prompt = prompt + &serde_json::to_string(&initial_data.clone()).unwrap();
             }
-            ParsingObjects::Architecture(system_context) => {
+            ParsingObjects::Architecture(_) => {
                 todo!()
             }
             ParsingObjects::MakeTicket(ticket_context) => {
@@ -408,7 +435,15 @@ fn build_prompt(
                 .to_string();
             prompt = prompt + &serde_json::to_string(&ticket_context).unwrap();
             }
-            ParsingObjects::CompletedTicket(_) => todo!(),
+            ParsingObjects::CompletedTicket(ticket ) => {
+                prompt = project_object
+                .prompts
+                .get("developers")
+                .unwrap()
+                .clone()
+                .to_string();
+            prompt = prompt + &serde_json::to_string(&ticket).unwrap();
+            }
             ParsingObjects::Implementation(_) => todo!(),
         };
 
@@ -428,15 +463,16 @@ fn send_openai_prompt(
     for (the_entity, _object, mut prompt, _unsent) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unsent>(); // We only want to process the entity once
         let client = openai.client.clone().unwrap();
-        let local_string = prompt.as_mut().text.clone();
+        let local_prompt = prompt.as_mut().text.clone();
 
         runtime.spawn_background_task(move |mut ctx| async move {
             let mut finish_reason = Some("".to_string());
 
+            let mut local_response = String::new();
             while finish_reason != Some("stop".to_string()) {
-                let mut local_response = String::new();
+                
 
-                let full_string = local_string.clone() + &local_response.clone();
+                let full_string = local_prompt.clone() + &local_response.clone();
                 let request = CreateCompletionRequestArgs::default()
                     .model("text-davinci-003")
                     .prompt(&full_string)
@@ -454,45 +490,22 @@ fn send_openai_prompt(
 
                 println!("Completions: {:?}", resp);
 
-                local_response = local_response + &resp.clone().to_string();
+                local_response = local_response.clone() + &resp.clone().to_string();
                 finish_reason = response.choices.first().unwrap().finish_reason.clone();
 
                 if finish_reason == Some("stop".to_string()) {
                     println!("Finished Reason: {:?}", finish_reason);
-                    println!("Local response: {}", local_response);
+                    println!("Local response: {}", local_response.clone());
 
-                    ctx.run_on_main_thread(move |mut ctx| {
+                    let super_local = local_response.clone();
+
+                    ctx.run_on_main_thread( move |mut ctx| {
                         ctx.world.entity_mut(the_entity.clone()).insert(Unparsed {
-                            text: local_response.clone(),
+                            text: super_local,
                         });
                     })
                     .await;
 
-                    // match parsed_text {
-                    //     Ok(parsed) => {
-                    //         match parsed {
-                    //             ParsingObjects::Architecture(system_context) => {
-                    //                 println!("System Context: {:?}", system_context);
-
-                    //                 for function in &system_context.functions {
-                    //                     let mut ticket = TeamLeadContextInput {
-                    //                         goal: local_goal.clone(),
-                    //                         functions: system_context.functions.clone(),
-                    //                         current_function: function.clone(),
-                    //                         objects: system_context.objects.clone(),
-                    //                     };
-
-                    //                     // cmd.cmd.push(Some(ParsingObjects::MakeTicket(ticket)));
-                    //                 }
-                    //             }
-                    //             // ParsingObjects::MakeTicket(_) => todo!(),
-                    //             ParsingObjects::CompletedTicket(_) => todo!(),
-                    //             ParsingObjects::Implementation(_) => todo!(),
-                    //             ParsingObjects::SystemOrientation(_) => todo!(),
-                    //         }
-                    //     }
-                    //     Err(e) => println!("Error: {:?}", e),
-                    // }
                 }
             }
         });
@@ -503,13 +516,17 @@ fn parse_text(
     mut query: Query<(Entity, &mut ParsingObjects, &mut Unparsed)>,
     mut commands: Commands,
     local_goal: Res<ProjectObjects>,
+    mut settings: ResMut<Settings>
 ) {
+
+    let write_file = settings.write_file.clone();
     for (the_entity, mut object, unparsed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unparsed>(); // We only want to process the entity once
 
         match object.as_mut() {
             ParsingObjects::SystemOrientation(_) => match parse_architecture_data(&unparsed.text) {
                 Ok(architecture_data) => {
+                    append_to_file(&write_file, &architecture_data.clone());
                     for function in &architecture_data.functions {
                         let mut ticket = TeamLeadContextInput {
                             goal: local_goal.goal.clone(),
@@ -523,11 +540,31 @@ fn parse_text(
                         // return Ok(ParsingObjects::Architecture(architecture_data))
                     }
                 }
-                Err(e) => todo!(),
+                Err(e) => println!("Error: {:?}", e)
             },
             ParsingObjects::Architecture(_) => todo!(),
-            ParsingObjects::MakeTicket(_) => todo!(),
-            ParsingObjects::CompletedTicket(_) => todo!(),
+            ParsingObjects::MakeTicket(_) => {
+                match parse_ticket_data(&unparsed.text) {
+                    Ok(ticket_data) => {
+                        append_to_file(&write_file, &ticket_data.clone());
+
+                        commands
+                            .spawn((ParsingObjects::CompletedTicket(ticket_data), Unprocessed));
+                    }
+                    Err(e) => println!("Error: {:?}", e)
+                }
+            },
+            ParsingObjects::CompletedTicket(_) => {
+                match parse_implementation_data(&unparsed.text) {
+                    Ok(implementation_data) => {
+                        append_to_file(&write_file, &implementation_data.clone());
+
+                        commands
+                            .spawn((ParsingObjects::Implementation(implementation_data), Unprocessed));
+                    }
+                    Err(e) => println!("Error: {:?}", e),
+                }
+            },
             ParsingObjects::Implementation(_) => todo!(),
         };
     }
@@ -539,7 +576,7 @@ fn main() {
         .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
         // .insert_resource(Cmd { cmd: vec![] })
         .insert_resource(ContainerInfo { id: None })
-        .insert_resource(Settings { max_iterations: 10 })
+        .insert_resource(Settings { max_iterations: 10, write_file: "output.json".to_string() })
         .insert_resource(CurrentIteration {
             current_iteration: 0,
         })

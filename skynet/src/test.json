@@ -1,0 +1,1582 @@
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "update_player(player : Object) : Void;",
+  "description":"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_dog(dog : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_cat(cat : Object) : Void;",
+  "description": "("
+Completions: " 
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_player(player : Object) : Void;",
+  "description":"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "check_for_collisions(cat : Object, dog : Object, player :"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_dog(dog : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_player(player : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_cat(cat : Object) : Void;",
+  "description": "("
+Completions: "
+
+{"goal":"Make a videogame about cats and dogs.","objects":["cat : Object;","dog : Object;","player : Object;"],"functions":["update_cat(cat : Object) : Void;","update_dog(dog : Object) : Void;","update_player(player : Object) : Void;","render_cat(cat : Object) : Void;","render_dog(dog : Object) : Void;","render_player(player : Object) : Void;","check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"],"current_function":"check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;", "description": "The check_for_collisions function should check if the cat, dog, and/or player objects are overlapping, and if so, return true. Otherwise, it should return false.", "test"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_dog(dog : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_player(player : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "render_dog(dog : Object) : Void;",
+  "description":"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_cat(cat : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_player(player : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_dog(dog : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "render_player(player : Object) : Void;",
+  "description":"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_dog(dog : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "update_cat(cat : Object) : Void;",
+  "description":"
+Completions: "
+
+{"goal":"Make a videogame about cats and dogs.","objects":["cat : Object;","dog : Object;","player : Object;"],"functions":["update_cat(cat : Object) : Void;","update_dog(dog : Object) : Void;","update_player(player : Object) : Void;","render_cat(cat : Object) : Void;","render_dog(dog : Object) : Void;","render_player(player : Object) : Void;","check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"],"current_function":"update_player(player : Object) : Void;","description":"The update_player function should take in an Object representing the player and update the object's internal state based on the current game logic. It should not take any additional parameters.", "testCases": [
+        {
+        "input": "(Input1 example"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "check_for_collisions(cat : Object, dog : Object, player : Object"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_dog(dog : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_player(player : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_dog(dog : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_cat(cat : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "check_for_collisions(cat : Object, dog : Object, player :"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_cat(cat : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_dog(dog : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_player(player : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_player(player : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_dog(dog : Object) : Void;",
+  "description": "("
+Completions: "
+
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_cat(cat : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_cat(cat : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "check_for_collisions(cat : Object, dog : Object, player : Object"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_player(player : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_dog(dog : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_dog(dog : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_player(player : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_player(player : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_cat(cat : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_player(player : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_cat(cat : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "check_for_collisions(cat : Object, dog : Object, player : Object"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_dog(dog : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "render_dog(dog : Object) : Void;",
+  "description":"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_dog(dog : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_dog(dog : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_player(player : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_player(player : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_cat(cat : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "check_for_collisions(cat : Object, dog : Object, player : Object"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_dog(dog : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "render_cat(cat : Object) : Void;",
+  "description":"
+Completions: "
+
+{
+ "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_dog(dog : Object) : Void;",
+  "description": "(description"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_player(player : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "update_player(player : Object) : Void;",
+  "description":"
+Completions: "
+
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_cat(cat : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal":"Make a videogame about cats and dogs.",
+  "objects":["cat : Object;","dog : Object;","player : Object;"],
+  "functions":["update_cat(cat : Object) : Void;","update_dog(dog : Object) : Void;","update_player(player : Object) : Void;","render_cat(cat : Object) : Void;","render_dog(dog : Object) : Void;","render_player(player : Object) : Void;","check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"],
+  "current_function":"update_dog(dog : Object) : Void;",
+  "description": "(description of the current function)",
+    "testCases": [
+        {
+        "input": "(input1 for the current function)",
+        "output": "(output"
+Completions: "
+
+{"goal":"Make a videogame about cats and dogs.","objects":["cat : Object;","dog : Object;","player : Object;"],"functions":["update_cat(cat : Object) : Void;","update_dog(dog : Object) : Void;","update_player(player : Object) : Void;","render_cat(cat : Object) : Void;","render_dog(dog : Object) : Void;","render_player(player : Object) : Void;","check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"],"currentFunction":"check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;","description": "The check_for_collisions function should take in three objects (cat, dog, and player) as its input and return a boolean value. The function should check for any possible collisions between the three objects"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": ["cat : Object;","dog : Object;","player : Object;"],
+  "functions": ["update_cat(cat : Object) : Void;","update_dog(dog : Object) : Void;","update_player(player : Object) : Void;","render_cat(cat : Object) : Void;","render_dog(dog : Object) : Void;","render_player(player : Object) : Void;","check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"],
+  "currentFunction": "render_dog(dog : Object) : Void;",
+  "description": "The render_dog function should take an instance of the Object type as its input and render it to the scene. It should render the dog's current position, color,"
+Completions: "
+
+{
+  "goal":"Make a videogame about cats and dogs.",
+  "objects":["cat : Object;","dog : Object;","player : Object;"],
+  "functions":["update_cat(cat : Object) : Void;","update_dog(dog : Object) : Void;","update_player(player : Object) : Void;","render_cat(cat : Object) : Void;","render_dog(dog : Object) : Void;","render_player(player : Object) : Void;","check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"],
+  "currentFunction":"render_player(player : Object) : Void;",
+  "description":"The render_player function should take in an object representing the player as its input and render it to the game window. It should use variables from the player object such as position and size for rendering"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_cat(cat : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_player(player : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": ["cat : Object;", "dog : Object;", "player : Object;"],
+  "functions": ["update_cat(cat : Object) : Void;", "update_dog(dog : Object) : Void;", "update_player(player : Object) : Void;", "render_cat(cat : Object) : Void;", "render_dog(dog : Object) : Void;", "render_player(player : Object) : Void;", "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"],
+  "currentFunction": "update_cat(cat : Object) : Void;",
+  "description": "The update_cat function should take in a cat object as an argument and update its properties according to the game rules. This could"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_dog(dog : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "render_player(player : Object) : Void;",
+  "description":"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_dog(dog : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "check_for_collisions(cat : Object, dog : Object, player : Object"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_cat(cat : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_player(player : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_cat(cat : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_dog(dog : Object) : Void;",
+  "description": "("
+Completions: "
+
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "render_player(player : Object) : Void;",
+  "description":"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects":[
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_dog(dog : Object) : Void;",
+  "description": "The"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "check_for_collisions(cat : Object, dog : Object, player :"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "render_cat(cat : Object) : Void;",
+  "description":"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_player(player : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_cat(cat : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_dog(dog : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "render_dog(dog : Object) : Void;",
+  "description":"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "render_player(player : Object) : Void;",
+  "description": ""
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "current_function": "render_cat(cat : Object) : Void;",
+  "description":"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "check_for_collisions(cat : Object, dog : Object, player : Object"
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_player(player : Object) : Void;",
+  "description": "("
+Completions: "
+
+{
+  "goal": "Make a videogame about cats and dogs.",
+  "objects": [
+    "cat : Object;",
+    "dog : Object;",
+    "player : Object;"
+  ],
+  "functions": [
+    "update_cat(cat : Object) : Void;",
+    "update_dog(dog : Object) : Void;",
+    "update_player(player : Object) : Void;",
+    "render_cat(cat : Object) : Void;",
+    "render_dog(dog : Object) : Void;",
+    "render_player(player : Object) : Void;",
+    "check_for_collisions(cat : Object, dog : Object, player : Object) : Boolean;"
+  ],
+  "currentFunction": "update_cat(cat : Object) : Void;",
+  "description": ""
+^C
+➜  skynet git:(main) ✗ 
