@@ -1,49 +1,35 @@
 {
     "objects": [
-        "canvas : Canvas",
-        "fractal : Fractal",
-        "ctx : RenderingContext",
-        "style : Style"
+        "iframe : HTMLIFrameElement;",
+        "websocket : WebSocket;"
     ],
     "functions": [
-        "drawFractal(ctx : RenderingContext, fractal: Fractal, style : Style) : Void;",
-        "updateStyle(ctx : RenderingContext, style : Style) : Void;"
-    ],
-    "currentFunction": "updateStyle(ctx : RenderingContext, style : Style) : Void;",
-    "description": "(description of the current function)",
-    "testCases": [
-        {
-            "input": "(input1 for the current function)",
-            "output": "(output1 for the current function)"
-        },
-        {
-            "input": "(input2 for the current function)",
-            "output": "(output2 for the current function)"
-        }
+        "createIframe() : void;",
+        "initializeWebsocket(url : string) : void;"
     ]
 }
 {
     "objects": [
-        "canvas : Canvas",
-        "fractal : Fractal",
-        "ctx : RenderingContext",
-        "style : Style"
+        "iframe : HTMLIFrameElement;",
+        "websocket : WebSocket;"
     ],
     "functions": [
-        "drawFractal(ctx : RenderingContext, fractal: Fractal, style : Style) : Void;",
-        "updateStyle(ctx : RenderingContext, style : Style) : Void;"
+        "createIframe() : void;",
+        "initializeWebsocket(url : string) : void;"
     ],
-    "currentFunction": "drawFractal(ctx : RenderingContext, fractal: Fractal, style : Style) : Void;",
-    "description": "The drawFractal function should take in a renderingContext, fractal, and style as input, then draw the fractal to the canvas according to the style.",
+    "currentFunction": "createIframe() : void;",
+    "description": "The createIframe function should create an iframe element and append it to the DOM.",
     "testCases": [
         {
-            "input": "{ctx : RenderingContext, fractal: Fractal1, style : Style1}",
-            "output": "Fractal1 correctly drawn to the canvas according to Style1."
-        },
-        {
-            "input": "{ctx : RenderingContext, fractal: Fractal2, style : Style2}",
-            "output": "Fractal2 correctly drawn to the canvas according to Style2."
+            "input": "",
+            "output": "An iframe element should be added to the DOM."
         }
     ]
 }
-"\n\nfilename: drawFractal.js\nlanguage: JavaScript\ncommand: node drawFractal.js\ncode:\n// drawFractal function\nfunction drawFractal(ctx, fractal, style) {\n  // draw fractal according to the style\n  updateStyle(ctx, style);\n  ctx.draw(fractal);\n}\n\n// update style function\nfunction updateStyle(ctx, style) {\n  ctx.style(style);\n}\n\n// main function\nfunction main() {\n  var testCases = [\n    {\n      input: {\n        ctx: RenderingContext,\n        fractal: Fractal1,\n        style: Style1\n      },\n      output: \"Fractal1 correctly drawn to the canvas according to Style1.\"\n    },\n    {\n      input: {\n        ctx: RenderingContext,\n        fractal: Fractal2,\n        style: Style2\n      },\n      output: \"Fractal2 correctly drawn to the canvas according to Style2.\"\n    }\n  ];\n\n  // Run tests and print out results\n  console.log(\"Tests:\");\n  for (var i = 0; i < testCases.length; i++) {\n    var testCase = testCases[i];\n    console.log(\"Test case \" + i);\n    console.log(\"  Input: \", testCase.input);\n    drawFractal(testCase.input.ctx, testCase.input.fractal, testCase.input.style);\n    if (testCase.output === ctx.status) {\n      console.log(\"  Test passed: \", testCase.output);\n    } else {\n      console.log(\"  Test failed: \", testCase.output);\n    }\n  }\n}\n\nmain();"
+{
+    "filename": "createIframe.js",
+    "language": "JavaScript",
+    "command": "node createIframe.js",
+    "code": "function createIframe() {\n  const iframe = document.createElement('iframe');\n  document.body.appendChild(iframe);\n}\n",
+    "instructions": "To run this code, you will need to have Node.js installed on your computer.\n\n1. Open a text editor and copy the code.\n2. Save the file as 'createIframe.js'.\n3. Open a terminal and navigate to the directory where the file is saved.\n4. Type 'node createIframe.js' and press enter.\n5. Check the DOM to confirm that an iframe element has been added.\n\nNote: The code assumes that there is a web page with a body element where the iframe will be appended. If the iframe doesn't appear, make sure that the code is running on an appropriate web page or adjust the code to target a specific element."
+}

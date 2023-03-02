@@ -1,1 +1,1 @@
-Write a program that will display a fractal on the screen. 
+Write some javascript that will create an iframe. In the iframe it will initialize a websocket chat with an external chat engine.

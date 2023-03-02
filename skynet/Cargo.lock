@@ -3544,6 +3544,7 @@ dependencies = [
  "iyes_loopless",
  "json",
  "nom",
+ "reqwest",
  "serde",
  "serde_json",
 ]

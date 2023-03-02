@@ -12,12 +12,13 @@ use bollard::errors::Error;
 use bollard::Docker;
 use std::fs::{self, OpenOptions};
 use std::io::BufWriter;
+use std::io::Write;
 use std::path::Path;
 use std::{fs::File, io::BufRead};
-use std::io::Write;
 
-use async_openai::Client;
+// use async_openai::Client;
 
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 #[derive(Resource)]
@@ -44,6 +45,30 @@ struct Args {
 struct ProjectObjects {
     goal: String,
     prompts: HashMap<String, String>,
+}
+
+#[derive(Debug, Deserialize, Serialize,Clone)]
+struct Usage {
+    prompt_tokens: u32,
+    completion_tokens: u32,
+    total_tokens: u32,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct Choice {
+    message: Message,
+    finish_reason: String,
+    index: u32,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct ChatCompletion {
+    id: String,
+    object: String,
+    created: u64,
+    model: String,
+    usage: Usage,
+    choices: Vec<Choice>,
 }
 
 #[derive(Resource)]
@@ -75,12 +100,12 @@ struct ContainerInfo {
 #[derive(Resource)]
 struct Settings {
     max_iterations: usize,
-    write_file: String
+    write_file: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct ImplementationDetails {
-    
+    result: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -117,13 +142,34 @@ enum ParsingObjects {
     Architecture(SystemContext),
     MakeTicket(TeamLeadContextInput),
     CompletedTicket(TeamLeadContextOutput),
-    Implementation(ImplementationDetails),
+    Implementation(Code),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct TestCase {
     input: String,
     output: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ChatCompletionRequest {
+    model: String,
+    messages: Vec<Message>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct Message {
+    role: String,
+    content: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+struct Code {
+    filename: String,
+    language: String,
+    command: String,
+    code: String,
+    instructions: String,
 }
 
 fn parse_architecture_data(input: &str) -> serde_json::Result<SystemContext> {
@@ -136,12 +182,15 @@ fn parse_ticket_data(input: &str) -> serde_json::Result<TeamLeadContextOutput> {
     serde_json::from_str(input).map_err(|e| e.into())
 }
 
-fn parse_implementation_data(input: &str) -> serde_json::Result<ImplementationDetails> {
+fn parse_implementation_data(input: &str) -> serde_json::Result<Code> {
     println!("Parsing Ticket Data:\n {}", input);
     serde_json::from_str(input).map_err(|e| e.into())
 }
 
-fn append_to_file<T: Serialize + Deserialize<'static>>(filename: &str, data: &T) -> Result<(), Box<dyn std::error::Error>> {
+fn append_to_file<T: Serialize + Deserialize<'static>>(
+    filename: &str,
+    data: &T,
+) -> Result<(), Box<dyn std::error::Error>> {
     let file = OpenOptions::new()
         .append(true)
         .create(true)
@@ -190,15 +239,15 @@ fn new_docker() -> Result<Docker> {
     Docker::new("tcp://127.0.0.1:8080")
 }
 
-fn setup_openai_client(mut commands: Commands) {
-    let args = Args::parse();
-    let api_key = args.api_key.clone();
-    let client = Client::new().with_api_key(api_key);
+// fn setup_openai_client(mut commands: Commands) {
+//     let args = Args::parse();
+//     let api_key = args.api_key.clone();
+//     let client = Client::new().with_api_key(api_key);
 
-    commands.insert_resource(OpenAIObjects {
-        client: Some(client),
-    });
-}
+//     commands.insert_resource(OpenAIObjects {
+//         client: Some(client),
+//     });
+// }
 
 fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>) {
     runtime.spawn_background_task(|mut ctx| async move {
@@ -425,21 +474,21 @@ fn build_prompt(
             }
             ParsingObjects::MakeTicket(ticket_context) => {
                 prompt = project_object
-                .prompts
-                .get("teamLead")
-                .unwrap()
-                .clone()
-                .to_string();
-            prompt = prompt + &serde_json::to_string(&ticket_context).unwrap();
+                    .prompts
+                    .get("teamLead")
+                    .unwrap()
+                    .clone()
+                    .to_string();
+                prompt = prompt + &serde_json::to_string(&ticket_context).unwrap();
             }
-            ParsingObjects::CompletedTicket(ticket ) => {
+            ParsingObjects::CompletedTicket(ticket) => {
                 prompt = project_object
-                .prompts
-                .get("developers")
-                .unwrap()
-                .clone()
-                .to_string();
-            prompt = prompt + &serde_json::to_string(&ticket).unwrap();
+                    .prompts
+                    .get("developers")
+                    .unwrap()
+                    .clone()
+                    .to_string();
+                prompt = prompt + &serde_json::to_string(&ticket).unwrap();
             }
             ParsingObjects::Implementation(_) => todo!(),
         };
@@ -452,59 +501,96 @@ fn build_prompt(
 }
 
 fn send_openai_prompt(
-    openai: Res<OpenAIObjects>,
+    // openai: Res<OpenAIObjects>,
     runtime: ResMut<TokioTasksRuntime>,
     mut query: Query<(Entity, &ParsingObjects, &mut Prompt, &mut Unsent)>,
     mut commands: Commands,
 ) {
     for (the_entity, _object, mut prompt, _unsent) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unsent>(); // We only want to process the entity once
-        let client = openai.client.clone().unwrap();
+                                                        // let client = openai.client.clone().unwrap();
         let local_prompt = prompt.as_mut().text.clone();
 
+        let args = Args::parse();
+        let api_key = args.api_key.clone();
+
         runtime.spawn_background_task(move |mut ctx| async move {
-            let mut finish_reason = Some("".to_string());
+            let mut finish_reason = "".to_string();
 
             let mut local_response = String::new();
-            while finish_reason != Some("stop".to_string()) {
-                
-
+            while finish_reason != "stop" {
                 let full_string = local_prompt.clone() + &local_response.clone();
-                let request = CreateCompletionRequestArgs::default()
-                    .model("text-davinci-003")
-                    .prompt(&full_string)
-                    .max_tokens(200_u16)
-                    .build()
-                    .unwrap();
+                // let request = CreateCompletionRequestArgs::default()
+                //     .model("text-davinci-003")
+                //     .prompt(&full_string)
+                //     .max_tokens(200_u16)
+                //     .build()
+                //     .unwrap();
+
+                // let response = client
+                //     .completions() // Get the API "group" (completions, images, etc.) from the client
+                //     .create(request) // Make the API call in that "group"
+                //     .await
+                //     .unwrap();
+
+                let url = "https://api.openai.com/v1/chat/completions";
+
+                let client = Client::new();
+                let request_body = ChatCompletionRequest {
+                    model: "gpt-3.5-turbo".to_string(),
+                    messages: vec![Message {
+                        role: "user".to_string(),
+                        content: full_string.clone(),
+                    }],
+                };
 
                 let response = client
-                    .completions() // Get the API "group" (completions, images, etc.) from the client
-                    .create(request) // Make the API call in that "group"
+                    .post(url)
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", format!("Bearer {}", api_key))
+                    .json(&request_body)
+                    .send()
                     .await
                     .unwrap();
+                println!("{:?}", response);
 
-                let resp = &response.choices.first().unwrap().text;
+                let response_body = response.text().await.unwrap();
+
+                println!("\n{:?}", response_body.clone());
+
+                let chat_completion =
+                    serde_json::from_str::<ChatCompletion>(&response_body).unwrap();
+
+                finish_reason = chat_completion.clone()
+                    .choices
+                    .first()
+                    .unwrap()
+                    .finish_reason
+                    .clone();
+
+                // let resp = &response.choices.first().unwrap().text;
 
                 // println!("Completions: {:?}", resp);
 
-                local_response = local_response.clone() + &resp.clone().to_string();
-                finish_reason = response.choices.first().unwrap().finish_reason.clone();
+                local_response = local_response.clone() + &chat_completion.choices.first().unwrap().message.content;
+                // finish_reason = response.choices.first().unwrap().finish_reason.clone();
 
-                if finish_reason == Some("stop".to_string()) {
-                    // println!("Finished Reason: {:?}", finish_reason);
-                    println!("Local response: {}", local_response.clone());
-
-                    let super_local = local_response.clone();
-
-                    ctx.run_on_main_thread( move |mut ctx| {
-                        ctx.world.entity_mut(the_entity.clone()).insert(Unparsed {
-                            text: super_local,
-                        });
-                    })
-                    .await;
-
-                }
+                // if finish_reason == Some("stop".to_string()) {
+                //     // println!("Finished Reason: {:?}", finish_reason);
+                //     println!("Local response: {}", local_response.clone());
             }
+            // let super_local = local_response.clone();
+            let super_local = local_response.clone();
+
+            ctx.run_on_main_thread(move |mut ctx| {
+                ctx.world
+                    .entity_mut(the_entity.clone())
+                    .insert(Unparsed { text: super_local });
+            })
+            .await;
+
+            // }
+            // }
         });
     }
 }
@@ -513,9 +599,8 @@ fn parse_text(
     mut query: Query<(Entity, &mut ParsingObjects, &mut Unparsed)>,
     mut commands: Commands,
     local_goal: Res<ProjectObjects>,
-    mut settings: ResMut<Settings>
+    mut settings: ResMut<Settings>,
 ) {
-
     let write_file = settings.write_file.clone();
     for (the_entity, mut object, unparsed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unparsed>(); // We only want to process the entity once
@@ -532,59 +617,65 @@ fn parse_text(
                             objects: architecture_data.objects.clone(),
                         };
 
-                        commands
-                            .spawn((ParsingObjects::MakeTicket(ticket), Unprocessed));
+                        commands.spawn((ParsingObjects::MakeTicket(ticket), Unprocessed));
                         // return Ok(ParsingObjects::Architecture(architecture_data))
                     }
                 }
-                Err(e) => {println!("Error: {:?}", e);
-                let mut prompt = "Given an input and an error, please output well formatted json that fixes the error.
+                Err(e) => {
+                    println!("Error: {:?}", e);
+                    let mut prompt = "Given an input and an error, please output well formatted json that fixes the error.
                 ".to_string();
-                prompt = prompt + &unparsed.text.clone();
-                prompt = prompt + e.to_string().as_str();
+                    prompt = prompt + &unparsed.text.clone();
+                    prompt = prompt + e.to_string().as_str();
 
-                commands
-                .entity(the_entity)
-                .insert(Prompt { text: prompt })
-                .insert(Unsent);
-            }
+                    commands
+                        .entity(the_entity)
+                        .insert(Prompt { text: prompt })
+                        .insert(Unsent);
+                }
             },
             ParsingObjects::Architecture(_) => todo!(),
-            ParsingObjects::MakeTicket(_) => {
-                match parse_ticket_data(&unparsed.text) {
-                    Ok(ticket_data) => {
-                        append_to_file(&write_file, &ticket_data.clone());
+            ParsingObjects::MakeTicket(_) => match parse_ticket_data(&unparsed.text) {
+                Ok(ticket_data) => {
+                    append_to_file(&write_file, &ticket_data.clone());
 
-                        commands
-                            .spawn((ParsingObjects::CompletedTicket(ticket_data), Unprocessed));
-                    }
-                    Err(e) => {println!("Error: {:?}", e);
+                    commands.spawn((ParsingObjects::CompletedTicket(ticket_data), Unprocessed));
+                }
+                Err(e) => {
+                    println!("Error: {:?}", e);
                     let mut prompt = "Given an input and an error, please output well formatted json that fixes the error.
                     ".to_string();
                     prompt = prompt + &unparsed.text.clone();
                     prompt = prompt + e.to_string().as_str();
-    
+
                     commands
-                    .entity(the_entity)
-                    .insert(Prompt { text: prompt })
-                    .insert(Unsent);
-                }
+                        .entity(the_entity)
+                        .insert(Prompt { text: prompt })
+                        .insert(Unsent);
                 }
             },
             ParsingObjects::CompletedTicket(_) => {
-                
-                // match parse_implementation_data(&unparsed.text) {
-                //     Ok(implementation_data) => {
-                //         append_to_file(&write_file, &implementation_data.clone());
+                let json = parse_implementation_data(&unparsed.text);
+                match json {
+                    Ok(code) => {
+                        append_to_file(&write_file, &code.clone());
 
-                //         commands
-                //             .spawn((ParsingObjects::Implementation(implementation_data), Unprocessed));
-                //     }
-                //     Err(e) => println!("Error: {:?}", e),
-                // }
-                append_to_file(&write_file, &unparsed.text.clone());
+                    }
+                    Err(e) => {
+                        println!("Error: {:?}", e);
+                        let mut prompt = "Given an input and an error, please output well formatted json that fixes the error.
+                        ".to_string();
+                        prompt = prompt + &unparsed.text.clone();
+                        prompt = prompt + e.to_string().as_str();
 
-            },
+                        commands
+                            .entity(the_entity)
+                            .insert(Prompt { text: prompt })
+                            .insert(Unsent);
+                    }
+                }
+
+            }
             ParsingObjects::Implementation(_) => todo!(),
         };
     }
@@ -596,7 +687,10 @@ fn main() {
         .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
         // .insert_resource(Cmd { cmd: vec![] })
         .insert_resource(ContainerInfo { id: None })
-        .insert_resource(Settings { max_iterations: 10, write_file: "output.json".to_string() })
+        .insert_resource(Settings {
+            max_iterations: 10,
+            write_file: "output.json".to_string(),
+        })
         .insert_resource(CurrentIteration {
             current_iteration: 0,
         })
@@ -604,7 +698,7 @@ fn main() {
         .add_startup_system(prepare_docker_container)
         // .add_startup_system(setup) // will add this back in when I figure out how to load a font
         .add_startup_system(initiate_project)
-        .add_startup_system(setup_openai_client)
+        // .add_startup_system(setup_openai_client)
         // .add_fixed_timestep(Duration::from_secs(5), "label")
         // .add_fixed_timestep_system("label", 0, print_container_info)
         // .add_system(text_input)

@@ -18,6 +18,6 @@ The response should take the form:
   ]
 }
 
-note that these should NOT be implementations, just the function signature that software developer can implement and a qa tester can write unit tests for. The function signatures should indicate the typed objects needed write the functionality. The objects are assumed to be top-level, global variables accessible in all of the functions as required. The response should just be plain json, do not include any other markup.
+note that these should NOT be implementations, just the function signature that a software developer can implement and a qa tester can write unit tests for. The function signatures should indicate the typed objects needed to write the functionality. The objects are assumed to be top-level, global variables accessible in all of the functions as required. The response should just be plain json, do not include any other markup.
 
 
