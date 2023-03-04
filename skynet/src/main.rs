@@ -185,6 +185,43 @@ struct Code {
     instructions: String,
 }
 
+
+#[derive(Resource)]
+struct DockerTerminal {
+    goal: String,
+    files: Vec<String>,
+    terminal_session : Vec<TerminalInfo>
+}
+
+enum TerminalInfo {
+    Input(String),
+    Output(String),
+    Err(String)
+}
+
+
+use std::io::prelude::*;
+use tar::Builder;
+
+
+
+fn create_tarball(file_names: Vec<String>) -> std::io::Result<()> {
+    // Create a new tar archive
+    let file = File::create("archive.tar")?;
+    let mut builder = Builder::new(file);
+
+    // Add files to the archive
+    for file_name in file_names {
+        builder.append_file(file_name.clone(), &mut File::open(file_name)?)?;
+    }
+
+    // Finish the archive
+    builder.finish()?;
+    
+    Ok(())
+}
+
+
 fn parse_architecture_data(input: &str) -> serde_json::Result<SystemContext> {
     println!("Parsing Architecture Data:\n {}", input);
     serde_json::from_str(input).map_err(|e| e.into())
