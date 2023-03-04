@@ -75,7 +75,7 @@ Example output:
     ]
 }
 
-Given the following input, respond only with the well-structured json:
+Given the following input, respond only with the well-structured json that has the exact fields as the example output: 
 
 
 

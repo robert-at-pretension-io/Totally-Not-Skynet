@@ -1,9 +1,11 @@
 use async_openai::types::CreateCompletionRequestArgs;
 use bevy::prelude::*;
+
 use bevy::utils::HashMap;
 use bevy_tokio_tasks::TokioTasksRuntime;
 use bollard::container::Config;
 use bollard::exec::{CreateExecOptions, StartExecResults};
+
 use bollard::image::CreateImageOptions;
 use clap::Parser;
 use futures_lite::StreamExt;
@@ -47,7 +49,7 @@ struct ProjectObjects {
     prompts: HashMap<String, String>,
 }
 
-#[derive(Debug, Deserialize, Serialize,Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 struct Usage {
     prompt_tokens: u32,
     completion_tokens: u32,
@@ -113,7 +115,7 @@ struct TeamLeadContextInput {
     goal: String,
     objects: Vec<String>,
     functions: Vec<String>,
-    current_function: String,
+    currentFunction: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -239,16 +241,6 @@ fn new_docker() -> Result<Docker> {
     Docker::new("tcp://127.0.0.1:8080")
 }
 
-// fn setup_openai_client(mut commands: Commands) {
-//     let args = Args::parse();
-//     let api_key = args.api_key.clone();
-//     let client = Client::new().with_api_key(api_key);
-
-//     commands.insert_resource(OpenAIObjects {
-//         client: Some(client),
-//     });
-// }
-
 fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>) {
     runtime.spawn_background_task(|mut ctx| async move {
         let docker = new_docker().unwrap();
@@ -290,66 +282,12 @@ fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>) {
     });
 }
 
-// fn text_input(
-//     mut char_evr: EventReader<ReceivedCharacter>,
-//     keys: Res<Input<KeyCode>>,
-//     mut string: Local<String>,
-//     mut commands: Commands,
-//     mut settings: ResMut<Settings>,
-// ) {
-//     if keys.just_pressed(KeyCode::Tab) {
-//         settings.next_mode();
-//         println!("Input Mode: {:?}", settings.input_mode);
-//         string.clear();
-//         return;
-//     }
-
-//     for ev in char_evr.iter() {
-//         print!("'{}'", ev.char);
-//         string.push(ev.char);
-//     }
-
-//     if keys.just_pressed(KeyCode::Return) {
-//         println!("Text input: {}", *string);
-//         string.clear();
-//     }
-// }
-
-// fn send_command(
-//     project_object: Res<ProjectObjects>,
-//     container_info: Res<ContainerInfo>,
-//     runtime: ResMut<TokioTasksRuntime>,
-//     commands: Commands,
-//     settings: ResMut<Settings>,
-//     current_iteration: ResMut<CurrentIteration>,
-//     openai: Res<OpenAIObjects>,
-// ) {
-//     if cmd.cmd.len() > 0 {
-//         match settings.input_mode {
-//             InputMode::DockerCommand => {
-//                 if container_info.id.is_some() {
-//                     send_docker_command(project_object, container_info, runtime, commands, cmd);
-//                 }
-//             }
-//             InputMode::OpenAI => {
-//                 send_openai_command(
-//                     project_object,
-//                     runtime,
-//                     cmd,
-//                     openai,
-//                     settings,
-//                     current_iteration,
-//                 );
-//             }
-//         }
-//     }
-
 fn send_docker_command(
     project_object: Res<ProjectObjects>,
     container_info: Res<ContainerInfo>,
     mut runtime: ResMut<TokioTasksRuntime>,
     commands: Commands,
-    // mut cmd: ResMut<Cmd>,
+    
 ) {
     // let local_cmd = cmd.cmd.pop().unwrap().unwrap();
 
@@ -561,7 +499,8 @@ fn send_openai_prompt(
                 let chat_completion =
                     serde_json::from_str::<ChatCompletion>(&response_body).unwrap();
 
-                finish_reason = chat_completion.clone()
+                finish_reason = chat_completion
+                    .clone()
                     .choices
                     .first()
                     .unwrap()
@@ -572,7 +511,8 @@ fn send_openai_prompt(
 
                 // println!("Completions: {:?}", resp);
 
-                local_response = local_response.clone() + &chat_completion.choices.first().unwrap().message.content;
+                local_response = local_response.clone()
+                    + &chat_completion.choices.first().unwrap().message.content;
                 // finish_reason = response.choices.first().unwrap().finish_reason.clone();
 
                 // if finish_reason == Some("stop".to_string()) {
@@ -599,7 +539,7 @@ fn parse_text(
     mut query: Query<(Entity, &mut ParsingObjects, &mut Unparsed)>,
     mut commands: Commands,
     local_goal: Res<ProjectObjects>,
-    mut settings: ResMut<Settings>,
+    settings: Res<Settings>,
 ) {
     let write_file = settings.write_file.clone();
     for (the_entity, mut object, unparsed) in query.iter_mut() {
@@ -613,7 +553,7 @@ fn parse_text(
                         let mut ticket = TeamLeadContextInput {
                             goal: local_goal.goal.clone(),
                             functions: architecture_data.functions.clone(),
-                            current_function: function.clone(),
+                            currentFunction: function.clone(),
                             objects: architecture_data.objects.clone(),
                         };
 
@@ -659,7 +599,6 @@ fn parse_text(
                 match json {
                     Ok(code) => {
                         append_to_file(&write_file, &code.clone());
-
                     }
                     Err(e) => {
                         println!("Error: {:?}", e);
@@ -674,7 +613,6 @@ fn parse_text(
                             .insert(Unsent);
                     }
                 }
-
             }
             ParsingObjects::Implementation(_) => todo!(),
         };
