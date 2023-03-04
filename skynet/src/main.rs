@@ -1,27 +1,22 @@
-use async_openai::types::CreateCompletionRequestArgs;
 use bevy::prelude::*;
-
+use bevy::render::settings;
 use bevy::utils::HashMap;
 use bevy_tokio_tasks::TokioTasksRuntime;
 use bollard::container::Config;
+use bollard::errors::Error;
 use bollard::exec::{CreateExecOptions, StartExecResults};
-
 use bollard::image::CreateImageOptions;
+use bollard::Docker;
 use clap::Parser;
 use futures_lite::StreamExt;
-
-use bollard::errors::Error;
-use bollard::Docker;
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
 use std::fs::{self, OpenOptions};
 use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
 use std::{fs::File, io::BufRead};
-
-// use async_openai::Client;
-
-use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use tar::Builder;
 
 #[derive(Resource)]
 struct CurrentIteration {
@@ -73,11 +68,6 @@ struct ChatCompletion {
     choices: Vec<Choice>,
 }
 
-#[derive(Resource)]
-struct OpenAIObjects {
-    client: Option<Client>,
-}
-
 #[derive(Component)]
 struct Unprocessed;
 
@@ -101,11 +91,18 @@ struct ContainerInfo {
 
 #[derive(Resource)]
 struct Settings {
+    project_folder: String,
     max_iterations: usize,
     write_file: String,
+    project_phase: Phase,
     implementation_finished: bool,
     all_functions: Vec<String>,
     implemented_functions: Vec<String>,
+}
+
+enum Phase {
+    Planning,
+    Implementation,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -154,8 +151,8 @@ enum ParsingObjects {
 enum TerminalInteraction {
     Input(String),
     Output(String),
-    Err(String)
-} 
+    Err(String),
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct TestCase {
@@ -185,25 +182,28 @@ struct Code {
     instructions: String,
 }
 
+#[derive(Component)]
+struct InitiateImplementation;
 
 #[derive(Resource)]
-struct DockerTerminal {
-    goal: String,
-    files: Vec<String>,
-    terminal_session : Vec<TerminalInfo>
-}
+struct RuntimeSettings {
+    goal: Option<String>,
+    files: Option<Vec<String>>,
+    project_phase: Phase,
+    terminal_session: Option<Vec<TerminalInfo>>,
+    project_progress: Option<Vec<ProjectObjects>>,
+ }
 
 enum TerminalInfo {
     Input(String),
     Output(String),
-    Err(String)
+    Err(String),
 }
 
-
-use std::io::prelude::*;
-use tar::Builder;
-
-
+fn file_exists(file_name: &str) -> bool {
+    let path = Path::new(file_name);
+    path.is_file()
+}
 
 fn create_tarball(file_names: Vec<String>) -> std::io::Result<()> {
     // Create a new tar archive
@@ -212,15 +212,20 @@ fn create_tarball(file_names: Vec<String>) -> std::io::Result<()> {
 
     // Add files to the archive
     for file_name in file_names {
+        if !file_exists(&file_name) {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "File not found",
+            ));
+        }
         builder.append_file(file_name.clone(), &mut File::open(file_name)?)?;
     }
 
     // Finish the archive
     builder.finish()?;
-    
+
     Ok(())
 }
-
 
 fn parse_architecture_data(input: &str) -> serde_json::Result<SystemContext> {
     println!("Parsing Architecture Data:\n {}", input);
@@ -335,7 +340,6 @@ fn send_docker_command(
     container_info: Res<ContainerInfo>,
     mut runtime: ResMut<TokioTasksRuntime>,
     commands: Commands,
-    
 ) {
     // let local_cmd = cmd.cmd.pop().unwrap().unwrap();
 
@@ -552,15 +556,15 @@ fn send_openai_prompt(
                         chat_completion = local_chat_completion;
 
                         finish_reason = chat_completion
-                        .clone()
-                        .choices
-                        .first()
-                        .unwrap()
-                        .finish_reason
-                        .clone();
+                            .clone()
+                            .choices
+                            .first()
+                            .unwrap()
+                            .finish_reason
+                            .clone();
 
                         local_response = local_response.clone()
-                        + &chat_completion.choices.first().unwrap().message.content;
+                            + &chat_completion.choices.first().unwrap().message.content;
                     }
                     Err(e) => {
                         println!("Error: {:?}", e);
@@ -570,7 +574,7 @@ fn send_openai_prompt(
                 //     // println!("Finished Reason: {:?}", finish_reason);
                 //     println!("Local response: {}", local_response.clone());
             }
-            
+
             let super_local = local_response.clone();
 
             ctx.run_on_main_thread(move |mut ctx| {
@@ -613,11 +617,11 @@ fn contains_mostly_similar_strings(v1: &Vec<String>, v2: &Vec<String>) -> bool {
 
     println!("comparing {:?} to {:?}", a, b);
 
-    let mut passes : Vec<bool> = Vec::new();
+    let mut passes: Vec<bool> = Vec::new();
     // Check if there's any difference between the sorted vectors.
     for i in 0..a.len() {
         for j in 0..b.len() {
-            let threshold : usize = (a[i].len() + b[j].len() ) / 2 / 3; // 33% of the average length of the two strings
+            let threshold: usize = (a[i].len() + b[j].len()) / 2 / 3; // 33% of the average length of the two strings
             if levenshtein_distance(&a[i], &b[j]) <= threshold {
                 passes.push(true);
                 // break out of the inner loop
@@ -637,22 +641,25 @@ fn levenshtein_distance(s: &str, t: &str) -> usize {
     let n = s.chars().count();
     let m = t.chars().count();
 
-    if n == 0 || m == 0 { return n + m; }
+    if n == 0 || m == 0 {
+        return n + m;
+    }
 
     let mut dp = vec![vec![0; m + 1]; n + 1];
 
-    for i in 0..=n { dp[i][0] = i; }
-    for j in 0..=m { dp[0][j] = j; }
+    for i in 0..=n {
+        dp[i][0] = i;
+    }
+    for j in 0..=m {
+        dp[0][j] = j;
+    }
 
     for (i, sc) in s.chars().enumerate() {
         for (j, tc) in t.chars().enumerate() {
             let cost = if sc == tc { 0 } else { 1 };
 
             dp[i + 1][j + 1] = std::cmp::min(
-                std::cmp::min(
-                    dp[i][j + 1] + 1,
-                    dp[i + 1][j] + 1,
-                ),
+                std::cmp::min(dp[i][j + 1] + 1, dp[i + 1][j] + 1),
                 dp[i][j] + cost,
             );
         }
@@ -662,13 +669,13 @@ fn levenshtein_distance(s: &str, t: &str) -> usize {
 }
 
 pub fn get_function_names(v: &Vec<String>) -> Vec<String> {
-    let mut result : Vec<String> = Vec::new();
+    let mut result: Vec<String> = Vec::new();
     for s in v {
         let first_bracket_index = match s.find('(') {
             Some(index) => index,
             None => continue,
         };
-        let function_name : String  = s[..first_bracket_index].to_string();
+        let function_name: String = s[..first_bracket_index].to_string();
 
         result.push(function_name.to_string());
     }
@@ -679,6 +686,7 @@ fn parse_text(
     mut query: Query<(Entity, &mut ParsingObjects, &mut Unparsed)>,
     mut commands: Commands,
     local_goal: Res<ProjectObjects>,
+    mut docker_terminal : ResMut<RuntimeSettings>,
     mut settings: ResMut<Settings>,
 ) {
     let write_file = settings.write_file.clone();
@@ -689,7 +697,8 @@ fn parse_text(
             ParsingObjects::SystemOrientation(_) => match parse_architecture_data(&unparsed.text) {
                 Ok(architecture_data) => {
                     append_to_file(&write_file, &architecture_data.clone());
-                    settings.all_functions = get_function_names(&architecture_data.functions.clone());
+                    settings.all_functions =
+                        get_function_names(&architecture_data.functions.clone());
                     println!("All functions: {:?}", settings.all_functions.clone());
                     for function in &architecture_data.functions {
                         let mut ticket = TeamLeadContextInput {
@@ -741,13 +750,19 @@ fn parse_text(
                 match json {
                     Ok(code) => {
                         append_to_file(&write_file, &code.clone());
-                        settings.implemented_functions.push(code.currentFunction.clone());
+                        settings
+                            .implemented_functions
+                            .push(code.currentFunction.clone());
 
-                        let function_names: Vec<String> = get_function_names(&settings.implemented_functions);
+                        let function_names: Vec<String> =
+                            get_function_names(&settings.implemented_functions);
 
-                        if contains_mostly_similar_strings(&function_names, &settings.all_functions){
+                        if contains_mostly_similar_strings(&function_names, &settings.all_functions)
+                        {
                             println!("All functions implemented!");
-                            settings.implementation_finished = true;    
+                            settings.implementation_finished = true;
+                            
+                            commands.entity(the_entity).insert(InitiateImplementation);
                         }
                     }
                     Err(e) => {
@@ -769,18 +784,37 @@ fn parse_text(
     }
 }
 
+fn initiate_implementation(settings: ResMut<Settings>, mut docker_terminal : ResMut<RuntimeSettings>) {
+    if settings.implementation_finished {
+        println!("Starting implementation");
+        docker_terminal.goal = Some(settings.goal.clone());
+        docker_terminal.files = Some(settings.implemented_functions.clone());
+    }
+}
+
+
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
         // .insert_resource(Cmd { cmd: vec![] })
         .insert_resource(ContainerInfo { id: None })
+        .insert_resource(RuntimeSettings{
+            goal: None,
+            files: None,
+            project_progress: None,
+            terminal_session: None,
+            project_phase: Phase::Planning,
+           })
         .insert_resource(Settings {
             max_iterations: 10,
             write_file: "output.json".to_string(),
             implementation_finished: false,
+            project_phase: Phase::Planning,
             all_functions: vec![],
             implemented_functions: vec![],
+            project_folder: "project".to_string(),
         })
         .insert_resource(CurrentIteration {
             current_iteration: 0,
@@ -791,5 +825,6 @@ fn main() {
         .add_system(build_prompt)
         .add_system(send_openai_prompt)
         .add_system(parse_text)
+        .add_system(initiate_implementation)
         .run();
 }
