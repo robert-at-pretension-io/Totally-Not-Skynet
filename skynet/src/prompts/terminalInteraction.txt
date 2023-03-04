@@ -1,0 +1,5 @@
+In the following section, there is an interactive terminal. In order to interact with the terminal, respond with a command that works in the standard unix shell. You do not need to worry about entering a command incorrectly as the errors from stderr will be reported back to you and you can later send the correct command. The only limitation is that you cannot open programs that require interaction with the user. For instance, it is not acceptable to open commands with vim. Only the last 50 lines of the terminal will be displayed. If at any time you need more context, simply run a command that will orient you to the system. I find that 'ls -la' and 'pwd' are good commands to get my barring within a system.
+
+Anything after the following line is from the terminal:
+
+################################################################################################################################

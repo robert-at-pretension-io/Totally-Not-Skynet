@@ -103,6 +103,9 @@ struct ContainerInfo {
 struct Settings {
     max_iterations: usize,
     write_file: String,
+    implementation_finished: bool,
+    all_functions: Vec<String>,
+    implemented_functions: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -147,6 +150,13 @@ enum ParsingObjects {
     Implementation(Code),
 }
 
+#[derive(Clone, Debug, Component)]
+enum TerminalInteraction {
+    Input(String),
+    Output(String),
+    Err(String)
+} 
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct TestCase {
     input: String,
@@ -168,6 +178,7 @@ struct Message {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 struct Code {
     filename: String,
+    currentFunction: String,
     language: String,
     command: String,
     code: String,
@@ -496,30 +507,33 @@ fn send_openai_prompt(
 
                 println!("\n{:?}", response_body.clone());
 
-                let chat_completion =
-                    serde_json::from_str::<ChatCompletion>(&response_body).unwrap();
+                let chat_completion: ChatCompletion;
 
-                finish_reason = chat_completion
-                    .clone()
-                    .choices
-                    .first()
-                    .unwrap()
-                    .finish_reason
-                    .clone();
+                match serde_json::from_str::<ChatCompletion>(&response_body) {
+                    Ok(local_chat_completion) => {
+                        println!("Chat Completion: {:?}", local_chat_completion);
+                        chat_completion = local_chat_completion;
 
-                // let resp = &response.choices.first().unwrap().text;
+                        finish_reason = chat_completion
+                        .clone()
+                        .choices
+                        .first()
+                        .unwrap()
+                        .finish_reason
+                        .clone();
 
-                // println!("Completions: {:?}", resp);
+                        local_response = local_response.clone()
+                        + &chat_completion.choices.first().unwrap().message.content;
+                    }
+                    Err(e) => {
+                        println!("Error: {:?}", e);
+                    }
+                }
 
-                local_response = local_response.clone()
-                    + &chat_completion.choices.first().unwrap().message.content;
-                // finish_reason = response.choices.first().unwrap().finish_reason.clone();
-
-                // if finish_reason == Some("stop".to_string()) {
                 //     // println!("Finished Reason: {:?}", finish_reason);
                 //     println!("Local response: {}", local_response.clone());
             }
-            // let super_local = local_response.clone();
+            
             let super_local = local_response.clone();
 
             ctx.run_on_main_thread(move |mut ctx| {
@@ -535,11 +549,100 @@ fn send_openai_prompt(
     }
 }
 
+fn contains_mostly_similar_strings(v1: &Vec<String>, v2: &Vec<String>) -> bool {
+    // Make copies of both vectors so we can modify them safely.
+
+    if v1.len() != v2.len() {
+        // doesn't even contain the same number of strings
+        return false;
+    }
+
+    let mut a = v1.clone();
+    let mut b = v2.clone();
+
+    // make all strings in a lowercase
+    for i in 0..a.len() {
+        a[i] = a[i].to_lowercase();
+    }
+
+    //same for b
+    for i in 0..b.len() {
+        b[i] = b[i].to_lowercase();
+    }
+
+    // Sort the vectors so we can compare them element-wise.
+    a.sort();
+    b.sort();
+
+    println!("comparing {:?} to {:?}", a, b);
+
+    let mut passes : Vec<bool> = Vec::new();
+    // Check if there's any difference between the sorted vectors.
+    for i in 0..a.len() {
+        for j in 0..b.len() {
+            let threshold : usize = (a[i].len() + b[j].len() ) / 2 / 3; // 33% of the average length of the two strings
+            if levenshtein_distance(&a[i], &b[j]) <= threshold {
+                passes.push(true);
+                // break out of the inner loop
+                break;
+            }
+        }
+    }
+
+    if passes.len() == a.len() {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+fn levenshtein_distance(s: &str, t: &str) -> usize {
+    let n = s.chars().count();
+    let m = t.chars().count();
+
+    if n == 0 || m == 0 { return n + m; }
+
+    let mut dp = vec![vec![0; m + 1]; n + 1];
+
+    for i in 0..=n { dp[i][0] = i; }
+    for j in 0..=m { dp[0][j] = j; }
+
+    for (i, sc) in s.chars().enumerate() {
+        for (j, tc) in t.chars().enumerate() {
+            let cost = if sc == tc { 0 } else { 1 };
+
+            dp[i + 1][j + 1] = std::cmp::min(
+                std::cmp::min(
+                    dp[i][j + 1] + 1,
+                    dp[i + 1][j] + 1,
+                ),
+                dp[i][j] + cost,
+            );
+        }
+    }
+
+    dp[n][m]
+}
+
+pub fn get_function_names(v: &Vec<String>) -> Vec<String> {
+    let mut result : Vec<String> = Vec::new();
+    for s in v {
+        let first_bracket_index = match s.find('(') {
+            Some(index) => index,
+            None => continue,
+        };
+        let function_name : String  = s[..first_bracket_index].to_string();
+
+        result.push(function_name.to_string());
+    }
+    result
+}
+
 fn parse_text(
     mut query: Query<(Entity, &mut ParsingObjects, &mut Unparsed)>,
     mut commands: Commands,
     local_goal: Res<ProjectObjects>,
-    settings: Res<Settings>,
+    mut settings: ResMut<Settings>,
 ) {
     let write_file = settings.write_file.clone();
     for (the_entity, mut object, unparsed) in query.iter_mut() {
@@ -549,6 +652,8 @@ fn parse_text(
             ParsingObjects::SystemOrientation(_) => match parse_architecture_data(&unparsed.text) {
                 Ok(architecture_data) => {
                     append_to_file(&write_file, &architecture_data.clone());
+                    settings.all_functions = get_function_names(&architecture_data.functions.clone());
+                    println!("All functions: {:?}", settings.all_functions.clone());
                     for function in &architecture_data.functions {
                         let mut ticket = TeamLeadContextInput {
                             goal: local_goal.goal.clone(),
@@ -599,6 +704,14 @@ fn parse_text(
                 match json {
                     Ok(code) => {
                         append_to_file(&write_file, &code.clone());
+                        settings.implemented_functions.push(code.currentFunction.clone());
+
+                        let function_names: Vec<String> = get_function_names(&settings.implemented_functions);
+
+                        if contains_mostly_similar_strings(&function_names, &settings.all_functions){
+                            println!("All functions implemented!");
+                            settings.implementation_finished = true;    
+                        }
                     }
                     Err(e) => {
                         println!("Error: {:?}", e);
@@ -628,18 +741,16 @@ fn main() {
         .insert_resource(Settings {
             max_iterations: 10,
             write_file: "output.json".to_string(),
+            implementation_finished: false,
+            all_functions: vec![],
+            implemented_functions: vec![],
         })
         .insert_resource(CurrentIteration {
             current_iteration: 0,
         })
         .init_resource::<ProjectObjects>()
         .add_startup_system(prepare_docker_container)
-        // .add_startup_system(setup) // will add this back in when I figure out how to load a font
         .add_startup_system(initiate_project)
-        // .add_startup_system(setup_openai_client)
-        // .add_fixed_timestep(Duration::from_secs(5), "label")
-        // .add_fixed_timestep_system("label", 0, print_container_info)
-        // .add_system(text_input)
         .add_system(build_prompt)
         .add_system(send_openai_prompt)
         .add_system(parse_text)

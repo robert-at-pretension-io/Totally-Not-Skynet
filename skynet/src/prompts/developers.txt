@@ -21,7 +21,8 @@ Produce code that implements only the 'currentFunction'. It can use any objects 
   filename: "(name of file)",
   language: "(language used to write the code)",
   command: "(command used to execute the code)",
-  code: "(code goes here)"
+  currentFunction: "('currentFunction' name copied from the field in the input)",
+  code: "(code goes here)",
   instructions: "(explanation of how to run the code in simple steps here. It should be written as if you are explaining it to a 5 year old or someone who has never used a computer before. Or a good programmer who is very tired and lazy.)"
 }
 

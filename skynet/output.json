@@ -1,105 +1,61 @@
 {
     "objects": [
-        "iframe : HTMLIFrameElement;",
+        "iframe : Element;",
         "websocket : WebSocket;"
     ],
     "functions": [
         "createIframe() : void;",
-        "initializeWebsocket(url : string) : void;"
+        "initializeChat() : void;"
     ]
 }
 {
     "objects": [
-        "iframe : HTMLIFrameElement;",
+        "iframe : Element;",
         "websocket : WebSocket;"
     ],
     "functions": [
         "createIframe() : void;",
-        "initializeWebsocket(url : string) : void;"
+        "initializeChat() : void;"
+    ],
+    "currentFunction": "initializeChat() : void;",
+    "description": "The initializeChat function will be responsible for setting up a websocket chat within an iframe. This function will be called within the createIframe function to ensure that the chat is fully initialized before being added to the iframe.",
+    "testCases": []
+}
+{
+    "objects": [
+        "iframe : Element;",
+        "websocket : WebSocket;"
+    ],
+    "functions": [
+        "createIframe() : void;",
+        "initializeChat() : void;"
     ],
     "currentFunction": "createIframe() : void;",
-    "description": "The createIframe function should create an iframe element and append it to the DOM.",
+    "description": "The createIframe function should create a new iframe element and append it to the HTML document. It should then initialize the chat by calling the initializeChat function within the iframe.",
     "testCases": [
         {
             "input": "",
-            "output": "An iframe element should be added to the DOM."
+            "output": "An iframe element should be added to the HTML document, which should initialize the chat with the external chat engine."
         }
     ]
 }
 {
     "filename": "createIframe.js",
+    "object_name": "createIframe()",
     "language": "JavaScript",
     "command": "node createIframe.js",
-    "code": "function createIframe() {
-  const iframe = document.createElement('iframe');
-  document.body.appendChild(iframe);
-}
-","instructions": "To run this code, you will need to have Node.js installed on your computer.
-
-1. Open a text editor and copy the code.
-2. Save the file as 'createIframe.js'.
-3. Open a terminal and navigate to the directory where the file is saved.
-4. Type 'node createIframe.js' and press enter.
-5. Check the DOM to confirm that an iframe element has been added.
-
-Note: The code assumes that there is a web page with a body element where the iframe will be appended. If the iframe doesn't appear, make sure that the code is running on an appropriate web page or adjust the code to target a specific element."
-}{
-"objects": [
-    "iframe : HTMLIframeElement;",
-    "websocket : WebSocket;"
-],
-"functions": [
-    "createIframe(url : string) : void;",
-    "initWebSocket(url : string) : void;"
-]
+    "code": "function createIframe(){\n\tconst iframe = document.createElement('iframe');\n\tdocument.body.appendChild(iframe);\n\tiframe.setAttribute('src', 'chat.html');\n\tinitializeChat();\n}\n",
+    "instructions": "To execute this code, you need to do the following:\n1. Create a new js file called 'createIframe.js'.\n2. Copy and paste the above code into the 'createIframe.js' file.\n3. Save the file.\n4. Make sure there is a 'chat.html' file present in the same directory as the 'createIframe.js' file.\n5. Open a terminal window and navigate to the directory containing the 'createIframe.js' file.\n6. Type the command 'node createIframe.js' and press enter.\n7. If successful, you should see an iframe added to the HTML document and the chat initialized within the iframe."
 }
 {
-"objects": [
-    "iframe : HTMLIframeElement;",
-    "websocket : WebSocket;"
-],
-"functions": [
-    "createIframe(url : string) : void;",
-    "initWebSocket(url : string) : void;"
-],
-"currentFunction": "createIframe",
-"description": "The createIframe function should take in a URL as its input and create an HTMLIframeElement with that URL. Inside the iframe, it should initialize a WebSocket chat with an external chat engine.",
-"testCases": [
-    {
-        "input": "http://example.com",
-        "output": "An iframe should be created with the specified URL, and a WebSocket chat should be initialized within the iframe."
-    }
-]
-}
-{
-"objects": [
-    "iframe : HTMLIframeElement;",
-    "websocket : WebSocket;"
-],
-"functions": [
-    "createIframe(url : string) : void;",
-    "initWebSocket(url : string) : void;"
-],
-"currentFunction": "initWebSocket(url : string) : void;",
-"description": "The initWebSocket function should take in a string representing a url as its input and initialize a websocket chat with an external chat engine within an iframe. This function should be called after the createIframe function has been called successfully.",
-"testCases": [
-    {
-        "input": "ws://example.com/chat",
-        "output": "WebSocket connection established with external chat engine within the iframe."
-    }
-]
-}
-{
-"filename": "websocket.js",
-"language": "JavaScript",
-"command": "node websocket.js",
-"code": "function initWebSocket(url) {\n  if (!websocket) {\n    throw new Error('Websocket not initialized!');\n  }\n  iframe.contentWindow.postMessage({ type: 'init', url: url }, '*');\n}\n",
-"instructions": "To run the code:\n1. Make sure you have Node.js installed on your computer.\n2. Create a new file called websocket.js and copy the code provided into it.\n3. Save the file and navigate to the folder it's saved in using the terminal.\n4. Type the command 'node websocket.js' to execute the code.\n5. Call the initWebSocket function with a string representing a url to initialize a websocket chat with an external chat engine within an iframe.\n6. Make sure to call the createIframe function first to ensure the necessary elements are present before using the initWebSocket function.\n7. See the test cases for an example of how to use the function."
-}
-{
-"filename": "createIframe.js",
-"language": "JavaScript",
-"command": "node createIframe.js",
-"code": "function createIframe(url) {\n  const iframe = document.createElement('iframe');\n  iframe.src = url;\n  document.body.appendChild(iframe);\n\n  const iframeWindow = iframe.contentWindow;\n  const chatEngine = initWebSocket('ws://example.com/chat');\n\n  iframeWindow.addEventListener('load', () => {\n    iframeWindow.postMessage({ type: 'chat-engine-init', engine: chatEngine }, '*');\n  });\n}\n\nfunction initWebSocket(url) {\n  const socket = new WebSocket(url);\n  socket.addEventListener('open', () => {\n    console.log('WebSocket Connection opened');\n  });\n  socket.addEventListener('message', (event) => {\n    console.log('WebSocket message received: ', event.data);\n  });\n  return socket;\n}",
-"instructions": "To run this code:\n1. Open your favorite text editor\n2. Create a new file and paste the code into it\n3. Save the file as createIframe.js\n4. Install Node.js if you don't already have it\n5. Open a terminal or command prompt\n6. Navigate to the directory where you saved createIframe.js\n7. Type 'node createIframe.js' into the terminal and hit enter\n8. Follow the prompts to input the URL\n9. If successful, an iframe should appear on your screen with the specified URL and a WebSocket chat should be initialized inside the iframe."
-}
+    "filename": "chatSetup.js",
+    "object_name": "iframe",
+    "language": "JavaScript",
+    "command": "node chatSetup.js",
+    "code": "function initializeChat() {\n    // initialize websocket\n    websocket = new WebSocket('ws://chat.example.com');\n    \n    // add event listener\n    websocket.addEventListener('message', function(event) {\n        // add message to chat window\n        var chatWindow = iframe.contentWindow.document.getElementById('chat-window');\n        chatWindow.innerHTML += event.data;\n    });\n}",
+    "instructions": "To run this code, you'll need to have Node.js installed on your computer. First, create a new file called 'chatSetup.js' and paste the code above into it. Then, in your terminal, navigate to the directory where the 'chatSetup.js' file is saved. Finally, type 'node chatSetup.js' into the terminal to execute the code. The 'initializeChat' function will set up a websocket chat within an iframe and be responsible for adding the chat messages to the chat window in the iframe."
+}{"objects":["chatFrame : HTMLIFrameElement;","chatSocket : WebSocket;","externalChatEngineURL : string;"],"functions":["createChatFrame() : void;","initChatSocket(chatUrl : string) : void;"]}
+{"objects":["chatFrame : HTMLIFrameElement;","chatSocket : WebSocket;","externalChatEngineURL : string;"],"functions":["createChatFrame() : void;","initChatSocket(chatUrl : string) : void;"],"currentFunction":"createChatFrame() : void;","description":"The createChatFrame function should create an HTMLIFrameElement and insert it into the DOM. It should then initialize a WebSocket chat with an external chat engine inside the iframe.","testCases":[{"input":"","output":""}]}
+{"objects":["chatFrame : HTMLIFrameElement;","chatSocket : WebSocket;","externalChatEngineURL : string;"],"functions":["createChatFrame() : void;","initChatSocket(chatUrl : string) : void;"],"currentFunction":"initChatSocket(chatUrl : string) : void;","description":"The initChatSocket function should take in a url string as its input and use it to initialize a WebSocket chat with the external chat engine. It should also create an iframe and place the chat inside of it.","testCases":[{"input":"https://chatengine.com","output":"Initialized websocket chat in iframe with external chat engine at https://chatengine.com"}]}
+{"filename":"chatFunctions.js","currentFunction":"createChatFrame() : void","language":"Javascript","command":"node chatFunctions.js","code":"function createChatFrame() {\n  var chatFrame = document.createElement('iframe');\n  chatFrame.src = externalChatEngineURL;\n  document.body.appendChild(chatFrame);\n  initChatSocket(externalChatEngineURL);\n}","instructions":"To run this code, first create a new Javascript file named chatFunctions.js. Then paste the code provided into the file. Finally, in your Unix terminal, navigate to the directory where the file is saved and enter the command 'node chatFunctions.js'."}
+{"filename":"chat.js","currentFunction":"initChatSocket(chatUrl : string) : void;","language":"JavaScript","command":"node chat.js","code":"function initChatSocket(chatUrl) {\n  chatFrame = createChatFrame();\n  chatSocket = new WebSocket(chatUrl);\n}\n\nfunction createChatFrame() {\n  const frame = document.createElement('iframe');\n  const body = document.getElementsByTagName('body')[0];\n  frame.src = externalChatEngineURL;\n  body.appendChild(frame);\n  return frame;\n}","instructions":"To run this program on your Unix terminal, you will need to have Node.js installed. If you have not already done so, please install Node.js from the official website.\n\n1. Copy the code into a file called 'chat.js'.\n2. In the terminal, navigate to the directory where 'chat.js' is located.\n3. Type the command 'node chat.js' and hit enter.\n4. The output of the program will be displayed in the terminal.\n\nNote: Before running the program, make sure to update the 'externalChatEngineURL' variable to the URL of your external chat engine."}
