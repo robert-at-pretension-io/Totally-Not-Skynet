@@ -1,1 +1,1 @@
-Write some javascript that will create an iframe. In the iframe it will initialize a websocket chat with an external chat engine.
+Write a rust project that calculates all of the fibianacci numbers up to 1000 and prints them out. Then renders a fractal using that information.

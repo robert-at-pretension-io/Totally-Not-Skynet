@@ -1,6 +1,5 @@
 use bevy::prelude::*;
-use bevy::render::settings;
-use bevy::utils::HashMap;
+use bevy::utils::hashbrown::HashMap;
 use bevy_tokio_tasks::TokioTasksRuntime;
 use bollard::container::Config;
 use bollard::errors::Error;
@@ -11,17 +10,11 @@ use clap::Parser;
 use futures_lite::StreamExt;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use std::fs::{self, OpenOptions};
-use std::io::BufWriter;
-use std::io::Write;
-use std::path::Path;
 use std::{fs::File, io::BufRead};
-use tar::Builder;
 
-#[derive(Resource)]
-struct CurrentIteration {
-    current_iteration: usize,
-}
+//import bevy hashmap
+
+mod helper_functions;
 
 #[derive(Parser)]
 struct Args {
@@ -36,12 +29,6 @@ struct Args {
         default_value = "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"
     )]
     api_key: String,
-}
-
-#[derive(Resource)]
-struct ProjectObjects {
-    goal: String,
-    prompts: HashMap<String, String>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -95,11 +82,11 @@ struct Settings {
     max_iterations: usize,
     write_file: String,
     project_phase: Phase,
-    implementation_finished: bool,
     all_functions: Vec<String>,
     implemented_functions: Vec<String>,
 }
 
+#[derive(PartialEq, Eq)]
 enum Phase {
     Planning,
     Implementation,
@@ -139,7 +126,7 @@ struct InitialData {
 }
 
 #[derive(Clone, Debug, Component)]
-enum ParsingObjects {
+enum PlanningPhases {
     SystemOrientation(InitialData),
     Architecture(SystemContext),
     MakeTicket(TeamLeadContextInput),
@@ -188,43 +175,18 @@ struct InitiateImplementation;
 #[derive(Resource)]
 struct RuntimeSettings {
     goal: Option<String>,
+    prompts: Option<HashMap<String, String>>,
+    current_iteration: usize,
     files: Option<Vec<String>>,
     project_phase: Phase,
     terminal_session: Option<Vec<TerminalInfo>>,
-    project_progress: Option<Vec<ProjectObjects>>,
- }
+    project_progress: Option<Vec<PlanningPhases>>,
+}
 
 enum TerminalInfo {
     Input(String),
     Output(String),
     Err(String),
-}
-
-fn file_exists(file_name: &str) -> bool {
-    let path = Path::new(file_name);
-    path.is_file()
-}
-
-fn create_tarball(file_names: Vec<String>) -> std::io::Result<()> {
-    // Create a new tar archive
-    let file = File::create("archive.tar")?;
-    let mut builder = Builder::new(file);
-
-    // Add files to the archive
-    for file_name in file_names {
-        if !file_exists(&file_name) {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                "File not found",
-            ));
-        }
-        builder.append_file(file_name.clone(), &mut File::open(file_name)?)?;
-    }
-
-    // Finish the archive
-    builder.finish()?;
-
-    Ok(())
 }
 
 fn parse_architecture_data(input: &str) -> serde_json::Result<SystemContext> {
@@ -240,48 +202,6 @@ fn parse_ticket_data(input: &str) -> serde_json::Result<TeamLeadContextOutput> {
 fn parse_implementation_data(input: &str) -> serde_json::Result<Code> {
     println!("Parsing Ticket Data:\n {}", input);
     serde_json::from_str(input).map_err(|e| e.into())
-}
-
-fn append_to_file<T: Serialize + Deserialize<'static>>(
-    filename: &str,
-    data: &T,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let file = OpenOptions::new()
-        .append(true)
-        .create(true)
-        .open(filename)?;
-    let mut writer = BufWriter::new(file);
-
-    // Serialize data to JSON and write to file
-    let serialized_data = serde_json::to_string(data)?;
-    writeln!(writer, "{}", serialized_data)?;
-
-    Ok(())
-}
-
-// Implementing this trait allows us to create a resource that is accessible from all future systems that we create.
-impl FromWorld for ProjectObjects {
-    fn from_world(_world: &mut World) -> Self {
-        let args = Args::parse();
-        let mut goal = String::new();
-        match File::open(args.project_goals_file) {
-            Ok(file) => {
-                // read the file
-                let reader = std::io::BufReader::new(file);
-                println!("Project Goals Found!");
-                for line in reader.lines() {
-                    //add line to goal
-                    goal.push_str(&line.unwrap().clone());
-                }
-            }
-            Err(error) => {
-                println!("Error: {}", error);
-                println!("Make sure that the 'project_goals_file' exists and is in the same directory as the executable.The default location is 'project_goals.txt")
-            }
-        }
-        let prompts = load_prompts();
-        Self { goal, prompts }
-    }
 }
 
 #[cfg(unix)]
@@ -336,13 +256,12 @@ fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>) {
 }
 
 fn send_docker_command(
-    project_object: Res<ProjectObjects>,
+    mut runtime_settings: ResMut<RuntimeSettings>,
     container_info: Res<ContainerInfo>,
     mut runtime: ResMut<TokioTasksRuntime>,
     commands: Commands,
 ) {
-    // let local_cmd = cmd.cmd.pop().unwrap().unwrap();
-
+    
     let id = container_info.id.clone().unwrap();
 
     runtime.spawn_background_task(|mut ctx| async move {
@@ -379,62 +298,58 @@ fn send_docker_command(
     });
 }
 
-fn load_prompts() -> HashMap<String, String> {
-    let directory_path = "./src/prompts";
-    let mut file_map = HashMap::new();
-    let directory = Path::new(directory_path);
-
-    for entry in fs::read_dir(directory).unwrap() {
-        let entry = entry.unwrap();
-        let file_path = entry.path();
-
-        if file_path.is_file() {
-            if let Some(file_name) = file_path.clone().file_name().and_then(|n| n.to_str()) {
-                if let Some(file_stem) = Path::new(file_name).file_stem().and_then(|s| s.to_str()) {
-                    let file_contents = fs::read_to_string(file_path).unwrap();
-                    file_map.insert(file_stem.to_string(), file_contents);
-                }
+fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands: Commands) {
+    let args = Args::parse();
+    let mut goal = String::new();
+    match File::open(args.project_goals_file) {
+        Ok(file) => {
+            // read the file
+            let reader = std::io::BufReader::new(file);
+            println!("Project Goals Found!");
+            for line in reader.lines() {
+                //add line to goal
+                goal.push_str(&line.unwrap().clone());
             }
         }
+        Err(error) => {
+            println!("Error: {}", error);
+            println!("Make sure that the 'project_goals_file' exists and is in the same directory as the executable.The default location is 'project_goals.txt")
+        }
     }
+    let prompts = helper_functions::load_prompts(&"./src/prompts");
 
-    file_map
-}
+    runtime_settings.goal = Some(goal.clone());
+    runtime_settings.prompts = Some(prompts.clone());
 
-fn initiate_project(goal: Res<ProjectObjects>, mut commands: Commands) {
     println!("Project Goals: \n------------------\n");
-    println!("{}", goal.goal);
+    println!("{}", goal);
     println!("\n------------------\n");
 
-    // cmd.cmd.push(Some(ParsingObjects::SystemOrientation(
-    //     InitialData { goal: goal.goal.clone() })));
-
     commands.spawn((
-        ParsingObjects::SystemOrientation(InitialData {
-            goal: goal.goal.clone(),
-        }),
+        PlanningPhases::SystemOrientation(InitialData { goal: goal.clone() }),
         Unprocessed,
     ));
 }
 
 fn build_prompt(
-    project_object: Res<ProjectObjects>,
     settings: ResMut<Settings>,
-    mut current_iteration: ResMut<CurrentIteration>,
-    mut query: Query<(Entity, &mut ParsingObjects, &mut Unprocessed)>,
+    mut runtime_settings: ResMut<RuntimeSettings>,
+    mut query: Query<(Entity, &mut PlanningPhases, &mut Unprocessed)>,
     mut commands: Commands,
 ) {
+    let mut current_iteration = runtime_settings.current_iteration.clone();
     for (the_entity, mut object, _unprocessed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unprocessed>(); // We only want to process the entity once
 
         print!(
             "Sending OpenAI Command: {:?}\nCurrent iteration: {:?}\n",
-            &object, &current_iteration.current_iteration
+            &object, &current_iteration
         );
 
-        current_iteration.current_iteration += 1;
+        current_iteration += 1;
+        runtime_settings.current_iteration = current_iteration;
 
-        if current_iteration.current_iteration > settings.max_iterations {
+        if current_iteration > settings.max_iterations {
             println!("Max iterations reached");
             return;
         }
@@ -443,44 +358,50 @@ fn build_prompt(
         let mut prompt = String::new();
 
         println!(
-            "project_object prompt keys: {:?}",
-            project_object.prompts.keys()
+            "prompt keys: {:?}",
+            runtime_settings.prompts.as_mut().unwrap().keys()
         );
 
         // let local_setting = settings.stage.clone();
 
         match object.as_mut() {
-            ParsingObjects::SystemOrientation(initial_data) => {
-                prompt = project_object
+            PlanningPhases::SystemOrientation(initial_data) => {
+                prompt = runtime_settings
                     .prompts
+                    .as_mut()
+                    .unwrap()
                     .get("softwareArchitect")
                     .unwrap()
                     .clone()
                     .to_string();
                 prompt = prompt + &serde_json::to_string(&initial_data.clone()).unwrap();
             }
-            ParsingObjects::Architecture(_) => {
+            PlanningPhases::Architecture(_) => {
                 todo!()
             }
-            ParsingObjects::MakeTicket(ticket_context) => {
-                prompt = project_object
+            PlanningPhases::MakeTicket(ticket_context) => {
+                prompt = runtime_settings
                     .prompts
+                    .as_mut()
+                    .unwrap()
                     .get("teamLead")
                     .unwrap()
                     .clone()
                     .to_string();
                 prompt = prompt + &serde_json::to_string(&ticket_context).unwrap();
             }
-            ParsingObjects::CompletedTicket(ticket) => {
-                prompt = project_object
+            PlanningPhases::CompletedTicket(ticket) => {
+                prompt = runtime_settings
                     .prompts
+                    .as_mut()
+                    .unwrap()
                     .get("developers")
                     .unwrap()
                     .clone()
                     .to_string();
                 prompt = prompt + &serde_json::to_string(&ticket).unwrap();
             }
-            ParsingObjects::Implementation(_) => todo!(),
+            PlanningPhases::Implementation(_) => todo!(),
         };
 
         commands
@@ -493,12 +414,12 @@ fn build_prompt(
 fn send_openai_prompt(
     // openai: Res<OpenAIObjects>,
     runtime: ResMut<TokioTasksRuntime>,
-    mut query: Query<(Entity, &ParsingObjects, &mut Prompt, &mut Unsent)>,
+    mut query: Query<(Entity, &PlanningPhases, &mut Prompt, &mut Unsent)>,
     mut commands: Commands,
 ) {
     for (the_entity, _object, mut prompt, _unsent) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unsent>(); // We only want to process the entity once
-                                                        // let client = openai.client.clone().unwrap();
+        
         let local_prompt = prompt.as_mut().text.clone();
 
         let args = Args::parse();
@@ -510,18 +431,6 @@ fn send_openai_prompt(
             let mut local_response = String::new();
             while finish_reason != "stop" {
                 let full_string = local_prompt.clone() + &local_response.clone();
-                // let request = CreateCompletionRequestArgs::default()
-                //     .model("text-davinci-003")
-                //     .prompt(&full_string)
-                //     .max_tokens(200_u16)
-                //     .build()
-                //     .unwrap();
-
-                // let response = client
-                //     .completions() // Get the API "group" (completions, images, etc.) from the client
-                //     .create(request) // Make the API call in that "group"
-                //     .await
-                //     .unwrap();
 
                 let url = "https://api.openai.com/v1/chat/completions";
 
@@ -570,9 +479,6 @@ fn send_openai_prompt(
                         println!("Error: {:?}", e);
                     }
                 }
-
-                //     // println!("Finished Reason: {:?}", finish_reason);
-                //     println!("Local response: {}", local_response.clone());
             }
 
             let super_local = local_response.clone();
@@ -590,103 +496,10 @@ fn send_openai_prompt(
     }
 }
 
-fn contains_mostly_similar_strings(v1: &Vec<String>, v2: &Vec<String>) -> bool {
-    // Make copies of both vectors so we can modify them safely.
-
-    if v1.len() != v2.len() {
-        // doesn't even contain the same number of strings
-        return false;
-    }
-
-    let mut a = v1.clone();
-    let mut b = v2.clone();
-
-    // make all strings in a lowercase
-    for i in 0..a.len() {
-        a[i] = a[i].to_lowercase();
-    }
-
-    //same for b
-    for i in 0..b.len() {
-        b[i] = b[i].to_lowercase();
-    }
-
-    // Sort the vectors so we can compare them element-wise.
-    a.sort();
-    b.sort();
-
-    println!("comparing {:?} to {:?}", a, b);
-
-    let mut passes: Vec<bool> = Vec::new();
-    // Check if there's any difference between the sorted vectors.
-    for i in 0..a.len() {
-        for j in 0..b.len() {
-            let threshold: usize = (a[i].len() + b[j].len()) / 2 / 3; // 33% of the average length of the two strings
-            if levenshtein_distance(&a[i], &b[j]) <= threshold {
-                passes.push(true);
-                // break out of the inner loop
-                break;
-            }
-        }
-    }
-
-    if passes.len() == a.len() {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-fn levenshtein_distance(s: &str, t: &str) -> usize {
-    let n = s.chars().count();
-    let m = t.chars().count();
-
-    if n == 0 || m == 0 {
-        return n + m;
-    }
-
-    let mut dp = vec![vec![0; m + 1]; n + 1];
-
-    for i in 0..=n {
-        dp[i][0] = i;
-    }
-    for j in 0..=m {
-        dp[0][j] = j;
-    }
-
-    for (i, sc) in s.chars().enumerate() {
-        for (j, tc) in t.chars().enumerate() {
-            let cost = if sc == tc { 0 } else { 1 };
-
-            dp[i + 1][j + 1] = std::cmp::min(
-                std::cmp::min(dp[i][j + 1] + 1, dp[i + 1][j] + 1),
-                dp[i][j] + cost,
-            );
-        }
-    }
-
-    dp[n][m]
-}
-
-pub fn get_function_names(v: &Vec<String>) -> Vec<String> {
-    let mut result: Vec<String> = Vec::new();
-    for s in v {
-        let first_bracket_index = match s.find('(') {
-            Some(index) => index,
-            None => continue,
-        };
-        let function_name: String = s[..first_bracket_index].to_string();
-
-        result.push(function_name.to_string());
-    }
-    result
-}
-
 fn parse_text(
-    mut query: Query<(Entity, &mut ParsingObjects, &mut Unparsed)>,
+    mut query: Query<(Entity, &mut PlanningPhases, &mut Unparsed)>,
     mut commands: Commands,
-    local_goal: Res<ProjectObjects>,
-    mut docker_terminal : ResMut<RuntimeSettings>,
+    mut runtime_settings: ResMut<RuntimeSettings>,
     mut settings: ResMut<Settings>,
 ) {
     let write_file = settings.write_file.clone();
@@ -694,21 +507,29 @@ fn parse_text(
         commands.entity(the_entity).remove::<Unparsed>(); // We only want to process the entity once
 
         match object.as_mut() {
-            ParsingObjects::SystemOrientation(_) => match parse_architecture_data(&unparsed.text) {
+            PlanningPhases::SystemOrientation(_) => match parse_architecture_data(&unparsed.text) {
                 Ok(architecture_data) => {
-                    append_to_file(&write_file, &architecture_data.clone());
+                    helper_functions::append_to_file(&write_file, &architecture_data.clone());
                     settings.all_functions =
-                        get_function_names(&architecture_data.functions.clone());
+                        helper_functions::get_function_names(&architecture_data.functions.clone());
                     println!("All functions: {:?}", settings.all_functions.clone());
+
+                    if runtime_settings.project_progress.is_some() {
+                        runtime_settings
+                            .project_progress.as_mut()
+                            .unwrap()
+                            .push(PlanningPhases::Architecture(architecture_data.clone()));
+                    }
+
                     for function in &architecture_data.functions {
                         let mut ticket = TeamLeadContextInput {
-                            goal: local_goal.goal.clone(),
+                            goal: runtime_settings.goal.as_ref().unwrap().clone(),
                             functions: architecture_data.functions.clone(),
                             currentFunction: function.clone(),
                             objects: architecture_data.objects.clone(),
                         };
 
-                        commands.spawn((ParsingObjects::MakeTicket(ticket), Unprocessed));
+                        commands.spawn((PlanningPhases::MakeTicket(ticket), Unprocessed));
                         // return Ok(ParsingObjects::Architecture(architecture_data))
                     }
                 }
@@ -725,12 +546,17 @@ fn parse_text(
                         .insert(Unsent);
                 }
             },
-            ParsingObjects::Architecture(_) => todo!(),
-            ParsingObjects::MakeTicket(_) => match parse_ticket_data(&unparsed.text) {
+            PlanningPhases::Architecture(_) => todo!(),
+            PlanningPhases::MakeTicket(_) => match parse_ticket_data(&unparsed.text) {
                 Ok(ticket_data) => {
-                    append_to_file(&write_file, &ticket_data.clone());
-
-                    commands.spawn((ParsingObjects::CompletedTicket(ticket_data), Unprocessed));
+                    helper_functions::append_to_file(&write_file, &ticket_data.clone());
+                    if runtime_settings.project_progress.is_some() {
+                        runtime_settings
+                            .project_progress.as_mut()
+                            .unwrap()
+                            .push(PlanningPhases::CompletedTicket(ticket_data.clone()));
+                    }
+                    commands.spawn((PlanningPhases::CompletedTicket(ticket_data), Unprocessed));
                 }
                 Err(e) => {
                     println!("Error: {:?}", e);
@@ -745,23 +571,24 @@ fn parse_text(
                         .insert(Unsent);
                 }
             },
-            ParsingObjects::CompletedTicket(_) => {
+            PlanningPhases::CompletedTicket(_) => {
                 let json = parse_implementation_data(&unparsed.text);
                 match json {
                     Ok(code) => {
-                        append_to_file(&write_file, &code.clone());
+                        helper_functions::append_to_file(&write_file, &code.clone());
                         settings
                             .implemented_functions
                             .push(code.currentFunction.clone());
 
                         let function_names: Vec<String> =
-                            get_function_names(&settings.implemented_functions);
+                            helper_functions::get_function_names(&settings.implemented_functions);
 
-                        if contains_mostly_similar_strings(&function_names, &settings.all_functions)
-                        {
+                        if helper_functions::contains_mostly_similar_strings(
+                            &function_names,
+                            &settings.all_functions,
+                        ) {
                             println!("All functions implemented!");
-                            settings.implementation_finished = true;
-                            
+                            runtime_settings.project_phase = Phase::Implementation;
                             commands.entity(the_entity).insert(InitiateImplementation);
                         }
                     }
@@ -779,20 +606,20 @@ fn parse_text(
                     }
                 }
             }
-            ParsingObjects::Implementation(_) => todo!(),
+            PlanningPhases::Implementation(_) => todo!(),
         };
     }
 }
 
-fn initiate_implementation(settings: ResMut<Settings>, mut docker_terminal : ResMut<RuntimeSettings>) {
-    if settings.implementation_finished {
+fn initiate_implementation(
+    settings: ResMut<Settings>,
+    mut runtime_settings: ResMut<RuntimeSettings>,
+) {
+    if runtime_settings.project_phase == Phase::Implementation {
         println!("Starting implementation");
-        docker_terminal.goal = Some(settings.goal.clone());
-        docker_terminal.files = Some(settings.implemented_functions.clone());
+        runtime_settings.files = Some(settings.implemented_functions.clone());
     }
 }
-
-
 
 fn main() {
     App::new()
@@ -800,26 +627,23 @@ fn main() {
         .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
         // .insert_resource(Cmd { cmd: vec![] })
         .insert_resource(ContainerInfo { id: None })
-        .insert_resource(RuntimeSettings{
+        .insert_resource(RuntimeSettings {
             goal: None,
             files: None,
             project_progress: None,
             terminal_session: None,
             project_phase: Phase::Planning,
-           })
+            prompts: None,
+            current_iteration: 1,
+        })
         .insert_resource(Settings {
             max_iterations: 10,
             write_file: "output.json".to_string(),
-            implementation_finished: false,
             project_phase: Phase::Planning,
             all_functions: vec![],
             implemented_functions: vec![],
             project_folder: "project".to_string(),
         })
-        .insert_resource(CurrentIteration {
-            current_iteration: 0,
-        })
-        .init_resource::<ProjectObjects>()
         .add_startup_system(prepare_docker_container)
         .add_startup_system(initiate_project)
         .add_system(build_prompt)
