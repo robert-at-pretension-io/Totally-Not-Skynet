@@ -71,19 +71,13 @@ struct Unparsed {
 #[derive(Component)]
 struct Unsent;
 
-#[derive(Resource)]
-struct ContainerInfo {
-    id: Option<String>,
-}
 
 #[derive(Resource)]
 struct Settings {
     project_folder: String,
     max_iterations: usize,
     write_file: String,
-    project_phase: Phase,
-    all_functions: Vec<String>,
-    implemented_functions: Vec<String>,
+    project_phase: Phase
 }
 
 #[derive(PartialEq, Eq)]
@@ -176,11 +170,14 @@ struct InitiateImplementation;
 struct RuntimeSettings {
     goal: Option<String>,
     prompts: Option<HashMap<String, String>>,
+    container_id: Option<String>,
     current_iteration: usize,
     files: Option<Vec<String>>,
     project_phase: Phase,
     terminal_session: Option<Vec<TerminalInfo>>,
     project_progress: Option<Vec<PlanningPhases>>,
+    all_functions: Vec<String>,
+    implemented_functions: Vec<String>
 }
 
 enum TerminalInfo {
@@ -214,7 +211,7 @@ fn new_docker() -> Result<Docker> {
     Docker::new("tcp://127.0.0.1:8080")
 }
 
-fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>) {
+fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>, mut runtime_settings: ResMut<RuntimeSettings>, mut settings: ResMut<Settings>) {
     runtime.spawn_background_task(|mut ctx| async move {
         let docker = new_docker().unwrap();
         let image = "ubuntu:latest";
@@ -247,9 +244,7 @@ fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>) {
             .id;
 
         ctx.run_on_main_thread(move |ctx| {
-            ctx.world.insert_resource(ContainerInfo {
-                id: Some(id.clone()),
-            });
+            ctx.world.get_resource_mut::<RuntimeSettings>().unwrap().container_id = Some(id);
         })
         .await;
     });
@@ -257,12 +252,10 @@ fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>) {
 
 fn send_docker_command(
     mut runtime_settings: ResMut<RuntimeSettings>,
-    container_info: Res<ContainerInfo>,
-    mut runtime: ResMut<TokioTasksRuntime>,
-    commands: Commands,
+    mut runtime: ResMut<TokioTasksRuntime>
 ) {
     
-    let id = container_info.id.clone().unwrap();
+    let id = runtime_settings.container_id.clone().unwrap();
 
     runtime.spawn_background_task(|mut ctx| async move {
         let docker = new_docker().unwrap();
@@ -338,12 +331,12 @@ fn build_prompt(
     mut commands: Commands,
 ) {
     let mut current_iteration = runtime_settings.current_iteration.clone();
-    for (the_entity, mut object, _unprocessed) in query.iter_mut() {
+    for (the_entity, mut planning_phase, _unprocessed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unprocessed>(); // We only want to process the entity once
 
         print!(
             "Sending OpenAI Command: {:?}\nCurrent iteration: {:?}\n",
-            &object, &current_iteration
+            &planning_phase, &current_iteration
         );
 
         current_iteration += 1;
@@ -364,7 +357,7 @@ fn build_prompt(
 
         // let local_setting = settings.stage.clone();
 
-        match object.as_mut() {
+        match planning_phase.as_mut() {
             PlanningPhases::SystemOrientation(initial_data) => {
                 prompt = runtime_settings
                     .prompts
@@ -419,7 +412,7 @@ fn send_openai_prompt(
 ) {
     for (the_entity, _object, mut prompt, _unsent) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unsent>(); // We only want to process the entity once
-        
+
         let local_prompt = prompt.as_mut().text.clone();
 
         let args = Args::parse();
@@ -510,9 +503,9 @@ fn parse_text(
             PlanningPhases::SystemOrientation(_) => match parse_architecture_data(&unparsed.text) {
                 Ok(architecture_data) => {
                     helper_functions::append_to_file(&write_file, &architecture_data.clone());
-                    settings.all_functions =
+                    runtime_settings.all_functions =
                         helper_functions::get_function_names(&architecture_data.functions.clone());
-                    println!("All functions: {:?}", settings.all_functions.clone());
+                    println!("All functions: {:?}", runtime_settings.all_functions.clone());
 
                     if runtime_settings.project_progress.is_some() {
                         runtime_settings
@@ -576,16 +569,16 @@ fn parse_text(
                 match json {
                     Ok(code) => {
                         helper_functions::append_to_file(&write_file, &code.clone());
-                        settings
+                        runtime_settings
                             .implemented_functions
                             .push(code.currentFunction.clone());
 
                         let function_names: Vec<String> =
-                            helper_functions::get_function_names(&settings.implemented_functions);
+                            helper_functions::get_function_names(&runtime_settings.implemented_functions);
 
                         if helper_functions::contains_mostly_similar_strings(
                             &function_names,
-                            &settings.all_functions,
+                            &runtime_settings.all_functions,
                         ) {
                             println!("All functions implemented!");
                             runtime_settings.project_phase = Phase::Implementation;
@@ -617,7 +610,7 @@ fn initiate_implementation(
 ) {
     if runtime_settings.project_phase == Phase::Implementation {
         println!("Starting implementation");
-        runtime_settings.files = Some(settings.implemented_functions.clone());
+        runtime_settings.files = Some(runtime_settings.implemented_functions.clone());
     }
 }
 
@@ -626,22 +619,23 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
         // .insert_resource(Cmd { cmd: vec![] })
-        .insert_resource(ContainerInfo { id: None })
         .insert_resource(RuntimeSettings {
             goal: None,
+            container_id: None,
             files: None,
             project_progress: None,
             terminal_session: None,
             project_phase: Phase::Planning,
             prompts: None,
             current_iteration: 1,
+            all_functions: vec![],
+            implemented_functions: vec![],
+            
         })
         .insert_resource(Settings {
             max_iterations: 10,
             write_file: "output.json".to_string(),
             project_phase: Phase::Planning,
-            all_functions: vec![],
-            implemented_functions: vec![],
             project_folder: "project".to_string(),
         })
         .add_startup_system(prepare_docker_container)
