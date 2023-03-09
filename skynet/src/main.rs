@@ -275,7 +275,44 @@ struct Opt {
 }
 
 async fn record_audio(mut ctx : TaskContext) -> Result<(), anyhow::Error> {
-    let opt = Opt::parse();
+    
+
+    let mut response = ctx.run_on_main_thread(move |ctx| {
+        ctx.world.get_resource::<RuntimeSettings>().unwrap().recording_in_progress.clone()
+    }).await;
+
+    println!("Recording in progress: {}", response);
+
+    let (tx, rx) = oneshot::channel::<bool>();
+    
+    tokio::spawn(tokio_thread(rx));
+
+    std::thread::sleep(std::time::Duration::from_secs(1));
+
+    while response {
+        std::thread::sleep(std::time::Duration::from_secs(1));
+        
+        response = ctx.run_on_main_thread(move |ctx| {
+            ctx.world.get_resource::<RuntimeSettings>().unwrap().recording_in_progress.clone()
+        }).await;
+        println!("Recording in progress: {}", response);
+    }
+
+ 
+    tx.send(true).unwrap();
+    
+    
+    Ok(())
+}
+
+
+
+use tokio::sync::oneshot;
+
+async fn tokio_thread(rx: oneshot::Receiver<bool>) {
+    
+        
+        let opt = Opt::parse();
 
     // Conditionally compile with jack if the feature is specified.
     #[cfg(all(
@@ -315,12 +352,12 @@ async fn record_audio(mut ctx : TaskContext) -> Result<(), anyhow::Error> {
     let device = if opt.device == "default" {
         host.default_input_device()
     } else {
-        host.input_devices()?
+        host.input_devices().unwrap()
             .find(|x| x.name().map(|y| y == opt.device).unwrap_or(false))
     }
     .expect("failed to find input device");
 
-    println!("Input device: {}", device.name()?);
+    println!("Input device: {}", device.name().unwrap());
 
     let config = device
         .default_input_config()
@@ -330,7 +367,7 @@ async fn record_audio(mut ctx : TaskContext) -> Result<(), anyhow::Error> {
     // The WAV file we're recording to.
     const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/recorded.wav");
     let spec = wav_spec_from_config(config.clone());
-    let writer = hound::WavWriter::create(PATH, spec)?;
+    let writer = hound::WavWriter::create(PATH, spec).unwrap();
     let writer = Arc::new(Mutex::new(Some(writer)));
 
     // A flag to indicate that recording is in progress.
@@ -342,66 +379,47 @@ async fn record_audio(mut ctx : TaskContext) -> Result<(), anyhow::Error> {
     let err_fn = move |err| {
         eprintln!("an error occurred on stream: {}", err);
     };
-
+    
     let stream = match config.sample_format() {
         cpal::SampleFormat::I8 => device.build_input_stream(
             &config.into(),
             move |data, _: &_| write_input_data::<i8, i8>(data, &writer_2),
             err_fn,
             None,
-        )?,
+        ),
         cpal::SampleFormat::I16 => device.build_input_stream(
             &config.into(),
             move |data, _: &_| write_input_data::<i16, i16>(data, &writer_2),
             err_fn,
             None,
-        )?,
+        ),
         cpal::SampleFormat::I32 => device.build_input_stream(
             &config.into(),
             move |data, _: &_| write_input_data::<i32, i32>(data, &writer_2),
             err_fn,
             None,
-        )?,
+        ),
         cpal::SampleFormat::F32 => device.build_input_stream(
             &config.into(),
             move |data, _: &_| write_input_data::<f32, f32>(data, &writer_2),
             err_fn,
             None,
-        )?,
-        sample_format => {
-            return Err(anyhow::Error::msg(format!(
-                "Unsupported sample format '{sample_format}'"
-            )))
-        }
+        )
     };
     
-    let mut response = ctx.run_on_main_thread(move |ctx| {
-        ctx.world.get_resource::<RuntimeSettings>().unwrap().recording_in_progress.clone()
-    }).await;
 
-    println!("Recording in progress: {}", response);
+stream.unwrap().play();
 
-    stream.play()?;
+let result = rx.await.unwrap();
 
-    std::thread::sleep(std::time::Duration::from_secs(1));
-
-    while response {
-        std::thread::sleep(std::time::Duration::from_secs(1));
-        
-        response = ctx.run_on_main_thread(move |ctx| {
-            ctx.world.get_resource::<RuntimeSettings>().unwrap().recording_in_progress.clone()
-        }).await;
-        println!("Recording in progress: {}", response);
-    }
-
-    drop(stream);
-    writer.lock().unwrap().take().unwrap().finalize()?;
-    println!("Recording {} complete!", PATH);
-    
-    
-    
-    Ok(())
+if result {
+// stream.unwrap().drop();
+writer.lock().unwrap().take().unwrap().finalize().unwrap();
+println!("Recording {} complete!", PATH);
 }
+    
+}
+
 
 fn sample_format(format: cpal::SampleFormat) -> hound::SampleFormat {
     if format.is_float() {
@@ -854,13 +872,13 @@ fn initiate_implementation(
 
 fn keyboard_input(
     keys: Res<Input<KeyCode>>,
-    runtime: ResMut<TokioTasksRuntime>
+    runtime: Res<TokioTasksRuntime>
     , mut runtime_settings: ResMut<RuntimeSettings>
 ) {
     if keys.just_pressed(KeyCode::Space) {
         // Space was just pressed
         if !runtime_settings.recording_in_progress{
-            let me = runtime.spawn_background_task( |ctx| async move {
+            runtime.spawn_background_task(  |ctx| async  move {
                 record_audio(ctx).await;
             });
             println!("Space was just pressed -- recording audio");
