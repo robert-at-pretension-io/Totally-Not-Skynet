@@ -1,16 +1,18 @@
 use bevy::prelude::*;
 use bevy::utils::hashbrown::HashMap;
-use bevy_tokio_tasks::TokioTasksRuntime;
+use bevy_tokio_tasks::{TokioTasksRuntime, TaskContext};
 use bollard::container::Config;
 use bollard::errors::Error;
 use bollard::exec::{CreateExecOptions, StartExecResults};
 use bollard::image::CreateImageOptions;
 use bollard::Docker;
 use clap::Parser;
-use futures_lite::StreamExt;
+use futures_lite::{StreamExt, Stream};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use std::sync::{Arc, Mutex};
 use std::{fs::File, io::BufRead};
+use serpapi_search_rust::serp_api_search::SerpApiSearch;
 
 //import bevy hashmap
 
@@ -28,7 +30,12 @@ struct Args {
         long,
         default_value = "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"
     )]
-    api_key: String,
+    api_key_openai: String,
+    #[clap(
+        long,
+        default_value ="a602132fb4dd2bad19d4df9532f26aa36d8bfadd8b08311f5fd96db7178b261c"
+    )]
+    api_key_serp: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -170,6 +177,7 @@ struct InitiateImplementation;
 struct RuntimeSettings {
     goal: Option<String>,
     prompts: Option<HashMap<String, String>>,
+    recording_in_progress: bool,
     container_id: Option<String>,
     current_iteration: usize,
     files: Option<Vec<String>>,
@@ -199,6 +207,234 @@ fn parse_ticket_data(input: &str) -> serde_json::Result<TeamLeadContextOutput> {
 fn parse_implementation_data(input: &str) -> serde_json::Result<Code> {
     println!("Parsing Ticket Data:\n {}", input);
     serde_json::from_str(input).map_err(|e| e.into())
+}
+
+
+// async fn get_search_results(){
+//         // read secret api key from environment variable
+//     // To get the key simply copy/paste from https://serpapi.com/dashboard.
+//     let params = HashMap::<String, String>::new();
+    
+//     let args = Args::parse();
+
+//     let api_key = args.api_key_serp;
+
+//     println!("let's search about coffee on google");
+//     let mut params : std::collections::HashMap<String, String> = std::collections::HashMap::<String, String>::new();
+//     params.insert("q".to_string(), "coffee".to_string());
+//     params.insert("location".to_string(), "Austin, TX, Texas, United States".to_string());
+
+//     // initialize the search engine
+//     let search = SerpApiSearch::google(params, api_key);
+
+//     // search returns a JSON as serde_json::Value which can be accessed like a HashMap.
+//     println!("waiting...");
+//     let results = search.getJson(params).await.unwrap();
+//     let organic_results = results["organic_results"].as_array().unwrap();
+//     println!("results received");
+//     println!("--- JSON ---");
+//     println!(" - number of organic results: {}", organic_results.len());
+//     println!(" - organic_results first result description: {}", results["organic_results"][0]["about_this_result"]["source"]["description"]);
+//     let places = results["local_results"]["places"].as_array().unwrap();
+//     println!("number of local_results: {}", places.len());
+//     println!(" - local_results first address: {}", places[0]["address"]);
+
+//     // search returns text
+//     println!("--- HTML search ---");
+//     let raw = search.html().await.unwrap();
+//     print!(" - raw HTML size {} bytes\n", raw.len());
+//     print!(" - async search completed with {}\n", results["search_parameters"]["engine"]);
+//     print!("ok");
+// }
+
+
+use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+use cpal::{FromSample, Sample};
+use std::io::BufWriter;
+
+#[derive(Parser, Debug)]
+#[command(version, about = "CPAL record_wav example", long_about = None)]
+struct Opt {
+    /// The audio device to use
+    #[arg(short, long, default_value_t = String::from("default"))]
+    device: String,
+
+    /// Use the JACK host
+    #[cfg(all(
+        any(
+            target_os = "linux",
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "netbsd"
+        ),
+        feature = "jack"
+    ))]
+    #[arg(short, long)]
+    #[allow(dead_code)]
+    jack: bool,
+}
+
+async fn record_audio(mut ctx : TaskContext) -> Result<(), anyhow::Error> {
+    let opt = Opt::parse();
+
+    // Conditionally compile with jack if the feature is specified.
+    #[cfg(all(
+        any(
+            target_os = "linux",
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "netbsd"
+        ),
+        feature = "jack"
+    ))]
+    // Manually check for flags. Can be passed through cargo with -- e.g.
+    // cargo run --release --example beep --features jack -- --jack
+    let host = if opt.jack {
+        cpal::host_from_id(cpal::available_hosts()
+            .into_iter()
+            .find(|id| *id == cpal::HostId::Jack)
+            .expect(
+                "make sure --features jack is specified. only works on OSes where jack is available",
+            )).expect("jack host unavailable")
+    } else {
+        cpal::default_host()
+    };
+
+    #[cfg(any(
+        not(any(
+            target_os = "linux",
+            target_os = "dragonfly",
+            target_os = "freebsd",
+            target_os = "netbsd"
+        )),
+        not(feature = "jack")
+    ))]
+    let host = cpal::default_host();
+
+    // Set up the input device and stream with the default input config.
+    let device = if opt.device == "default" {
+        host.default_input_device()
+    } else {
+        host.input_devices()?
+            .find(|x| x.name().map(|y| y == opt.device).unwrap_or(false))
+    }
+    .expect("failed to find input device");
+
+    println!("Input device: {}", device.name()?);
+
+    let config = device
+        .default_input_config()
+        .expect("Failed to get default input config");
+    println!("Default input config: {:?}", config);
+
+    // The WAV file we're recording to.
+    const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/recorded.wav");
+    let spec = wav_spec_from_config(config.clone());
+    let writer = hound::WavWriter::create(PATH, spec)?;
+    let writer = Arc::new(Mutex::new(Some(writer)));
+
+    // A flag to indicate that recording is in progress.
+    println!("Begin recording...");
+
+    // Run the input stream on a separate thread.
+    let writer_2 = writer.clone();
+
+    let err_fn = move |err| {
+        eprintln!("an error occurred on stream: {}", err);
+    };
+
+    let stream = match config.sample_format() {
+        cpal::SampleFormat::I8 => device.build_input_stream(
+            &config.into(),
+            move |data, _: &_| write_input_data::<i8, i8>(data, &writer_2),
+            err_fn,
+            None,
+        )?,
+        cpal::SampleFormat::I16 => device.build_input_stream(
+            &config.into(),
+            move |data, _: &_| write_input_data::<i16, i16>(data, &writer_2),
+            err_fn,
+            None,
+        )?,
+        cpal::SampleFormat::I32 => device.build_input_stream(
+            &config.into(),
+            move |data, _: &_| write_input_data::<i32, i32>(data, &writer_2),
+            err_fn,
+            None,
+        )?,
+        cpal::SampleFormat::F32 => device.build_input_stream(
+            &config.into(),
+            move |data, _: &_| write_input_data::<f32, f32>(data, &writer_2),
+            err_fn,
+            None,
+        )?,
+        sample_format => {
+            return Err(anyhow::Error::msg(format!(
+                "Unsupported sample format '{sample_format}'"
+            )))
+        }
+    };
+    
+    let mut response = ctx.run_on_main_thread(move |ctx| {
+        ctx.world.get_resource::<RuntimeSettings>().unwrap().recording_in_progress.clone()
+    }).await;
+
+    println!("Recording in progress: {}", response);
+
+    stream.play()?;
+
+    std::thread::sleep(std::time::Duration::from_secs(1));
+
+    while response {
+        std::thread::sleep(std::time::Duration::from_secs(1));
+        
+        response = ctx.run_on_main_thread(move |ctx| {
+            ctx.world.get_resource::<RuntimeSettings>().unwrap().recording_in_progress.clone()
+        }).await;
+        println!("Recording in progress: {}", response);
+    }
+
+    drop(stream);
+    writer.lock().unwrap().take().unwrap().finalize()?;
+    println!("Recording {} complete!", PATH);
+    
+    
+    
+    Ok(())
+}
+
+fn sample_format(format: cpal::SampleFormat) -> hound::SampleFormat {
+    if format.is_float() {
+        hound::SampleFormat::Float
+    } else {
+        hound::SampleFormat::Int
+    }
+}
+
+fn wav_spec_from_config(config: cpal::SupportedStreamConfig) -> hound::WavSpec {
+    hound::WavSpec {
+        channels: config.channels() as _,
+        sample_rate: config.sample_rate().0,
+        bits_per_sample: (config.sample_format().sample_size() * 8) as _,
+        sample_format: sample_format(config.sample_format()),
+    }
+}
+
+type WavWriterHandle = Arc<Mutex<Option<hound::WavWriter<BufWriter<File>>>>>;
+
+fn write_input_data<T, U>(input: &[T], writer: &WavWriterHandle)
+where
+    T: Sample,
+    U: Sample + hound::Sample + FromSample<T>,
+{
+    if let Ok(mut guard) = writer.try_lock() {
+        if let Some(writer) = guard.as_mut() {
+            for &sample in input.iter() {
+                let sample: U = U::from_sample(sample);
+                writer.write_sample(sample).ok();
+            }
+        }
+    }
 }
 
 #[cfg(unix)]
@@ -416,7 +652,7 @@ fn send_openai_prompt(
         let local_prompt = prompt.as_mut().text.clone();
 
         let args = Args::parse();
-        let api_key = args.api_key.clone();
+        let api_key = args.api_key_openai.clone();
 
         runtime.spawn_background_task(move |mut ctx| async move {
             let mut finish_reason = "".to_string();
@@ -614,6 +850,42 @@ fn initiate_implementation(
     }
 }
 
+
+
+fn keyboard_input(
+    keys: Res<Input<KeyCode>>,
+    runtime: ResMut<TokioTasksRuntime>
+    , mut runtime_settings: ResMut<RuntimeSettings>
+) {
+    if keys.just_pressed(KeyCode::Space) {
+        // Space was just pressed
+        if !runtime_settings.recording_in_progress{
+            let me = runtime.spawn_background_task( |ctx| async move {
+                record_audio(ctx).await;
+            });
+            println!("Space was just pressed -- recording audio");
+            runtime_settings.recording_in_progress = true;
+        }
+        else {
+            println!("Space was just pressed -- stopping recording audio");
+            runtime_settings.recording_in_progress = false;
+        }
+    }
+    if keys.just_released(KeyCode::LControl) {
+        // Left Ctrl was released
+    }
+    if keys.pressed(KeyCode::W) {
+        // W is being held down
+    }
+    // we can check multiple at once with `.any_*`
+    if keys.any_pressed([KeyCode::LShift, KeyCode::RShift]) {
+        // Either the left or right shift are being held down
+    }
+    if keys.any_just_pressed([KeyCode::Delete, KeyCode::Back]) {
+        // Either delete or backspace was just pressed
+    }
+}
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
@@ -623,6 +895,7 @@ fn main() {
             goal: None,
             container_id: None,
             files: None,
+            recording_in_progress: false,
             project_progress: None,
             terminal_session: None,
             project_phase: Phase::Planning,
@@ -638,11 +911,12 @@ fn main() {
             project_phase: Phase::Planning,
             project_folder: "project".to_string(),
         })
-        .add_startup_system(prepare_docker_container)
-        .add_startup_system(initiate_project)
-        .add_system(build_prompt)
-        .add_system(send_openai_prompt)
-        .add_system(parse_text)
-        .add_system(initiate_implementation)
+        // .add_startup_system(prepare_docker_container)
+        // .add_startup_system(initiate_project)
+        // .add_system(build_prompt)
+        // .add_system(send_openai_prompt)
+        // .add_system(parse_text)
+        // .add_system(initiate_implementation)
+        .add_system(keyboard_input)
         .run();
 }

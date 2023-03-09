@@ -1,1 +1,1 @@
-Given an input and an error, please output well formatted json that fixes the error.
+Read the following log of events and decide if there is enough information to write a program that will fulfill the project goal. If there is enough information simply respond with "Yes". If there is not enough information, respond with "No" and explain why.
