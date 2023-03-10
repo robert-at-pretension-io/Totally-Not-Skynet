@@ -1,18 +1,19 @@
 use bevy::prelude::*;
 use bevy::utils::hashbrown::HashMap;
-use bevy_tokio_tasks::{TokioTasksRuntime, TaskContext};
+use bevy_tokio_tasks::{TaskContext, TokioTasksRuntime};
 use bollard::container::Config;
 use bollard::errors::Error;
 use bollard::exec::{CreateExecOptions, StartExecResults};
 use bollard::image::CreateImageOptions;
 use bollard::Docker;
 use clap::Parser;
-use futures_lite::{StreamExt, Stream};
+use core::panic;
+use futures_lite::{Stream, StreamExt};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Mutex};
-use std::{fs::File, io::BufRead};
 use serpapi_search_rust::serp_api_search::SerpApiSearch;
+use std::sync::{mpsc, Arc, Mutex};
+use std::{fs::File, io::BufRead};
 
 //import bevy hashmap
 
@@ -33,7 +34,7 @@ struct Args {
     api_key_openai: String,
     #[clap(
         long,
-        default_value ="a602132fb4dd2bad19d4df9532f26aa36d8bfadd8b08311f5fd96db7178b261c"
+        default_value = "a602132fb4dd2bad19d4df9532f26aa36d8bfadd8b08311f5fd96db7178b261c"
     )]
     api_key_serp: String,
 }
@@ -78,13 +79,12 @@ struct Unparsed {
 #[derive(Component)]
 struct Unsent;
 
-
 #[derive(Resource)]
 struct Settings {
     project_folder: String,
     max_iterations: usize,
     write_file: String,
-    project_phase: Phase
+    project_phase: Phase,
 }
 
 #[derive(PartialEq, Eq)]
@@ -185,7 +185,7 @@ struct RuntimeSettings {
     terminal_session: Option<Vec<TerminalInfo>>,
     project_progress: Option<Vec<PlanningPhases>>,
     all_functions: Vec<String>,
-    implemented_functions: Vec<String>
+    implemented_functions: Vec<String>,
 }
 
 enum TerminalInfo {
@@ -209,12 +209,11 @@ fn parse_implementation_data(input: &str) -> serde_json::Result<Code> {
     serde_json::from_str(input).map_err(|e| e.into())
 }
 
-
 // async fn get_search_results(){
 //         // read secret api key from environment variable
 //     // To get the key simply copy/paste from https://serpapi.com/dashboard.
 //     let params = HashMap::<String, String>::new();
-    
+
 //     let args = Args::parse();
 
 //     let api_key = args.api_key_serp;
@@ -247,9 +246,8 @@ fn parse_implementation_data(input: &str) -> serde_json::Result<Code> {
 //     print!("ok");
 // }
 
-
-use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use cpal::{FromSample, Sample};
+use cpal::traits::{DeviceTrait, HostTrait};
+use cpal::{ FromSample, Sample, SizedSample, SupportedStreamConfig};
 use std::io::BufWriter;
 
 #[derive(Parser, Debug)]
@@ -274,45 +272,12 @@ struct Opt {
     jack: bool,
 }
 
-async fn record_audio(mut ctx : TaskContext) -> Result<(), anyhow::Error> {
-    
-
-    let mut response = ctx.run_on_main_thread(move |ctx| {
-        ctx.world.get_resource::<RuntimeSettings>().unwrap().recording_in_progress.clone()
-    }).await;
-
-    println!("Recording in progress: {}", response);
-
-    let (tx, rx) = oneshot::channel::<bool>();
-    
-    tokio::spawn(tokio_thread(rx));
-
-    std::thread::sleep(std::time::Duration::from_secs(1));
-
-    while response {
-        std::thread::sleep(std::time::Duration::from_secs(1));
-        
-        response = ctx.run_on_main_thread(move |ctx| {
-            ctx.world.get_resource::<RuntimeSettings>().unwrap().recording_in_progress.clone()
-        }).await;
-        println!("Recording in progress: {}", response);
-    }
-
- 
-    tx.send(true).unwrap();
-    
-    
-    Ok(())
-}
-
-
-
-use tokio::sync::oneshot;
-
-async fn tokio_thread(rx: oneshot::Receiver<bool>) {
-    
-        
-        let opt = Opt::parse();
+async fn record_audio(mut ctx: TaskContext) -> Result<(), anyhow::Error>
+// where
+//     T: Sample,
+//     U: Sample + hound::Sample + FromSample<T>,
+{
+    let opt = Opt::parse();
 
     // Conditionally compile with jack if the feature is specified.
     #[cfg(all(
@@ -352,7 +317,8 @@ async fn tokio_thread(rx: oneshot::Receiver<bool>) {
     let device = if opt.device == "default" {
         host.default_input_device()
     } else {
-        host.input_devices().unwrap()
+        host.input_devices()
+            .unwrap()
             .find(|x| x.name().map(|y| y == opt.device).unwrap_or(false))
     }
     .expect("failed to find input device");
@@ -364,62 +330,239 @@ async fn tokio_thread(rx: oneshot::Receiver<bool>) {
         .expect("Failed to get default input config");
     println!("Default input config: {:?}", config);
 
+    let response = ctx
+        .run_on_main_thread(move |ctx| {
+            ctx.world
+                .get_resource::<RuntimeSettings>()
+                .unwrap()
+                .recording_in_progress
+                .clone()
+        })
+        .await;
+
+    println!("Recording in progress: {}", response);
+
+    match config.sample_format() {
+        cpal::SampleFormat::I8 => {
+            let (tx, rx) = unbounded::<i8>();
+
+            thread::spawn(move || recording_thread::<i8, i8>(tx, config.into(), device));
+
+            while rx.try_recv().is_ok() {
+                let result = rx.recv().unwrap();
+                println!("Received: {}", result);
+            }
+        }
+        cpal::SampleFormat::I16 => {
+            let (tx, rx) = unbounded::<i16>();
+
+            thread::spawn(move || recording_thread::<i16, i16>(tx, config.into(), device));
+
+            while rx.try_recv().is_ok() {
+                let result = rx.recv().unwrap();
+                println!("Received: {}", result);
+            }
+        }
+        cpal::SampleFormat::I32 => {
+            let (tx, rx) = unbounded::<i32>();
+
+            thread::spawn(move || recording_thread::<i32, i32>(tx, config.into(), device));
+
+            while rx.try_recv().is_ok() {
+                let result = rx.recv().unwrap();
+                println!("Received: {}", result);
+            }
+        }
+        cpal::SampleFormat::I64 => panic!("I64 not supported"),
+        cpal::SampleFormat::U8 => panic!("U8 not supported"),
+        cpal::SampleFormat::U16 => panic!("U16 not supported"),
+        cpal::SampleFormat::U32 => panic!("U32 not supported"),
+
+        cpal::SampleFormat::U64 => panic!("U64 not supported"),
+        cpal::SampleFormat::F32 => {
+            let (tx, rx) = unbounded::<f32>();
+
+            thread::spawn(move || recording_thread::<f32, f32>(tx, config.into(), device));
+
+            while rx.try_recv().is_ok() {
+                let result = rx.recv().unwrap();
+                println!("Received: {}", result);
+            }
+        }
+        cpal::SampleFormat::F64 => panic!("F64 not supported"),
+        _ => todo!(),
+    }
+
+    Ok(())
+}
+
+use crossbeam_channel::{unbounded, Receiver, Sender};
+use std::thread;
+
+// fn recording_thread<T, U>(
+//     tx: crossbeam_channel::Sender<U>,
+//     config: cpal::StreamConfig,
+//     device: cpal::Device,
+// ) where
+//     T: Sample,
+//     U: Sample + hound::Sample + FromSample<T>,
+// {
+//     // The WAV file we're recording to.
+//     const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/recorded.wav");
+//     // let spec = wav_spec_from_config(config.clone());
+//     // let writer = hound::WavWriter::create(PATH, spec).unwrap();
+//     // let writer = Arc::new(Mutex::new(Some(writer)));
+
+//     // A flag to indicate that recording is in progress.
+//     println!("Begin recording...");
+
+//     // Run the input stream on a separate thread.
+//     // let writer_2 = writer.clone();
+
+//     let err_fn = move |err| {
+//         eprintln!("an error occurred on stream: {}", err);
+//     };
+
+//     let stream = match config.sample_format() {
+//         cpal::SampleFormat::I8 => device.build_input_stream(
+//             &config,
+//             move |data: &[i8], _: &cpal::InputCallbackInfo| {
+//                 let mut buf = Vec::new();
+//                 for &sample in data.iter() {
+//                     tx.send(sample).unwrap();
+//                 }
+//             },
+//             err_fn,
+//             None,
+//         ),
+//         cpal::SampleFormat::I16 => device.build_input_stream(
+//             &config,
+//             move |data: &[i16], _: &cpal::InputCallbackInfo| {
+//                 let mut buf = Vec::new();
+//                 for &sample in data.iter() {
+//                     tx.send(sample).unwrap();
+//                 }
+//             },
+//             err_fn,
+//             None,
+//         ),
+//         cpal::SampleFormat::I32 => device.build_input_stream(
+//             &config,
+//             move |data: &[i32], _: &cpal::InputCallbackInfo| {
+//                 let mut buf = Vec::new();
+//                 for &sample in data.iter() {
+//                     tx.send(sample).unwrap();
+//                 }
+//             },
+//             err_fn,
+//             None,
+//         ),
+//         cpal::SampleFormat::I64 => panic!("I64 not supported"),
+//         cpal::SampleFormat::U8 => panic!("U8 not supported"),
+//         cpal::SampleFormat::U16 => panic!("U16 not supported"),
+//         cpal::SampleFormat::U32 => panic!("U32 not supported"),
+//         cpal::SampleFormat::U64 => panic!("U64 not supported"),
+//         _ => todo!(),
+//     };
+// }
+
+fn recording_thread<T, U>(
+    tx: crossbeam_channel::Sender<U>,
+    config: cpal::SupportedStreamConfig,
+    device: cpal::Device,
+) 
+where
+    T: Sample,
+    U: Sample + hound::Sample + FromSample<T> + SizedSample + Send + 'static,
+{
+
+
     // The WAV file we're recording to.
-    const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/recorded.wav");
-    let spec = wav_spec_from_config(config.clone());
-    let writer = hound::WavWriter::create(PATH, spec).unwrap();
-    let writer = Arc::new(Mutex::new(Some(writer)));
+    // const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/recorded.wav");
+    // let spec = wav_spec_from_config(config.clone());
+    // let writer = hound::WavWriter::create(PATH, spec).unwrap();
 
     // A flag to indicate that recording is in progress.
     println!("Begin recording...");
 
-    // Run the input stream on a separate thread.
-    let writer_2 = writer.clone();
-
     let err_fn = move |err| {
         eprintln!("an error occurred on stream: {}", err);
     };
-    
-    let stream = match config.sample_format() {
-        cpal::SampleFormat::I8 => device.build_input_stream(
-            &config.into(),
-            move |data, _: &_| write_input_data::<i8, i8>(data, &writer_2),
-            err_fn,
-            None,
-        ),
-        cpal::SampleFormat::I16 => device.build_input_stream(
-            &config.into(),
-            move |data, _: &_| write_input_data::<i16, i16>(data, &writer_2),
-            err_fn,
-            None,
-        ),
-        cpal::SampleFormat::I32 => device.build_input_stream(
-            &config.into(),
-            move |data, _: &_| write_input_data::<i32, i32>(data, &writer_2),
-            err_fn,
-            None,
-        ),
-        cpal::SampleFormat::F32 => device.build_input_stream(
-            &config.into(),
-            move |data, _: &_| write_input_data::<f32, f32>(data, &writer_2),
-            err_fn,
-            None,
-        )
-    };
-    
 
-stream.unwrap().play();
+    let stream = device.build_input_stream(
+        &config.into(),
+        move |data, _: &_| {
+            // let mut writer = writer.clone();
+            for &sample in data.iter() {
+                // writer.write_sample(FromSample::from_sample::<U, T>(sample)).unwrap();
+                tx.send(sample).unwrap();
+            }
+        },
+        err_fn,
+        None
+    ).unwrap();
 
-let result = rx.await.unwrap();
-
-if result {
-// stream.unwrap().drop();
-writer.lock().unwrap().take().unwrap().finalize().unwrap();
-println!("Recording {} complete!", PATH);
-}
-    
+    stream.play();
 }
 
+// where
+//     T: Sample,
+//     U: Sample + hound::Sample + FromSample<T>,
+// {
+//     // The WAV file we're recording to.
+//     const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/recorded.wav");
+//     // let spec = wav_spec_from_config(config.clone());
+//     // let writer = hound::WavWriter::create(PATH, spec).unwrap();
+//     // let writer = Arc::new(Mutex::new(Some(writer)));
+
+//     // A flag to indicate that recording is in progress.
+//     println!("Begin recording...");
+
+//     // Run the input stream on a separate thread.
+//     // let writer_2 = writer.clone();
+
+//     let err_fn = move |err| {
+//         eprintln!("an error occurred on stream: {}", err);
+//     };
+
+//     let stream = match config.sample_format() {
+//         cpal::SampleFormat::I8 => device.build_input_stream(
+//             &config.into(),
+//             move |data, _: &_| write_input_data::<i8, i8>(data, &writer_2, tx),
+//             err_fn,
+//             None,
+//         ),
+//         cpal::SampleFormat::I16 => device.build_input_stream(
+//             &config.into(),
+//             move |data, _: &_| write_input_data::<i16, i16>(data, &writer_2, tx),
+//             err_fn,
+//             None,
+//         ),
+//         cpal::SampleFormat::I32 => device.build_input_stream(
+//             &config.into(),
+//             move |data, _: &_| write_input_data::<i32, i32>(data, &writer_2, tx),
+//             err_fn,
+//             None,
+//         ),
+//         cpal::SampleFormat::F32 => device.build_input_stream(
+//             &config.into(),
+//             move |data, _: &_| write_input_data::<f32, f32>(data, &writer_2, tx),
+//             err_fn,
+//             None,
+//         ),
+//         _ => todo!(),
+//     };
+
+//     stream.unwrap().play();
+
+//     let result = rx.await.unwrap();
+
+//     if result {
+//         // stream.unwrap().drop();
+//         writer.lock().unwrap().take().unwrap().finalize().unwrap();
+//         println!("Recording {} complete!", PATH);
+//     }
+// }
 
 fn sample_format(format: cpal::SampleFormat) -> hound::SampleFormat {
     if format.is_float() {
@@ -440,7 +583,7 @@ fn wav_spec_from_config(config: cpal::SupportedStreamConfig) -> hound::WavSpec {
 
 type WavWriterHandle = Arc<Mutex<Option<hound::WavWriter<BufWriter<File>>>>>;
 
-fn write_input_data<T, U>(input: &[T], writer: &WavWriterHandle)
+fn write_input_data<T, U>(input: &[T], writer: &WavWriterHandle, tx: crossbeam_channel::Sender<U>)
 where
     T: Sample,
     U: Sample + hound::Sample + FromSample<T>,
@@ -449,6 +592,7 @@ where
         if let Some(writer) = guard.as_mut() {
             for &sample in input.iter() {
                 let sample: U = U::from_sample(sample);
+                tx.send(sample.clone()).unwrap();
                 writer.write_sample(sample).ok();
             }
         }
@@ -465,7 +609,11 @@ fn new_docker() -> Result<Docker> {
     Docker::new("tcp://127.0.0.1:8080")
 }
 
-fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>, mut runtime_settings: ResMut<RuntimeSettings>, mut settings: ResMut<Settings>) {
+fn prepare_docker_container(
+    runtime: ResMut<TokioTasksRuntime>,
+    mut runtime_settings: ResMut<RuntimeSettings>,
+    mut settings: ResMut<Settings>,
+) {
     runtime.spawn_background_task(|mut ctx| async move {
         let docker = new_docker().unwrap();
         let image = "ubuntu:latest";
@@ -498,7 +646,10 @@ fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>, mut runtime_sett
             .id;
 
         ctx.run_on_main_thread(move |ctx| {
-            ctx.world.get_resource_mut::<RuntimeSettings>().unwrap().container_id = Some(id);
+            ctx.world
+                .get_resource_mut::<RuntimeSettings>()
+                .unwrap()
+                .container_id = Some(id);
         })
         .await;
     });
@@ -506,9 +657,8 @@ fn prepare_docker_container(runtime: ResMut<TokioTasksRuntime>, mut runtime_sett
 
 fn send_docker_command(
     mut runtime_settings: ResMut<RuntimeSettings>,
-    mut runtime: ResMut<TokioTasksRuntime>
+    mut runtime: ResMut<TokioTasksRuntime>,
 ) {
-    
     let id = runtime_settings.container_id.clone().unwrap();
 
     runtime.spawn_background_task(|mut ctx| async move {
@@ -759,11 +909,15 @@ fn parse_text(
                     helper_functions::append_to_file(&write_file, &architecture_data.clone());
                     runtime_settings.all_functions =
                         helper_functions::get_function_names(&architecture_data.functions.clone());
-                    println!("All functions: {:?}", runtime_settings.all_functions.clone());
+                    println!(
+                        "All functions: {:?}",
+                        runtime_settings.all_functions.clone()
+                    );
 
                     if runtime_settings.project_progress.is_some() {
                         runtime_settings
-                            .project_progress.as_mut()
+                            .project_progress
+                            .as_mut()
                             .unwrap()
                             .push(PlanningPhases::Architecture(architecture_data.clone()));
                     }
@@ -799,7 +953,8 @@ fn parse_text(
                     helper_functions::append_to_file(&write_file, &ticket_data.clone());
                     if runtime_settings.project_progress.is_some() {
                         runtime_settings
-                            .project_progress.as_mut()
+                            .project_progress
+                            .as_mut()
                             .unwrap()
                             .push(PlanningPhases::CompletedTicket(ticket_data.clone()));
                     }
@@ -827,8 +982,9 @@ fn parse_text(
                             .implemented_functions
                             .push(code.currentFunction.clone());
 
-                        let function_names: Vec<String> =
-                            helper_functions::get_function_names(&runtime_settings.implemented_functions);
+                        let function_names: Vec<String> = helper_functions::get_function_names(
+                            &runtime_settings.implemented_functions,
+                        );
 
                         if helper_functions::contains_mostly_similar_strings(
                             &function_names,
@@ -868,23 +1024,20 @@ fn initiate_implementation(
     }
 }
 
-
-
 fn keyboard_input(
     keys: Res<Input<KeyCode>>,
-    runtime: Res<TokioTasksRuntime>
-    , mut runtime_settings: ResMut<RuntimeSettings>
+    runtime: Res<TokioTasksRuntime>,
+    mut runtime_settings: ResMut<RuntimeSettings>,
 ) {
     if keys.just_pressed(KeyCode::Space) {
         // Space was just pressed
-        if !runtime_settings.recording_in_progress{
-            runtime.spawn_background_task(  |ctx| async  move {
+        if !runtime_settings.recording_in_progress {
+            runtime.spawn_background_task(|ctx| async move {
                 record_audio(ctx).await;
             });
             println!("Space was just pressed -- recording audio");
             runtime_settings.recording_in_progress = true;
-        }
-        else {
+        } else {
             println!("Space was just pressed -- stopping recording audio");
             runtime_settings.recording_in_progress = false;
         }
@@ -921,7 +1074,6 @@ fn main() {
             current_iteration: 1,
             all_functions: vec![],
             implemented_functions: vec![],
-            
         })
         .insert_resource(Settings {
             max_iterations: 10,
