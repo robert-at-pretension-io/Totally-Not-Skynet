@@ -209,42 +209,42 @@ fn parse_implementation_data(input: &str) -> serde_json::Result<Code> {
     serde_json::from_str(input).map_err(|e| e.into())
 }
 
-// async fn get_search_results(){
-//         // read secret api key from environment variable
-//     // To get the key simply copy/paste from https://serpapi.com/dashboard.
-//     let params = HashMap::<String, String>::new();
+async fn get_search_results(){
+        // read secret api key from environment variable
+    // To get the key simply copy/paste from https://serpapi.com/dashboard.
+    let params = HashMap::<String, String>::new();
 
-//     let args = Args::parse();
+    let args = Args::parse();
 
-//     let api_key = args.api_key_serp;
+    let api_key = args.api_key_serp;
 
-//     println!("let's search about coffee on google");
-//     let mut params : std::collections::HashMap<String, String> = std::collections::HashMap::<String, String>::new();
-//     params.insert("q".to_string(), "coffee".to_string());
-//     params.insert("location".to_string(), "Austin, TX, Texas, United States".to_string());
+    println!("let's search about coffee on google");
+    let mut params : std::collections::HashMap<String, String> = std::collections::HashMap::<String, String>::new();
+    params.insert("q".to_string(), "coffee".to_string());
+    params.insert("location".to_string(), "Austin, TX, Texas, United States".to_string());
 
-//     // initialize the search engine
-//     let search = SerpApiSearch::google(params, api_key);
+    // initialize the search engine
+    let search = SerpApiSearch::google(params, api_key);
 
-//     // search returns a JSON as serde_json::Value which can be accessed like a HashMap.
-//     println!("waiting...");
-//     let results = search.getJson(params).await.unwrap();
-//     let organic_results = results["organic_results"].as_array().unwrap();
-//     println!("results received");
-//     println!("--- JSON ---");
-//     println!(" - number of organic results: {}", organic_results.len());
-//     println!(" - organic_results first result description: {}", results["organic_results"][0]["about_this_result"]["source"]["description"]);
-//     let places = results["local_results"]["places"].as_array().unwrap();
-//     println!("number of local_results: {}", places.len());
-//     println!(" - local_results first address: {}", places[0]["address"]);
+    // search returns a JSON as serde_json::Value which can be accessed like a HashMap.
+    println!("waiting...");
+    // let results = search.getJson(params).await.unwrap();
+    // let organic_results = results["organic_results"].as_array().unwrap();
+    // println!("results received");
+    // println!("--- JSON ---");
+    // println!(" - number of organic results: {}", organic_results.len());
+    // println!(" - organic_results first result description: {}", results["organic_results"][0]["about_this_result"]["source"]["description"]);
+    // let places = results["local_results"]["places"].as_array().unwrap();
+    // println!("number of local_results: {}", places.len());
+    // println!(" - local_results first address: {}", places[0]["address"]);
 
-//     // search returns text
-//     println!("--- HTML search ---");
-//     let raw = search.html().await.unwrap();
-//     print!(" - raw HTML size {} bytes\n", raw.len());
-//     print!(" - async search completed with {}\n", results["search_parameters"]["engine"]);
-//     print!("ok");
-// }
+    // // search returns text
+    // println!("--- HTML search ---");
+    // let raw = search.html().await.unwrap();
+    // print!(" - raw HTML size {} bytes\n", raw.len());
+    // print!(" - async search completed with {}\n", results["search_parameters"]["engine"]);
+    // print!("ok");
+}
 
 use cpal::traits::{DeviceTrait, HostTrait};
 use cpal::{ FromSample, Sample, SizedSample, SupportedStreamConfig};
@@ -372,6 +372,7 @@ async fn record_audio(mut ctx: TaskContext) -> Result<(), anyhow::Error>
                 let result = rx.recv().unwrap();
                 println!("Received: {}", result);
             }
+            
         }
         cpal::SampleFormat::I64 => panic!("I64 not supported"),
         cpal::SampleFormat::U8 => panic!("U8 not supported"),
@@ -393,78 +394,14 @@ async fn record_audio(mut ctx: TaskContext) -> Result<(), anyhow::Error>
         _ => todo!(),
     }
 
+    println!("Recording complete");
+
     Ok(())
 }
 
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use std::thread;
 
-// fn recording_thread<T, U>(
-//     tx: crossbeam_channel::Sender<U>,
-//     config: cpal::StreamConfig,
-//     device: cpal::Device,
-// ) where
-//     T: Sample,
-//     U: Sample + hound::Sample + FromSample<T>,
-// {
-//     // The WAV file we're recording to.
-//     const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/recorded.wav");
-//     // let spec = wav_spec_from_config(config.clone());
-//     // let writer = hound::WavWriter::create(PATH, spec).unwrap();
-//     // let writer = Arc::new(Mutex::new(Some(writer)));
-
-//     // A flag to indicate that recording is in progress.
-//     println!("Begin recording...");
-
-//     // Run the input stream on a separate thread.
-//     // let writer_2 = writer.clone();
-
-//     let err_fn = move |err| {
-//         eprintln!("an error occurred on stream: {}", err);
-//     };
-
-//     let stream = match config.sample_format() {
-//         cpal::SampleFormat::I8 => device.build_input_stream(
-//             &config,
-//             move |data: &[i8], _: &cpal::InputCallbackInfo| {
-//                 let mut buf = Vec::new();
-//                 for &sample in data.iter() {
-//                     tx.send(sample).unwrap();
-//                 }
-//             },
-//             err_fn,
-//             None,
-//         ),
-//         cpal::SampleFormat::I16 => device.build_input_stream(
-//             &config,
-//             move |data: &[i16], _: &cpal::InputCallbackInfo| {
-//                 let mut buf = Vec::new();
-//                 for &sample in data.iter() {
-//                     tx.send(sample).unwrap();
-//                 }
-//             },
-//             err_fn,
-//             None,
-//         ),
-//         cpal::SampleFormat::I32 => device.build_input_stream(
-//             &config,
-//             move |data: &[i32], _: &cpal::InputCallbackInfo| {
-//                 let mut buf = Vec::new();
-//                 for &sample in data.iter() {
-//                     tx.send(sample).unwrap();
-//                 }
-//             },
-//             err_fn,
-//             None,
-//         ),
-//         cpal::SampleFormat::I64 => panic!("I64 not supported"),
-//         cpal::SampleFormat::U8 => panic!("U8 not supported"),
-//         cpal::SampleFormat::U16 => panic!("U16 not supported"),
-//         cpal::SampleFormat::U32 => panic!("U32 not supported"),
-//         cpal::SampleFormat::U64 => panic!("U64 not supported"),
-//         _ => todo!(),
-//     };
-// }
 
 fn recording_thread<T, U>(
     tx: crossbeam_channel::Sender<U>,
@@ -495,6 +432,7 @@ where
             // let mut writer = writer.clone();
             for &sample in data.iter() {
                 // writer.write_sample(FromSample::from_sample::<U, T>(sample)).unwrap();
+                // print!("{:?} ", sample);
                 tx.send(sample).unwrap();
             }
         },
@@ -502,67 +440,11 @@ where
         None
     ).unwrap();
 
-    stream.play();
+    println!("Recording started. Press space to stop.");
+
+    stream.play().unwrap();
 }
-
-// where
-//     T: Sample,
-//     U: Sample + hound::Sample + FromSample<T>,
-// {
-//     // The WAV file we're recording to.
-//     const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/recorded.wav");
-//     // let spec = wav_spec_from_config(config.clone());
-//     // let writer = hound::WavWriter::create(PATH, spec).unwrap();
-//     // let writer = Arc::new(Mutex::new(Some(writer)));
-
-//     // A flag to indicate that recording is in progress.
-//     println!("Begin recording...");
-
-//     // Run the input stream on a separate thread.
-//     // let writer_2 = writer.clone();
-
-//     let err_fn = move |err| {
-//         eprintln!("an error occurred on stream: {}", err);
-//     };
-
-//     let stream = match config.sample_format() {
-//         cpal::SampleFormat::I8 => device.build_input_stream(
-//             &config.into(),
-//             move |data, _: &_| write_input_data::<i8, i8>(data, &writer_2, tx),
-//             err_fn,
-//             None,
-//         ),
-//         cpal::SampleFormat::I16 => device.build_input_stream(
-//             &config.into(),
-//             move |data, _: &_| write_input_data::<i16, i16>(data, &writer_2, tx),
-//             err_fn,
-//             None,
-//         ),
-//         cpal::SampleFormat::I32 => device.build_input_stream(
-//             &config.into(),
-//             move |data, _: &_| write_input_data::<i32, i32>(data, &writer_2, tx),
-//             err_fn,
-//             None,
-//         ),
-//         cpal::SampleFormat::F32 => device.build_input_stream(
-//             &config.into(),
-//             move |data, _: &_| write_input_data::<f32, f32>(data, &writer_2, tx),
-//             err_fn,
-//             None,
-//         ),
-//         _ => todo!(),
-//     };
-
-//     stream.unwrap().play();
-
-//     let result = rx.await.unwrap();
-
-//     if result {
-//         // stream.unwrap().drop();
-//         writer.lock().unwrap().take().unwrap().finalize().unwrap();
-//         println!("Recording {} complete!", PATH);
-//     }
-// }
+use cpal::traits::StreamTrait;
 
 fn sample_format(format: cpal::SampleFormat) -> hound::SampleFormat {
     if format.is_float() {
