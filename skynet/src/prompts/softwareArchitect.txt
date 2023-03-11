@@ -1,2 +1,0 @@
-Read the event log and respond with a search query that if answered would give more relevant context that will help the developer either come up with an implementation
-

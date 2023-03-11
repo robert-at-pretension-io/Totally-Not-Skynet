@@ -71,6 +71,25 @@ struct Prompt {
     text: String,
 }
 
+#[derive(Component, Serialize, Deserialize, Debug, Clone)]
+struct Role {
+    action: String,
+    description: String,
+    prompt: String,
+}
+impl Role {
+    fn new(file_contents: String) -> Option<Role> {
+        // deserialize the file contents
+        match serde_json::from_str(&file_contents) {
+            Ok(role) => Some(role),
+            Err(e) => {
+                println!("Error parsing role file: {}", e);
+                None
+            }
+        }
+    }
+}
+
 #[derive(Component)]
 struct Unparsed {
     text: String,
@@ -176,7 +195,7 @@ struct InitiateImplementation;
 #[derive(Resource)]
 struct RuntimeSettings {
     goal: Option<String>,
-    prompts: Option<HashMap<String, String>>,
+    roles : Option<Vec<Role>>,
     recording_in_progress: bool,
     container_id: Option<String>,
     current_iteration: usize,
@@ -248,203 +267,7 @@ async fn get_search_results(){
 
 use cpal::traits::{DeviceTrait, HostTrait};
 use cpal::{ FromSample, Sample, SizedSample, SupportedStreamConfig};
-use std::io::BufWriter;
-
-#[derive(Parser, Debug)]
-#[command(version, about = "CPAL record_wav example", long_about = None)]
-struct Opt {
-    /// The audio device to use
-    #[arg(short, long, default_value_t = String::from("default"))]
-    device: String,
-
-    /// Use the JACK host
-    #[cfg(all(
-        any(
-            target_os = "linux",
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "netbsd"
-        ),
-        feature = "jack"
-    ))]
-    #[arg(short, long)]
-    #[allow(dead_code)]
-    jack: bool,
-}
-
-async fn record_audio(mut ctx: TaskContext) -> Result<(), anyhow::Error>
-// where
-//     T: Sample,
-//     U: Sample + hound::Sample + FromSample<T>,
-{
-    let opt = Opt::parse();
-
-    // Conditionally compile with jack if the feature is specified.
-    #[cfg(all(
-        any(
-            target_os = "linux",
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "netbsd"
-        ),
-        feature = "jack"
-    ))]
-    // Manually check for flags. Can be passed through cargo with -- e.g.
-    // cargo run --release --example beep --features jack -- --jack
-    let host = if opt.jack {
-        cpal::host_from_id(cpal::available_hosts()
-            .into_iter()
-            .find(|id| *id == cpal::HostId::Jack)
-            .expect(
-                "make sure --features jack is specified. only works on OSes where jack is available",
-            )).expect("jack host unavailable")
-    } else {
-        cpal::default_host()
-    };
-
-    #[cfg(any(
-        not(any(
-            target_os = "linux",
-            target_os = "dragonfly",
-            target_os = "freebsd",
-            target_os = "netbsd"
-        )),
-        not(feature = "jack")
-    ))]
-    let host = cpal::default_host();
-
-    // Set up the input device and stream with the default input config.
-    let device = if opt.device == "default" {
-        host.default_input_device()
-    } else {
-        host.input_devices()
-            .unwrap()
-            .find(|x| x.name().map(|y| y == opt.device).unwrap_or(false))
-    }
-    .expect("failed to find input device");
-
-    println!("Input device: {}", device.name().unwrap());
-
-    let config = device
-        .default_input_config()
-        .expect("Failed to get default input config");
-    println!("Default input config: {:?}", config);
-
-    let response = ctx
-        .run_on_main_thread(move |ctx| {
-            ctx.world
-                .get_resource::<RuntimeSettings>()
-                .unwrap()
-                .recording_in_progress
-                .clone()
-        })
-        .await;
-
-    println!("Recording in progress: {}", response);
-
-    match config.sample_format() {
-        cpal::SampleFormat::I8 => {
-            let (tx, rx) = unbounded::<i8>();
-
-            thread::spawn(move || recording_thread::<i8, i8>(tx, config.into(), device));
-
-            while rx.try_recv().is_ok() {
-                let result = rx.recv().unwrap();
-                println!("Received: {}", result);
-            }
-        }
-        cpal::SampleFormat::I16 => {
-            let (tx, rx) = unbounded::<i16>();
-
-            thread::spawn(move || recording_thread::<i16, i16>(tx, config.into(), device));
-
-            while rx.try_recv().is_ok() {
-                let result = rx.recv().unwrap();
-                println!("Received: {}", result);
-            }
-        }
-        cpal::SampleFormat::I32 => {
-            let (tx, rx) = unbounded::<i32>();
-
-            thread::spawn(move || recording_thread::<i32, i32>(tx, config.into(), device));
-
-            while rx.try_recv().is_ok() {
-                let result = rx.recv().unwrap();
-                println!("Received: {}", result);
-            }
-            
-        }
-        cpal::SampleFormat::I64 => panic!("I64 not supported"),
-        cpal::SampleFormat::U8 => panic!("U8 not supported"),
-        cpal::SampleFormat::U16 => panic!("U16 not supported"),
-        cpal::SampleFormat::U32 => panic!("U32 not supported"),
-
-        cpal::SampleFormat::U64 => panic!("U64 not supported"),
-        cpal::SampleFormat::F32 => {
-            let (tx, rx) = unbounded::<f32>();
-
-            thread::spawn(move || recording_thread::<f32, f32>(tx, config.into(), device));
-
-            while rx.try_recv().is_ok() {
-                let result = rx.recv().unwrap();
-                println!("Received: {}", result);
-            }
-        }
-        cpal::SampleFormat::F64 => panic!("F64 not supported"),
-        _ => todo!(),
-    }
-
-    println!("Recording complete");
-
-    Ok(())
-}
-
-use crossbeam_channel::{unbounded, Receiver, Sender};
-use std::thread;
-
-
-fn recording_thread<T, U>(
-    tx: crossbeam_channel::Sender<U>,
-    config: cpal::SupportedStreamConfig,
-    device: cpal::Device,
-) 
-where
-    T: Sample,
-    U: Sample + hound::Sample + FromSample<T> + SizedSample + Send + 'static,
-{
-
-
-    // The WAV file we're recording to.
-    // const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/recorded.wav");
-    // let spec = wav_spec_from_config(config.clone());
-    // let writer = hound::WavWriter::create(PATH, spec).unwrap();
-
-    // A flag to indicate that recording is in progress.
-    println!("Begin recording...");
-
-    let err_fn = move |err| {
-        eprintln!("an error occurred on stream: {}", err);
-    };
-
-    let stream = device.build_input_stream(
-        &config.into(),
-        move |data, _: &_| {
-            // let mut writer = writer.clone();
-            for &sample in data.iter() {
-                // writer.write_sample(FromSample::from_sample::<U, T>(sample)).unwrap();
-                // print!("{:?} ", sample);
-                tx.send(sample).unwrap();
-            }
-        },
-        err_fn,
-        None
-    ).unwrap();
-
-    println!("Recording started. Press space to stop.");
-
-    stream.play().unwrap();
-}
-use cpal::traits::StreamTrait;
+use std::io::BufWriter
 
 fn sample_format(format: cpal::SampleFormat) -> hound::SampleFormat {
     if format.is_float() {
@@ -595,10 +418,10 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
             println!("Make sure that the 'project_goals_file' exists and is in the same directory as the executable.The default location is 'project_goals.txt")
         }
     }
-    let prompts = helper_functions::load_prompts(&"./src/prompts");
+    let roles = helper_functions::load_prompts(&"./src/roles");
 
     runtime_settings.goal = Some(goal.clone());
-    runtime_settings.prompts = Some(prompts.clone());
+    runtime_settings.roles = Some(roles.clone());
 
     println!("Project Goals: \n------------------\n");
     println!("{}", goal);
@@ -912,24 +735,28 @@ fn keyboard_input(
     mut runtime_settings: ResMut<RuntimeSettings>,
 ) {
     if keys.just_pressed(KeyCode::Space) {
-        // Space was just pressed
-        if !runtime_settings.recording_in_progress {
-            runtime.spawn_background_task(|ctx| async move {
-                record_audio(ctx).await;
-            });
-            println!("Space was just pressed -- recording audio");
-            runtime_settings.recording_in_progress = true;
-        } else {
-            println!("Space was just pressed -- stopping recording audio");
-            runtime_settings.recording_in_progress = false;
-        }
+
+
+
+    //     // Space was just pressed
+    //     if !runtime_settings.recording_in_progress {
+    //         runtime.spawn_background_task(|ctx| async move {
+    //             record_audio(ctx).await;
+    //         });
+    //         println!("Space was just pressed -- recording audio");
+    //         runtime_settings.recording_in_progress = true;
+    //     } else {
+    //         println!("Space was just pressed -- stopping recording audio");
+    //         runtime_settings.recording_in_progress = false;
+    //     }
     }
-    if keys.just_released(KeyCode::LControl) {
-        // Left Ctrl was released
-    }
+    // if keys.just_released(KeyCode::LControl) {
+    //     // Left Ctrl was released
+    // }
     if keys.pressed(KeyCode::W) {
         // W is being held down
     }
+
     // we can check multiple at once with `.any_*`
     if keys.any_pressed([KeyCode::LShift, KeyCode::RShift]) {
         // Either the left or right shift are being held down
@@ -952,7 +779,7 @@ fn main() {
             project_progress: None,
             terminal_session: None,
             project_phase: Phase::Planning,
-            prompts: None,
+            roles: None,
             current_iteration: 1,
             all_functions: vec![],
             implemented_functions: vec![],
@@ -963,8 +790,8 @@ fn main() {
             project_phase: Phase::Planning,
             project_folder: "project".to_string(),
         })
-        // .add_startup_system(prepare_docker_container)
-        // .add_startup_system(initiate_project)
+        .add_startup_system(prepare_docker_container)
+        .add_startup_system(initiate_project)
         // .add_system(build_prompt)
         // .add_system(send_openai_prompt)
         // .add_system(parse_text)

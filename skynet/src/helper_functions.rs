@@ -8,6 +8,8 @@ use tar::Builder;
 
 use std::io::Write;
 
+use crate::Role;
+
 pub fn contains_mostly_similar_strings(v1: &Vec<String>, v2: &Vec<String>) -> bool {
     // Make copies of both vectors so we can modify them safely.
 
@@ -72,8 +74,9 @@ pub fn append_to_file<T: Serialize + Deserialize<'static>>(
     Ok(())
 }
 
-pub fn load_prompts(directory_path : &str) -> HashMap<String, String> {
-    let mut file_map = HashMap::new();
+pub fn load_prompts(directory_path : &str) -> Vec<Role> {
+    
+    let mut roles : Vec<Role> = Vec::new();
     let directory = Path::new(directory_path);
 
     for entry in fs::read_dir(directory).unwrap() {
@@ -84,13 +87,16 @@ pub fn load_prompts(directory_path : &str) -> HashMap<String, String> {
             if let Some(file_name) = file_path.clone().file_name().and_then(|n| n.to_str()) {
                 if let Some(file_stem) = Path::new(file_name).file_stem().and_then(|s| s.to_str()) {
                     let file_contents = fs::read_to_string(file_path).unwrap();
-                    file_map.insert(file_stem.to_string(), file_contents);
+                    match Role::new( file_contents){
+                        Some(role) => roles.push(role),
+                        None => println!("Unable to parse: {:?}", file_stem),
+                    }
                 }
             }
         }
     }
 
-    file_map
+    roles
 }
 
 pub fn file_exists(file_name: &str) -> bool {
