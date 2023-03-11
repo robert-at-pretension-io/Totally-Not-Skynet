@@ -103,8 +103,7 @@ struct Unsent;
 struct Settings {
     project_folder: String,
     max_iterations: usize,
-    write_file: String,
-    project_phase: Phase,
+    write_file: String
 }
 
 #[derive(PartialEq, Eq)]
@@ -146,14 +145,6 @@ struct InitialData {
     goal: String,
 }
 
-#[derive(Clone, Debug, Component)]
-enum PlanningPhases {
-    SystemOrientation(InitialData),
-    Architecture(SystemContext),
-    MakeTicket(TeamLeadContextInput),
-    CompletedTicket(TeamLeadContextOutput),
-    Implementation(Code),
-}
 
 #[derive(Clone, Debug, Component)]
 enum TerminalInteraction {
@@ -196,14 +187,14 @@ struct InitiateImplementation;
 #[derive(Resource)]
 struct RuntimeSettings {
     goal: Option<String>,
+    available_actions: Vec<String>,
     roles : Option<Vec<Role>>,
+    current_role: Option<Role>,
     recording_in_progress: bool,
     container_id: Option<String>,
     current_iteration: usize,
     files: Option<Vec<String>>,
-    project_phase: Phase,
     log: Option<Vec<String>>,
-    terminal_session: Option<Vec<TerminalInfo>>,
 }
 
 enum TerminalInfo {
@@ -421,6 +412,12 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
     let roles = helper_functions::load_prompts(&"./src/roles");
 
     runtime_settings.goal = Some(goal.clone());
+    // loop through the roles and add the possible actions to the possible action list
+    for role in roles.iter() {
+        let action = role.action;
+        runtime_settings.available_actions.push(action.clone());
+    }
+    
     runtime_settings.roles = Some(roles.clone());
     let log_entry = format!("Goal: {}", goal.clone());
     runtime_settings.log = Some(vec!(log_entry));
@@ -429,7 +426,6 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
     println!("\n------------------\n");
 
     commands.spawn((
-        PlanningPhases::SystemOrientation(InitialData { goal: goal.clone() }),
         Unprocessed,
     ));
 }
@@ -437,16 +433,16 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
 fn build_prompt(
     settings: ResMut<Settings>,
     mut runtime_settings: ResMut<RuntimeSettings>,
-    mut query: Query<(Entity, &mut PlanningPhases, &mut Unprocessed)>,
+    mut query: Query<(Entity,  &mut Unprocessed)>,
     mut commands: Commands,
 ) {
     let mut current_iteration = runtime_settings.current_iteration.clone();
-    for (the_entity, mut planning_phase, _unprocessed) in query.iter_mut() {
+    for (the_entity, _unprocessed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unprocessed>(); // We only want to process the entity once
 
         print!(
-            "Sending OpenAI Command: {:?}\nCurrent iteration: {:?}\n",
-            &planning_phase, &current_iteration
+            "\nCurrent iteration: {:?}\n",
+             &current_iteration
         );
 
         current_iteration += 1;
@@ -460,11 +456,17 @@ fn build_prompt(
         // here is where we determine the prompt based on the stage of development
         let mut prompt = String::new();
 
+        let current_role = runtime_settings.current_role.clone();
+
         match planning_phase.as_mut() {
             PlanningPhases::SystemOrientation(initial_data) => {
                 let roles = runtime_settings
                     .roles.unwrap();
 
+                // get the role with the name choose_action
+                let current_role = runtime_settings.roles.unwrap().iter().find(|&role| role.action == "choose_action").unwrap();
+
+                runtime_settings.current_role = Some(current_role.clone());
                 prompt = initial_data.goal.clone();
 
                 // make the action : description pairs
@@ -570,7 +572,7 @@ fn send_openai_prompt(
     }
 }
 
-fn log_text(
+fn process_text(
     mut query: Query<(Entity, &mut PlanningPhases, &mut Unparsed)>,
     mut commands: Commands,
     mut runtime_settings: ResMut<RuntimeSettings>,
@@ -582,6 +584,25 @@ fn log_text(
 
         runtime_settings.log.unwrap().push(unparsed.text);
 
+        // before going back into the prompt creation loop, we need to determine if the initialization agent has given a valid response. That is, it must be one of the actions in the list of actions.
+        let available_actions = runtime_settings.available_actions.clone();
+
+        // if the last action was 'choose_action' then we need to loop through the available actions and see if the response is one of them
+
+        let current_role = runtime_settings.current_role.clone().unwrap();
+        if current_role.action == "choose_action" {
+            let mut valid_response = false;
+            for action in available_actions.iter() {
+                if unparsed.text.contains(action) {
+                    valid_response = true;
+                }
+            }
+
+            if !valid_response {
+                println!("Invalid response. Please try again.");
+                return;
+            }
+        }
 
     }
 }
@@ -640,24 +661,23 @@ fn main() {
         // .insert_resource(Cmd { cmd: vec![] })
         .insert_resource(RuntimeSettings {
             goal: None,
+            available_actions: vec![],
+            current_role: None,
             log: None,
             container_id: None,
             files: None,
             recording_in_progress: false,
-            terminal_session: None,
-            project_phase: Phase::Planning,
             roles: None,
             current_iteration: 1,
         })
         .insert_resource(Settings {
             max_iterations: 10,
             write_file: "output.json".to_string(),
-            project_phase: Phase::Planning,
             project_folder: "project".to_string(),
         })
         .add_startup_system(prepare_docker_container)
         .add_startup_system(initiate_project)
-        // .add_system(build_prompt)
+        .add_system(build_prompt)
         // .add_system(send_openai_prompt)
         // .add_system(parse_text)
         // .add_system(initiate_implementation)
