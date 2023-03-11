@@ -8,6 +8,7 @@ use bollard::image::CreateImageOptions;
 use bollard::Docker;
 use clap::Parser;
 use core::panic;
+use std::vec;
 use futures_lite::{Stream, StreamExt};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -201,10 +202,8 @@ struct RuntimeSettings {
     current_iteration: usize,
     files: Option<Vec<String>>,
     project_phase: Phase,
+    log: Option<Vec<String>>,
     terminal_session: Option<Vec<TerminalInfo>>,
-    project_progress: Option<Vec<PlanningPhases>>,
-    all_functions: Vec<String>,
-    implemented_functions: Vec<String>,
 }
 
 enum TerminalInfo {
@@ -411,6 +410,7 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
             for line in reader.lines() {
                 //add line to goal
                 goal.push_str(&line.unwrap().clone());
+            
             }
         }
         Err(error) => {
@@ -422,7 +422,8 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
 
     runtime_settings.goal = Some(goal.clone());
     runtime_settings.roles = Some(roles.clone());
-
+    let log_entry = format!("Goal: {}", goal.clone());
+    runtime_settings.log = Some(vec!(log_entry));
     println!("Project Goals: \n------------------\n");
     println!("{}", goal);
     println!("\n------------------\n");
@@ -459,51 +460,22 @@ fn build_prompt(
         // here is where we determine the prompt based on the stage of development
         let mut prompt = String::new();
 
-        println!(
-            "prompt keys: {:?}",
-            runtime_settings.prompts.as_mut().unwrap().keys()
-        );
-
-        // let local_setting = settings.stage.clone();
-
         match planning_phase.as_mut() {
             PlanningPhases::SystemOrientation(initial_data) => {
-                prompt = runtime_settings
-                    .prompts
-                    .as_mut()
-                    .unwrap()
-                    .get("softwareArchitect")
-                    .unwrap()
-                    .clone()
-                    .to_string();
-                prompt = prompt + &serde_json::to_string(&initial_data.clone()).unwrap();
-            }
-            PlanningPhases::Architecture(_) => {
-                todo!()
-            }
-            PlanningPhases::MakeTicket(ticket_context) => {
-                prompt = runtime_settings
-                    .prompts
-                    .as_mut()
-                    .unwrap()
-                    .get("teamLead")
-                    .unwrap()
-                    .clone()
-                    .to_string();
-                prompt = prompt + &serde_json::to_string(&ticket_context).unwrap();
-            }
-            PlanningPhases::CompletedTicket(ticket) => {
-                prompt = runtime_settings
-                    .prompts
-                    .as_mut()
-                    .unwrap()
-                    .get("developers")
-                    .unwrap()
-                    .clone()
-                    .to_string();
-                prompt = prompt + &serde_json::to_string(&ticket).unwrap();
+                let roles = runtime_settings
+                    .roles.unwrap();
+
+                prompt = initial_data.goal.clone();
+
+                // make the action : description pairs
+                for role in roles.iter() {
+                    prompt = prompt + &format!("\n{} : {}", role.action, role.description);
+                }
+
+                prompt = prompt + &format!("Action to take:");
             }
             PlanningPhases::Implementation(_) => todo!(),
+                _ => todo!(),
         };
 
         commands
@@ -598,7 +570,7 @@ fn send_openai_prompt(
     }
 }
 
-fn parse_text(
+fn log_text(
     mut query: Query<(Entity, &mut PlanningPhases, &mut Unparsed)>,
     mut commands: Commands,
     mut runtime_settings: ResMut<RuntimeSettings>,
@@ -608,114 +580,9 @@ fn parse_text(
     for (the_entity, mut object, unparsed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unparsed>(); // We only want to process the entity once
 
-        match object.as_mut() {
-            PlanningPhases::SystemOrientation(_) => match parse_architecture_data(&unparsed.text) {
-                Ok(architecture_data) => {
-                    helper_functions::append_to_file(&write_file, &architecture_data.clone());
-                    runtime_settings.all_functions =
-                        helper_functions::get_function_names(&architecture_data.functions.clone());
-                    println!(
-                        "All functions: {:?}",
-                        runtime_settings.all_functions.clone()
-                    );
+        runtime_settings.log.unwrap().push(unparsed.text);
 
-                    if runtime_settings.project_progress.is_some() {
-                        runtime_settings
-                            .project_progress
-                            .as_mut()
-                            .unwrap()
-                            .push(PlanningPhases::Architecture(architecture_data.clone()));
-                    }
 
-                    for function in &architecture_data.functions {
-                        let mut ticket = TeamLeadContextInput {
-                            goal: runtime_settings.goal.as_ref().unwrap().clone(),
-                            functions: architecture_data.functions.clone(),
-                            currentFunction: function.clone(),
-                            objects: architecture_data.objects.clone(),
-                        };
-
-                        commands.spawn((PlanningPhases::MakeTicket(ticket), Unprocessed));
-                        // return Ok(ParsingObjects::Architecture(architecture_data))
-                    }
-                }
-                Err(e) => {
-                    println!("Error: {:?}", e);
-                    let mut prompt = "Given an input and an error, please output well formatted json that fixes the error.
-                ".to_string();
-                    prompt = prompt + &unparsed.text.clone();
-                    prompt = prompt + e.to_string().as_str();
-
-                    commands
-                        .entity(the_entity)
-                        .insert(Prompt { text: prompt })
-                        .insert(Unsent);
-                }
-            },
-            PlanningPhases::Architecture(_) => todo!(),
-            PlanningPhases::MakeTicket(_) => match parse_ticket_data(&unparsed.text) {
-                Ok(ticket_data) => {
-                    helper_functions::append_to_file(&write_file, &ticket_data.clone());
-                    if runtime_settings.project_progress.is_some() {
-                        runtime_settings
-                            .project_progress
-                            .as_mut()
-                            .unwrap()
-                            .push(PlanningPhases::CompletedTicket(ticket_data.clone()));
-                    }
-                    commands.spawn((PlanningPhases::CompletedTicket(ticket_data), Unprocessed));
-                }
-                Err(e) => {
-                    println!("Error: {:?}", e);
-                    let mut prompt = "Given an input and an error, please output well formatted json that fixes the error.
-                    ".to_string();
-                    prompt = prompt + &unparsed.text.clone();
-                    prompt = prompt + e.to_string().as_str();
-
-                    commands
-                        .entity(the_entity)
-                        .insert(Prompt { text: prompt })
-                        .insert(Unsent);
-                }
-            },
-            PlanningPhases::CompletedTicket(_) => {
-                let json = parse_implementation_data(&unparsed.text);
-                match json {
-                    Ok(code) => {
-                        helper_functions::append_to_file(&write_file, &code.clone());
-                        runtime_settings
-                            .implemented_functions
-                            .push(code.currentFunction.clone());
-
-                        let function_names: Vec<String> = helper_functions::get_function_names(
-                            &runtime_settings.implemented_functions,
-                        );
-
-                        if helper_functions::contains_mostly_similar_strings(
-                            &function_names,
-                            &runtime_settings.all_functions,
-                        ) {
-                            println!("All functions implemented!");
-                            runtime_settings.project_phase = Phase::Implementation;
-                            commands.entity(the_entity).insert(InitiateImplementation);
-                        }
-                    }
-                    Err(e) => {
-                        println!("Error: {:?}", e);
-                        let mut prompt = "Given an input and an error, please output well formatted json that fixes the error.
-                        ".to_string();
-                        prompt = prompt + &unparsed.text.clone();
-                        prompt = prompt + e.to_string().as_str();
-
-                        commands
-                            .entity(the_entity)
-                            .insert(Prompt { text: prompt })
-                            .insert(Unsent);
-                    }
-                }
-            }
-            PlanningPhases::Implementation(_) => todo!(),
-        };
     }
 }
 
@@ -773,16 +640,14 @@ fn main() {
         // .insert_resource(Cmd { cmd: vec![] })
         .insert_resource(RuntimeSettings {
             goal: None,
+            log: None,
             container_id: None,
             files: None,
             recording_in_progress: false,
-            project_progress: None,
             terminal_session: None,
             project_phase: Phase::Planning,
             roles: None,
             current_iteration: 1,
-            all_functions: vec![],
-            implemented_functions: vec![],
         })
         .insert_resource(Settings {
             max_iterations: 10,

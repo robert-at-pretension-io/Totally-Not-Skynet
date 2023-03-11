@@ -1,5 +1,5 @@
 {
-    "prompt": "Your job is to determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task.",
+    "prompt": "Your job is to determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. respond with the exact action name (the string that preceeds the colon.",
     "action" : "choose_action",
     "description": "This agent chooses which agent to invoke given the current log of actions taken"
 }
