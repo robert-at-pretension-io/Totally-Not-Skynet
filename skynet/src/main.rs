@@ -393,6 +393,7 @@ fn send_docker_command(
 fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands: Commands) {
     let args = Args::parse();
     let mut goal = String::new();
+    
     match File::open(args.project_goals_file) {
         Ok(file) => {
             // read the file
@@ -456,18 +457,19 @@ fn build_prompt(
         // here is where we determine the prompt based on the stage of development
         let mut prompt = String::new();
 
+        let roles = runtime_settings.roles.clone().unwrap();
+        // check to see if the current role is equal to "choose_action"
         let current_role = runtime_settings.current_role.clone();
+        
+        // if this is the first time through the loop
+        if current_role.is_none() {
 
-        match planning_phase.as_mut() {
-            PlanningPhases::SystemOrientation(initial_data) => {
-                let roles = runtime_settings
-                    .roles.unwrap();
-
-                // get the role with the name choose_action
-                let current_role = runtime_settings.roles.unwrap().iter().find(|&role| role.action == "choose_action").unwrap();
+                // get the role where the action is "choose_action"
+                let current_role = roles.iter().find(|&role| role.action == "choose_action").unwrap();
 
                 runtime_settings.current_role = Some(current_role.clone());
-                prompt = initial_data.goal.clone();
+                
+                // The prompt consists of the log appended to the top of the prompt for the current role
 
                 // make the action : description pairs
                 for role in roles.iter() {
@@ -475,10 +477,7 @@ fn build_prompt(
                 }
 
                 prompt = prompt + &format!("Action to take:");
-            }
-            PlanningPhases::Implementation(_) => todo!(),
-                _ => todo!(),
-        };
+        }
 
         commands
             .entity(the_entity)
@@ -490,10 +489,10 @@ fn build_prompt(
 fn send_openai_prompt(
     // openai: Res<OpenAIObjects>,
     runtime: ResMut<TokioTasksRuntime>,
-    mut query: Query<(Entity, &PlanningPhases, &mut Prompt, &mut Unsent)>,
+    mut query: Query<(Entity,&mut Prompt, &mut Unsent)>,
     mut commands: Commands,
 ) {
-    for (the_entity, _object, mut prompt, _unsent) in query.iter_mut() {
+    for (the_entity, mut prompt, _unsent) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unsent>(); // We only want to process the entity once
 
         let local_prompt = prompt.as_mut().text.clone();
@@ -565,21 +564,18 @@ fn send_openai_prompt(
                     .insert(Unparsed { text: super_local });
             })
             .await;
-
-            // }
-            // }
         });
     }
 }
 
 fn process_text(
-    mut query: Query<(Entity, &mut PlanningPhases, &mut Unparsed)>,
+    mut query: Query<(Entity, &mut Unparsed)>,
     mut commands: Commands,
     mut runtime_settings: ResMut<RuntimeSettings>,
     mut settings: ResMut<Settings>,
 ) {
     let write_file = settings.write_file.clone();
-    for (the_entity, mut object, unparsed) in query.iter_mut() {
+    for (the_entity, unparsed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unparsed>(); // We only want to process the entity once
 
         runtime_settings.log.unwrap().push(unparsed.text);
@@ -595,27 +591,22 @@ fn process_text(
             for action in available_actions.iter() {
                 if unparsed.text.contains(action) {
                     valid_response = true;
+                    // get the role corresponding to the action
+                    let roles = runtime_settings.roles.clone().unwrap();
+                    let current_role = roles.iter().find(|&role| role.action.to_string() == action.to_string()).unwrap();
+                    runtime_settings.current_role = Some(current_role.clone());
                 }
             }
 
             if !valid_response {
                 println!("Invalid response. Please try again.");
-                return;
+                panic!("Invalid response. Please try again.");
             }
         }
 
     }
 }
 
-fn initiate_implementation(
-    settings: ResMut<Settings>,
-    mut runtime_settings: ResMut<RuntimeSettings>,
-) {
-    if runtime_settings.project_phase == Phase::Implementation {
-        println!("Starting implementation");
-        runtime_settings.files = Some(runtime_settings.implemented_functions.clone());
-    }
-}
 
 fn keyboard_input(
     keys: Res<Input<KeyCode>>,
@@ -658,7 +649,6 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
-        // .insert_resource(Cmd { cmd: vec![] })
         .insert_resource(RuntimeSettings {
             goal: None,
             available_actions: vec![],
@@ -678,9 +668,8 @@ fn main() {
         .add_startup_system(prepare_docker_container)
         .add_startup_system(initiate_project)
         .add_system(build_prompt)
-        // .add_system(send_openai_prompt)
-        // .add_system(parse_text)
-        // .add_system(initiate_implementation)
+        .add_system(send_openai_prompt)
+        .add_system(process_text)
         .add_system(keyboard_input)
         .run();
 }
