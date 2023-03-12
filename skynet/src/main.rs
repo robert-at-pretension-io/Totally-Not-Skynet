@@ -7,6 +7,7 @@ use bollard::exec::{CreateExecOptions, StartExecResults};
 use bollard::image::CreateImageOptions;
 use bollard::Docker;
 use clap::Parser;
+use tokio::runtime;
 use core::panic;
 use std::vec;
 use futures_lite::{Stream, StreamExt};
@@ -73,7 +74,7 @@ struct Prompt {
 }
 
 #[derive(Component, Serialize, Deserialize, Debug, Clone)]
-struct Role {
+pub struct Role {
     action: String,
     description: String,
     prompt: String,
@@ -257,7 +258,7 @@ async fn get_search_results(){
 
 use cpal::traits::{DeviceTrait, HostTrait};
 use cpal::{ FromSample, Sample, SizedSample, SupportedStreamConfig};
-use std::io::BufWriter
+use std::io::BufWriter;
 
 fn sample_format(format: cpal::SampleFormat) -> hound::SampleFormat {
     if format.is_float() {
@@ -415,7 +416,7 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
     runtime_settings.goal = Some(goal.clone());
     // loop through the roles and add the possible actions to the possible action list
     for role in roles.iter() {
-        let action = role.action;
+        let action = &role.action;
         runtime_settings.available_actions.push(action.clone());
     }
     
@@ -460,9 +461,10 @@ fn build_prompt(
         let roles = runtime_settings.roles.clone().unwrap();
         // check to see if the current role is equal to "choose_action"
         let current_role = runtime_settings.current_role.clone();
+
         
         // if this is the first time through the loop
-        if current_role.is_none() {
+        if current_role.is_none() || current_role.clone().unwrap().action == "choose_action" {
 
                 // get the role where the action is "choose_action"
                 let current_role = roles.iter().find(|&role| role.action == "choose_action").unwrap();
@@ -478,6 +480,25 @@ fn build_prompt(
 
                 prompt = prompt + &format!("Action to take:");
         }
+        else {
+            // append the runtime log into a large string where the entries are separated by a newline
+            let log : Vec<String> = runtime_settings.log.clone().unwrap();
+            let mut acc = String::new();
+           
+            let role = current_role.clone().unwrap();
+
+            for entry in log {
+                acc = format!("{}\n{}", acc, entry)
+            }
+
+            prompt = format!("\n[{}]:[{}]\n{}", role.action.clone(), role.description.clone(), role.prompt.clone())
+        
+        }
+        let role = current_role.clone().unwrap();
+
+
+
+        println!("sending to open ai: [{}] : [{}]", &role.action, &role.description);
 
         commands
             .entity(the_entity)
@@ -578,7 +599,7 @@ fn process_text(
     for (the_entity, unparsed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unparsed>(); // We only want to process the entity once
 
-        runtime_settings.log.unwrap().push(unparsed.text);
+        runtime_settings.log.as_mut().unwrap().push(unparsed.text.clone());
 
         // before going back into the prompt creation loop, we need to determine if the initialization agent has given a valid response. That is, it must be one of the actions in the list of actions.
         let available_actions = runtime_settings.available_actions.clone();
@@ -603,6 +624,16 @@ fn process_text(
                 panic!("Invalid response. Please try again.");
             }
         }
+        else {
+            let roles = runtime_settings.roles.clone().unwrap();
+            let current_role = roles.iter().find(|&role| role.action == "choose_action").unwrap();
+
+            runtime_settings.current_role = Some(current_role.clone());
+        }
+
+        commands
+        .entity(the_entity)
+        .insert(Unprocessed);
 
     }
 }
