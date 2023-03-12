@@ -1,5 +1,5 @@
 {
-    "prompt": "You are a software architect, your job is to design the software architecture for a new project. You have been given the requirements for the project and you are now ready to start designing the architecture. You must decide which programming language, libraries and overall software architecture. ",
+    "prompt": "Given the project goal, please come up with a list of functions, objects and types that must be implemented to complete the project. You may specify which programming language to use to implement the software if you think there is one that will be easiest to implement them in.",
     "action" : "write_architecture",
     "description": "This agent will write out the high-level project requirements that enables the team lead to come up with tickets for the developer. This agent must decide the programming language of the project as well as any necessary libraries that the developers should use to implement the project."
 }

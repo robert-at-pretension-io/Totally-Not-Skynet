@@ -7,15 +7,16 @@ use bollard::exec::{CreateExecOptions, StartExecResults};
 use bollard::image::CreateImageOptions;
 use bollard::Docker;
 use clap::Parser;
-use tokio::runtime;
 use core::panic;
-use std::vec;
 use futures_lite::{Stream, StreamExt};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serpapi_search_rust::serp_api_search::SerpApiSearch;
+use std::fmt::{write, self};
 use std::sync::{mpsc, Arc, Mutex};
+use std::vec;
 use std::{fs::File, io::BufRead};
+use tokio::runtime;
 
 //import bevy hashmap
 
@@ -104,48 +105,13 @@ struct Unsent;
 struct Settings {
     project_folder: String,
     max_iterations: usize,
-    write_file: String
-}
-
-#[derive(PartialEq, Eq)]
-enum Phase {
-    Planning,
-    Implementation,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-struct ImplementationDetails {
-    result: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-struct TeamLeadContextInput {
-    goal: String,
-    objects: Vec<String>,
-    functions: Vec<String>,
-    currentFunction: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-struct TeamLeadContextOutput {
-    objects: Vec<String>,
-    functions: Vec<String>,
-    currentFunction: String,
-    description: String,
-    testCases: Vec<TestCase>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-struct SystemContext {
-    objects: Vec<String>,
-    functions: Vec<String>,
+    write_file: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct InitialData {
     goal: String,
 }
-
 
 #[derive(Clone, Debug, Component)]
 enum TerminalInteraction {
@@ -185,42 +151,33 @@ struct Code {
 #[derive(Component)]
 struct InitiateImplementation;
 
-#[derive(Resource)]
+#[derive(Resource, Clone)]
 struct RuntimeSettings {
     goal: Option<String>,
     available_actions: Vec<String>,
-    roles : Option<Vec<Role>>,
+    roles: Option<Vec<Role>>,
     current_role: Option<Role>,
     recording_in_progress: bool,
     container_id: Option<String>,
     current_iteration: usize,
-    files: Option<Vec<String>>,
     log: Option<Vec<String>>,
 }
 
-enum TerminalInfo {
-    Input(String),
-    Output(String),
-    Err(String),
+
+impl fmt::Display for RuntimeSettings {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Current Iteration:\t{}", self.current_iteration)?;
+        writeln!(f, "Current Role:\t\t{:?}", self.current_role)?;
+        writeln!(f, "Log:")?;
+        for entry in self.log.as_ref().unwrap_or(&vec![]).iter() {
+            writeln!(f, "\t\t\t\t {}", entry)?;
+        }
+        Ok(())
+    }
 }
 
-fn parse_architecture_data(input: &str) -> serde_json::Result<SystemContext> {
-    println!("Parsing Architecture Data:\n {}", input);
-    serde_json::from_str(input).map_err(|e| e.into())
-}
-
-fn parse_ticket_data(input: &str) -> serde_json::Result<TeamLeadContextOutput> {
-    println!("Parsing Ticket Data:\n {}", input);
-    serde_json::from_str(input).map_err(|e| e.into())
-}
-
-fn parse_implementation_data(input: &str) -> serde_json::Result<Code> {
-    println!("Parsing Ticket Data:\n {}", input);
-    serde_json::from_str(input).map_err(|e| e.into())
-}
-
-async fn get_search_results(){
-        // read secret api key from environment variable
+async fn get_search_results() {
+    // read secret api key from environment variable
     // To get the key simply copy/paste from https://serpapi.com/dashboard.
     let params = HashMap::<String, String>::new();
 
@@ -229,9 +186,13 @@ async fn get_search_results(){
     let api_key = args.api_key_serp;
 
     println!("let's search about coffee on google");
-    let mut params : std::collections::HashMap<String, String> = std::collections::HashMap::<String, String>::new();
+    let mut params: std::collections::HashMap<String, String> =
+        std::collections::HashMap::<String, String>::new();
     params.insert("q".to_string(), "coffee".to_string());
-    params.insert("location".to_string(), "Austin, TX, Texas, United States".to_string());
+    params.insert(
+        "location".to_string(),
+        "Austin, TX, Texas, United States".to_string(),
+    );
 
     // initialize the search engine
     let search = SerpApiSearch::google(params, api_key);
@@ -257,7 +218,7 @@ async fn get_search_results(){
 }
 
 use cpal::traits::{DeviceTrait, HostTrait};
-use cpal::{ FromSample, Sample, SizedSample, SupportedStreamConfig};
+use cpal::{FromSample, Sample, SizedSample, SupportedStreamConfig};
 use std::io::BufWriter;
 
 fn sample_format(format: cpal::SampleFormat) -> hound::SampleFormat {
@@ -394,7 +355,7 @@ fn send_docker_command(
 fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands: Commands) {
     let args = Args::parse();
     let mut goal = String::new();
-    
+
     match File::open(args.project_goals_file) {
         Ok(file) => {
             // read the file
@@ -403,7 +364,6 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
             for line in reader.lines() {
                 //add line to goal
                 goal.push_str(&line.unwrap().clone());
-            
             }
         }
         Err(error) => {
@@ -419,33 +379,28 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
         let action = &role.action;
         runtime_settings.available_actions.push(action.clone());
     }
-    
+
     runtime_settings.roles = Some(roles.clone());
     let log_entry = format!("Goal: {}", goal.clone());
-    runtime_settings.log = Some(vec!(log_entry));
+    runtime_settings.log = Some(vec![log_entry]);
     println!("Project Goals: \n------------------\n");
     println!("{}", goal);
     println!("\n------------------\n");
 
-    commands.spawn((
-        Unprocessed,
-    ));
+    commands.spawn((Unprocessed,));
 }
 
 fn build_prompt(
     settings: ResMut<Settings>,
     mut runtime_settings: ResMut<RuntimeSettings>,
-    mut query: Query<(Entity,  &mut Unprocessed)>,
+    mut query: Query<(Entity, &mut Unprocessed)>,
     mut commands: Commands,
 ) {
     let mut current_iteration = runtime_settings.current_iteration.clone();
     for (the_entity, _unprocessed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unprocessed>(); // We only want to process the entity once
 
-        print!(
-            "\nCurrent iteration: {:?}\n",
-             &current_iteration
-        );
+        print!("\nCurrent iteration: {:?}\n", &current_iteration);
 
         current_iteration += 1;
         runtime_settings.current_iteration = current_iteration;
@@ -462,43 +417,50 @@ fn build_prompt(
         // check to see if the current role is equal to "choose_action"
         let current_role = runtime_settings.current_role.clone();
 
-        
         // if this is the first time through the loop
         if current_role.is_none() || current_role.clone().unwrap().action == "choose_action" {
+            // get the role where the action is "choose_action"
+            let current_role = roles
+                .iter()
+                .find(|&role| role.action == "choose_action")
+                .unwrap();
 
-                // get the role where the action is "choose_action"
-                let current_role = roles.iter().find(|&role| role.action == "choose_action").unwrap();
+            runtime_settings.current_role = Some(current_role.clone());
 
-                runtime_settings.current_role = Some(current_role.clone());
-                
-                // The prompt consists of the log appended to the top of the prompt for the current role
+            // The prompt consists of the log appended to the top of the prompt for the current role
 
-                // make the action : description pairs
-                for role in roles.iter() {
-                    prompt = prompt + &format!("\n{} : {}", role.action, role.description);
-                }
+            // make the action : description pairs
+            for role in roles.iter() {
+                prompt = prompt + &format!("\n{} : {}", role.action, role.description);
+            }
 
-                prompt = prompt + &format!("Action to take:");
-        }
-        else {
+            prompt = prompt + &format!("Action to take:");
+        } else {
             // append the runtime log into a large string where the entries are separated by a newline
-            let log : Vec<String> = runtime_settings.log.clone().unwrap();
+            let log: Vec<String> = runtime_settings.log.clone().unwrap();
             let mut acc = String::new();
-           
+
             let role = current_role.clone().unwrap();
 
             for entry in log {
                 acc = format!("{}\n{}", acc, entry)
             }
 
-            prompt = format!("\n[{}]:[{}]\n{}", role.action.clone(), role.description.clone(), role.prompt.clone())
-        
+            prompt = format!(
+                "\n[{}]:[{}]\n{}",
+                role.action.clone(),
+                role.description.clone(),
+                role.prompt.clone()
+            )
         }
-        let role = current_role.clone().unwrap();
 
-
-
-        println!("sending to open ai: [{}] : [{}]", &role.action, &role.description);
+        if current_role.clone().is_some() {
+            let role = current_role.clone().unwrap();
+            println!(
+                "sending to open ai: [{}] : [{}]",
+                &role.action, &role.description
+            );
+        }
 
         commands
             .entity(the_entity)
@@ -510,7 +472,7 @@ fn build_prompt(
 fn send_openai_prompt(
     // openai: Res<OpenAIObjects>,
     runtime: ResMut<TokioTasksRuntime>,
-    mut query: Query<(Entity,&mut Prompt, &mut Unsent)>,
+    mut query: Query<(Entity, &mut Prompt, &mut Unsent)>,
     mut commands: Commands,
 ) {
     for (the_entity, mut prompt, _unsent) in query.iter_mut() {
@@ -547,17 +509,14 @@ fn send_openai_prompt(
                     .send()
                     .await
                     .unwrap();
-                println!("{:?}", response);
 
                 let response_body = response.text().await.unwrap();
-
-                println!("\n{:?}", response_body.clone());
 
                 let chat_completion: ChatCompletion;
 
                 match serde_json::from_str::<ChatCompletion>(&response_body) {
                     Ok(local_chat_completion) => {
-                        println!("Chat Completion: {:?}", local_chat_completion);
+                        // println!("Chat Completion: {:?}", local_chat_completion);
                         chat_completion = local_chat_completion;
 
                         finish_reason = chat_completion
@@ -578,6 +537,7 @@ fn send_openai_prompt(
             }
 
             let super_local = local_response.clone();
+            println!("\n{:?}\n", super_local.clone());
 
             ctx.run_on_main_thread(move |mut ctx| {
                 ctx.world
@@ -599,7 +559,25 @@ fn process_text(
     for (the_entity, unparsed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unparsed>(); // We only want to process the entity once
 
-        runtime_settings.log.as_mut().unwrap().push(unparsed.text.clone());
+        // write the unparsed text to the log:
+        use std::fs::OpenOptions;
+        use std::io::prelude::*;
+
+        let mut file = OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open(write_file.clone())
+            .unwrap();
+
+        let debug_string = format!("\n--------------\n{}\n{}\n--------------\n", runtime_settings.clone(), unparsed.text.clone());
+
+        file.write_all(debug_string.clone().as_bytes()).unwrap();
+
+        runtime_settings
+            .log
+            .as_mut()
+            .unwrap()
+            .push(unparsed.text.clone());
 
         // before going back into the prompt creation loop, we need to determine if the initialization agent has given a valid response. That is, it must be one of the actions in the list of actions.
         let available_actions = runtime_settings.available_actions.clone();
@@ -614,7 +592,10 @@ fn process_text(
                     valid_response = true;
                     // get the role corresponding to the action
                     let roles = runtime_settings.roles.clone().unwrap();
-                    let current_role = roles.iter().find(|&role| role.action.to_string() == action.to_string()).unwrap();
+                    let current_role = roles
+                        .iter()
+                        .find(|&role| role.action.to_string() == action.to_string())
+                        .unwrap();
                     runtime_settings.current_role = Some(current_role.clone());
                 }
             }
@@ -623,21 +604,19 @@ fn process_text(
                 println!("Invalid response. Please try again.");
                 panic!("Invalid response. Please try again.");
             }
-        }
-        else {
+        } else {
             let roles = runtime_settings.roles.clone().unwrap();
-            let current_role = roles.iter().find(|&role| role.action == "choose_action").unwrap();
+            let current_role = roles
+                .iter()
+                .find(|&role| role.action == "choose_action")
+                .unwrap();
 
             runtime_settings.current_role = Some(current_role.clone());
         }
 
-        commands
-        .entity(the_entity)
-        .insert(Unprocessed);
-
+        commands.entity(the_entity).insert(Unprocessed);
     }
 }
-
 
 fn keyboard_input(
     keys: Res<Input<KeyCode>>,
@@ -646,19 +625,17 @@ fn keyboard_input(
 ) {
     if keys.just_pressed(KeyCode::Space) {
 
-
-
-    //     // Space was just pressed
-    //     if !runtime_settings.recording_in_progress {
-    //         runtime.spawn_background_task(|ctx| async move {
-    //             record_audio(ctx).await;
-    //         });
-    //         println!("Space was just pressed -- recording audio");
-    //         runtime_settings.recording_in_progress = true;
-    //     } else {
-    //         println!("Space was just pressed -- stopping recording audio");
-    //         runtime_settings.recording_in_progress = false;
-    //     }
+        //     // Space was just pressed
+        //     if !runtime_settings.recording_in_progress {
+        //         runtime.spawn_background_task(|ctx| async move {
+        //             record_audio(ctx).await;
+        //         });
+        //         println!("Space was just pressed -- recording audio");
+        //         runtime_settings.recording_in_progress = true;
+        //     } else {
+        //         println!("Space was just pressed -- stopping recording audio");
+        //         runtime_settings.recording_in_progress = false;
+        //     }
     }
     // if keys.just_released(KeyCode::LControl) {
     //     // Left Ctrl was released
@@ -686,14 +663,13 @@ fn main() {
             current_role: None,
             log: None,
             container_id: None,
-            files: None,
             recording_in_progress: false,
             roles: None,
             current_iteration: 1,
         })
         .insert_resource(Settings {
             max_iterations: 10,
-            write_file: "output.json".to_string(),
+            write_file: "output.txt".to_string(),
             project_folder: "project".to_string(),
         })
         .add_startup_system(prepare_docker_container)
@@ -701,6 +677,6 @@ fn main() {
         .add_system(build_prompt)
         .add_system(send_openai_prompt)
         .add_system(process_text)
-        .add_system(keyboard_input)
+        // .add_system(keyboard_input)
         .run();
 }
