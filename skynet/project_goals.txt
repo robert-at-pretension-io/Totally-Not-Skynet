@@ -1,1 +1,1 @@
-Write a rust project that calculates all of the fibianacci numbers up to 1000 and prints them out. Then renders a fractal using that information.
+Make a website that displays pictures of cats.

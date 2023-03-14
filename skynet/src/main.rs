@@ -138,16 +138,6 @@ struct Message {
     content: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-struct Code {
-    filename: String,
-    currentFunction: String,
-    language: String,
-    command: String,
-    code: String,
-    instructions: String,
-}
-
 #[derive(Component)]
 struct InitiateImplementation;
 
@@ -157,6 +147,7 @@ struct RuntimeSettings {
     available_actions: Vec<String>,
     roles: Option<Vec<Role>>,
     current_role: Option<Role>,
+    current_prompt: Option<String>,
     recording_in_progress: bool,
     container_id: Option<String>,
     current_iteration: usize,
@@ -167,10 +158,15 @@ struct RuntimeSettings {
 impl fmt::Display for RuntimeSettings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Current Iteration:\t{}", self.current_iteration)?;
-        writeln!(f, "Current Role:\t\t{:?}", self.current_role)?;
-        writeln!(f, "Log:")?;
-        for entry in self.log.as_ref().unwrap_or(&vec![]).iter() {
-            writeln!(f, "\t\t\t\t {}", entry)?;
+        writeln!(f, "avilable actions:\t{:?}", self.available_actions)?;
+        writeln!(f, "Current Role:\t\t[{}]:[{}]", self.current_role.as_ref().unwrap().action, self.current_role.as_ref().unwrap().description)?;
+        writeln!(f, "Latest Log:")?;
+
+        // only print the last log entry:
+        if let Some(log) = self.log.as_ref() {
+            if let Some(last_entry) = log.last() {
+                writeln!(f, "\t\t\t\t {}", last_entry)?;
+            }
         }
         Ok(())
     }
@@ -425,6 +421,10 @@ fn build_prompt(
                 .find(|&role| role.action == "choose_action")
                 .unwrap();
 
+            prompt = current_role.prompt.clone();
+
+            prompt = prompt + &format!("Goal: {}", runtime_settings.goal.clone().unwrap());
+
             runtime_settings.current_role = Some(current_role.clone());
 
             // The prompt consists of the log appended to the top of the prompt for the current role
@@ -434,7 +434,15 @@ fn build_prompt(
                 prompt = prompt + &format!("\n{} : {}", role.action, role.description);
             }
 
-            prompt = prompt + &format!("Action to take:");
+            let mut acc = String::new();
+            let log: Vec<String> = runtime_settings.log.clone().unwrap();
+
+            for entry in log.clone() {
+                acc = format!("{}\n{}", acc, entry)
+            }
+            prompt = prompt + &format!("\nLog:{:?}", acc);
+
+            prompt = prompt + &format!("\nAction to take:");
         } else {
             // append the runtime log into a large string where the entries are separated by a newline
             let log: Vec<String> = runtime_settings.log.clone().unwrap();
@@ -442,15 +450,16 @@ fn build_prompt(
 
             let role = current_role.clone().unwrap();
 
-            for entry in log {
+            for entry in log.clone() {
                 acc = format!("{}\n{}", acc, entry)
             }
 
             prompt = format!(
-                "\n[{}]:[{}]\n{}",
+                "\n[{}]:[{}]\n{}\nLog:{:?},\n------------------\n",
                 role.action.clone(),
                 role.description.clone(),
-                role.prompt.clone()
+                role.prompt.clone(),
+                acc,
             )
         }
 
@@ -461,6 +470,8 @@ fn build_prompt(
                 &role.action, &role.description
             );
         }
+
+        runtime_settings.current_prompt = Some(prompt.clone());
 
         commands
             .entity(the_entity)
@@ -569,7 +580,7 @@ fn process_text(
             .open(write_file.clone())
             .unwrap();
 
-        let debug_string = format!("\n--------------\n{}\n{}\n--------------\n", runtime_settings.clone(), unparsed.text.clone());
+        let debug_string = format!("\n--------------\n{}\nPrompt:\n{}\n\nOpenAI response:{}\n--------------\n", runtime_settings.clone(), runtime_settings.clone().current_prompt.unwrap().clone(), unparsed.text.clone());
 
         file.write_all(debug_string.clone().as_bytes()).unwrap();
 
@@ -661,6 +672,7 @@ fn main() {
             goal: None,
             available_actions: vec![],
             current_role: None,
+            current_prompt: None,
             log: None,
             container_id: None,
             recording_in_progress: false,
@@ -668,7 +680,7 @@ fn main() {
             current_iteration: 1,
         })
         .insert_resource(Settings {
-            max_iterations: 10,
+            max_iterations: 4,
             write_file: "output.txt".to_string(),
             project_folder: "project".to_string(),
         })

@@ -1,6 +1,5 @@
 use std::{fs::{File, self, OpenOptions}, path::Path, io::BufWriter};
 
-use bevy::utils::HashMap;
 use serde::{Serialize, Deserialize};
 use tar::Builder;
 

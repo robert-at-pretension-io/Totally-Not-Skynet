@@ -1,5 +1,5 @@
 {
     "prompt": "Given the log of the project events. Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete.",
-    "action" : "write_code",
+    "action" : "developer",
     "description": "This agent will write code that fulfills the requirements of the project."
 }
