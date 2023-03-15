@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy::utils::hashbrown::HashMap;
-use bevy_tokio_tasks::{TaskContext, TokioTasksRuntime};
+use bevy_tokio_tasks::{ TokioTasksRuntime};
 use bollard::container::Config;
 use bollard::errors::Error;
 use bollard::exec::{CreateExecOptions, StartExecResults};
@@ -8,15 +8,14 @@ use bollard::image::CreateImageOptions;
 use bollard::Docker;
 use clap::Parser;
 use core::panic;
-use futures_lite::{Stream, StreamExt};
+use futures_lite::{StreamExt};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serpapi_search_rust::serp_api_search::SerpApiSearch;
-use std::fmt::{write, self};
-use std::sync::{mpsc, Arc, Mutex};
+use std::fmt::{self};
+use std::sync::{ Arc, Mutex};
 use std::vec;
 use std::{fs::File, io::BufRead};
-use tokio::runtime;
 
 //import bevy hashmap
 
@@ -69,19 +68,14 @@ struct ChatCompletion {
 #[derive(Component)]
 struct Unprocessed;
 
-#[derive(Component)]
-struct Prompt {
-    text: String,
-}
-
 #[derive(Component, Serialize, Deserialize, Debug, Clone)]
-pub struct Role {
+pub struct SystemRole {
     action: String,
-    description: String,
+    system: String,
     prompt: String,
 }
-impl Role {
-    fn new(file_contents: String) -> Option<Role> {
+impl SystemRole {
+    fn new(file_contents: String) -> Option<SystemRole> {
         // deserialize the file contents
         match serde_json::from_str(&file_contents) {
             Ok(role) => Some(role),
@@ -103,28 +97,10 @@ struct Unsent;
 
 #[derive(Resource)]
 struct Settings {
-    project_folder: String,
     max_iterations: usize,
     write_file: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-struct InitialData {
-    goal: String,
-}
-
-#[derive(Clone, Debug, Component)]
-enum TerminalInteraction {
-    Input(String),
-    Output(String),
-    Err(String),
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-struct TestCase {
-    input: String,
-    output: String,
-}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ChatCompletionRequest {
@@ -134,8 +110,35 @@ struct ChatCompletionRequest {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Message {
-    role: String,
+    role: Role,
     content: String,
+}
+
+impl fmt::Display for Message {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.content)
+    }
+}
+
+#[derive(PartialEq, Eq, Debug, Serialize, Deserialize, Clone, Copy)]
+enum Role {
+    #[serde(rename = "system")]
+    System,
+    #[serde(rename = "user")]
+    User,
+    #[serde(rename = "assistant")]
+    Assistant,
+}
+
+impl fmt::Display for Role {
+    // this is the implementation of the fmt::Display trait
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Role::System => write!(f, "system"),
+            Role::User => write!(f, "user"),
+            Role::Assistant => write!(f, "assistant"),
+        }
+    }
 }
 
 #[derive(Component)]
@@ -145,13 +148,13 @@ struct InitiateImplementation;
 struct RuntimeSettings {
     goal: Option<String>,
     available_actions: Vec<String>,
-    roles: Option<Vec<Role>>,
-    current_role: Option<Role>,
+    roles: Option<Vec<SystemRole>>,
+    current_role: Option<SystemRole>,
     current_prompt: Option<String>,
     recording_in_progress: bool,
     container_id: Option<String>,
     current_iteration: usize,
-    log: Option<Vec<String>>,
+    log: Option<Vec<Message>>,
 }
 
 
@@ -159,13 +162,14 @@ impl fmt::Display for RuntimeSettings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Current Iteration:\t{}", self.current_iteration)?;
         writeln!(f, "avilable actions:\t{:?}", self.available_actions)?;
-        writeln!(f, "Current Role:\t\t[{}]:[{}]", self.current_role.as_ref().unwrap().action, self.current_role.as_ref().unwrap().description)?;
+        writeln!(f, "Current Role:\t\t[{}]:[{}]", self.current_role.as_ref().unwrap().action, self.current_role.as_ref().unwrap().system)?;
         writeln!(f, "Latest Log:")?;
 
         // only print the last log entry:
         if let Some(log) = self.log.as_ref() {
-            if let Some(last_entry) = log.last() {
-                writeln!(f, "\t\t\t\t {}", last_entry)?;
+            // Write out all of the log entries: 
+            for entry in log {
+                writeln!(f, "\t[{}]:[{}]", entry.role, entry.content)?;
             }
         }
         Ok(())
@@ -378,7 +382,14 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
 
     runtime_settings.roles = Some(roles.clone());
     let log_entry = format!("Goal: {}", goal.clone());
-    runtime_settings.log = Some(vec![log_entry]);
+
+
+    let message : Message = Message {
+        content: log_entry.clone(),
+        role: Role::User,
+    };
+
+    runtime_settings.log = Some(vec![message]);
     println!("Project Goals: \n------------------\n");
     println!("{}", goal);
     println!("\n------------------\n");
@@ -386,7 +397,7 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
     commands.spawn((Unprocessed,));
 }
 
-fn build_prompt(
+fn build_message_log(
     settings: ResMut<Settings>,
     mut runtime_settings: ResMut<RuntimeSettings>,
     mut query: Query<(Entity, &mut Unprocessed)>,
@@ -409,6 +420,11 @@ fn build_prompt(
         // here is where we determine the prompt based on the stage of development
         let mut prompt = String::new();
 
+        let mut system : String = String::new();
+
+        // At the very least, the goal should be here
+        let mut log: Vec<Message> = runtime_settings.log.clone().unwrap();
+
         let roles = runtime_settings.roles.clone().unwrap();
         // check to see if the current role is equal to "choose_action"
         let current_role = runtime_settings.current_role.clone();
@@ -422,8 +438,7 @@ fn build_prompt(
                 .unwrap();
 
             prompt = current_role.prompt.clone();
-
-            prompt = prompt + &format!("Goal: {}", runtime_settings.goal.clone().unwrap());
+            system = current_role.system.clone();
 
             runtime_settings.current_role = Some(current_role.clone());
 
@@ -431,51 +446,53 @@ fn build_prompt(
 
             // make the action : description pairs
             for role in roles.iter() {
-                prompt = prompt + &format!("\n{} : {}", role.action, role.description);
+                prompt = prompt + &format!("\n{} : {}", role.action, role.system);
             }
-
-            let mut acc = String::new();
-            let log: Vec<String> = runtime_settings.log.clone().unwrap();
-
-            for entry in log.clone() {
-                acc = format!("{}\n{}", acc, entry)
-            }
-            prompt = prompt + &format!("\nLog:{:?}", acc);
 
             prompt = prompt + &format!("\nAction to take:");
+          
         } else {
-            // append the runtime log into a large string where the entries are separated by a newline
-            let log: Vec<String> = runtime_settings.log.clone().unwrap();
-            let mut acc = String::new();
+            prompt = current_role.clone().unwrap().prompt.clone();
+        } 
 
-            let role = current_role.clone().unwrap();
+          // insert the prompt at the end of the log
+          let prompt_message : Message = Message {
+            content: prompt.clone(),
+            role: Role::User,
+        };
 
-            for entry in log.clone() {
-                acc = format!("{}\n{}", acc, entry)
-            }
+        log.push(prompt_message);
 
-            prompt = format!(
-                "\n[{}]:[{}]\n{}\nLog:{:?},\n------------------\n",
-                role.action.clone(),
-                role.description.clone(),
-                role.prompt.clone(),
-                acc,
-            )
-        }
 
         if current_role.clone().is_some() {
+
+            // if the first entry in the log is system then change the content:
+            if log[0].role == Role::System {
+                log[0].content = format!("{}", system);
+            }
+            // otherwise, we need to add the system to the beginning of the log
+            else {
+                let system_message : Message = Message {
+                    content: format!("{}", system),
+                    role: Role::System,
+                };
+                log.insert(0, system_message);
+            }
+
+
             let role = current_role.clone().unwrap();
             println!(
                 "sending to open ai: [{}] : [{}]",
-                &role.action, &role.description
+                &role.action, &role.system
             );
         }
 
         runtime_settings.current_prompt = Some(prompt.clone());
 
+        println!("The current log: \n{:#?}", log.clone());
+
         commands
             .entity(the_entity)
-            .insert(Prompt { text: prompt })
             .insert(Unsent);
     }
 }
@@ -483,14 +500,14 @@ fn build_prompt(
 fn send_openai_prompt(
     // openai: Res<OpenAIObjects>,
     runtime: ResMut<TokioTasksRuntime>,
-    mut query: Query<(Entity, &mut Prompt, &mut Unsent)>,
+    runtime_settings: Res<RuntimeSettings>,
+    mut query: Query<(Entity,&mut Unsent)>,
     mut commands: Commands,
 ) {
-    for (the_entity, mut prompt, _unsent) in query.iter_mut() {
+    for (mut the_entity, _unsent) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unsent>(); // We only want to process the entity once
 
-        let local_prompt = prompt.as_mut().text.clone();
-
+        let log = runtime_settings.log.clone().unwrap();
         let args = Args::parse();
         let api_key = args.api_key_openai.clone();
 
@@ -499,17 +516,13 @@ fn send_openai_prompt(
 
             let mut local_response = String::new();
             while finish_reason != "stop" {
-                let full_string = local_prompt.clone() + &local_response.clone();
 
                 let url = "https://api.openai.com/v1/chat/completions";
 
                 let client = Client::new();
                 let request_body = ChatCompletionRequest {
                     model: "gpt-3.5-turbo".to_string(),
-                    messages: vec![Message {
-                        role: "user".to_string(),
-                        content: full_string.clone(),
-                    }],
+                    messages: log.clone(),
                 };
 
                 let response = client
@@ -553,7 +566,7 @@ fn send_openai_prompt(
             ctx.run_on_main_thread(move |mut ctx| {
                 ctx.world
                     .entity_mut(the_entity.clone())
-                    .insert(Unparsed { text: super_local });
+                    .insert(Unparsed { text: super_local.clone() });
             })
             .await;
         });
@@ -580,15 +593,22 @@ fn process_text(
             .open(write_file.clone())
             .unwrap();
 
-        let debug_string = format!("\n--------------\n{}\nPrompt:\n{}\n\nOpenAI response:{}\n--------------\n", runtime_settings.clone(), runtime_settings.clone().current_prompt.unwrap().clone(), unparsed.text.clone());
+        let debug_string = format!("\n--------------\n{}\n--------------\n", runtime_settings.clone());
 
         file.write_all(debug_string.clone().as_bytes()).unwrap();
+
+        // Make an assistant response
+
+        let new_message : Message = Message {
+            content: unparsed.text.clone(),
+            role: Role::Assistant,
+        };
 
         runtime_settings
             .log
             .as_mut()
             .unwrap()
-            .push(unparsed.text.clone());
+            .push(new_message.clone());
 
         // before going back into the prompt creation loop, we need to determine if the initialization agent has given a valid response. That is, it must be one of the actions in the list of actions.
         let available_actions = runtime_settings.available_actions.clone();
@@ -682,11 +702,10 @@ fn main() {
         .insert_resource(Settings {
             max_iterations: 4,
             write_file: "output.txt".to_string(),
-            project_folder: "project".to_string(),
         })
         .add_startup_system(prepare_docker_container)
         .add_startup_system(initiate_project)
-        .add_system(build_prompt)
+        .add_system(build_message_log)
         .add_system(send_openai_prompt)
         .add_system(process_text)
         // .add_system(keyboard_input)
