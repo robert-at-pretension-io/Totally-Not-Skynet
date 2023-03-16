@@ -149,6 +149,7 @@ struct RuntimeSettings {
     goal: Option<String>,
     available_actions: Vec<String>,
     roles: Option<Vec<SystemRole>>,
+    implemented_thus_far: Option<Vec<HashMap<String,String>>>,
     current_role: Option<SystemRole>,
     current_prompt: Option<String>,
     recording_in_progress: bool,
@@ -669,11 +670,45 @@ fn process_text(
                 .find(|&role| role.action == "choose_action")
                 .unwrap();
 
+            // get the current role, if it was a developer then we will attempt to parse the code blocks
+            if runtime_settings.current_role.clone().unwrap().action == "developer" {
+                let code_blocks = parse_code_blocks(&unparsed.text.clone());
+                for code_block in code_blocks.iter() {
+                    let language = code_block.get("language").unwrap();
+                    let code = code_block.get("code").unwrap();
+                    let new_message : Message = Message {
+                        content: code.clone().to_string(),
+                        role: Role::Developer,
+                    };
+
+                    runtime_settings.log.as_mut().unwrap().push(new_message.clone());
+                }
+            }
+
+
             runtime_settings.current_role = Some(current_role.clone());
+    
+            
         }
 
         commands.entity(the_entity).insert(Unprocessed);
     }
+}
+
+use regex::Regex;
+
+fn parse_code_blocks(text: &str) -> Vec<HashMap<String, String>> {
+    let re = Regex::new(r"\[code:(?P<language>[\w]+)\](?P<code>.*?)\[/code\]").unwrap();
+    let mut code_blocks = Vec::new();
+
+    for captures in re.captures_iter(text) {
+        let mut code_block = HashMap::new();
+        code_block.insert("language".to_string(), captures["language"].to_string());
+        code_block.insert("code".to_string(), captures["code"].to_string());
+        code_blocks.push(code_block);
+    }
+
+    code_blocks
 }
 
 fn keyboard_input(
