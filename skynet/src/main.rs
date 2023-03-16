@@ -163,7 +163,7 @@ impl fmt::Display for RuntimeSettings {
         writeln!(f, "Current Iteration:\t{}", self.current_iteration)?;
         writeln!(f, "avilable actions:\t{:?}", self.available_actions)?;
         writeln!(f, "Current Role:\t\t[{}]:[{}]", self.current_role.as_ref().unwrap().action, self.current_role.as_ref().unwrap().system)?;
-        writeln!(f, "Latest Log:")?;
+        writeln!(f, "Log:")?;
 
         // only print the last log entry:
         if let Some(log) = self.log.as_ref() {
@@ -488,6 +488,7 @@ fn build_message_log(
         }
 
         runtime_settings.current_prompt = Some(prompt.clone());
+        runtime_settings.log = Some(log.clone());
 
         println!("The current log: \n{:#?}", log.clone());
 
@@ -506,6 +507,8 @@ fn send_openai_prompt(
 ) {
     for (mut the_entity, _unsent) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unsent>(); // We only want to process the entity once
+
+        println!("runtime settings:\n {}", runtime_settings.clone());
 
         let log = runtime_settings.log.clone().unwrap();
         let args = Args::parse();
@@ -561,7 +564,7 @@ fn send_openai_prompt(
             }
 
             let super_local = local_response.clone();
-            println!("\n{:?}\n", super_local.clone());
+            println!("\nResponse: {:?}\n", super_local.clone());
 
             ctx.run_on_main_thread(move |mut ctx| {
                 ctx.world
@@ -632,9 +635,33 @@ fn process_text(
             }
 
             if !valid_response {
-                println!("Invalid response. Please try again.");
-                panic!("Invalid response. Please try again.");
-            }
+                let roles = runtime_settings.roles.clone().unwrap();
+                let current_role = roles
+                    .iter()
+                    .find(|&role| role.action == "choose_action")
+                    .unwrap();
+
+                runtime_settings.current_role = Some(current_role.clone());
+
+                let mut log = runtime_settings.log.clone().unwrap();
+
+                // come up with a message that collects all of the available actions
+                let mut available_actions_string = "".to_string();
+                for action in runtime_settings.available_actions.clone().iter() {
+                    available_actions_string = available_actions_string.clone() + &action.to_string() + ", ";
+                }
+
+                let content = "Sorry, Please select one of the following: ".to_string() + &available_actions_string;
+
+                let new_message : Message = Message {
+                    content: content,
+                    role: Role::User,
+                };
+
+                runtime_settings.log.as_mut().unwrap().push(new_message.clone());
+                commands.entity(the_entity).insert(Unsent);
+                return;
+                }
         } else {
             let roles = runtime_settings.roles.clone().unwrap();
             let current_role = roles
@@ -700,7 +727,7 @@ fn main() {
             current_iteration: 1,
         })
         .insert_resource(Settings {
-            max_iterations: 4,
+            max_iterations: 10,
             write_file: "output.txt".to_string(),
         })
         .add_startup_system(prepare_docker_container)
