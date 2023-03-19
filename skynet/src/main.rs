@@ -149,13 +149,20 @@ struct RuntimeSettings {
     goal: Option<String>,
     available_actions: Vec<String>,
     roles: Option<Vec<SystemRole>>,
-    implemented_thus_far: Option<Vec<HashMap<String,String>>>,
+    implemented_thus_far: Option<Vec<Code>>,
     current_role: Option<SystemRole>,
     current_prompt: Option<String>,
     recording_in_progress: bool,
     container_id: Option<String>,
     current_iteration: usize,
     log: Option<Vec<Message>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct Code {
+    code: Option<String>,
+    language: Option<String>,
+    description: Option<String>,
 }
 
 
@@ -454,6 +461,7 @@ fn build_message_log(
           
         } else {
             prompt = current_role.clone().unwrap().prompt.clone();
+            system = current_role.clone().unwrap().system.clone();
         } 
 
           // insert the prompt at the end of the log
@@ -676,9 +684,26 @@ fn process_text(
                 for code_block in code_blocks.iter() {
                     let language = code_block.get("language").unwrap();
                     let code = code_block.get("code").unwrap();
+
+
+                    let roles = runtime_settings.roles.clone().unwrap();
+                
+                let current_role = roles
+                .iter()
+                .find(|&role| role.action == "code_description")
+                .unwrap();
+
+                    let prompt = current_role.prompt.clone();
+
+                    let system = current_role.system.clone();
+
+                    // get the prompt, system message, ect from role information
+
+                    // code_description
+
                     let new_message : Message = Message {
                         content: code.clone().to_string(),
-                        role: Role::Developer,
+                        role: Role::User,
                     };
 
                     runtime_settings.log.as_mut().unwrap().push(new_message.clone());
@@ -760,6 +785,7 @@ fn main() {
             recording_in_progress: false,
             roles: None,
             current_iteration: 1,
+            implemented_thus_far: None,
         })
         .insert_resource(Settings {
             max_iterations: 10,

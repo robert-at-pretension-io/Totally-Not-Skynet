@@ -1,13 +1,14 @@
 
 --------------
 Current Iteration:	2
-avilable actions:	["decompose_task", "write_tests", "write_architecture", "choose_action", "developer"]
+avilable actions:	["decompose_task", "write_tests", "code_description", "write_architecture", "choose_action", "developer"]
 Current Role:		[choose_action]:[This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.]
 Log:
 	[user]:[Goal: Make a website that displays pictures of cats.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
@@ -17,7 +18,7 @@ Action to take:]
 
 --------------
 Current Iteration:	3
-avilable actions:	["decompose_task", "write_tests", "write_architecture", "choose_action", "developer"]
+avilable actions:	["decompose_task", "write_tests", "code_description", "write_architecture", "choose_action", "developer"]
 Current Role:		[developer]:[This agent will write code that fulfills the requirements of the project.]
 Log:
 	[system]:[]
@@ -25,18 +26,19 @@ Log:
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
 	[assistant]:[developer]
-	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete.]
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
 
 --------------
 
 --------------
 Current Iteration:	4
-avilable actions:	["decompose_task", "write_tests", "write_architecture", "choose_action", "developer"]
+avilable actions:	["decompose_task", "write_tests", "code_description", "write_architecture", "choose_action", "developer"]
 Current Role:		[choose_action]:[This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.]
 Log:
 	[system]:[This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.]
@@ -44,63 +46,65 @@ Log:
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
 	[assistant]:[developer]
-	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete.]
-	[assistant]:[To create a website that displays pictures of cats, you can use HTML, CSS, and JavaScript. Here is some sample code:
-
-HTML:
-```
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[[code:html]
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Cute Cats</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<title>Cats Gallery</title>
+	<style type="text/css">
+		img {
+			width: 300px; /* Change the width to your preference */
+			height: auto;
+			margin: 10px;
+			border-radius: 10px; /* Optional */
+			box-shadow: 0px 0px 10px #888888; /* Optional */
+			object-fit: cover; /* Optional */
+		}
+	</style>
 </head>
 <body>
-	<h1>Cute Cats Gallery</h1>
-	<div class="cat-gallery">
-		<img src="cat1.jpg">
-		<img src="cat2.jpg">
-		<img src="cat3.jpg">
-		<img src="cat4.jpg">
-		<img src="cat5.jpg">
-		<img src="cat6.jpg">
-		<img src="cat7.jpg">
-		<img src="cat8.jpg">
-	</div>
-	<script src="main.js"></script>
+	<h1>Cats Gallery</h1>
+	<div id="cat-images"></div>
+
+	<script type="text/javascript">
+		/* Replace the image URLs with your own */
+		const catImages = [
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image'
+		];
+
+		const container = document.getElementById("cat-images");
+
+		catImages.forEach(img => {
+			const image = document.createElement('img');
+			image.src = img;
+			container.appendChild(image);
+		});
+	</script>
 </body>
 </html>
-```
+[/code] 
 
-CSS:
-```
-.cat-gallery {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	grid-gap: 20px;
-	padding: 20px;
-}
-
-img {
-	max-width: 100%;
-	height: auto;
-}
-```
-
-JavaScript:
-```
-// This is optional and can be used to add interactivity, such as randomly selecting images or allowing users to filter images.
-```
-
-Replace the `src` attributes of the `img` tags with the file paths of actual cat images. Save the HTML, CSS, and JavaScript in separate files with the names `index.html`, `style.css`, and `main.js`, respectively, and place them in the same folder. You can then open the `index.html` file in a web browser to see the website.]
+This code creates a basic web page with a title, a header, a container div for our cat images, and a JavaScript script that populates the container with ten cat images from placeholder.com. You can change the placeholders with your own image links. The CSS styles are optional and just add some simple styling to the images, as well as apply css object-fit and border-radius.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
@@ -110,173 +114,85 @@ Action to take:]
 
 --------------
 Current Iteration:	5
-avilable actions:	["decompose_task", "write_tests", "write_architecture", "choose_action", "developer"]
-Current Role:		[choose_action]:[This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.]
-Log:
-	[system]:[This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.]
-	[user]:[Goal: Make a website that displays pictures of cats.]
-	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
-decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
-write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
-write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
-choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
-developer : This agent will write code that fulfills the requirements of the project.
-Action to take:]
-	[assistant]:[developer]
-	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete.]
-	[assistant]:[To create a website that displays pictures of cats, you can use HTML, CSS, and JavaScript. Here is some sample code:
-
-HTML:
-```
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Cute Cats</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
-	<h1>Cute Cats Gallery</h1>
-	<div class="cat-gallery">
-		<img src="cat1.jpg">
-		<img src="cat2.jpg">
-		<img src="cat3.jpg">
-		<img src="cat4.jpg">
-		<img src="cat5.jpg">
-		<img src="cat6.jpg">
-		<img src="cat7.jpg">
-		<img src="cat8.jpg">
-	</div>
-	<script src="main.js"></script>
-</body>
-</html>
-```
-
-CSS:
-```
-.cat-gallery {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	grid-gap: 20px;
-	padding: 20px;
-}
-
-img {
-	max-width: 100%;
-	height: auto;
-}
-```
-
-JavaScript:
-```
-// This is optional and can be used to add interactivity, such as randomly selecting images or allowing users to filter images.
-```
-
-Replace the `src` attributes of the `img` tags with the file paths of actual cat images. Save the HTML, CSS, and JavaScript in separate files with the names `index.html`, `style.css`, and `main.js`, respectively, and place them in the same folder. You can then open the `index.html` file in a web browser to see the website.]
-	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
-decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
-write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
-write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
-choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
-developer : This agent will write code that fulfills the requirements of the project.
-Action to take:]
-	[assistant]:[choose_action]
-	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
-decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
-write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
-write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
-choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
-developer : This agent will write code that fulfills the requirements of the project.
-Action to take:]
-
---------------
-
---------------
-Current Iteration:	6
-avilable actions:	["decompose_task", "write_tests", "write_architecture", "choose_action", "developer"]
-Current Role:		[decompose_task]:[This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.]
+avilable actions:	["decompose_task", "write_tests", "code_description", "write_architecture", "choose_action", "developer"]
+Current Role:		[write_tests]:[This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.]
 Log:
 	[system]:[]
 	[user]:[Goal: Make a website that displays pictures of cats.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
 	[assistant]:[developer]
-	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete.]
-	[assistant]:[To create a website that displays pictures of cats, you can use HTML, CSS, and JavaScript. Here is some sample code:
-
-HTML:
-```
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[[code:html]
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Cute Cats</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<title>Cats Gallery</title>
+	<style type="text/css">
+		img {
+			width: 300px; /* Change the width to your preference */
+			height: auto;
+			margin: 10px;
+			border-radius: 10px; /* Optional */
+			box-shadow: 0px 0px 10px #888888; /* Optional */
+			object-fit: cover; /* Optional */
+		}
+	</style>
 </head>
 <body>
-	<h1>Cute Cats Gallery</h1>
-	<div class="cat-gallery">
-		<img src="cat1.jpg">
-		<img src="cat2.jpg">
-		<img src="cat3.jpg">
-		<img src="cat4.jpg">
-		<img src="cat5.jpg">
-		<img src="cat6.jpg">
-		<img src="cat7.jpg">
-		<img src="cat8.jpg">
-	</div>
-	<script src="main.js"></script>
+	<h1>Cats Gallery</h1>
+	<div id="cat-images"></div>
+
+	<script type="text/javascript">
+		/* Replace the image URLs with your own */
+		const catImages = [
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image'
+		];
+
+		const container = document.getElementById("cat-images");
+
+		catImages.forEach(img => {
+			const image = document.createElement('img');
+			image.src = img;
+			container.appendChild(image);
+		});
+	</script>
 </body>
 </html>
-```
+[/code] 
 
-CSS:
-```
-.cat-gallery {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	grid-gap: 20px;
-	padding: 20px;
-}
-
-img {
-	max-width: 100%;
-	height: auto;
-}
-```
-
-JavaScript:
-```
-// This is optional and can be used to add interactivity, such as randomly selecting images or allowing users to filter images.
-```
-
-Replace the `src` attributes of the `img` tags with the file paths of actual cat images. Save the HTML, CSS, and JavaScript in separate files with the names `index.html`, `style.css`, and `main.js`, respectively, and place them in the same folder. You can then open the `index.html` file in a web browser to see the website.]
+This code creates a basic web page with a title, a header, a container div for our cat images, and a JavaScript script that populates the container with ten cat images from placeholder.com. You can change the placeholders with your own image links. The CSS styles are optional and just add some simple styling to the images, as well as apply css object-fit and border-radius.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
-	[assistant]:[choose_action]
-	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
-decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
-write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
-write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
-choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
-developer : This agent will write code that fulfills the requirements of the project.
-Action to take:]
-	[assistant]:[decompose_task]
-	[user]:[Break down the provided task into an ordered list of smaller tasks. The task will be provided on the next line. Analyze the task and identify its key components, then create an ordered list of smaller tasks that, when completed, will achieve the original task. Respond with the enumerated task components, separated by commas and in the order they should be completed.]
+	[assistant]:[write_tests]
+	[user]:[You are a quality assurance agent, your job is to write code that will test that the code written by the developer is correct. You will write code that tests the most immediate code in the log.]
 
 --------------
 
 --------------
-Current Iteration:	7
-avilable actions:	["decompose_task", "write_tests", "write_architecture", "choose_action", "developer"]
+Current Iteration:	6
+avilable actions:	["decompose_task", "write_tests", "code_description", "write_architecture", "choose_action", "developer"]
 Current Role:		[choose_action]:[This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.]
 Log:
 	[system]:[This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.]
@@ -284,90 +200,102 @@ Log:
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
 	[assistant]:[developer]
-	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete.]
-	[assistant]:[To create a website that displays pictures of cats, you can use HTML, CSS, and JavaScript. Here is some sample code:
-
-HTML:
-```
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[[code:html]
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Cute Cats</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<title>Cats Gallery</title>
+	<style type="text/css">
+		img {
+			width: 300px; /* Change the width to your preference */
+			height: auto;
+			margin: 10px;
+			border-radius: 10px; /* Optional */
+			box-shadow: 0px 0px 10px #888888; /* Optional */
+			object-fit: cover; /* Optional */
+		}
+	</style>
 </head>
 <body>
-	<h1>Cute Cats Gallery</h1>
-	<div class="cat-gallery">
-		<img src="cat1.jpg">
-		<img src="cat2.jpg">
-		<img src="cat3.jpg">
-		<img src="cat4.jpg">
-		<img src="cat5.jpg">
-		<img src="cat6.jpg">
-		<img src="cat7.jpg">
-		<img src="cat8.jpg">
-	</div>
-	<script src="main.js"></script>
+	<h1>Cats Gallery</h1>
+	<div id="cat-images"></div>
+
+	<script type="text/javascript">
+		/* Replace the image URLs with your own */
+		const catImages = [
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image'
+		];
+
+		const container = document.getElementById("cat-images");
+
+		catImages.forEach(img => {
+			const image = document.createElement('img');
+			image.src = img;
+			container.appendChild(image);
+		});
+	</script>
 </body>
 </html>
-```
+[/code] 
 
-CSS:
-```
-.cat-gallery {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	grid-gap: 20px;
-	padding: 20px;
-}
-
-img {
-	max-width: 100%;
-	height: auto;
-}
-```
-
-JavaScript:
-```
-// This is optional and can be used to add interactivity, such as randomly selecting images or allowing users to filter images.
-```
-
-Replace the `src` attributes of the `img` tags with the file paths of actual cat images. Save the HTML, CSS, and JavaScript in separate files with the names `index.html`, `style.css`, and `main.js`, respectively, and place them in the same folder. You can then open the `index.html` file in a web browser to see the website.]
+This code creates a basic web page with a title, a header, a container div for our cat images, and a JavaScript script that populates the container with ten cat images from placeholder.com. You can change the placeholders with your own image links. The CSS styles are optional and just add some simple styling to the images, as well as apply css object-fit and border-radius.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
-	[assistant]:[choose_action]
+	[assistant]:[write_tests]
+	[user]:[You are a quality assurance agent, your job is to write code that will test that the code written by the developer is correct. You will write code that tests the most immediate code in the log.]
+	[assistant]:[Sure, here's an example test function for the code provided by the developer:
+
+[code:javascript]
+function testCatGallery() {
+  // Get the container div
+  const container = document.getElementById("cat-images");
+
+  // Get all the images in the container
+  const images = container.getElementsByTagName("img");
+
+  // Check that there are 10 images
+  if (images.length !== 10) {
+    console.error("Test failed: expected 10 images, but got " + images.length);
+  }
+
+  // Check that each image has the correct width
+  for (let i = 0; i < images.length; i++) {
+    if (images[i].width !== 300) {
+      console.error("Test failed: image " + i + " has width " + images[i].width + ", but expected 300");
+    }
+  }
+
+  console.log("Tests complete");
+}
+[/code]
+
+This function checks that there are 10 images in the container, and that each image has a width of 300 pixels. It outputs an error message if any of the tests fail, and a success message if all tests pass. You can run this function in the browser console after loading the page to confirm that the gallery is working as expected.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
-write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
-choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
-developer : This agent will write code that fulfills the requirements of the project.
-Action to take:]
-	[assistant]:[decompose_task]
-	[user]:[Break down the provided task into an ordered list of smaller tasks. The task will be provided on the next line. Analyze the task and identify its key components, then create an ordered list of smaller tasks that, when completed, will achieve the original task. Respond with the enumerated task components, separated by commas and in the order they should be completed.]
-	[assistant]:[1. Determine the requirements of the website, including its content and functionality.
-2. Create a wireframe or design for the website's layout and structure.
-3. Write HTML code to create the basic structure of the website, including head and body sections, and add appropriate tags to format text and images.
-4. Write CSS code to add styles and layout to the HTML elements, including font, color, margin, padding, and positioning.
-5. Choose appropriate images of cats and save them in a folder.
-6. Add the image tags to the HTML code and use appropriate attributes to reference the image files.
-7. Test the website to ensure that all images are displaying correctly.
-8. Add interactivity, if desired, using JavaScript or a JavaScript library such as jQuery. For example, you could add a button to randomize the order of the images or create a lightbox effect to enlarge images when clicked.
-9. Test the website on different devices and browsers to ensure that it is responsive and functioning correctly.
-10. Publish the website, either by uploading it to a web server or by using a platform such as GitHub Pages.]
-	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
-decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
-write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
@@ -376,8 +304,8 @@ Action to take:]
 --------------
 
 --------------
-Current Iteration:	8
-avilable actions:	["decompose_task", "write_tests", "write_architecture", "choose_action", "developer"]
+Current Iteration:	7
+avilable actions:	["decompose_task", "write_tests", "code_description", "write_architecture", "choose_action", "developer"]
 Current Role:		[developer]:[This agent will write code that fulfills the requirements of the project.]
 Log:
 	[system]:[]
@@ -385,102 +313,114 @@ Log:
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
 	[assistant]:[developer]
-	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete.]
-	[assistant]:[To create a website that displays pictures of cats, you can use HTML, CSS, and JavaScript. Here is some sample code:
-
-HTML:
-```
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[[code:html]
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Cute Cats</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<title>Cats Gallery</title>
+	<style type="text/css">
+		img {
+			width: 300px; /* Change the width to your preference */
+			height: auto;
+			margin: 10px;
+			border-radius: 10px; /* Optional */
+			box-shadow: 0px 0px 10px #888888; /* Optional */
+			object-fit: cover; /* Optional */
+		}
+	</style>
 </head>
 <body>
-	<h1>Cute Cats Gallery</h1>
-	<div class="cat-gallery">
-		<img src="cat1.jpg">
-		<img src="cat2.jpg">
-		<img src="cat3.jpg">
-		<img src="cat4.jpg">
-		<img src="cat5.jpg">
-		<img src="cat6.jpg">
-		<img src="cat7.jpg">
-		<img src="cat8.jpg">
-	</div>
-	<script src="main.js"></script>
+	<h1>Cats Gallery</h1>
+	<div id="cat-images"></div>
+
+	<script type="text/javascript">
+		/* Replace the image URLs with your own */
+		const catImages = [
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image'
+		];
+
+		const container = document.getElementById("cat-images");
+
+		catImages.forEach(img => {
+			const image = document.createElement('img');
+			image.src = img;
+			container.appendChild(image);
+		});
+	</script>
 </body>
 </html>
-```
+[/code] 
 
-CSS:
-```
-.cat-gallery {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	grid-gap: 20px;
-	padding: 20px;
-}
-
-img {
-	max-width: 100%;
-	height: auto;
-}
-```
-
-JavaScript:
-```
-// This is optional and can be used to add interactivity, such as randomly selecting images or allowing users to filter images.
-```
-
-Replace the `src` attributes of the `img` tags with the file paths of actual cat images. Save the HTML, CSS, and JavaScript in separate files with the names `index.html`, `style.css`, and `main.js`, respectively, and place them in the same folder. You can then open the `index.html` file in a web browser to see the website.]
+This code creates a basic web page with a title, a header, a container div for our cat images, and a JavaScript script that populates the container with ten cat images from placeholder.com. You can change the placeholders with your own image links. The CSS styles are optional and just add some simple styling to the images, as well as apply css object-fit and border-radius.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
-	[assistant]:[choose_action]
+	[assistant]:[write_tests]
+	[user]:[You are a quality assurance agent, your job is to write code that will test that the code written by the developer is correct. You will write code that tests the most immediate code in the log.]
+	[assistant]:[Sure, here's an example test function for the code provided by the developer:
+
+[code:javascript]
+function testCatGallery() {
+  // Get the container div
+  const container = document.getElementById("cat-images");
+
+  // Get all the images in the container
+  const images = container.getElementsByTagName("img");
+
+  // Check that there are 10 images
+  if (images.length !== 10) {
+    console.error("Test failed: expected 10 images, but got " + images.length);
+  }
+
+  // Check that each image has the correct width
+  for (let i = 0; i < images.length; i++) {
+    if (images[i].width !== 300) {
+      console.error("Test failed: image " + i + " has width " + images[i].width + ", but expected 300");
+    }
+  }
+
+  console.log("Tests complete");
+}
+[/code]
+
+This function checks that there are 10 images in the container, and that each image has a width of 300 pixels. It outputs an error message if any of the tests fail, and a success message if all tests pass. You can run this function in the browser console after loading the page to confirm that the gallery is working as expected.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
-write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
-choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
-developer : This agent will write code that fulfills the requirements of the project.
-Action to take:]
-	[assistant]:[decompose_task]
-	[user]:[Break down the provided task into an ordered list of smaller tasks. The task will be provided on the next line. Analyze the task and identify its key components, then create an ordered list of smaller tasks that, when completed, will achieve the original task. Respond with the enumerated task components, separated by commas and in the order they should be completed.]
-	[assistant]:[1. Determine the requirements of the website, including its content and functionality.
-2. Create a wireframe or design for the website's layout and structure.
-3. Write HTML code to create the basic structure of the website, including head and body sections, and add appropriate tags to format text and images.
-4. Write CSS code to add styles and layout to the HTML elements, including font, color, margin, padding, and positioning.
-5. Choose appropriate images of cats and save them in a folder.
-6. Add the image tags to the HTML code and use appropriate attributes to reference the image files.
-7. Test the website to ensure that all images are displaying correctly.
-8. Add interactivity, if desired, using JavaScript or a JavaScript library such as jQuery. For example, you could add a button to randomize the order of the images or create a lightbox effect to enlarge images when clicked.
-9. Test the website on different devices and browsers to ensure that it is responsive and functioning correctly.
-10. Publish the website, either by uploading it to a web server or by using a platform such as GitHub Pages.]
-	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
-decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
-write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
 	[assistant]:[developer]
-	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete.]
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
 
 --------------
 
 --------------
-Current Iteration:	9
-avilable actions:	["decompose_task", "write_tests", "write_architecture", "choose_action", "developer"]
+Current Iteration:	8
+avilable actions:	["decompose_task", "write_tests", "code_description", "write_architecture", "choose_action", "developer"]
 Current Role:		[choose_action]:[This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.]
 Log:
 	[system]:[This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.]
@@ -488,176 +428,157 @@ Log:
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
 	[assistant]:[developer]
-	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete.]
-	[assistant]:[To create a website that displays pictures of cats, you can use HTML, CSS, and JavaScript. Here is some sample code:
-
-HTML:
-```
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[[code:html]
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Cute Cats</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<title>Cats Gallery</title>
+	<style type="text/css">
+		img {
+			width: 300px; /* Change the width to your preference */
+			height: auto;
+			margin: 10px;
+			border-radius: 10px; /* Optional */
+			box-shadow: 0px 0px 10px #888888; /* Optional */
+			object-fit: cover; /* Optional */
+		}
+	</style>
 </head>
 <body>
-	<h1>Cute Cats Gallery</h1>
-	<div class="cat-gallery">
-		<img src="cat1.jpg">
-		<img src="cat2.jpg">
-		<img src="cat3.jpg">
-		<img src="cat4.jpg">
-		<img src="cat5.jpg">
-		<img src="cat6.jpg">
-		<img src="cat7.jpg">
-		<img src="cat8.jpg">
-	</div>
-	<script src="main.js"></script>
+	<h1>Cats Gallery</h1>
+	<div id="cat-images"></div>
+
+	<script type="text/javascript">
+		/* Replace the image URLs with your own */
+		const catImages = [
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image'
+		];
+
+		const container = document.getElementById("cat-images");
+
+		catImages.forEach(img => {
+			const image = document.createElement('img');
+			image.src = img;
+			container.appendChild(image);
+		});
+	</script>
 </body>
 </html>
-```
+[/code] 
 
-CSS:
-```
-.cat-gallery {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	grid-gap: 20px;
-	padding: 20px;
-}
-
-img {
-	max-width: 100%;
-	height: auto;
-}
-```
-
-JavaScript:
-```
-// This is optional and can be used to add interactivity, such as randomly selecting images or allowing users to filter images.
-```
-
-Replace the `src` attributes of the `img` tags with the file paths of actual cat images. Save the HTML, CSS, and JavaScript in separate files with the names `index.html`, `style.css`, and `main.js`, respectively, and place them in the same folder. You can then open the `index.html` file in a web browser to see the website.]
+This code creates a basic web page with a title, a header, a container div for our cat images, and a JavaScript script that populates the container with ten cat images from placeholder.com. You can change the placeholders with your own image links. The CSS styles are optional and just add some simple styling to the images, as well as apply css object-fit and border-radius.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
-	[assistant]:[choose_action]
+	[assistant]:[write_tests]
+	[user]:[You are a quality assurance agent, your job is to write code that will test that the code written by the developer is correct. You will write code that tests the most immediate code in the log.]
+	[assistant]:[Sure, here's an example test function for the code provided by the developer:
+
+[code:javascript]
+function testCatGallery() {
+  // Get the container div
+  const container = document.getElementById("cat-images");
+
+  // Get all the images in the container
+  const images = container.getElementsByTagName("img");
+
+  // Check that there are 10 images
+  if (images.length !== 10) {
+    console.error("Test failed: expected 10 images, but got " + images.length);
+  }
+
+  // Check that each image has the correct width
+  for (let i = 0; i < images.length; i++) {
+    if (images[i].width !== 300) {
+      console.error("Test failed: image " + i + " has width " + images[i].width + ", but expected 300");
+    }
+  }
+
+  console.log("Tests complete");
+}
+[/code]
+
+This function checks that there are 10 images in the container, and that each image has a width of 300 pixels. It outputs an error message if any of the tests fail, and a success message if all tests pass. You can run this function in the browser console after loading the page to confirm that the gallery is working as expected.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
-write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
-choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
-developer : This agent will write code that fulfills the requirements of the project.
-Action to take:]
-	[assistant]:[decompose_task]
-	[user]:[Break down the provided task into an ordered list of smaller tasks. The task will be provided on the next line. Analyze the task and identify its key components, then create an ordered list of smaller tasks that, when completed, will achieve the original task. Respond with the enumerated task components, separated by commas and in the order they should be completed.]
-	[assistant]:[1. Determine the requirements of the website, including its content and functionality.
-2. Create a wireframe or design for the website's layout and structure.
-3. Write HTML code to create the basic structure of the website, including head and body sections, and add appropriate tags to format text and images.
-4. Write CSS code to add styles and layout to the HTML elements, including font, color, margin, padding, and positioning.
-5. Choose appropriate images of cats and save them in a folder.
-6. Add the image tags to the HTML code and use appropriate attributes to reference the image files.
-7. Test the website to ensure that all images are displaying correctly.
-8. Add interactivity, if desired, using JavaScript or a JavaScript library such as jQuery. For example, you could add a button to randomize the order of the images or create a lightbox effect to enlarge images when clicked.
-9. Test the website on different devices and browsers to ensure that it is responsive and functioning correctly.
-10. Publish the website, either by uploading it to a web server or by using a platform such as GitHub Pages.]
-	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
-decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
-write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
 	[assistant]:[developer]
-	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete.]
-	[assistant]:[Since I have already provided the code to create a website that displays pictures of cats, I am going to provide some additional information that could be useful for enhancing the user experience of the website. One way to make it more interactive is to allow users to filter the images based on their category or attributes. Here's an example of how to implement that using JavaScript and data attributes.
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[Sure, here's an updated code that pulls cat images randomly from an array of cat image URLs. 
 
-HTML:
-```
-<div class="filters">
-	<button class="filter-btn" data-cat="all">All</button>
-	<button class="filter-btn" data-cat="cute">Cute</button>
-	<button class="filter-btn" data-cat="funny">Funny</button>
-	<button class="filter-btn" data-cat="sleepy">Sleepy</button>
-	<button class="filter-btn" data-cat="playful">Playful</button>
-</div>
-<div class="cat-gallery">
-	<img src="cat1.jpg" data-cat="cute">
-	<img src="cat2.jpg" data-cat="funny">
-	<img src="cat3.jpg" data-cat="sleepy">
-	<img src="cat4.jpg" data-cat="cute">
-	<img src="cat5.jpg" data-cat="playful">
-	<img src="cat6.jpg" data-cat="funny">
-	<img src="cat7.jpg" data-cat="sleepy">
-	<img src="cat8.jpg" data-cat="playful">
-</div>
-```
+[code:html]
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Cats Gallery</title>
+	<style type="text/css">
+		img {
+			width: 300px; /* Change the width to your preference */
+			height: auto;
+			margin: 10px;
+			border-radius: 10px; /* Optional */
+			box-shadow: 0px 0px 10px #888888; /* Optional */
+			object-fit: cover; /* Optional */
+		}
+	</style>
+</head>
+<body>
+	<h1>Cats Gallery</h1>
+	<div id="cat-images"></div>
 
-CSS:
-```
-.filters {
-	display: flex;
-	margin-bottom: 20px;
-}
+	<script type="text/javascript">
+		const catImages = [
+			'https://via.placeholder.com/300x300.png?text=Cat+Image1',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image2',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image3',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image4',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image5'
+		];
 
-.filter-btn {
-	padding: 5px 10px;
-	margin-right: 10px;
-	background-color: #ddd;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
-}
+		const container = document.getElementById("cat-images");
 
-.filter-btn.active {
-	background-color: #555;
-	color: white;
-}
+		for (let i = 0; i < 10; i++) {
+			const image = document.createElement('img');
+			const randomIndex = Math.floor(Math.random() * catImages.length);
+			image.src = catImages[randomIndex];
+			container.appendChild(image);
+		}
+	</script>
+</body>
+</html>
+[/code]
 
-.cat-gallery img {
-	display: block;
-	max-width: 100%;
-	height: auto;
-	margin-bottom: 20px;
-}
-```
-
-JavaScript:
-```
-const filterBtns = document.querySelectorAll('.filter-btn');
-const catImgs = document.querySelectorAll('.cat-gallery img');
-
-filterBtns.forEach(btn => {
-	btn.addEventListener('click', () => {
-		// Add active class to the clicked button
-		filterBtns.forEach(btn => btn.classList.remove('active'));
-		btn.classList.add('active');
-
-		// Filter images based on data-cat attribute
-		const cat = btn.dataset.cat;
-		catImgs.forEach(img => {
-			if (cat === 'all' || img.dataset.cat === cat) {
-				img.style.display = 'block';
-			} else {
-				img.style.display = 'none';
-			}
-		});
-	});
-});
-```
-
-This code adds buttons with data attributes for each category of cat images, and uses JavaScript to filter the images based on the category that the user selects. When a button is clicked, it adds an `active` class to that button and filters the images to show only those with the corresponding category. If the "All" button is clicked, it shows all of the images.]
+In this updated code, we first declare an array `catImages` that contains URLs for five cat images. Then, we use a loop to create 10 `img` elements and add them to the container. For each iteration of the loop, we generate a random integer between 0 and `catImages.length - 1` using the `Math.random()` and `Math.floor()` functions, and use that integer to select a random URL from the `catImages` array to assign to the `src` attribute of the `img` element.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
@@ -666,190 +587,359 @@ Action to take:]
 --------------
 
 --------------
-Current Iteration:	10
-avilable actions:	["decompose_task", "write_tests", "write_architecture", "choose_action", "developer"]
-Current Role:		[write_architecture]:[This agent will give the developer guidance on how to move forward if they are stuck.]
+Current Iteration:	9
+avilable actions:	["decompose_task", "write_tests", "code_description", "write_architecture", "choose_action", "developer"]
+Current Role:		[decompose_task]:[This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.]
 Log:
 	[system]:[]
 	[user]:[Goal: Make a website that displays pictures of cats.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
 	[assistant]:[developer]
-	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete.]
-	[assistant]:[To create a website that displays pictures of cats, you can use HTML, CSS, and JavaScript. Here is some sample code:
-
-HTML:
-```
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[[code:html]
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Cute Cats</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<title>Cats Gallery</title>
+	<style type="text/css">
+		img {
+			width: 300px; /* Change the width to your preference */
+			height: auto;
+			margin: 10px;
+			border-radius: 10px; /* Optional */
+			box-shadow: 0px 0px 10px #888888; /* Optional */
+			object-fit: cover; /* Optional */
+		}
+	</style>
 </head>
 <body>
-	<h1>Cute Cats Gallery</h1>
-	<div class="cat-gallery">
-		<img src="cat1.jpg">
-		<img src="cat2.jpg">
-		<img src="cat3.jpg">
-		<img src="cat4.jpg">
-		<img src="cat5.jpg">
-		<img src="cat6.jpg">
-		<img src="cat7.jpg">
-		<img src="cat8.jpg">
-	</div>
-	<script src="main.js"></script>
+	<h1>Cats Gallery</h1>
+	<div id="cat-images"></div>
+
+	<script type="text/javascript">
+		/* Replace the image URLs with your own */
+		const catImages = [
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image'
+		];
+
+		const container = document.getElementById("cat-images");
+
+		catImages.forEach(img => {
+			const image = document.createElement('img');
+			image.src = img;
+			container.appendChild(image);
+		});
+	</script>
 </body>
 </html>
-```
+[/code] 
 
-CSS:
-```
-.cat-gallery {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	grid-gap: 20px;
-	padding: 20px;
-}
-
-img {
-	max-width: 100%;
-	height: auto;
-}
-```
-
-JavaScript:
-```
-// This is optional and can be used to add interactivity, such as randomly selecting images or allowing users to filter images.
-```
-
-Replace the `src` attributes of the `img` tags with the file paths of actual cat images. Save the HTML, CSS, and JavaScript in separate files with the names `index.html`, `style.css`, and `main.js`, respectively, and place them in the same folder. You can then open the `index.html` file in a web browser to see the website.]
+This code creates a basic web page with a title, a header, a container div for our cat images, and a JavaScript script that populates the container with ten cat images from placeholder.com. You can change the placeholders with your own image links. The CSS styles are optional and just add some simple styling to the images, as well as apply css object-fit and border-radius.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
-	[assistant]:[choose_action]
+	[assistant]:[write_tests]
+	[user]:[You are a quality assurance agent, your job is to write code that will test that the code written by the developer is correct. You will write code that tests the most immediate code in the log.]
+	[assistant]:[Sure, here's an example test function for the code provided by the developer:
+
+[code:javascript]
+function testCatGallery() {
+  // Get the container div
+  const container = document.getElementById("cat-images");
+
+  // Get all the images in the container
+  const images = container.getElementsByTagName("img");
+
+  // Check that there are 10 images
+  if (images.length !== 10) {
+    console.error("Test failed: expected 10 images, but got " + images.length);
+  }
+
+  // Check that each image has the correct width
+  for (let i = 0; i < images.length; i++) {
+    if (images[i].width !== 300) {
+      console.error("Test failed: image " + i + " has width " + images[i].width + ", but expected 300");
+    }
+  }
+
+  console.log("Tests complete");
+}
+[/code]
+
+This function checks that there are 10 images in the container, and that each image has a width of 300 pixels. It outputs an error message if any of the tests fail, and a success message if all tests pass. You can run this function in the browser console after loading the page to confirm that the gallery is working as expected.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[developer]
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[Sure, here's an updated code that pulls cat images randomly from an array of cat image URLs. 
+
+[code:html]
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Cats Gallery</title>
+	<style type="text/css">
+		img {
+			width: 300px; /* Change the width to your preference */
+			height: auto;
+			margin: 10px;
+			border-radius: 10px; /* Optional */
+			box-shadow: 0px 0px 10px #888888; /* Optional */
+			object-fit: cover; /* Optional */
+		}
+	</style>
+</head>
+<body>
+	<h1>Cats Gallery</h1>
+	<div id="cat-images"></div>
+
+	<script type="text/javascript">
+		const catImages = [
+			'https://via.placeholder.com/300x300.png?text=Cat+Image1',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image2',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image3',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image4',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image5'
+		];
+
+		const container = document.getElementById("cat-images");
+
+		for (let i = 0; i < 10; i++) {
+			const image = document.createElement('img');
+			const randomIndex = Math.floor(Math.random() * catImages.length);
+			image.src = catImages[randomIndex];
+			container.appendChild(image);
+		}
+	</script>
+</body>
+</html>
+[/code]
+
+In this updated code, we first declare an array `catImages` that contains URLs for five cat images. Then, we use a loop to create 10 `img` elements and add them to the container. For each iteration of the loop, we generate a random integer between 0 and `catImages.length - 1` using the `Math.random()` and `Math.floor()` functions, and use that integer to select a random URL from the `catImages` array to assign to the `src` attribute of the `img` element.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
 	[assistant]:[decompose_task]
 	[user]:[Break down the provided task into an ordered list of smaller tasks. The task will be provided on the next line. Analyze the task and identify its key components, then create an ordered list of smaller tasks that, when completed, will achieve the original task. Respond with the enumerated task components, separated by commas and in the order they should be completed.]
-	[assistant]:[1. Determine the requirements of the website, including its content and functionality.
-2. Create a wireframe or design for the website's layout and structure.
-3. Write HTML code to create the basic structure of the website, including head and body sections, and add appropriate tags to format text and images.
-4. Write CSS code to add styles and layout to the HTML elements, including font, color, margin, padding, and positioning.
-5. Choose appropriate images of cats and save them in a folder.
-6. Add the image tags to the HTML code and use appropriate attributes to reference the image files.
-7. Test the website to ensure that all images are displaying correctly.
-8. Add interactivity, if desired, using JavaScript or a JavaScript library such as jQuery. For example, you could add a button to randomize the order of the images or create a lightbox effect to enlarge images when clicked.
-9. Test the website on different devices and browsers to ensure that it is responsive and functioning correctly.
-10. Publish the website, either by uploading it to a web server or by using a platform such as GitHub Pages.]
+
+--------------
+
+--------------
+Current Iteration:	10
+avilable actions:	["decompose_task", "write_tests", "code_description", "write_architecture", "choose_action", "developer"]
+Current Role:		[choose_action]:[This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.]
+Log:
+	[system]:[This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.]
+	[user]:[Goal: Make a website that displays pictures of cats.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
 	[assistant]:[developer]
-	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete.]
-	[assistant]:[Since I have already provided the code to create a website that displays pictures of cats, I am going to provide some additional information that could be useful for enhancing the user experience of the website. One way to make it more interactive is to allow users to filter the images based on their category or attributes. Here's an example of how to implement that using JavaScript and data attributes.
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[[code:html]
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Cats Gallery</title>
+	<style type="text/css">
+		img {
+			width: 300px; /* Change the width to your preference */
+			height: auto;
+			margin: 10px;
+			border-radius: 10px; /* Optional */
+			box-shadow: 0px 0px 10px #888888; /* Optional */
+			object-fit: cover; /* Optional */
+		}
+	</style>
+</head>
+<body>
+	<h1>Cats Gallery</h1>
+	<div id="cat-images"></div>
 
-HTML:
-```
-<div class="filters">
-	<button class="filter-btn" data-cat="all">All</button>
-	<button class="filter-btn" data-cat="cute">Cute</button>
-	<button class="filter-btn" data-cat="funny">Funny</button>
-	<button class="filter-btn" data-cat="sleepy">Sleepy</button>
-	<button class="filter-btn" data-cat="playful">Playful</button>
-</div>
-<div class="cat-gallery">
-	<img src="cat1.jpg" data-cat="cute">
-	<img src="cat2.jpg" data-cat="funny">
-	<img src="cat3.jpg" data-cat="sleepy">
-	<img src="cat4.jpg" data-cat="cute">
-	<img src="cat5.jpg" data-cat="playful">
-	<img src="cat6.jpg" data-cat="funny">
-	<img src="cat7.jpg" data-cat="sleepy">
-	<img src="cat8.jpg" data-cat="playful">
-</div>
-```
+	<script type="text/javascript">
+		/* Replace the image URLs with your own */
+		const catImages = [
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image'
+		];
 
-CSS:
-```
-.filters {
-	display: flex;
-	margin-bottom: 20px;
-}
+		const container = document.getElementById("cat-images");
 
-.filter-btn {
-	padding: 5px 10px;
-	margin-right: 10px;
-	background-color: #ddd;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
-}
-
-.filter-btn.active {
-	background-color: #555;
-	color: white;
-}
-
-.cat-gallery img {
-	display: block;
-	max-width: 100%;
-	height: auto;
-	margin-bottom: 20px;
-}
-```
-
-JavaScript:
-```
-const filterBtns = document.querySelectorAll('.filter-btn');
-const catImgs = document.querySelectorAll('.cat-gallery img');
-
-filterBtns.forEach(btn => {
-	btn.addEventListener('click', () => {
-		// Add active class to the clicked button
-		filterBtns.forEach(btn => btn.classList.remove('active'));
-		btn.classList.add('active');
-
-		// Filter images based on data-cat attribute
-		const cat = btn.dataset.cat;
-		catImgs.forEach(img => {
-			if (cat === 'all' || img.dataset.cat === cat) {
-				img.style.display = 'block';
-			} else {
-				img.style.display = 'none';
-			}
+		catImages.forEach(img => {
+			const image = document.createElement('img');
+			image.src = img;
+			container.appendChild(image);
 		});
-	});
-});
-```
+	</script>
+</body>
+</html>
+[/code] 
 
-This code adds buttons with data attributes for each category of cat images, and uses JavaScript to filter the images based on the category that the user selects. When a button is clicked, it adds an `active` class to that button and filters the images to show only those with the corresponding category. If the "All" button is clicked, it shows all of the images.]
+This code creates a basic web page with a title, a header, a container div for our cat images, and a JavaScript script that populates the container with ten cat images from placeholder.com. You can change the placeholders with your own image links. The CSS styles are optional and just add some simple styling to the images, as well as apply css object-fit and border-radius.]
 	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
 decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
 write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
 write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
 choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
 developer : This agent will write code that fulfills the requirements of the project.
 Action to take:]
-	[assistant]:[write_architecture]
-	[user]:[Given the project goal, please come up with a list of functions, objects and types that must be implemented to complete the goal. Specify which programming language to use to implement the software if you think there is one that will be easiest to implement them in. If the log already contains code, give guidance on what other functions, objects, types or patterns remain to be implmented.]
+	[assistant]:[write_tests]
+	[user]:[You are a quality assurance agent, your job is to write code that will test that the code written by the developer is correct. You will write code that tests the most immediate code in the log.]
+	[assistant]:[Sure, here's an example test function for the code provided by the developer:
+
+[code:javascript]
+function testCatGallery() {
+  // Get the container div
+  const container = document.getElementById("cat-images");
+
+  // Get all the images in the container
+  const images = container.getElementsByTagName("img");
+
+  // Check that there are 10 images
+  if (images.length !== 10) {
+    console.error("Test failed: expected 10 images, but got " + images.length);
+  }
+
+  // Check that each image has the correct width
+  for (let i = 0; i < images.length; i++) {
+    if (images[i].width !== 300) {
+      console.error("Test failed: image " + i + " has width " + images[i].width + ", but expected 300");
+    }
+  }
+
+  console.log("Tests complete");
+}
+[/code]
+
+This function checks that there are 10 images in the container, and that each image has a width of 300 pixels. It outputs an error message if any of the tests fail, and a success message if all tests pass. You can run this function in the browser console after loading the page to confirm that the gallery is working as expected.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[developer]
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[Sure, here's an updated code that pulls cat images randomly from an array of cat image URLs. 
+
+[code:html]
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Cats Gallery</title>
+	<style type="text/css">
+		img {
+			width: 300px; /* Change the width to your preference */
+			height: auto;
+			margin: 10px;
+			border-radius: 10px; /* Optional */
+			box-shadow: 0px 0px 10px #888888; /* Optional */
+			object-fit: cover; /* Optional */
+		}
+	</style>
+</head>
+<body>
+	<h1>Cats Gallery</h1>
+	<div id="cat-images"></div>
+
+	<script type="text/javascript">
+		const catImages = [
+			'https://via.placeholder.com/300x300.png?text=Cat+Image1',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image2',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image3',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image4',
+			'https://via.placeholder.com/300x300.png?text=Cat+Image5'
+		];
+
+		const container = document.getElementById("cat-images");
+
+		for (let i = 0; i < 10; i++) {
+			const image = document.createElement('img');
+			const randomIndex = Math.floor(Math.random() * catImages.length);
+			image.src = catImages[randomIndex];
+			container.appendChild(image);
+		}
+	</script>
+</body>
+</html>
+[/code]
+
+In this updated code, we first declare an array `catImages` that contains URLs for five cat images. Then, we use a loop to create 10 `img` elements and add them to the container. For each iteration of the loop, we generate a random integer between 0 and `catImages.length - 1` using the `Math.random()` and `Math.floor()` functions, and use that integer to select a random URL from the `catImages` array to assign to the `src` attribute of the `img` element.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[decompose_task]
+	[user]:[Break down the provided task into an ordered list of smaller tasks. The task will be provided on the next line. Analyze the task and identify its key components, then create an ordered list of smaller tasks that, when completed, will achieve the original task. Respond with the enumerated task components, separated by commas and in the order they should be completed.]
+	[assistant]:[1. Create an array of cat image URLs.
+2. Create a container `div` element for the cat images in the HTML code.
+3. Use a loop to create `img` elements.
+4. For each `img` element, generate a random number between 0 and the length of the `catImages` array.
+5. Use the random number to select a URL from the `catImages` array.
+6. Assign the selected URL to the `src` attribute of the `img` element.
+7. Append the `img` element to the container `div`.
+8. Add optional styling to the `img` element using CSS, such as defining its width, height, margin, border, and box-shadow.
+9. Optional: Add accessibility features to the images, such as an `alt` attribute.
+10. Optional: Add more features to the gallery, such as a title or caption for each image, or a way to filter the images by color or breed.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : This agent chooses which agent to invoke given the current log of actions taken. Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
 
 --------------
