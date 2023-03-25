@@ -42,6 +42,14 @@ struct Args {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct Process {
+    name : String,
+    trigger : String,
+    steps: Vec<String>,
+    description: String
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
 struct Usage {
     prompt_tokens: u32,
     completion_tokens: u32,
@@ -87,6 +95,19 @@ impl SystemRole {
     }
 }
 
+impl Process {
+    fn new(file_contents: String) -> Option<Process> {
+        // deserialize the file contents
+        match serde_json::from_str(&file_contents) {
+            Ok(role) => Some(role),
+            Err(e) => {
+                println!("Error parsing role file: {}", e);
+                None
+            }
+        }
+    }
+}
+
 #[derive(Component)]
 struct Unparsed {
     text: String,
@@ -95,11 +116,6 @@ struct Unparsed {
 #[derive(Component)]
 struct Unsent;
 
-#[derive(Resource)]
-struct Settings {
-    max_iterations: usize,
-    write_file: String,
-}
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -147,8 +163,11 @@ struct InitiateImplementation;
 #[derive(Resource, Clone)]
 struct RuntimeSettings {
     goal: Option<String>,
+    max_iterations: usize,
+    write_file: String,
     available_actions: Vec<String>,
     roles: Option<Vec<SystemRole>>,
+    processes: Option<Vec<Process>>,
     implemented_thus_far: Option<Vec<Code>>,
     current_role: Option<SystemRole>,
     current_prompt: Option<String>,
@@ -277,7 +296,6 @@ fn new_docker() -> Result<Docker> {
 fn prepare_docker_container(
     runtime: ResMut<TokioTasksRuntime>,
     mut runtime_settings: ResMut<RuntimeSettings>,
-    mut settings: ResMut<Settings>,
 ) {
     runtime.spawn_background_task(|mut ctx| async move {
         let docker = new_docker().unwrap();
@@ -364,6 +382,7 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
     let args = Args::parse();
     let mut goal = String::new();
 
+    // retrieve the goal from the project goal file
     match File::open(args.project_goals_file) {
         Ok(file) => {
             // read the file
@@ -379,7 +398,15 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
             println!("Make sure that the 'project_goals_file' exists and is in the same directory as the executable.The default location is 'project_goals.txt")
         }
     }
-    let roles = helper_functions::load_prompts(&"./src/roles");
+    let roles = helper_functions::load_roles(&"./src/roles");
+
+    //collect all of the actions into a vector of strings
+    let mut actions = Vec::new();
+    for role in roles.iter() {
+        actions.push(role.action.clone());
+    }
+
+    let processes = helper_functions::load_processes(&"./src/processes", actions);
 
     runtime_settings.goal = Some(goal.clone());
     // loop through the roles and add the possible actions to the possible action list
@@ -389,6 +416,8 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
     }
 
     runtime_settings.roles = Some(roles.clone());
+    runtime_settings.processes = Some(processes.clone());
+
     let log_entry = format!("Goal: {}", goal.clone());
 
 
@@ -406,7 +435,6 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
 }
 
 fn build_message_log(
-    settings: ResMut<Settings>,
     mut runtime_settings: ResMut<RuntimeSettings>,
     mut query: Query<(Entity, &mut Unprocessed)>,
     mut commands: Commands,
@@ -420,7 +448,7 @@ fn build_message_log(
         current_iteration += 1;
         runtime_settings.current_iteration = current_iteration;
 
-        if current_iteration > settings.max_iterations {
+        if current_iteration > runtime_settings.max_iterations {
             println!("Max iterations reached");
             return;
         }
@@ -589,9 +617,8 @@ fn process_text(
     mut query: Query<(Entity, &mut Unparsed)>,
     mut commands: Commands,
     mut runtime_settings: ResMut<RuntimeSettings>,
-    mut settings: ResMut<Settings>,
 ) {
-    let write_file = settings.write_file.clone();
+    let write_file = runtime_settings.write_file.clone();
     for (the_entity, unparsed) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unparsed>(); // We only want to process the entity once
 
@@ -695,14 +722,14 @@ fn process_text(
 
                     let prompt = current_role.prompt.clone();
 
-                    let system = current_role.system.clone();
-
                     // get the prompt, system message, ect from role information
 
                     // code_description
 
+                    let content = prompt.clone() + &code.clone();
+
                     let new_message : Message = Message {
-                        content: code.clone().to_string(),
+                        content: content,
                         role: Role::User,
                     };
 
@@ -784,10 +811,9 @@ fn main() {
             container_id: None,
             recording_in_progress: false,
             roles: None,
+            processes: None,
             current_iteration: 1,
             implemented_thus_far: None,
-        })
-        .insert_resource(Settings {
             max_iterations: 10,
             write_file: "output.txt".to_string(),
         })

@@ -5,8 +5,9 @@ use tar::Builder;
 
 
 use crate::SystemRole;
+use crate::Process;
 
-pub fn load_prompts(directory_path : &str) -> Vec<SystemRole> {
+pub fn load_roles(directory_path : &str) -> Vec<SystemRole> {
     
     let mut roles : Vec<SystemRole> = Vec::new();
     let directory = Path::new(directory_path);
@@ -29,6 +30,42 @@ pub fn load_prompts(directory_path : &str) -> Vec<SystemRole> {
     }
 
     roles
+}
+
+pub fn load_processes(directory_path : &str, available_actions: Vec<String>) -> Vec<Process> {
+        
+        let mut processes : Vec<Process> = Vec::new();
+        let directory = Path::new(directory_path);
+    
+        for entry in fs::read_dir(directory).unwrap() {
+            let entry = entry.unwrap();
+            let file_path = entry.path();
+    
+            if file_path.is_file() {
+                if let Some(file_name) = file_path.clone().file_name().and_then(|n| n.to_str()) {
+                    if let Some(file_stem) = Path::new(file_name).file_stem().and_then(|s| s.to_str()) {
+                        let file_contents = fs::read_to_string(file_path).unwrap();
+                        match Process::new( file_contents){
+                            Some(process) => {
+                                // check to see that all of the actions are contained in the available actions
+                                for action in process.steps.iter() {
+                                    if !available_actions.contains(action) {
+                                        println!("Unable to parse: {:?} because action {:?} is not available", file_stem, action)
+                                    }
+                                    else {
+                                        processes.push(process.clone());
+                                    }
+                                }
+                                
+                            },
+                            None => println!("Unable to parse: {:?}", file_stem),
+                        }
+                    }
+                }
+            }
+        }
+    
+        processes
 }
 
 pub fn file_exists(file_name: &str) -> bool {
