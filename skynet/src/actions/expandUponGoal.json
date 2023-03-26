@@ -1,5 +1,5 @@
 {
     "prompt": "Given the following software project goal, please provide a comprehensive and detailed expansion of the goal to ensure clarity and eliminate any potential ambiguities. Please elaborate on each aspect of the project, including its purpose, main features, target audience, and any technical considerations that should be taken into account.",
-    "action" : "expand_goal",
+    "name" : "expand_goal",
     "system": "Expand on the software goal, provide very concise yet elucidating text."
 }

@@ -1,5 +1,5 @@
 {
     "prompt": "Please provide a detailed description of what the given code does. If the code is unclear or ambiguous, specify what information is needed to provide a better description.",
-    "action": "code_description",
+    "name": "code_description",
     "system": "This agent analyzes the provided code and writes a detailed description of its functionality."
 }

@@ -4,12 +4,12 @@ use tar::Builder;
 
 
 
-use crate::SystemRole;
+use crate::Action;
 use crate::Process;
 
-pub fn load_roles(directory_path : &str) -> Vec<SystemRole> {
+pub fn load_actions(directory_path : &str) -> Vec<Action> {
     
-    let mut roles : Vec<SystemRole> = Vec::new();
+    let mut actions : Vec<Action> = Vec::new();
     let directory = Path::new(directory_path);
 
     for entry in fs::read_dir(directory).unwrap() {
@@ -20,8 +20,8 @@ pub fn load_roles(directory_path : &str) -> Vec<SystemRole> {
             if let Some(file_name) = file_path.clone().file_name().and_then(|n| n.to_str()) {
                 if let Some(file_stem) = Path::new(file_name).file_stem().and_then(|s| s.to_str()) {
                     let file_contents = fs::read_to_string(file_path).unwrap();
-                    match SystemRole::new( file_contents){
-                        Some(role) => roles.push(role),
+                    match Action::new( file_contents){
+                        Some(action) => actions.push(action),
                         None => println!("Unable to parse: {:?}", file_stem),
                     }
                 }
@@ -29,7 +29,7 @@ pub fn load_roles(directory_path : &str) -> Vec<SystemRole> {
         }
     }
 
-    roles
+    actions
 }
 
 pub fn load_processes(directory_path : &str, available_actions: Vec<String>) -> Vec<Process> {

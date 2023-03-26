@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::utils::hashbrown::HashMap;
+use bevy_egui::{EguiPlugin, egui, EguiContext};
 use bevy_tokio_tasks::{ TokioTasksRuntime};
 use bollard::container::Config;
 use bollard::errors::Error;
@@ -7,7 +8,7 @@ use bollard::exec::{CreateExecOptions, StartExecResults};
 use bollard::image::CreateImageOptions;
 use bollard::Docker;
 use clap::Parser;
-use core::panic;
+
 use futures_lite::{StreamExt};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -44,10 +45,18 @@ struct Args {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Process {
     name : String,
-    trigger : String,
+    triggered_by : String,
+    triggers: String,
     steps: Vec<String>,
-    description: String
+    description: String,
+    creates_process_branch: bool,
+    waits_for_branch_completion: bool
 }
+
+// struct ProcessRuntime {
+//     process: Process,
+//     id: String,
+// }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 struct Usage {
@@ -77,18 +86,18 @@ struct ChatCompletion {
 struct Unprocessed;
 
 #[derive(Component, Serialize, Deserialize, Debug, Clone)]
-pub struct SystemRole {
-    action: String,
+pub struct Action {
+    name: String,
     system: String,
     prompt: String,
 }
-impl SystemRole {
-    fn new(file_contents: String) -> Option<SystemRole> {
+impl Action {
+    fn new(file_contents: String) -> Option<Action> {
         // deserialize the file contents
         match serde_json::from_str(&file_contents) {
-            Ok(role) => Some(role),
+            Ok(action) => Some(action),
             Err(e) => {
-                println!("Error parsing role file: {}", e);
+                println!("Error parsing action file: {}", e);
                 None
             }
         }
@@ -99,9 +108,9 @@ impl Process {
     fn new(file_contents: String) -> Option<Process> {
         // deserialize the file contents
         match serde_json::from_str(&file_contents) {
-            Ok(role) => Some(role),
+            Ok(action) => Some(action),
             Err(e) => {
-                println!("Error parsing role file: {}", e);
+                println!("Error parsing action file: {}", e);
                 None
             }
         }
@@ -166,10 +175,10 @@ struct RuntimeSettings {
     max_iterations: usize,
     write_file: String,
     available_actions: Vec<String>,
-    roles: Option<Vec<SystemRole>>,
+    actions: Option<Vec<Action>>,
     processes: Option<Vec<Process>>,
     implemented_thus_far: Option<Vec<Code>>,
-    current_role: Option<SystemRole>,
+    current_action: Option<Action>,
     current_prompt: Option<String>,
     recording_in_progress: bool,
     container_id: Option<String>,
@@ -189,7 +198,7 @@ impl fmt::Display for RuntimeSettings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Current Iteration:\t{}", self.current_iteration)?;
         writeln!(f, "avilable actions:\t{:?}", self.available_actions)?;
-        writeln!(f, "Current Role:\t\t[{}]:[{}]", self.current_role.as_ref().unwrap().action, self.current_role.as_ref().unwrap().system)?;
+        writeln!(f, "Current action:\t\t[{}]:[{}]", self.current_action.as_ref().unwrap().name, self.current_action.as_ref().unwrap().system)?;
         writeln!(f, "Log:")?;
 
         // only print the last log entry:
@@ -206,7 +215,7 @@ impl fmt::Display for RuntimeSettings {
 async fn get_search_results() {
     // read secret api key from environment variable
     // To get the key simply copy/paste from https://serpapi.com/dashboard.
-    let params = HashMap::<String, String>::new();
+    let _params = HashMap::<String, String>::new();
 
     let args = Args::parse();
 
@@ -222,7 +231,7 @@ async fn get_search_results() {
     );
 
     // initialize the search engine
-    let search = SerpApiSearch::google(params, api_key);
+    let _search = SerpApiSearch::google(params, api_key);
 
     // search returns a JSON as serde_json::Value which can be accessed like a HashMap.
     println!("waiting...");
@@ -244,8 +253,8 @@ async fn get_search_results() {
     // print!("ok");
 }
 
-use cpal::traits::{DeviceTrait, HostTrait};
-use cpal::{FromSample, Sample, SizedSample, SupportedStreamConfig};
+use cpal::traits::{DeviceTrait};
+use cpal::{FromSample, Sample};
 use std::io::BufWriter;
 
 fn sample_format(format: cpal::SampleFormat) -> hound::SampleFormat {
@@ -293,9 +302,27 @@ fn new_docker() -> Result<Docker> {
     Docker::new("tcp://127.0.0.1:8080")
 }
 
+
+fn ui_example_system(
+    mut egui_ctx: Query<&mut EguiContext>) {
+    
+        let mut ctx = match egui_ctx.get_single_mut().ok() {
+            Some(ctx) => ctx,
+            None => {
+                return;
+            }
+        };
+        egui::Window::new("Second Window")
+            .vscroll(true)
+            .show(ctx.get_mut(), |ui| {
+                ui.horizontal(|ui| {
+                    ui.label("Write something else: ");
+                });
+            });}
+
 fn prepare_docker_container(
-    runtime: ResMut<TokioTasksRuntime>,
-    mut runtime_settings: ResMut<RuntimeSettings>,
+    runtime: Res<TokioTasksRuntime>,
+    _runtime_settings: ResMut<RuntimeSettings>,
 ) {
     runtime.spawn_background_task(|mut ctx| async move {
         let docker = new_docker().unwrap();
@@ -339,12 +366,12 @@ fn prepare_docker_container(
 }
 
 fn send_docker_command(
-    mut runtime_settings: ResMut<RuntimeSettings>,
-    mut runtime: ResMut<TokioTasksRuntime>,
+    runtime_settings: ResMut<RuntimeSettings>,
+    runtime: ResMut<TokioTasksRuntime>,
 ) {
     let id = runtime_settings.container_id.clone().unwrap();
 
-    runtime.spawn_background_task(|mut ctx| async move {
+    runtime.spawn_background_task(|_ctx| async move {
         let docker = new_docker().unwrap();
         // println!("Docker Container: {:?}", &docker);
 
@@ -398,25 +425,25 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
             println!("Make sure that the 'project_goals_file' exists and is in the same directory as the executable.The default location is 'project_goals.txt")
         }
     }
-    let roles = helper_functions::load_roles(&"./src/roles");
+    let actions = helper_functions::load_actions(&"./src/actions");
 
     //collect all of the actions into a vector of strings
-    let mut actions = Vec::new();
-    for role in roles.iter() {
-        actions.push(role.action.clone());
+    let mut my_actions = Vec::new();
+    for action in actions.iter() {
+        my_actions.push(action.name.clone());
     }
 
-    let processes = helper_functions::load_processes(&"./src/processes", actions);
+    // let processes = helper_functions::load_processes(&"./src/processes", my_actions);
 
     runtime_settings.goal = Some(goal.clone());
-    // loop through the roles and add the possible actions to the possible action list
-    for role in roles.iter() {
-        let action = &role.action;
+    // loop through the actions and add the possible actions to the possible action list
+    for action in actions.iter() {
+        let action = &action.name;
         runtime_settings.available_actions.push(action.clone());
     }
 
-    runtime_settings.roles = Some(roles.clone());
-    runtime_settings.processes = Some(processes.clone());
+    runtime_settings.actions = Some(actions.clone());
+    // runtime_settings.processes = Some(processes.clone());
 
     let log_entry = format!("Goal: {}", goal.clone());
 
@@ -461,35 +488,35 @@ fn build_message_log(
         // At the very least, the goal should be here
         let mut log: Vec<Message> = runtime_settings.log.clone().unwrap();
 
-        let roles = runtime_settings.roles.clone().unwrap();
-        // check to see if the current role is equal to "choose_action"
-        let current_role = runtime_settings.current_role.clone();
+        let actions = runtime_settings.actions.clone().unwrap();
+        // check to see if the current action is equal to "choose_action"
+        let current_action = runtime_settings.current_action.clone();
 
         // if this is the first time through the loop
-        if current_role.is_none() || current_role.clone().unwrap().action == "choose_action" {
-            // get the role where the action is "choose_action"
-            let current_role = roles
+        if current_action.is_none() || current_action.clone().unwrap().name == "choose_action" {
+            // get the action where the action is "choose_action"
+            let current_action = actions
                 .iter()
-                .find(|&role| role.action == "choose_action")
+                .find(|&action| action.name == "choose_action")
                 .unwrap();
 
-            prompt = current_role.prompt.clone();
-            system = current_role.system.clone();
+            prompt = current_action.prompt.clone();
+            system = current_action.system.clone();
 
-            runtime_settings.current_role = Some(current_role.clone());
+            runtime_settings.current_action = Some(current_action.clone());
 
-            // The prompt consists of the log appended to the top of the prompt for the current role
+            // The prompt consists of the log appended to the top of the prompt for the current action
 
             // make the action : description pairs
-            for role in roles.iter() {
-                prompt = prompt + &format!("\n{} : {}", role.action, role.system);
+            for action in actions.iter() {
+                prompt = prompt + &format!("\n{} : {}", action.name, action.system);
             }
 
             prompt = prompt + &format!("\nAction to take:");
           
         } else {
-            prompt = current_role.clone().unwrap().prompt.clone();
-            system = current_role.clone().unwrap().system.clone();
+            prompt = current_action.clone().unwrap().prompt.clone();
+            system = current_action.clone().unwrap().system.clone();
         } 
 
           // insert the prompt at the end of the log
@@ -501,7 +528,7 @@ fn build_message_log(
         log.push(prompt_message);
 
 
-        if current_role.clone().is_some() {
+        if current_action.clone().is_some() {
 
             // if the first entry in the log is system then change the content:
             if log[0].role == Role::System {
@@ -517,10 +544,10 @@ fn build_message_log(
             }
 
 
-            let role = current_role.clone().unwrap();
+            let action = current_action.clone().unwrap();
             println!(
                 "sending to open ai: [{}] : [{}]",
-                &role.action, &role.system
+                &action.name, &action.system
             );
         }
 
@@ -542,7 +569,7 @@ fn send_openai_prompt(
     mut query: Query<(Entity,&mut Unsent)>,
     mut commands: Commands,
 ) {
-    for (mut the_entity, _unsent) in query.iter_mut() {
+    for (the_entity, _unsent) in query.iter_mut() {
         commands.entity(the_entity).remove::<Unsent>(); // We only want to process the entity once
 
         println!("runtime settings:\n {}", runtime_settings.clone());
@@ -595,7 +622,7 @@ fn send_openai_prompt(
                             + &chat_completion.choices.first().unwrap().message.content;
                     }
                     Err(e) => {
-                        println!("Error: {:?}", e);
+                        println!("Error: {:?}\nResponse Body: {:?}", e, response_body.clone());
                     }
                 }
             }
@@ -603,7 +630,7 @@ fn send_openai_prompt(
             let super_local = local_response.clone();
             println!("\nResponse: {:?}\n", super_local.clone());
 
-            ctx.run_on_main_thread(move |mut ctx| {
+            ctx.run_on_main_thread(move |ctx| {
                 ctx.world
                     .entity_mut(the_entity.clone())
                     .insert(Unparsed { text: super_local.clone() });
@@ -640,7 +667,7 @@ fn process_text(
 
         let new_message : Message = Message {
             content: unparsed.text.clone(),
-            role: Role::Assistant,
+            role : Role::Assistant,
         };
 
         runtime_settings
@@ -654,32 +681,32 @@ fn process_text(
 
         // if the last action was 'choose_action' then we need to loop through the available actions and see if the response is one of them
 
-        let current_role = runtime_settings.current_role.clone().unwrap();
-        if current_role.action == "choose_action" {
+        let current_action = runtime_settings.current_action.clone().unwrap();
+        if current_action.name == "choose_action" {
             let mut valid_response = false;
             for action in available_actions.iter() {
                 if unparsed.text.contains(action) {
                     valid_response = true;
-                    // get the role corresponding to the action
-                    let roles = runtime_settings.roles.clone().unwrap();
-                    let current_role = roles
+                    // get the action corresponding to the action
+                    let actions = runtime_settings.actions.clone().unwrap();
+                    let current_action = actions
                         .iter()
-                        .find(|&role| role.action.to_string() == action.to_string())
+                        .find(|&this_action| this_action.name.to_string() == action.to_string())
                         .unwrap();
-                    runtime_settings.current_role = Some(current_role.clone());
+                    runtime_settings.current_action = Some(current_action.clone());
                 }
             }
 
             if !valid_response {
-                let roles = runtime_settings.roles.clone().unwrap();
-                let current_role = roles
+                let actions = runtime_settings.actions.clone().unwrap();
+                let current_action = actions
                     .iter()
-                    .find(|&role| role.action == "choose_action")
+                    .find(|&action| action.name == "choose_action")
                     .unwrap();
 
-                runtime_settings.current_role = Some(current_role.clone());
+                runtime_settings.current_action = Some(current_action.clone());
 
-                let mut log = runtime_settings.log.clone().unwrap();
+                let _log = runtime_settings.log.clone().unwrap();
 
                 // come up with a message that collects all of the available actions
                 let mut available_actions_string = "".to_string();
@@ -691,7 +718,7 @@ fn process_text(
 
                 let new_message : Message = Message {
                     content: content,
-                    role: Role::User,
+                    role : Role::User,
                 };
 
                 runtime_settings.log.as_mut().unwrap().push(new_message.clone());
@@ -699,30 +726,30 @@ fn process_text(
                 return;
                 }
         } else {
-            let roles = runtime_settings.roles.clone().unwrap();
-            let current_role = roles
+            let actions = runtime_settings.actions.clone().unwrap();
+            let current_action = actions
                 .iter()
-                .find(|&role| role.action == "choose_action")
+                .find(|&action| action.name == "choose_action")
                 .unwrap();
 
-            // get the current role, if it was a developer then we will attempt to parse the code blocks
-            if runtime_settings.current_role.clone().unwrap().action == "developer" {
+            // get the current action, if it was a developer then we will attempt to parse the code blocks
+            if runtime_settings.current_action.clone().unwrap().name == "developer" {
                 let code_blocks = parse_code_blocks(&unparsed.text.clone());
                 for code_block in code_blocks.iter() {
-                    let language = code_block.get("language").unwrap();
+                    let _language = code_block.get("language").unwrap();
                     let code = code_block.get("code").unwrap();
 
 
-                    let roles = runtime_settings.roles.clone().unwrap();
+                    let actions = runtime_settings.actions.clone().unwrap();
                 
-                let current_role = roles
+                let current_action = actions
                 .iter()
-                .find(|&role| role.action == "code_description")
+                .find(|&action| action.name == "code_description")
                 .unwrap();
 
-                    let prompt = current_role.prompt.clone();
+                    let prompt = current_action.prompt.clone();
 
-                    // get the prompt, system message, ect from role information
+                    // get the prompt, system message, ect from action information
 
                     // code_description
 
@@ -738,7 +765,7 @@ fn process_text(
             }
 
 
-            runtime_settings.current_role = Some(current_role.clone());
+            runtime_settings.current_action = Some(current_action.clone());
     
             
         }
@@ -765,8 +792,8 @@ fn parse_code_blocks(text: &str) -> Vec<HashMap<String, String>> {
 
 fn keyboard_input(
     keys: Res<Input<KeyCode>>,
-    runtime: Res<TokioTasksRuntime>,
-    mut runtime_settings: ResMut<RuntimeSettings>,
+    _runtime: Res<TokioTasksRuntime>,
+    _runtime_settings: ResMut<RuntimeSettings>,
 ) {
     if keys.just_pressed(KeyCode::Space) {
 
@@ -802,15 +829,16 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
+        .add_plugin(EguiPlugin)
         .insert_resource(RuntimeSettings {
             goal: None,
             available_actions: vec![],
-            current_role: None,
+            current_action: None,
             current_prompt: None,
             log: None,
             container_id: None,
             recording_in_progress: false,
-            roles: None,
+            actions: None,
             processes: None,
             current_iteration: 1,
             implemented_thus_far: None,
@@ -819,6 +847,7 @@ fn main() {
         })
         .add_startup_system(prepare_docker_container)
         .add_startup_system(initiate_project)
+        .add_system(ui_example_system)
         .add_system(build_message_log)
         .add_system(send_openai_prompt)
         .add_system(process_text)
