@@ -1037,3 +1037,666 @@ developer : This agent will write code that fulfills the requirements of the pro
 Action to take:]
 
 --------------
+
+--------------
+Current Iteration:	2
+avilable actions:	["decompose_task", "write_tests", "expand_goal", "code_description", "write_architecture", "choose_action", "developer"]
+Current action:		[choose_action]:[Only respond with one of the actions and nothing else.]
+Log:
+	[user]:[Goal: Make a website that displays pictures of cats.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+
+--------------
+
+--------------
+Current Iteration:	3
+avilable actions:	["decompose_task", "write_tests", "expand_goal", "code_description", "write_architecture", "choose_action", "developer"]
+Current action:		[expand_goal]:[Expand on the software goal, provide very concise yet elucidating text.]
+Log:
+	[system]:[Expand on the software goal, provide very concise yet elucidating text.]
+	[user]:[Goal: Make a website that displays pictures of cats.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[expand_goal]
+	[user]:[Given the following software project goal, please provide a comprehensive and detailed expansion of the goal to ensure clarity and eliminate any potential ambiguities. Please elaborate on each aspect of the project, including its purpose, main features, target audience, and any technical considerations that should be taken into account.]
+
+--------------
+
+--------------
+Current Iteration:	4
+avilable actions:	["decompose_task", "write_tests", "expand_goal", "code_description", "write_architecture", "choose_action", "developer"]
+Current action:		[choose_action]:[Only respond with one of the actions and nothing else.]
+Log:
+	[system]:[Only respond with one of the actions and nothing else.]
+	[user]:[Goal: Make a website that displays pictures of cats.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[expand_goal]
+	[user]:[Given the following software project goal, please provide a comprehensive and detailed expansion of the goal to ensure clarity and eliminate any potential ambiguities. Please elaborate on each aspect of the project, including its purpose, main features, target audience, and any technical considerations that should be taken into account.]
+	[assistant]:[Software Project Goal: Make a website that displays pictures of cats.
+
+Expansion:
+The purpose of this project is to develop a visually appealing and user-friendly website that allows users to browse and view pictures of cats. The website should have a simple and intuitive design that enables users to easily navigate through different pages, search for specific types or breeds of cats, and save or share their favorite cat pictures. To achieve this, the website should have the following main features:
+
+1. Picture Gallery: The website should have a collection of high-quality cat pictures arranged in a gallery format. Users should be able to click on each picture to view a larger and more detailed version of the image.
+
+2. Navigation Menu: The website should have a clear and well-structured navigation menu that allows users to browse through different categories of cats, such as hair length, breeds, or colors.
+
+3. Search Bar: The website should have a search bar that enables users to search for specific types or breeds of cats. The search function should be optimized to provide accurate and relevant search results.
+
+4. User Accounts: The website should allow users to create their own accounts, which will enable them to save their favorite cat pictures, share pictures with other users, and receive notifications about new pictures added to the website.
+
+5. Social Media Integration: The website should be integrated with social media platforms such as Facebook or Instagram, allowing users to easily share pictures on their own profiles.
+
+The target audience for this website could be anyone who loves cats, especially those who want to browse and view high-quality pictures of different breeds and types of cats. However, since this project is focused on the development of the website, it is also important to consider the technical aspects of the project. The website should be designed to be responsive, meaning that it should be accessible on different devices and screen sizes. Additionally, the website should be coded with clean and optimized code, ensuring fast loading times and minimal errors. Furthermore, security should be a priority, and the website should follow best practices to ensure user data is safe and secure.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+
+--------------
+
+--------------
+Current Iteration:	5
+avilable actions:	["decompose_task", "write_tests", "expand_goal", "code_description", "write_architecture", "choose_action", "developer"]
+Current action:		[write_architecture]:[This agent will give the developer guidance on how to move forward if they are stuck.]
+Log:
+	[system]:[This agent will give the developer guidance on how to move forward if they are stuck.]
+	[user]:[Goal: Make a website that displays pictures of cats.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[expand_goal]
+	[user]:[Given the following software project goal, please provide a comprehensive and detailed expansion of the goal to ensure clarity and eliminate any potential ambiguities. Please elaborate on each aspect of the project, including its purpose, main features, target audience, and any technical considerations that should be taken into account.]
+	[assistant]:[Software Project Goal: Make a website that displays pictures of cats.
+
+Expansion:
+The purpose of this project is to develop a visually appealing and user-friendly website that allows users to browse and view pictures of cats. The website should have a simple and intuitive design that enables users to easily navigate through different pages, search for specific types or breeds of cats, and save or share their favorite cat pictures. To achieve this, the website should have the following main features:
+
+1. Picture Gallery: The website should have a collection of high-quality cat pictures arranged in a gallery format. Users should be able to click on each picture to view a larger and more detailed version of the image.
+
+2. Navigation Menu: The website should have a clear and well-structured navigation menu that allows users to browse through different categories of cats, such as hair length, breeds, or colors.
+
+3. Search Bar: The website should have a search bar that enables users to search for specific types or breeds of cats. The search function should be optimized to provide accurate and relevant search results.
+
+4. User Accounts: The website should allow users to create their own accounts, which will enable them to save their favorite cat pictures, share pictures with other users, and receive notifications about new pictures added to the website.
+
+5. Social Media Integration: The website should be integrated with social media platforms such as Facebook or Instagram, allowing users to easily share pictures on their own profiles.
+
+The target audience for this website could be anyone who loves cats, especially those who want to browse and view high-quality pictures of different breeds and types of cats. However, since this project is focused on the development of the website, it is also important to consider the technical aspects of the project. The website should be designed to be responsive, meaning that it should be accessible on different devices and screen sizes. Additionally, the website should be coded with clean and optimized code, ensuring fast loading times and minimal errors. Furthermore, security should be a priority, and the website should follow best practices to ensure user data is safe and secure.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[write_architecture]
+	[user]:[Given the project goal, please come up with a list of functions, objects and types that must be implemented to complete the goal. Specify which programming language to use to implement the software if you think there is one that will be easiest to implement them in. If the log already contains code, give guidance on what other functions, objects, types or patterns remain to be implmented.]
+
+--------------
+
+--------------
+Current Iteration:	6
+avilable actions:	["decompose_task", "write_tests", "expand_goal", "code_description", "write_architecture", "choose_action", "developer"]
+Current action:		[choose_action]:[Only respond with one of the actions and nothing else.]
+Log:
+	[system]:[Only respond with one of the actions and nothing else.]
+	[user]:[Goal: Make a website that displays pictures of cats.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[expand_goal]
+	[user]:[Given the following software project goal, please provide a comprehensive and detailed expansion of the goal to ensure clarity and eliminate any potential ambiguities. Please elaborate on each aspect of the project, including its purpose, main features, target audience, and any technical considerations that should be taken into account.]
+	[assistant]:[Software Project Goal: Make a website that displays pictures of cats.
+
+Expansion:
+The purpose of this project is to develop a visually appealing and user-friendly website that allows users to browse and view pictures of cats. The website should have a simple and intuitive design that enables users to easily navigate through different pages, search for specific types or breeds of cats, and save or share their favorite cat pictures. To achieve this, the website should have the following main features:
+
+1. Picture Gallery: The website should have a collection of high-quality cat pictures arranged in a gallery format. Users should be able to click on each picture to view a larger and more detailed version of the image.
+
+2. Navigation Menu: The website should have a clear and well-structured navigation menu that allows users to browse through different categories of cats, such as hair length, breeds, or colors.
+
+3. Search Bar: The website should have a search bar that enables users to search for specific types or breeds of cats. The search function should be optimized to provide accurate and relevant search results.
+
+4. User Accounts: The website should allow users to create their own accounts, which will enable them to save their favorite cat pictures, share pictures with other users, and receive notifications about new pictures added to the website.
+
+5. Social Media Integration: The website should be integrated with social media platforms such as Facebook or Instagram, allowing users to easily share pictures on their own profiles.
+
+The target audience for this website could be anyone who loves cats, especially those who want to browse and view high-quality pictures of different breeds and types of cats. However, since this project is focused on the development of the website, it is also important to consider the technical aspects of the project. The website should be designed to be responsive, meaning that it should be accessible on different devices and screen sizes. Additionally, the website should be coded with clean and optimized code, ensuring fast loading times and minimal errors. Furthermore, security should be a priority, and the website should follow best practices to ensure user data is safe and secure.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[write_architecture]
+	[user]:[Given the project goal, please come up with a list of functions, objects and types that must be implemented to complete the goal. Specify which programming language to use to implement the software if you think there is one that will be easiest to implement them in. If the log already contains code, give guidance on what other functions, objects, types or patterns remain to be implmented.]
+	[assistant]:[To complete the goal of making a website that displays pictures of cats, the following functions, objects and types must be implemented:
+
+1. A function to retrieve cat pictures from a database
+2. A function to display the retrieved pictures to the user
+3. An object for user accounts and user authentication
+4. A function to allow users to save and share pictures with other users
+5. A search function to allow users to search for specific types or breeds of cats
+6. A function to integrate with social media platforms
+7. A function to optimize website loading time
+8. An object to secure user data
+9. An object-oriented approach to encapsulate various functions should be followed.
+
+Web development frameworks such as Django or Ruby on Rails would be useful to implement these functions and objects. 
+
+If the log already contains code, further attention should be given to how the objects will interact with each other. Additionally, features such as user authentication, search functionality, and social media integration should be added if they are missing. Further optimization of the website loading time should also be considered if necessary.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+
+--------------
+
+--------------
+Current Iteration:	7
+avilable actions:	["decompose_task", "write_tests", "expand_goal", "code_description", "write_architecture", "choose_action", "developer"]
+Current action:		[developer]:[This agent will write code that fulfills the requirements of the project.]
+Log:
+	[system]:[This agent will write code that fulfills the requirements of the project.]
+	[user]:[Goal: Make a website that displays pictures of cats.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[expand_goal]
+	[user]:[Given the following software project goal, please provide a comprehensive and detailed expansion of the goal to ensure clarity and eliminate any potential ambiguities. Please elaborate on each aspect of the project, including its purpose, main features, target audience, and any technical considerations that should be taken into account.]
+	[assistant]:[Software Project Goal: Make a website that displays pictures of cats.
+
+Expansion:
+The purpose of this project is to develop a visually appealing and user-friendly website that allows users to browse and view pictures of cats. The website should have a simple and intuitive design that enables users to easily navigate through different pages, search for specific types or breeds of cats, and save or share their favorite cat pictures. To achieve this, the website should have the following main features:
+
+1. Picture Gallery: The website should have a collection of high-quality cat pictures arranged in a gallery format. Users should be able to click on each picture to view a larger and more detailed version of the image.
+
+2. Navigation Menu: The website should have a clear and well-structured navigation menu that allows users to browse through different categories of cats, such as hair length, breeds, or colors.
+
+3. Search Bar: The website should have a search bar that enables users to search for specific types or breeds of cats. The search function should be optimized to provide accurate and relevant search results.
+
+4. User Accounts: The website should allow users to create their own accounts, which will enable them to save their favorite cat pictures, share pictures with other users, and receive notifications about new pictures added to the website.
+
+5. Social Media Integration: The website should be integrated with social media platforms such as Facebook or Instagram, allowing users to easily share pictures on their own profiles.
+
+The target audience for this website could be anyone who loves cats, especially those who want to browse and view high-quality pictures of different breeds and types of cats. However, since this project is focused on the development of the website, it is also important to consider the technical aspects of the project. The website should be designed to be responsive, meaning that it should be accessible on different devices and screen sizes. Additionally, the website should be coded with clean and optimized code, ensuring fast loading times and minimal errors. Furthermore, security should be a priority, and the website should follow best practices to ensure user data is safe and secure.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[write_architecture]
+	[user]:[Given the project goal, please come up with a list of functions, objects and types that must be implemented to complete the goal. Specify which programming language to use to implement the software if you think there is one that will be easiest to implement them in. If the log already contains code, give guidance on what other functions, objects, types or patterns remain to be implmented.]
+	[assistant]:[To complete the goal of making a website that displays pictures of cats, the following functions, objects and types must be implemented:
+
+1. A function to retrieve cat pictures from a database
+2. A function to display the retrieved pictures to the user
+3. An object for user accounts and user authentication
+4. A function to allow users to save and share pictures with other users
+5. A search function to allow users to search for specific types or breeds of cats
+6. A function to integrate with social media platforms
+7. A function to optimize website loading time
+8. An object to secure user data
+9. An object-oriented approach to encapsulate various functions should be followed.
+
+Web development frameworks such as Django or Ruby on Rails would be useful to implement these functions and objects. 
+
+If the log already contains code, further attention should be given to how the objects will interact with each other. Additionally, features such as user authentication, search functionality, and social media integration should be added if they are missing. Further optimization of the website loading time should also be considered if necessary.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[developer]
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+
+--------------
+
+--------------
+Current Iteration:	8
+avilable actions:	["decompose_task", "write_tests", "expand_goal", "code_description", "write_architecture", "choose_action", "developer"]
+Current action:		[choose_action]:[Only respond with one of the actions and nothing else.]
+Log:
+	[system]:[Only respond with one of the actions and nothing else.]
+	[user]:[Goal: Make a website that displays pictures of cats.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[expand_goal]
+	[user]:[Given the following software project goal, please provide a comprehensive and detailed expansion of the goal to ensure clarity and eliminate any potential ambiguities. Please elaborate on each aspect of the project, including its purpose, main features, target audience, and any technical considerations that should be taken into account.]
+	[assistant]:[Software Project Goal: Make a website that displays pictures of cats.
+
+Expansion:
+The purpose of this project is to develop a visually appealing and user-friendly website that allows users to browse and view pictures of cats. The website should have a simple and intuitive design that enables users to easily navigate through different pages, search for specific types or breeds of cats, and save or share their favorite cat pictures. To achieve this, the website should have the following main features:
+
+1. Picture Gallery: The website should have a collection of high-quality cat pictures arranged in a gallery format. Users should be able to click on each picture to view a larger and more detailed version of the image.
+
+2. Navigation Menu: The website should have a clear and well-structured navigation menu that allows users to browse through different categories of cats, such as hair length, breeds, or colors.
+
+3. Search Bar: The website should have a search bar that enables users to search for specific types or breeds of cats. The search function should be optimized to provide accurate and relevant search results.
+
+4. User Accounts: The website should allow users to create their own accounts, which will enable them to save their favorite cat pictures, share pictures with other users, and receive notifications about new pictures added to the website.
+
+5. Social Media Integration: The website should be integrated with social media platforms such as Facebook or Instagram, allowing users to easily share pictures on their own profiles.
+
+The target audience for this website could be anyone who loves cats, especially those who want to browse and view high-quality pictures of different breeds and types of cats. However, since this project is focused on the development of the website, it is also important to consider the technical aspects of the project. The website should be designed to be responsive, meaning that it should be accessible on different devices and screen sizes. Additionally, the website should be coded with clean and optimized code, ensuring fast loading times and minimal errors. Furthermore, security should be a priority, and the website should follow best practices to ensure user data is safe and secure.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[write_architecture]
+	[user]:[Given the project goal, please come up with a list of functions, objects and types that must be implemented to complete the goal. Specify which programming language to use to implement the software if you think there is one that will be easiest to implement them in. If the log already contains code, give guidance on what other functions, objects, types or patterns remain to be implmented.]
+	[assistant]:[To complete the goal of making a website that displays pictures of cats, the following functions, objects and types must be implemented:
+
+1. A function to retrieve cat pictures from a database
+2. A function to display the retrieved pictures to the user
+3. An object for user accounts and user authentication
+4. A function to allow users to save and share pictures with other users
+5. A search function to allow users to search for specific types or breeds of cats
+6. A function to integrate with social media platforms
+7. A function to optimize website loading time
+8. An object to secure user data
+9. An object-oriented approach to encapsulate various functions should be followed.
+
+Web development frameworks such as Django or Ruby on Rails would be useful to implement these functions and objects. 
+
+If the log already contains code, further attention should be given to how the objects will interact with each other. Additionally, features such as user authentication, search functionality, and social media integration should be added if they are missing. Further optimization of the website loading time should also be considered if necessary.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[developer]
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[It is necessary to know the details of the implementation before writing code. However, I can provide a sample implementation of a function that retrieves cat pictures from a database, using Python and the Django web framework:
+
+```python
+from django.db import models
+
+class Cat(models.Model):
+    breed = models.CharField(max_length=100)
+    description = models.TextField()
+    picture = models.ImageField(upload_to='cats')
+
+def get_cat_pictures():
+    cats = Cat.objects.all()
+    pictures = []
+    for cat in cats:
+        pictures.append(cat.picture.url)
+    return pictures
+```
+
+This implementation assumes that the Cat model has been defined in a Django application and that each Cat object has a picture attribute that is an image file. The function `get_cat_pictures` retrieves all Cat objects from the database and appends the URL of the picture attribute of each object to a list. The list of picture URL's is then returned.
+
+This is just one example of how the requirements could be implemented, and further functionality would need to be added in order to fully realize the goal.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+
+--------------
+
+--------------
+Current Iteration:	9
+avilable actions:	["decompose_task", "write_tests", "expand_goal", "code_description", "write_architecture", "choose_action", "developer"]
+Current action:		[write_tests]:[This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.]
+Log:
+	[system]:[This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.]
+	[user]:[Goal: Make a website that displays pictures of cats.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[expand_goal]
+	[user]:[Given the following software project goal, please provide a comprehensive and detailed expansion of the goal to ensure clarity and eliminate any potential ambiguities. Please elaborate on each aspect of the project, including its purpose, main features, target audience, and any technical considerations that should be taken into account.]
+	[assistant]:[Software Project Goal: Make a website that displays pictures of cats.
+
+Expansion:
+The purpose of this project is to develop a visually appealing and user-friendly website that allows users to browse and view pictures of cats. The website should have a simple and intuitive design that enables users to easily navigate through different pages, search for specific types or breeds of cats, and save or share their favorite cat pictures. To achieve this, the website should have the following main features:
+
+1. Picture Gallery: The website should have a collection of high-quality cat pictures arranged in a gallery format. Users should be able to click on each picture to view a larger and more detailed version of the image.
+
+2. Navigation Menu: The website should have a clear and well-structured navigation menu that allows users to browse through different categories of cats, such as hair length, breeds, or colors.
+
+3. Search Bar: The website should have a search bar that enables users to search for specific types or breeds of cats. The search function should be optimized to provide accurate and relevant search results.
+
+4. User Accounts: The website should allow users to create their own accounts, which will enable them to save their favorite cat pictures, share pictures with other users, and receive notifications about new pictures added to the website.
+
+5. Social Media Integration: The website should be integrated with social media platforms such as Facebook or Instagram, allowing users to easily share pictures on their own profiles.
+
+The target audience for this website could be anyone who loves cats, especially those who want to browse and view high-quality pictures of different breeds and types of cats. However, since this project is focused on the development of the website, it is also important to consider the technical aspects of the project. The website should be designed to be responsive, meaning that it should be accessible on different devices and screen sizes. Additionally, the website should be coded with clean and optimized code, ensuring fast loading times and minimal errors. Furthermore, security should be a priority, and the website should follow best practices to ensure user data is safe and secure.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[write_architecture]
+	[user]:[Given the project goal, please come up with a list of functions, objects and types that must be implemented to complete the goal. Specify which programming language to use to implement the software if you think there is one that will be easiest to implement them in. If the log already contains code, give guidance on what other functions, objects, types or patterns remain to be implmented.]
+	[assistant]:[To complete the goal of making a website that displays pictures of cats, the following functions, objects and types must be implemented:
+
+1. A function to retrieve cat pictures from a database
+2. A function to display the retrieved pictures to the user
+3. An object for user accounts and user authentication
+4. A function to allow users to save and share pictures with other users
+5. A search function to allow users to search for specific types or breeds of cats
+6. A function to integrate with social media platforms
+7. A function to optimize website loading time
+8. An object to secure user data
+9. An object-oriented approach to encapsulate various functions should be followed.
+
+Web development frameworks such as Django or Ruby on Rails would be useful to implement these functions and objects. 
+
+If the log already contains code, further attention should be given to how the objects will interact with each other. Additionally, features such as user authentication, search functionality, and social media integration should be added if they are missing. Further optimization of the website loading time should also be considered if necessary.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[developer]
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[It is necessary to know the details of the implementation before writing code. However, I can provide a sample implementation of a function that retrieves cat pictures from a database, using Python and the Django web framework:
+
+```python
+from django.db import models
+
+class Cat(models.Model):
+    breed = models.CharField(max_length=100)
+    description = models.TextField()
+    picture = models.ImageField(upload_to='cats')
+
+def get_cat_pictures():
+    cats = Cat.objects.all()
+    pictures = []
+    for cat in cats:
+        pictures.append(cat.picture.url)
+    return pictures
+```
+
+This implementation assumes that the Cat model has been defined in a Django application and that each Cat object has a picture attribute that is an image file. The function `get_cat_pictures` retrieves all Cat objects from the database and appends the URL of the picture attribute of each object to a list. The list of picture URL's is then returned.
+
+This is just one example of how the requirements could be implemented, and further functionality would need to be added in order to fully realize the goal.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[write_tests]
+	[user]:[You are a quality assurance agent, your job is to write code that will test that the code written by the developer is correct. You will write code that tests the most immediate code in the log.]
+
+--------------
+
+--------------
+Current Iteration:	10
+avilable actions:	["decompose_task", "write_tests", "expand_goal", "code_description", "write_architecture", "choose_action", "developer"]
+Current action:		[choose_action]:[Only respond with one of the actions and nothing else.]
+Log:
+	[system]:[Only respond with one of the actions and nothing else.]
+	[user]:[Goal: Make a website that displays pictures of cats.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[expand_goal]
+	[user]:[Given the following software project goal, please provide a comprehensive and detailed expansion of the goal to ensure clarity and eliminate any potential ambiguities. Please elaborate on each aspect of the project, including its purpose, main features, target audience, and any technical considerations that should be taken into account.]
+	[assistant]:[Software Project Goal: Make a website that displays pictures of cats.
+
+Expansion:
+The purpose of this project is to develop a visually appealing and user-friendly website that allows users to browse and view pictures of cats. The website should have a simple and intuitive design that enables users to easily navigate through different pages, search for specific types or breeds of cats, and save or share their favorite cat pictures. To achieve this, the website should have the following main features:
+
+1. Picture Gallery: The website should have a collection of high-quality cat pictures arranged in a gallery format. Users should be able to click on each picture to view a larger and more detailed version of the image.
+
+2. Navigation Menu: The website should have a clear and well-structured navigation menu that allows users to browse through different categories of cats, such as hair length, breeds, or colors.
+
+3. Search Bar: The website should have a search bar that enables users to search for specific types or breeds of cats. The search function should be optimized to provide accurate and relevant search results.
+
+4. User Accounts: The website should allow users to create their own accounts, which will enable them to save their favorite cat pictures, share pictures with other users, and receive notifications about new pictures added to the website.
+
+5. Social Media Integration: The website should be integrated with social media platforms such as Facebook or Instagram, allowing users to easily share pictures on their own profiles.
+
+The target audience for this website could be anyone who loves cats, especially those who want to browse and view high-quality pictures of different breeds and types of cats. However, since this project is focused on the development of the website, it is also important to consider the technical aspects of the project. The website should be designed to be responsive, meaning that it should be accessible on different devices and screen sizes. Additionally, the website should be coded with clean and optimized code, ensuring fast loading times and minimal errors. Furthermore, security should be a priority, and the website should follow best practices to ensure user data is safe and secure.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[write_architecture]
+	[user]:[Given the project goal, please come up with a list of functions, objects and types that must be implemented to complete the goal. Specify which programming language to use to implement the software if you think there is one that will be easiest to implement them in. If the log already contains code, give guidance on what other functions, objects, types or patterns remain to be implmented.]
+	[assistant]:[To complete the goal of making a website that displays pictures of cats, the following functions, objects and types must be implemented:
+
+1. A function to retrieve cat pictures from a database
+2. A function to display the retrieved pictures to the user
+3. An object for user accounts and user authentication
+4. A function to allow users to save and share pictures with other users
+5. A search function to allow users to search for specific types or breeds of cats
+6. A function to integrate with social media platforms
+7. A function to optimize website loading time
+8. An object to secure user data
+9. An object-oriented approach to encapsulate various functions should be followed.
+
+Web development frameworks such as Django or Ruby on Rails would be useful to implement these functions and objects. 
+
+If the log already contains code, further attention should be given to how the objects will interact with each other. Additionally, features such as user authentication, search functionality, and social media integration should be added if they are missing. Further optimization of the website loading time should also be considered if necessary.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[developer]
+	[user]:[Please write code that fulfills the requirements as given. If there is not enough information to complete this task then specify what information is needed before the code can complete. Put any code generated in a code block like [code:language] code goes here [/code]. For instance, [code:javascript] console.log('hello world'); [/code].]
+	[assistant]:[It is necessary to know the details of the implementation before writing code. However, I can provide a sample implementation of a function that retrieves cat pictures from a database, using Python and the Django web framework:
+
+```python
+from django.db import models
+
+class Cat(models.Model):
+    breed = models.CharField(max_length=100)
+    description = models.TextField()
+    picture = models.ImageField(upload_to='cats')
+
+def get_cat_pictures():
+    cats = Cat.objects.all()
+    pictures = []
+    for cat in cats:
+        pictures.append(cat.picture.url)
+    return pictures
+```
+
+This implementation assumes that the Cat model has been defined in a Django application and that each Cat object has a picture attribute that is an image file. The function `get_cat_pictures` retrieves all Cat objects from the database and appends the URL of the picture attribute of each object to a list. The list of picture URL's is then returned.
+
+This is just one example of how the requirements could be implemented, and further functionality would need to be added in order to fully realize the goal.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[write_tests]
+	[user]:[You are a quality assurance agent, your job is to write code that will test that the code written by the developer is correct. You will write code that tests the most immediate code in the log.]
+	[assistant]:[As there is currently no code in the log to test, I cannot write tests for it. 
+
+However, I can provide an example of what a test case for the function `get_cat_pictures` described earlier might look like:
+
+```python
+from django.test import TestCase
+from .models import Cat, get_cat_pictures
+
+class CatTestCase(TestCase):
+    def setUp(self):
+        Cat.objects.create(breed="Siamese", description="A beautiful blue-eyed cat", picture="test/siamese.jpg")
+        Cat.objects.create(breed="Tabby", description="A cute striped cat", picture="test/tabby.jpg")
+
+    def test_get_cat_pictures(self):
+        siamese = Cat.objects.get(breed="Siamese")
+        tabby = Cat.objects.get(breed="Tabby")
+        self.assertEqual(get_cat_pictures(), [siamese.picture.url, tabby.picture.url])
+```
+
+This test case first creates two `Cat` objects, then tests whether the `get_cat_pictures` function returns the expected list of picture URLs. The `setUp` method is a special method that is called before each test case is run, and is used to create any necessary objects. The `test_get_cat_pictures` method tests the functionality of the `get_cat_pictures` function by retrieving the picture URLs for each `Cat` object and comparing them with the expected list using the `assertEqual` method. If the function works as expected, the test case will pass.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+
+--------------
+
+--------------
+Current Iteration:	2
+avilable actions:	["decompose_task", "write_tests", "expand_goal", "code_description", "write_architecture", "choose_action", "developer"]
+Current action:		[choose_action]:[Only respond with one of the actions and nothing else.]
+Log:
+	[user]:[Goal: Make a website that displays pictures of cats.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+
+--------------
+
+--------------
+Current Iteration:	3
+avilable actions:	["decompose_task", "write_tests", "expand_goal", "code_description", "write_architecture", "choose_action", "developer"]
+Current action:		[expand_goal]:[Expand on the software goal, provide very concise yet elucidating text.]
+Log:
+	[system]:[Expand on the software goal, provide very concise yet elucidating text.]
+	[user]:[Goal: Make a website that displays pictures of cats.]
+	[user]:[Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.
+decompose_task : This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal.
+write_tests : This agent will write code that tests the most immediate code in the log. This agent should be run any time the developer produces code.
+expand_goal : Expand on the software goal, provide very concise yet elucidating text.
+code_description : This agent analyzes the provided code and writes a detailed description of its functionality.
+write_architecture : This agent will give the developer guidance on how to move forward if they are stuck.
+choose_action : Only respond with one of the actions and nothing else.
+developer : This agent will write code that fulfills the requirements of the project.
+Action to take:]
+	[assistant]:[expand_goal]
+	[user]:[Given the following software project goal, please provide a comprehensive and detailed expansion of the goal to ensure clarity and eliminate any potential ambiguities. Please elaborate on each aspect of the project, including its purpose, main features, target audience, and any technical considerations that should be taken into account.]
+
+--------------

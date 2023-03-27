@@ -169,11 +169,36 @@ impl fmt::Display for Role {
 #[derive(Component)]
 struct InitiateImplementation;
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+enum ViewMode {
+    Action,
+    Process,
+}
+
+impl ViewMode {
+    fn toggle(&mut self) {
+        match self {
+            ViewMode::Action => *self = ViewMode::Process,
+            ViewMode::Process => *self = ViewMode::Action,
+        }
+    }
+}
+
+
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct NodeGraph {
+    nodes: Vec<Node>,
+    edges: Vec<Edge>,
+}
+
 #[derive(Resource, Clone)]
 struct RuntimeSettings {
     goal: Option<String>,
+    node_graphs: Option<HashMap<ViewMode, NodeGraph>>,
     max_iterations: usize,
     write_file: String,
+    view_mode: ViewMode,
     available_actions: Vec<String>,
     actions: Option<Vec<Action>>,
     processes: Option<Vec<Process>>,
@@ -304,14 +329,28 @@ fn new_docker() -> Result<Docker> {
 
 
 fn ui_example_system(
-    mut egui_ctx: Query<&mut EguiContext>) {
+    mut egui_ctx: Query<&mut EguiContext>
+    , mut runtime_settings: ResMut<RuntimeSettings>
+) {
     
+
         let mut ctx = match egui_ctx.get_single_mut().ok() {
             Some(ctx) => ctx,
             None => {
                 return;
             }
         };
+
+
+        egui::SidePanel::left("side_panel").show(ctx.get_mut(), |ui| {
+            ui.heading("Side Panel");
+            ui.label("This is a side panel");
+
+            if ui.button("Change View").clicked(){
+                runtime_settings.view_mode.toggle();
+            }
+        });
+
         egui::Window::new("Second Window")
             .vscroll(true)
             .show(ctx.get_mut(), |ui| {
@@ -832,6 +871,7 @@ fn main() {
         .add_plugin(EguiPlugin)
         .insert_resource(RuntimeSettings {
             goal: None,
+            view_mode: ViewMode::Process,
             available_actions: vec![],
             current_action: None,
             current_prompt: None,
@@ -842,7 +882,8 @@ fn main() {
             processes: None,
             current_iteration: 1,
             implemented_thus_far: None,
-            max_iterations: 10,
+            max_iterations: 3,
+            node_graphs: Vec
             write_file: "output.txt".to_string(),
         })
         .add_startup_system(prepare_docker_container)
