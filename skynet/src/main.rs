@@ -669,22 +669,29 @@ fn send_openai_prompt(
 
 use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
 
+
 fn start_websocket_server(runtime: ResMut<TokioTasksRuntime>) {
     runtime.spawn_background_task(move |ctx| async {
         let mut listener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
 
         while let Ok((stream, addr)) = listener.accept().await {
-            let ws_stream = tokio_tungstenite::accept_async(stream)
-                .await
-                .expect("Error during the websocket handshake occurred");
-            println!("WebSocket connection established: {}", addr);
+            // Spawn a new task for each incoming connection
+            tokio::spawn(async move {
+                let ws_stream = match tokio_tungstenite::accept_async(stream).await {
+                    Ok(ws_stream) => ws_stream,
+                    Err(e) => {
+                        println!("Error during the websocket handshake occurred: {:?}", e);
+                        return;
+                    }
+                };
+                println!("WebSocket connection established: {}", addr);
 
-            let (outgoing, incoming) = ws_stream.split();
+                let (outgoing, mut incoming) = ws_stream.split();
 
-            incoming.try_for_each( |msg| async move {
-                println!("Received a message from {}: {}", addr, &msg.to_text().unwrap());
-                Ok(())
-            }).await;
+                while let Some(Ok(msg)) = incoming.next().await {
+                    println!("Received a message from {}: {}", addr, msg.to_text().unwrap());
+                }
+            });
         }
     });
 }
@@ -901,7 +908,7 @@ fn main() {
             processes: None,
             current_iteration: 1,
             implemented_thus_far: None,
-            max_iterations: 3,
+            max_iterations: 1,
             write_file: "output.txt".to_string(),
         })
         .add_startup_system(prepare_docker_container)
