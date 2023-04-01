@@ -1,1 +1,1 @@
-Make a website that displays pictures of cats.
+Build a webpage that allows video chatting between users.

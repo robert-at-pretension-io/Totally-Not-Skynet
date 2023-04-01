@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy::utils::hashbrown::HashMap;
-use bevy_egui::{EguiPlugin, egui, EguiContext};
-use bevy_tokio_tasks::{ TokioTasksRuntime};
+use bevy_tokio_tasks::TokioTasksRuntime;
 use bollard::container::Config;
 use bollard::errors::Error;
 use bollard::exec::{CreateExecOptions, StartExecResults};
@@ -9,14 +8,14 @@ use bollard::image::CreateImageOptions;
 use bollard::Docker;
 use clap::Parser;
 
-use futures_lite::{StreamExt};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serpapi_search_rust::serp_api_search::SerpApiSearch;
 use std::fmt::{self};
-use std::sync::{ Arc, Mutex};
+use std::sync::{Arc, Mutex};
 use std::vec;
 use std::{fs::File, io::BufRead};
+use tokio::net::{TcpListener, TcpStream};
 
 //import bevy hashmap
 
@@ -44,13 +43,13 @@ struct Args {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Process {
-    name : String,
-    triggered_by : String,
+    name: String,
+    triggered_by: String,
     triggers: String,
     steps: Vec<String>,
     description: String,
     creates_process_branch: bool,
-    waits_for_branch_completion: bool
+    waits_for_branch_completion: bool,
 }
 
 // struct ProcessRuntime {
@@ -125,8 +124,6 @@ struct Unparsed {
 #[derive(Component)]
 struct Unsent;
 
-
-
 #[derive(Debug, Serialize, Deserialize)]
 struct ChatCompletionRequest {
     model: String,
@@ -184,18 +181,16 @@ impl ViewMode {
     }
 }
 
-
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-struct NodeGraph {
-    nodes: Vec<Node>,
-    edges: Vec<Edge>,
-}
+// #[derive(Serialize, Deserialize, Debug, Clone)]
+// struct NodeGraph {
+//     nodes: Vec<Node>,
+//     edges: Vec<Edge>,
+// }
 
 #[derive(Resource, Clone)]
 struct RuntimeSettings {
     goal: Option<String>,
-    node_graphs: Option<HashMap<ViewMode, NodeGraph>>,
+    // node_graphs: Option<HashMap<ViewMode, NodeGraph>>,
     max_iterations: usize,
     write_file: String,
     view_mode: ViewMode,
@@ -218,17 +213,21 @@ struct Code {
     description: Option<String>,
 }
 
-
 impl fmt::Display for RuntimeSettings {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Current Iteration:\t{}", self.current_iteration)?;
         writeln!(f, "avilable actions:\t{:?}", self.available_actions)?;
-        writeln!(f, "Current action:\t\t[{}]:[{}]", self.current_action.as_ref().unwrap().name, self.current_action.as_ref().unwrap().system)?;
+        writeln!(
+            f,
+            "Current action:\t\t[{}]:[{}]",
+            self.current_action.as_ref().unwrap().name,
+            self.current_action.as_ref().unwrap().system
+        )?;
         writeln!(f, "Log:")?;
 
         // only print the last log entry:
         if let Some(log) = self.log.as_ref() {
-            // Write out all of the log entries: 
+            // Write out all of the log entries:
             for entry in log {
                 writeln!(f, "\t[{}]:[{}]", entry.role, entry.content)?;
             }
@@ -278,7 +277,7 @@ async fn get_search_results() {
     // print!("ok");
 }
 
-use cpal::traits::{DeviceTrait};
+use cpal::traits::DeviceTrait;
 use cpal::{FromSample, Sample};
 use std::io::BufWriter;
 
@@ -327,37 +326,34 @@ fn new_docker() -> Result<Docker> {
     Docker::new("tcp://127.0.0.1:8080")
 }
 
+// fn ui_example_system(
+//     mut egui_ctx: Query<&mut EguiContext>,
+//     mut runtime_settings: ResMut<RuntimeSettings>,
+// ) {
+//     let mut ctx = match egui_ctx.get_single_mut().ok() {
+//         Some(ctx) => ctx,
+//         None => {
+//             return;
+//         }
+//     };
 
-fn ui_example_system(
-    mut egui_ctx: Query<&mut EguiContext>
-    , mut runtime_settings: ResMut<RuntimeSettings>
-) {
-    
+//     egui::SidePanel::left("side_panel").show(ctx.get_mut(), |ui| {
+//         ui.heading("Side Panel");
+//         ui.label("This is a side panel");
 
-        let mut ctx = match egui_ctx.get_single_mut().ok() {
-            Some(ctx) => ctx,
-            None => {
-                return;
-            }
-        };
+//         if ui.button("Change View").clicked() {
+//             runtime_settings.view_mode.toggle();
+//         }
+//     });
 
-
-        egui::SidePanel::left("side_panel").show(ctx.get_mut(), |ui| {
-            ui.heading("Side Panel");
-            ui.label("This is a side panel");
-
-            if ui.button("Change View").clicked(){
-                runtime_settings.view_mode.toggle();
-            }
-        });
-
-        egui::Window::new("Second Window")
-            .vscroll(true)
-            .show(ctx.get_mut(), |ui| {
-                ui.horizontal(|ui| {
-                    ui.label("Write something else: ");
-                });
-            });}
+//     egui::Window::new("Second Window")
+//         .vscroll(true)
+//         .show(ctx.get_mut(), |ui| {
+//             ui.horizontal(|ui| {
+//                 ui.label("Write something else: ");
+//             });
+//         });
+// }
 
 fn prepare_docker_container(
     runtime: Res<TokioTasksRuntime>,
@@ -486,8 +482,7 @@ fn initiate_project(mut runtime_settings: ResMut<RuntimeSettings>, mut commands:
 
     let log_entry = format!("Goal: {}", goal.clone());
 
-
-    let message : Message = Message {
+    let message: Message = Message {
         content: log_entry.clone(),
         role: Role::User,
     };
@@ -522,7 +517,7 @@ fn build_message_log(
         // here is where we determine the prompt based on the stage of development
         let mut prompt = String::new();
 
-        let mut system : String = String::new();
+        let mut system: String = String::new();
 
         // At the very least, the goal should be here
         let mut log: Vec<Message> = runtime_settings.log.clone().unwrap();
@@ -552,36 +547,32 @@ fn build_message_log(
             }
 
             prompt = prompt + &format!("\nAction to take:");
-          
         } else {
             prompt = current_action.clone().unwrap().prompt.clone();
             system = current_action.clone().unwrap().system.clone();
-        } 
+        }
 
-          // insert the prompt at the end of the log
-          let prompt_message : Message = Message {
+        // insert the prompt at the end of the log
+        let prompt_message: Message = Message {
             content: prompt.clone(),
             role: Role::User,
         };
 
         log.push(prompt_message);
 
-
         if current_action.clone().is_some() {
-
             // if the first entry in the log is system then change the content:
             if log[0].role == Role::System {
                 log[0].content = format!("{}", system);
             }
             // otherwise, we need to add the system to the beginning of the log
             else {
-                let system_message : Message = Message {
+                let system_message: Message = Message {
                     content: format!("{}", system),
                     role: Role::System,
                 };
                 log.insert(0, system_message);
             }
-
 
             let action = current_action.clone().unwrap();
             println!(
@@ -595,9 +586,7 @@ fn build_message_log(
 
         println!("The current log: \n{:#?}", log.clone());
 
-        commands
-            .entity(the_entity)
-            .insert(Unsent);
+        commands.entity(the_entity).insert(Unsent);
     }
 }
 
@@ -605,7 +594,7 @@ fn send_openai_prompt(
     // openai: Res<OpenAIObjects>,
     runtime: ResMut<TokioTasksRuntime>,
     runtime_settings: Res<RuntimeSettings>,
-    mut query: Query<(Entity,&mut Unsent)>,
+    mut query: Query<(Entity, &mut Unsent)>,
     mut commands: Commands,
 ) {
     for (the_entity, _unsent) in query.iter_mut() {
@@ -622,7 +611,6 @@ fn send_openai_prompt(
 
             let mut local_response = String::new();
             while finish_reason != "stop" {
-
                 let url = "https://api.openai.com/v1/chat/completions";
 
                 let client = Client::new();
@@ -670,13 +658,35 @@ fn send_openai_prompt(
             println!("\nResponse: {:?}\n", super_local.clone());
 
             ctx.run_on_main_thread(move |ctx| {
-                ctx.world
-                    .entity_mut(the_entity.clone())
-                    .insert(Unparsed { text: super_local.clone() });
+                ctx.world.entity_mut(the_entity.clone()).insert(Unparsed {
+                    text: super_local.clone(),
+                });
             })
             .await;
         });
     }
+}
+
+use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
+
+fn start_websocket_server(runtime: ResMut<TokioTasksRuntime>) {
+    runtime.spawn_background_task(move |ctx| async {
+        let mut listener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
+
+        while let Ok((stream, addr)) = listener.accept().await {
+            let ws_stream = tokio_tungstenite::accept_async(stream)
+                .await
+                .expect("Error during the websocket handshake occurred");
+            println!("WebSocket connection established: {}", addr);
+
+            let (outgoing, incoming) = ws_stream.split();
+
+            incoming.try_for_each( |msg| async move {
+                println!("Received a message from {}: {}", addr, &msg.to_text().unwrap());
+                Ok(())
+            }).await;
+        }
+    });
 }
 
 fn process_text(
@@ -698,15 +708,18 @@ fn process_text(
             .open(write_file.clone())
             .unwrap();
 
-        let debug_string = format!("\n--------------\n{}\n--------------\n", runtime_settings.clone());
+        let debug_string = format!(
+            "\n--------------\n{}\n--------------\n",
+            runtime_settings.clone()
+        );
 
         file.write_all(debug_string.clone().as_bytes()).unwrap();
 
         // Make an assistant response
 
-        let new_message : Message = Message {
+        let new_message: Message = Message {
             content: unparsed.text.clone(),
-            role : Role::Assistant,
+            role: Role::Assistant,
         };
 
         runtime_settings
@@ -750,20 +763,26 @@ fn process_text(
                 // come up with a message that collects all of the available actions
                 let mut available_actions_string = "".to_string();
                 for action in runtime_settings.available_actions.clone().iter() {
-                    available_actions_string = available_actions_string.clone() + &action.to_string() + ", ";
+                    available_actions_string =
+                        available_actions_string.clone() + &action.to_string() + ", ";
                 }
 
-                let content = "Sorry, Please select one of the following: ".to_string() + &available_actions_string;
+                let content = "Sorry, Please select one of the following: ".to_string()
+                    + &available_actions_string;
 
-                let new_message : Message = Message {
+                let new_message: Message = Message {
                     content: content,
-                    role : Role::User,
+                    role: Role::User,
                 };
 
-                runtime_settings.log.as_mut().unwrap().push(new_message.clone());
+                runtime_settings
+                    .log
+                    .as_mut()
+                    .unwrap()
+                    .push(new_message.clone());
                 commands.entity(the_entity).insert(Unsent);
                 return;
-                }
+            }
         } else {
             let actions = runtime_settings.actions.clone().unwrap();
             let current_action = actions
@@ -778,13 +797,12 @@ fn process_text(
                     let _language = code_block.get("language").unwrap();
                     let code = code_block.get("code").unwrap();
 
-
                     let actions = runtime_settings.actions.clone().unwrap();
-                
-                let current_action = actions
-                .iter()
-                .find(|&action| action.name == "code_description")
-                .unwrap();
+
+                    let current_action = actions
+                        .iter()
+                        .find(|&action| action.name == "code_description")
+                        .unwrap();
 
                     let prompt = current_action.prompt.clone();
 
@@ -794,19 +812,20 @@ fn process_text(
 
                     let content = prompt.clone() + &code.clone();
 
-                    let new_message : Message = Message {
+                    let new_message: Message = Message {
                         content: content,
                         role: Role::User,
                     };
 
-                    runtime_settings.log.as_mut().unwrap().push(new_message.clone());
+                    runtime_settings
+                        .log
+                        .as_mut()
+                        .unwrap()
+                        .push(new_message.clone());
                 }
             }
 
-
             runtime_settings.current_action = Some(current_action.clone());
-    
-            
         }
 
         commands.entity(the_entity).insert(Unprocessed);
@@ -868,7 +887,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(bevy_tokio_tasks::TokioTasksPlugin::default())
-        .add_plugin(EguiPlugin)
+        // .add_plugin(EguiPlugin)
         .insert_resource(RuntimeSettings {
             goal: None,
             view_mode: ViewMode::Process,
@@ -883,12 +902,12 @@ fn main() {
             current_iteration: 1,
             implemented_thus_far: None,
             max_iterations: 3,
-            node_graphs: Vec
             write_file: "output.txt".to_string(),
         })
         .add_startup_system(prepare_docker_container)
         .add_startup_system(initiate_project)
-        .add_system(ui_example_system)
+        .add_startup_system(start_websocket_server)
+        // .add_system(ui_example_system)
         .add_system(build_message_log)
         .add_system(send_openai_prompt)
         .add_system(process_text)
