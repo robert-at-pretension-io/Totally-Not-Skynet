@@ -44,18 +44,16 @@ struct Args {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Process {
     name: String,
-    triggered_by: String,
-    triggers: String,
+    trigger: String,
+    triggers_next_process: String,
     steps: Vec<String>,
     description: String,
     creates_process_branch: bool,
     waits_for_branch_completion: bool,
+    branch_step: String
 }
 
-// struct ProcessRuntime {
-//     process: Process,
-//     id: String,
-// }
+
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 struct Usage {
@@ -325,35 +323,6 @@ fn new_docker() -> Result<Docker, Error> {
 fn new_docker() -> Result<Docker> {
     Docker::new("tcp://127.0.0.1:8080")
 }
-
-// fn ui_example_system(
-//     mut egui_ctx: Query<&mut EguiContext>,
-//     mut runtime_settings: ResMut<RuntimeSettings>,
-// ) {
-//     let mut ctx = match egui_ctx.get_single_mut().ok() {
-//         Some(ctx) => ctx,
-//         None => {
-//             return;
-//         }
-//     };
-
-//     egui::SidePanel::left("side_panel").show(ctx.get_mut(), |ui| {
-//         ui.heading("Side Panel");
-//         ui.label("This is a side panel");
-
-//         if ui.button("Change View").clicked() {
-//             runtime_settings.view_mode.toggle();
-//         }
-//     });
-
-//     egui::Window::new("Second Window")
-//         .vscroll(true)
-//         .show(ctx.get_mut(), |ui| {
-//             ui.horizontal(|ui| {
-//                 ui.label("Write something else: ");
-//             });
-//         });
-// }
 
 fn prepare_docker_container(
     runtime: Res<TokioTasksRuntime>,
@@ -667,12 +636,28 @@ fn send_openai_prompt(
     }
 }
 
-use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt};
+use futures_util::{future, pin_mut, stream::TryStreamExt, StreamExt, SinkExt};
+
+use tokio::sync::mpsc::{
+    error::TryRecvError, unbounded_channel, UnboundedReceiver, UnboundedSender,
+};
+
+#[derive(Resource)]
+struct MyChannel {
+sender: UnboundedSender<String>,
+receiver: UnboundedReceiver<String>
+}
 
 
-fn start_websocket_server(runtime: ResMut<TokioTasksRuntime>) {
+fn start_websocket_server(runtime: ResMut<TokioTasksRuntime>, my_channel: ResMut<MyChannel>, runtime_settings: Res<RuntimeSettings>) {
+
+    let available_actions = runtime_settings.available_actions.clone();
+    let json_string = serde_json::to_string(&available_actions).unwrap();
+    let cloned_message = json_string.clone();
+
     runtime.spawn_background_task(move |ctx| async {
         let mut listener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
+
 
         while let Ok((stream, addr)) = listener.accept().await {
             // Spawn a new task for each incoming connection
@@ -686,15 +671,34 @@ fn start_websocket_server(runtime: ResMut<TokioTasksRuntime>) {
                 };
                 println!("WebSocket connection established: {}", addr);
 
-                let (outgoing, mut incoming) = ws_stream.split();
+                let (mut outgoing, mut incoming) = ws_stream.split();
 
-                while let Some(Ok(msg)) = incoming.next().await {
-                    println!("Received a message from {}: {}", addr, msg.to_text().unwrap());
+                // Process incoming messages for each connection
+                while let Some(msg) = incoming.next().await {
+                    match msg {
+                        Ok(msg) => {
+
+                            //Todo: Send/receive actions, processes and messages by reading from the unbounded channel
+
+                            println!("Received a message from {}: {}", addr, msg.to_text().unwrap());
+
+                            
+
+                            let msg = tokio_tungstenite::tungstenite::Message::Text(cloned_message.clone());
+
+                            outgoing.send(msg.clone()).await.unwrap();
+                        }
+                        Err(e) => {
+                            println!("Error processing message from {}: {:?}", addr, e);
+                            break;
+                        }
+                    }
                 }
             });
         }
     });
 }
+
 
 fn process_text(
     mut query: Query<(Entity, &mut Unparsed)>,
@@ -890,6 +894,16 @@ fn keyboard_input(
     }
 }
 
+fn create_tokio_channel(mut commands: Commands){
+    let (tx, rx): (UnboundedSender<String>, UnboundedReceiver<String>) = unbounded_channel();
+    
+    let my_channel = MyChannel {
+        sender: tx,
+        receiver: rx,
+    };
+    commands.insert_resource(my_channel);
+}
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
@@ -911,6 +925,7 @@ fn main() {
             max_iterations: 1,
             write_file: "output.txt".to_string(),
         })
+        .add_startup_system(create_tokio_channel)
         .add_startup_system(prepare_docker_container)
         .add_startup_system(initiate_project)
         .add_startup_system(start_websocket_server)
