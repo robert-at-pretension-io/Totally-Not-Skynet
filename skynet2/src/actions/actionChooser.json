@@ -1,0 +1,5 @@
+{
+    "prompt": "Determine which action to take in order to make progress on the stated goal. You will be provided the goal on the next line and then a sequence of action : description pairs. Look over the list of action : description pairs and choose the action that will make progress on the task. Respond with the exact action name (the string that preceeds the colon). Never respond with choose_action as this will lead to a recursive loop.",
+    "name" : "choose_action",
+    "system": "Only respond with one of the actions and nothing else."
+}

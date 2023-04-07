@@ -1,0 +1,5 @@
+{
+    "prompt": "Given the project goal, please come up with a list of functions, objects and types that must be implemented to complete the goal. Specify which programming language to use to implement the software if you think there is one that will be easiest to implement them in. If the log already contains code, give guidance on what other functions, objects, types or patterns remain to be implmented.",
+    "name" : "write_architecture",
+    "system": "This agent will give the developer guidance on how to move forward if they are stuck."
+}
