@@ -87,6 +87,11 @@ async fn start_websocket_server(rx: Arc<Mutex<mpsc::Receiver<(Identity, Message)
         });
     }
 }
+use mongodb::{Client, options::ClientOptions};
+async fn start_mongo_client() {
+    Client::with_uri_str("mongodb://localhost:27017/").await.unwrap();
+}
+
 
 async fn start_message_sending_loop(tx: mpsc::Sender<(Identity, Message)>, client_rx : mpsc::Receiver<(Identity, String)>, my_actions: Vec<Action>) {
 
@@ -144,6 +149,8 @@ async fn main() {
 },
             Err(_) => todo!(),
         }
+
+    let session = start_mongo_client().await;
 
     
 
