@@ -8,7 +8,8 @@ Current Implementation
     A set of agents with distinct abilities (represented as prompts for the language model)
     A central agent that chooses the best action to take given the current log
 
-
+Project Architecture
+![Architecture](https://i.imgur.com/UHsnRJ8.png)
 
 
 Future Enhancements
