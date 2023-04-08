@@ -4,6 +4,19 @@ use tokio::time::{self, Duration};
 use tokio_tungstenite::tungstenite::Message;
 use futures_util::{SinkExt, StreamExt};
 use std::sync::Arc;
+use std::fs::File;
+use std::io::BufReader;
+use std::path::Path;
+use walkdir::WalkDir;
+use serde::{Serialize, Deserialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Action {
+    prompt: String,
+    name: String,
+    system: String,
+}
+
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Identity {
@@ -75,18 +88,24 @@ async fn start_websocket_server(rx: Arc<Mutex<mpsc::Receiver<(Identity, Message)
     }
 }
 
-use std::fs::File;
-use std::io::BufReader;
-use std::path::Path;
-use walkdir::WalkDir;
-use serde::{Serialize, Deserialize};
+async fn start_message_sending_loop(tx: mpsc::Sender<(Identity, Message)>, client_rx : mpsc::Receiver<(Identity, String)>, my_actions: Vec<Action>) {
 
-#[derive(Debug, Serialize, Deserialize)]
-struct Action {
-    prompt: String,
-    name: String,
-    system: String,
+        //read messages from the client
+        while let Some(msg) = client_rx.recv().await {
+            println!("Received a message from the client: {}", msg.1);
+
+            
+                for action in &my_actions {
+                    tx.send((Identity::new("test".to_string()),Message::Text(serde_json::to_string(&action).unwrap()))).await.unwrap();
+                }
+        }
+        
+        loop {
+            tx.send((Identity::new("test".to_string()), Message::Text("Hello World".to_string()))).await.unwrap();
+            time::sleep(Duration::from_secs(10)).await;
+        }
 }
+
 
 fn read_json_file<P: AsRef<Path>>(path: P) -> Result<Action, Box<dyn std::error::Error>> {
     let file = File::open(path)?;
@@ -114,15 +133,18 @@ fn import_actions(directory: &str) -> Result<Vec<Action>, Box<dyn std::error::Er
 #[tokio::main]
 async fn main() {
 
+
+    // In the future, these will be loaded from mongodb
     let mut my_actions = vec![];
 
     match import_actions("./src/actions")
         {
-            Ok(actions) => my_actions = actions,
+            Ok(actions) => {my_actions = actions;
+                println!("actions loaded");
+},
             Err(_) => todo!(),
         }
 
-    println!("{:?}", my_actions);
     
 
     let (tx, rx) = mpsc::channel(100);
@@ -137,21 +159,7 @@ async fn main() {
 
     // Spawn the message sender task
     let sender_task = tokio::spawn(async move {
-        
-        //read messages from the client
-        while let Some(msg) = client_rx.recv().await {
-            println!("Received a message from the client: {}", msg);
-
-            
-                for action in &my_actions {
-                    tx.send(Message::Text(serde_json::to_string(&action).unwrap())).await.unwrap();
-                }
-        }
-        
-        loop {
-            tx.send(Message::Text("Hello World".to_string())).await.unwrap();
-            time::sleep(Duration::from_secs(10)).await;
-        }
+        start_message_sending_loop(tx, client_rx, my_actions).await;
     });
 
     // Wait for both tasks to complete
