@@ -8,6 +8,9 @@ Current Implementation
     A set of agents with distinct abilities (represented as prompts for the language model)
     A central agent that chooses the best action to take given the current log
 
+
+
+
 Future Enhancements
 
     Staleness Meta-Agent: Develop a meta-agent that assesses the staleness of the current log. The agent will determine if the log has reached a state where no further progress can be made with the available agents and actions.
