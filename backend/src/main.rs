@@ -43,6 +43,8 @@ impl Identity {
     }
 }
 
+use uuid::Uuid;
+
 async fn start_websocket_server(
     rx: Arc<Mutex<mpsc::Receiver<(Identity, Message)>>>,
     client_tx: mpsc::Sender<(Identity, String)>,
@@ -54,8 +56,11 @@ async fn start_websocket_server(
         let client_tx = client_tx.clone();
         // Spawn a new task for each incoming connection
         tokio::spawn(async move {
+            
+            let id = Uuid::new_v4();
+            
             let mut this_client = Identity {
-                name: "test".to_string(),
+                name: id.to_string(),
             };
             let this_client_clone = this_client.clone();
 
@@ -93,10 +98,6 @@ async fn start_websocket_server(
                             msg.to_text().unwrap()
                         );
 
-                        // if this_client is not set, then set it
-                        if this_client_clone.check_equal_to_string("".to_string()) {
-                            this_client.name = msg.to_text().unwrap().to_string();
-                        }
 
                         client_tx
                             .send((this_client.clone(), msg.to_string()))
@@ -132,7 +133,7 @@ async fn start_message_sending_loop(
 
         for action in &my_actions {
             tx.send((
-                Identity::new("test".to_string()),
+                Identity::new(msg.0.name.to_string()),
                 Message::Text(serde_json::to_string(&action).unwrap()),
             ))
             .await
@@ -140,15 +141,7 @@ async fn start_message_sending_loop(
         }
     }
 
-    loop {
-        tx.send((
-            Identity::new("test".to_string()),
-            Message::Text("Hello World".to_string()),
-        ))
-        .await
-        .unwrap();
-        time::sleep(Duration::from_secs(10)).await;
-    }
+
 }
 
 fn read_json_file<P: AsRef<Path>>(path: P) -> Result<Action, Box<dyn std::error::Error>> {
