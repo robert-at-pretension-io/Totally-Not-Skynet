@@ -43,6 +43,45 @@ impl Identity {
     }
 }
 
+use serde_json::Result;
+use std::str::FromStr;
+
+
+// Define the Message trait
+pub trait SystemMessage: Serialize + Deserialize<'static> {}
+
+// Implement the Message trait for any type that implements Serialize and Deserialize
+impl<T> SystemMessage for T where T: Serialize + Deserialize<'static> {}
+
+#[derive(Serialize,Deserialize,Debug)]
+pub struct Goal {
+    text: String
+}
+
+#[derive(Serialize,Debug, Deserialize)]
+pub struct InitializeProject{
+    initial_message: String
+}
+
+#[derive(Serialize,Deserialize,Debug)]
+pub enum MessageTypes {
+    Goal(Goal),
+    InitializeProject(InitializeProject)
+    // Add more types here
+}
+
+pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
+    if let Ok(msg) = serde_json::from_str::<Goal>(message_str) {
+        return Some(MessageTypes::Goal(msg));
+    }
+
+    if let Ok(msg) = serde_json::from_str::<InitializeProject>(message_str) {
+        return Some(MessageTypes::InitializeProject(msg));
+    }
+
+    None
+}
+
 use uuid::Uuid;
 
 async fn start_websocket_server(
@@ -131,42 +170,30 @@ async fn start_message_sending_loop(
     while let Some(msg) = client_rx.recv().await {
         println!("Received a message from the client: {}", msg.1);
 
-        for action in &my_actions {
-            tx.send((
-                Identity::new(msg.0.name.to_string()),
-                Message::Text(serde_json::to_string(&action).unwrap()),
-            ))
-            .await
-            .unwrap();
+        let received_message : MessageTypes = parse_message(&msg.1).unwrap();
+
+        match received_message{
+            MessageTypes::Goal(_) => todo!(),
+            MessageTypes::InitializeProject(_) => {
+                // send the actions to the client and initialize a docker container
+                for action in &my_actions {
+                    tx.send((
+                        Identity::new(msg.0.name.to_string()),
+                        Message::Text(serde_json::to_string(&action).unwrap()),
+                    ))
+                    .await
+                    .unwrap();
+                }
+            },
         }
+
+        
     }
 
 
 }
 
-fn read_json_file<P: AsRef<Path>>(path: P) -> Result<Action, Box<dyn std::error::Error>> {
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-    let data = serde_json::from_reader(reader)?;
-    Ok(data)
-}
 
-fn import_actions(directory: &str) -> Result<Vec<Action>, Box<dyn std::error::Error>> {
-    let mut results = Vec::new();
-
-    for entry in WalkDir::new(directory)
-        .into_iter()
-        .filter_map(Result::ok)
-        .filter(|e| {
-            e.file_type().is_file() && e.path().extension().map_or(false, |ext| ext == "json")
-        })
-    {
-        let json_data = read_json_file(entry.path())?;
-        results.push(json_data);
-    }
-
-    Ok(results)
-}
 
 #[tokio::main]
 async fn main() {
