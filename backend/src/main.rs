@@ -1,6 +1,7 @@
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -99,9 +100,18 @@ async fn start_websocket_server(
 ) {
     let listener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
 
+    let mut request_dispatcher : HashMap<Identity, (UnboundedReceiver<Message>, mpsc::Sender<String>)> = HashMap::new();
+
+    //write two tasks:
+    // 
+
     while let Ok((stream, addr)) = listener.accept().await {
         let rx = rx.clone();
         let client_tx = client_tx.clone();
+
+
+        
+
         // Spawn a new task for each incoming connection
         tokio::spawn(async move {
             let id = Uuid::new_v4();
@@ -120,6 +130,7 @@ async fn start_websocket_server(
             println!("WebSocket connection established: {}", addr);
 
             let (mut outgoing, mut incoming) = ws_stream.split();
+
 
             let cloned_client = this_client.clone();
 
