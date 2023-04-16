@@ -1,5 +1,6 @@
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -20,14 +21,14 @@ use futures_util::TryStreamExt;
 
 const IMAGE: &str = "alpine:3";
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct Action {
     prompt: String,
     name: String,
     system: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct Process {
     name: String,
     trigger: String,
@@ -93,7 +94,7 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
 use uuid::Uuid;
 
 async fn start_websocket_server(
-    rx: Arc<Mutex<mpsc::Receiver<(Identity, Message)>>>,
+    rx: Arc<tokio::sync::Mutex<UnboundedReceiver<(Identity, Message)>>>,
     client_tx: mpsc::Sender<(Identity, String)>,
 ) {
     let listener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
@@ -105,10 +106,9 @@ async fn start_websocket_server(
         tokio::spawn(async move {
             let id = Uuid::new_v4();
 
-            let mut this_client = Identity {
+            let this_client = Identity {
                 name: id.to_string(),
             };
-            let this_client_clone = this_client.clone();
 
             let ws_stream = match tokio_tungstenite::accept_async(stream).await {
                 Ok(ws_stream) => ws_stream,
@@ -126,9 +126,24 @@ async fn start_websocket_server(
             // Send/receive actions, processes, and messages by reading from the channel
             tokio::spawn(async move {
                 while let Some(outgoing_msg) = rx.lock().await.recv().await {
+                    println!("\n\nSending message:\n {} \nto: {}", outgoing_msg.1, outgoing_msg.0.name);
+                    
                     // check if the client has the same identity as the message
                     if outgoing_msg.0.name == cloned_client.name {
-                        outgoing.send(outgoing_msg.1.clone()).await.unwrap();
+                        println!("sent"
+                        );
+                        match outgoing.send(outgoing_msg.1.clone()).await {
+                            Ok(_) => {}
+                            Err(e) => {
+                                println!("Error sending message to client: {:?}", e);
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        println!("not sent"
+                        );
+                        println!("{} \n!= \n{}", outgoing_msg.0.name, cloned_client.name)
                     }
                 }
             });
@@ -143,10 +158,13 @@ async fn start_websocket_server(
                             msg.to_text().unwrap()
                         );
 
-                        client_tx
-                            .send((this_client.clone(), msg.to_string()))
-                            .await
-                            .unwrap();
+                        match client_tx.send((this_client.clone(), msg.to_string())).await {
+                            Ok(_) => {}
+                            Err(e) => {
+                                println!("Error sending message to client: {:?}", e);
+                                break;
+                            }
+                        }
                     }
                     Err(e) => {
                         println!("Error processing message from {}: {:?}", addr, e);
@@ -168,13 +186,15 @@ async fn return_db() -> mongodb::Database {
 
 type DockerId = String;
 
+use tokio::time::sleep;
+
 async fn start_message_sending_loop(
     docker: Docker,
-    tx: mpsc::Sender<(Identity, Message)>,
-    mut client_rx: mpsc::Receiver<(Identity, String)>,
-    my_actions: Vec<Action>,
-    my_processes: Vec<Process>,
+    tx: UnboundedSender<(Identity, Message)>,
+    mut client_rx: mpsc::Receiver<(Identity, String)>
 ) {
+    let delay_duration = Duration::from_millis(500);
+
     let alpine_config = Config {
         image: Some(IMAGE),
         tty: Some(true),
@@ -184,6 +204,9 @@ async fn start_message_sending_loop(
     };
 
     let mut identities: Vec<(Identity, DockerId)> = Vec::new();
+
+    // get the database
+    let db = return_db().await;
 
     //read messages from the client
     while let Some(msg) = client_rx.recv().await {
@@ -202,24 +225,48 @@ async fn start_message_sending_loop(
         match message_contents {
             MessageTypes::Goal(_) => todo!(),
             MessageTypes::InitializeProject(_) => {
+                // get the actions and processes from the db
+
                 // send the actions to the client
-                for action in &my_actions {
-                    tx.send((
+
+                let (my_actions, my_processes) = get_actions_and_processes(&db).await;
+
+                println!("Sending {} actions to the client", my_actions.len());
+
+                for action in &my_actions.clone() {
+                    // sleep(delay_duration).await;
+                    
+                    println!("sending action {} to {}", action.name, msg.0.name);
+                    
+                    match tx.send((
                         Identity::new(msg.0.name.to_string()),
                         Message::Text(serde_json::to_string(&action).unwrap()),
                     ))
-                    .await
-                    .unwrap();
+                    {
+                        Ok(_) => {},
+                        Err(e) => {
+                            println!("Error sending message to client: {:?}", e);
+                            break;
+                        }
+                    }
                 }
 
+                println!("Sending {} processes to the client", my_processes.len());
+
                 //send processes to the client
-                for process in &my_processes {
-                    tx.send((
-                        Identity::new(msg.0.name.to_string()),
-                        Message::Text(serde_json::to_string(&process).unwrap()),
-                    ))
-                    .await
-                    .unwrap();
+                for process in &my_processes.clone() {
+                    // sleep(delay_duration).await;
+                    match tx
+                        .send((
+                            Identity::new(msg.0.name.to_string()),
+                            Message::Text(serde_json::to_string(&process).unwrap()),
+                        )) {
+                        Ok(_) => {},
+                        Err(e) => {
+                            println!("Error sending message to client: {:?}", e);
+                            break;
+                        }
+                    }
                 }
 
                 let id = docker
@@ -234,10 +281,7 @@ async fn start_message_sending_loop(
     }
 }
 
-#[tokio::main]
-async fn main() {
-    // get the database
-    let db = return_db().await;
+async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Action>, Vec<Process>){
     let action_collection = db.collection::<Action>("actions");
     let process_collection = db.collection::<Process>("processes");
 
@@ -255,6 +299,12 @@ async fn main() {
     while let Some(process) = processes_cursor.next().await {
         processes.push(process.unwrap());
     }
+
+    (actions, processes)
+}
+
+#[tokio::main]
+async fn main() {
     // setup docker client
     let docker = Docker::connect_with_local_defaults().unwrap();
 
@@ -271,10 +321,10 @@ async fn main() {
         .await
         .unwrap();
 
-    let (tx, rx) = mpsc::channel(100);
+    let (tx, rx) = mpsc::unbounded_channel();
     let rx = Arc::new(Mutex::new(rx));
 
-    let (client_tx, mut client_rx) = mpsc::channel(100);
+    let (client_tx,  client_rx) = mpsc::channel(100);
 
     // Spawn the WebSocket server task
     let server_task = tokio::spawn(async move {
@@ -283,9 +333,17 @@ async fn main() {
 
     // Spawn the message sender task
     let sender_task = tokio::spawn(async move {
-        start_message_sending_loop(docker, tx, client_rx, actions, processes).await;
+        start_message_sending_loop(docker, tx, client_rx).await;
     });
 
     // Wait for both tasks to complete
-    tokio::join!(server_task, sender_task);
+    match tokio::join!(server_task, sender_task){
+        (Ok(_), Ok(_)) => {}
+        (Err(e), _) => {
+            println!("Error in server task: {:?}", e);
+        }
+        (_, Err(e)) => {
+            println!("Error in sender task: {:?}", e);
+        }
+    }
 }
