@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bollard = "0.14.0"
 crossbeam-channel = "0.5.7"
 futures-util = "0.3.28"
 mongodb = "2.4.0"
