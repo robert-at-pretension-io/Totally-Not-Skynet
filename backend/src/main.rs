@@ -1,12 +1,14 @@
+use clap::Parser;
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
-use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use std::collections::HashMap;
+use std::fmt;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::net::TcpListener;
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::sync::{mpsc, Mutex};
 use tokio::time::{self, Duration};
 use tokio_tungstenite::tungstenite::Message;
@@ -41,7 +43,7 @@ struct Process {
     branch_step: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 struct Identity {
     name: String,
 }
@@ -75,9 +77,15 @@ pub struct InitializeProject {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct OpenaiKey {
+    key: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub enum MessageTypes {
     Goal(Goal),
     InitializeProject(InitializeProject), // Add more types here
+    SetOpenAIKey(OpenaiKey),
 }
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
@@ -89,8 +97,74 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
         return Some(MessageTypes::InitializeProject(msg));
     }
 
+    if let Ok(msg) = serde_json::from_str::<OpenaiKey>(message_str) {
+        return Some(MessageTypes::SetOpenAIKey(msg));
+    }
+
     None
 }
+
+
+
+// types used for sending messages to openai
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct Usage {
+    prompt_tokens: u32,
+    completion_tokens: u32,
+    total_tokens: u32,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct Choice {
+    message: ChatMessage,
+    finish_reason: String,
+    index: u32,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct ChatCompletion {
+    id: String,
+    object: String,
+    created: u64,
+    model: String,
+    usage: Usage,
+    choices: Vec<Choice>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct ChatMessage {
+    role: Role,
+    content: String,
+}
+
+impl fmt::Display for ChatMessage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.content)
+    }
+}
+
+#[derive(PartialEq, Eq, Debug, Serialize, Deserialize, Clone, Copy)]
+enum Role {
+    #[serde(rename = "system")]
+    System,
+    #[serde(rename = "user")]
+    User,
+    #[serde(rename = "assistant")]
+    Assistant,
+}
+
+impl fmt::Display for Role {
+    // this is the implementation of the fmt::Display trait
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Role::System => write!(f, "system"),
+            Role::User => write!(f, "user"),
+            Role::Assistant => write!(f, "assistant"),
+        }
+    }
+}
+
+
 
 use uuid::Uuid;
 
@@ -100,21 +174,54 @@ async fn start_websocket_server(
 ) {
     let listener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
 
-    let mut request_dispatcher : HashMap<Identity, (UnboundedReceiver<Message>, mpsc::Sender<String>)> = HashMap::new();
-
+    let mut request_dispatcher: HashMap<
+        Identity,
+        UnboundedSender<Message>,
+    > = HashMap::new();
+    let mut thread_safe_request_dispatcher = Arc::new(Mutex::new(request_dispatcher));
     //write two tasks:
-    // 
+    //
+
+    let thread_safe_request_dispatcher_clone_1 = thread_safe_request_dispatcher.clone();
+
+    //dispatch the message to the appropriate client
+    tokio::spawn(async move {
+        while let Some(outgoing_msg) = rx.lock().await.recv().await {
+            println!(
+                "\n\nSending message:\n {} \nto: {}",
+                outgoing_msg.1, outgoing_msg.0.name
+            );
+
+            //get the client's outgoing channel
+            let sending_channel = thread_safe_request_dispatcher_clone_1
+                .lock()
+                .await
+                .get_mut(&outgoing_msg.0)
+                .unwrap()
+                .clone();
+            sending_channel.send(outgoing_msg.1);
+
+        }
+    });
+    let thread_safe_request_dispatcher_clone_2 = thread_safe_request_dispatcher.clone();
 
     while let Ok((stream, addr)) = listener.accept().await {
-        let rx = rx.clone();
+        // let rx = rx.clone();
         let client_tx = client_tx.clone();
 
+        // create an unbounded sender and receiver
+        let (local_tx, mut local_rx) = tokio::sync::mpsc::unbounded_channel::<Message>();
 
-        
+        let thread_safe_request_dispatcher_clone_3 = thread_safe_request_dispatcher.clone();
 
         // Spawn a new task for each incoming connection
         tokio::spawn(async move {
             let id = Uuid::new_v4();
+
+            thread_safe_request_dispatcher_clone_3
+                .lock()
+                .await
+                .insert(Identity::new(id.to_string()),  local_tx);
 
             let this_client = Identity {
                 name: id.to_string(),
@@ -131,30 +238,21 @@ async fn start_websocket_server(
 
             let (mut outgoing, mut incoming) = ws_stream.split();
 
-
             let cloned_client = this_client.clone();
 
-            // Send/receive actions, processes, and messages by reading from the channel
             tokio::spawn(async move {
-                while let Some(outgoing_msg) = rx.lock().await.recv().await {
-                    println!("\n\nSending message:\n {} \nto: {}", outgoing_msg.1, outgoing_msg.0.name);
-                    
-                    // check if the client has the same identity as the message
-                    if outgoing_msg.0.name == cloned_client.name {
-                        println!("sent"
-                        );
-                        match outgoing.send(outgoing_msg.1.clone()).await {
-                            Ok(_) => {}
-                            Err(e) => {
-                                println!("Error sending message to client: {:?}", e);
-                                break;
-                            }
+                while let Some(outgoing_msg) = local_rx.recv().await {
+                    println!(
+                        "\n\nSending message:\n {} \nto: {}",
+                        outgoing_msg, cloned_client.name
+                    );
+
+                    match outgoing.send(outgoing_msg.clone()).await {
+                        Ok(_) => {}
+                        Err(e) => {
+                            println!("Error sending message to client: {:?}", e);
+                            break;
                         }
-                    }
-                    else {
-                        println!("not sent"
-                        );
-                        println!("{} \n!= \n{}", outgoing_msg.0.name, cloned_client.name)
                     }
                 }
             });
@@ -197,14 +295,15 @@ async fn return_db() -> mongodb::Database {
 
 type DockerId = String;
 
-use tokio::time::sleep;
+struct RuntimeSettings {
+    openai_api_key : String
+}
 
 async fn start_message_sending_loop(
     docker: Docker,
     tx: UnboundedSender<(Identity, Message)>,
-    mut client_rx: mpsc::Receiver<(Identity, String)>
+    mut client_rx: mpsc::Receiver<(Identity, String)>,
 ) {
-    let delay_duration = Duration::from_millis(500);
 
     let alpine_config = Config {
         image: Some(IMAGE),
@@ -214,7 +313,9 @@ async fn start_message_sending_loop(
         ..Default::default()
     };
 
-    let mut identities: Vec<(Identity, DockerId)> = Vec::new();
+    let mut docker_containers: Vec<(Identity, DockerId)> = Vec::new();
+
+    let mut runtimeSettings : Vec<(Identity, RuntimeSettings)> = Vec::new();
 
     // get the database
     let db = return_db().await;
@@ -246,15 +347,14 @@ async fn start_message_sending_loop(
 
                 for action in &my_actions.clone() {
                     // sleep(delay_duration).await;
-                    
+
                     println!("sending action {} to {}", action.name, msg.0.name);
-                    
+
                     match tx.send((
                         Identity::new(msg.0.name.to_string()),
                         Message::Text(serde_json::to_string(&action).unwrap()),
-                    ))
-                    {
-                        Ok(_) => {},
+                    )) {
+                        Ok(_) => {}
                         Err(e) => {
                             println!("Error sending message to client: {:?}", e);
                             break;
@@ -267,12 +367,11 @@ async fn start_message_sending_loop(
                 //send processes to the client
                 for process in &my_processes.clone() {
                     // sleep(delay_duration).await;
-                    match tx
-                        .send((
-                            Identity::new(msg.0.name.to_string()),
-                            Message::Text(serde_json::to_string(&process).unwrap()),
-                        )) {
-                        Ok(_) => {},
+                    match tx.send((
+                        Identity::new(msg.0.name.to_string()),
+                        Message::Text(serde_json::to_string(&process).unwrap()),
+                    )) {
+                        Ok(_) => {}
                         Err(e) => {
                             println!("Error sending message to client: {:?}", e);
                             break;
@@ -286,13 +385,17 @@ async fn start_message_sending_loop(
                     .unwrap()
                     .id;
 
-                identities.push((msg.0, id));
+                    docker_containers.push((msg.0, id));
+            }
+            MessageTypes::SetOpenAIKey(key) => {
+                println!("Setting openai key for {}", msg.0.name);
+                runtimeSettings.push((msg.0, RuntimeSettings { openai_api_key: key.key }));
             }
         }
     }
 }
 
-async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Action>, Vec<Process>){
+async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Action>, Vec<Process>) {
     let action_collection = db.collection::<Action>("actions");
     let process_collection = db.collection::<Process>("processes");
 
@@ -335,7 +438,7 @@ async fn main() {
     let (tx, rx) = mpsc::unbounded_channel();
     let rx = Arc::new(Mutex::new(rx));
 
-    let (client_tx,  client_rx) = mpsc::channel(100);
+    let (client_tx, client_rx) = mpsc::channel(100);
 
     // Spawn the WebSocket server task
     let server_task = tokio::spawn(async move {
@@ -348,7 +451,7 @@ async fn main() {
     });
 
     // Wait for both tasks to complete
-    match tokio::join!(server_task, sender_task){
+    match tokio::join!(server_task, sender_task) {
         (Ok(_), Ok(_)) => {}
         (Err(e), _) => {
             println!("Error in server task: {:?}", e);
