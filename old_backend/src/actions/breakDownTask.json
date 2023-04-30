@@ -1,5 +1,0 @@
-{
-    "prompt": "Break down the provided task into an ordered list of smaller tasks. The task will be provided on the next line. Analyze the task and identify its key components, then create an ordered list of smaller tasks that, when completed, will achieve the original task. Respond with the enumerated task components, separated by commas and in the order they should be completed.",
-    "name": "decompose_task",
-    "system": "This agent decomposes a given task into an ordered list of smaller tasks. It identifies the key components of the task and provides an ordered list of subtasks to achieve the original goal."
-}
