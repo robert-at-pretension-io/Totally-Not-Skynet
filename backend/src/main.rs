@@ -300,7 +300,7 @@ struct RuntimeSettings {
 }
 
 async fn start_message_sending_loop(
-    docker: Docker,
+    // docker: Docker,
     tx: UnboundedSender<(Identity, Message)>,
     mut client_rx: mpsc::Receiver<(Identity, String)>,
 ) {
@@ -379,13 +379,13 @@ async fn start_message_sending_loop(
                     }
                 }
 
-                let id = docker
-                    .create_container::<&str, &str>(None, alpine_config.clone())
-                    .await
-                    .unwrap()
-                    .id;
+                // let id = docker
+                //     .create_container::<&str, &str>(None, alpine_config.clone())
+                //     .await
+                //     .unwrap()
+                //     .id;
 
-                    docker_containers.push((msg.0, id));
+                //     docker_containers.push((msg.0, id));
             }
             MessageTypes::SetOpenAIKey(key) => {
                 println!("Setting openai key for {}", msg.0.name);
@@ -420,20 +420,20 @@ async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Action>, Vec<
 #[tokio::main]
 async fn main() {
     // setup docker client
-    let docker = Docker::connect_with_local_defaults().unwrap();
+    // let docker = Docker::connect_with_local_defaults().unwrap();
 
-    docker
-        .create_image(
-            Some(CreateImageOptions {
-                from_image: IMAGE,
-                ..Default::default()
-            }),
-            None,
-            None,
-        )
-        .try_collect::<Vec<_>>()
-        .await
-        .unwrap();
+    // docker
+    //     .create_image(
+    //         Some(CreateImageOptions {
+    //             from_image: IMAGE,
+    //             ..Default::default()
+    //         }),
+    //         None,
+    //         None,
+    //     )
+    //     .try_collect::<Vec<_>>()
+    //     .await
+    //     .unwrap();
 
     let (tx, rx) = mpsc::unbounded_channel();
     let rx = Arc::new(Mutex::new(rx));
@@ -447,7 +447,7 @@ async fn main() {
 
     // Spawn the message sender task
     let sender_task = tokio::spawn(async move {
-        start_message_sending_loop(docker, tx, client_rx).await;
+        start_message_sending_loop(tx, client_rx).await;
     });
 
     // Wait for both tasks to complete

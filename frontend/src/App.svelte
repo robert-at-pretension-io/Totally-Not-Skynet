@@ -6,32 +6,36 @@
     Graph,
     selectedGraphComponent,
     GraphState,
+    Goal,
+    InitializeProject,
+    OpenaiKey,
+    Action,
+    Process
   } from "./system_types";
   import { setGraphState } from "./helper_functions/graph";
 import {onMount} from "svelte";
-
+import websocketStore from "./stores/websocketStore";
 let user_id = "";
 
 onMount(async () => {
   // start the websocket connection 
-  let ws = new WebSocket('ws://127.0.0.1:8080');
-
-  ws.send('initializing_actions');
-
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    result += characters.charAt(randomIndex);
-  }
-
-  user_id = result;
-
-  ws.addEventListener('message', (event) => {
-    console.log("Received message: ", event.data);
-  })
-})
+  $websocketStore.addEventListener("open", () => {
+    console.log("websocket connection opened");
+    $websocketStore.send(JSON.stringify({initial_message: "initial message"}));
+  });
+  $websocketStore.addEventListener("message", (event) => {
+    console.log("websocket message received");
+    let data = JSON.parse(event.data);
+    // check to see if the data has the shape of a Process or Action
+    if (data.hasOwnProperty("description")) {
+      let process: Process = data;
+      console.log(process);
+    } else if (data.hasOwnProperty("prompt")) {
+      let action: Action = data;
+      console.log(action);
+    }
+  });
+});
 const graph: Graph = {
   nodes: [
     {

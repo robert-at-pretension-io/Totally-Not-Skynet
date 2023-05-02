@@ -60,3 +60,24 @@ export type AiSystemState = {
   processes: Process[],
   messages: Message[]
 }
+
+export type SystemState = {
+  websocketReady: boolean,
+}
+
+export type Goal = {
+  text: string;
+};
+
+export type InitializeProject = {
+  initial_message: string;
+};
+
+export type OpenaiKey = {
+  key: string;
+};
+
+export type MessageTypes =
+  | { type: 'Goal'; data: Goal }
+  | { type: 'InitializeProject'; data: InitializeProject }
+  | { type: 'SetOpenAIKey'; data: OpenaiKey };
