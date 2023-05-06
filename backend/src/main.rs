@@ -170,53 +170,60 @@ impl fmt::Display for Role {
 use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE, AUTHORIZATION};
 use serde_json::json;
 
-async fn call_openai(messages : Vec<ChatMessage>, api_key : String) -> Result<String> {
+use serde_json::{ Value as JsonValue};
+
+// Your existing type definitions here...
+
+async fn call_openai(messages: Vec<ChatMessage>, api_key: String) -> Result<String> {
     // Define the URL for the API endpoint
     let url = "https://api.openai.com/v1/chat/completions";
 
     // Define the initial request body
-    let mut body = json!({
+    let mut body: JsonValue = json!({
         "model": "gpt-3.5-turbo",
         "messages": messages,
         "temperature": 0.7
-    }).to_string();
+    });
 
     // Set up the headers
     let mut headers = HeaderMap::new();
     headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-    headers.insert(AUTHORIZATION, HeaderValue::from_str(&format!("Bearer {}", api_key))?);
+    headers.insert(AUTHORIZATION, HeaderValue::from_str(&format!("Bearer {}", api_key)).unwrap());
 
     // Create an HTTP client
     let client = reqwest::Client::new();
 
+    let mut response_string = String::new();
+
     // Loop to make repeated API requests
     loop {
         // Make the HTTP POST request asynchronously
-        let response = client.post(url)
+        let response = client
+            .post(url)
             .headers(headers.clone())
-            .body(body.clone())
+            .body(body.to_string())
             .send()
-            .await;
+            .await
+            .unwrap();
 
         // Deserialize the response JSON into the ChatCompletion struct
-        let chat_completion: Result<ChatCompletion> = serde_json::from_str(&response.unwrap().text().await.unwrap());
-
-        let unwrapped_chat_completion = chat_completion.unwrap();
+        let chat_completion: ChatCompletion = serde_json::from_str(&response.text().await.unwrap())?;
 
         // Print the result
         println!("{:#?}", chat_completion);
 
         // Check if the finish_reason is "stop"
-        if let Some(choice) = unwrapped_chat_completion.choices.first() {
+        if let Some(choice) = chat_completion.choices.first() {
             if choice.finish_reason == "stop" {
                 // If the finish_reason is "stop", exit the loop
+                response_string = choice.message.content.clone();
                 break;
             } else {
                 // If the finish_reason is not "stop", update the request body
                 // to include the assistant's response and make another request
-                let messages = body["messages"].as_array_mut().unwrap();
-                messages.push(json!(choice.message));
-                body["messages"] = json!(messages);
+                if let JsonValue::Array(messages) = &mut body["messages"] {
+                    messages.push(json!(choice.message));
+                }
             }
         } else {
             // If there are no choices, exit the loop
@@ -224,10 +231,9 @@ async fn call_openai(messages : Vec<ChatMessage>, api_key : String) -> Result<St
         }
     }
 
-    let response = chat_
-
-    Ok(())
+    Ok(response_string)
 }
+
 
 
 
@@ -483,17 +489,24 @@ async fn start_message_sending_loop(
                     }
                 );
 
-                    call_openai(messages, openai_api_key.unwrap()).await;
-                    match tx.send((
-                        Identity::new(msg.0.name.to_string()),
-                        Message::Text(serde_json::to_string(&completion).unwrap()),
-                    )) {
-                        Ok(_) => {}
-                        Err(e) => {
-                            println!("Error sending message to client: {:?}", e);
-                            break;
-                        }
+                    let response = call_openai(messages, openai_api_key.unwrap()).await;
+                    
+                    match response {
+                        Ok(res) => {
+                            match tx.send((
+                                Identity::new(msg.0.name.to_string()),
+                                Message::Text(res),
+                            )) {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    println!("Error sending message to client: {:?}", e);
+                                    break;
+                                }
+                            }
+                        },
+                        Err(_) => todo!(),
                     }
+                    
                 }
 
                 println!("Received text completion from {}", msg.0.name);
