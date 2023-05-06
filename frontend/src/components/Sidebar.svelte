@@ -4,18 +4,20 @@
   import DeleteEdge from "./sidebarComponents/DeleteEdge.svelte";
   import SetOpenaiKey from "./sidebarComponents/SetOpenaiKey.svelte";
   import SendPrompt from "./sidebarComponents/SendPrompt.svelte";
+  import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
 
   let sections = [
     { header: "Set API Key", component: SetOpenaiKey, open: true},
     { header: "Send Prompt", component: SendPrompt, open: true},
-    { header: "Add Node", component: AddNodeButton, open: false },
-    {
-      header: "Modify Nodes or Edges",
-      component: ModifyNodesOrEdges,
-      open: false,
-    },
-    { header: "Delete Edge", component: DeleteEdge, open: false },
-    { header: "View Available Actions"}
+    { header : "Interact with Actions and Processes", component: InteractWithActionsAndProcesses, open: true}
+    // { header: "Add Node", component: AddNodeButton, open: false },
+    // {
+    //   header: "Modify Nodes or Edges",
+    //   component: ModifyNodesOrEdges,
+    //   open: false,
+    // },
+    // { header: "Delete Edge", component: DeleteEdge, open: false },
+    // { header: "View Available Actions"}
   ];
 </script>
 

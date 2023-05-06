@@ -15,7 +15,7 @@ use tokio_tungstenite::tungstenite::Message;
 // use bollard::exec::{CreateExecOptions, StartExecResults};
 // use bollard::image::CreateImageOptions;
 
-const IMAGE: &str = "alpine:3";
+// const IMAGE: &str = "alpine:3";
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Action {
@@ -45,9 +45,6 @@ impl Identity {
     fn new(name: String) -> Identity {
         Identity { name }
     }
-    fn check_equal_to_string(&self, name: String) -> bool {
-        self.name == name
-    }
 }
 
 use serde_json::Result;
@@ -75,7 +72,7 @@ pub struct OpenaiKey {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Prompt {
-    text: String,
+    prompt_text: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -246,11 +243,11 @@ async fn start_websocket_server(
 ) {
     let listener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
 
-    let mut request_dispatcher: HashMap<
+    let request_dispatcher: HashMap<
         Identity,
         UnboundedSender<Message>,
     > = HashMap::new();
-    let mut thread_safe_request_dispatcher = Arc::new(Mutex::new(request_dispatcher));
+    let thread_safe_request_dispatcher = Arc::new(Mutex::new(request_dispatcher));
     //write two tasks:
     //
 
@@ -271,11 +268,13 @@ async fn start_websocket_server(
                 .get_mut(&outgoing_msg.0)
                 .unwrap()
                 .clone();
-            sending_channel.send(outgoing_msg.1);
+            match sending_channel.send(outgoing_msg.1){
+                Ok(_res) => println!("sent message to client"),
+                Err(_) => todo!(),
+            }
 
         }
     });
-    let thread_safe_request_dispatcher_clone_2 = thread_safe_request_dispatcher.clone();
 
     while let Ok((stream, addr)) = listener.accept().await {
         // let rx = rx.clone();
@@ -365,7 +364,7 @@ async fn return_db() -> mongodb::Database {
     client.database("skynet")
 }
 
-type DockerId = String;
+// type DockerId = String;
 
 struct RuntimeSettings {
     openai_api_key : String
@@ -385,9 +384,9 @@ async fn start_message_sending_loop(
     //     ..Default::default()
     // };
 
-    let mut docker_containers: Vec<(Identity, DockerId)> = Vec::new();
+    // let mut docker_containers: Vec<(Identity, DockerId)> = Vec::new();
 
-    let mut runtimeSettings : HashMap<Identity, RuntimeSettings> = HashMap::new();
+    let mut runtime_settings : HashMap<Identity, RuntimeSettings> = HashMap::new();
 
     // get the database
     let db = return_db().await;
@@ -461,14 +460,14 @@ async fn start_message_sending_loop(
             }
             MessageTypes::SetOpenAIKey(key) => {
                 println!("Setting openai key for {}", msg.0.name);
-                runtimeSettings.insert(msg.0, RuntimeSettings{
+                runtime_settings.insert(msg.0, RuntimeSettings{
                     openai_api_key: key.key,
                 });
             }
             MessageTypes::GetTextCompletion(prompt) => {
 
                 // check to see if the client has an openai key
-                let openai_api_key = match runtimeSettings.get(&msg.0) {
+                let openai_api_key = match runtime_settings.get(&msg.0) {
                     Some(settings) => Some(settings.openai_api_key.clone()),
                     None => {
                         println!("No openai key set for {}", msg.0.name);
@@ -485,7 +484,7 @@ async fn start_message_sending_loop(
                     },
                     ChatMessage {
                         role: Role::User,
-                        content: prompt.text.clone()
+                        content: prompt.prompt_text.clone()
                     }
                 );
 

@@ -10,12 +10,16 @@
     InitializeProject,
     OpenaiKey,
     Action,
-    Process
+    Process,
+
+    AiSystemState
+
   } from "./system_types";
   import { setGraphState } from "./helper_functions/graph";
 import {onMount} from "svelte";
 import websocketStore from "./stores/websocketStore";
 let user_id = "";
+import { aiSystemStore } from "stores/aiSystemStore";
 
 onMount(async () => {
   // start the websocket connection 
@@ -24,15 +28,21 @@ onMount(async () => {
     $websocketStore.send(JSON.stringify({initial_message: "initial message"}));
   });
   $websocketStore.addEventListener("message", (event) => {
-    console.log("websocket message received");
+    console.log("websocket message received: ", event.data);
     let data = JSON.parse(event.data);
     // check to see if the data has the shape of a Process or Action
     if (data.hasOwnProperty("description")) {
       let process: Process = data;
-      console.log(process);
+      aiSystemStore.update((state : AiSystemState) => {
+        state.processes.push(process);
+        return state;
+      });
     } else if (data.hasOwnProperty("prompt")) {
       let action: Action = data;
-      console.log(action);
+      aiSystemStore.update((state : AiSystemState) => {
+        state.actions.push(action);
+        return state;
+      });
     }
   });
 });

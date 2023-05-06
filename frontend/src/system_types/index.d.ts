@@ -77,7 +77,12 @@ export type OpenaiKey = {
   key: string;
 };
 
+export type Prompt = {
+  prompt_text: string;
+}
+
 export type MessageTypes =
   | { type: 'Goal'; data: Goal }
   | { type: 'InitializeProject'; data: InitializeProject }
-  | { type: 'SetOpenAIKey'; data: OpenaiKey };
+  | { type: 'SetOpenAIKey'; data: OpenaiKey }
+  | { type: 'Prompt'; data: Prompt}

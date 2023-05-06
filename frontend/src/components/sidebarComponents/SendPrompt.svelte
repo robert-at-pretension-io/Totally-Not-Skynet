@@ -6,7 +6,7 @@
 
 function send_prompt() {
   
-  $websocketStore.send(JSON.stringify({text: prompt}));
+  $websocketStore.send(JSON.stringify({prompt_text: prompt}));
 
   console.log("Sending prompt: " + prompt);
   
@@ -16,7 +16,7 @@ function send_prompt() {
   
   <div id="cy" />
   <input type="text" bind:value={prompt} placeholder="Enter the openai api key here." />
-  <button on:click={send_prompt}>Set Key</button>
+  <button on:click={send_prompt}>Send Prompt</button>
   
   <style>
     input {
