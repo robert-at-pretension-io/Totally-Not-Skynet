@@ -1,26 +1,19 @@
-use clap::Parser;
 use futures_util::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
-use std::fs::File;
-use std::io::BufReader;
-use std::path::Path;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::sync::{mpsc, Mutex};
-use tokio::time::{self, Duration};
 use tokio_tungstenite::tungstenite::Message;
-use walkdir::WalkDir;
 
 // Needed for setting up the docker container
-use bollard::container::{Config, RemoveContainerOptions};
-use bollard::Docker;
+// use bollard::container::{Config, RemoveContainerOptions};
+// use bollard::Docker;
 
-use bollard::exec::{CreateExecOptions, StartExecResults};
-use bollard::image::CreateImageOptions;
-use futures_util::TryStreamExt;
+// use bollard::exec::{CreateExecOptions, StartExecResults};
+// use bollard::image::CreateImageOptions;
 
 const IMAGE: &str = "alpine:3";
 
@@ -58,7 +51,6 @@ impl Identity {
 }
 
 use serde_json::Result;
-use std::str::FromStr;
 
 // Define the Message trait
 pub trait SystemMessage: Serialize + Deserialize<'static> {}
@@ -82,10 +74,16 @@ pub struct OpenaiKey {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct Prompt {
+    text: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub enum MessageTypes {
     Goal(Goal),
     InitializeProject(InitializeProject), // Add more types here
     SetOpenAIKey(OpenaiKey),
+    GetTextCompletion(Prompt)
 }
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
@@ -99,6 +97,10 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
 
     if let Ok(msg) = serde_json::from_str::<OpenaiKey>(message_str) {
         return Some(MessageTypes::SetOpenAIKey(msg));
+    }
+
+    if let Ok(msg) = serde_json::from_str::<Prompt>(message_str) {
+        return Some(MessageTypes::GetTextCompletion(msg));
     }
 
     None
@@ -139,7 +141,7 @@ struct ChatMessage {
 
 impl fmt::Display for ChatMessage {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.content)
+        write!(f, "{} : {}", self.role, self.content)
     }
 }
 
@@ -163,6 +165,70 @@ impl fmt::Display for Role {
         }
     }
 }
+
+
+use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE, AUTHORIZATION};
+use serde_json::json;
+
+async fn call_openai(messages : Vec<ChatMessage>, api_key : String) -> Result<String> {
+    // Define the URL for the API endpoint
+    let url = "https://api.openai.com/v1/chat/completions";
+
+    // Define the initial request body
+    let mut body = json!({
+        "model": "gpt-3.5-turbo",
+        "messages": messages,
+        "temperature": 0.7
+    }).to_string();
+
+    // Set up the headers
+    let mut headers = HeaderMap::new();
+    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+    headers.insert(AUTHORIZATION, HeaderValue::from_str(&format!("Bearer {}", api_key))?);
+
+    // Create an HTTP client
+    let client = reqwest::Client::new();
+
+    // Loop to make repeated API requests
+    loop {
+        // Make the HTTP POST request asynchronously
+        let response = client.post(url)
+            .headers(headers.clone())
+            .body(body.clone())
+            .send()
+            .await;
+
+        // Deserialize the response JSON into the ChatCompletion struct
+        let chat_completion: Result<ChatCompletion> = serde_json::from_str(&response.unwrap().text().await.unwrap());
+
+        let unwrapped_chat_completion = chat_completion.unwrap();
+
+        // Print the result
+        println!("{:#?}", chat_completion);
+
+        // Check if the finish_reason is "stop"
+        if let Some(choice) = unwrapped_chat_completion.choices.first() {
+            if choice.finish_reason == "stop" {
+                // If the finish_reason is "stop", exit the loop
+                break;
+            } else {
+                // If the finish_reason is not "stop", update the request body
+                // to include the assistant's response and make another request
+                let messages = body["messages"].as_array_mut().unwrap();
+                messages.push(json!(choice.message));
+                body["messages"] = json!(messages);
+            }
+        } else {
+            // If there are no choices, exit the loop
+            break;
+        }
+    }
+
+    let response = chat_
+
+    Ok(())
+}
+
 
 
 
@@ -284,7 +350,7 @@ async fn start_websocket_server(
         });
     }
 }
-use mongodb::{options::ClientOptions, Client};
+use mongodb::{Client};
 async fn return_db() -> mongodb::Database {
     let client = Client::with_uri_str("mongodb://localhost:27017/")
         .await
@@ -305,17 +371,17 @@ async fn start_message_sending_loop(
     mut client_rx: mpsc::Receiver<(Identity, String)>,
 ) {
 
-    let alpine_config = Config {
-        image: Some(IMAGE),
-        tty: Some(true),
-        attach_stdout: Some(true),
-        attach_stderr: Some(true),
-        ..Default::default()
-    };
+    // let alpine_config = Config {
+    //     image: Some(IMAGE),
+    //     tty: Some(true),
+    //     attach_stdout: Some(true),
+    //     attach_stderr: Some(true),
+    //     ..Default::default()
+    // };
 
     let mut docker_containers: Vec<(Identity, DockerId)> = Vec::new();
 
-    let mut runtimeSettings : Vec<(Identity, RuntimeSettings)> = Vec::new();
+    let mut runtimeSettings : HashMap<Identity, RuntimeSettings> = HashMap::new();
 
     // get the database
     let db = return_db().await;
@@ -389,7 +455,52 @@ async fn start_message_sending_loop(
             }
             MessageTypes::SetOpenAIKey(key) => {
                 println!("Setting openai key for {}", msg.0.name);
-                runtimeSettings.push((msg.0, RuntimeSettings { openai_api_key: key.key }));
+                runtimeSettings.insert(msg.0, RuntimeSettings{
+                    openai_api_key: key.key,
+                });
+            }
+            MessageTypes::GetTextCompletion(prompt) => {
+
+                // check to see if the client has an openai key
+                let openai_api_key = match runtimeSettings.get(&msg.0) {
+                    Some(settings) => Some(settings.openai_api_key.clone()),
+                    None => {
+                        println!("No openai key set for {}", msg.0.name);
+                        None
+                        
+                    }
+                };
+
+                if openai_api_key.is_some() {
+
+                    let messages = vec!(ChatMessage {
+                        role: Role::System,
+                        content: "You are a helpful assistant, you will help the user in any way they ask.".to_string()
+                    },
+                    ChatMessage {
+                        role: Role::User,
+                        content: prompt.text.clone()
+                    }
+                );
+
+                    call_openai(messages, openai_api_key.unwrap()).await;
+                    match tx.send((
+                        Identity::new(msg.0.name.to_string()),
+                        Message::Text(serde_json::to_string(&completion).unwrap()),
+                    )) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            println!("Error sending message to client: {:?}", e);
+                            break;
+                        }
+                    }
+                }
+
+                println!("Received text completion from {}", msg.0.name);
+
+                
+
+ 
             }
         }
     }
