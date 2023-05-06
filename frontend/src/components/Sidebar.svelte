@@ -2,8 +2,10 @@
   import AddNodeButton from "./sidebarComponents/AddNodeButton.svelte";
   import ModifyNodesOrEdges from "./sidebarComponents/ModifyNodesOrEdges.svelte";
   import DeleteEdge from "./sidebarComponents/DeleteEdge.svelte";
+  import SetOpenaiKey from "./sidebarComponents/SetOpenaiKey.svelte";
 
   let sections = [
+    { header: "Set API Key", component: SetOpenaiKey, open: true},
     { header: "Add Node", component: AddNodeButton, open: false },
     {
       header: "Modify Nodes or Edges",
