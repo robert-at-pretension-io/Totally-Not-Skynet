@@ -138,7 +138,7 @@ within the graph.
 
 <style>
   .graph {
-    left: 200px;
+    left: 300px;
     height: 100%;
     width: 100%;
   }

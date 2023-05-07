@@ -1704,6 +1704,7 @@ name = "skynet2"
 version = "0.1.0"
 dependencies = [
  "bollard",
+ "bson",
  "clap",
  "crossbeam-channel",
  "futures-util",

@@ -7,6 +7,7 @@ use tokio::net::TcpListener;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::sync::{mpsc, Mutex};
 use tokio_tungstenite::tungstenite::Message;
+use bson::{doc, Document, oid::ObjectId};
 
 // Needed for setting up the docker container
 // use bollard::container::{Config, RemoveContainerOptions};
@@ -19,6 +20,7 @@ use tokio_tungstenite::tungstenite::Message;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Action {
+    _id : ObjectId,
     prompt: String,
     name: String,
     system: String,
@@ -26,6 +28,7 @@ struct Action {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Process {
+    _id : ObjectId,
     name: String,
     trigger: String,
     triggers_next_process: String,

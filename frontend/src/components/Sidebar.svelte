@@ -1,15 +1,17 @@
 <script>
-  import AddNodeButton from "./sidebarComponents/AddNodeButton.svelte";
-  import ModifyNodesOrEdges from "./sidebarComponents/ModifyNodesOrEdges.svelte";
-  import DeleteEdge from "./sidebarComponents/DeleteEdge.svelte";
+  // import AddNodeButton from "./sidebarComponents/AddNodeButton.svelte";
+  // import ModifyNodesOrEdges from "./sidebarComponents/ModifyNodesOrEdges.svelte";
+  // import DeleteEdge from "./sidebarComponents/DeleteEdge.svelte";
   import SetOpenaiKey from "./sidebarComponents/SetOpenaiKey.svelte";
   import SendPrompt from "./sidebarComponents/SendPrompt.svelte";
   import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
+  import JsonEditor from "./sidebarComponents/JsonEditor.svelte";
 
   let sections = [
     { header: "Set API Key", component: SetOpenaiKey, open: true},
     { header: "Send Prompt", component: SendPrompt, open: true},
-    { header : "Interact with Actions and Processes", component: InteractWithActionsAndProcesses, open: true}
+    { header : "Interact with Actions and Processes", component: InteractWithActionsAndProcesses, open: true},
+    {header: "Edit Action or Process", component: JsonEditor, open: true}
     // { header: "Add Node", component: AddNodeButton, open: false },
     // {
     //   header: "Modify Nodes or Edges",

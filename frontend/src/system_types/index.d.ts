@@ -35,12 +35,14 @@ export type GraphState = {
 };
 
 export type Action = {
+  _id: String,
   prompt: String,
   name: String,
   system: String
 }
 
 export type Process = {
+  _id: String,
   name: String,
   trigger: String,
   triggers_next_process: String,
@@ -63,6 +65,8 @@ export type AiSystemState = {
 
 export type SystemState = {
   websocketReady: boolean,
+  selectedAction: Action | null,
+  selectedProcess: Process | null,
 }
 
 export type Goal = {
