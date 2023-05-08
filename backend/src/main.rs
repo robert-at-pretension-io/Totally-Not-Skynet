@@ -7,7 +7,11 @@ use tokio::net::TcpListener;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::sync::{mpsc, Mutex};
 use tokio_tungstenite::tungstenite::Message;
-use bson::{doc, Document, oid::ObjectId};
+use bson::{doc, oid::ObjectId};
+use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE, AUTHORIZATION};
+use serde_json::json;
+use serde_json::{ Value as JsonValue};
+use uuid::Uuid;
 
 // Needed for setting up the docker container
 // use bollard::container::{Config, RemoveContainerOptions};
@@ -166,12 +170,6 @@ impl fmt::Display for Role {
     }
 }
 
-
-use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE, AUTHORIZATION};
-use serde_json::json;
-
-use serde_json::{ Value as JsonValue};
-
 // Your existing type definitions here...
 
 async fn call_openai(messages: Vec<ChatMessage>, api_key: String) -> Result<String> {
@@ -234,11 +232,6 @@ async fn call_openai(messages: Vec<ChatMessage>, api_key: String) -> Result<Stri
     Ok(response_string)
 }
 
-
-
-
-
-use uuid::Uuid;
 
 async fn start_websocket_server(
     rx: Arc<tokio::sync::Mutex<UnboundedReceiver<(Identity, Message)>>>,
@@ -513,9 +506,6 @@ async fn start_message_sending_loop(
 
                 println!("Received text completion from {}", msg.0.name);
 
-                
-
- 
             }
         }
     }
