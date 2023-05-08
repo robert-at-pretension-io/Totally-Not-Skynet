@@ -30,31 +30,32 @@ export type selectedGraphComponent = {
 export type GraphState = {
   graph: Graph;
   selected: selectedGraphComponent | null;
-  lastAction: "addNode" | "addEdge" | "removeNode" | "removeEdge" | "selectNode" | "deselectNode" | "none" | "selectEdge" | "deselectEdge" | "updateNode" | "updateEdge";
+  lastAction: "addNode" | "addEdge" | "removeNode" | "removeEdge" | "selectNode" | "deselectNode" | "none" | "selectEdge" | "deselectEdge" | "updateNode" | "updateEdge" | "resetGraph";
   actedOn: Node | Edge | null;
 };
 
 export type Action = {
-  _id: String,
-  prompt: String,
-  name: String,
-  system: String
+  _id: string,
+  prompt: string,
+  name: string,
+  system: string
 }
 
 export type Process = {
-  _id: String,
-  name: String,
-  trigger: String,
-  triggers_next_process: String,
+  _id: string,
+  name: string,
+  steps: string[],
+  trigger: string,
+  triggers_next_process: string,
   waits_for_branch_completion: boolean,
-  description: String,
+  description: string,
   creates_process_branch: boolean,
-  branch_step: String
+  branch_step: string
 }
 
 export type Message = {
-  role: String,
-  content: String
+  role: string,
+  content: string
 }
 
 export type AiSystemState = {

@@ -20,7 +20,7 @@ export default   [
     selector: "node:selected",
     style: {
       "background-color": "darkred",
-      color: "white",
+      color: "black",
       "border-color": "darkred",
       "line-color": "#0e76ba",
       "target-arrow-color": "#0e76ba"

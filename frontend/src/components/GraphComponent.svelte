@@ -75,6 +75,21 @@ within the graph.
       cyInstance.$("#" + value.actedOn.id).remove();
       resetLastAction();
     }
+    else if (
+      cyInstance &&
+      value.lastAction === "removeNode" &&
+      value.actedOn != null
+    ) {
+      cyInstance.$("#" + value.actedOn.id).remove();
+      resetLastAction();
+    }
+    else if (
+      cyInstance &&
+      value.lastAction === "resetGraph"
+    ){
+      cyInstance.elements().remove();
+      resetLastAction();
+    }
   });
 
   // Get nodes and edges from the graphStore on component mount

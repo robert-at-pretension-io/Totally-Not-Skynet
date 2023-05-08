@@ -20,6 +20,8 @@ import {onMount} from "svelte";
 import websocketStore from "./stores/websocketStore";
 let user_id = "";
 import { aiSystemStore } from "stores/aiSystemStore";
+import systemStateStore from "stores/systemStateStore";
+import { processToGraph } from "helper_functions/graph";
 
 onMount(async () => {
   // start the websocket connection 
@@ -46,6 +48,21 @@ onMount(async () => {
     }
   });
 });
+
+async function handleProcessChange(process : Process) {
+  console.log("selected process changed: ", process);
+  await processToGraph(process);
+}
+
+$:  {
+  let process = $systemStateStore.selectedProcess;
+  console.log("process: ", process);
+  if (process) {
+    handleProcessChange(process);
+  }
+  
+}
+
 const graph: Graph = {
   nodes: [
     {

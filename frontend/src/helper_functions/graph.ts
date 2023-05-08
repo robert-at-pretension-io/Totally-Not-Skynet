@@ -1,5 +1,7 @@
-import type { Node, Edge, GraphState } from "../system_types";
+import type { Node, Edge, GraphState, AiSystemState } from "../system_types";
 import { graphStore } from "../stores/graphStore";
+import { Process } from "../system_types";
+import { aiSystemStore } from "../stores/aiSystemStore";
 
 // Define the getter and setter
 
@@ -21,6 +23,63 @@ export async function addNode(node: Node): Promise<void> {
   graphState.lastAction = "addNode";
   graphState.actedOn = node;
   setGraphState(graphState);
+}
+
+// function for converting a process to a graph
+export async function processToGraph(process: Process): Promise<void> {
+  await resetGraph();
+  
+  let ai_system_state : AiSystemState= await new Promise((resolve, _reject) => {
+    aiSystemStore.subscribe((ai_system_state: AiSystemState) => {
+      resolve(ai_system_state);
+    });
+  });
+
+  console.log(ai_system_state);
+
+  // verify that all of the steps have corresponding actions
+  let actions = process.steps;
+
+  // create a map from label to id
+  let label_to_id = new Map();
+
+  // loop through the actions and make sure that they are all in the ai_system_state
+  for (let i = 0; i < actions.length; i++) {
+    let action = actions[i];
+    // check if the action is in the ai_system_state
+    for (let j = 0; j < ai_system_state.actions.length; j++) {
+      let ai_system_action = ai_system_state.actions[j];
+      if (ai_system_action.name == action) {
+        // create a node
+
+        let this_id = await getUniqueId();
+
+        let node = {
+          id: this_id,
+          label: ai_system_action.name,
+          data: ai_system_action,
+        };
+
+        label_to_id.set(ai_system_action.name, this_id);
+
+        await addNode(node);
+      }
+    }
+
+  }
+
+  // loop through the actions and create edges
+  for (let i = 0; i < actions.length - 1; i++) {
+    let edge = {
+      id : await getUniqueId(),
+      source: label_to_id.get(actions[i]),
+      target: label_to_id.get(actions[i + 1]),
+      label: "next",
+      data: null,
+    };
+    await addEdge(edge);
+  }
+
 }
 
 export async function updateNode(
@@ -79,6 +138,8 @@ export async function removeEdge(
 ): Promise<void> {
   const graphState = await getGraphState();
   // find the id of the edge to remove
+
+  console.log("removing edge:", sourceId, targetId, "from graph");
 
   const edge = graphState.graph.edges.find(
     (edge) => edge.source === sourceId && edge.target === targetId
@@ -171,4 +232,15 @@ export async function getUniqueId(): Promise<string> {
     graphState.graph.edges.some((edge) => edge.id === id)
   );
   return id;
+}
+
+// reset the graphState to a new empty graph
+export async function resetGraph(): Promise<void> {
+  
+  const graphState = await getGraphState();
+  graphState.graph = { nodes: [], edges: [] };
+  graphState.lastAction = "resetGraph";
+  graphState.actedOn = null;
+  setGraphState(graphState);
+
 }
