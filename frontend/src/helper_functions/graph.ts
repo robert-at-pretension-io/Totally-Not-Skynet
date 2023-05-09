@@ -2,6 +2,7 @@ import type { Node, Edge, GraphState, AiSystemState } from "../system_types";
 import { graphStore } from "../stores/graphStore";
 import { Process } from "../system_types";
 import { aiSystemStore } from "../stores/aiSystemStore";
+import systemStateStore from "stores/systemStateStore";
 
 // Define the getter and setter
 
@@ -157,6 +158,17 @@ export async function removeEdge(
 export async function selectNode(id: string): Promise<void> {
   const graphState = await getGraphState();
   const selectedNode = graphState.graph.nodes.find((node) => node.id === id);
+  
+  systemStateStore.update((system_state) => {
+    if (selectedNode && selectedNode.data) {
+      // Return a new SystemState object with the updated selectedAction property
+      return { ...system_state, selectedAction: selectedNode.data, selectedProcess: null };
+    } else {
+      // Return the unmodified system_state if the condition is not met
+      return system_state;
+    }
+  });
+  
   if (selectedNode && graphState.selected) {
     graphState.lastAction = "selectNode";
     graphState.actedOn = selectedNode;
