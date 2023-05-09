@@ -44123,14 +44123,14 @@ var printLayoutInfo;
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[7] = list[i][0];
-    	child_ctx[8] = list[i][1];
-    	child_ctx[9] = list;
-    	child_ctx[10] = i;
+    	child_ctx[8] = list[i][0];
+    	child_ctx[9] = list[i][1];
+    	child_ctx[10] = list;
+    	child_ctx[11] = i;
     	return child_ctx;
     }
 
-    // (29:4) {#if mainObject !== null && Object.keys(mainObject).length > 0}
+    // (32:4) {#if mainObject !== null && Object.keys(mainObject).length > 0}
     function create_if_block$1(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -44140,7 +44140,7 @@ var printLayoutInfo;
     	let dispose;
     	let each_value = Object.entries(/*mainObject*/ ctx[0]);
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*index*/ ctx[10];
+    	const get_key = ctx => /*index*/ ctx[11];
     	validate_each_keys(ctx, each_value, get_each_context$1, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -44158,7 +44158,7 @@ var printLayoutInfo;
     			t0 = space();
     			button = element$1("button");
     			button.textContent = "Save";
-    			add_location(button, file$1, 43, 8, 1437);
+    			add_location(button, file$1, 46, 8, 1713);
     		},
     		m: function mount(target, anchor) {
     			for (let i = 0; i < each_blocks.length; i += 1) {
@@ -44199,14 +44199,14 @@ var printLayoutInfo;
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(29:4) {#if mainObject !== null && Object.keys(mainObject).length > 0}",
+    		source: "(32:4) {#if mainObject !== null && Object.keys(mainObject).length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (39:16) {:else}
+    // (42:16) {:else}
     function create_else_block(ctx) {
     	let textarea;
     	let textarea_id_value;
@@ -44214,20 +44214,20 @@ var printLayoutInfo;
     	let dispose;
 
     	function textarea_input_handler() {
-    		/*textarea_input_handler*/ ctx[5].call(textarea, /*key*/ ctx[7]);
+    		/*textarea_input_handler*/ ctx[5].call(textarea, /*key*/ ctx[8]);
     	}
 
     	const block = {
     		c: function create() {
     			textarea = element$1("textarea");
-    			attr_dev(textarea, "id", textarea_id_value = "input-" + /*index*/ ctx[10]);
+    			attr_dev(textarea, "id", textarea_id_value = "input-" + /*index*/ ctx[11]);
     			attr_dev(textarea, "rows", "1");
     			attr_dev(textarea, "class", "svelte-1ovkri5");
-    			add_location(textarea, file$1, 39, 20, 1302);
+    			add_location(textarea, file$1, 42, 20, 1578);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, textarea, anchor);
-    			set_input_value(textarea, /*mainObject*/ ctx[0][/*key*/ ctx[7]]);
+    			set_input_value(textarea, /*mainObject*/ ctx[0][/*key*/ ctx[8]]);
 
     			if (!mounted) {
     				dispose = listen_dev(textarea, "input", textarea_input_handler);
@@ -44237,12 +44237,12 @@ var printLayoutInfo;
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*mainObject*/ 1 && textarea_id_value !== (textarea_id_value = "input-" + /*index*/ ctx[10])) {
+    			if (dirty & /*mainObject*/ 1 && textarea_id_value !== (textarea_id_value = "input-" + /*index*/ ctx[11])) {
     				attr_dev(textarea, "id", textarea_id_value);
     			}
 
     			if (dirty & /*mainObject, Object*/ 1) {
-    				set_input_value(textarea, /*mainObject*/ ctx[0][/*key*/ ctx[7]]);
+    				set_input_value(textarea, /*mainObject*/ ctx[0][/*key*/ ctx[8]]);
     			}
     		},
     		d: function destroy(detaching) {
@@ -44256,14 +44256,14 @@ var printLayoutInfo;
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(39:16) {:else}",
+    		source: "(42:16) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (37:52) 
+    // (40:52) 
     function create_if_block_3(ctx) {
     	let input;
     	let input_id_value;
@@ -44271,19 +44271,19 @@ var printLayoutInfo;
     	let dispose;
 
     	function input_input_handler() {
-    		/*input_input_handler*/ ctx[4].call(input, /*key*/ ctx[7]);
+    		/*input_input_handler*/ ctx[4].call(input, /*key*/ ctx[8]);
     	}
 
     	const block = {
     		c: function create() {
     			input = element$1("input");
-    			attr_dev(input, "id", input_id_value = "input-" + /*index*/ ctx[10]);
+    			attr_dev(input, "id", input_id_value = "input-" + /*index*/ ctx[11]);
     			attr_dev(input, "type", "number");
-    			add_location(input, file$1, 37, 20, 1186);
+    			add_location(input, file$1, 40, 20, 1462);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
-    			set_input_value(input, /*mainObject*/ ctx[0][/*key*/ ctx[7]]);
+    			set_input_value(input, /*mainObject*/ ctx[0][/*key*/ ctx[8]]);
 
     			if (!mounted) {
     				dispose = listen_dev(input, "input", input_input_handler);
@@ -44293,12 +44293,12 @@ var printLayoutInfo;
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*mainObject*/ 1 && input_id_value !== (input_id_value = "input-" + /*index*/ ctx[10])) {
+    			if (dirty & /*mainObject*/ 1 && input_id_value !== (input_id_value = "input-" + /*index*/ ctx[11])) {
     				attr_dev(input, "id", input_id_value);
     			}
 
-    			if (dirty & /*mainObject, Object*/ 1 && to_number(input.value) !== /*mainObject*/ ctx[0][/*key*/ ctx[7]]) {
-    				set_input_value(input, /*mainObject*/ ctx[0][/*key*/ ctx[7]]);
+    			if (dirty & /*mainObject, Object*/ 1 && to_number(input.value) !== /*mainObject*/ ctx[0][/*key*/ ctx[8]]) {
+    				set_input_value(input, /*mainObject*/ ctx[0][/*key*/ ctx[8]]);
     			}
     		},
     		d: function destroy(detaching) {
@@ -44312,14 +44312,14 @@ var printLayoutInfo;
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(37:52) ",
+    		source: "(40:52) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (35:53) 
+    // (38:53) 
     function create_if_block_2(ctx) {
     	let input;
     	let input_id_value;
@@ -44327,19 +44327,19 @@ var printLayoutInfo;
     	let dispose;
 
     	function input_change_handler() {
-    		/*input_change_handler*/ ctx[3].call(input, /*key*/ ctx[7]);
+    		/*input_change_handler*/ ctx[3].call(input, /*key*/ ctx[8]);
     	}
 
     	const block = {
     		c: function create() {
     			input = element$1("input");
-    			attr_dev(input, "id", input_id_value = "input-" + /*index*/ ctx[10]);
+    			attr_dev(input, "id", input_id_value = "input-" + /*index*/ ctx[11]);
     			attr_dev(input, "type", "checkbox");
-    			add_location(input, file$1, 35, 20, 1037);
+    			add_location(input, file$1, 38, 20, 1313);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
-    			input.checked = /*mainObject*/ ctx[0][/*key*/ ctx[7]];
+    			input.checked = /*mainObject*/ ctx[0][/*key*/ ctx[8]];
 
     			if (!mounted) {
     				dispose = listen_dev(input, "change", input_change_handler);
@@ -44349,12 +44349,12 @@ var printLayoutInfo;
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty & /*mainObject*/ 1 && input_id_value !== (input_id_value = "input-" + /*index*/ ctx[10])) {
+    			if (dirty & /*mainObject*/ 1 && input_id_value !== (input_id_value = "input-" + /*index*/ ctx[11])) {
     				attr_dev(input, "id", input_id_value);
     			}
 
     			if (dirty & /*mainObject, Object*/ 1) {
-    				input.checked = /*mainObject*/ ctx[0][/*key*/ ctx[7]];
+    				input.checked = /*mainObject*/ ctx[0][/*key*/ ctx[8]];
     			}
     		},
     		d: function destroy(detaching) {
@@ -44368,14 +44368,14 @@ var printLayoutInfo;
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(35:53) ",
+    		source: "(38:53) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (33:16) {#if typeof value === "object" && value !== null}
+    // (36:16) {#if typeof value === "object" && value !== null}
     function create_if_block_1(ctx) {
     	const block = { c: noop$2, m: noop$2, p: noop$2, d: noop$2 };
 
@@ -44383,27 +44383,27 @@ var printLayoutInfo;
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(33:16) {#if typeof value === \\\"object\\\" && value !== null}",
+    		source: "(36:16) {#if typeof value === \\\"object\\\" && value !== null}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (30:8) {#each Object.entries(mainObject) as [key, value], index (index)}
+    // (33:8) {#each Object.entries(mainObject) as [key, value], index (index)}
     function create_each_block$1(key_1, ctx) {
     	let div;
     	let label;
-    	let t0_value = /*key*/ ctx[7] + "";
+    	let t0_value = /*key*/ ctx[8] + "";
     	let t0;
     	let t1;
     	let label_for_value;
     	let t2;
 
     	function select_block_type(ctx, dirty) {
-    		if (typeof /*value*/ ctx[8] === "object" && /*value*/ ctx[8] !== null) return create_if_block_1;
-    		if (typeof /*value*/ ctx[8] === "boolean") return create_if_block_2;
-    		if (typeof /*value*/ ctx[8] === "number") return create_if_block_3;
+    		if (typeof /*value*/ ctx[9] === "object" && /*value*/ ctx[9] !== null) return create_if_block_1;
+    		if (typeof /*value*/ ctx[9] === "boolean") return create_if_block_2;
+    		if (typeof /*value*/ ctx[9] === "number") return create_if_block_3;
     		return create_else_block;
     	}
 
@@ -44420,10 +44420,10 @@ var printLayoutInfo;
     			t1 = text(":");
     			t2 = space();
     			if_block.c();
-    			attr_dev(label, "for", label_for_value = "input-" + /*index*/ ctx[10]);
-    			add_location(label, file$1, 31, 16, 748);
+    			attr_dev(label, "for", label_for_value = "input-" + /*index*/ ctx[11]);
+    			add_location(label, file$1, 34, 16, 1024);
     			attr_dev(div, "class", "object-field");
-    			add_location(div, file$1, 30, 12, 705);
+    			add_location(div, file$1, 33, 12, 981);
     			this.first = div;
     		},
     		m: function mount(target, anchor) {
@@ -44436,9 +44436,9 @@ var printLayoutInfo;
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*mainObject*/ 1 && t0_value !== (t0_value = /*key*/ ctx[7] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*mainObject*/ 1 && t0_value !== (t0_value = /*key*/ ctx[8] + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty & /*mainObject*/ 1 && label_for_value !== (label_for_value = "input-" + /*index*/ ctx[10])) {
+    			if (dirty & /*mainObject*/ 1 && label_for_value !== (label_for_value = "input-" + /*index*/ ctx[11])) {
     				attr_dev(label, "for", label_for_value);
     			}
 
@@ -44464,7 +44464,7 @@ var printLayoutInfo;
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(30:8) {#each Object.entries(mainObject) as [key, value], index (index)}",
+    		source: "(33:8) {#each Object.entries(mainObject) as [key, value], index (index)}",
     		ctx
     	});
 
@@ -44481,7 +44481,7 @@ var printLayoutInfo;
     			div = element$1("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "json-editor");
-    			add_location(div, file$1, 27, 0, 525);
+    			add_location(div, file$1, 30, 0, 801);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -44526,7 +44526,10 @@ var printLayoutInfo;
     }
 
     function instance$2($$self, $$props, $$invalidate) {
+    	let $websocketStore;
     	let $systemStateStore;
+    	validate_store(websocketStore, 'websocketStore');
+    	component_subscribe($$self, websocketStore, $$value => $$invalidate(6, $websocketStore = $$value));
     	validate_store(systemStateStore, 'systemStateStore');
     	component_subscribe($$self, systemStateStore, $$value => $$invalidate(2, $systemStateStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
@@ -44535,7 +44538,11 @@ var printLayoutInfo;
     	const dispatch = createEventDispatcher();
 
     	function save() {
-    		dispatch("save", mainObject);
+    		if (mainObject !== null && mainObject.prompt !== undefined) {
+    			let updateAction = { action: mainObject };
+    			console.log("sending: " + JSON.stringify(updateAction));
+    			$websocketStore.send(JSON.stringify(updateAction));
+    		}
     	}
 
     	const writable_props = [];
@@ -44562,9 +44569,11 @@ var printLayoutInfo;
     	$$self.$capture_state = () => ({
     		createEventDispatcher,
     		systemStateStore,
+    		websocketStore,
     		mainObject,
     		dispatch,
     		save,
+    		$websocketStore,
     		$systemStateStore
     	});
 

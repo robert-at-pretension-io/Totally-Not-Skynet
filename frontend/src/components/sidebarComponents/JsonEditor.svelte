@@ -1,9 +1,11 @@
 <!-- JsonEditor.svelte -->
-<script>
+<script lang="ts">
     import { createEventDispatcher } from "svelte";
     import systemStateStore from "stores/systemStateStore";
+    import websocketStore from "stores/websocketStore";
+    import { Action, Process, UpdateAction } from "system_types";
 
-    let mainObject = {};
+    let mainObject : Action | Process | null | {} = {};
 
     $: {
       mainObject = $systemStateStore.selectedAction || $systemStateStore.selectedProcess;
@@ -13,7 +15,14 @@
     const dispatch = createEventDispatcher();
 
     function save() {
-      dispatch("save", mainObject);
+      if (mainObject !== null && mainObject.prompt !== undefined){
+        let updateAction : UpdateAction = {
+          action: mainObject
+        };
+        console.log("sending: " + JSON.stringify(updateAction));
+        $websocketStore.send(JSON.stringify(updateAction));
+      }
+      
     }
 </script>
 
