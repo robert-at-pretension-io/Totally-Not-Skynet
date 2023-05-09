@@ -83,11 +83,17 @@ pub struct Prompt {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct UpdateAction {
+    action: Action,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub enum MessageTypes {
     Goal(Goal),
     InitializeProject(InitializeProject), // Add more types here
     SetOpenAIKey(OpenaiKey),
-    GetTextCompletion(Prompt)
+    GetTextCompletion(Prompt),
+    UpdateAction(UpdateAction)
 }
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
@@ -105,6 +111,10 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
 
     if let Ok(msg) = serde_json::from_str::<Prompt>(message_str) {
         return Some(MessageTypes::GetTextCompletion(msg));
+    }
+
+    if let Ok(msg) = serde_json::from_str::<UpdateAction>(message_str) {
+        return Some(MessageTypes::UpdateAction(msg));
     }
 
     None
@@ -506,6 +516,37 @@ async fn start_message_sending_loop(
 
                 println!("Received text completion from {}", msg.0.name);
 
+            },
+            MessageTypes::UpdateAction(update_action) => {
+                let updated_action = update_action.action;
+
+                let action_collection = db.collection::<Action>("actions");
+
+                let filter = doc! { "_id": updated_action._id.clone() };
+
+                let update = doc! { "$set": { "name": updated_action.name.clone(), "prompt": 
+            
+                updated_action.prompt.clone(),  "system" : updated_action.system.clone() }
+            };
+
+                let update_result = action_collection
+                    .update_one(filter, update, None)
+                    .await
+                    .unwrap();
+
+                println!("Updated {} actions", update_result.modified_count);
+            
+                match tx.send((
+                    Identity::new(msg.0.name.to_string()),
+                    Message::Text(format!("Updated {} actions", update_result.modified_count)),
+                )) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        println!("Error sending message to client: {:?}", e);
+                        break;
+                    }
+                }
+            
             }
         }
     }
