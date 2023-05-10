@@ -12,8 +12,6 @@
       console.log("mainObject: ", mainObject);
     }
 
-    const dispatch = createEventDispatcher();
-
     function save() {
       if (mainObject !== null && mainObject.prompt !== undefined){
         let updateAction : UpdateAction = {

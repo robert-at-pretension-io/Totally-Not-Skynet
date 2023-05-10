@@ -90,9 +90,14 @@ export type UpdateAction = {
   action: Action;
 };
 
+export type CreateAction = {
+  action: Action;
+}
+
 export type MessageTypes =
   | { type: 'Goal'; data: Goal }
   | { type: 'InitializeProject'; data: InitializeProject }
   | { type: 'SetOpenAIKey'; data: OpenaiKey }
   | { type: 'Prompt'; data: Prompt}
   | { type: 'UpdateAction'; data: UpdateAction}
+  | { type: 'CreateAction'; data: CreateAction}

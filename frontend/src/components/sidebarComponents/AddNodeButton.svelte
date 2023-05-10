@@ -1,32 +1,49 @@
 <script lang="ts">
   import type { Node } from "../../system_types";
 
-  import { getUniqueId, addNode } from "../../helper_functions/graph";
+  import {  addNode } from "../../helper_functions/graph";
+
+  import type { Action } from "../../system_types";
+
+  import websocketStore from "stores/websocketStore";
 
   let label = "Node Label";
 
+  let action: Action = {
+    _id: "",
+    prompt: "",
+    name: "",
+    system: ""
+  };
+
   async function localAddNode() {
-    let id = await getUniqueId();
 
-    let newNode: Node = {
-      id: id,
-      label: label,
-      data: {},
-    };
+    // The id should come from the mongod database after the creation of the action
 
-    await addNode(newNode);
+    // create the action in the database by sending a message to the backend
+
+    $websocketStore.send(JSON.stringify({create_action: action}));
+
   }
 </script>
 
-<div id="cy" />
-<input type="text" bind:value={label} placeholder="Enter label for new node" />
-<button on:click={localAddNode}>Add Node</button>
-
 <style>
-  input {
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    white-space: pre-wrap;
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
   }
 </style>
+
+<form on:submit|preventDefault={localAddNode}>
+  <label for="prompt">Prompt</label>
+  <input id="prompt" bind:value={action.prompt} type="text" required>
+
+  <label for="name">Name</label>
+  <input id="name" bind:value={action.name} type="text" required>
+
+  <label for="system">System</label>
+  <input id="system" bind:value={action.system} type="text" required>
+
+  <button type="submit">Submit</button>
+</form>

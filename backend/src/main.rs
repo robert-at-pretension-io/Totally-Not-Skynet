@@ -24,7 +24,7 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Action {
-    _id : ObjectId,
+    _id : Option<ObjectId>,
     prompt: String,
     name: String,
     system: String,
@@ -88,15 +88,43 @@ pub struct UpdateAction {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct CreateAction {
+    create_action: Action,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub enum MessageTypes {
     Goal(Goal),
     InitializeProject(InitializeProject), // Add more types here
     SetOpenAIKey(OpenaiKey),
     GetTextCompletion(Prompt),
-    UpdateAction(UpdateAction)
+    UpdateAction(UpdateAction),
+    CreateAction(CreateAction),
 }
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
+
+    use serde_json::Value;
+    let value: Value = match serde_json::from_str(message_str) {
+        Ok(val) => val,
+        Err(_) => return None,  // or handle this error as you see fit
+    };
+    
+    if let Some(obj) = value.as_object() {
+        if let Some(create_action_value) = obj.get("create_action") {
+            if let Some(create_action_obj) = create_action_value.as_object() {
+                let action = Action  {
+                    _id: None, // Assuming you have changed your struct field to `_id`
+                    name: create_action_obj.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                    prompt: create_action_obj.get("prompt").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                    system: create_action_obj.get("system").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                };
+                return Some(MessageTypes::CreateAction(CreateAction{create_action: action}));
+            }
+        }
+    }
+
+
     if let Ok(msg) = serde_json::from_str::<Goal>(message_str) {
         return Some(MessageTypes::Goal(msg));
     }
@@ -116,6 +144,12 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
     if let Ok(msg) = serde_json::from_str::<UpdateAction>(message_str) {
         return Some(MessageTypes::UpdateAction(msg));
     }
+
+    if let Ok(msg) = serde_json::from_str::<CreateAction>(message_str) {
+        return Some(MessageTypes::CreateAction(msg));
+    }
+
+    println!("Could not parse message: {}", message_str);
 
     None
 }
@@ -403,12 +437,16 @@ async fn start_message_sending_loop(
 
         let received_message: Option<MessageTypes> = parse_message(&msg.1);
 
+
         let message_contents: MessageTypes;
 
         if received_message.is_none() {
+            print!("Received an invalid message from the client: {}", msg.1);
             continue;
         } else {
             message_contents = received_message.unwrap();
+            println!("Received a parsed message from the client: {:?}", message_contents);
+
         }
 
         match message_contents {
@@ -548,6 +586,45 @@ async fn start_message_sending_loop(
                 }
             
             }
+            MessageTypes::CreateAction(create_action) => {
+                let action_collection = db.collection::<Action>("actions");
+
+                let mut action = create_action.create_action.clone();
+
+                action._id = Some(bson::oid::ObjectId::new());
+
+                let insert_result = action_collection
+                    .insert_one(action, None)
+                    .await
+                    .unwrap();
+
+                println!("Inserted action: {}", insert_result.inserted_id);
+
+                let inserted_action = action_collection
+                    .find_one(doc! { "_id": insert_result.inserted_id.clone() }, None)
+                    .await
+                    .unwrap()
+                    .unwrap();
+
+                // send the created action back to the client
+                let created_action : Action = inserted_action;
+
+                let response = CreateAction{
+                    create_action: created_action,
+                };
+                
+
+                match tx.send((
+                    Identity::new(msg.0.name.to_string()),
+                    Message::Text(json!(response).to_string()),
+                )) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        println!("Error sending message to client: {:?}", e);
+                        break;
+                    }
+                }
+            },
         }
     }
 }

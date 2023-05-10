@@ -1,5 +1,4 @@
 <script lang="ts">
-    import type { MessageTypes } from "../../system_types";
 
     import websocketStore from "../../stores/websocketStore";
   

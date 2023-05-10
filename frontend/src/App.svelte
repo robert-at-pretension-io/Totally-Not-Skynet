@@ -6,9 +6,6 @@
     Graph,
     selectedGraphComponent,
     GraphState,
-    Goal,
-    InitializeProject,
-    OpenaiKey,
     Action,
     Process,
 
@@ -18,7 +15,6 @@
   import { setGraphState } from "./helper_functions/graph";
 import {onMount} from "svelte";
 import websocketStore from "./stores/websocketStore";
-let user_id = "";
 import { aiSystemStore } from "stores/aiSystemStore";
 import systemStateStore from "stores/systemStateStore";
 import { processToGraph } from "helper_functions/graph";
@@ -33,14 +29,21 @@ onMount(async () => {
     console.log("websocket message received: ", event.data);
     let data = JSON.parse(event.data);
     // check to see if the data has the shape of a Process or Action
-    if (data.hasOwnProperty("description")) {
+    if (Object.prototype.hasOwnProperty.call(data, "description")) {
       let process: Process = data;
       aiSystemStore.update((state : AiSystemState) => {
         state.processes.push(process);
         return state;
       });
-    } else if (data.hasOwnProperty("prompt")) {
+    } else if (Object.prototype.hasOwnProperty.call(data, "prompt")) {
       let action: Action = data;
+      aiSystemStore.update((state : AiSystemState) => {
+        state.actions.push(action);
+        return state;
+      });
+    }
+    else if (Object.prototype.hasOwnProperty.call(data, "create_action")) {
+      let action : Action = data.create_action;
       aiSystemStore.update((state : AiSystemState) => {
         state.actions.push(action);
         return state;
