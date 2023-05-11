@@ -128,6 +128,22 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                 return Some(MessageTypes::CreateAction(CreateAction{create_action: action}));
             }
         }
+        if let Some(create_process_value) = obj.get("create_process") {
+            if let Some(create_process_obj) = create_process_value.as_object() {
+                let process = Process  {
+                    _id: None, // Assuming you have changed your struct field to `_id`
+                    name: create_process_obj.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                    trigger: create_process_obj.get("trigger").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                    triggers_next_process: create_process_obj.get("triggers_next_process").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                    waits_for_branch_completion: create_process_obj.get("waits_for_branch_completion").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                    steps: create_process_obj.get("steps").and_then(|v| v.as_array()).unwrap_or(&vec![]).iter().map(|v| v.as_str().unwrap_or("").to_string()).collect(),
+                    description: create_process_obj.get("description").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                    creates_process_branch: create_process_obj.get("creates_process_branch").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                    branch_step: create_process_obj.get("branch_step").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                };
+                return Some(MessageTypes::CreateProcess(CreateProcess{create_process: process}));
+            }
+        }
     }
 
 
@@ -149,10 +165,6 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
 
     if let Ok(msg) = serde_json::from_str::<UpdateAction>(message_str) {
         return Some(MessageTypes::UpdateAction(msg));
-    }
-
-    if let Ok(msg) = serde_json::from_str::<CreateAction>(message_str) {
-        return Some(MessageTypes::CreateAction(msg));
     }
 
     println!("Could not parse message: {}", message_str);

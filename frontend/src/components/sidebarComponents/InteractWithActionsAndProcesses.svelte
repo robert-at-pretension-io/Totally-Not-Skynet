@@ -1,6 +1,8 @@
 <script>
     import { aiSystemStore } from "stores/aiSystemStore";
     import systemStateStore from "stores/systemStateStore";
+  import JsonEditor from "./JsonEditor.svelte";
+
     let selectedAction = "";
     let selectedProcess = "";
 
@@ -57,3 +59,5 @@
       <option value={process.name}>{process.name}</option>
     {/each}
   </select>
+
+  <JsonEditor></JsonEditor>

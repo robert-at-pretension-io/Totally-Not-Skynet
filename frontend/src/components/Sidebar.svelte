@@ -6,13 +6,17 @@
   import SendPrompt from "./sidebarComponents/SendPrompt.svelte";
   import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
   import JsonEditor from "./sidebarComponents/JsonEditor.svelte";
+  import CreateProcess from "./sidebarComponents/CreateProcess.svelte";
+
+  import { blur, fade } from "svelte/transition";
 
   let sections = [
     { header: "Set API Key", component: SetOpenaiKey, open: true},
-    { header: "Send Prompt", component: SendPrompt, open: true},
-    { header : "Interact with Actions and Processes", component: InteractWithActionsAndProcesses, open: true},
-    {header: "Edit Action or Process", component: JsonEditor, open: true},
+    { header: "Send Prompt", component: SendPrompt, open: false},
+    { header : "Interact with Actions and Processes", component: InteractWithActionsAndProcesses, open: false},
+    // {header: "Edit Action or Process", component: JsonEditor, open: false},
     { header: "Add Action", component: AddNodeButton, open: false },
+    { header: "Create Process" , component: CreateProcess, open: false}
     // {
     //   header: "Modify Nodes or Edges",
     //   component: ModifyNodesOrEdges,
@@ -21,24 +25,33 @@
     // { header: "Delete Edge", component: DeleteEdge, open: false },
     // { header: "View Available Actions"}
   ];
+
+  function toggleSection(clickedSection) {
+    sections = sections.map(section => {
+      return {...section, open: section === clickedSection};
+    });
+  }
 </script>
 
 <div class="sidebar">
-  {#each sections as section}
+  {#each sections as section (section.header)}
     <div class="section">
       <div
         class="section-header"
         on:keydown={(event) => {
           if (event.key === "Enter") {
-            section.open = !section.open;
+            toggleSection(section);
           }
         }}
-        on:click={() => (section.open = !section.open)}
+        on:click={() => toggleSection(section)}
+        tabindex="0"
       >
         {section.header}
       </div>
       {#if section.open}
-        <div class="section-content">
+        <div class="section-content" 
+             in:fade={{duration: 700}} 
+             out:blur={{duration: 700, amount: 5}}>
           <svelte:component this={section.component} />
         </div>
       {/if}

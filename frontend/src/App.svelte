@@ -49,6 +49,14 @@ onMount(async () => {
         return state;
       });
     }
+    else if (Object.prototype.hasOwnProperty.call(data, "create_process")){
+      let process : Process = data.create_process;
+      aiSystemStore.update((state : AiSystemState) => {
+        state.processes.push(process);
+        return state;
+      });
+    
+    }
   });
 });
 
