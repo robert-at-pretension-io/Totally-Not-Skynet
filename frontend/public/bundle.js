@@ -43461,27 +43461,27 @@ var printLayoutInfo;
     			button = element$1("button");
     			button.textContent = "Submit";
     			attr_dev(label0, "for", "prompt");
-    			add_location(label0, file$5, 37, 2, 1381);
+    			add_location(label0, file$5, 35, 2, 1316);
     			attr_dev(input0, "id", "prompt");
     			attr_dev(input0, "type", "text");
     			input0.required = true;
-    			add_location(input0, file$5, 38, 2, 1418);
+    			add_location(input0, file$5, 36, 2, 1353);
     			attr_dev(label1, "for", "name");
-    			add_location(label1, file$5, 40, 2, 1489);
+    			add_location(label1, file$5, 38, 2, 1424);
     			attr_dev(input1, "id", "name");
     			attr_dev(input1, "type", "text");
     			input1.required = true;
-    			add_location(input1, file$5, 41, 2, 1522);
+    			add_location(input1, file$5, 39, 2, 1457);
     			attr_dev(label2, "for", "system");
-    			add_location(label2, file$5, 43, 2, 1589);
+    			add_location(label2, file$5, 41, 2, 1524);
     			attr_dev(input2, "id", "system");
     			attr_dev(input2, "type", "text");
     			input2.required = true;
-    			add_location(input2, file$5, 44, 2, 1626);
+    			add_location(input2, file$5, 42, 2, 1561);
     			attr_dev(button, "type", "submit");
-    			add_location(button, file$5, 46, 2, 1697);
+    			add_location(button, file$5, 44, 2, 1632);
     			attr_dev(form, "class", "svelte-14ljocl");
-    			add_location(form, file$5, 36, 0, 1332);
+    			add_location(form, file$5, 34, 0, 1267);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -43592,8 +43592,6 @@ var printLayoutInfo;
     			});
     	};
 
-    	let label = "Node Label";
-
     	let action = {
     		_id: "",
     		prompt: "",
@@ -43633,7 +43631,6 @@ var printLayoutInfo;
     	$$self.$capture_state = () => ({
     		__awaiter,
     		websocketStore,
-    		label,
     		action,
     		localAddNode,
     		$websocketStore
@@ -43641,7 +43638,6 @@ var printLayoutInfo;
 
     	$$self.$inject_state = $$props => {
     		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
-    		if ('label' in $$props) label = $$props.label;
     		if ('action' in $$props) $$invalidate(0, action = $$props.action);
     	};
 

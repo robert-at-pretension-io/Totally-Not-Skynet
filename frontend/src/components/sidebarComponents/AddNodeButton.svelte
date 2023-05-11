@@ -1,13 +1,8 @@
 <script lang="ts">
-  import type { Node } from "../../system_types";
-
-  import {  addNode } from "../../helper_functions/graph";
 
   import type { Action } from "../../system_types";
 
   import websocketStore from "stores/websocketStore";
-
-  let label = "Node Label";
 
   let action: Action = {
     _id: "",

@@ -91,7 +91,7 @@ export type UpdateAction = {
 };
 
 export type CreateAction = {
-  action: Action;
+  create_action: Action;
 }
 
 export type MessageTypes =
