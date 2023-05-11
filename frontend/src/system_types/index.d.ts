@@ -94,6 +94,10 @@ export type CreateAction = {
   create_action: Action;
 }
 
+export type CreateProcess = {
+  create_process: Process;
+}
+
 export type MessageTypes =
   | { type: 'Goal'; data: Goal }
   | { type: 'InitializeProject'; data: InitializeProject }
@@ -101,3 +105,4 @@ export type MessageTypes =
   | { type: 'Prompt'; data: Prompt}
   | { type: 'UpdateAction'; data: UpdateAction}
   | { type: 'CreateAction'; data: CreateAction}
+  | { type: 'CreateProcess'; data: CreateProcess}

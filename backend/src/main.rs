@@ -32,7 +32,7 @@ struct Action {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Process {
-    _id : ObjectId,
+    _id : Option<ObjectId>,
     name: String,
     trigger: String,
     triggers_next_process: String,
@@ -93,6 +93,11 @@ pub struct CreateAction {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct CreateProcess {
+    create_process : Process,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub enum MessageTypes {
     Goal(Goal),
     InitializeProject(InitializeProject), // Add more types here
@@ -100,6 +105,7 @@ pub enum MessageTypes {
     GetTextCompletion(Prompt),
     UpdateAction(UpdateAction),
     CreateAction(CreateAction),
+    CreateProcess(CreateProcess),
 }
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
@@ -624,6 +630,46 @@ async fn start_message_sending_loop(
                         break;
                     }
                 }
+            },
+            MessageTypes::CreateProcess(create_process) => {
+                let process_collection = db.collection::<Process>("processes");
+
+                let mut process = create_process.create_process.clone();
+
+                process._id = Some(bson::oid::ObjectId::new());
+
+                let insert_result = process_collection
+                    .insert_one(process, None)
+                    .await
+                    .unwrap();
+
+                println!("Inserted process: {}", insert_result.inserted_id);
+
+                let inserted_process = process_collection
+                    .find_one(doc! { "_id": insert_result.inserted_id.clone() }, None)
+                    .await
+                    .unwrap()
+                    .unwrap();
+
+                // send the created process back to the client
+                let created_process : Process = inserted_process;
+
+                let response = CreateProcess{
+                    create_process: created_process,
+                };
+                
+
+                match tx.send((
+                    Identity::new(msg.0.name.to_string()),
+                    Message::Text(json!(response).to_string()),
+                )) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        println!("Error sending message to client: {:?}", e);
+                        break;
+                    }
+                }
+            
             },
         }
     }
