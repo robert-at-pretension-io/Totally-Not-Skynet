@@ -122,6 +122,7 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
             if let Some(create_action_obj) = create_action_value.as_object() {
                 let action = Action  {
                     _id: None, // Assuming you have changed your struct field to `_id`
+                    variables: create_action_obj.get("variables").and_then(|v| v.as_array()).unwrap_or(&vec![]).iter().map(|v| v.as_str().unwrap_or("").to_string()).collect(),
                     name: create_action_obj.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string(),
                     prompt: create_action_obj.get("prompt").and_then(|v| v.as_str()).unwrap_or("").to_string(),
                     system: create_action_obj.get("system").and_then(|v| v.as_str()).unwrap_or("").to_string(),
@@ -579,11 +580,11 @@ async fn start_message_sending_loop(
 
                 let action_collection = db.collection::<Action>("actions");
 
-                let filter = doc! { "_id": updated_action._id.clone() };
+                let filter = doc! { "_id": updated_action._id.clone().unwrap() };
 
                 let update = doc! { "$set": { "name": updated_action.name.clone(), "prompt": 
             
-                updated_action.prompt.clone(),  "system" : updated_action.system.clone() }
+                updated_action.prompt.clone(),  "system" : updated_action.system.clone(), "variables" : updated_action.variables.clone() }
             };
 
                 let update_result = action_collection
@@ -591,18 +592,27 @@ async fn start_message_sending_loop(
                     .await
                     .unwrap();
 
-                println!("Updated {} actions", update_result.modified_count);
-            
-                match tx.send((
-                    Identity::new(msg.0.name.to_string()),
-                    Message::Text(format!("Updated {} actions", update_result.modified_count)),
-                )) {
-                    Ok(_) => {}
-                    Err(e) => {
-                        println!("Error sending message to client: {:?}", e);
-                        break;
+
+                if ( update_result.modified_count == 0 ) {
+                    println!("No actions updated");
+                }
+                else {
+                    println!("Updated {} actions", update_result.modified_count);
+
+
+                    match tx.send((
+                        Identity::new(msg.0.name.to_string()),
+                        Message::Text(json!(updated_action).to_string()),
+                    )) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            println!("Error sending message to client: {:?}", e);
+                            break;
+                        }
                     }
                 }
+            
+
             
             }
             MessageTypes::CreateAction(create_action) => {

@@ -18,7 +18,7 @@ import websocketStore from "./stores/websocketStore";
 import { aiSystemStore } from "stores/aiSystemStore";
 import systemStateStore from "stores/systemStateStore";
 import { processToGraph } from "helper_functions/graph";
-import populateVariables from "helper_functions/validation";
+import {populateVariables} from "helper_functions/validation";
 
 onMount(async () => {
   // start the websocket connection 
@@ -40,16 +40,22 @@ onMount(async () => {
       let action: Action = data;
       aiSystemStore.update((state : AiSystemState) => {
         let variables = populateVariables(action);
+        console.log("variables: ", variables);
         // check to see that the variables stored in the action are valid
         let compareThese = action.variables;
+        console.log("compareThese: ", compareThese);
 
-        let set1 = new Set(Object.keys(variables));
+        let set1 = new Set(variables);
+        console.log("set1: ", set1);
         let set2 = new Set(compareThese);
+        console.log("set2: ", set2);
         let union = new Set([...set1, ...set2]);
+        console.log("union: ", union);
 
         if ( union.size !== set1.size || union.size !== set2.size) {
           console.log("invalid variables");
-          $websocketStore.send(JSON.stringify({update_action: "invalid variables"}));
+          action.variables = variables;
+          $websocketStore.send(JSON.stringify({"action": action}));
           return state;
         }
 
