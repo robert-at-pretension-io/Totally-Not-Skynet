@@ -26,6 +26,7 @@ use uuid::Uuid;
 struct Action {
     _id : Option<ObjectId>,
     prompt: String,
+    variables: Vec<String>,
     name: String,
     system: String,
 }

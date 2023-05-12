@@ -37,6 +37,7 @@ export type GraphState = {
 export type Action = {
   _id: string,
   prompt: string,
+  variables: string[],
   name: string,
   system: string
 }
