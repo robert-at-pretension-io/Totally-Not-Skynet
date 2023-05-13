@@ -43278,8 +43278,10 @@ var printLayoutInfo;
             type: "Node",
             instance: {
                 id: "",
+                source: null,
+                target: null,
                 label: "",
-                data: {}
+                data: undefined
             },
             neighbors: null,
             outgoing: null,
@@ -43360,7 +43362,6 @@ var printLayoutInfo;
                     resolve(ai_system_state);
                 });
             });
-            console.log(ai_system_state);
             // verify that all of the steps have corresponding actions
             let actions = process.steps;
             // create a map from label to id
@@ -50023,7 +50024,7 @@ var printLayoutInfo;
     	return child_ctx;
     }
 
-    // (35:2) {#if mainObject !== null && Object.keys(mainObject).length > 0}
+    // (42:2) {#if mainObject !== null && Object.keys(mainObject).length > 0}
     function create_if_block$1(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -50052,7 +50053,7 @@ var printLayoutInfo;
     			t0 = space();
     			button = element$1("button");
     			button.textContent = "Save";
-    			add_location(button, file$3, 56, 6, 2223);
+    			add_location(button, file$3, 63, 6, 2315);
     		},
     		m: function mount(target, anchor) {
     			for (let i = 0; i < each_blocks.length; i += 1) {
@@ -50066,12 +50067,12 @@ var printLayoutInfo;
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*save*/ ctx[2], false, false, false, false);
+    				dispose = listen_dev(button, "click", /*save*/ ctx[3], false, false, false, false);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*Object, mainObject, $aiSystemStore, handleStepsChange, Array*/ 11) {
+    			if (dirty & /*Object, mainObject, options, $aiSystemStore, handleStepsChange, Array*/ 23) {
     				each_value = Object.entries(/*mainObject*/ ctx[0]);
     				validate_each_argument(each_value);
     				group_outros();
@@ -50112,14 +50113,14 @@ var printLayoutInfo;
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(35:2) {#if mainObject !== null && Object.keys(mainObject).length > 0}",
+    		source: "(42:2) {#if mainObject !== null && Object.keys(mainObject).length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (52:14) {:else}
+    // (59:14) {:else}
     function create_else_block(ctx) {
     	let textarea;
     	let textarea_id_value;
@@ -50136,7 +50137,7 @@ var printLayoutInfo;
     			attr_dev(textarea, "id", textarea_id_value = "input-" + /*index*/ ctx[14]);
     			attr_dev(textarea, "rows", "1");
     			attr_dev(textarea, "class", "svelte-ohr7st");
-    			add_location(textarea, file$3, 52, 18, 2096);
+    			add_location(textarea, file$3, 59, 18, 2188);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, textarea, anchor);
@@ -50171,14 +50172,14 @@ var printLayoutInfo;
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(52:14) {:else}",
+    		source: "(59:14) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (50:50) 
+    // (57:50) 
     function create_if_block_3(ctx) {
     	let input;
     	let input_id_value;
@@ -50194,7 +50195,7 @@ var printLayoutInfo;
     			input = element$1("input");
     			attr_dev(input, "id", input_id_value = "input-" + /*index*/ ctx[14]);
     			attr_dev(input, "type", "number");
-    			add_location(input, file$3, 50, 18, 1984);
+    			add_location(input, file$3, 57, 18, 2076);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -50229,14 +50230,14 @@ var printLayoutInfo;
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(50:50) ",
+    		source: "(57:50) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (48:51) 
+    // (55:51) 
     function create_if_block_2(ctx) {
     	let input;
     	let input_id_value;
@@ -50252,7 +50253,7 @@ var printLayoutInfo;
     			input = element$1("input");
     			attr_dev(input, "id", input_id_value = "input-" + /*index*/ ctx[14]);
     			attr_dev(input, "type", "checkbox");
-    			add_location(input, file$3, 48, 18, 1839);
+    			add_location(input, file$3, 55, 18, 1931);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -50287,14 +50288,14 @@ var printLayoutInfo;
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(48:51) ",
+    		source: "(55:51) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (39:14) {#if key === "steps" && Array.isArray(value)}
+    // (46:14) {#if key === "steps" && Array.isArray(value)}
     function create_if_block_1(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -50330,7 +50331,7 @@ var printLayoutInfo;
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*Object, mainObject, $aiSystemStore, handleStepsChange*/ 11) {
+    			if (dirty & /*Object, mainObject, options, $aiSystemStore, handleStepsChange*/ 23) {
     				each_value_1 = /*value*/ ctx[12];
     				validate_each_argument(each_value_1);
     				group_outros();
@@ -50368,22 +50369,18 @@ var printLayoutInfo;
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(39:14) {#if key === \\\"steps\\\" && Array.isArray(value)}",
+    		source: "(46:14) {#if key === \\\"steps\\\" && Array.isArray(value)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (40:16) {#each value as step, index (index)}
+    // (47:14) {#each value as step, index (index)}
     function create_each_block_1$1(key_1, ctx) {
     	let first;
     	let select;
     	let current;
-
-    	function func(...args) {
-    		return /*func*/ ctx[5](/*step*/ ctx[15], ...args);
-    	}
 
     	function change_handler(...args) {
     		return /*change_handler*/ ctx[6](/*index*/ ctx[14], ...args);
@@ -50392,13 +50389,8 @@ var printLayoutInfo;
     	select = new Select({
     			props: {
     				id: "steps_" + /*index*/ ctx[14],
-    				selected: /*$aiSystemStore*/ ctx[1].actions.find(func)
-    				? {
-    						value: /*step*/ ctx[15],
-    						label: /*step*/ ctx[15]
-    					}
-    				: null,
-    				items: /*$aiSystemStore*/ ctx[1].actions.map(func_1),
+    				value: /*options*/ ctx[1][/*index*/ ctx[14]],
+    				items: /*$aiSystemStore*/ ctx[2].actions.map(func$1),
     				placeholder: "Select step..."
     			},
     			$$inline: true
@@ -50423,15 +50415,8 @@ var printLayoutInfo;
     			ctx = new_ctx;
     			const select_changes = {};
     			if (dirty & /*mainObject*/ 1) select_changes.id = "steps_" + /*index*/ ctx[14];
-
-    			if (dirty & /*$aiSystemStore, mainObject*/ 3) select_changes.selected = /*$aiSystemStore*/ ctx[1].actions.find(func)
-    			? {
-    					value: /*step*/ ctx[15],
-    					label: /*step*/ ctx[15]
-    				}
-    			: null;
-
-    			if (dirty & /*$aiSystemStore*/ 2) select_changes.items = /*$aiSystemStore*/ ctx[1].actions.map(func_1);
+    			if (dirty & /*options, mainObject*/ 3) select_changes.value = /*options*/ ctx[1][/*index*/ ctx[14]];
+    			if (dirty & /*$aiSystemStore*/ 4) select_changes.items = /*$aiSystemStore*/ ctx[2].actions.map(func$1);
     			select.$set(select_changes);
     		},
     		i: function intro(local) {
@@ -50453,14 +50438,14 @@ var printLayoutInfo;
     		block,
     		id: create_each_block_1$1.name,
     		type: "each",
-    		source: "(40:16) {#each value as step, index (index)}",
+    		source: "(47:14) {#each value as step, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (36:6) {#each Object.entries(mainObject) as [key, value], index (index)}
+    // (43:6) {#each Object.entries(mainObject) as [key, value], index (index)}
     function create_each_block$3(key_1, ctx) {
     	let div;
     	let label;
@@ -50499,9 +50484,9 @@ var printLayoutInfo;
     			t2 = space();
     			if_block.c();
     			attr_dev(label, "for", label_for_value = "input-" + /*index*/ ctx[14]);
-    			add_location(label, file$3, 37, 14, 1145);
+    			add_location(label, file$3, 44, 14, 1439);
     			attr_dev(div, "class", "object-field");
-    			add_location(div, file$3, 36, 10, 1104);
+    			add_location(div, file$3, 43, 10, 1398);
     			this.first = div;
     		},
     		m: function mount(target, anchor) {
@@ -50566,7 +50551,7 @@ var printLayoutInfo;
     		block,
     		id: create_each_block$3.name,
     		type: "each",
-    		source: "(36:6) {#each Object.entries(mainObject) as [key, value], index (index)}",
+    		source: "(43:6) {#each Object.entries(mainObject) as [key, value], index (index)}",
     		ctx
     	});
 
@@ -50584,7 +50569,7 @@ var printLayoutInfo;
     			div = element$1("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "json-editor");
-    			add_location(div, file$3, 33, 0, 930);
+    			add_location(div, file$3, 40, 0, 1224);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -50646,7 +50631,7 @@ var printLayoutInfo;
     	return block;
     }
 
-    const func_1 = action => ({ value: action.name, label: action.name });
+    const func$1 = action => ({ value: action.name, label: action.name });
 
     function instance$4($$self, $$props, $$invalidate) {
     	let $websocketStore;
@@ -50655,23 +50640,35 @@ var printLayoutInfo;
     	validate_store(websocketStore, 'websocketStore');
     	component_subscribe($$self, websocketStore, $$value => $$invalidate(10, $websocketStore = $$value));
     	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(4, $systemStateStore = $$value));
+    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(5, $systemStateStore = $$value));
     	validate_store(aiSystemStore, 'aiSystemStore');
-    	component_subscribe($$self, aiSystemStore, $$value => $$invalidate(1, $aiSystemStore = $$value));
+    	component_subscribe($$self, aiSystemStore, $$value => $$invalidate(2, $aiSystemStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('JsonEditor', slots, []);
     	let mainObject = {};
+    	let options = [];
 
     	function save() {
     		if (mainObject !== null && mainObject.prompt !== undefined) {
     			let updateAction = { action: mainObject };
     			console.log("sending: " + JSON.stringify(updateAction));
+    			a;
     			$websocketStore.send(JSON.stringify(updateAction));
     		}
     	}
 
     	function handleStepsChange(selected, index) {
     		$$invalidate(0, mainObject.steps[index] = selected.value, mainObject);
+
+    		$$invalidate(
+    			1,
+    			options[index] = {
+    				value: selected.value,
+    				label: selected.value
+    			},
+    			options
+    		);
+
     		$$invalidate(0, mainObject = Object.assign({}, mainObject)); // trigger reactivity
     	}
 
@@ -50681,22 +50678,21 @@ var printLayoutInfo;
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<JsonEditor> was created with unknown prop '${key}'`);
     	});
 
-    	const func = (step, action) => action.name === step;
     	const change_handler = (index, event) => handleStepsChange(event.detail, index);
 
     	function input_change_handler(key) {
     		mainObject[key] = this.checked;
-    		($$invalidate(0, mainObject), $$invalidate(4, $systemStateStore));
+    		(($$invalidate(0, mainObject), $$invalidate(5, $systemStateStore)), $$invalidate(1, options));
     	}
 
     	function input_input_handler(key) {
     		mainObject[key] = to_number(this.value);
-    		($$invalidate(0, mainObject), $$invalidate(4, $systemStateStore));
+    		(($$invalidate(0, mainObject), $$invalidate(5, $systemStateStore)), $$invalidate(1, options));
     	}
 
     	function textarea_input_handler(key) {
     		mainObject[key] = this.value;
-    		($$invalidate(0, mainObject), $$invalidate(4, $systemStateStore));
+    		(($$invalidate(0, mainObject), $$invalidate(5, $systemStateStore)), $$invalidate(1, options));
     	}
 
     	$$self.$capture_state = () => ({
@@ -50705,6 +50701,7 @@ var printLayoutInfo;
     		websocketStore,
     		Select,
     		mainObject,
+    		options,
     		save,
     		handleStepsChange,
     		$websocketStore,
@@ -50714,6 +50711,7 @@ var printLayoutInfo;
 
     	$$self.$inject_state = $$props => {
     		if ('mainObject' in $$props) $$invalidate(0, mainObject = $$props.mainObject);
+    		if ('options' in $$props) $$invalidate(1, options = $$props.options);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -50721,21 +50719,26 @@ var printLayoutInfo;
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$systemStateStore, mainObject*/ 17) {
+    		if ($$self.$$.dirty & /*$systemStateStore, mainObject, options*/ 35) {
     			{
     				$$invalidate(0, mainObject = $systemStateStore.selectedAction || $systemStateStore.selectedProcess);
     				console.log("mainObject: ", mainObject);
+
+    				if (mainObject !== null && mainObject.steps !== undefined) {
+    					$$invalidate(1, options = mainObject.steps.map(step => ({ value: step, label: step })));
+    					console.log("options: ", options);
+    				}
     			}
     		}
     	};
 
     	return [
     		mainObject,
+    		options,
     		$aiSystemStore,
     		save,
     		handleStepsChange,
     		$systemStateStore,
-    		func,
     		change_handler,
     		input_change_handler,
     		input_input_handler,
@@ -51187,39 +51190,39 @@ var printLayoutInfo;
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[17] = list[i];
-    	child_ctx[18] = list;
-    	child_ctx[19] = i;
+    	child_ctx[16] = list[i];
+    	child_ctx[17] = list;
+    	child_ctx[18] = i;
     	return child_ctx;
     }
 
-    // (82:4) {#each process.steps as step, index (index)}
+    // (75:4) {#each process.steps as step, index (index)}
     function create_each_block$1(key_1, ctx) {
     	let first;
     	let select;
-    	let updating_selected;
+    	let updating_value;
     	let current;
 
-    	function select_selected_binding(value) {
-    		/*select_selected_binding*/ ctx[5](value, /*step*/ ctx[17], /*each_value*/ ctx[18], /*index*/ ctx[19]);
+    	function select_value_binding(value) {
+    		/*select_value_binding*/ ctx[5](value, /*step*/ ctx[16], /*each_value*/ ctx[17], /*index*/ ctx[18]);
     	}
 
     	function change_handler(...args) {
-    		return /*change_handler*/ ctx[6](/*index*/ ctx[19], ...args);
+    		return /*change_handler*/ ctx[6](/*index*/ ctx[18], ...args);
     	}
 
     	let select_props = {
-    		id: "steps_" + /*index*/ ctx[19],
-    		items: /*$aiSystemStore*/ ctx[0].actions.map(func),
+    		id: "steps_" + /*index*/ ctx[18],
+    		items: /*$aiSystemStore*/ ctx[1].actions.map(func),
     		placeholder: "Select step..."
     	};
 
-    	if (/*step*/ ctx[17] !== void 0) {
-    		select_props.selected = /*step*/ ctx[17];
+    	if (/*step*/ ctx[16] !== void 0) {
+    		select_props.value = /*step*/ ctx[16];
     	}
 
     	select = new Select({ props: select_props, $$inline: true });
-    	binding_callbacks.push(() => bind(select, 'selected', select_selected_binding));
+    	binding_callbacks.push(() => bind(select, 'value', select_value_binding));
     	select.$on("change", change_handler);
 
     	const block = {
@@ -51238,13 +51241,13 @@ var printLayoutInfo;
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
     			const select_changes = {};
-    			if (dirty & /*process*/ 2) select_changes.id = "steps_" + /*index*/ ctx[19];
-    			if (dirty & /*$aiSystemStore*/ 1) select_changes.items = /*$aiSystemStore*/ ctx[0].actions.map(func);
+    			if (dirty & /*process*/ 1) select_changes.id = "steps_" + /*index*/ ctx[18];
+    			if (dirty & /*$aiSystemStore*/ 2) select_changes.items = /*$aiSystemStore*/ ctx[1].actions.map(func);
 
-    			if (!updating_selected && dirty & /*process*/ 2) {
-    				updating_selected = true;
-    				select_changes.selected = /*step*/ ctx[17];
-    				add_flush_callback(() => updating_selected = false);
+    			if (!updating_value && dirty & /*process*/ 1) {
+    				updating_value = true;
+    				select_changes.value = /*step*/ ctx[16];
+    				add_flush_callback(() => updating_value = false);
     			}
 
     			select.$set(select_changes);
@@ -51268,7 +51271,7 @@ var printLayoutInfo;
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(82:4) {#each process.steps as step, index (index)}",
+    		source: "(75:4) {#each process.steps as step, index (index)}",
     		ctx
     	});
 
@@ -51314,9 +51317,9 @@ var printLayoutInfo;
     	let current;
     	let mounted;
     	let dispose;
-    	let each_value = /*process*/ ctx[1].steps;
+    	let each_value = /*process*/ ctx[0].steps;
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*index*/ ctx[19];
+    	const get_key = ctx => /*index*/ ctx[18];
     	validate_each_keys(ctx, each_value, get_each_context$1, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -51367,31 +51370,31 @@ var printLayoutInfo;
     			button = element$1("button");
     			button.textContent = "Submit";
     			attr_dev(input0, "type", "text");
-    			add_location(input0, file$1, 77, 10, 2219);
-    			add_location(label0, file$1, 76, 2, 2201);
+    			add_location(input0, file$1, 70, 10, 2029);
+    			add_location(label0, file$1, 69, 2, 2011);
     			attr_dev(label1, "for", "steps");
-    			add_location(label1, file$1, 79, 2, 2280);
+    			add_location(label1, file$1, 72, 2, 2090);
     			attr_dev(input1, "type", "text");
-    			add_location(input1, file$1, 91, 15, 2719);
-    			add_location(label2, file$1, 90, 4, 2696);
+    			add_location(input1, file$1, 84, 15, 2526);
+    			add_location(label2, file$1, 83, 4, 2503);
     			attr_dev(input2, "type", "text");
-    			add_location(input2, file$1, 94, 29, 2824);
-    			add_location(label3, file$1, 93, 4, 2787);
+    			add_location(input2, file$1, 87, 29, 2631);
+    			add_location(label3, file$1, 86, 4, 2594);
     			attr_dev(input3, "type", "checkbox");
-    			add_location(input3, file$1, 97, 35, 2949);
-    			add_location(label4, file$1, 96, 4, 2906);
+    			add_location(input3, file$1, 90, 35, 2756);
+    			add_location(label4, file$1, 89, 4, 2713);
     			attr_dev(input4, "type", "text");
-    			add_location(input4, file$1, 100, 19, 3070);
-    			add_location(label5, file$1, 99, 4, 3043);
+    			add_location(input4, file$1, 93, 19, 2877);
+    			add_location(label5, file$1, 92, 4, 2850);
     			attr_dev(input5, "type", "checkbox");
-    			add_location(input5, file$1, 103, 30, 3180);
-    			add_location(label6, file$1, 102, 4, 3142);
+    			add_location(input5, file$1, 96, 30, 2987);
+    			add_location(label6, file$1, 95, 4, 2949);
     			attr_dev(input6, "type", "text");
-    			add_location(input6, file$1, 106, 19, 3296);
-    			add_location(label7, file$1, 105, 4, 3269);
+    			add_location(input6, file$1, 99, 19, 3103);
+    			add_location(label7, file$1, 98, 4, 3076);
     			attr_dev(button, "type", "submit");
-    			add_location(button, file$1, 108, 4, 3368);
-    			add_location(form, file$1, 74, 0, 2151);
+    			add_location(button, file$1, 101, 4, 3175);
+    			add_location(form, file$1, 67, 0, 1961);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -51401,7 +51404,7 @@ var printLayoutInfo;
     			append_dev(form, label0);
     			append_dev(label0, t0);
     			append_dev(label0, input0);
-    			set_input_value(input0, /*process*/ ctx[1].name);
+    			set_input_value(input0, /*process*/ ctx[0].name);
     			append_dev(form, t1);
     			append_dev(form, label1);
     			append_dev(label1, t2);
@@ -51416,32 +51419,32 @@ var printLayoutInfo;
     			append_dev(form, label2);
     			append_dev(label2, t4);
     			append_dev(label2, input1);
-    			set_input_value(input1, /*process*/ ctx[1].trigger);
+    			set_input_value(input1, /*process*/ ctx[0].trigger);
     			append_dev(form, t5);
     			append_dev(form, label3);
     			append_dev(label3, t6);
     			append_dev(label3, input2);
-    			set_input_value(input2, /*process*/ ctx[1].triggers_next_process);
+    			set_input_value(input2, /*process*/ ctx[0].triggers_next_process);
     			append_dev(form, t7);
     			append_dev(form, label4);
     			append_dev(label4, t8);
     			append_dev(label4, input3);
-    			input3.checked = /*process*/ ctx[1].waits_for_branch_completion;
+    			input3.checked = /*process*/ ctx[0].waits_for_branch_completion;
     			append_dev(form, t9);
     			append_dev(form, label5);
     			append_dev(label5, t10);
     			append_dev(label5, input4);
-    			set_input_value(input4, /*process*/ ctx[1].description);
+    			set_input_value(input4, /*process*/ ctx[0].description);
     			append_dev(form, t11);
     			append_dev(form, label6);
     			append_dev(label6, t12);
     			append_dev(label6, input5);
-    			input5.checked = /*process*/ ctx[1].creates_process_branch;
+    			input5.checked = /*process*/ ctx[0].creates_process_branch;
     			append_dev(form, t13);
     			append_dev(form, label7);
     			append_dev(label7, t14);
     			append_dev(label7, input6);
-    			set_input_value(input6, /*process*/ ctx[1].branch_step);
+    			set_input_value(input6, /*process*/ ctx[0].branch_step);
     			append_dev(form, t15);
     			append_dev(form, button);
     			current = true;
@@ -51462,12 +51465,12 @@ var printLayoutInfo;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*process*/ 2 && input0.value !== /*process*/ ctx[1].name) {
-    				set_input_value(input0, /*process*/ ctx[1].name);
+    			if (dirty & /*process*/ 1 && input0.value !== /*process*/ ctx[0].name) {
+    				set_input_value(input0, /*process*/ ctx[0].name);
     			}
 
     			if (dirty & /*process, $aiSystemStore, handleStepsChange*/ 7) {
-    				each_value = /*process*/ ctx[1].steps;
+    				each_value = /*process*/ ctx[0].steps;
     				validate_each_argument(each_value);
     				group_outros();
     				validate_each_keys(ctx, each_value, get_each_context$1, get_key);
@@ -51475,28 +51478,28 @@ var printLayoutInfo;
     				check_outros();
     			}
 
-    			if (dirty & /*process*/ 2 && input1.value !== /*process*/ ctx[1].trigger) {
-    				set_input_value(input1, /*process*/ ctx[1].trigger);
+    			if (dirty & /*process*/ 1 && input1.value !== /*process*/ ctx[0].trigger) {
+    				set_input_value(input1, /*process*/ ctx[0].trigger);
     			}
 
-    			if (dirty & /*process*/ 2 && input2.value !== /*process*/ ctx[1].triggers_next_process) {
-    				set_input_value(input2, /*process*/ ctx[1].triggers_next_process);
+    			if (dirty & /*process*/ 1 && input2.value !== /*process*/ ctx[0].triggers_next_process) {
+    				set_input_value(input2, /*process*/ ctx[0].triggers_next_process);
     			}
 
-    			if (dirty & /*process*/ 2) {
-    				input3.checked = /*process*/ ctx[1].waits_for_branch_completion;
+    			if (dirty & /*process*/ 1) {
+    				input3.checked = /*process*/ ctx[0].waits_for_branch_completion;
     			}
 
-    			if (dirty & /*process*/ 2 && input4.value !== /*process*/ ctx[1].description) {
-    				set_input_value(input4, /*process*/ ctx[1].description);
+    			if (dirty & /*process*/ 1 && input4.value !== /*process*/ ctx[0].description) {
+    				set_input_value(input4, /*process*/ ctx[0].description);
     			}
 
-    			if (dirty & /*process*/ 2) {
-    				input5.checked = /*process*/ ctx[1].creates_process_branch;
+    			if (dirty & /*process*/ 1) {
+    				input5.checked = /*process*/ ctx[0].creates_process_branch;
     			}
 
-    			if (dirty & /*process*/ 2 && input6.value !== /*process*/ ctx[1].branch_step) {
-    				set_input_value(input6, /*process*/ ctx[1].branch_step);
+    			if (dirty & /*process*/ 1 && input6.value !== /*process*/ ctx[0].branch_step) {
+    				set_input_value(input6, /*process*/ ctx[0].branch_step);
     			}
     		},
     		i: function intro(local) {
@@ -51544,9 +51547,9 @@ var printLayoutInfo;
     	let $websocketStore;
     	let $aiSystemStore;
     	validate_store(websocketStore, 'websocketStore');
-    	component_subscribe($$self, websocketStore, $$value => $$invalidate(15, $websocketStore = $$value));
+    	component_subscribe($$self, websocketStore, $$value => $$invalidate(14, $websocketStore = $$value));
     	validate_store(aiSystemStore, 'aiSystemStore');
-    	component_subscribe($$self, aiSystemStore, $$value => $$invalidate(0, $aiSystemStore = $$value));
+    	component_subscribe($$self, aiSystemStore, $$value => $$invalidate(1, $aiSystemStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('CreateProcess', slots, []);
 
@@ -51562,11 +51565,10 @@ var printLayoutInfo;
     		branch_step: ""
     	};
 
-    	let selectedSteps = [];
     	let invalidSteps = [];
 
     	function handleStepsChange(selected, index) {
-    		$$invalidate(1, process.steps[index] = selected.value, process);
+    		$$invalidate(0, process.steps[index] = selected.value, process);
 
     		if (process.steps.length - 1 === index) {
     			process.steps.push(null);
@@ -51582,7 +51584,7 @@ var printLayoutInfo;
     			for (let step of steps) {
     				if (!system.actions.find(action => action.name == step)) {
     					// remove this action from the process.steps array
-    					$$invalidate(1, process.steps = process.steps.filter(value => value != step), process);
+    					$$invalidate(0, process.steps = process.steps.filter(value => value != step), process);
     				}
     			}
     		});
@@ -51595,7 +51597,7 @@ var printLayoutInfo;
     		if (invalidSteps.length > 0) {
     			alert("Invalid steps: " + invalidSteps.join(", "));
     			invalidSteps = [];
-    			$$invalidate(1, process.steps = [null], process);
+    			$$invalidate(0, process.steps = [null], process);
     			return;
     		}
 
@@ -51612,7 +51614,7 @@ var printLayoutInfo;
     		checkStepsValidity();
     		$websocketStore.send(JSON.stringify({ "create_process": process }));
 
-    		$$invalidate(1, process = {
+    		$$invalidate(0, process = {
     			_id: "",
     			name: "",
     			steps: [null],
@@ -51633,44 +51635,44 @@ var printLayoutInfo;
 
     	function input0_input_handler() {
     		process.name = this.value;
-    		$$invalidate(1, process);
+    		$$invalidate(0, process);
     	}
 
-    	function select_selected_binding(value, step, each_value, index) {
+    	function select_value_binding(value, step, each_value, index) {
     		each_value[index] = value;
-    		$$invalidate(1, process);
+    		$$invalidate(0, process);
     	}
 
     	const change_handler = (index, event) => handleStepsChange(event.detail, index);
 
     	function input1_input_handler() {
     		process.trigger = this.value;
-    		$$invalidate(1, process);
+    		$$invalidate(0, process);
     	}
 
     	function input2_input_handler() {
     		process.triggers_next_process = this.value;
-    		$$invalidate(1, process);
+    		$$invalidate(0, process);
     	}
 
     	function input3_change_handler() {
     		process.waits_for_branch_completion = this.checked;
-    		$$invalidate(1, process);
+    		$$invalidate(0, process);
     	}
 
     	function input4_input_handler() {
     		process.description = this.value;
-    		$$invalidate(1, process);
+    		$$invalidate(0, process);
     	}
 
     	function input5_change_handler() {
     		process.creates_process_branch = this.checked;
-    		$$invalidate(1, process);
+    		$$invalidate(0, process);
     	}
 
     	function input6_input_handler() {
     		process.branch_step = this.value;
-    		$$invalidate(1, process);
+    		$$invalidate(0, process);
     	}
 
     	$$self.$capture_state = () => ({
@@ -51678,7 +51680,6 @@ var printLayoutInfo;
     		websocketStore,
     		Select,
     		process,
-    		selectedSteps,
     		invalidSteps,
     		handleStepsChange,
     		checkStepsValidity,
@@ -51688,8 +51689,7 @@ var printLayoutInfo;
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('process' in $$props) $$invalidate(1, process = $$props.process);
-    		if ('selectedSteps' in $$props) selectedSteps = $$props.selectedSteps;
+    		if ('process' in $$props) $$invalidate(0, process = $$props.process);
     		if ('invalidSteps' in $$props) invalidSteps = $$props.invalidSteps;
     	};
 
@@ -51697,26 +51697,13 @@ var printLayoutInfo;
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$aiSystemStore*/ 1) {
-    			{
-    				selectedSteps = $aiSystemStore.actions.map(action => {
-    					return {
-    						value: action.name,
-    						label: action.description
-    					};
-    				});
-    			}
-    		}
-    	};
-
     	return [
-    		$aiSystemStore,
     		process,
+    		$aiSystemStore,
     		handleStepsChange,
     		handleSubmit,
     		input0_input_handler,
-    		select_selected_binding,
+    		select_value_binding,
     		change_handler,
     		input1_input_handler,
     		input2_input_handler,
@@ -51777,7 +51764,7 @@ var printLayoutInfo;
     	return child_ctx;
     }
 
-    // (51:6) {#if section.open}
+    // (50:6) {#if section.open}
     function create_if_block(ctx) {
     	let div;
     	let switch_instance;
@@ -51799,7 +51786,7 @@ var printLayoutInfo;
     			div = element$1("div");
     			if (switch_instance) create_component(switch_instance.$$.fragment);
     			attr_dev(div, "class", "section-content svelte-1qqfi20");
-    			add_location(div, file, 51, 8, 1979);
+    			add_location(div, file, 50, 8, 1910);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -51859,14 +51846,14 @@ var printLayoutInfo;
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(51:6) {#if section.open}",
+    		source: "(50:6) {#if section.open}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (37:2) {#each sections as section (section.header)}
+    // (36:2) {#each sections as section (section.header)}
     function create_each_block(key_1, ctx) {
     	let div1;
     	let div0;
@@ -51900,9 +51887,9 @@ var printLayoutInfo;
     			t2 = space();
     			attr_dev(div0, "class", "section-header svelte-1qqfi20");
     			attr_dev(div0, "tabindex", "0");
-    			add_location(div0, file, 38, 6, 1664);
+    			add_location(div0, file, 37, 6, 1595);
     			attr_dev(div1, "class", "section svelte-1qqfi20");
-    			add_location(div1, file, 37, 4, 1636);
+    			add_location(div1, file, 36, 4, 1567);
     			this.first = div1;
     		},
     		m: function mount(target, anchor) {
@@ -51971,7 +51958,7 @@ var printLayoutInfo;
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(37:2) {#each sections as section (section.header)}",
+    		source: "(36:2) {#each sections as section (section.header)}",
     		ctx
     	});
 
@@ -52003,7 +51990,7 @@ var printLayoutInfo;
     			}
 
     			attr_dev(div, "class", "sidebar svelte-1qqfi20");
-    			add_location(div, file, 35, 0, 1563);
+    			add_location(div, file, 34, 0, 1494);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -52075,19 +52062,15 @@ var printLayoutInfo;
     			component: SetOpenaiKey,
     			open: true
     		},
+    		// { header: "Send Prompt", component: SendPrompt, open: false},
     		{
-    			header: "Send Prompt",
-    			component: SendPrompt,
-    			open: false
-    		},
-    		{
-    			header: "Interact with Actions and Processes",
+    			header: "Edit Actions and Processes",
     			component: InteractWithActionsAndProcesses,
     			open: false
     		},
     		// {header: "Edit Action or Process", component: JsonEditor, open: false},
     		{
-    			header: "Add Action",
+    			header: "Create Action",
     			component: AddNodeButton,
     			open: false
     		},
@@ -52132,7 +52115,6 @@ var printLayoutInfo;
     		SetOpenaiKey,
     		SendPrompt,
     		InteractWithActionsAndProcesses,
-    		JsonEditor,
     		CreateProcess,
     		blur,
     		fade,
@@ -52311,19 +52293,15 @@ var printLayoutInfo;
 
     				aiSystemStore.update(state => {
     					let variables = populateVariables(action);
-    					console.log("variables: ", variables);
 
     					// check to see that the variables stored in the action are valid
     					let compareThese = action.variables;
 
-    					console.log("compareThese: ", compareThese);
     					let set1 = new Set(variables);
-    					console.log("set1: ", set1);
     					let set2 = new Set(compareThese);
-    					console.log("set2: ", set2);
     					let union = new Set([...set1, ...set2]);
-    					console.log("union: ", union);
 
+    					// This ensures that the variables are always up-to-date
     					if (union.size !== set1.size || union.size !== set2.size) {
     						console.log("invalid variables");
     						action.variables = variables;
@@ -52359,39 +52337,7 @@ var printLayoutInfo;
     		});
     	}
 
-    	const graph = {
-    		nodes: [
-    			{
-    				id: "1",
-    				label: "Node 1",
-    				data: { someData: "value" }
-    			},
-    			{
-    				id: "2",
-    				label: "Node 2",
-    				data: { someOtherData: "value2" }
-    			},
-    			{
-    				id: "3",
-    				label: "Node 3",
-    				data: { yetAnotherData: "value3" }
-    			}
-    		],
-    		edges: [
-    			{
-    				id: "a",
-    				source: "1",
-    				target: "2",
-    				label: "Edge 1"
-    			},
-    			{
-    				id: "b",
-    				source: "2",
-    				target: "3",
-    				label: "Edge 2"
-    			}
-    		]
-    	};
+    	const graph = { nodes: [], edges: [] };
 
     	const selectedComponent = {
     		type: "Node",

@@ -5,17 +5,16 @@
   import SetOpenaiKey from "./sidebarComponents/SetOpenaiKey.svelte";
   import SendPrompt from "./sidebarComponents/SendPrompt.svelte";
   import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
-  import JsonEditor from "./sidebarComponents/JsonEditor.svelte";
   import CreateProcess from "./sidebarComponents/CreateProcess.svelte";
 
   import { blur, fade } from "svelte/transition";
 
   let sections = [
     { header: "Set API Key", component: SetOpenaiKey, open: true},
-    { header: "Send Prompt", component: SendPrompt, open: false},
-    { header : "Interact with Actions and Processes", component: InteractWithActionsAndProcesses, open: false},
+    // { header: "Send Prompt", component: SendPrompt, open: false},
+    { header : "Edit Actions and Processes", component: InteractWithActionsAndProcesses, open: false},
     // {header: "Edit Action or Process", component: JsonEditor, open: false},
-    { header: "Add Action", component: AddNodeButton, open: false },
+    { header: "Create Action", component: AddNodeButton, open: false },
     { header: "Create Process" , component: CreateProcess, open: false}
     // {
     //   header: "Modify Nodes or Edges",

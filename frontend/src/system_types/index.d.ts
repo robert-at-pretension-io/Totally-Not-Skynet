@@ -1,9 +1,8 @@
 export type Node = {
   id: string;
   label?: string;
-  data?: any;
-  source? : null; // need these purely for type checking
-  target? : null; // need these purely for type checking... they will never ben assigned
+  data?: Action;
+  type: "action" | "variable"
 };
 
 export type Edge = {
@@ -11,7 +10,6 @@ export type Edge = {
   source: string; // Node id
   target: string; // Node id
   label?: string;
-  data?: any; // purely for type checking.. never will be assigned
 };
 
 export type Graph = {

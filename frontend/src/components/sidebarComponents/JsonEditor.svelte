@@ -7,9 +7,16 @@
 
   let mainObject : Action | Process | null | {} = {};
 
+  let options = [];
+
   $: {
     mainObject = $systemStateStore.selectedAction || $systemStateStore.selectedProcess;
     console.log("mainObject: ", mainObject);
+
+    if (mainObject !== null && mainObject.steps !== undefined){
+      options = mainObject.steps.map(step => ({value: step, label: step}));
+      console.log("options: ", options);
+    }
   }
 
   function save() {
@@ -17,13 +24,14 @@
       let updateAction : UpdateAction = {
         action: mainObject
       };
-      console.log("sending: " + JSON.stringify(updateAction));
+      console.log("sending: " + JSON.stringify(updateAction));a;
       $websocketStore.send(JSON.stringify(updateAction));
     }
   }
 
   function handleStepsChange(selected, index) {
     mainObject.steps[index] = selected.value;
+    options[index] = {value: selected.value, label: selected.value};
     mainObject = {...mainObject}; // trigger reactivity
   }
 
@@ -42,14 +50,14 @@ textarea {
           <div class="object-field">
               <label for="input-{index}">{key}:</label>
               {#if key === "steps" && Array.isArray(value)}
-                {#each value as step, index (index)}
-                <Select id="steps_{index}"
-                        selected={$aiSystemStore.actions.find(action => action.name === step) ? {value: step, label: step} : null}
-                        items={$aiSystemStore.actions.map(action => ({value: action.name, label: action.name}))}
-                        on:change={(event) => handleStepsChange(event.detail, index)}
-                        placeholder="Select step..."
-                />
-                {/each}
+              {#each value as step, index (index)}
+              <Select id="steps_{index}"
+value={options[index]}
+items={$aiSystemStore.actions.map(action => ({value: action.name, label: action.name}))}
+on:change={(event) => handleStepsChange(event.detail, index)}
+placeholder="Select step..."
+/>
+              {/each}
               {:else if typeof value === "boolean"}
                   <input id="input-{index}" type="checkbox" bind:checked={mainObject[key]} />
               {:else if typeof value === "number"}

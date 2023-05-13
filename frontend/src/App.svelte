@@ -40,18 +40,14 @@ onMount(async () => {
       let action: Action = data;
       aiSystemStore.update((state : AiSystemState) => {
         let variables = populateVariables(action);
-        console.log("variables: ", variables);
         // check to see that the variables stored in the action are valid
         let compareThese = action.variables;
-        console.log("compareThese: ", compareThese);
 
         let set1 = new Set(variables);
-        console.log("set1: ", set1);
         let set2 = new Set(compareThese);
-        console.log("set2: ", set2);
         let union = new Set([...set1, ...set2]);
-        console.log("union: ", union);
 
+        // This ensures that the variables are always up-to-date
         if ( union.size !== set1.size || union.size !== set2.size) {
           console.log("invalid variables");
           action.variables = variables;
@@ -97,35 +93,9 @@ $:  {
 
 const graph: Graph = {
   nodes: [
-    {
-      id: "1",
-      label: "Node 1",
-      data: { someData: "value" },
-    },
-    {
-      id: "2",
-      label: "Node 2",
-      data: { someOtherData: "value2" },
-    },
-    {
-      id: "3",
-      label: "Node 3",
-      data: { yetAnotherData: "value3" },
-    },
   ],
   edges: [
-    {
-      id: "a",
-      source: "1",
-      target: "2",
-      label: "Edge 1",
-    },
-    {
-      id: "b",
-      source: "2",
-      target: "3",
-      label: "Edge 2",
-    },
+
   ],
 };
 

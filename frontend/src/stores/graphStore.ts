@@ -11,8 +11,10 @@ export const graphStore = writable<GraphState>({
     type: "Node",
     instance: {
       id: "",
+      source: null,
+      target: null,
       label: "",
-      data: {}
+      data: undefined
     },
     neighbors: null,
     outgoing: null,

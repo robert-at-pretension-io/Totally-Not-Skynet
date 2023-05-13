@@ -1,6 +1,6 @@
 <script lang='ts'>
     import { aiSystemStore } from "stores/aiSystemStore";
-    import { AiSystemState, Action, Process } from "system_types";
+    import { AiSystemState, Process } from "system_types";
     import websocketStore from "stores/websocketStore";
     import Select from "svelte-select";
 
@@ -16,13 +16,6 @@
       branch_step: ""
     };
 
-    let selectedSteps = [];
-    $:{
-      selectedSteps = $aiSystemStore.actions.map(action => {
-        return { value: action.name, label: action.description };
-      });
-    }
-
     let invalidSteps : String[] = [];
   
     function handleStepsChange(selected, index) {
@@ -36,7 +29,6 @@
       let steps = process.steps;
       let unsubscribe = aiSystemStore.subscribe( (value) => {
         let system: AiSystemState = value;
-        let valid = true;
         for (let step of steps) {
           if (!system.actions.find( (action) => action.name == step)) {
             // remove this action from the process.steps array
@@ -93,7 +85,7 @@
     Steps:
     {#each process.steps as step, index (index)}
         <Select id="steps_{index}"
-                bind:selected={step}
+                bind:value={step}
                 items={$aiSystemStore.actions.map(action => ({value: action.name, label: action.name}))}
                 on:change={(event) => handleStepsChange(event.detail, index)}
                 placeholder="Select step..."

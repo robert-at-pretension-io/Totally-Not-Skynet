@@ -36,8 +36,6 @@ export async function processToGraph(process: Process): Promise<void> {
     });
   });
 
-  console.log(ai_system_state);
-
   // verify that all of the steps have corresponding actions
   let actions = process.steps;
 
