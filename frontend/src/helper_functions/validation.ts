@@ -1,6 +1,6 @@
 import { Action } from "system_types";
 
-export function populateVariables(action: Action): string[] {
+export function populateInputVariables(action: Action): string[] {
   const regex = /\[(.*?)\]/g;
   let match;
   let variables : string []= [];
@@ -18,4 +18,22 @@ export function populateVariables(action: Action): string[] {
     });
   }
   return variables;
+}
+
+export function populateOutputVariables(action: Action): string[] {
+  const input = action.prompt;
+
+  const exampleTagPattern = /\[example\][\s\S]*?\[\/example\]/g;
+  const tagPattern = /\[(.*?)\](.*?)\[\/\1\]/g;
+      
+  // Remove content within [example] tags
+  const filteredInput = input.replace(exampleTagPattern, "");
+      
+  // Find all tags in the remaining text
+  const matches = [...filteredInput.matchAll(tagPattern)];
+      
+  // Extract the tag names from the matches
+  const tags = matches.map(match => match[1]);
+      
+  return tags;
 }

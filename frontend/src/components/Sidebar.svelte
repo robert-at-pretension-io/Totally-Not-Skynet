@@ -43,7 +43,7 @@
           }
         }}
         on:click={() => toggleSection(section)}
-        tabindex="0"
+        
       >
         {section.header}
       </div>

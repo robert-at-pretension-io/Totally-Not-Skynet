@@ -1,3 +1,4 @@
+
 export type Node = {
   id: string;
   label?: string;
@@ -29,13 +30,14 @@ export type GraphState = {
   graph: Graph;
   selected: selectedGraphComponent | null;
   lastAction: "addNode" | "addEdge" | "removeNode" | "removeEdge" | "selectNode" | "deselectNode" | "none" | "selectEdge" | "deselectEdge" | "updateNode" | "updateEdge" | "resetGraph";
-  actedOn: Node | Edge | null;
+  actedOn: {id: string} | null;
 };
 
 export type Action = {
   _id: string,
   prompt: string,
-  variables: string[],
+  input_variables: string[],
+  output_variables: string[],
   name: string,
   system: string
 }

@@ -26,7 +26,8 @@ use uuid::Uuid;
 struct Action {
     _id : Option<ObjectId>,
     prompt: String,
-    variables: Vec<String>,
+    input_variables: Vec<String>,
+    output_variables: Vec<String>,
     name: String,
     system: String,
 }
@@ -122,7 +123,8 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
             if let Some(create_action_obj) = create_action_value.as_object() {
                 let action = Action  {
                     _id: None, // Assuming you have changed your struct field to `_id`
-                    variables: create_action_obj.get("variables").and_then(|v| v.as_array()).unwrap_or(&vec![]).iter().map(|v| v.as_str().unwrap_or("").to_string()).collect(),
+                    input_variables: create_action_obj.get("input_variables").and_then(|v| v.as_array()).unwrap_or(&vec![]).iter().map(|v| v.as_str().unwrap_or("").to_string()).collect(),
+                    output_variables: create_action_obj.get("output_variables").and_then(|v| v.as_array()).unwrap_or(&vec![]).iter().map(|v| v.as_str().unwrap_or("").to_string()).collect(),
                     name: create_action_obj.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string(),
                     prompt: create_action_obj.get("prompt").and_then(|v| v.as_str()).unwrap_or("").to_string(),
                     system: create_action_obj.get("system").and_then(|v| v.as_str()).unwrap_or("").to_string(),
@@ -584,7 +586,7 @@ async fn start_message_sending_loop(
 
                 let update = doc! { "$set": { "name": updated_action.name.clone(), "prompt": 
             
-                updated_action.prompt.clone(),  "system" : updated_action.system.clone(), "variables" : updated_action.variables.clone() }
+                updated_action.prompt.clone(),  "system" : updated_action.system.clone(), "input_variables" : updated_action.input_variables.clone(), output_variables: updated_action.output_variables.clone() }
             };
 
                 let update_result = action_collection

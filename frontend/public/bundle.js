@@ -43278,9 +43278,8 @@ var printLayoutInfo;
             type: "Node",
             instance: {
                 id: "",
-                source: null,
-                target: null,
                 label: "",
+                type: "action",
                 data: undefined
             },
             neighbors: null,
@@ -43377,6 +43376,7 @@ var printLayoutInfo;
                         let this_id = yield getUniqueId();
                         let node = {
                             id: this_id,
+                            type: "action",
                             label: ai_system_action.name,
                             data: ai_system_action,
                         };
@@ -50024,7 +50024,7 @@ var printLayoutInfo;
     	return child_ctx;
     }
 
-    // (42:2) {#if mainObject !== null && Object.keys(mainObject).length > 0}
+    // (40:2) {#if mainObject !== null && Object.keys(mainObject).length > 0}
     function create_if_block$1(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -50053,7 +50053,7 @@ var printLayoutInfo;
     			t0 = space();
     			button = element$1("button");
     			button.textContent = "Save";
-    			add_location(button, file$3, 63, 6, 2315);
+    			add_location(button, file$3, 61, 6, 2261);
     		},
     		m: function mount(target, anchor) {
     			for (let i = 0; i < each_blocks.length; i += 1) {
@@ -50113,14 +50113,14 @@ var printLayoutInfo;
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(42:2) {#if mainObject !== null && Object.keys(mainObject).length > 0}",
+    		source: "(40:2) {#if mainObject !== null && Object.keys(mainObject).length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (59:14) {:else}
+    // (57:14) {:else}
     function create_else_block(ctx) {
     	let textarea;
     	let textarea_id_value;
@@ -50137,7 +50137,7 @@ var printLayoutInfo;
     			attr_dev(textarea, "id", textarea_id_value = "input-" + /*index*/ ctx[14]);
     			attr_dev(textarea, "rows", "1");
     			attr_dev(textarea, "class", "svelte-ohr7st");
-    			add_location(textarea, file$3, 59, 18, 2188);
+    			add_location(textarea, file$3, 57, 18, 2134);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, textarea, anchor);
@@ -50172,14 +50172,14 @@ var printLayoutInfo;
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(59:14) {:else}",
+    		source: "(57:14) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (57:50) 
+    // (55:50) 
     function create_if_block_3(ctx) {
     	let input;
     	let input_id_value;
@@ -50195,7 +50195,7 @@ var printLayoutInfo;
     			input = element$1("input");
     			attr_dev(input, "id", input_id_value = "input-" + /*index*/ ctx[14]);
     			attr_dev(input, "type", "number");
-    			add_location(input, file$3, 57, 18, 2076);
+    			add_location(input, file$3, 55, 18, 2022);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -50230,14 +50230,14 @@ var printLayoutInfo;
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(57:50) ",
+    		source: "(55:50) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (55:51) 
+    // (53:51) 
     function create_if_block_2(ctx) {
     	let input;
     	let input_id_value;
@@ -50253,7 +50253,7 @@ var printLayoutInfo;
     			input = element$1("input");
     			attr_dev(input, "id", input_id_value = "input-" + /*index*/ ctx[14]);
     			attr_dev(input, "type", "checkbox");
-    			add_location(input, file$3, 55, 18, 1931);
+    			add_location(input, file$3, 53, 18, 1877);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input, anchor);
@@ -50288,14 +50288,14 @@ var printLayoutInfo;
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(55:51) ",
+    		source: "(53:51) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (46:14) {#if key === "steps" && Array.isArray(value)}
+    // (44:14) {#if key === "steps" && Array.isArray(value)}
     function create_if_block_1(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -50369,14 +50369,14 @@ var printLayoutInfo;
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(46:14) {#if key === \\\"steps\\\" && Array.isArray(value)}",
+    		source: "(44:14) {#if key === \\\"steps\\\" && Array.isArray(value)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (47:14) {#each value as step, index (index)}
+    // (45:14) {#each value as step, index (index)}
     function create_each_block_1$1(key_1, ctx) {
     	let first;
     	let select;
@@ -50438,14 +50438,14 @@ var printLayoutInfo;
     		block,
     		id: create_each_block_1$1.name,
     		type: "each",
-    		source: "(47:14) {#each value as step, index (index)}",
+    		source: "(45:14) {#each value as step, index (index)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (43:6) {#each Object.entries(mainObject) as [key, value], index (index)}
+    // (41:6) {#each Object.entries(mainObject) as [key, value], index (index)}
     function create_each_block$3(key_1, ctx) {
     	let div;
     	let label;
@@ -50484,9 +50484,9 @@ var printLayoutInfo;
     			t2 = space();
     			if_block.c();
     			attr_dev(label, "for", label_for_value = "input-" + /*index*/ ctx[14]);
-    			add_location(label, file$3, 44, 14, 1439);
+    			add_location(label, file$3, 42, 14, 1385);
     			attr_dev(div, "class", "object-field");
-    			add_location(div, file$3, 43, 10, 1398);
+    			add_location(div, file$3, 41, 10, 1344);
     			this.first = div;
     		},
     		m: function mount(target, anchor) {
@@ -50551,7 +50551,7 @@ var printLayoutInfo;
     		block,
     		id: create_each_block$3.name,
     		type: "each",
-    		source: "(43:6) {#each Object.entries(mainObject) as [key, value], index (index)}",
+    		source: "(41:6) {#each Object.entries(mainObject) as [key, value], index (index)}",
     		ctx
     	});
 
@@ -50569,7 +50569,7 @@ var printLayoutInfo;
     			div = element$1("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "json-editor");
-    			add_location(div, file$3, 40, 0, 1224);
+    			add_location(div, file$3, 38, 0, 1170);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -50652,7 +50652,6 @@ var printLayoutInfo;
     		if (mainObject !== null && mainObject.prompt !== undefined) {
     			let updateAction = { action: mainObject };
     			console.log("sending: " + JSON.stringify(updateAction));
-    			a;
     			$websocketStore.send(JSON.stringify(updateAction));
     		}
     	}
@@ -50682,17 +50681,17 @@ var printLayoutInfo;
 
     	function input_change_handler(key) {
     		mainObject[key] = this.checked;
-    		(($$invalidate(0, mainObject), $$invalidate(5, $systemStateStore)), $$invalidate(1, options));
+    		($$invalidate(0, mainObject), $$invalidate(5, $systemStateStore));
     	}
 
     	function input_input_handler(key) {
     		mainObject[key] = to_number(this.value);
-    		(($$invalidate(0, mainObject), $$invalidate(5, $systemStateStore)), $$invalidate(1, options));
+    		($$invalidate(0, mainObject), $$invalidate(5, $systemStateStore));
     	}
 
     	function textarea_input_handler(key) {
     		mainObject[key] = this.value;
-    		(($$invalidate(0, mainObject), $$invalidate(5, $systemStateStore)), $$invalidate(1, options));
+    		($$invalidate(0, mainObject), $$invalidate(5, $systemStateStore));
     	}
 
     	$$self.$capture_state = () => ({
@@ -50719,14 +50718,13 @@ var printLayoutInfo;
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$systemStateStore, mainObject, options*/ 35) {
+    		if ($$self.$$.dirty & /*$systemStateStore, mainObject*/ 33) {
     			{
     				$$invalidate(0, mainObject = $systemStateStore.selectedAction || $systemStateStore.selectedProcess);
     				console.log("mainObject: ", mainObject);
 
     				if (mainObject !== null && mainObject.steps !== undefined) {
     					$$invalidate(1, options = mainObject.steps.map(step => ({ value: step, label: step })));
-    					console.log("options: ", options);
     				}
     			}
     		}
@@ -51786,7 +51784,7 @@ var printLayoutInfo;
     			div = element$1("div");
     			if (switch_instance) create_component(switch_instance.$$.fragment);
     			attr_dev(div, "class", "section-content svelte-1qqfi20");
-    			add_location(div, file, 50, 8, 1910);
+    			add_location(div, file, 50, 8, 1898);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -51886,7 +51884,6 @@ var printLayoutInfo;
     			if (if_block) if_block.c();
     			t2 = space();
     			attr_dev(div0, "class", "section-header svelte-1qqfi20");
-    			attr_dev(div0, "tabindex", "0");
     			add_location(div0, file, 37, 6, 1595);
     			attr_dev(div1, "class", "section svelte-1qqfi20");
     			add_location(div1, file, 36, 4, 1567);
@@ -52147,7 +52144,7 @@ var printLayoutInfo;
     	}
     }
 
-    function populateVariables(action) {
+    function populateInputVariables(action) {
         const regex = /\[(.*?)\]/g;
         let match;
         let variables = [];
@@ -52292,19 +52289,19 @@ var printLayoutInfo;
     				let action = data;
 
     				aiSystemStore.update(state => {
-    					let variables = populateVariables(action);
+    					let input_variables = populateInputVariables(action);
 
     					// check to see that the variables stored in the action are valid
-    					let compareThese = action.variables;
+    					let compareThese = action.input_variables;
 
-    					let set1 = new Set(variables);
+    					let set1 = new Set(input_variables);
     					let set2 = new Set(compareThese);
     					let union = new Set([...set1, ...set2]);
 
     					// This ensures that the variables are always up-to-date
     					if (union.size !== set1.size || union.size !== set2.size) {
     						console.log("invalid variables");
-    						action.variables = variables;
+    						action.input_variables = input_variables;
     						$websocketStore.send(JSON.stringify({ action }));
     						return state;
     					}
@@ -52371,7 +52368,7 @@ var printLayoutInfo;
     		aiSystemStore,
     		systemStateStore,
     		processToGraph,
-    		populateVariables,
+    		populateInputVariables,
     		handleProcessChange,
     		graph,
     		selectedComponent,

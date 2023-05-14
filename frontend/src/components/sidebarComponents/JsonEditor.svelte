@@ -7,7 +7,7 @@
 
   let mainObject : Action | Process | null | {} = {};
 
-  let options = [];
+  let options : {value: string, label: string}[]= [];
 
   $: {
     mainObject = $systemStateStore.selectedAction || $systemStateStore.selectedProcess;
@@ -15,7 +15,6 @@
 
     if (mainObject !== null && mainObject.steps !== undefined){
       options = mainObject.steps.map(step => ({value: step, label: step}));
-      console.log("options: ", options);
     }
   }
 
@@ -24,7 +23,7 @@
       let updateAction : UpdateAction = {
         action: mainObject
       };
-      console.log("sending: " + JSON.stringify(updateAction));a;
+      console.log("sending: " + JSON.stringify(updateAction));
       $websocketStore.send(JSON.stringify(updateAction));
     }
   }

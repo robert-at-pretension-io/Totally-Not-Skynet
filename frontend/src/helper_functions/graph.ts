@@ -53,8 +53,9 @@ export async function processToGraph(process: Process): Promise<void> {
 
         let this_id = await getUniqueId();
 
-        let node = {
+        let node : Node= {
           id: this_id,
+          type: "action",
           label: ai_system_action.name,
           data: ai_system_action,
         };
@@ -100,13 +101,11 @@ export async function updateNode(
 export async function updateEdge(
   id: string,
   label: string,
-  data: any
 ): Promise<void> {
   const graphState = await getGraphState();
   const edge = graphState.graph.edges.find((edge) => edge.id === id);
   if (edge) {
     edge.label = label;
-    edge.data = data;
     graphState.lastAction = "updateEdge";
     graphState.actedOn = edge;
     setGraphState(graphState);
@@ -148,7 +147,7 @@ export async function removeEdge(
       (edge) => edge.source !== sourceId && edge.target !== targetId
     );
     graphState.lastAction = "removeEdge";
-    graphState.actedOn = { id: edge.id, source: sourceId, target: targetId };
+    graphState.actedOn = { id: edge.id };
     setGraphState(graphState);
   }
 }
