@@ -34,7 +34,7 @@ export type GraphState = {
 };
 
 export type Action = {
-  _id: string,
+  _id: Object,
   prompt: string,
   input_variables: string[],
   output_variables: string[],
@@ -45,14 +45,12 @@ export type Action = {
 
 
 export type Process = {
-  _id: string,
+  _id: Object,
   name: string,
   steps: string[],
   trigger: string,
   triggers_next_process: string,
-  waits_for_branch_completion: boolean,
   description: string,
-  creates_process_branch: boolean,
   branch_step: string
 }
 

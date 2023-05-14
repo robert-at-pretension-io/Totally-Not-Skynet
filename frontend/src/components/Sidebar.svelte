@@ -3,7 +3,7 @@
   // import ModifyNodesOrEdges from "./sidebarComponents/ModifyNodesOrEdges.svelte";
   // import DeleteEdge from "./sidebarComponents/DeleteEdge.svelte";
   import SetOpenaiKey from "./sidebarComponents/SetOpenaiKey.svelte";
-  import SendPrompt from "./sidebarComponents/SendPrompt.svelte";
+  // import SendPrompt from "./sidebarComponents/SendPrompt.svelte";
   import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
   import CreateProcess from "./sidebarComponents/CreateProcess.svelte";
 

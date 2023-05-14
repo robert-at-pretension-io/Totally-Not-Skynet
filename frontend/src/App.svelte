@@ -12,13 +12,16 @@
     AiSystemState
 
   } from "./system_types";
+
+  import { isAction, isProcess } from "helper_functions/type_checker";
+
   import { setGraphState } from "./helper_functions/graph";
 import {onMount} from "svelte";
 import websocketStore from "./stores/websocketStore";
 import { aiSystemStore } from "stores/aiSystemStore";
 import systemStateStore from "stores/systemStateStore";
 import { processToGraph } from "helper_functions/graph";
-import {populateInputVariables} from "helper_functions/validation";
+import {populateInputVariables, populateOutputVariables} from "helper_functions/validation";
 
 onMount(async () => {
   // start the websocket connection 
@@ -30,32 +33,60 @@ onMount(async () => {
     console.log("websocket message received: ", event.data);
     let data = JSON.parse(event.data);
     // check to see if the data has the shape of a Process or Action
-    if (Object.prototype.hasOwnProperty.call(data, "description")) {
+    if (isProcess(data)) {
       let process: Process = data;
       aiSystemStore.update((state : AiSystemState) => {
+        console.log("Adding process to state:");
         state.processes.push(process);
         return state;
       });
-    } else if (Object.prototype.hasOwnProperty.call(data, "prompt")) {
+    } else if (isAction(data)) {
       let action: Action = data;
       aiSystemStore.update((state : AiSystemState) => {
+        console.log("Adding action to state:");
         let input_variables = populateInputVariables(action);
+        console.log("input_variables: ", input_variables);
+        let output_variables = populateOutputVariables(action);
+        console.log("output_variables: ", output_variables);
         // check to see that the variables stored in the action are valid
         let compareThese = action.input_variables;
+        let compareThese2 = action.output_variables;
 
         let set1 = new Set(input_variables);
         let set2 = new Set(compareThese);
         let union = new Set([...set1, ...set2]);
 
-        // This ensures that the variables are always up-to-date
+        let set3 = new Set(output_variables);
+        let set4 = new Set(compareThese2);
+        let union2 = new Set([...set3, ...set4]);
+
+        let invalid = false;
+
+        // This ensures that the input variables are always up-to-date
         if ( union.size !== set1.size || union.size !== set2.size) {
-          console.log("invalid variables");
+          console.log("invalid input variables");
           action.input_variables = input_variables;
+          invalid = true;
+        }
+        // This ensures that the output variables are always up-to-date
+        if ( union2.size !== set3.size || union2.size !== set4.size) {
+          console.log("invalid output variables");
+          action.output_variables = output_variables;
+          invalid = true;
+        }
+
+        if (invalid) {
           $websocketStore.send(JSON.stringify({"action": action}));
           return state;
         }
-
-        state.actions.push(action);
+        // check if the action is already in the state by looking at the name
+        let actionIndex = state.actions.findIndex((a) => a.name === action.name);
+        if (actionIndex === -1) {
+          state.actions.push(action);
+        } else {
+          state.actions[actionIndex] = action;
+        }
+        
         return state;
       });
     }

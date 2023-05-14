@@ -38,10 +38,8 @@ struct Process {
     name: String,
     trigger: String,
     triggers_next_process: String,
-    waits_for_branch_completion: String,
     steps: Vec<String>,
     description: String,
-    creates_process_branch: String,
     branch_step: String,
 }
 
@@ -139,10 +137,8 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                     name: create_process_obj.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string(),
                     trigger: create_process_obj.get("trigger").and_then(|v| v.as_str()).unwrap_or("").to_string(),
                     triggers_next_process: create_process_obj.get("triggers_next_process").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                    waits_for_branch_completion: create_process_obj.get("waits_for_branch_completion").and_then(|v| v.as_str()).unwrap_or("").to_string(),
                     steps: create_process_obj.get("steps").and_then(|v| v.as_array()).unwrap_or(&vec![]).iter().map(|v| v.as_str().unwrap_or("").to_string()).collect(),
                     description: create_process_obj.get("description").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                    creates_process_branch: create_process_obj.get("creates_process_branch").and_then(|v| v.as_str()).unwrap_or("").to_string(),
                     branch_step: create_process_obj.get("branch_step").and_then(|v| v.as_str()).unwrap_or("").to_string(),
                 };
                 return Some(MessageTypes::CreateProcess(CreateProcess{create_process: process}));
@@ -238,7 +234,7 @@ impl fmt::Display for Role {
 
 // Your existing type definitions here...
 
-async fn call_openai(messages: Vec<ChatMessage>, api_key: String) -> Result<String> {
+async fn get_openai_completion(messages: Vec<ChatMessage>, api_key: String) -> Result<String> {
     // Define the URL for the API endpoint
     let url = "https://api.openai.com/v1/chat/completions";
 
@@ -554,7 +550,7 @@ async fn start_message_sending_loop(
                     }
                 );
 
-                    let response = call_openai(messages, openai_api_key.unwrap()).await;
+                    let response = get_openai_completion(messages, openai_api_key.unwrap()).await;
                     
                     match response {
                         Ok(res) => {
@@ -586,7 +582,7 @@ async fn start_message_sending_loop(
 
                 let update = doc! { "$set": { "name": updated_action.name.clone(), "prompt": 
             
-                updated_action.prompt.clone(),  "system" : updated_action.system.clone(), "input_variables" : updated_action.input_variables.clone(), output_variables: updated_action.output_variables.clone() }
+                updated_action.prompt.clone(),  "system" : updated_action.system.clone(), "input_variables" : updated_action.input_variables.clone(), "output_variables": updated_action.output_variables.clone() }
             };
 
                 let update_result = action_collection
@@ -595,7 +591,7 @@ async fn start_message_sending_loop(
                     .unwrap();
 
 
-                if ( update_result.modified_count == 0 ) {
+                if update_result.modified_count == 0 {
                     println!("No actions updated");
                 }
                 else {
