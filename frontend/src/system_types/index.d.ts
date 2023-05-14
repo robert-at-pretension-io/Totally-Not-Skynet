@@ -42,6 +42,8 @@ export type Action = {
   system: string
 }
 
+
+
 export type Process = {
   _id: string,
   name: string,
@@ -66,9 +68,10 @@ export type AiSystemState = {
 }
 
 export type SystemState = {
+  currentlySelected: "action" | "process" | "none",
   websocketReady: boolean,
-  selectedAction: Action | null,
-  selectedProcess: Process | null,
+  selectedAction: Action ,
+  selectedProcess: Process ,
 }
 
 export type Goal = {

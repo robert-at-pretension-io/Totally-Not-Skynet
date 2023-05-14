@@ -7,7 +7,7 @@
     let process : Process= {
       _id: "",
       name: "",
-      steps: [null],
+      steps: [""],
       trigger: "",
       triggers_next_process: "",
       waits_for_branch_completion: false,
@@ -18,10 +18,10 @@
 
     let invalidSteps : String[] = [];
   
-    function handleStepsChange(selected, index) {
+    function handleStepsChange(selected : {value: string, label: string}, index : number) {
       process.steps[index] = selected.value;
       if (process.steps.length - 1 === index) {
-        process.steps.push(null);
+        process.steps.push("");
       }
     }
   
@@ -46,7 +46,7 @@
       if (invalidSteps.length > 0) {
         alert("Invalid steps: " + invalidSteps.join(", "));
         invalidSteps = [];
-        process.steps = [null];
+        process.steps = [""];
         return;
       }
       if (process.name == "") {
@@ -65,7 +65,7 @@
       process = {
         _id: "",
         name: "",
-        steps: [null],
+        steps: [""],
         trigger: "",
         triggers_next_process: "",
         waits_for_branch_completion: false,

@@ -4,22 +4,22 @@
   import websocketStore from "stores/websocketStore";
   import { Action, Process, UpdateAction } from "system_types";
   import Select from "svelte-select";
-
+import { isProcess, isAction } from "helper_functions/type_checker";
   let mainObject : Action | Process | null | {} = {};
 
   let options : {value: string, label: string}[]= [];
 
   $: {
-    mainObject = $systemStateStore.selectedAction || $systemStateStore.selectedProcess;
+    Action= $systemStateStore.selectedAction || $systemStateStore.selectedProcess;
     console.log("mainObject: ", mainObject);
 
-    if (mainObject !== null && mainObject.steps !== undefined){
+    if (isProcess(mainObject)) {
       options = mainObject.steps.map(step => ({value: step, label: step}));
     }
   }
 
   function save() {
-    if (mainObject !== null && mainObject.prompt !== undefined){
+    if (isAction(mainObject)){
       let updateAction : UpdateAction = {
         action: mainObject
       };
@@ -28,10 +28,12 @@
     }
   }
 
-  function handleStepsChange(selected, index) {
-    mainObject.steps[index] = selected.value;
-    options[index] = {value: selected.value, label: selected.value};
-    mainObject = {...mainObject}; // trigger reactivity
+  function handleStepsChange(selected : {value : string, label: string}, index : number) {
+    if (isProcess(mainObject)){
+      mainObject.steps[index] = selected.value;
+      options[index] = {value: selected.value, label: selected.value};
+      mainObject = {...mainObject}; // trigger reactivity
+    }
   }
 
 </script>
