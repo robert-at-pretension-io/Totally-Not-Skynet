@@ -29,6 +29,7 @@
     "start:dev": "sirv public --dev"
   },
   "dependencies": {
+    "@dagrejs/graphlib": "^2.1.12",
     "@rollup/plugin-typescript": "^11.0.0",
     "@types/cytoscape": "^3.19.9",
     "@types/cytoscape-dagre": "^2.3.0",

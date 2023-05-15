@@ -32,7 +32,7 @@ within the graph.
 
   // Listen to graphStore and add nodes and edges to the graph
   graphStore.subscribe((value) => {
-    console.log("graphStore", value);
+    // console.log("graphStore", value);
     if (cyInstance && value.lastAction === "addNode" && value.actedOn != null) {
       cyInstance.add({
         group: "nodes",
@@ -156,5 +156,6 @@ within the graph.
     left: 300px;
     height: 100%;
     width: 100%;
+    right: 300px;
   }
 </style>

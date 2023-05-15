@@ -1,7 +1,7 @@
 import { Action } from "system_types";
 
 export function populateInputVariables(action: Action): string[] {
-  const tagPattern = /\[(.*?)\](.*?)\[\/\1\]/g;
+  const tagPattern = /\[(.*?)\](.*?)\[\/\1\]/gs;
   const regex = /\[(.*?)\]/g;
     
   let filteredInput = action.prompt.replace(tagPattern, "");
@@ -27,8 +27,8 @@ export function populateOutputVariables(action: Action): string[] {
   const input = action.prompt;
 
   const exampleTagPattern = /\[example\][\s\S]*?\[\/example\]/g;
-  const tagPattern = /\[(.*?)\](.*?)\[\/\1\]/g;
-      
+  const tagPattern = /\[(.*?)\](.*?)\[\/\1\]/gs;
+        
   // Remove content within [example] tags
   const filteredInput = input.replace(exampleTagPattern, "");
       

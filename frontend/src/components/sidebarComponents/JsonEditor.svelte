@@ -42,6 +42,7 @@ import { isProcess, isAction } from "helper_functions/type_checker";
 textarea {
   resize: vertical;
   width: 100%;
+  height: 100%;
 }
 </style>
 
@@ -49,6 +50,7 @@ textarea {
   {#if mainObject !== null && Object.keys(mainObject).length > 0}
     {#each Object.entries(mainObject) as [key, value], index (index)}
       <div class="object-field">
+        
         <label for="input-{index}">{key}:</label>
         {#if key === "steps" && Array.isArray(value) && isProcess(mainObject)}
         {#each value as _step, index (index)}
@@ -59,6 +61,7 @@ textarea {
         placeholder="Select step..."
         />
         {/each}
+        
         {:else if typeof value === "boolean" && (isAction(mainObject) || isProcess(mainObject))}
           <input id="input-{index}" type="checkbox" bind:checked={mainObject[key]} />
         {:else if typeof value === "number" && (isAction(mainObject) || isProcess(mainObject))}

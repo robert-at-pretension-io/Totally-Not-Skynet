@@ -1,6 +1,7 @@
 <script lang="ts">
   import GraphComponent from "./components/GraphComponent.svelte";
   import Sidebar from "./components/Sidebar.svelte";
+  import RightSidebar from "./components/RightSidebar.svelte";
 
   import type {
     Graph,
@@ -115,10 +116,8 @@ async function handleProcessChange(process : Process) {
 
 $:  {
   let process = $systemStateStore.selectedProcess;
-  console.log("process: ", process);
-  if (process) {
-    handleProcessChange(process);
-  }
+
+  handleProcessChange(process);
   
 }
 
@@ -143,6 +142,7 @@ const graph: Graph = {
     selected: selectedComponent,
     lastAction: "none",
     actedOn: null,
+    root_node_id: "",
   };
 
   setGraphState(graphState);
@@ -150,3 +150,4 @@ const graph: Graph = {
 
 <Sidebar />
 <GraphComponent />
+<RightSidebar />

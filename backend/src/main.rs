@@ -36,11 +36,8 @@ struct Action {
 struct Process {
     _id : Option<ObjectId>,
     name: String,
-    trigger: String,
-    triggers_next_process: String,
     steps: Vec<String>,
     description: String,
-    branch_step: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -135,12 +132,9 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                 let process = Process  {
                     _id: None, // Assuming you have changed your struct field to `_id`
                     name: create_process_obj.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                    trigger: create_process_obj.get("trigger").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                    triggers_next_process: create_process_obj.get("triggers_next_process").and_then(|v| v.as_str()).unwrap_or("").to_string(),
                     steps: create_process_obj.get("steps").and_then(|v| v.as_array()).unwrap_or(&vec![]).iter().map(|v| v.as_str().unwrap_or("").to_string()).collect(),
                     description: create_process_obj.get("description").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                    branch_step: create_process_obj.get("branch_step").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                };
+                    };
                 return Some(MessageTypes::CreateProcess(CreateProcess{create_process: process}));
             }
         }

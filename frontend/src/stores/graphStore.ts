@@ -20,5 +20,6 @@ export const graphStore = writable<GraphState>({
     incoming: null
   },
   lastAction: "none",
-  actedOn: null
+  actedOn: null,
+  root_node_id: "",
 });

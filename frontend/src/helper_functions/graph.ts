@@ -19,11 +19,14 @@ export function setGraphState(graphState: GraphState) {
   graphStore.set(graphState);
 }
 
-export async function addNode(node: Node): Promise<void> {
+export async function addNode(node: Node, is_root_node: boolean): Promise<void> {
   const graphState = await getGraphState();
   graphState.graph.nodes.push(node);
   graphState.lastAction = "addNode";
   graphState.actedOn = node;
+  if (is_root_node) {
+    graphState.root_node_id = node.id;
+  }
   setGraphState(graphState);
 }
 
@@ -63,7 +66,12 @@ export async function processToGraph(process: Process): Promise<void> {
 
         label_to_id.set(ai_system_action.name, this_id);
 
-        await addNode(node);
+        if (i == 0) {
+          // is the root node
+          await addNode(node, true);
+        } else {
+          await addNode(node,false);
+        }
       }
     }
 
@@ -123,11 +131,16 @@ export async function addEdge(edge: Edge): Promise<void> {
 
 export async function removeNode(id: string): Promise<void> {
   const graphState = await getGraphState();
+
+  // get the node
+  const node = graphState.graph.nodes.find((node) => node.id === id);
   graphState.graph.nodes = graphState.graph.nodes.filter(
     (node) => node.id !== id
   );
-  graphState.lastAction = "removeNode";
-  graphState.actedOn = { id: id };
+  if (node !== undefined) {
+    graphState.lastAction = "removeNode";
+    graphState.actedOn = node;
+  }
   setGraphState(graphState);
 }
 
@@ -148,7 +161,7 @@ export async function removeEdge(
       (edge) => edge.source !== sourceId && edge.target !== targetId
     );
     graphState.lastAction = "removeEdge";
-    graphState.actedOn = { id: edge.id };
+    graphState.actedOn = edge;
     setGraphState(graphState);
   }
 }

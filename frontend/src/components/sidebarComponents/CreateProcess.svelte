@@ -8,12 +8,7 @@
       _id: "",
       name: "",
       steps: [""],
-      trigger: "",
-      triggers_next_process: "",
-      waits_for_branch_completion: false,
-      description: "",
-      creates_process_branch: false,
-      branch_step: ""
+      description: ""
     };
 
     let invalidSteps : String[] = [];
@@ -66,12 +61,9 @@
         _id: "",
         name: "",
         steps: [""],
-        trigger: "",
-        triggers_next_process: "",
-        waits_for_branch_completion: false,
+        
         description: "",
-        creates_process_branch: false,
-        branch_step: ""
+        
       };
     }
 </script>
@@ -92,23 +84,10 @@
         />
     {/each}
 </label>
-    <label>
-      Trigger: <input type="text" bind:value={process.trigger} />
-    </label>
-    <label>
-      Triggers next process: <input type="text" bind:value={process.triggers_next_process} />
-    </label>
-    <label>
-      Waits for branch completion: <input type="checkbox" bind:checked={process.waits_for_branch_completion} />
-    </label>
+
     <label>
       Description: <input type="text" bind:value={process.description} />
     </label>
-    <label>
-      Creates process branch: <input type="checkbox" bind:checked={process.creates_process_branch} />
-    </label>
-    <label>
-      Branch step: <input type="text" bind:value={process.branch_step} />
-    </label>
+
     <button type="submit">Submit</button>
   </form>

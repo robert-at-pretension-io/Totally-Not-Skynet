@@ -29,23 +29,8 @@ export function isProcess(object: any): object is Process {
     }
   }
   
-  if (typeof object.trigger !== "string") {
-    if (debug) {console.log("The object does not have a `trigger` property.");}
-    return false;
-  }
-  
-  if (typeof object.triggers_next_process !== "string") {
-    if (debug) {console.log("The object does not have a `triggers_next_process` property.");}
-    return false;
-  }
-  
   if (typeof object.description !== "string") {
     if (debug) {console.log("The object does not have a `description` property.");}
-    return false;
-  }
-  
-  if (typeof object.branch_step !== "string") {
-    if (debug) {console.log("The object does not have a `branch_step` property.");}
     return false;
   }
   
@@ -122,10 +107,9 @@ export function newProcess(): Process {
     _id: "",
     name: "",
     steps: [],
-    trigger: "",
-    triggers_next_process: "",
+    
     description: "",
-    branch_step: ""
+    
   };
 }
 
