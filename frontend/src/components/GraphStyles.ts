@@ -1,4 +1,5 @@
-export default   [
+export default   
+[
   {
     selector: "node",
     style: {

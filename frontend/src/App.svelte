@@ -1,10 +1,13 @@
 <script lang="ts">
-  import GraphComponent from "./components/GraphComponent.svelte";
+  // import GraphComponent from "./components/GraphComponent.svelte";
   import Sidebar from "./components/Sidebar.svelte";
   import RightSidebar from "./components/RightSidebar.svelte";
+  import GraphComponentGraphlib from "./components/GraphComponent_graphlib.svelte";
+
+  import { Graph, json } from "graphlib";
 
   import type {
-    Graph,
+    
     selectedGraphComponent,
     GraphState,
     Action,
@@ -23,6 +26,8 @@ import { aiSystemStore } from "stores/aiSystemStore";
 import systemStateStore from "stores/systemStateStore";
 import { processToGraph } from "helper_functions/graph";
 import {populateInputVariables, populateOutputVariables} from "helper_functions/validation";
+
+let lastSelectedProcess : Process | null = null;
 
 onMount(async () => {
   // start the websocket connection 
@@ -100,6 +105,12 @@ onMount(async () => {
     }
     else if (Object.prototype.hasOwnProperty.call(data, "create_process")){
       let process : Process = data.create_process;
+
+      // check if process.graph is a string
+      if (typeof process.graph === "string") {
+        process.graph = json.read(process.graph);
+      }
+
       aiSystemStore.update((state : AiSystemState) => {
         state.processes.push(process);
         return state;
@@ -116,38 +127,14 @@ async function handleProcessChange(process : Process) {
 
 $:  {
   let process = $systemStateStore.selectedProcess;
-
-  handleProcessChange(process);
-  
+  if (lastSelectedProcess == null || process.name !== lastSelectedProcess.name) {
+    handleProcessChange(process);
+    lastSelectedProcess = process;
+  }
 }
-
-const graph: Graph = {
-  nodes: [
-  ],
-  edges: [
-
-  ],
-};
-
-  const selectedComponent: selectedGraphComponent = {
-    type: "Node",
-    instance: graph.nodes[0],
-    neighbors: graph.nodes,
-    outgoing: graph.edges.filter((edge) => edge.source === graph.nodes[0].id),
-    incoming: graph.edges.filter((edge) => edge.target === graph.nodes[0].id),
-  };
-
-  let graphState: GraphState = {
-    graph: graph,
-    selected: selectedComponent,
-    lastAction: "none",
-    actedOn: null,
-    root_node_id: "",
-  };
-
-  setGraphState(graphState);
+  
 </script>
 
 <Sidebar />
-<GraphComponent />
+<GraphComponentGraphlib />
 <RightSidebar />

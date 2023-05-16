@@ -1,25 +1,11 @@
 import { writable } from "svelte/store";
 import type { GraphState } from "../system_types";
+import { Graph } from "@dagrejs/graphlib";
 
 // Create the store
 export const graphStore = writable<GraphState>({
-  graph: {
-    nodes: [],
-    edges: []
-  },
-  selected: {
-    type: "Node",
-    instance: {
-      id: "",
-      label: "",
-      type: "action",
-      data: undefined
-    },
-    neighbors: null,
-    outgoing: null,
-    incoming: null
-  },
+  graph: new Graph(),
   lastAction: "none",
   actedOn: null,
-  root_node_id: "",
+  name: null
 });

@@ -1,41 +1,22 @@
+import { Edge } from "@dagrejs/graphlib";
+import type { Graph, json } from "graphlib";
 
-export type Node = {
-  id: string;
-  label?: string;
-  data?: Action;
-  type: "action" | "variable"
-};
 
-export type Edge = {
-  id: string;
-  source: string; // Node id
-  target: string; // Node id
-  label?: string;
-};
 
-export type Graph = {
-  nodes: Node[];
-  edges: Edge[];
-};
 
 export type selectedGraphComponent = {
     type: "Node" | "Edge" | null;
-    instance: Node | Edge;
-    neighbors: Node[] | null;
-    outgoing: Edge[] | null;
-    incoming: Edge[] | null;
 }
 
 export type GraphState = {
   graph: Graph;
-  selected: selectedGraphComponent | null;
   lastAction: "addNode" | "addEdge" | "removeNode" | "removeEdge" | "selectNode" | "deselectNode" | "none" | "selectEdge" | "deselectEdge" | "updateNode" | "updateEdge" | "resetGraph";
-  actedOn: Node | Edge | null;
-  root_node_id: string;
+  actedOn: Edge | string | null;
+  name: string | null;
 };
 
 export type Action = {
-  _id: Object,
+  _id: MongoId,
   prompt: string,
   input_variables: string[],
   output_variables: string[],
@@ -43,12 +24,16 @@ export type Action = {
   system: string
 }
 
+export type MongoId = {
+  $oid: string
+}
+
 
 
 export type Process = {
-  _id: Object,
+  _id: MongoId,
   name: string,
-  steps: string[],
+  graph: Graph,
   description: string,
 }
 

@@ -4,7 +4,7 @@
   import websocketStore from "stores/websocketStore";
   import { Action, Process, UpdateAction } from "system_types";
   import Select from "svelte-select";
-import { isProcess, isAction } from "helper_functions/type_checker";
+  import { isProcess, isAction } from "helper_functions/type_checker";
   let mainObject : Action | Process;
 
   let options : {value: string, label: string}[]= [];

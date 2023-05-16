@@ -1,3 +1,4 @@
+import { Graph } from "@dagrejs/graphlib";
 import { Process, Action } from "system_types";
 
 export function isProcess(object: any): object is Process {
@@ -17,16 +18,9 @@ export function isProcess(object: any): object is Process {
     return false;
   }
   
-  if (!Array.isArray(object.steps)) {
-    if (debug) {console.log("The object does not have a `steps` property.");}
+  if (typeof object.graph !== "string") {
+    if (debug) {console.log("The object does not have a `graph` property.");}
     return false;
-  }
-  
-  for (const step of object.steps) {
-    if (typeof step !== "string") {
-      if (debug) {console.log("The `steps` property contains a non-string value.");}
-      return false;
-    }
   }
   
   if (typeof object.description !== "string") {
@@ -93,7 +87,7 @@ export function isAction(object: any): object is Action {
 
 export function newAction(): Action {
   return {
-    _id: "",
+    _id: { $oid: "" },
     prompt: "",
     input_variables: [],
     output_variables: [],
@@ -104,18 +98,9 @@ export function newAction(): Action {
 
 export function newProcess(): Process {
   return {
-    _id: "",
+    _id: { $oid: "" },
     name: "",
-    steps: [],
-    
+    graph: new Graph(),
     description: "",
-    
   };
-}
-
-export function isNode(object: any): object is Node {
-  return typeof object.id === "string" &&
-      (typeof object.label === "string" || object.label === undefined) &&
-      (isAction(object.data) || object.data === undefined) &&
-      (object.type === "action" || object.type === "variable");
 }

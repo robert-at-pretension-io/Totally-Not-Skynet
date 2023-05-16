@@ -1,13 +1,14 @@
-<script lang='ts'>
+<!-- <script lang='ts'>
     import { aiSystemStore } from "stores/aiSystemStore";
     import { AiSystemState, Process } from "system_types";
     import websocketStore from "stores/websocketStore";
     import Select from "svelte-select";
+    import { Graph } from "graphlib";
 
     let process : Process= {
-      _id: "",
+      _id: {$oid: ""},
       name: "",
-      steps: [""],
+      graph: new Graph(),
       description: ""
     };
 
@@ -58,10 +59,9 @@
       $websocketStore.send(JSON.stringify({"create_process": process}));
 
       process = {
-        _id: "",
+        _id: {$oid: ""},
         name: "",
-        steps: [""],
-        
+        graph: new Graph(),
         description: "",
         
       };
@@ -90,4 +90,4 @@
     </label>
 
     <button type="submit">Submit</button>
-  </form>
+  </form> -->
