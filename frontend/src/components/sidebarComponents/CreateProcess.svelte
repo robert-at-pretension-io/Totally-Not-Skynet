@@ -1,93 +1,77 @@
-<!-- <script lang='ts'>
-    import { aiSystemStore } from "stores/aiSystemStore";
-    import { AiSystemState, Process } from "system_types";
-    import websocketStore from "stores/websocketStore";
-    import Select from "svelte-select";
-    import { Graph } from "graphlib";
-
-    let process : Process= {
-      _id: {$oid: ""},
-      name: "",
-      graph: new Graph(),
-      description: ""
-    };
-
-    let invalidSteps : String[] = [];
+<script lang="ts">
+  import { onMount } from "svelte";
+  import { aiSystemStore } from "stores/aiSystemStore";
+  import type { Action } from "system_types";
   
-    function handleStepsChange(selected : {value: string, label: string}, index : number) {
-      process.steps[index] = selected.value;
-      if (process.steps.length - 1 === index) {
-        process.steps.push("");
-      }
-    }
-  
-    function checkStepsValidity() {
-      let steps = process.steps;
-      let unsubscribe = aiSystemStore.subscribe( (value) => {
-        let system: AiSystemState = value;
-        for (let step of steps) {
-          if (!system.actions.find( (action) => action.name == step)) {
-            // remove this action from the process.steps array
-            process.steps = process.steps.filter( (value) => value != step);
-            
-          }
-        }
-        
-      });
-      unsubscribe();
-    }
-  
-    function handleSubmit() {
-      // if invalidSteps is not empty, then the user has entered an invalid step
-      if (invalidSteps.length > 0) {
-        alert("Invalid steps: " + invalidSteps.join(", "));
-        invalidSteps = [];
-        process.steps = [""];
-        return;
-      }
-      if (process.name == "") {
-        alert("Please enter a name for the process");
-        return;
-      }
-      if (process.steps.length == 0) {
-        alert("Please enter at least one step for the process");
-        return;
-      }
+  let actions: Action[] = [];
+  let selectedActions: Action[] = [];
 
-      checkStepsValidity();
-        
-      $websocketStore.send(JSON.stringify({"create_process": process}));
+  onMount(async () => {
+    aiSystemStore.subscribe((value) => {
 
-      process = {
-        _id: {$oid: ""},
-        name: "",
-        graph: new Graph(),
-        description: "",
-        
-      };
+      actions = value.actions;
+
+      // loop through the actions and print their values:
+      for (let i = 0; i < actions.length; i++) {
+        console.log("Action " + i + ": " + JSON.stringify(actions[i]));
+      }
+    });
+  });
+
+  function addNode() {
+    // Implement your addNode logic here
+  }
+
+  function toggleSelect(action: Action) {
+    console.log("toggleSelect called on action: ", action);
+    const index = selectedActions.findIndex(a => a._id.$oid === action._id.$oid);
+    if (index !== -1) {
+      // action is currently selected, remove it
+      selectedActions = selectedActions.filter(a => a._id.$oid !== action._id.$oid);
+    } else {
+      // action is not currently selected, add it
+      selectedActions = [...selectedActions, action];
     }
+    console.log("selectedActions after toggleSelect:", selectedActions);
+  }
+
+  function isSelected(action: Action) {
+    console.log("isSelected called on action: ", action);
+    let is_selected = selectedActions.some(a => a._id.$oid === action._id.$oid);
+    console.log("selectedActions during isSelected:", selectedActions);
+    console.log("isSelected returning: ", is_selected);
+    return is_selected;
+  }
 </script>
 
-<form on:submit|preventDefault={handleSubmit}>
-
-  <label>
-    Name: <input type="text" bind:value={process.name} />
-  </label>
-  <label for="steps">
-    Steps:
-    {#each process.steps as step, index (index)}
-        <Select id="steps_{index}"
-                bind:value={step}
-                items={$aiSystemStore.actions.map(action => ({value: action.name, label: action.name}))}
-                on:change={(event) => handleStepsChange(event.detail, index)}
-                placeholder="Select step..."
-        />
+<div class="sidebar">
+  <h2>Actions</h2>
+  <ul>
+    {#each actions as action (action._id)}
+      <li>
+        <button class:selected={isSelected(action)} type="button" on:click={() => toggleSelect(action)}>{action.name}</button>
+      </li>
     {/each}
-</label>
+  </ul>
+  <button on:click={addNode}>Add Node(s)</button>
+</div>
 
-    <label>
-      Description: <input type="text" bind:value={process.description} />
-    </label>
+<style>
+  .sidebar {
+    /* style your sidebar here */
+  }
 
-    <button type="submit">Submit</button>
-  </form> -->
+  button.selected {
+    /* style your selected actions here */
+    background-color: #3079d8;
+    color: royalblue;
+  }
+
+  /* Additional styles for the button if needed */
+  button {
+    border: solid;
+    background-color: transparent;
+    padding: 0;
+    cursor: pointer;
+  }
+</style>

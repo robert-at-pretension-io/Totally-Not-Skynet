@@ -15,7 +15,7 @@
     { header : "Edit Actions and Processes", component: InteractWithActionsAndProcesses, open: false},
     // {header: "Edit Action or Process", component: JsonEditor, open: false},
     { header: "Create Action", component: AddNodeButton, open: false },
-    // { header: "Create Process" , component: CreateProcess, open: false}
+    { header: "Create Process" , component: CreateProcess, open: false},
     // {
     //   header: "Modify Nodes or Edges",
     //   component: ModifyNodesOrEdges,

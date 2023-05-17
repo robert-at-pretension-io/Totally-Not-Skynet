@@ -19,7 +19,7 @@
 
   import { isAction, isProcess } from "helper_functions/type_checker";
 
-  import { setGraphState } from "./helper_functions/graph";
+  import { getId, setGraphState } from "./helper_functions/graph";
 import {onMount} from "svelte";
 import websocketStore from "./stores/websocketStore";
 import { aiSystemStore } from "stores/aiSystemStore";
@@ -48,6 +48,7 @@ onMount(async () => {
       });
     } else if (isAction(data)) {
       let action: Action = data;
+      console.log(getId(action));
       aiSystemStore.update((state : AiSystemState) => {
         console.log("Adding action to state:");
         let input_variables = populateInputVariables(action);
