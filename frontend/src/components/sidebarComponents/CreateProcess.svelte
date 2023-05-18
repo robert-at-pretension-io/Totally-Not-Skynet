@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { aiSystemStore } from "stores/aiSystemStore";
   import type { Action } from "system_types";
+  import { addNode } from "../../helper_functions/graph";
   
   let actions: Action[] = [];
   let selectedActions: Action[] = [];
@@ -18,8 +19,11 @@
     });
   });
 
-  function addNode() {
-    // Implement your addNode logic here
+  function localAddNodes() {
+    // for each of the selected actions, add a node to the graph
+    selectedActions.forEach(action => {
+      addNode(action._id.$oid);
+    });
   }
 
   function toggleSelect(action: Action) {
@@ -53,13 +57,10 @@
       </li>
     {/each}
   </ul>
-  <button on:click={addNode}>Add Node(s)</button>
+  <button on:click={localAddNodes}>Add Node(s)</button>
 </div>
 
 <style>
-  .sidebar {
-    /* style your sidebar here */
-  }
 
   button.selected {
     /* style your selected actions here */

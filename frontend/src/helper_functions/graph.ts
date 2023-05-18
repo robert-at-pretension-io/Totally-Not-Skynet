@@ -25,15 +25,18 @@ export async function getAiSystemState(): Promise<AiSystemState> {
 }
 
 // get the name of the action by using the id
-export async function getNodeName(id: string) {
+export async function getNodeName(id: string) : Promise<string | undefined> {
   let res : AiSystemState= await new Promise((resolve, _reject) => {
     aiSystemStore.subscribe((aiSystemState: AiSystemState) => {
       resolve(aiSystemState);
     });
   });
-  return res.actions.find((action) => {
+  let action = await res.actions.find((action) => {
     getId(action) == id;
   });
+  if (action){
+    return action.name;
+  }
 }
 
 export function getId(actionOrProcess : Process | Action) : string {
@@ -48,8 +51,13 @@ export async function addNode(node_id: string): Promise<void> {
   const graphState = await getGraphState();
   graphState.graph.setNode(node_id);
   graphState.lastAction = "addNode";
-  graphState.actedOn = node_id;
-  
+  const node_name = await getNodeName(node_id);
+  if (node_name) {
+    graphState.name = node_name;
+  }
+  else {
+    graphState.actedOn = [node_id, ""];
+  }
   setGraphState(graphState);
 }
 
@@ -67,9 +75,14 @@ export async function processToGraph(process: Process): Promise<void> {
   let graph = process.graph;
   let nodes = graph.nodes();
 
+  // for each of the node ids stored in nodes, get the name of the action
+
   //loop through the nodes
   for (let i = 0; i<nodes.length; i++) {
-    await addNode(nodes[i]);
+    let name = await getNodeName(nodes[i]);
+    if (name) {
+      await addNode(nodes[i]);
+    }
   }
 
   let my_edges = graph.edges();
@@ -138,11 +151,16 @@ export async function addEdge(edge: Edge): Promise<void> {
 }
 
 export async function removeNode(id: string): Promise<void> {
+  const name = await getNodeName(id);
   const graphState = await getGraphState();
   graphState.graph.removeNode(id);
   graphState.lastAction = "removeNode";
-  graphState.actedOn = id;
-  
+  if (name) {
+    graphState.actedOn = [id, name];
+  }
+  else {
+    graphState.actedOn = [id, "unknown"];
+  }
   setGraphState(graphState);
 }
 
@@ -187,7 +205,7 @@ export async function selectNode(id: string): Promise<void> {
     let graphState = await getGraphState();
   
     graphState.lastAction = "selectNode";
-    graphState.actedOn = id;
+    graphState.actedOn = [id , specific_action.name];
     graphState.name = specific_action.name;
     setGraphState(graphState);
   

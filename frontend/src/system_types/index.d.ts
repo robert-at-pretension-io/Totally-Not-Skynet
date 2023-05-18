@@ -11,7 +11,7 @@ export type selectedGraphComponent = {
 export type GraphState = {
   graph: Graph;
   lastAction: "addNode" | "addEdge" | "removeNode" | "removeEdge" | "selectNode" | "deselectNode" | "none" | "selectEdge" | "deselectEdge" | "updateNode" | "updateEdge" | "resetGraph";
-  actedOn: Edge | string | null;
+  actedOn: Edge | [string, string] | null;
   name: string | null;
 };
 
