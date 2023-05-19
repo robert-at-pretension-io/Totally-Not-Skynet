@@ -16085,10 +16085,11 @@ var app = (function () {
                     resolve(aiSystemState);
                 });
             });
-            let action = yield res.actions.find((action) => {
-                getId(action) == id;
+            let action = yield res.actions.find(action => {
+                return getId(action) == id;
             });
             if (action) {
+                console.log("action name: " + action.name);
                 return action.name;
             }
         });
@@ -16107,6 +16108,7 @@ var app = (function () {
             const node_name = yield getNodeName(node_id);
             if (node_name) {
                 graphState.name = node_name;
+                graphState.actedOn = [node_id, node_name];
             }
             else {
                 graphState.actedOn = [node_id, ""];
@@ -16193,7 +16195,7 @@ var app = (function () {
             let ai_system_state = yield getAiSystemState();
             let actions = ai_system_state.actions;
             let specific_action;
-            let res = actions.find((action) => {
+            let res = actions.find(action => {
                 return getId(action) == id;
             });
             if (res) {
@@ -16251,7 +16253,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (55:4) {#each actions as action (action._id)}
+    // (56:4) {#each actions as action (action._id)}
     function create_each_block$1(key_1, ctx) {
     	let li;
     	let button;
@@ -16276,8 +16278,8 @@ var app = (function () {
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "svelte-1pfbei");
     			toggle_class(button, "selected", /*isSelected*/ ctx[3](/*action*/ ctx[7]));
-    			add_location(button, file$3, 56, 8, 2396);
-    			add_location(li, file$3, 55, 6, 2383);
+    			add_location(button, file$3, 57, 8, 2426);
+    			add_location(li, file$3, 56, 6, 2413);
     			this.first = li;
     		},
     		m: function mount(target, anchor) {
@@ -16310,7 +16312,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(55:4) {#each actions as action (action._id)}",
+    		source: "(56:4) {#each actions as action (action._id)}",
     		ctx
     	});
 
@@ -16354,12 +16356,12 @@ var app = (function () {
     			t2 = space();
     			button = element$1("button");
     			button.textContent = "Add Node(s)";
-    			add_location(h2, file$3, 52, 2, 2310);
-    			add_location(ul, file$3, 53, 2, 2329);
+    			add_location(h2, file$3, 53, 2, 2340);
+    			add_location(ul, file$3, 54, 2, 2359);
     			attr_dev(button, "class", "svelte-1pfbei");
-    			add_location(button, file$3, 60, 2, 2549);
+    			add_location(button, file$3, 61, 2, 2579);
     			attr_dev(div, "class", "sidebar");
-    			add_location(div, file$3, 51, 0, 2286);
+    			add_location(div, file$3, 52, 0, 2316);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -16474,6 +16476,7 @@ var app = (function () {
     	function localAddNodes() {
     		// for each of the selected actions, add a node to the graph
     		selectedActions.forEach(action => {
+    			console.log("local");
     			addNode(action._id.$oid);
     		});
     	}
@@ -53106,7 +53109,7 @@ var printLayoutInfo;
     const { console: console_1$1 } = globals;
     const file = "src/components/GraphComponent_graphlib.svelte";
 
-    // (89:2) {#if cyInstance}
+    // (92:2) {#if cyInstance}
     function create_if_block(ctx) {
     	let current;
     	const default_slot_template = /*#slots*/ ctx[3].default;
@@ -53157,7 +53160,7 @@ var printLayoutInfo;
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(89:2) {#if cyInstance}",
+    		source: "(92:2) {#if cyInstance}",
     		ctx
     	});
 
@@ -53174,7 +53177,7 @@ var printLayoutInfo;
     			div = element$1("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "graph svelte-11g0t9p");
-    			add_location(div, file, 87, 0, 3350);
+    			add_location(div, file, 90, 0, 3785);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -53281,36 +53284,41 @@ var printLayoutInfo;
     	let cyInstance = null;
     	let g = new graphlib$1.Graph();
     	let id_map = new Map();
+    	let lastAction = "";
 
-    	graphStore.subscribe(value => {
+    	graphStore.subscribe(value => __awaiter(void 0, void 0, void 0, function* () {
     		console.log("graphStore value: ", value);
 
-    		if (value.lastAction === "addNode" && value.actedOn != null && typeof value.actedOn === "string") {
-    			g.setNode(value.actedOn, value.actedOn);
-    			id_map.set(value.actedOn, value.name);
-    			resetLastAction();
+    		if (value.lastAction === "addNode" && value.actedOn != null && Array.isArray(value.actedOn)) {
+    			id_map = id_map.set(value.actedOn[0], value.actedOn[1]);
+    			console.log("id_map: ", id_map);
+    			g.setNode(value.actedOn[0], value.actedOn[1]);
     		} else if (value.lastAction === "addEdge" && value.actedOn != null && typeof value.actedOn === "object") {
     			g.setEdge(value.actedOn.v, value.actedOn.w, value.actedOn);
-    			resetLastAction();
     		} else if (value.lastAction === "removeEdge" && value.actedOn != null) {
     			g.removeEdge(value.actedOn.v, value.actedOn.w);
-    			resetLastAction();
     		} else if (value.lastAction === "removeNode" && value.actedOn != null) {
     			g.removeNode(value.actedOn);
-    			resetLastAction();
     		} else if (value.lastAction === "resetGraph") {
     			g = new graphlib$1.Graph(); // reset graph
     			resetLastAction();
     		}
 
+    		lastAction = value.lastAction;
+
     		// Now update cytoscape graph based on graphlib graph
-    		if (cyInstance) {
+    		if (cyInstance && (lastAction === "addNode" || lastAction === "addEdge" || lastAction === "removeEdge" || lastAction === "removeNode")) {
+    			// show the id_map
+    			console.log("id_map: ", id_map);
+
     			cyInstance.elements().remove(); // clear the cytoscape graph
     			const elements = [];
 
     			g.nodes().forEach(node => {
+    				console.log("Adding node: ", node, id_map.get(node));
+
     				elements.push({
-    					data: { id: node, name: id_map.get(node) }
+    					data: { id: node, label: id_map.get(node) }
     				});
     			});
 
@@ -53320,7 +53328,7 @@ var printLayoutInfo;
 
     			cyInstance.add(elements); // add new elements
     		}
-    	});
+    	}));
 
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
     		cytoscape_cjs.use(dagre);
@@ -53331,7 +53339,9 @@ var printLayoutInfo;
     		}));
 
     		cyInstance.on("add", () => {
-    			if (cyInstance) {
+    			console.log("add event fired, lastAction: ", lastAction);
+
+    			if (cyInstance && (lastAction === "addNode" || lastAction === "addEdge")) {
     				cyInstance.layout({ name: "dagre" }).run();
     			}
     		});
@@ -53378,7 +53388,8 @@ var printLayoutInfo;
     		refElement,
     		cyInstance,
     		g,
-    		id_map
+    		id_map,
+    		lastAction
     	});
 
     	$$self.$inject_state = $$props => {
@@ -53387,6 +53398,7 @@ var printLayoutInfo;
     		if ('cyInstance' in $$props) $$invalidate(1, cyInstance = $$props.cyInstance);
     		if ('g' in $$props) g = $$props.g;
     		if ('id_map' in $$props) id_map = $$props.id_map;
+    		if ('lastAction' in $$props) lastAction = $$props.lastAction;
     	};
 
     	if ($$props && "$$inject" in $$props) {

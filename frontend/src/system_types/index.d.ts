@@ -1,9 +1,6 @@
 import { Edge } from "@dagrejs/graphlib";
 import type { Graph, json } from "graphlib";
 
-
-
-
 export type selectedGraphComponent = {
     type: "Node" | "Edge" | null;
 }
@@ -27,8 +24,6 @@ export type Action = {
 export type MongoId = {
   $oid: string
 }
-
-
 
 export type Process = {
   _id: MongoId,

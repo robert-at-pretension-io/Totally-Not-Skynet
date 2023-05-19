@@ -21,32 +21,30 @@
     let cyInstance: Core | null = null;
     let g = new graphlib.Graph();
     let id_map = new Map();
+    let lastAction = "";
   
-    graphStore.subscribe((value) => {
+    graphStore.subscribe(async (value) => {
       console.log("graphStore value: ", value);
-      if (value.lastAction === "addNode" && value.actedOn != null && typeof value.actedOn === "string") {
-        g.setNode(value.actedOn, value.actedOn);
-        id_map.set(value.actedOn, value.name);
-        resetLastAction();
+      if (value.lastAction === "addNode" && value.actedOn != null && Array.isArray(value.actedOn)) {
+        id_map = id_map.set(value.actedOn[0], value.actedOn[1]);
+        console.log("id_map: ", id_map);
+        g.setNode(value.actedOn[0], value.actedOn[1]);
       } else if (
         value.lastAction === "addEdge" &&
         value.actedOn != null && typeof value.actedOn === "object"
       ) {
         g.setEdge(value.actedOn.v, value.actedOn.w, value.actedOn);
-        resetLastAction();
       } else if (
         value.lastAction === "removeEdge" &&
         value.actedOn != null
       ) {
         g.removeEdge(value.actedOn.v, value.actedOn.w);
-        resetLastAction();
       }
       else if (
         value.lastAction === "removeNode" &&
         value.actedOn != null
       ) {
         g.removeNode(value.actedOn);
-        resetLastAction();
       }
       else if (
         value.lastAction === "resetGraph"
@@ -54,13 +52,17 @@
         g = new graphlib.Graph(); // reset graph
         resetLastAction();
       }
+      lastAction = value.lastAction;
   
       // Now update cytoscape graph based on graphlib graph
-      if (cyInstance) {
+      if (cyInstance && (lastAction === "addNode" || lastAction === "addEdge" || lastAction === "removeEdge" || lastAction === "removeNode")) {
+        // show the id_map
+        console.log("id_map: ", id_map);
         cyInstance.elements().remove(); // clear the cytoscape graph
         const elements : ElementDefinition[] = [];
         g.nodes().forEach(node => {
-          elements.push({ data: { id: node, name: id_map.get(node) }});
+          console.log("Adding node: ", node, id_map.get(node));
+          elements.push({ data: { id: node, label: id_map.get(node) }});
         });
         g.edges().forEach(edge => {
           elements.push({ data: { source: edge.v, target: edge.w,  } });
@@ -79,7 +81,8 @@
       });
   
       cyInstance.on("add", () => {
-        if (cyInstance) {
+        console.log("add event fired, lastAction: ", lastAction);
+        if (cyInstance && (lastAction === "addNode" || lastAction === "addEdge")) {
           cyInstance
             .layout({
               name: "dagre",

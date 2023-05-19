@@ -22,6 +22,7 @@
   function localAddNodes() {
     // for each of the selected actions, add a node to the graph
     selectedActions.forEach(action => {
+      console.log("local");
       addNode(action._id.$oid);
     });
   }
