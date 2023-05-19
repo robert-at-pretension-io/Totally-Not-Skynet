@@ -31,12 +31,12 @@ export async function getAiSystemState(): Promise<AiSystemState> {
 
 // get the name of the action by using the id
 export async function getNodeName(id: string): Promise<string | undefined> {
-  let res: AiSystemState = await new Promise((resolve, _reject) => {
+  const res: AiSystemState = await new Promise((resolve, _reject) => {
     aiSystemStore.subscribe((aiSystemState: AiSystemState) => {
       resolve(aiSystemState);
     });
   });
-  let action = await res.actions.find(action => {
+  const action = await res.actions.find(action => {
     return getId(action) == id;
   });
   if (action) {
@@ -71,27 +71,27 @@ export async function addNode(node_id: string): Promise<void> {
 export async function processToGraph(process: Process): Promise<void> {
   await resetGraph();
 
-  let ai_system_state: AiSystemState = await new Promise((resolve, _reject) => {
+  const ai_system_state: AiSystemState = await new Promise((resolve, _reject) => {
     aiSystemStore.subscribe((ai_system_state: AiSystemState) => {
       resolve(ai_system_state);
     });
   });
 
   // verify that all of the steps have corresponding actions
-  let graph = process.graph;
-  let nodes = graph.nodes();
+  const graph = process.graph;
+  const nodes = graph.nodes();
 
   // for each of the node ids stored in nodes, get the name of the action
 
   //loop through the nodes
   for (let i = 0; i < nodes.length; i++) {
-    let name = await getNodeName(nodes[i]);
+    const name = await getNodeName(nodes[i]);
     if (name) {
       await addNode(nodes[i]);
     }
   }
 
-  let my_edges = graph.edges();
+  const my_edges = graph.edges();
 
   //loop through the edges
   for (let i = 0; i < my_edges.length; i++) {
@@ -168,6 +168,14 @@ export async function removeNode(id: string): Promise<void> {
   setGraphState(graphState);
 }
 
+export async function removeSelectedNode(): Promise<void> {
+  const graphState = await getGraphState();
+  if (Array.isArray(graphState.actedOn)) {
+    const selected = graphState.actedOn[0];
+    await removeNode(selected);
+  }
+}
+
 export async function removeEdge(
   sourceId: string,
   targetId: string
@@ -187,11 +195,11 @@ export async function removeEdge(
 }
 
 export async function selectNode(id: string): Promise<void> {
-  let ai_system_state = await getAiSystemState();
-  let actions = ai_system_state.actions;
+  const ai_system_state = await getAiSystemState();
+  const actions = ai_system_state.actions;
   let specific_action: Action;
 
-  let res = actions.find(action => {
+  const res = actions.find(action => {
     return getId(action) == id;
   });
   if (res) {
@@ -206,7 +214,7 @@ export async function selectNode(id: string): Promise<void> {
       };
     });
 
-    let graphState = await getGraphState();
+    const graphState = await getGraphState();
 
     graphState.lastAction = "selectNode";
     graphState.actedOn = [id, specific_action.name];
@@ -219,7 +227,7 @@ export async function selectEdge(
   source: string,
   target: string
 ): Promise<void> {
-  let graphState = await getGraphState();
+  const graphState = await getGraphState();
 
   graphState.lastAction = "selectEdge";
   graphState.actedOn = {v: source, w: target};
@@ -234,7 +242,7 @@ export async function resetLastAction(): Promise<void> {
   setGraphState(graphState);
 }
 
-export async function nodes(): Promise<String[]> {
+export async function nodes(): Promise<string[]> {
   const graphState = await getGraphState();
   return graphState.graph.nodes();
 }

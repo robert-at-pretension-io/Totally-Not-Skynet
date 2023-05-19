@@ -4,9 +4,9 @@ export function populateInputVariables(action: Action): string[] {
   const tagPattern = /\[(.*?)\](.*?)\[\/\1\]/gs;
   const regex = /\[(.*?)\]/g;
     
-  let filteredInput = action.prompt.replace(tagPattern, "");
+  const filteredInput = action.prompt.replace(tagPattern, "");
   let match;
-  let variables : string []= [];
+  const variables : string []= [];
   while ((match = regex.exec(filteredInput)) !== null) {
     // This is necessary to avoid infinite loops with zero-width matches
     if (match.index === regex.lastIndex) {

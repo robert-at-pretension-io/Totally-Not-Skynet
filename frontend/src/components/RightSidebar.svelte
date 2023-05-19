@@ -8,7 +8,7 @@
       }
   </script>
   
-  <style>
+  <!-- <style>
     .sidebar {
       position: fixed;
       top: 0;
@@ -42,9 +42,9 @@
         top: 0;
         left: 30px;
     }
-  </style>
+  </style> -->
   
-  <div class={isExpanded ? "sidebar" : "sidebar collapsed"}>
+  <div class={isExpanded ? "right_sidebar" : "right_sidebar collapsed"}>
     {#if isExpanded}
       <button class="expandTab" on:click={toggleSidebar} on:keydown={toggleSidebar}>Shrink</button>
       <div class="content">

@@ -18,11 +18,11 @@ function send_prompt() {
   <input type="text" bind:value={prompt} placeholder="Enter the openai api key here." />
   <button on:click={send_prompt}>Send Prompt</button>
   
-  <style>
+  <!-- <style>
     input {
       width: 100%;
       height: 100%;
       box-sizing: border-box;
       white-space: pre-wrap;
     }
-  </style>
+  </style> -->

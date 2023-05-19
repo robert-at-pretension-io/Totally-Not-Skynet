@@ -6,6 +6,8 @@
 
   import { Graph, json } from "graphlib";
 
+  import "./global.css";
+
   import type {
     
     selectedGraphComponent,
@@ -113,7 +115,10 @@ onMount(async () => {
       }
 
       aiSystemStore.update((state : AiSystemState) => {
-        state.processes.push(process);
+        if(process != null){
+          state.processes.push(process);
+          return state;
+        }
         return state;
       });
     
@@ -126,9 +131,9 @@ async function handleProcessChange(process : Process) {
   await processToGraph(process);
 }
 
-$:  {
+$: {
   let process = $systemStateStore.selectedProcess;
-  if (lastSelectedProcess == null || process.name !== lastSelectedProcess.name) {
+  if (lastSelectedProcess == null || (process && process.name !== lastSelectedProcess.name)) {
     handleProcessChange(process);
     lastSelectedProcess = process;
   }

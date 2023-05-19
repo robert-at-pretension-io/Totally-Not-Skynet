@@ -18,7 +18,7 @@ function set_api_key() {
   <div id="cy" />
   <input type="text" bind:value={apiKey} placeholder="Enter the openai api key here." />
   <button on:click={set_api_key}>Set Key</button>
-  
+<!--   
   <style>
     input {
       width: 100%;
@@ -26,4 +26,4 @@ function set_api_key() {
       box-sizing: border-box;
       white-space: pre-wrap;
     }
-  </style>
+  </style> -->

@@ -6,7 +6,24 @@
     let selectedAction = "";
     let selectedProcess = "";
 
-    $:{
+    // Subscribe to the graphStore to get the latest values
+    let actions = [];
+    let processes = [];
+
+    $: {
+      actions = $aiSystemStore.actions;
+      processes = $aiSystemStore.processes;
+    }
+
+    // Function to handle dropdown change events
+    function onDropdownChange(type) {
+      console.log("onDropdownChange called: ", type, " selectedAction: ", selectedAction, " selectedProcess: ", selectedProcess);
+      if (type === "action") {
+        selectedProcess = "";
+      } else {
+        selectedAction = "";
+      }
+
       if (selectedAction) {
         // Set the selected action in the systemStateStore
         // it should get the action from the aiSystemStore
@@ -22,24 +39,6 @@
         let this_process = $aiSystemStore.processes.find(obj => obj.name === selectedProcess);
         $systemStateStore.selectedProcess = this_process;
         $systemStateStore.selectedAction = null;
-      }
-    }
-  
-    // Subscribe to the graphStore to get the latest values
-    let actions = [];
-    let processes = [];
-
-    $: {
-      actions = $aiSystemStore.actions;
-      processes = $aiSystemStore.processes;
-    }
-
-    // Function to handle dropdown change events
-    function onDropdownChange(type) {
-      if (type === "action") {
-        selectedProcess = "";
-      } else {
-        selectedAction = "";
       }
     }
 </script>

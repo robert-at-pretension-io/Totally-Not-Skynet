@@ -22,13 +22,13 @@
   }
 </script>
 
-<style>
+<!-- <style>
   form {
     display: flex;
     flex-direction: column;
     gap: 1em;
   }
-</style>
+</style> -->
 
 <form on:submit|preventDefault={localAddNode}>
   <label for="prompt">Prompt</label>

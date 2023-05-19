@@ -42,9 +42,9 @@
       }
       else if (
         value.lastAction === "removeNode" &&
-        value.actedOn != null
+        value.actedOn != null && Array.isArray(value.actedOn)
       ) {
-        g.removeNode(value.actedOn);
+        g.removeNode(value.actedOn[0]);
       }
       else if (
         value.lastAction === "resetGraph"
@@ -108,12 +108,12 @@
   {/if}
 </div>
 
-<style>
+<!-- <style>
   .graph {
     position: absolute;
-    left: 300px;
+    left: 400px;
     height: 100%;
 
     right: 300px;
   }
-</style>
+</style> -->

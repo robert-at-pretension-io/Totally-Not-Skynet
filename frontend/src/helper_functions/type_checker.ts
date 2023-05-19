@@ -2,7 +2,7 @@ import { Graph } from "@dagrejs/graphlib";
 import { Process, Action } from "system_types";
 
 export function isProcess(object: any): object is Process {
-  let debug = false;
+  const debug = false;
   if (typeof object !== "object") {
     if (debug) {console.log("The object is not an object.");}
     return false;
@@ -32,7 +32,7 @@ export function isProcess(object: any): object is Process {
 }
   
 export function isAction(object: any): object is Action {
-  let debug = false;
+  const debug = false;
   if (typeof object !== "object") {
     if (debug) {console.log("The object is not an object.");}
     return false;

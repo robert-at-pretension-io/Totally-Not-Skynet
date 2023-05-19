@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { aiSystemStore } from "stores/aiSystemStore";
-  import type { Action } from "system_types";
-  import { addNode } from "../../helper_functions/graph";
+  import type { Action, Process } from "system_types";
+  import { addNode , removeSelectedNode} from "../../helper_functions/graph";
   
   let actions: Action[] = [];
   let selectedActions: Action[] = [];
+  let createdProcess : Process | null = null;
 
   onMount(async () => {
     aiSystemStore.subscribe((value) => {
@@ -25,6 +26,9 @@
       console.log("local");
       addNode(action._id.$oid);
     });
+
+    // clear out the selected actions
+    selectedActions = [];
   }
 
   function toggleSelect(action: Action) {
@@ -49,8 +53,6 @@
   }
 </script>
 
-<div class="sidebar">
-  <h2>Actions</h2>
   <ul>
     {#each actions as action (action._id)}
       <li>
@@ -58,22 +60,12 @@
       </li>
     {/each}
   </ul>
-  <button on:click={localAddNodes}>Add Node(s)</button>
-</div>
 
-<style>
-
-  button.selected {
-    /* style your selected actions here */
-    background-color: #3079d8;
-    color: royalblue;
-  }
-
-  /* Additional styles for the button if needed */
-  button {
-    border: solid;
-    background-color: transparent;
-    padding: 0;
-    cursor: pointer;
-  }
-</style>
+  <div class="section-header">
+    <h3>Nodes to add:</h3>
+  </div>
+  {#each selectedActions as action (action._id)}
+    <p>{action.name}</p>
+  {/each}
+  <button class="add-button" on:click={localAddNodes}>Add Node(s)</button>
+  <button class="remove-button" on:click={removeSelectedNode}>Remove Node(s)</button>

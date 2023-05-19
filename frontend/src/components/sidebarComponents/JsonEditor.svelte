@@ -38,13 +38,13 @@
 
 </script>
 
-<style>
+<!-- <style>
 textarea {
   resize: vertical;
   width: 100%;
   height: 100%;
 }
-</style>
+</style> -->
 
 <div class="json-editor">
   {#if mainObject !== null && Object.keys(mainObject).length > 0}
