@@ -6,6 +6,7 @@ import terser from "@rollup/plugin-terser";
 import autoPreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
 import eslint from "@rollup/plugin-eslint";
+import postcss from 'rollup-plugin-postcss';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -28,6 +29,9 @@ export default {
       css: (css) => {
         css.write("bundle.css");
       },
+    }),
+    postcss({
+      extensions: ['.css'],
     }),
     typescript({ sourceMap: !production }),
 

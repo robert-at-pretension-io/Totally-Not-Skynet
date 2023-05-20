@@ -30,13 +30,15 @@
         console.log("id_map: ", id_map);
         g.setNode(value.actedOn[0], value.actedOn[1]);
       } else if (
-        value.lastAction === "addEdge" &&
-        value.actedOn != null && typeof value.actedOn === "object"
+        value.lastAction === "addEdge" 
+        && value.actedOn != null
+        && !Array.isArray(value.actedOn)
       ) {
         g.setEdge(value.actedOn.v, value.actedOn.w, value.actedOn);
-      } else if (
+      }
+      else if (
         value.lastAction === "removeEdge" &&
-        value.actedOn != null
+        value.actedOn != null && !Array.isArray(value.actedOn)
       ) {
         g.removeEdge(value.actedOn.v, value.actedOn.w);
       }
@@ -82,7 +84,9 @@
   
       cyInstance.on("add", () => {
         console.log("add event fired, lastAction: ", lastAction);
-        if (cyInstance && (lastAction === "addNode" || lastAction === "addEdge")) {
+        if (cyInstance && (lastAction === "addNode" || lastAction === "addEdge" 
+        || lastAction === "removeEdge" || lastAction === "removeNode"
+        )) {
           cyInstance
             .layout({
               name: "dagre",

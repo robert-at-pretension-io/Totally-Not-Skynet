@@ -1,5 +1,9 @@
 {
     "rust-analyzer.linkedProjects": [
         "./backend/Cargo.toml"
-    ]
+    ],
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+    "python.formatting.provider": "none"
 }

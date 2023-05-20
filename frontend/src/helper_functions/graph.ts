@@ -71,11 +71,13 @@ export async function addNode(node_id: string): Promise<void> {
 export async function processToGraph(process: Process): Promise<void> {
   await resetGraph();
 
-  const ai_system_state: AiSystemState = await new Promise((resolve, _reject) => {
-    aiSystemStore.subscribe((ai_system_state: AiSystemState) => {
-      resolve(ai_system_state);
-    });
-  });
+  const ai_system_state: AiSystemState = await new Promise(
+    (resolve, _reject) => {
+      aiSystemStore.subscribe((ai_system_state: AiSystemState) => {
+        resolve(ai_system_state);
+      });
+    }
+  );
 
   // verify that all of the steps have corresponding actions
   const graph = process.graph;
@@ -217,6 +219,7 @@ export async function selectNode(id: string): Promise<void> {
     const graphState = await getGraphState();
 
     graphState.lastAction = "selectNode";
+    graphState.lastActedOn = graphState.actedOn;
     graphState.actedOn = [id, specific_action.name];
     graphState.name = specific_action.name;
     setGraphState(graphState);
