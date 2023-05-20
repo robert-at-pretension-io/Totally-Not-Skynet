@@ -178,6 +178,21 @@ export async function removeSelectedNode(): Promise<void> {
   }
 }
 
+export async function removeSelectedEdge(): Promise<void> {
+  const graphState = await getGraphState();
+  if (
+    !Array.isArray(graphState.actedOn) &&
+    graphState.lastAction == "selectEdge"
+  ) {
+    const selected = graphState.actedOn;
+    if (selected != null) {
+      await removeEdge(selected.v, selected.w);
+    }
+  } else {
+    console.log("not removing edge, doesn't meet criteria");
+  }
+}
+
 export async function removeEdge(
   sourceId: string,
   targetId: string
@@ -187,8 +202,8 @@ export async function removeEdge(
 
   console.log("removing edge:", sourceId, targetId, " from graph");
 
-  const edge = graphState.graph.edge(sourceId, targetId);
-  graphState.graph.removeEdge(edge);
+  const edge = graphState.actedOn;
+  // graphState.graph.removeEdge(edge);
 
   graphState.lastAction = "removeEdge";
   graphState.actedOn = edge;

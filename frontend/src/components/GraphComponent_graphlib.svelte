@@ -40,6 +40,7 @@
         value.lastAction === "removeEdge" &&
         value.actedOn != null && !Array.isArray(value.actedOn)
       ) {
+        console.log("Removing edge: ", value.actedOn.v, value.actedOn.w);
         g.removeEdge(value.actedOn.v, value.actedOn.w);
       }
       else if (

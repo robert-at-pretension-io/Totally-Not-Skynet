@@ -16209,6 +16209,34 @@ var app = (function () {
             }
         });
     }
+    function removeSelectedEdge() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const graphState = yield getGraphState();
+            if (!Array.isArray(graphState.actedOn) &&
+                graphState.lastAction == "selectEdge") {
+                const selected = graphState.actedOn;
+                if (selected != null) {
+                    yield removeEdge(selected.v, selected.w);
+                }
+            }
+            else {
+                console.log("not removing edge, doesn't meet criteria");
+            }
+        });
+    }
+    function removeEdge(sourceId, targetId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const graphState = yield getGraphState();
+            // find the id of the edge to remove
+            console.log("removing edge:", sourceId, targetId, " from graph");
+            const edge = graphState.actedOn;
+            // graphState.graph.removeEdge(edge);
+            graphState.lastAction = "removeEdge";
+            graphState.actedOn = edge;
+            graphState.name = null;
+            setGraphState(graphState);
+        });
+    }
     function selectNode(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const ai_system_state = yield getAiSystemState();
@@ -16303,8 +16331,8 @@ var app = (function () {
     			t1 = space();
     			attr_dev(button, "type", "button");
     			toggle_class(button, "selected", /*isSelected*/ ctx[5](/*action*/ ctx[9]));
-    			add_location(button, file$3, 77, 8, 3229);
-    			add_location(li, file$3, 76, 6, 3216);
+    			add_location(button, file$3, 77, 8, 3249);
+    			add_location(li, file$3, 76, 6, 3236);
     			this.first = li;
     		},
     		m: function mount(target, anchor) {
@@ -16356,7 +16384,7 @@ var app = (function () {
     		c: function create() {
     			p = element$1("p");
     			t = text(t_value);
-    			add_location(p, file$3, 86, 4, 3501);
+    			add_location(p, file$3, 86, 4, 3521);
     			this.first = p;
     		},
     		m: function mount(target, anchor) {
@@ -16399,6 +16427,8 @@ var app = (function () {
     	let button1;
     	let t7;
     	let button2;
+    	let t9;
+    	let button3;
     	let mounted;
     	let dispose;
     	let each_value_1 = /*actions*/ ctx[0];
@@ -16450,16 +16480,21 @@ var app = (function () {
     			t7 = space();
     			button2 = element$1("button");
     			button2.textContent = "Add Edge";
-    			add_location(ul, file$3, 74, 2, 3162);
-    			add_location(h3, file$3, 83, 4, 3416);
+    			t9 = space();
+    			button3 = element$1("button");
+    			button3.textContent = "Remove Edge";
+    			add_location(ul, file$3, 74, 2, 3182);
+    			add_location(h3, file$3, 83, 4, 3436);
     			attr_dev(div, "class", "section-header");
-    			add_location(div, file$3, 82, 2, 3383);
+    			add_location(div, file$3, 82, 2, 3403);
     			attr_dev(button0, "class", "add-button");
-    			add_location(button0, file$3, 88, 2, 3534);
+    			add_location(button0, file$3, 88, 2, 3554);
     			attr_dev(button1, "class", "remove-button");
-    			add_location(button1, file$3, 89, 2, 3609);
+    			add_location(button1, file$3, 89, 2, 3629);
     			attr_dev(button2, "class", "add-edge-button");
-    			add_location(button2, file$3, 90, 2, 3695);
+    			add_location(button2, file$3, 90, 2, 3715);
+    			attr_dev(button3, "class", "remove-button");
+    			add_location(button3, file$3, 91, 2, 3791);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -16490,12 +16525,15 @@ var app = (function () {
     			insert_dev(target, button1, anchor);
     			insert_dev(target, t7, anchor);
     			insert_dev(target, button2, anchor);
+    			insert_dev(target, t9, anchor);
+    			insert_dev(target, button3, anchor);
 
     			if (!mounted) {
     				dispose = [
     					listen_dev(button0, "click", /*localAddNodes*/ ctx[2], false, false, false, false),
     					listen_dev(button1, "click", removeSelectedNode, false, false, false, false),
-    					listen_dev(button2, "click", /*localAddEdge*/ ctx[3], false, false, false, false)
+    					listen_dev(button2, "click", /*localAddEdge*/ ctx[3], false, false, false, false),
+    					listen_dev(button3, "click", removeSelectedEdge, false, false, false, false)
     				];
 
     				mounted = true;
@@ -16539,6 +16577,8 @@ var app = (function () {
     			if (detaching) detach_dev(button1);
     			if (detaching) detach_dev(t7);
     			if (detaching) detach_dev(button2);
+    			if (detaching) detach_dev(t9);
+    			if (detaching) detach_dev(button3);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -16680,6 +16720,7 @@ var app = (function () {
     		aiSystemStore,
     		addEdge,
     		addNode,
+    		removeSelectedEdge,
     		removeSelectedNode,
     		graphStore,
     		actions,
@@ -53284,7 +53325,7 @@ var printLayoutInfo;
     const { console: console_1$1 } = globals;
     const file = "src/components/GraphComponent_graphlib.svelte";
 
-    // (94:2) {#if cyInstance}
+    // (95:2) {#if cyInstance}
     function create_if_block(ctx) {
     	let current;
     	const default_slot_template = /*#slots*/ ctx[3].default;
@@ -53335,7 +53376,7 @@ var printLayoutInfo;
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(94:2) {#if cyInstance}",
+    		source: "(95:2) {#if cyInstance}",
     		ctx
     	});
 
@@ -53352,7 +53393,7 @@ var printLayoutInfo;
     			div = element$1("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "graph");
-    			add_location(div, file, 92, 0, 3931);
+    			add_location(div, file, 93, 0, 4005);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -53471,6 +53512,7 @@ var printLayoutInfo;
     		} else if (value.lastAction === "addEdge" && value.actedOn != null && !Array.isArray(value.actedOn)) {
     			g.setEdge(value.actedOn.v, value.actedOn.w, value.actedOn);
     		} else if (value.lastAction === "removeEdge" && value.actedOn != null && !Array.isArray(value.actedOn)) {
+    			console.log("Removing edge: ", value.actedOn.v, value.actedOn.w);
     			g.removeEdge(value.actedOn.v, value.actedOn.w);
     		} else if (value.lastAction === "removeNode" && value.actedOn != null && Array.isArray(value.actedOn)) {
     			g.removeNode(value.actedOn[0]);
