@@ -20,9 +20,8 @@ def git_pull(path):
 def run_npm(path):
     path = os.path.expanduser(path)
     print(f"Starting npm run build in {path}...")
-    subprocess.Popen(['nohup', 'npm', 'run', 'build'], cwd=path,
-                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-    print(f"Npm run build in {path} started.")
+    subprocess.run(['npm', 'run', 'build'], cwd=path)
+    print(f"Npm run build in {path} completed.")
     print(f"Starting npm run start in {path}...")
     subprocess.Popen(['nohup', 'npm', 'run', 'start'], cwd=path,
                      stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
