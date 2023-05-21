@@ -30,8 +30,8 @@
     "build": "rollup -c ",
     "autobuild": "rollup -c -w",
     "dev": "run-p start:dev autobuild",
-    "start": "sirv public",
-    "start:dev": "sirv public --dev"
+    "start": "sirv public --host 0.0.0.0 --port 80",
+    "start:dev": "sirv public --dev --host 0.0.0.0 --port 80"
   },
   "dependencies": {
     "@dagrejs/graphlib": "^2.1.12",

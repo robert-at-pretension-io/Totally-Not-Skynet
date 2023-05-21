@@ -339,7 +339,7 @@ async fn start_websocket_server(
     rx: Arc<tokio::sync::Mutex<UnboundedReceiver<(Identity, Message)>>>,
     client_tx: mpsc::Sender<(Identity, String)>,
 ) {
-    let listener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
+    let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
 
     let request_dispatcher: HashMap<Identity, UnboundedSender<Message>> = HashMap::new();
     let thread_safe_request_dispatcher = Arc::new(Mutex::new(request_dispatcher));

@@ -3678,8 +3678,10 @@ var app = (function () {
 
     function getCssDimensions(element) {
       const css = getComputedStyle$1(element);
-      let width = parseFloat(css.width);
-      let height = parseFloat(css.height);
+      // In testing environments, the `width` and `height` properties are empty
+      // strings for SVG elements, returning NaN. Fallback to `0` in this case.
+      let width = parseFloat(css.width) || 0;
+      let height = parseFloat(css.height) || 0;
       const hasOffset = isHTMLElement(element);
       const offsetWidth = hasOffset ? element.offsetWidth : width;
       const offsetHeight = hasOffset ? element.offsetHeight : height;
@@ -4416,7 +4418,7 @@ var app = (function () {
     			attr_dev(svg, "viewBox", "0 0 20 20");
     			attr_dev(svg, "focusable", "false");
     			attr_dev(svg, "aria-hidden", "true");
-    			attr_dev(svg, "class", "svelte-kvy30e");
+    			attr_dev(svg, "class", "svelte-qbd276");
     			add_location(svg, file$9, 0, 0, 0);
     		},
     		l: function claim(nodes) {
@@ -4492,7 +4494,7 @@ var app = (function () {
     			attr_dev(svg, "focusable", "false");
     			attr_dev(svg, "aria-hidden", "true");
     			attr_dev(svg, "role", "presentation");
-    			attr_dev(svg, "class", "svelte-1krt9p1");
+    			attr_dev(svg, "class", "svelte-whdbu1");
     			add_location(svg, file$8, 0, 0, 0);
     		},
     		l: function claim(nodes) {
@@ -4559,7 +4561,7 @@ var app = (function () {
     		c: function create() {
     			svg = svg_element("svg");
     			circle = svg_element("circle");
-    			attr_dev(circle, "class", "circle_path svelte-13eve6t");
+    			attr_dev(circle, "class", "circle_path svelte-1p3nqvd");
     			attr_dev(circle, "cx", "50");
     			attr_dev(circle, "cy", "50");
     			attr_dev(circle, "r", "20");
@@ -4568,7 +4570,7 @@ var app = (function () {
     			attr_dev(circle, "stroke-width", "5");
     			attr_dev(circle, "stroke-miterlimit", "10");
     			add_location(circle, file$7, 1, 4, 48);
-    			attr_dev(svg, "class", "loading svelte-13eve6t");
+    			attr_dev(svg, "class", "loading svelte-1p3nqvd");
     			attr_dev(svg, "viewBox", "25 25 50 50");
     			add_location(svg, file$7, 0, 0, 0);
     		},
@@ -4723,7 +4725,7 @@ var app = (function () {
     			if (if_block1) if_block1.c();
     			t1 = space();
     			if (if_block2) if_block2.c();
-    			attr_dev(div, "class", "svelte-select-list svelte-1un9tlm");
+    			attr_dev(div, "class", "svelte-select-list svelte-apvs86");
     			toggle_class(div, "prefloat", /*prefloat*/ ctx[28]);
     			add_location(div, file$6, 682, 8, 20859);
     		},
@@ -5157,7 +5159,7 @@ var app = (function () {
     		c: function create() {
     			div = element$1("div");
     			div.textContent = "No options";
-    			attr_dev(div, "class", "empty svelte-1un9tlm");
+    			attr_dev(div, "class", "empty svelte-apvs86");
     			add_location(div, file$6, 718, 20, 22698);
     		},
     		m: function mount(target, anchor) {
@@ -5243,7 +5245,7 @@ var app = (function () {
     			div0 = element$1("div");
     			if (item_slot_or_fallback) item_slot_or_fallback.c();
     			t = space();
-    			attr_dev(div0, "class", "item svelte-1un9tlm");
+    			attr_dev(div0, "class", "item svelte-apvs86");
     			toggle_class(div0, "list-group-title", /*item*/ ctx[125].groupHeader);
     			toggle_class(div0, "active", /*isItemActive*/ ctx[45](/*item*/ ctx[125], /*value*/ ctx[3], /*itemId*/ ctx[13]));
     			toggle_class(div0, "first", isItemFirst(/*i*/ ctx[127]));
@@ -5251,7 +5253,7 @@ var app = (function () {
     			toggle_class(div0, "group-item", /*item*/ ctx[125].groupItem);
     			toggle_class(div0, "not-selectable", /*item*/ ctx[125]?.selectable === false);
     			add_location(div0, file$6, 700, 24, 21726);
-    			attr_dev(div1, "class", "list-item svelte-1un9tlm");
+    			attr_dev(div1, "class", "list-item svelte-apvs86");
     			attr_dev(div1, "tabindex", "-1");
     			add_location(div1, file$6, 693, 20, 21348);
     		},
@@ -5439,10 +5441,10 @@ var app = (function () {
     			span1 = element$1("span");
     			t2 = text(/*ariaContext*/ ctx[31]);
     			attr_dev(span0, "id", "aria-selection");
-    			attr_dev(span0, "class", "svelte-1un9tlm");
+    			attr_dev(span0, "class", "svelte-apvs86");
     			add_location(span0, file$6, 727, 12, 23008);
     			attr_dev(span1, "id", "aria-context");
-    			attr_dev(span1, "class", "svelte-1un9tlm");
+    			attr_dev(span1, "class", "svelte-apvs86");
     			add_location(span1, file$6, 728, 12, 23069);
     		},
     		m: function mount(target, anchor) {
@@ -5566,7 +5568,7 @@ var app = (function () {
     		c: function create() {
     			div = element$1("div");
     			if (selection_slot_or_fallback) selection_slot_or_fallback.c();
-    			attr_dev(div, "class", "selected-item svelte-1un9tlm");
+    			attr_dev(div, "class", "selected-item svelte-apvs86");
     			toggle_class(div, "hide-selected-item", /*hideSelectedItem*/ ctx[35]);
     			add_location(div, file$6, 766, 16, 24542);
     		},
@@ -5807,7 +5809,7 @@ var app = (function () {
     		c: function create() {
     			div = element$1("div");
     			if (multi_clear_icon_slot_or_fallback) multi_clear_icon_slot_or_fallback.c();
-    			attr_dev(div, "class", "multi-item-clear svelte-1un9tlm");
+    			attr_dev(div, "class", "multi-item-clear svelte-apvs86");
     			add_location(div, file$6, 755, 28, 24066);
     		},
     		m: function mount(target, anchor) {
@@ -5935,9 +5937,9 @@ var app = (function () {
     			t0 = space();
     			if (if_block) if_block.c();
     			t1 = space();
-    			attr_dev(span, "class", "multi-item-text svelte-1un9tlm");
+    			attr_dev(span, "class", "multi-item-text svelte-apvs86");
     			add_location(span, file$6, 748, 24, 23733);
-    			attr_dev(div, "class", "multi-item svelte-1un9tlm");
+    			attr_dev(div, "class", "multi-item svelte-apvs86");
     			toggle_class(div, "active", /*activeValue*/ ctx[26] === /*i*/ ctx[127]);
     			toggle_class(div, "disabled", /*disabled*/ ctx[11]);
     			add_location(div, file$6, 742, 20, 23386);
@@ -6060,7 +6062,7 @@ var app = (function () {
     		c: function create() {
     			div = element$1("div");
     			if (loading_icon_slot_or_fallback) loading_icon_slot_or_fallback.c();
-    			attr_dev(div, "class", "icon loading svelte-1un9tlm");
+    			attr_dev(div, "class", "icon loading svelte-apvs86");
     			attr_dev(div, "aria-hidden", "true");
     			add_location(div, file$6, 789, 12, 25231);
     		},
@@ -6168,7 +6170,8 @@ var app = (function () {
     		c: function create() {
     			button = element$1("button");
     			if (clear_icon_slot_or_fallback) clear_icon_slot_or_fallback.c();
-    			attr_dev(button, "class", "icon clear-select svelte-1un9tlm");
+    			attr_dev(button, "type", "button");
+    			attr_dev(button, "class", "icon clear-select svelte-apvs86");
     			add_location(button, file$6, 797, 12, 25450);
     		},
     		m: function mount(target, anchor) {
@@ -6181,7 +6184,7 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "pointerup", stop_propagation(prevent_default(/*handleClear*/ ctx[22])), false, true, true, false);
+    				dispose = listen_dev(button, "click", /*handleClear*/ ctx[22], false, false, false, false);
     				mounted = true;
     			}
     		},
@@ -6280,9 +6283,9 @@ var app = (function () {
     		c: function create() {
     			div = element$1("div");
     			if (chevron_icon_slot_or_fallback) chevron_icon_slot_or_fallback.c();
-    			attr_dev(div, "class", "icon chevron svelte-1un9tlm");
+    			attr_dev(div, "class", "icon chevron svelte-apvs86");
     			attr_dev(div, "aria-hidden", "true");
-    			add_location(div, file$6, 805, 12, 25717);
+    			add_location(div, file$6, 805, 12, 25696);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -6389,8 +6392,8 @@ var app = (function () {
     			? JSON.stringify(/*value*/ ctx[3])
     			: null;
 
-    			attr_dev(input_1, "class", "svelte-1un9tlm");
-    			add_location(input_1, file$6, 814, 8, 25969);
+    			attr_dev(input_1, "class", "svelte-apvs86");
+    			add_location(input_1, file$6, 814, 8, 25948);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, input_1, anchor);
@@ -6488,11 +6491,11 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			select = element$1("select");
-    			attr_dev(select, "class", "required svelte-1un9tlm");
+    			attr_dev(select, "class", "required svelte-apvs86");
     			select.required = true;
     			attr_dev(select, "tabindex", "-1");
     			attr_dev(select, "aria-hidden", "true");
-    			add_location(select, file$6, 819, 12, 26162);
+    			add_location(select, file$6, 819, 12, 26141);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, select, anchor);
@@ -6594,18 +6597,18 @@ var app = (function () {
     			attr_dev(span, "aria-live", "polite");
     			attr_dev(span, "aria-atomic", "false");
     			attr_dev(span, "aria-relevant", "additions text");
-    			attr_dev(span, "class", "a11y-text svelte-1un9tlm");
+    			attr_dev(span, "class", "a11y-text svelte-apvs86");
     			add_location(span, file$6, 725, 4, 22879);
-    			attr_dev(div0, "class", "prepend svelte-1un9tlm");
+    			attr_dev(div0, "class", "prepend svelte-apvs86");
     			add_location(div0, file$6, 734, 4, 23175);
     			set_attributes(input_1, input_data);
-    			toggle_class(input_1, "svelte-1un9tlm", true);
+    			toggle_class(input_1, "svelte-apvs86", true);
     			add_location(input_1, file$6, 774, 8, 24807);
-    			attr_dev(div1, "class", "value-container svelte-1un9tlm");
+    			attr_dev(div1, "class", "value-container svelte-apvs86");
     			add_location(div1, file$6, 738, 4, 23245);
-    			attr_dev(div2, "class", "indicators svelte-1un9tlm");
+    			attr_dev(div2, "class", "indicators svelte-apvs86");
     			add_location(div2, file$6, 787, 4, 25172);
-    			attr_dev(div3, "class", div3_class_value = "svelte-select " + /*containerClasses*/ ctx[21] + " svelte-1un9tlm");
+    			attr_dev(div3, "class", div3_class_value = "svelte-select " + /*containerClasses*/ ctx[21] + " svelte-apvs86");
     			attr_dev(div3, "style", /*containerStyles*/ ctx[14]);
     			toggle_class(div3, "multi", /*multiple*/ ctx[9]);
     			toggle_class(div3, "disabled", /*disabled*/ ctx[11]);
@@ -6760,7 +6763,7 @@ var app = (function () {
     				set_input_value(input_1, /*filterText*/ ctx[4]);
     			}
 
-    			toggle_class(input_1, "svelte-1un9tlm", true);
+    			toggle_class(input_1, "svelte-apvs86", true);
 
     			if (/*loading*/ ctx[5]) {
     				if (if_block3) {
@@ -6873,7 +6876,7 @@ var app = (function () {
     				check_outros();
     			}
 
-    			if (!current || dirty[0] & /*containerClasses*/ 2097152 && div3_class_value !== (div3_class_value = "svelte-select " + /*containerClasses*/ ctx[21] + " svelte-1un9tlm")) {
+    			if (!current || dirty[0] & /*containerClasses*/ 2097152 && div3_class_value !== (div3_class_value = "svelte-select " + /*containerClasses*/ ctx[21] + " svelte-apvs86")) {
     				attr_dev(div3, "class", div3_class_value);
     			}
 
