@@ -16333,28 +16333,28 @@ var app = (function () {
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[9] = list[i];
+    	child_ctx[15] = list[i];
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[9] = list[i];
+    	child_ctx[15] = list[i];
     	return child_ctx;
     }
 
-    // (76:4) {#each actions as action (action._id)}
+    // (112:4) {#each actions as action (action._id)}
     function create_each_block_1(key_1, ctx) {
     	let li;
     	let button;
-    	let t0_value = /*action*/ ctx[9].name + "";
+    	let t0_value = /*action*/ ctx[15].name + "";
     	let t0;
     	let t1;
     	let mounted;
     	let dispose;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[6](/*action*/ ctx[9]);
+    		return /*click_handler*/ ctx[11](/*action*/ ctx[15]);
     	}
 
     	const block = {
@@ -16366,9 +16366,9 @@ var app = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(button, "type", "button");
-    			toggle_class(button, "selected", /*isSelected*/ ctx[5](/*action*/ ctx[9]));
-    			add_location(button, file$3, 77, 8, 3249);
-    			add_location(li, file$3, 76, 6, 3236);
+    			toggle_class(button, "selected", /*isSelected*/ ctx[8](/*action*/ ctx[15]));
+    			add_location(button, file$3, 113, 8, 4460);
+    			add_location(li, file$3, 112, 6, 4447);
     			this.first = li;
     		},
     		m: function mount(target, anchor) {
@@ -16384,10 +16384,10 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*actions*/ 1 && t0_value !== (t0_value = /*action*/ ctx[9].name + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*actions*/ 1 && t0_value !== (t0_value = /*action*/ ctx[15].name + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty & /*isSelected, actions*/ 33) {
-    				toggle_class(button, "selected", /*isSelected*/ ctx[5](/*action*/ ctx[9]));
+    			if (dirty & /*isSelected, actions*/ 257) {
+    				toggle_class(button, "selected", /*isSelected*/ ctx[8](/*action*/ ctx[15]));
     			}
     		},
     		d: function destroy(detaching) {
@@ -16401,17 +16401,17 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(76:4) {#each actions as action (action._id)}",
+    		source: "(112:4) {#each actions as action (action._id)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (85:2) {#each selectedActions as action (action._id)}
+    // (121:2) {#each selectedActions as action (action._id)}
     function create_each_block$1(key_1, ctx) {
     	let p;
-    	let t_value = /*action*/ ctx[9].name + "";
+    	let t_value = /*action*/ ctx[15].name + "";
     	let t;
 
     	const block = {
@@ -16420,7 +16420,7 @@ var app = (function () {
     		c: function create() {
     			p = element$1("p");
     			t = text(t_value);
-    			add_location(p, file$3, 85, 4, 3483);
+    			add_location(p, file$3, 121, 4, 4694);
     			this.first = p;
     		},
     		m: function mount(target, anchor) {
@@ -16429,7 +16429,7 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*selectedActions*/ 2 && t_value !== (t_value = /*action*/ ctx[9].name + "")) set_data_dev(t, t_value);
+    			if (dirty & /*selectedActions*/ 2 && t_value !== (t_value = /*action*/ ctx[15].name + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(p);
@@ -16440,7 +16440,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(85:2) {#each selectedActions as action (action._id)}",
+    		source: "(121:2) {#each selectedActions as action (action._id)}",
     		ctx
     	});
 
@@ -16448,27 +16448,39 @@ var app = (function () {
     }
 
     function create_fragment$3(ctx) {
+    	let p0;
+    	let t1;
+    	let p1;
+    	let t3;
+    	let input0;
+    	let t4;
+    	let p2;
+    	let t6;
+    	let input1;
+    	let t7;
     	let ul;
     	let each_blocks_1 = [];
     	let each0_lookup = new Map();
-    	let t0;
+    	let t8;
     	let h3;
-    	let t2;
+    	let t10;
     	let each_blocks = [];
     	let each1_lookup = new Map();
-    	let t3;
+    	let t11;
     	let button0;
-    	let t5;
+    	let t13;
     	let button1;
-    	let t7;
+    	let t15;
     	let button2;
-    	let t9;
+    	let t17;
     	let button3;
+    	let t19;
+    	let button4;
     	let mounted;
     	let dispose;
     	let each_value_1 = /*actions*/ ctx[0];
     	validate_each_argument(each_value_1);
-    	const get_key = ctx => /*action*/ ctx[9]._id;
+    	const get_key = ctx => /*action*/ ctx[15]._id;
     	validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
@@ -16479,7 +16491,7 @@ var app = (function () {
 
     	let each_value = /*selectedActions*/ ctx[1];
     	validate_each_argument(each_value);
-    	const get_key_1 = ctx => /*action*/ ctx[9]._id;
+    	const get_key_1 = ctx => /*action*/ ctx[15]._id;
     	validate_each_keys(ctx, each_value, get_each_context$1, get_key_1);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -16490,48 +16502,85 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
+    			p0 = element$1("p");
+    			p0.textContent = "Click the node buttons below to add them to the graph. Then click \"Add Node(s) to see them populate on the graph.\"";
+    			t1 = space();
+    			p1 = element$1("p");
+    			p1.textContent = "Please set a descriptive name for your process:";
+    			t3 = space();
+    			input0 = element$1("input");
+    			t4 = space();
+    			p2 = element$1("p");
+    			p2.textContent = "Please set a description for your process, please talk about what purpose it serves:";
+    			t6 = space();
+    			input1 = element$1("input");
+    			t7 = space();
     			ul = element$1("ul");
 
     			for (let i = 0; i < each_blocks_1.length; i += 1) {
     				each_blocks_1[i].c();
     			}
 
-    			t0 = space();
+    			t8 = space();
     			h3 = element$1("h3");
     			h3.textContent = "Nodes to add:";
-    			t2 = space();
+    			t10 = space();
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			t3 = space();
+    			t11 = space();
     			button0 = element$1("button");
     			button0.textContent = "Add Node(s)";
-    			t5 = space();
+    			t13 = space();
     			button1 = element$1("button");
     			button1.textContent = "Remove Node(s)";
-    			t7 = space();
+    			t15 = space();
     			button2 = element$1("button");
     			button2.textContent = "Add Edge";
-    			t9 = space();
+    			t17 = space();
     			button3 = element$1("button");
     			button3.textContent = "Remove Edge";
-    			add_location(ul, file$3, 74, 2, 3182);
-    			add_location(h3, file$3, 82, 4, 3405);
+    			t19 = space();
+    			button4 = element$1("button");
+    			button4.textContent = "Save Process";
+    			add_location(p0, file$3, 99, 1, 3959);
+    			add_location(p1, file$3, 105, 0, 4153);
+    			attr_dev(input0, "type", "text");
+    			add_location(input0, file$3, 106, 0, 4210);
+    			add_location(p2, file$3, 107, 0, 4250);
+    			attr_dev(input1, "type", "text");
+    			add_location(input1, file$3, 108, 0, 4344);
+    			add_location(ul, file$3, 110, 1, 4393);
+    			add_location(h3, file$3, 118, 4, 4616);
     			attr_dev(button0, "class", "add-button");
-    			add_location(button0, file$3, 87, 2, 3516);
+    			add_location(button0, file$3, 123, 2, 4727);
     			attr_dev(button1, "class", "remove-button");
-    			add_location(button1, file$3, 88, 2, 3591);
+    			add_location(button1, file$3, 124, 2, 4802);
     			attr_dev(button2, "class", "add-button");
-    			add_location(button2, file$3, 89, 2, 3677);
+    			add_location(button2, file$3, 125, 2, 4888);
     			attr_dev(button3, "class", "remove-button");
-    			add_location(button3, file$3, 90, 2, 3748);
+    			add_location(button3, file$3, 126, 2, 4959);
+    			attr_dev(button4, "class", "add-button");
+    			add_location(button4, file$3, 127, 2, 5042);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
+    			insert_dev(target, p0, anchor);
+    			insert_dev(target, t1, anchor);
+    			insert_dev(target, p1, anchor);
+    			insert_dev(target, t3, anchor);
+    			insert_dev(target, input0, anchor);
+    			set_input_value(input0, /*name*/ ctx[2]);
+    			insert_dev(target, t4, anchor);
+    			insert_dev(target, p2, anchor);
+    			insert_dev(target, t6, anchor);
+    			insert_dev(target, input1, anchor);
+    			set_input_value(input1, /*description*/ ctx[3]);
+    			insert_dev(target, t7, anchor);
     			insert_dev(target, ul, anchor);
 
     			for (let i = 0; i < each_blocks_1.length; i += 1) {
@@ -16540,9 +16589,9 @@ var app = (function () {
     				}
     			}
 
-    			insert_dev(target, t0, anchor);
+    			insert_dev(target, t8, anchor);
     			insert_dev(target, h3, anchor);
-    			insert_dev(target, t2, anchor);
+    			insert_dev(target, t10, anchor);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				if (each_blocks[i]) {
@@ -16550,28 +16599,41 @@ var app = (function () {
     				}
     			}
 
-    			insert_dev(target, t3, anchor);
+    			insert_dev(target, t11, anchor);
     			insert_dev(target, button0, anchor);
-    			insert_dev(target, t5, anchor);
+    			insert_dev(target, t13, anchor);
     			insert_dev(target, button1, anchor);
-    			insert_dev(target, t7, anchor);
+    			insert_dev(target, t15, anchor);
     			insert_dev(target, button2, anchor);
-    			insert_dev(target, t9, anchor);
+    			insert_dev(target, t17, anchor);
     			insert_dev(target, button3, anchor);
+    			insert_dev(target, t19, anchor);
+    			insert_dev(target, button4, anchor);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(button0, "click", /*localAddNodes*/ ctx[2], false, false, false, false),
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[9]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[10]),
+    					listen_dev(button0, "click", /*localAddNodes*/ ctx[4], false, false, false, false),
     					listen_dev(button1, "click", removeSelectedNode, false, false, false, false),
-    					listen_dev(button2, "click", /*localAddEdge*/ ctx[3], false, false, false, false),
-    					listen_dev(button3, "click", removeSelectedEdge, false, false, false, false)
+    					listen_dev(button2, "click", /*localAddEdge*/ ctx[5], false, false, false, false),
+    					listen_dev(button3, "click", removeSelectedEdge, false, false, false, false),
+    					listen_dev(button4, "click", /*saveProcess*/ ctx[6], false, false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*isSelected, actions, toggleSelect*/ 49) {
+    			if (dirty & /*name*/ 4 && input0.value !== /*name*/ ctx[2]) {
+    				set_input_value(input0, /*name*/ ctx[2]);
+    			}
+
+    			if (dirty & /*description*/ 8 && input1.value !== /*description*/ ctx[3]) {
+    				set_input_value(input1, /*description*/ ctx[3]);
+    			}
+
+    			if (dirty & /*isSelected, actions, toggleSelect*/ 385) {
     				each_value_1 = /*actions*/ ctx[0];
     				validate_each_argument(each_value_1);
     				validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
@@ -16582,34 +16644,46 @@ var app = (function () {
     				each_value = /*selectedActions*/ ctx[1];
     				validate_each_argument(each_value);
     				validate_each_keys(ctx, each_value, get_each_context$1, get_key_1);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key_1, 1, ctx, each_value, each1_lookup, t3.parentNode, destroy_block, create_each_block$1, t3, get_each_context$1);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key_1, 1, ctx, each_value, each1_lookup, t11.parentNode, destroy_block, create_each_block$1, t11, get_each_context$1);
     			}
     		},
     		i: noop$3,
     		o: noop$3,
     		d: function destroy(detaching) {
+    			if (detaching) detach_dev(p0);
+    			if (detaching) detach_dev(t1);
+    			if (detaching) detach_dev(p1);
+    			if (detaching) detach_dev(t3);
+    			if (detaching) detach_dev(input0);
+    			if (detaching) detach_dev(t4);
+    			if (detaching) detach_dev(p2);
+    			if (detaching) detach_dev(t6);
+    			if (detaching) detach_dev(input1);
+    			if (detaching) detach_dev(t7);
     			if (detaching) detach_dev(ul);
 
     			for (let i = 0; i < each_blocks_1.length; i += 1) {
     				each_blocks_1[i].d();
     			}
 
-    			if (detaching) detach_dev(t0);
+    			if (detaching) detach_dev(t8);
     			if (detaching) detach_dev(h3);
-    			if (detaching) detach_dev(t2);
+    			if (detaching) detach_dev(t10);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].d(detaching);
     			}
 
-    			if (detaching) detach_dev(t3);
+    			if (detaching) detach_dev(t11);
     			if (detaching) detach_dev(button0);
-    			if (detaching) detach_dev(t5);
+    			if (detaching) detach_dev(t13);
     			if (detaching) detach_dev(button1);
-    			if (detaching) detach_dev(t7);
+    			if (detaching) detach_dev(t15);
     			if (detaching) detach_dev(button2);
-    			if (detaching) detach_dev(t9);
+    			if (detaching) detach_dev(t17);
     			if (detaching) detach_dev(button3);
+    			if (detaching) detach_dev(t19);
+    			if (detaching) detach_dev(button4);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -16627,6 +16701,9 @@ var app = (function () {
     }
 
     function instance$3($$self, $$props, $$invalidate) {
+    	let $websocketStore;
+    	validate_store(websocketStore, 'websocketStore');
+    	component_subscribe($$self, websocketStore, $$value => $$invalidate(12, $websocketStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('CreateProcess', slots, []);
 
@@ -16669,6 +16746,8 @@ var app = (function () {
     	let actions = [];
     	let selectedActions = [];
     	let createdProcess = null;
+    	let name = "";
+    	let description = "";
 
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
     		aiSystemStore.subscribe(value => {
@@ -16714,6 +16793,26 @@ var app = (function () {
     		}
     	}
 
+    	function saveProcess() {
+    		// create a process object
+    		// create an alert message if either name or description are null
+    		if (name === null || description === null) {
+    			alert("Please enter a name and description for the process");
+    			return;
+    		} else {
+    			// get the graph from the graphStore
+    			let graph = null;
+
+    			graphStore.subscribe(value => {
+    				graph = value.graph;
+    			});
+
+    			let process = { name, description, graph };
+    			$websocketStore.send(JSON.stringify({ create_process: process }));
+    			$$invalidate(1, selectedActions = []);
+    		}
+    	}
+
     	function toggleSelect(action) {
     		console.log("toggleSelect called on action: ", action);
     		const index = selectedActions.findIndex(a => a._id.$oid === action._id.$oid);
@@ -16743,6 +16842,16 @@ var app = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<CreateProcess> was created with unknown prop '${key}'`);
     	});
 
+    	function input0_input_handler() {
+    		name = this.value;
+    		$$invalidate(2, name);
+    	}
+
+    	function input1_input_handler() {
+    		description = this.value;
+    		$$invalidate(3, description);
+    	}
+
     	const click_handler = action => toggleSelect(action);
 
     	$$self.$capture_state = () => ({
@@ -16754,13 +16863,18 @@ var app = (function () {
     		removeSelectedEdge,
     		removeSelectedNode,
     		graphStore,
+    		websocketStore,
     		actions,
     		selectedActions,
     		createdProcess,
+    		name,
+    		description,
     		localAddNodes,
     		localAddEdge,
+    		saveProcess,
     		toggleSelect,
-    		isSelected
+    		isSelected,
+    		$websocketStore
     	});
 
     	$$self.$inject_state = $$props => {
@@ -16768,6 +16882,8 @@ var app = (function () {
     		if ('actions' in $$props) $$invalidate(0, actions = $$props.actions);
     		if ('selectedActions' in $$props) $$invalidate(1, selectedActions = $$props.selectedActions);
     		if ('createdProcess' in $$props) createdProcess = $$props.createdProcess;
+    		if ('name' in $$props) $$invalidate(2, name = $$props.name);
+    		if ('description' in $$props) $$invalidate(3, description = $$props.description);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -16777,10 +16893,15 @@ var app = (function () {
     	return [
     		actions,
     		selectedActions,
+    		name,
+    		description,
     		localAddNodes,
     		localAddEdge,
+    		saveProcess,
     		toggleSelect,
     		isSelected,
+    		input0_input_handler,
+    		input1_input_handler,
     		click_handler
     	];
     }
@@ -53474,7 +53595,7 @@ var printLayoutInfo;
       }
     }
 
-    var css_248z = "/* Global Styles */\n* {\n  box-sizing: border-box;\n  font-family: 'Roboto', sans-serif;\n  color: #2c3e50; /* Dark Blue */\n}\n\n.section-header {\n  cursor: pointer;\n  transition: background-color 0.2s ease;\n  padding: 10px;\n  border-radius: 4px;\n}\n\n.section-header:hover {\n  background-color: #f0f0f0;\n}\n\n.section-header::after {\n  content: \"▼\";  /* You can replace with any symbol or icon font you like */\n  margin-left: 5px;\n}\n\ntextarea, input {\n  resize: vertical;\n  width: 100%;\n  height: 100%;\n  white-space: pre-wrap;\n  border-radius: 4px;\n  border: 2px solid #27ae60; /* Green */\n  background-color: #ecf0f1; /* Light Gray */\n}\nbutton.selected {\n  background-color: #2ecc71; /* Green */\n  color: #ecf0f1; /* Light Gray */\n}\n\n.add-button {\n  background-color: #16a085; /* Green */\n  margin-top: 20px;\n  margin-bottom: 10px;\n}\n\n.remove-button {\n  background-color: #c0392b; /* Dark Red */\n}\n\n.section-content {\n  background-color: #ecf0f1; /* Light Gray */\n}\n\n\nform {\n  display: flex;\n  flex-direction: column;\n  gap: 1em;\n}\n/* Mobile Styles */\n@media (max-width: 800px) {\n  .app-container {\n    display: flex;\n    flex-direction: column;\n    height: 100vh;\n  }\n\n  .graph {\n    width: 100%;\n    /* height should take up rest of screen */\n    height: 60vh;\n    order: 2;\n  }\n\n  .sidebar {\n    width: 100%;\n    height: 40vh;\n    min-height: 200px;\n    order: 1;\n    padding: 2vw;\n    overflow-y: auto;\n  }\n\n  .section {\n    margin-bottom: 2vh;\n    border-radius: 1vh;\n    background-color: #9b59b6; /* Purple */\n  }\n\n  .section-header {\n    padding: 1vh;\n    background-color: #f1c40f; /* Yellow */\n    border-radius: 1vh;\n  }\n}\n\n\n\n/* Larger screen styles */\n@media (min-width: 801px) {\n  /* Styles specific to components */\n  .app-container {\n      display: grid;\n      grid-template-columns: 25vw 1fr;\n  }\n\n\n  /* ./components/GraphComponent_graphlib.svelte */\n  .graph {\n      grid-column: 2;\n      height: 100%;\n  }\n\n  /* ./components/Sidebar.svelte */\n  .sidebar {\n      grid-column: 1;\n      position: sticky;\n      top: 0;\n      height: 100vh;\n      background-color: #2ecc71; /* Green */\n      overflow-y: auto;\n      box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.541);\n      border-radius: 12px;\n  }\n\n}\n\n";
+    var css_248z = "/* Global Styles */\n* {\n  box-sizing: border-box;\n  font-family: 'Roboto', sans-serif;\n  color: #2c3e50; /* Dark Blue */\n}\n\n.section-header {\n  cursor: pointer;\n  transition: background-color 0.2s ease;\n  padding: 10px;\n  border-radius: 4px;\n}\n\n.section-header:hover {\n  background-color: #f0f0f0;\n}\n\n.section-header::after {\n  content: \"▼\";  /* You can replace with any symbol or icon font you like */\n  margin-left: 5px;\n}\n\ntextarea, input {\n  resize: vertical;\n  width: 100%;\n  height: 100%;\n  white-space: pre-wrap;\n  border-radius: 4px;\n  border: 2px solid #27ae60; /* Green */\n  background-color: #ecf0f1; /* Light Gray */\n}\nbutton.selected {\n  background-color: #2ecc71; /* Green */\n  color: #ecf0f1; /* Light Gray */\n}\n\n.add-button {\n  background-color: #16a085; /* Green */\n  margin-top: 20px;\n  margin-bottom: 10px;\n}\n\n.remove-button {\n  background-color: #c0392b; /* Dark Red */\n}\n\n.section-content {\n  background-color: #ecf0f1; /* Light Gray */\n}\n\n\nform {\n  display: flex;\n  flex-direction: column;\n  gap: 1em;\n}\n/* Mobile Styles */\n@media (max-width: 800px) {\n  .app-container {\n    display: flex;\n    flex-direction: column;\n    height: 100vh;\n  }\n\n  .graph {\n    width: 100%;\n    /* height should take up rest of screen */\n    height: 60vh;\n    order: 2;\n  }\n\n  .sidebar {\n    width: 100%;\n    height: 40vh;\n    min-height: 200px;\n    order: 1;\n    padding: 2vw;\n    overflow-y: auto;\n    outline: 2px solid #333; /* Outline added */\n  }\n\n  .section {\n    margin-bottom: 2vh;\n    border-radius: 1vh;\n    background-color: #9b59b6; /* Purple */\n  }\n\n  .section-header {\n    padding: 1vh;\n    background-color: #f1c40f; /* Yellow */\n    border-radius: 1vh;\n  }\n}\n\n\n\n/* Larger screen styles */\n@media (min-width: 801px) {\n  /* Styles specific to components */\n  .app-container {\n      display: grid;\n      grid-template-columns: 25vw 1fr;\n  }\n\n\n  /* ./components/GraphComponent_graphlib.svelte */\n  .graph {\n      grid-column: 2;\n      height: 100%;\n  }\n\n  /* ./components/Sidebar.svelte */\n  .sidebar {\n      grid-column: 1;\n      position: sticky;\n      top: 0;\n      height: 100vh;\n      background-color: #2ecc71; /* Green */\n      overflow-y: auto;\n      box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.541);\n      border-radius: 12px;\n  }\n\n}\n\n";
     styleInject(css_248z);
 
     function populateInputVariables(action) {

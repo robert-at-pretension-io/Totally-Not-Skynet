@@ -4,10 +4,15 @@
   import type { Action, Process } from "system_types";
   import { addEdge, addNode , removeSelectedEdge, removeSelectedNode} from "../../helper_functions/graph";
   import { graphStore } from "../../stores/graphStore";
+    import { Graph } from "graphlib";
+   import websocketStore from "stores/websocketStore";
   
   let actions: Action[] = [];
   let selectedActions: Action[] = [];
   let createdProcess : Process | null = null;
+
+  let name = "";
+  let description = "";
 
   onMount(async () => {
     aiSystemStore.subscribe((value) => {
@@ -54,6 +59,33 @@
     }
   }
 
+  function saveProcess() {
+    // create a process object
+
+    // create an alert message if either name or description are null
+    if (name === null || description === null) {
+      alert("Please enter a name and description for the process");
+      return;
+    }
+    else {
+
+      // get the graph from the graphStore
+      let graph : null | Graph= null;
+      graphStore.subscribe((value) => {
+        graph = value.graph;
+      });
+    
+      let process = {
+        name: name,
+        description: description,
+        graph: graph
+      };
+
+      $websocketStore.send(JSON.stringify({create_process: process}));
+      selectedActions = [];
+    }
+  }
+
   function toggleSelect(action: Action) {
     console.log("toggleSelect called on action: ", action);
     const index = selectedActions.findIndex(a => a._id.$oid === action._id.$oid);
@@ -75,8 +107,18 @@
     return is_selected;
   }
 </script>
+ <p> Click the node buttons below to add them to the graph. Then click "Add Node(s) to see them populate on the graph." </p>
+ <!--  name: string;
+  graph: Graph;
+  description: string;
+};-->   
 
-  <ul>
+<p> Please set a descriptive name for your process: </p>
+<input type="text" bind:value={name} />
+<p> Please set a description for your process, please talk about what purpose it serves: </p>
+<input type="text" bind:value={description} />
+
+ <ul>
     {#each actions as action (action._id)}
       <li>
         <button class:selected={isSelected(action)} type="button" on:click={() => toggleSelect(action)}>{action.name}</button>
@@ -93,3 +135,4 @@
   <button class="remove-button" on:click={removeSelectedNode}>Remove Node(s)</button>
   <button class="add-button" on:click={localAddEdge}>Add Edge</button>
   <button class="remove-button" on:click={removeSelectedEdge}>Remove Edge</button>
+  <button class="add-button" on:click={saveProcess}>Save Process</button>

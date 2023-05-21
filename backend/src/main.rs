@@ -179,13 +179,11 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .and_then(|v| v.as_str())
                         .unwrap_or("")
                         .to_string(),
-                    steps: create_process_obj
-                        .get("steps")
-                        .and_then(|v| v.as_array())
-                        .unwrap_or(&vec![])
-                        .iter()
-                        .map(|v| v.as_str().unwrap_or("").to_string())
-                        .collect(),
+                    graph: create_process_obj
+                        .get("graph")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string(),
                     description: create_process_obj
                         .get("description")
                         .and_then(|v| v.as_str())
