@@ -20,18 +20,20 @@ def git_pull(path):
 def run_npm(path):
     path = os.path.expanduser(path)
     print(f"Starting npm run build in {path}...")
-    subprocess.Popen(['npm', 'run', 'build'], cwd=path).wait()
-    print(f"Npm run build in {path} completed.")
-
+    subprocess.Popen(['nohup', 'npm', 'run', 'build'], cwd=path,
+                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    print(f"Npm run build in {path} started.")
     print(f"Starting npm run start in {path}...")
-    subprocess.Popen(['npm', 'run', 'start'], cwd=path)
+    subprocess.Popen(['nohup', 'npm', 'run', 'start'], cwd=path,
+                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
     print(f"Npm run start in {path} started.")
 
 
 def run_cargo(path):
     path = os.path.expanduser(path)
     print(f"Starting cargo run in {path}...")
-    subprocess.Popen(['cargo', 'run'], cwd=path)
+    subprocess.Popen(['nohup', 'cargo', 'run'], cwd=path,
+                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
     print(f"Cargo run in {path} started.")
 
 
