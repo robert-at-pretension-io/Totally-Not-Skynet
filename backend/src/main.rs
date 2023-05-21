@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
+use std::env;
+use std::env;
 use std::fmt;
 use std::sync::Arc;
 use tokio::net::TcpListener;
@@ -77,6 +79,18 @@ pub struct InitializeProject {
 pub struct UserSettings {
     openai_api_key: String,
     mongo_db_uri: String,
+}
+
+impl UserSettings {
+    pub fn new() -> Option<UserSettings> {
+        let openai_api_key = env::var("OPENAI_API_KEY").unwrap();
+        let mongo_db_uri = env::var("MONGO_DB_URI").unwrap();
+
+        Some(UserSettings {
+            openai_api_key,
+            mongo_db_uri,
+        })
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -570,13 +584,29 @@ async fn start_message_sending_loop(
             }
             MessageTypes::SetUserSettings(settings) => {
                 println!("Setting openai key for {}", msg.0.name);
-                runtime_settings.insert(
-                    msg.0.clone(),
-                    RuntimeSettings {
-                        openai_api_key: settings.openai_api_key,
-                        mongo_db_uri: settings.mongo_db_uri,
-                    },
-                );
+
+                // attempt to set them from environment variables
+                let user_settings = UserSettings::new();
+
+                if (user_settings.is_some()) {
+                    let user_settings = user_settings.unwrap();
+                    runtime_settings.insert(
+                        msg.0.clone(),
+                        RuntimeSettings {
+                            openai_api_key: user_settings.openai_api_key,
+                            mongo_db_uri: user_settings.mongo_db_uri,
+                        },
+                    );
+                } else {
+                    runtime_settings.insert(
+                        msg.0.clone(),
+                        RuntimeSettings {
+                            openai_api_key: settings.openai_api_key,
+                            mongo_db_uri: settings.mongo_db_uri,
+                        },
+                    );
+                }
+
                 // respond to the client
                 match tx.send((
                     Identity::new(msg.0.name.to_string()),

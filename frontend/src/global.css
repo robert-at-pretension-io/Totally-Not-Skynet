@@ -49,7 +49,7 @@ button.selected {
   color: white;
 }
 
-button {
+/* button {
   display: block;
   border: none;
   padding: 1vw;
@@ -59,7 +59,7 @@ button {
   width: 100%;
   background-color: #e74c3c; /* Red */
   color: #ecf0f1; /* Light Gray */
-}
+} */
 
 form {
   display: flex;
