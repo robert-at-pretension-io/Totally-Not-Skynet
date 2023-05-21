@@ -1,7 +1,7 @@
 <script lang="ts">
   // import GraphComponent from "./components/GraphComponent.svelte";
   import Sidebar from "./components/Sidebar.svelte";
-  import RightSidebar from "./components/RightSidebar.svelte";
+  // import RightSidebar from "./components/RightSidebar.svelte";
   import GraphComponentGraphlib from "./components/GraphComponent_graphlib.svelte";
 
   import { Graph, json } from "graphlib";
@@ -155,5 +155,5 @@ $: {
 <div class="app-container">
 <Sidebar />
 <GraphComponentGraphlib />
-<RightSidebar />
+<!-- <RightSidebar /> -->
 </div>
