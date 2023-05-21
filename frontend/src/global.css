@@ -1,171 +1,146 @@
 /* Global Styles */
 * {
-    box-sizing: border-box;
-    font-family: 'Roboto', sans-serif;
-    color: #2c3e50; /* Dark Blue */
-  }
-  
-  textarea, input {
-    resize: vertical;
-    width: 100%;
-    height: 100%;
-    white-space: pre-wrap;
-    border-radius: 4px;
-    border: 2px solid #27ae60; /* Green */
-    background-color: #ecf0f1; /* Light Gray */
-  }
-  
-  button {
-    display: block;
-    border: none;
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 12px;
-    cursor: pointer;
-    width: 100%;
-    background-color: #e74c3c; /* Red */
-    color: #ecf0f1; /* Light Gray */
-  }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-  }
-  
-  /* Styles specific to components */
-  /* ./components/RightSidebar.svelte */
-  .right_sidebar {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 300px;
-    background-color: #3498db; /* Blue */
-    transition: width 0.3s;
-    border-radius: 12px;
-  }
-  
-  .right_sidebar.collapsed {
-    width: 30px;
-  }
-  
-  .expandTab {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 30px;
-    height: 100%;
-    background-color: #8e44ad; /* Purple */
-    cursor: pointer;
-    text-align: center;
-    writing-mode: vertical-lr;
-    transform: rotate(180deg);
-  }
-  
-  .content {
-    position: absolute;
-    top: 0;
-    left: 30px;
-  }
-  
-  /* ./components/GraphComponent_graphlib.svelte */
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+  color: #2c3e50; /* Dark Blue */
+}
+
+textarea, input {
+  resize: vertical;
+  width: 100%;
+  height: 100%;
+  white-space: pre-wrap;
+  border-radius: 4px;
+  border: 2px solid #27ae60; /* Green */
+  background-color: #ecf0f1; /* Light Gray */
+}
+
+button {
+  display: block;
+  border: none;
+  padding: 1vw;
+  font-size: 3vw;
+  border-radius: 1vw;
+  cursor: pointer;
+  width: 100%;
+  background-color: #e74c3c; /* Red */
+  color: #ecf0f1; /* Light Gray */
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+/* Mobile Styles */
+@media (max-width: 800px) {
   .graph {
-    position: absolute;
-    left: 300px;
-    right: 300px;
-    height: 100%;
+      position: relative;
+      width: 100%;
+      height: 50vh;
+      left: 0;
+      right: 0;
   }
-  
-  /* ./components/Sidebar.svelte */
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 300px;
-    background-color: #2ecc71; /* Green */
-    overflow-y: auto;
-    box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.541);
-    border-radius: 12px;
+
+  .sidebar, .right_sidebar {
+      position: relative;
+      width: 100%;
+      height: 25vh;
   }
-  
-  .section {
-    margin-bottom: 10px;
-    border-radius: 12px;
-    background-color: #9b59b6; /* Purple */
+
+  .right_sidebar.collapsed {
+      width: 100%;
   }
-  
-  .section-header, .section-content {
-    padding: 10px;
-    background-color: #f1c40f; /* Yellow */
-    border-radius: 12px;
+
+  .expandTab {
+      position: relative;
+      width: 100%;
+      height: 5vh;
   }
-  
-  .section-content {
-    background-color: #ecf0f1; /* Light Gray */
+
+  .content {
+      position: relative;
+      top: 0;
+      left: 0;
   }
-  
+
   /* ./components/sidebarComponents/CreateProcess.svelte */
   .sidebar {
-    padding: 20px;
-    background-color: #e67e22; /* Orange */
-    color: #ecf0f1; /* Light Gray */
-    border-right: 1px solid #34495e; /* Dark Blue */
-    width: 300px;
-    height: 100%;
-    overflow-y: auto;
-    border-radius: 12px;
+      padding: 2vw;
+      width: 100%;
+      height: 25vh;
   }
-  
-  ul {
-    list-style-type: none;
-    padding: 0;
+}
+
+/* Larger screen styles */
+@media (min-width: 801px) {
+  /* Styles specific to components */
+  .right_sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 20vw;
+      background-color: #3498db; /* Blue */
+      transition: width 0.3s;
+      border-radius: 12px;
   }
-  
-  ul li {
-    margin-bottom: 20px;
-    color: #2c3e50; /* Dark Blue */
+
+  .right_sidebar.collapsed {
+      width: 5vw;
   }
-  
-  .section-header {
-    margin-top: 20px;
-    margin-bottom: 10px;
+
+  .expandTab {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 5vw;
+      height: 100%;
+      background-color: #8e44ad; /* Purple */
+      cursor: pointer;
+      text-align: center;
+      writing-mode: vertical-lr;
+      transform: rotate(180deg);
   }
-  
-  button.selected {
-    background-color: #2ecc71; /* Green */
-    color: #ecf0f1; /* Light Gray */
+
+  .content {
+      position: absolute;
+      top: 0;
+      left: 5vw;
   }
-  
-  .add-button {
-    background-color: #16a085; /* Green */
-    margin-top: 20px;
-    margin-bottom: 10px;
+
+  /* ./components/GraphComponent_graphlib.svelte */
+  .graph {
+      position: absolute;
+      left: 20vw;
+      right: 20vw;
+      height: 100%;
   }
-  
-  .remove-button {
-    background-color: #c0392b; /* Dark Red */
+
+  /* ./components/Sidebar.svelte */
+  .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 20vw;
+      background-color: #2ecc71; /* Green */
+      overflow-y: auto;
+      box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.541);
+      border-radius: 12px;
   }
-  .add-edge-button {
-    background-color: #f39c12; /* Orange */
-    color: #ecf0f1; /* Light Gray */
-    border: none;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    transition-duration: 0.4s;
-    cursor: pointer;
-    border-radius: 12px;
-    width: 100%;
+
+  /* ./components/sidebarComponents/CreateProcess.svelte */
+  .sidebar {
+      padding: 2vw;
+      background-color: #e67e22; /* Orange */
+      color: #ecf0f1; /* Light Gray */
+      border-right: 1px solid #34495e; /* Dark Blue */
+      width: 20vw;
+      height: 100%;
+      overflow-y: auto;
+      border-radius: 12px;
   }
-  
-  .add-edge-button:hover {
-    background-color: #d35400; /* Dark Orange */
-    color: white;
-  }
-  
+}
