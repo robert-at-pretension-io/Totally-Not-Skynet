@@ -65,7 +65,8 @@ form {
 
   .graph {
     width: 100%;
-    height: 50vh;
+    /* height should take up rest of screen */
+    height: 100%;
     order: 2;
   }
 
