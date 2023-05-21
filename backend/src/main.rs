@@ -1,5 +1,13 @@
+use bson::{doc, oid::ObjectId};
 use futures_util::{SinkExt, StreamExt};
+use mongodb::{
+    options::{ClientOptions, ServerApi, ServerApiVersion},
+    Client,
+};
+use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
+use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 use std::fmt;
 use std::sync::Arc;
@@ -7,10 +15,6 @@ use tokio::net::TcpListener;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::sync::{mpsc, Mutex};
 use tokio_tungstenite::tungstenite::Message;
-use bson::{doc, oid::ObjectId};
-use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE, AUTHORIZATION};
-use serde_json::json;
-use serde_json::{ Value as JsonValue};
 use uuid::Uuid;
 
 // Needed for setting up the docker container
@@ -24,7 +28,7 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Action {
-    _id : Option<ObjectId>,
+    _id: Option<ObjectId>,
     prompt: String,
     input_variables: Vec<String>,
     output_variables: Vec<String>,
@@ -34,7 +38,7 @@ struct Action {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Process {
-    _id : Option<ObjectId>,
+    _id: Option<ObjectId>,
     name: String,
     steps: Vec<String>,
     description: String,
@@ -70,8 +74,9 @@ pub struct InitializeProject {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct OpenaiKey {
-    key: String,
+pub struct UserSettings {
+    openai_api_key: String,
+    mongo_db_uri: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -91,14 +96,14 @@ pub struct CreateAction {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateProcess {
-    create_process : Process,
+    create_process: Process,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum MessageTypes {
     Goal(Goal),
     InitializeProject(InitializeProject), // Add more types here
-    SetOpenAIKey(OpenaiKey),
+    SetUserSettings(UserSettings),
     GetTextCompletion(Prompt),
     UpdateAction(UpdateAction),
     CreateAction(CreateAction),
@@ -106,40 +111,80 @@ pub enum MessageTypes {
 }
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
-
     use serde_json::Value;
     let value: Value = match serde_json::from_str(message_str) {
         Ok(val) => val,
-        Err(_) => return None,  // or handle this error as you see fit
+        Err(_) => return None, // or handle this error as you see fit
     };
-    
+
     if let Some(obj) = value.as_object() {
         if let Some(create_action_value) = obj.get("create_action") {
             if let Some(create_action_obj) = create_action_value.as_object() {
-                let action = Action  {
+                let action = Action {
                     _id: None, // Assuming you have changed your struct field to `_id`
-                    input_variables: create_action_obj.get("input_variables").and_then(|v| v.as_array()).unwrap_or(&vec![]).iter().map(|v| v.as_str().unwrap_or("").to_string()).collect(),
-                    output_variables: create_action_obj.get("output_variables").and_then(|v| v.as_array()).unwrap_or(&vec![]).iter().map(|v| v.as_str().unwrap_or("").to_string()).collect(),
-                    name: create_action_obj.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                    prompt: create_action_obj.get("prompt").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                    system: create_action_obj.get("system").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                    input_variables: create_action_obj
+                        .get("input_variables")
+                        .and_then(|v| v.as_array())
+                        .unwrap_or(&vec![])
+                        .iter()
+                        .map(|v| v.as_str().unwrap_or("").to_string())
+                        .collect(),
+                    output_variables: create_action_obj
+                        .get("output_variables")
+                        .and_then(|v| v.as_array())
+                        .unwrap_or(&vec![])
+                        .iter()
+                        .map(|v| v.as_str().unwrap_or("").to_string())
+                        .collect(),
+                    name: create_action_obj
+                        .get("name")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string(),
+                    prompt: create_action_obj
+                        .get("prompt")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string(),
+                    system: create_action_obj
+                        .get("system")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string(),
                 };
-                return Some(MessageTypes::CreateAction(CreateAction{create_action: action}));
+                return Some(MessageTypes::CreateAction(CreateAction {
+                    create_action: action,
+                }));
             }
         }
         if let Some(create_process_value) = obj.get("create_process") {
             if let Some(create_process_obj) = create_process_value.as_object() {
-                let process = Process  {
+                let process = Process {
                     _id: None, // Assuming you have changed your struct field to `_id`
-                    name: create_process_obj.get("name").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                    steps: create_process_obj.get("steps").and_then(|v| v.as_array()).unwrap_or(&vec![]).iter().map(|v| v.as_str().unwrap_or("").to_string()).collect(),
-                    description: create_process_obj.get("description").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                    };
-                return Some(MessageTypes::CreateProcess(CreateProcess{create_process: process}));
+                    name: create_process_obj
+                        .get("name")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string(),
+                    steps: create_process_obj
+                        .get("steps")
+                        .and_then(|v| v.as_array())
+                        .unwrap_or(&vec![])
+                        .iter()
+                        .map(|v| v.as_str().unwrap_or("").to_string())
+                        .collect(),
+                    description: create_process_obj
+                        .get("description")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string(),
+                };
+                return Some(MessageTypes::CreateProcess(CreateProcess {
+                    create_process: process,
+                }));
             }
         }
     }
-
 
     if let Ok(msg) = serde_json::from_str::<Goal>(message_str) {
         return Some(MessageTypes::Goal(msg));
@@ -149,8 +194,8 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
         return Some(MessageTypes::InitializeProject(msg));
     }
 
-    if let Ok(msg) = serde_json::from_str::<OpenaiKey>(message_str) {
-        return Some(MessageTypes::SetOpenAIKey(msg));
+    if let Ok(msg) = serde_json::from_str::<UserSettings>(message_str) {
+        return Some(MessageTypes::SetUserSettings(msg));
     }
 
     if let Ok(msg) = serde_json::from_str::<Prompt>(message_str) {
@@ -165,8 +210,6 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
 
     None
 }
-
-
 
 // types used for sending messages to openai
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -242,7 +285,10 @@ async fn get_openai_completion(messages: Vec<ChatMessage>, api_key: String) -> R
     // Set up the headers
     let mut headers = HeaderMap::new();
     headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-    headers.insert(AUTHORIZATION, HeaderValue::from_str(&format!("Bearer {}", api_key)).unwrap());
+    headers.insert(
+        AUTHORIZATION,
+        HeaderValue::from_str(&format!("Bearer {}", api_key)).unwrap(),
+    );
 
     // Create an HTTP client
     let client = reqwest::Client::new();
@@ -261,7 +307,8 @@ async fn get_openai_completion(messages: Vec<ChatMessage>, api_key: String) -> R
             .unwrap();
 
         // Deserialize the response JSON into the ChatCompletion struct
-        let chat_completion: ChatCompletion = serde_json::from_str(&response.text().await.unwrap())?;
+        let chat_completion: ChatCompletion =
+            serde_json::from_str(&response.text().await.unwrap())?;
 
         // Print the result
         println!("{:#?}", chat_completion);
@@ -288,17 +335,13 @@ async fn get_openai_completion(messages: Vec<ChatMessage>, api_key: String) -> R
     Ok(response_string)
 }
 
-
 async fn start_websocket_server(
     rx: Arc<tokio::sync::Mutex<UnboundedReceiver<(Identity, Message)>>>,
     client_tx: mpsc::Sender<(Identity, String)>,
 ) {
     let listener = TcpListener::bind("127.0.0.1:8080").await.unwrap();
 
-    let request_dispatcher: HashMap<
-        Identity,
-        UnboundedSender<Message>,
-    > = HashMap::new();
+    let request_dispatcher: HashMap<Identity, UnboundedSender<Message>> = HashMap::new();
     let thread_safe_request_dispatcher = Arc::new(Mutex::new(request_dispatcher));
     //write two tasks:
     //
@@ -320,11 +363,10 @@ async fn start_websocket_server(
                 .get_mut(&outgoing_msg.0)
                 .unwrap()
                 .clone();
-            match sending_channel.send(outgoing_msg.1){
+            match sending_channel.send(outgoing_msg.1) {
                 Ok(_res) => println!("sent message to client"),
                 Err(_) => todo!(),
             }
-
         }
     });
 
@@ -344,7 +386,7 @@ async fn start_websocket_server(
             thread_safe_request_dispatcher_clone_3
                 .lock()
                 .await
-                .insert(Identity::new(id.to_string()),  local_tx);
+                .insert(Identity::new(id.to_string()), local_tx);
 
             let this_client = Identity {
                 name: id.to_string(),
@@ -407,19 +449,28 @@ async fn start_websocket_server(
         });
     }
 }
-use mongodb::{Client};
-async fn return_db() -> mongodb::Database {
-    let client = Client::with_uri_str("mongodb://localhost:27017/")
-        .await
-        .unwrap();
+async fn return_db(db_uri: String) -> mongodb::Database {
+    let client_options = ClientOptions::parse(db_uri).await;
 
-    client.database("skynet")
+    match client_options {
+        Ok(mut client_options) => {
+            // Set the server_api field of the client_options object to Stable API version 1
+            let server_api = ServerApi::builder().version(ServerApiVersion::V1).build();
+            client_options.server_api = Some(server_api);
+            // Get a handle to the cluster
+            let client = Client::with_options(client_options).unwrap();
+
+            client.database("skynet")
+        }
+        Err(e) => panic!("Error connecting to MongoDB: {:?}", e),
+    }
 }
 
 // type DockerId = String;
 
 struct RuntimeSettings {
-    openai_api_key : String
+    openai_api_key: String,
+    mongo_db_uri: String,
 }
 
 async fn start_message_sending_loop(
@@ -427,7 +478,6 @@ async fn start_message_sending_loop(
     tx: UnboundedSender<(Identity, Message)>,
     mut client_rx: mpsc::Receiver<(Identity, String)>,
 ) {
-
     // let alpine_config = Config {
     //     image: Some(IMAGE),
     //     tty: Some(true),
@@ -438,17 +488,15 @@ async fn start_message_sending_loop(
 
     // let mut docker_containers: Vec<(Identity, DockerId)> = Vec::new();
 
-    let mut runtime_settings : HashMap<Identity, RuntimeSettings> = HashMap::new();
+    let mut runtime_settings: HashMap<Identity, RuntimeSettings> = HashMap::new();
 
     // get the database
-    let db = return_db().await;
 
     //read messages from the client
     while let Some(msg) = client_rx.recv().await {
         println!("Received a message from the client: {}", msg.1);
 
         let received_message: Option<MessageTypes> = parse_message(&msg.1);
-
 
         let message_contents: MessageTypes;
 
@@ -457,8 +505,10 @@ async fn start_message_sending_loop(
             continue;
         } else {
             message_contents = received_message.unwrap();
-            println!("Received a parsed message from the client: {:?}", message_contents);
-
+            println!(
+                "Received a parsed message from the client: {:?}",
+                message_contents
+            );
         }
 
         match message_contents {
@@ -467,6 +517,10 @@ async fn start_message_sending_loop(
                 // get the actions and processes from the db
 
                 // send the actions to the client
+
+                let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
+
+                let db = return_db(db_uri).await;
 
                 let (my_actions, my_processes) = get_actions_and_processes(&db).await;
 
@@ -514,26 +568,38 @@ async fn start_message_sending_loop(
 
                 //     docker_containers.push((msg.0, id));
             }
-            MessageTypes::SetOpenAIKey(key) => {
+            MessageTypes::SetUserSettings(settings) => {
                 println!("Setting openai key for {}", msg.0.name);
-                runtime_settings.insert(msg.0, RuntimeSettings{
-                    openai_api_key: key.key,
-                });
+                runtime_settings.insert(
+                    msg.0.clone(),
+                    RuntimeSettings {
+                        openai_api_key: settings.openai_api_key,
+                        mongo_db_uri: settings.mongo_db_uri,
+                    },
+                );
+                // respond to the client
+                match tx.send((
+                    Identity::new(msg.0.name.to_string()),
+                    Message::Text("Settings received".to_string()),
+                )) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        println!("Error sending message to client: {:?}", e);
+                        break;
+                    }
+                }
             }
             MessageTypes::GetTextCompletion(prompt) => {
-
                 // check to see if the client has an openai key
                 let openai_api_key = match runtime_settings.get(&msg.0) {
                     Some(settings) => Some(settings.openai_api_key.clone()),
                     None => {
                         println!("No openai key set for {}", msg.0.name);
                         None
-                        
                     }
                 };
 
                 if openai_api_key.is_some() {
-
                     let messages = vec!(ChatMessage {
                         role: Role::System,
                         content: "You are a helpful assistant, you will help the user in any way they ask.".to_string()
@@ -545,52 +611,50 @@ async fn start_message_sending_loop(
                 );
 
                     let response = get_openai_completion(messages, openai_api_key.unwrap()).await;
-                    
+
                     match response {
                         Ok(res) => {
-                            match tx.send((
-                                Identity::new(msg.0.name.to_string()),
-                                Message::Text(res),
-                            )) {
+                            match tx
+                                .send((Identity::new(msg.0.name.to_string()), Message::Text(res)))
+                            {
                                 Ok(_) => {}
                                 Err(e) => {
                                     println!("Error sending message to client: {:?}", e);
                                     break;
                                 }
                             }
-                        },
+                        }
                         Err(_) => todo!(),
                     }
-                    
                 }
 
                 println!("Received text completion from {}", msg.0.name);
-
-            },
+            }
             MessageTypes::UpdateAction(update_action) => {
                 let updated_action = update_action.action;
+
+                let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
+
+                let db = return_db(db_uri).await;
 
                 let action_collection = db.collection::<Action>("actions");
 
                 let filter = doc! { "_id": updated_action._id.clone().unwrap() };
 
-                let update = doc! { "$set": { "name": updated_action.name.clone(), "prompt": 
-            
-                updated_action.prompt.clone(),  "system" : updated_action.system.clone(), "input_variables" : updated_action.input_variables.clone(), "output_variables": updated_action.output_variables.clone() }
-            };
+                let update = doc! { "$set": { "name": updated_action.name.clone(), "prompt":
+
+                    updated_action.prompt.clone(),  "system" : updated_action.system.clone(), "input_variables" : updated_action.input_variables.clone(), "output_variables": updated_action.output_variables.clone() }
+                };
 
                 let update_result = action_collection
                     .update_one(filter, update, None)
                     .await
                     .unwrap();
 
-
                 if update_result.modified_count == 0 {
                     println!("No actions updated");
-                }
-                else {
+                } else {
                     println!("Updated {} actions", update_result.modified_count);
-
 
                     match tx.send((
                         Identity::new(msg.0.name.to_string()),
@@ -603,21 +667,19 @@ async fn start_message_sending_loop(
                         }
                     }
                 }
-            
-
-            
             }
             MessageTypes::CreateAction(create_action) => {
+                let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
+
+                let db = return_db(db_uri).await;
+
                 let action_collection = db.collection::<Action>("actions");
 
                 let mut action = create_action.create_action.clone();
 
                 action._id = Some(bson::oid::ObjectId::new());
 
-                let insert_result = action_collection
-                    .insert_one(action, None)
-                    .await
-                    .unwrap();
+                let insert_result = action_collection.insert_one(action, None).await.unwrap();
 
                 println!("Inserted action: {}", insert_result.inserted_id);
 
@@ -628,12 +690,11 @@ async fn start_message_sending_loop(
                     .unwrap();
 
                 // send the created action back to the client
-                let created_action : Action = inserted_action;
+                let created_action: Action = inserted_action;
 
-                let response = CreateAction{
+                let response = CreateAction {
                     create_action: created_action,
                 };
-                
 
                 match tx.send((
                     Identity::new(msg.0.name.to_string()),
@@ -645,18 +706,19 @@ async fn start_message_sending_loop(
                         break;
                     }
                 }
-            },
+            }
             MessageTypes::CreateProcess(create_process) => {
+                let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
+
+                let db = return_db(db_uri).await;
+
                 let process_collection = db.collection::<Process>("processes");
 
                 let mut process = create_process.create_process.clone();
 
                 process._id = Some(bson::oid::ObjectId::new());
 
-                let insert_result = process_collection
-                    .insert_one(process, None)
-                    .await
-                    .unwrap();
+                let insert_result = process_collection.insert_one(process, None).await.unwrap();
 
                 println!("Inserted process: {}", insert_result.inserted_id);
 
@@ -667,12 +729,11 @@ async fn start_message_sending_loop(
                     .unwrap();
 
                 // send the created process back to the client
-                let created_process : Process = inserted_process;
+                let created_process: Process = inserted_process;
 
-                let response = CreateProcess{
+                let response = CreateProcess {
                     create_process: created_process,
                 };
-                
 
                 match tx.send((
                     Identity::new(msg.0.name.to_string()),
@@ -684,8 +745,7 @@ async fn start_message_sending_loop(
                         break;
                     }
                 }
-            
-            },
+            }
         }
     }
 }

@@ -35,7 +35,6 @@ onMount(async () => {
   // start the websocket connection 
   $websocketStore.addEventListener("open", () => {
     console.log("websocket connection opened");
-    $websocketStore.send(JSON.stringify({initial_message: "initial message"}));
   });
   $websocketStore.addEventListener("message", (event) => {
     console.log("websocket message received: ", event.data);

@@ -1401,8 +1401,10 @@ var app = (function () {
     function create_fragment$b(ctx) {
     	let div;
     	let t0;
-    	let input;
+    	let input0;
     	let t1;
+    	let input1;
+    	let t2;
     	let button;
     	let mounted;
     	let dispose;
@@ -1411,16 +1413,21 @@ var app = (function () {
     		c: function create() {
     			div = element$1("div");
     			t0 = space();
-    			input = element$1("input");
+    			input0 = element$1("input");
     			t1 = space();
+    			input1 = element$1("input");
+    			t2 = space();
     			button = element$1("button");
     			button.textContent = "Set Key";
     			attr_dev(div, "id", "cy");
-    			add_location(div, file$a, 9, 2, 325);
-    			attr_dev(input, "type", "text");
-    			attr_dev(input, "placeholder", "Enter the openai api key here.");
-    			add_location(input, file$a, 10, 2, 343);
-    			add_location(button, file$a, 11, 2, 432);
+    			add_location(div, file$a, 13, 2, 610);
+    			attr_dev(input0, "type", "text");
+    			attr_dev(input0, "placeholder", "Enter the openai api key here.");
+    			add_location(input0, file$a, 14, 2, 628);
+    			attr_dev(input1, "type", "text");
+    			attr_dev(input1, "placeholder", "Enter the mongo uri here.");
+    			add_location(input1, file$a, 15, 2, 717);
+    			add_location(button, file$a, 16, 2, 804);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1428,23 +1435,31 @@ var app = (function () {
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
     			insert_dev(target, t0, anchor);
-    			insert_dev(target, input, anchor);
-    			set_input_value(input, /*apiKey*/ ctx[0]);
+    			insert_dev(target, input0, anchor);
+    			set_input_value(input0, /*apiKey*/ ctx[0]);
     			insert_dev(target, t1, anchor);
+    			insert_dev(target, input1, anchor);
+    			set_input_value(input1, /*mongo_uri*/ ctx[1]);
+    			insert_dev(target, t2, anchor);
     			insert_dev(target, button, anchor);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input, "input", /*input_input_handler*/ ctx[2]),
-    					listen_dev(button, "click", /*set_api_key*/ ctx[1], false, false, false, false)
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[3]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[4]),
+    					listen_dev(button, "click", /*set_api_key*/ ctx[2], false, false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*apiKey*/ 1 && input.value !== /*apiKey*/ ctx[0]) {
-    				set_input_value(input, /*apiKey*/ ctx[0]);
+    			if (dirty & /*apiKey*/ 1 && input0.value !== /*apiKey*/ ctx[0]) {
+    				set_input_value(input0, /*apiKey*/ ctx[0]);
+    			}
+
+    			if (dirty & /*mongo_uri*/ 2 && input1.value !== /*mongo_uri*/ ctx[1]) {
+    				set_input_value(input1, /*mongo_uri*/ ctx[1]);
     			}
     		},
     		i: noop$3,
@@ -1452,8 +1467,10 @@ var app = (function () {
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
     			if (detaching) detach_dev(t0);
-    			if (detaching) detach_dev(input);
+    			if (detaching) detach_dev(input0);
     			if (detaching) detach_dev(t1);
+    			if (detaching) detach_dev(input1);
+    			if (detaching) detach_dev(t2);
     			if (detaching) detach_dev(button);
     			mounted = false;
     			run_all(dispose);
@@ -1474,15 +1491,24 @@ var app = (function () {
     function instance$b($$self, $$props, $$invalidate) {
     	let $websocketStore;
     	validate_store(websocketStore, 'websocketStore');
-    	component_subscribe($$self, websocketStore, $$value => $$invalidate(3, $websocketStore = $$value));
+    	component_subscribe($$self, websocketStore, $$value => $$invalidate(5, $websocketStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('SetOpenaiKey', slots, []);
     	let apiKey = localStorage.getItem("apiKey") || "Api Key";
+    	let mongo_uri = localStorage.getItem("mongo_uri") || "Mongo Uri";
 
     	function set_api_key() {
     		localStorage.setItem("apiKey", apiKey);
-    		$websocketStore.send(JSON.stringify({ key: apiKey }));
+    		localStorage.setItem("mongo_uri", mongo_uri);
+
+    		$websocketStore.send(JSON.stringify({
+    			openai_api_key: apiKey,
+    			mongo_db_uri: mongo_uri
+    		}));
+
+    		$websocketStore.send(JSON.stringify({ initial_message: "initial message" }));
     		console.log("Set api key to: " + apiKey);
+    		console.log("Set mongo uri to: " + mongo_uri);
     	}
 
     	const writable_props = [];
@@ -1491,27 +1517,34 @@ var app = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$5.warn(`<SetOpenaiKey> was created with unknown prop '${key}'`);
     	});
 
-    	function input_input_handler() {
+    	function input0_input_handler() {
     		apiKey = this.value;
     		$$invalidate(0, apiKey);
+    	}
+
+    	function input1_input_handler() {
+    		mongo_uri = this.value;
+    		$$invalidate(1, mongo_uri);
     	}
 
     	$$self.$capture_state = () => ({
     		websocketStore,
     		apiKey,
+    		mongo_uri,
     		set_api_key,
     		$websocketStore
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('apiKey' in $$props) $$invalidate(0, apiKey = $$props.apiKey);
+    		if ('mongo_uri' in $$props) $$invalidate(1, mongo_uri = $$props.mongo_uri);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [apiKey, set_api_key, input_input_handler];
+    	return [apiKey, mongo_uri, set_api_key, input0_input_handler, input1_input_handler];
     }
 
     class SetOpenaiKey extends SvelteComponentDev {
@@ -53822,7 +53855,6 @@ var printLayoutInfo;
     		// start the websocket connection 
     		$websocketStore.addEventListener("open", () => {
     			console.log("websocket connection opened");
-    			$websocketStore.send(JSON.stringify({ initial_message: "initial message" }));
     		});
 
     		$websocketStore.addEventListener("message", event => {
