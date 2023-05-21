@@ -5,6 +5,21 @@
   color: #2c3e50; /* Dark Blue */
 }
 
+.section-header {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.section-header:hover {
+  background-color: #f0f0f0;
+}
+
+.section-header::after {
+  content: "▼";  /* You can replace with any symbol or icon font you like */
+  margin-left: 5px;
+}
+
+
 textarea, input {
   resize: vertical;
   width: 100%;

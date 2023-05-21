@@ -92,5 +92,5 @@
   {/each}
   <button class="add-button" on:click={localAddNodes}>Add Node(s)</button>
   <button class="remove-button" on:click={removeSelectedNode}>Remove Node(s)</button>
-  <button class="add-edge-button" on:click={localAddEdge}>Add Edge</button>
+  <button class="add-button" on:click={localAddEdge}>Add Edge</button>
   <button class="remove-button" on:click={removeSelectedEdge}>Remove Edge</button>
