@@ -17,9 +17,13 @@ def git_pull(path):
 
 
 def run_npm(path):
-    print(f"Starting npm run dev in {path}...")
-    subprocess.Popen(['npm', 'run', 'dev'], cwd=path)
-    print(f"Npm run dev in {path} started.")
+    print(f"Starting npm run build in {path}...")
+    subprocess.Popen(['npm', 'run', 'build'], cwd=path).wait()
+    print(f"Npm run build in {path} completed.")
+
+    print(f"Starting npm run start in {path}...")
+    subprocess.Popen(['npm', 'run', 'start'], cwd=path)
+    print(f"Npm run start in {path} started.")
 
 
 def run_cargo(path):
@@ -50,7 +54,9 @@ while True:
     if listen_on_port(420, "reset"):
         print("Received 'reset' command.")
         kill_process('rust')
+        kill_process('skynet2')
         kill_process('npm')
+        kill_process('node')
         git_pull('~/projects/totally_not_skynet')
         run_npm('~/projects/totally_not_skynet/frontend')
         run_cargo('~/projects/totally_not_skynet/backend')
