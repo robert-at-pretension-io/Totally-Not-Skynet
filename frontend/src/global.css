@@ -72,9 +72,10 @@ button.selected {
   border-radius: 1vw;
   cursor: pointer;
   width: 100%;
-  background-color: #e74c3c; /* Red */
-  color: #ecf0f1; /* Light Gray */
-} */
+  background-color: #e74c3c; 
+  color: #ecf0f1;
+} 
+*/
 
 form {
   display: flex;
