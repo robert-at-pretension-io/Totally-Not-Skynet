@@ -1,0 +1,13 @@
+name: Reset Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send reset command
+        run: echo "reset" | nc liminalnook.com 420
