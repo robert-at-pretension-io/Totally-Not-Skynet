@@ -16978,7 +16978,7 @@ var app = (function () {
     			div = element$1("div");
     			if (switch_instance) create_component(switch_instance.$$.fragment);
     			attr_dev(div, "class", "section-content");
-    			add_location(div, file$2, 41, 8, 1450);
+    			add_location(div, file$2, 41, 8, 1453);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -17078,9 +17078,9 @@ var app = (function () {
     			if (if_block) if_block.c();
     			t2 = space();
     			attr_dev(div0, "class", "section-header");
-    			add_location(div0, file$2, 29, 6, 1156);
+    			add_location(div0, file$2, 29, 6, 1159);
     			attr_dev(div1, "class", "section");
-    			add_location(div1, file$2, 28, 4, 1128);
+    			add_location(div1, file$2, 28, 4, 1131);
     			this.first = div1;
     		},
     		m: function mount(target, anchor) {
@@ -17181,7 +17181,7 @@ var app = (function () {
     			}
 
     			attr_dev(div, "class", "sidebar");
-    			add_location(div, file$2, 26, 0, 1055);
+    			add_location(div, file$2, 26, 0, 1058);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -17252,17 +17252,17 @@ var app = (function () {
     		{
     			header: "Edit Actions and Processes",
     			component: InteractWithActionsAndProcesses,
-    			open: true
+    			open: false
     		},
     		{
     			header: "Create Action",
     			component: AddNodeButton,
-    			open: true
+    			open: false
     		},
     		{
     			header: "Create Process",
     			component: CreateProcess,
-    			open: true
+    			open: false
     		}
     	];
 
