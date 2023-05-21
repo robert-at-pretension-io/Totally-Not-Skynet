@@ -142,4 +142,4 @@ $: {
 
 <Sidebar />
 <GraphComponentGraphlib />
-<RightSidebar />
+<!-- <RightSidebar /> -->
