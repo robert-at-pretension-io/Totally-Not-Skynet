@@ -793,7 +793,7 @@ async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Action>, Vec<
     }
 
     while let Some(process) = processes_cursor.next().await {
-        if let Some(process) = process {
+        if let Ok(process) = process {
             processes.push(process);
         }
     }
