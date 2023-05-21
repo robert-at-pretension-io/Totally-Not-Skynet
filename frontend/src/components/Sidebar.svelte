@@ -7,7 +7,7 @@
   import { blur, fade } from "svelte/transition";
 
   let sections = [
-    { header: "Set API Key", component: SetOpenaiKey, open: true},
+    // { header: "Set API Key", component: SetOpenaiKey, open: true},
     { header : "Edit Actions and Processes", component: InteractWithActionsAndProcesses, open: true},
     { header: "Create Action", component: AddNodeButton, open: true },
     { header: "Create Process" , component: CreateProcess, open: true},
