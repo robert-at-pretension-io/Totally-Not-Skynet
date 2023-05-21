@@ -22,6 +22,12 @@ def run_npm(path):
     print(f"Starting npm run build in {path}...")
     subprocess.run(['npm', 'run', 'build'], cwd=path)
     print(f"Npm run build in {path} completed.")
+
+    kill_process('rust')
+    kill_process('skynet2')
+    kill_process('npm')
+    kill_process('node')
+
     print(f"Starting npm run start in {path}...")
     subprocess.Popen(['nohup', 'npm', 'run', 'start'], cwd=path,
                      stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
@@ -57,10 +63,6 @@ def listen_on_port(port, message):
 while True:
     if listen_on_port(420, "reset"):
         print("Received 'reset' command.")
-        kill_process('rust')
-        kill_process('skynet2')
-        kill_process('npm')
-        kill_process('node')
         git_pull('~/projects/totally_not_skynet')
         run_npm('~/projects/totally_not_skynet/frontend')
         run_cargo('~/projects/totally_not_skynet/backend')
