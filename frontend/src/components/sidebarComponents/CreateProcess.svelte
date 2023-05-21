@@ -84,9 +84,8 @@
     {/each}
   </ul>
 
-  <div class="section-header">
     <h3>Nodes to add:</h3>
-  </div>
+ 
   {#each selectedActions as action (action._id)}
     <p>{action.name}</p>
   {/each}
