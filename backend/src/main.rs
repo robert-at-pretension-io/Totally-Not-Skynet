@@ -10,7 +10,6 @@ use serde_json::json;
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 use std::env;
-use std::env;
 use std::fmt;
 use std::sync::Arc;
 use tokio::net::TcpListener;
@@ -588,7 +587,7 @@ async fn start_message_sending_loop(
                 // attempt to set them from environment variables
                 let user_settings = UserSettings::new();
 
-                if (user_settings.is_some()) {
+                if user_settings.is_some() {
                     let user_settings = user_settings.unwrap();
                     runtime_settings.insert(
                         msg.0.clone(),
