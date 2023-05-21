@@ -11,12 +11,14 @@ def kill_process(name):
 
 
 def git_pull(path):
+    path = os.path.expanduser(path)
     print(f"Starting git pull in {path}...")
     subprocess.run(['git', '-C', path, 'pull'])
     print(f"Git pull in {path} completed.")
 
 
 def run_npm(path):
+    path = os.path.expanduser(path)
     print(f"Starting npm run build in {path}...")
     subprocess.Popen(['npm', 'run', 'build'], cwd=path).wait()
     print(f"Npm run build in {path} completed.")
@@ -27,6 +29,7 @@ def run_npm(path):
 
 
 def run_cargo(path):
+    path = os.path.expanduser(path)
     print(f"Starting cargo run in {path}...")
     subprocess.Popen(['cargo', 'run'], cwd=path)
     print(f"Cargo run in {path} started.")
