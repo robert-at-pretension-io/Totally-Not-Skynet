@@ -4,7 +4,6 @@
     let apiKey = localStorage.getItem("apiKey") || "Api Key";
     let mongo_uri = localStorage.getItem("mongo_uri") || "Mongo Uri";
 
-
 function set_api_key() {
 
   localStorage.setItem("apiKey", apiKey);

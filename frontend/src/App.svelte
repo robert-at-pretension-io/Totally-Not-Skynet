@@ -38,14 +38,14 @@ onMount(async () => {
 
     let apiKey = localStorage.getItem("apiKey") || "Api Key";
     let mongo_uri = localStorage.getItem("mongo_uri") || "Mongo Uri";
-  localStorage.setItem("apiKey", apiKey);
-  localStorage.setItem("mongo_uri", mongo_uri);
-  $websocketStore.send(JSON.stringify({openai_api_key: apiKey, mongo_db_uri: mongo_uri}));
+    localStorage.setItem("apiKey", apiKey);
+    localStorage.setItem("mongo_uri", mongo_uri);
+    $websocketStore.send(JSON.stringify({openai_api_key: apiKey, mongo_db_uri: mongo_uri}));
 
-  $websocketStore.send(JSON.stringify({initial_message: "initial message"}));
+    $websocketStore.send(JSON.stringify({initial_message: "initial message"}));
 
-  console.log("Set api key to: " + apiKey);
-  console.log("Set mongo uri to: " + mongo_uri);
+    console.log("Set api key to: " + apiKey);
+    console.log("Set mongo uri to: " + mongo_uri);
 
   });
   $websocketStore.addEventListener("message", (event) => {
