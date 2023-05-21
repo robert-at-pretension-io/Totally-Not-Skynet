@@ -1418,7 +1418,7 @@ var app = (function () {
     			input1 = element$1("input");
     			t2 = space();
     			button = element$1("button");
-    			button.textContent = "Set Key";
+    			button.textContent = "Save Settings";
     			attr_dev(div, "id", "cy");
     			add_location(div, file$a, 13, 2, 610);
     			attr_dev(input0, "type", "text");

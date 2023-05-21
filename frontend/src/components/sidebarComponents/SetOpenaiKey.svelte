@@ -23,7 +23,7 @@ function set_api_key() {
   <div id="cy" />
   <input type="text" bind:value={apiKey} placeholder="Enter the openai api key here." />
   <input type="text" bind:value={mongo_uri} placeholder="Enter the mongo uri here." />
-  <button on:click={set_api_key}>Set Key</button>
+  <button on:click={set_api_key}>Save Settings</button>
 <!--   
   <style>
     input {
