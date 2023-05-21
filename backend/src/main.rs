@@ -41,7 +41,7 @@ struct Action {
 struct Process {
     _id: Option<ObjectId>,
     name: String,
-    graph: Vec<String>,
+    graph: String,
     description: String,
 }
 
