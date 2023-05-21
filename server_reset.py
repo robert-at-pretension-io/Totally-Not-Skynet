@@ -12,6 +12,9 @@ def kill_process(name):
 
 def git_pull(path):
     path = os.path.expanduser(path)
+    print(f"Starting git stash in {path}...")
+    subprocess.run(['git', '-C', path, 'stash', '--include-untracked'])
+
     print(f"Starting git pull in {path}...")
     subprocess.run(['git', '-C', path, 'pull'])
     print(f"Git pull in {path} completed.")
