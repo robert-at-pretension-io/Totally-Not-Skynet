@@ -48,7 +48,14 @@ onMount(async () => {
   });
   $websocketStore.addEventListener("message", (event) => {
     console.log("websocket message received: ", event.data);
-    let data = JSON.parse(event.data);
+    let data : any;
+    try {
+      data = JSON.parse(event.data);
+    }
+    catch {
+      console.log("Error parsing websocket message");
+    }
+    
     // check to see if the data has the shape of a Process or Action
     if (isProcess(data)) {
       let graph : Graph = json.read(data.graph);
@@ -76,7 +83,7 @@ onMount(async () => {
       });
     } else if (isAction(data)) {
       let action: Action = data;
-      console.log(getId(action));
+      // console.log(getId(action));
       aiSystemStore.update((state : AiSystemState) => {
         // console.log("Adding action to state:");
         let input_variables = populateInputVariables(action);
@@ -142,6 +149,14 @@ onMount(async () => {
 
       aiSystemStore.update((state : AiSystemState) => {
         if(process != null){
+          // only push if the process isn't already in the state:
+          let processAlreadyInState = state.processes.find((p) => {
+            return p._id === process._id;
+          });
+          if (processAlreadyInState) {
+            console.log("Process already in state");
+            return state;
+          }
           state.processes.push(process);
           return state;
         }
