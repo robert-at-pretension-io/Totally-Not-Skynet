@@ -47,7 +47,7 @@ onMount(async () => {
 
   });
   $websocketStore.addEventListener("message", (event) => {
-    console.log("websocket message received: ", event.data);
+    // console.log("websocket message received: ", event.data);
     let data : any;
     try {
       data = JSON.parse(event.data);
@@ -57,7 +57,7 @@ onMount(async () => {
     }
     
     // check to see if the data has the shape of a Process or Action
-    if (data.create_process != null && isProcess(data.create_process)) {
+    if (isProcess(data)) {
       let graph : Graph = json.read(data.graph);
       let process: Process = {
         name: data.name,

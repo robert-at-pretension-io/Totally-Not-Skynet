@@ -109,7 +109,6 @@
     return is_selected;
   }
 </script>
- <p> Click the node buttons below to add them to the graph. Then click "Add Node(s) to see them populate on the graph." </p>
  <!--  name: string;
   graph: Graph;
   description: string;
@@ -119,6 +118,9 @@
 <input type="text" bind:value={name} />
 <p> Please set a description for your process, please talk about what purpose it serves: </p>
 <input type="text" bind:value={description} />
+
+
+<p> Click the node buttons below to add them to the graph. Then click "Add Node(s) to see them populate on the graph." </p>
 
  <ul>
     {#each actions as action (action._id)}
