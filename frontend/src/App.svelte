@@ -4,7 +4,7 @@
   // import RightSidebar from "./components/RightSidebar.svelte";
   import GraphComponentGraphlib from "./components/GraphComponent_graphlib.svelte";
 
-  import {  json } from "graphlib";
+  import {  Graph, json } from "graphlib";
 
   import "./global.css";
 
@@ -51,11 +51,28 @@ onMount(async () => {
     let data = JSON.parse(event.data);
     // check to see if the data has the shape of a Process or Action
     if (isProcess(data)) {
-      let process: Process = data;
+      let graph : Graph = json.read(data.graph);
+      let process: Process = {
+        name: data.name,
+        graph: graph,
+        _id: data._id,
+        description: data.description,
+      }
       aiSystemStore.update((state : AiSystemState) => {
-        console.log("Adding process to state:");
-        state.processes.push(process);
+        // Check if the process is already in the state
+        let processAlreadyInState = state.processes.find((process) => {
+          return process._id === data._id;
+        });
+        if (processAlreadyInState) {
+          console.log("Process already in state");
+          return state;
+        }
+        else {
+          console.log("Adding process to state:");
+          state.processes.push(process);
         return state;
+        }
+
       });
     } else if (isAction(data)) {
       let action: Action = data;
