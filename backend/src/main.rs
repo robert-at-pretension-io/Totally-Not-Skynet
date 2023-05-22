@@ -182,7 +182,7 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                     graph: create_process_obj
                         .get("graph")
                         .and_then(|v| v.as_str())
-                        .unwrap_or("")
+                        .unwrap()
                         .to_string(),
                     description: create_process_obj
                         .get("description")
@@ -190,6 +190,7 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .unwrap_or("")
                         .to_string(),
                 };
+                println!("create_process: {:?}", process);
                 return Some(MessageTypes::CreateProcess(CreateProcess {
                     create_process: process,
                 }));
