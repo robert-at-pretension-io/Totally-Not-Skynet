@@ -14,6 +14,11 @@
 
   let name = "";
   let description = "";
+  let current_graph : Graph = new Graph();
+
+  graphStore.subscribe((value) => {
+    current_graph = value.graph;
+  });
 
   onMount(async () => {
     aiSystemStore.subscribe((value) => {
@@ -69,24 +74,19 @@
       return;
     }
     else {
-
-      // get the graph from the graphStore
-      let graph : null | Graph= null;
-      graphStore.subscribe((value) => {
-        graph = value.graph;
-        let process : Process= {
+      let process : Process= {
           _id: { $oid: "" },
           name: name,
           description: description,
-          graph: graph
+          graph: current_graph
         };
         console.log("sending process: " + JSON.stringify(process));
         $websocketStore.send(JSON.stringify({create_process: process}));
         selectedActions = [];
-      });
+      };
 
     }
-  }
+  
 
   function toggleSelect(action: Action) {
     // console.log("toggleSelect called on action: ", action);
