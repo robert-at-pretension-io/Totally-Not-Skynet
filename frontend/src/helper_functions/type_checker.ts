@@ -28,7 +28,7 @@ export function isProcess(object: any): object is Process {
     return false;
   }
 
-  if (typeof object.graph !== "string") {
+  if (typeof object.graph !== "object") {
     if (debug) {
       console.log("The object does not have a `graph` property.");
     }

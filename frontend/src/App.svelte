@@ -55,16 +55,14 @@ onMount(async () => {
     catch {
       console.log("Error parsing websocket message");
     }
+
+    if (data.graph !== undefined && typeof data.graph === "string") {
+        data.graph = json.read(data.graph);
+      }
     
     // check to see if the data has the shape of a Process or Action
     if (isProcess(data)) {
-      let graph : Graph = json.read(data.graph);
-      let process: Process = {
-        name: data.name,
-        graph: graph,
-        _id: data._id,
-        description: data.description,
-      }
+      let process: Process = data;
       aiSystemStore.update((state : AiSystemState) => {
         // Check if the process is already in the state
         let processAlreadyInState = state.processes.find((process) => {
