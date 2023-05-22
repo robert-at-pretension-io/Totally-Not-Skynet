@@ -15,40 +15,38 @@ The current implementation of the system includes:
 
 # To-Do List:
 
-The features are listed in order of their importance and usefulness:
+1. **Implement a memory construct:** This is fundamental for storing and retrieving information that's used throughout your system.
 
-- [ ] Implement a memory construct:
+   - Allow metaprocess to add to memory context, influencing all prompts
+   - Introduce a runtime state
 
-  - [ ] Allow metaprocess to add to memory context, influencing all prompts
-  - [ ] Introduce a runtime state
+2. **Decide on the appropriate data structure and algorithm for storing the execution of the node-graph:** This step involves the underlying architecture of how your system will organize and process data, which is critical before other functionalities can be built.
 
-- [ ] Enhance self-reflection capabilities to avoid issues like infinite loops
+3. **Implement digital system features such as search, parse, store, execute, retrieve, order, sort, filter, etc.:** These features are core to your system's operation and should be addressed early on.
 
-  - [ ] Implement a metaprocess that maintains a list of summarized actions that have occurred in relation to the goal
+4. **Introduce various node types including flow control, store data, subprocesses, memory, context, conditionals:** Different node types will enable you to build more complex and flexible functionality.
 
-- [ ] Implement separate Docker containers for each connection
+5. **Create a system to describe the components of the software project so the system can recognize its components:** This will enable your system to understand its own structure, which will help with later development stages.
 
-- [ ] Develop a web browsing process
+6. **Develop a web browsing process:** This can be done once the fundamental structures and features of the system are implemented.
 
-- [ ] Allow the style of nodes to be altered based on node type
+7. **Allow the style of nodes to be altered based on node type:** This is important for visual distinction and user interaction, but can be done after the core functionality is established.
 
-- [ ] Decide on the appropriate data structure and algorithm for storing the execution of the node-graph
+8. **Enhance self-reflection capabilities to avoid issues like infinite loops:** This is a complex task that requires a functioning system to test and improve upon.
 
-- [ ] Integrate the runtime/execution of processes with an external, real-time (human-scale) workflow engine
+   - Implement a metaprocess that maintains a list of summarized actions that have occurred in relation to the goal
 
-- [ ] Implement digital system features such as search, parse, store, execute, retrieve, order, sort, filter, etc.
+9. **Save execution context along with the ID of actions (with semantic versioning) to facilitate version control:** This will help with tracking changes and maintaining the stability of your system.
 
-- [ ] Introduce various node types including flow control, store data, subprocesses, memory, context, conditionals
+10. **Implement separate Docker containers for each connection:** This involves containerization and can be done once the system's core features are stable.
 
-- [ ] Develop a method to suspend and schedule processes
+11. **Implement a global variable store to eliminate the need for variable nodes:** This optimization can improve efficiency but isn't essential in the early stages of the system.
 
-- [ ] Create a system to describe the components of the software project so the system can recognize its components
+12. **Introduce semantic versioning to actions so that processes can maintain stable dependencies:** Semantic versioning is important for maintaining backward compatibility and should be done when the system has a set of stable features.
 
-- [ ] Save execution context along with the ID of actions (with semantic versioning) to facilitate version control
+13. **Develop a method to suspend and schedule processes:** This feature is important for controlling execution flow and can be developed after the main features are implemented.
 
-- [ ] Implement a global variable store to eliminate the need for variable nodes
-
-- [ ] Introduce semantic versioning to actions so that processes can maintain stable dependencies
+14. **Integrate the runtime/execution of processes with an external, real-time (human-scale) workflow engine:** This can be a later step once the system is functioning correctly and the integration will provide additional functionality.
 
 # Example Usages
 
