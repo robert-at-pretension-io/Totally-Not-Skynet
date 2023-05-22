@@ -3,14 +3,16 @@
   import SetOpenaiKey from "./sidebarComponents/SetOpenaiKey.svelte";
   import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
   import CreateProcess from "./sidebarComponents/CreateProcess.svelte";
+  import BackgroundInfo from "./sidebarComponents/BackgroundInfo.svelte";
 
   import { blur, fade } from "svelte/transition";
 
   let sections = [
     // { header: "Set API Key", component: SetOpenaiKey, open: true},
+    { header: "Explanation" , component: BackgroundInfo, open: true},
+    { header: "Create Process (graph: edges and nodes)" , component: CreateProcess, open: false},
+    { header: "Create Action (node)", component: AddNodeButton, open: false },
     { header : "Edit Actions and Processes", component: InteractWithActionsAndProcesses, open: false},
-    { header: "Create Action", component: AddNodeButton, open: false },
-    { header: "Create Process" , component: CreateProcess, open: false},
   ];
 
   function toggleSection(clickedSection) {
