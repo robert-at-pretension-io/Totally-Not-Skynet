@@ -14,7 +14,7 @@
       let updateAction : UpdateAction = {
         action: mainObject
       };
-      console.log("sending: " + JSON.stringify(updateAction));
+      // console.log("sending: " + JSON.stringify(updateAction));
       $websocketStore.send(JSON.stringify(updateAction));
     }
   }

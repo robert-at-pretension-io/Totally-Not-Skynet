@@ -17,7 +17,7 @@
 
     // Function to handle dropdown change events
     function onDropdownChange(type) {
-      console.log("onDropdownChange called: ", type, " selectedAction: ", selectedAction, " selectedProcess: ", selectedProcess);
+      // console.log("onDropdownChange called: ", type, " selectedAction: ", selectedAction, " selectedProcess: ", selectedProcess);
       if (type === "action") {
         selectedProcess = "";
       } else {

@@ -21,16 +21,16 @@
       actions = value.actions;
 
       // loop through the actions and print their values:
-      for (let i = 0; i < actions.length; i++) {
-        console.log("Action " + i + ": " + JSON.stringify(actions[i]));
-      }
+      // for (let i = 0; i < actions.length; i++) {
+      //   console.log("Action " + i + ": " + JSON.stringify(actions[i]));
+      // }
     });
   });
 
   function localAddNodes() {
     // for each of the selected actions, add a node to the graph
     selectedActions.forEach(action => {
-      console.log("local");
+      // console.log("local");
       addNode(action._id.$oid);
     });
 
@@ -56,7 +56,7 @@
       addEdge(edge);
     }
     else {
-      console.log("lastActedOn or actedOn is null or not an array");
+      // console.log("lastActedOn or actedOn is null or not an array");
     }
   }
 
@@ -88,7 +88,7 @@
   }
 
   function toggleSelect(action: Action) {
-    console.log("toggleSelect called on action: ", action);
+    // console.log("toggleSelect called on action: ", action);
     const index = selectedActions.findIndex(a => a._id.$oid === action._id.$oid);
     if (index !== -1) {
       // action is currently selected, remove it
@@ -97,14 +97,14 @@
       // action is not currently selected, add it
       selectedActions = [...selectedActions, action];
     }
-    console.log("selectedActions after toggleSelect:", selectedActions);
+    // console.log("selectedActions after toggleSelect:", selectedActions);
   }
 
   function isSelected(action: Action) {
-    console.log("isSelected called on action: ", action);
+    // console.log("isSelected called on action: ", action);
     let is_selected = selectedActions.some(a => a._id.$oid === action._id.$oid);
-    console.log("selectedActions during isSelected:", selectedActions);
-    console.log("isSelected returning: ", is_selected);
+    // console.log("selectedActions during isSelected:", selectedActions);
+    // console.log("isSelected returning: ", is_selected);
     return is_selected;
   }
 </script>

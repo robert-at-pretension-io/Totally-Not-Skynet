@@ -61,11 +61,11 @@ onMount(async () => {
       let action: Action = data;
       console.log(getId(action));
       aiSystemStore.update((state : AiSystemState) => {
-        console.log("Adding action to state:");
+        // console.log("Adding action to state:");
         let input_variables = populateInputVariables(action);
-        console.log("input_variables: ", input_variables);
+        // console.log("input_variables: ", input_variables);
         let output_variables = populateOutputVariables(action);
-        console.log("output_variables: ", output_variables);
+        // console.log("output_variables: ", output_variables);
         // check to see that the variables stored in the action are valid
         let compareThese = action.input_variables;
         let compareThese2 = action.output_variables;

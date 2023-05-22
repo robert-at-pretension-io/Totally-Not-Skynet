@@ -12,8 +12,8 @@ function set_api_key() {
 
   $websocketStore.send(JSON.stringify({initial_message: "initial message"}));
 
-  console.log("Set api key to: " + apiKey);
-  console.log("Set mongo uri to: " + mongo_uri);
+  // console.log("Set api key to: " + apiKey);
+  // console.log("Set mongo uri to: " + mongo_uri);
   
 }
 

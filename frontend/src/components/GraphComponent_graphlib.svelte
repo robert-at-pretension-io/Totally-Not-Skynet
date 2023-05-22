@@ -23,10 +23,10 @@
     let lastAction = "";
   
     graphStore.subscribe(async (value) => {
-      console.log("graphStore value: ", value);
+      // console.log("graphStore value: ", value);
       if (value.lastAction === "addNode" && value.actedOn != null && Array.isArray(value.actedOn)) {
         id_map = id_map.set(value.actedOn[0], value.actedOn[1]);
-        console.log("id_map: ", id_map);
+        // console.log("id_map: ", id_map);
         g.setNode(value.actedOn[0], value.actedOn[1]);
       } else if (
         value.lastAction === "addEdge" 
@@ -39,7 +39,7 @@
         value.lastAction === "removeEdge" &&
         value.actedOn != null && !Array.isArray(value.actedOn)
       ) {
-        console.log("Removing edge: ", value.actedOn.v, value.actedOn.w);
+        // console.log("Removing edge: ", value.actedOn.v, value.actedOn.w);
         g.removeEdge(value.actedOn.v, value.actedOn.w);
       }
       else if (
@@ -59,11 +59,11 @@
       // Now update cytoscape graph based on graphlib graph
       if (cyInstance && (lastAction === "addNode" || lastAction === "addEdge" || lastAction === "removeEdge" || lastAction === "removeNode")) {
         // show the id_map
-        console.log("id_map: ", id_map);
+        // console.log("id_map: ", id_map);
         cyInstance.elements().remove(); // clear the cytoscape graph
         const elements : ElementDefinition[] = [];
         g.nodes().forEach(node => {
-          console.log("Adding node: ", node, id_map.get(node));
+          // console.log("Adding node: ", node, id_map.get(node));
           elements.push({ data: { id: node, label: id_map.get(node) }});
         });
         g.edges().forEach(edge => {
@@ -83,7 +83,7 @@
       });
   
       cyInstance.on("add", () => {
-        console.log("add event fired, lastAction: ", lastAction);
+        // console.log("add event fired, lastAction: ", lastAction);
         if (cyInstance && (lastAction === "addNode" || lastAction === "addEdge" 
         || lastAction === "removeEdge" || lastAction === "removeNode"
         )) {

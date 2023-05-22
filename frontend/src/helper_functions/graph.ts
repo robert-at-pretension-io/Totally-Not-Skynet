@@ -40,7 +40,7 @@ export async function getNodeName(id: string): Promise<string | undefined> {
     return getId(action) == id;
   });
   if (action) {
-    console.log("action name: " + action.name);
+    // console.log("action name: " + action.name);
     return action.name;
   }
 }
@@ -181,7 +181,7 @@ export async function removeSelectedEdge(): Promise<void> {
       await removeEdge(selected.v, selected.w);
     }
   } else {
-    console.log("not removing edge, doesn't meet criteria");
+    // console.log("not removing edge, doesn't meet criteria");
   }
 }
 
@@ -192,7 +192,7 @@ export async function removeEdge(
   const graphState = await getGraphState();
   // find the id of the edge to remove
 
-  console.log("removing edge:", sourceId, targetId, " from graph");
+  // console.log("removing edge:", sourceId, targetId, " from graph");
 
   const edge = graphState.actedOn;
   // graphState.graph.removeEdge(edge);
