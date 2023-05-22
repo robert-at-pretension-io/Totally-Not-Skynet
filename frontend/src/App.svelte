@@ -57,7 +57,7 @@ onMount(async () => {
     }
     
     // check to see if the data has the shape of a Process or Action
-    if (isProcess(data)) {
+    if (data.create_process != null && isProcess(data.create_process)) {
       let graph : Graph = json.read(data.graph);
       let process: Process = {
         name: data.name,

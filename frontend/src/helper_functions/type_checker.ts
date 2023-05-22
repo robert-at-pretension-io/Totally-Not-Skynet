@@ -3,6 +3,9 @@ import {Process, Action} from "system_types";
 
 // eslint-disable-next-line no-explicit-any
 export function isProcess(object: any): object is Process {
+  
+  console.log("isProcess? ", object)
+  
   const debug = true;
   if (typeof object !== "object") {
     if (debug) {
