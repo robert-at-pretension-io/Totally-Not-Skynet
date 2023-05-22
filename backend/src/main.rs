@@ -172,6 +172,13 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
         }
         if let Some(create_process_value) = obj.get("create_process") {
             if let Some(create_process_obj) = create_process_value.as_object() {
+                let graph = match create_process_obj.get("graph") {
+                    Some(v) => match serde_json::to_string(v) {
+                        Ok(s) => s,
+                        Err(_) => "".to_string(),
+                    },
+                    None => "".to_string(),
+                };
                 let process = Process {
                     _id: None, // Assuming you have changed your struct field to `_id`
                     name: create_process_obj
@@ -179,11 +186,7 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .and_then(|v| v.as_str())
                         .unwrap_or("")
                         .to_string(),
-                    graph: create_process_obj
-                        .get("graph")
-                        .and_then(|v| v.as_str())
-                        .unwrap()
-                        .to_string(),
+                    graph,
                     description: create_process_obj
                         .get("description")
                         .and_then(|v| v.as_str())

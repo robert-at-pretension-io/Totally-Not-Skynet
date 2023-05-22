@@ -80,6 +80,7 @@
           description: description,
           graph: graph
         };
+        console.log("sending process: " + JSON.stringify(process));
         $websocketStore.send(JSON.stringify({create_process: process}));
         selectedActions = [];
       });
