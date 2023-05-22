@@ -6,10 +6,11 @@
   import { graphStore } from "../../stores/graphStore";
     import { Graph } from "graphlib";
    import websocketStore from "stores/websocketStore";
+
+   import InteractWithActionsAndProcesses from "./InteractWithActionsAndProcesses.svelte";
   
   let actions: Action[] = [];
   let selectedActions: Action[] = [];
-  let createdProcess : Process | null = null;
 
   let name = "";
   let description = "";
@@ -73,16 +74,16 @@
       let graph : null | Graph= null;
       graphStore.subscribe((value) => {
         graph = value.graph;
+        let process : Process= {
+          _id: { $oid: "" },
+          name: name,
+          description: description,
+          graph: graph
+        };
+        $websocketStore.send(JSON.stringify({create_process: process}));
+        selectedActions = [];
       });
-    
-      let process = {
-        name: name,
-        description: description,
-        graph: graph
-      };
 
-      $websocketStore.send(JSON.stringify({create_process: process}));
-      selectedActions = [];
     }
   }
 
@@ -136,3 +137,5 @@
   <button class="add-button" on:click={localAddEdge}>Add Edge</button>
   <button class="remove-button" on:click={removeSelectedEdge}>Remove Edge</button>
   <button class="add-button" on:click={saveProcess}>Save Process</button>
+
+  <InteractWithActionsAndProcesses></InteractWithActionsAndProcesses>

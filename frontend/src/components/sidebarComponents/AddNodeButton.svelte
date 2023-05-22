@@ -5,10 +5,12 @@
   import websocketStore from "stores/websocketStore";
 
   let action: Action = {
-    _id: "",
+    _id: { $oid: "" },
     prompt: "",
     name: "",
-    system: ""
+    system: "",
+    input_variables: [],
+    output_variables: [],
   };
 
   async function localAddNode() {

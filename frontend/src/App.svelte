@@ -4,14 +4,12 @@
   // import RightSidebar from "./components/RightSidebar.svelte";
   import GraphComponentGraphlib from "./components/GraphComponent_graphlib.svelte";
 
-  import { Graph, json } from "graphlib";
+  import {  json } from "graphlib";
 
   import "./global.css";
 
   import type {
     
-    selectedGraphComponent,
-    GraphState,
     Action,
     Process,
 
@@ -21,7 +19,7 @@
 
   import { isAction, isProcess } from "helper_functions/type_checker";
 
-  import { getId, setGraphState } from "./helper_functions/graph";
+  import { getId } from "./helper_functions/graph";
 import {onMount} from "svelte";
 import websocketStore from "./stores/websocketStore";
 import { aiSystemStore } from "stores/aiSystemStore";

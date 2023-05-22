@@ -14,7 +14,7 @@ import {Edge} from "@dagrejs/graphlib";
 // Define the getter and setter
 
 export async function getGraphState(): Promise<GraphState> {
-  return new Promise((resolve, _reject) => {
+  return new Promise((resolve, _) => {
     graphStore.subscribe((graphState: GraphState) => {
       resolve(graphState);
     });
@@ -22,7 +22,7 @@ export async function getGraphState(): Promise<GraphState> {
 }
 
 export async function getAiSystemState(): Promise<AiSystemState> {
-  return new Promise((resolve, _reject) => {
+  return new Promise((resolve, _) => {
     aiSystemStore.subscribe((aiSystemState: AiSystemState) => {
       resolve(aiSystemState);
     });
@@ -31,7 +31,7 @@ export async function getAiSystemState(): Promise<AiSystemState> {
 
 // get the name of the action by using the id
 export async function getNodeName(id: string): Promise<string | undefined> {
-  const res: AiSystemState = await new Promise((resolve, _reject) => {
+  const res: AiSystemState = await new Promise((resolve, _) => {
     aiSystemStore.subscribe((aiSystemState: AiSystemState) => {
       resolve(aiSystemState);
     });
@@ -70,14 +70,6 @@ export async function addNode(node_id: string): Promise<void> {
 // function for converting a process to a graph
 export async function processToGraph(process: Process): Promise<void> {
   await resetGraph();
-
-  const ai_system_state: AiSystemState = await new Promise(
-    (resolve, _reject) => {
-      aiSystemStore.subscribe((ai_system_state: AiSystemState) => {
-        resolve(ai_system_state);
-      });
-    }
-  );
 
   // verify that all of the steps have corresponding actions
   const graph = process.graph;

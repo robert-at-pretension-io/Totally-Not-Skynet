@@ -1,7 +1,4 @@
 {
-  "parserOptions": {
-    "extraFileExtensions": [".css"],
-  },
     "compilerOptions": {
       "allowJs": true,
       "lib": ["ES2022", "dom"],

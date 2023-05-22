@@ -1,7 +1,5 @@
 <script>
   import AddNodeButton from "./sidebarComponents/AddNodeButton.svelte";
-  import SetOpenaiKey from "./sidebarComponents/SetOpenaiKey.svelte";
-  import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
   import CreateProcess from "./sidebarComponents/CreateProcess.svelte";
   import BackgroundInfo from "./sidebarComponents/BackgroundInfo.svelte";
 
@@ -12,7 +10,7 @@
     { header: "Explanation" , component: BackgroundInfo, open: true},
     { header: "Create Process (graph: edges and nodes)" , component: CreateProcess, open: false},
     { header: "Create Action (node)", component: AddNodeButton, open: false },
-    { header : "Edit Actions and Processes", component: InteractWithActionsAndProcesses, open: false},
+    // { header : "Edit Actions and Processes", component: InteractWithActionsAndProcesses, open: false},
   ];
 
   function toggleSection(clickedSection) {

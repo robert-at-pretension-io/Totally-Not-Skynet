@@ -8,7 +8,6 @@
       selectNode,
       resetLastAction,
       selectEdge,
-      getNodeName,
       
     } from "../helper_functions/graph";
     import graphlib from "graphlib";
