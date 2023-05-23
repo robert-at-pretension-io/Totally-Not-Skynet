@@ -8,6 +8,8 @@
    import websocketStore from "stores/websocketStore";
 
    import InteractWithActionsAndProcesses from "./InteractWithActionsAndProcesses.svelte";
+
+   import { json } from "graphlib";
   
   let actions: Action[] = [];
   let selectedActions: Action[] = [];
@@ -74,11 +76,16 @@
       return;
     }
     else {
+      console.log("current_graph: " + JSON.stringify(current_graph));
+
+      let current_graph_string = json.write(current_graph)
+      
+      console.log("current_graph_string: " + current_graph_string)
       let process : Process= {
           _id: { $oid: "" },
           name: name,
           description: description,
-          graph: current_graph
+          graph: current_graph_string
         };
         console.log("sending process: " + JSON.stringify(process));
         $websocketStore.send(JSON.stringify({create_process: process}));
