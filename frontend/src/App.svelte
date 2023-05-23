@@ -56,7 +56,9 @@ onMount(async () => {
     }
 
     if (data.graph !== undefined && typeof data.graph === "string") {
+        console.log("data.graph is a string: ", data);
         data.graph = json.read(data.graph);
+        console.log("data.graph is now: ", data);
       }
     
     // check to see if the data has the shape of a Process or Action
@@ -72,7 +74,7 @@ onMount(async () => {
           return state;
         }
         else {
-          console.log("Adding process to state:");
+          console.log("Adding process to state:", process);
           state.processes.push(process);
         return state;
         }
