@@ -57,7 +57,7 @@ onMount(async () => {
 
     if (data.graph !== undefined && typeof data.graph === "string") {
         console.log("data.graph is a string: ", data);
-        data.graph = json.read(data.graph);
+        data.graph = json.read(JSON.parse( data.graph));
         console.log("data.graph is now: ", data);
       }
     
