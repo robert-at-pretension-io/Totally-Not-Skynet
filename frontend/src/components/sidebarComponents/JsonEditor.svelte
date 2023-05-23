@@ -23,7 +23,7 @@
 <div class="json-editor">
   {#if mainObject !== null && Object.keys(mainObject).length > 0}
     {#each Object.entries(mainObject) as [key, value], index (index)}
-      {#if key !== "_id"} <!-- Skip entities with key of "_id" -->
+      {#if key !== "_id" && key != "graph"} <!-- Skip entities with key of "_id" -->
         <div class="object-field">
           <label for="input-{index}">{key}:</label>
           {#if typeof value === "boolean" && (isAction(mainObject) || isProcess(mainObject))}

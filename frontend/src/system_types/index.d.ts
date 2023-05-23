@@ -41,7 +41,7 @@ export type MongoId = {
 export type Process = {
   _id: MongoId;
   name: string;
-  graph: Graph;
+  graph: Graph | Object;
   description: string;
 };
 

@@ -78,7 +78,7 @@
     else {
       console.log("current_graph: " + JSON.stringify(current_graph));
 
-      let current_graph_string = json.write(current_graph)
+      let current_graph_string : string = json.write(current_graph)
       
       console.log("current_graph_string: " + current_graph_string)
       let process : Process= {
