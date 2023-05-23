@@ -7,7 +7,7 @@
 
   let sections = [
     // { header: "Set API Key", component: SetOpenaiKey, open: true},
-    { header: "Explanation" , component: BackgroundInfo, open: true},
+    { header: "Explanation" , component: BackgroundInfo, open: false},
     { header: "Create Process (graph: edges and nodes)" , component: CreateProcess, open: false},
     { header: "Create Action (node)", component: AddNodeButton, open: false },
     // { header : "Edit Actions and Processes", component: InteractWithActionsAndProcesses, open: false},

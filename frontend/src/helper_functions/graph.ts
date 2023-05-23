@@ -75,6 +75,8 @@ export async function processToGraph(process: Process): Promise<void> {
   const graph = process.graph;
   const nodes = graph.nodes();
 
+  console.log("nodes: ", nodes);
+
   // for each of the node ids stored in nodes, get the name of the action
 
   //loop through the nodes
@@ -87,58 +89,12 @@ export async function processToGraph(process: Process): Promise<void> {
 
   const my_edges = graph.edges();
 
+  console.log("edges: ", my_edges);
+
   //loop through the edges
   for (let i = 0; i < my_edges.length; i++) {
     await addEdge(my_edges[i]);
   }
-
-  // create a map from label to id
-  // let label_to_id = new Map();
-
-  // loop through the actions and make sure that they are all in the ai_system_state
-  // for (let i = 0; i < nodes.length; i++) {
-  //   let action_id = nodes[i];
-  // check if the action is in the ai_system_state
-  // for (let j = 0; j < ai_system_state.actions.length; j++) {
-  //   let ai_system_action_id = ai_system_state.actions[j];
-  //   if (ai_system_action.name == action) {
-  //     // create a node
-
-  //     let this_id = await getUniqueId();
-
-  //     let node : Node= {
-  //       id: this_id,
-  //       type: "action",
-  //       label: ai_system_action.name,
-  //       data: ai_system_action,
-  //     };
-
-  // Get the name of the action by looking up the id within the system_state actions and set the l
-
-  //loop through the nodes
-
-  // if (i == 0) {
-  //   // is the root node
-  //   await addNode(node, true);
-  // } else {
-  //   await addNode(node,false);
-  // }
-
-  //   }
-
-  // }
-
-  // loop through the actions and create edges
-  // for (let i = 0; i < actions.length - 1; i++) {
-  // let edge = {
-  //   id : await getUniqueId(),
-  //   source: label_to_id.get(actions[i]),
-  //   target: label_to_id.get(actions[i + 1]),
-  //   label: "next",
-  //   data: null,
-  // };
-  // await addEdge(edge);
-  // }
 }
 
 export async function addEdge(edge: Edge): Promise<void> {
