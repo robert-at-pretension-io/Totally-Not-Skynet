@@ -33,7 +33,7 @@ def run_npm(path):
 
     print(f"Starting npm run start in {path}...")
     subprocess.Popen(['nohup', 'npm', 'run', 'start'], cwd=path,
-                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, preexec_fn=os.setpgrp)
     print(f"Npm run start in {path} started.")
 
 
@@ -41,7 +41,7 @@ def run_cargo(path):
     path = os.path.expanduser(path)
     print(f"Starting cargo run in {path}...")
     subprocess.Popen(['nohup', 'cargo', 'run'], cwd=path,
-                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, preexec_fn=os.setpgrp)
     print(f"Cargo run in {path} started.")
 
 
