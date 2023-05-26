@@ -29,6 +29,33 @@ export async function getAiSystemState(): Promise<AiSystemState> {
   });
 }
 
+export async function getAllInputVariables() : Promise<string[]>{
+  let graph_state = await getGraphState();
+  let graph = graph_state.graph;
+  let input_variables = []
+  // for each node in the graph
+  let nodes = graph.nodes();
+  for (let node of nodes){
+    let input = await returnInputVariablesOfNode(node)
+    input_variables.push(...input)
+  }
+  return input_variables
+}
+
+export async function getAllOutputVariables() : Promise<string[]>{
+  let graph_state = await getGraphState();
+  let graph = graph_state.graph;
+  let output_variables = []
+  // for each node in the graph
+  let nodes = graph.nodes();
+  for (let node of nodes){
+    let output = await returnOutputVariablesOfNode(node)
+    output_variables.push(...output)
+  }
+  return output_variables
+}
+
+
 export async function returnInputVariablesOfNode(node_id : string) {
   let ai_system_state = await getAiSystemState();
   // loop through the actions
@@ -56,21 +83,35 @@ export async function returnOutputVariablesOfNode(node_id : string) {
   return []
 }
 
-// export async function returnNodeWithMatchingInputVariable(graph: Graph, input_variable: string) {
-//   let nodes = graph.nodes();
+export async function returnNodeWithMatchingInputVariable(graph: Graph, input_variable: string) {
+  let nodes = graph.nodes();
 
-//   // loop through nodes
-//   for (let i=0; i++; i < nodes.length) {
-//     let test_node_id = nodes[i];
-//     let test_input_variables = await returnInputVariablesOfNode(test_node_id);
-//     if (test_input_variables.indexOf(input_variable) != -1){
-//       return test_node_id;
-//     }
-//   }
+  // loop through nodes
+  for (let i=0; i++; i < nodes.length) {
+    let test_node_id = nodes[i];
+    let test_input_variables = await returnInputVariablesOfNode(test_node_id);
+    if (test_input_variables.indexOf(input_variable) != -1){
+      return test_node_id;
+    }
+  }
 
-//   return null
-// }
+  return null
+}
 
+export async function returnNodeWithMatchingOutputVariable(graph: Graph, input_variable: string) {
+  let nodes = graph.nodes();
+
+  // loop through nodes
+  for (let i=0; i++; i < nodes.length) {
+    let test_node_id = nodes[i];
+    let test_input_variables = await returnOutputVariablesOfNode(test_node_id);
+    if (test_input_variables.indexOf(input_variable) != -1){
+      return test_node_id;
+    }
+  }
+
+  return null
+}
 
 // get the name of the action by using the id
 export async function getNodeName(id: string): Promise<string | undefined> {
@@ -92,12 +133,25 @@ export function getId(actionOrProcess: Process | Action): string {
   return actionOrProcess._id.$oid;
 }
 
-export function setGraphState(graphState: GraphState) {
+export async function setGraphState(graphState: GraphState) {
+  let input_variables = await getAllInputVariables();
+  let output_variables = await getAllOutputVariables();
+  graphState.input_variables = input_variables;
+  graphState.output_variables = output_variables;
+  console.log("The graphstate is:\n ", graphState)
   graphStore.set(graphState);
+}
+
+export async function addGlobalVariable(variable_name : string) {
+  let current_state = await getGraphState();
+  current_state.global_variables.push(variable_name);
+  await setGraphState(current_state);
 }
 
 export async function addNode(node_id: string): Promise<void> {
   const graphState = await getGraphState();
+  // add the input and output variables to the graph state
+  
   graphState.graph.setNode(node_id);
   graphState.lastAction = "addNode";
   const node_name = await getNodeName(node_id);
