@@ -172,13 +172,6 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
         }
         if let Some(create_process_value) = obj.get("create_process") {
             if let Some(create_process_obj) = create_process_value.as_object() {
-                let graph = match create_process_obj.get("graph") {
-                    Some(v) => match serde_json::to_string(v) {
-                        Ok(s) => s,
-                        Err(_) => "".to_string(),
-                    },
-                    None => "".to_string(),
-                };
                 let process = Process {
                     _id: None, // Assuming you have changed your struct field to `_id`
                     name: create_process_obj
@@ -186,14 +179,17 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .and_then(|v| v.as_str())
                         .unwrap_or("")
                         .to_string(),
-                    graph,
+                    graph: create_process_obj
+                        .get("graph")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string(),
                     description: create_process_obj
                         .get("description")
                         .and_then(|v| v.as_str())
                         .unwrap_or("")
                         .to_string(),
                 };
-                println!("create_process: {:?}", process);
                 return Some(MessageTypes::CreateProcess(CreateProcess {
                     create_process: process,
                 }));
@@ -493,16 +489,6 @@ async fn start_message_sending_loop(
     tx: UnboundedSender<(Identity, Message)>,
     mut client_rx: mpsc::Receiver<(Identity, String)>,
 ) {
-    // let alpine_config = Config {
-    //     image: Some(IMAGE),
-    //     tty: Some(true),
-    //     attach_stdout: Some(true),
-    //     attach_stderr: Some(true),
-    //     ..Default::default()
-    // };
-
-    // let mut docker_containers: Vec<(Identity, DockerId)> = Vec::new();
-
     let mut runtime_settings: HashMap<Identity, RuntimeSettings> = HashMap::new();
 
     // get the database

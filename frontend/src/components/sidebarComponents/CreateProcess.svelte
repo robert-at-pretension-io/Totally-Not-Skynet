@@ -70,7 +70,7 @@
   function saveProcess() {
     // create a process object
 
-    console.log("saveProcess with input name and description: ", name, description)
+    console.log("saveProcess with input name and description: ", name, description);
 
     // create an alert message if either name or description are null
     if (name === null || description === null) {
@@ -80,22 +80,21 @@
     else {
       console.log("current_graph: " + JSON.stringify(current_graph));
 
-      let current_graph_string : string = json.write(current_graph)
+      let current_graph_string : string = json.write(current_graph);
       
-      console.log("current_graph_string: " + current_graph_string)
+      console.log("current_graph_string: " + current_graph_string);
       let process : Process= {
-          _id: { $oid: "" },
-          name: name,
-          description: description,
-          graph: current_graph_string
-        };
-        console.log("sending process: " + JSON.stringify(process));
-        $websocketStore.send(JSON.stringify({create_process: process}));
-        selectedActions = [];
+        _id: { $oid: "" },
+        name: name,
+        description: description,
+        graph: current_graph_string
       };
-
+      console.log("sending process: " + JSON.stringify(process));
+      $websocketStore.send(JSON.stringify({create_process: process}));
+      selectedActions = [];
     }
-  
+
+  }
 
   function toggleSelect(action: Action) {
     // console.log("toggleSelect called on action: ", action);
@@ -127,7 +126,6 @@
 <input type="text" bind:value={name} />
 <p> Please set a description for your process, please talk about what purpose it serves: </p>
 <input type="text" bind:value={description} />
-
 
 <p> Click the node buttons below to add them to the graph. Then click "Add Node(s) to see them populate on the graph." </p>
 

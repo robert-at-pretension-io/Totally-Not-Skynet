@@ -38,7 +38,7 @@
         // with the name selectedProcess
         let this_process = $aiSystemStore.processes.find(obj => obj.name === selectedProcess);
 
-        console.log("this_process: ", this_process)
+        console.log("this_process: ", this_process);
 
         $systemStateStore.selectedProcess = this_process;
         $systemStateStore.selectedAction = null;
