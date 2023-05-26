@@ -2,6 +2,7 @@
   import AddNodeButton from "./sidebarComponents/AddNodeButton.svelte";
   import CreateProcess from "./sidebarComponents/CreateProcess.svelte";
   import BackgroundInfo from "./sidebarComponents/BackgroundInfo.svelte";
+  import GraphStoreState from "./sidebarComponents/GraphStoreState.svelte";
 
   import { blur, fade } from "svelte/transition";
 
@@ -10,6 +11,7 @@
     { header: "Explanation" , component: BackgroundInfo, open: false},
     { header: "Create Process (graph: edges and nodes)" , component: CreateProcess, open: false},
     { header: "Create Action (node)", component: AddNodeButton, open: false },
+    { header: "View Graph State", component: GraphStoreState, open: false },
     // { header : "Edit Actions and Processes", component: InteractWithActionsAndProcesses, open: false},
   ];
 
