@@ -23,6 +23,9 @@ export type GraphState = {
   actedOn: Edge | [string, string] | null;
   lastActedOn: Edge | [string, string] | null;
   name: string | null;
+  global_variables: string[];
+  input_variables: string[];
+  output_variables: string[];
 };
 
 export type Action = {
