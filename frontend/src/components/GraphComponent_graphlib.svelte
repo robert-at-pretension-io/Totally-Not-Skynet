@@ -21,6 +21,7 @@
     let g = new graphlib.Graph();
     let id_map = new Map();
     let lastAction = "";
+    let lastActionValid = false;
   
     graphStore.subscribe(async (value) => {
       // console.log("graphStore value: ", value);

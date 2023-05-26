@@ -29,6 +29,49 @@ export async function getAiSystemState(): Promise<AiSystemState> {
   });
 }
 
+export async function returnInputVariablesOfNode(node_id : string) {
+  let ai_system_state = await getAiSystemState();
+  // loop through the actions
+  for (let i = 0; i++; i< ai_system_state.actions.length) {
+    let current_action = ai_system_state.actions[i];
+    // if the node_id matches the id of the action then return the input_variables
+    if (current_action._id.$oid == node_id) {
+      return current_action.input_variables
+    }
+  }
+  return []
+}
+
+export async function returnOutputVariablesOfNode(node_id : string) {
+  let ai_system_state = await getAiSystemState();
+  // loop through the actions
+  for (let i = 0; i++; i< ai_system_state.actions.length) {
+    let current_action = ai_system_state.actions[i];
+    // if the node_id matches the id of the action then return the input_variables
+    if (current_action._id.$oid == node_id) {
+      return current_action.output_variables
+    }
+  }
+  console.log("the node/action wasn't found");
+  return []
+}
+
+// export async function returnNodeWithMatchingInputVariable(graph: Graph, input_variable: string) {
+//   let nodes = graph.nodes();
+
+//   // loop through nodes
+//   for (let i=0; i++; i < nodes.length) {
+//     let test_node_id = nodes[i];
+//     let test_input_variables = await returnInputVariablesOfNode(test_node_id);
+//     if (test_input_variables.indexOf(input_variable) != -1){
+//       return test_node_id;
+//     }
+//   }
+
+//   return null
+// }
+
+
 // get the name of the action by using the id
 export async function getNodeName(id: string): Promise<string | undefined> {
   const res: AiSystemState = await new Promise((resolve, _) => {

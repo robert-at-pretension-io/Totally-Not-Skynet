@@ -70,6 +70,8 @@
   function saveProcess() {
     // create a process object
 
+    console.log("saveProcess with input name and description: ", name, description)
+
     // create an alert message if either name or description are null
     if (name === null || description === null) {
       alert("Please enter a name and description for the process");
