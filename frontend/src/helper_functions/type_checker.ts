@@ -1,9 +1,9 @@
-import {Graph} from "@dagrejs/graphlib";
-import {Process, Action} from "system_types";
+import { Graph } from "@dagrejs/graphlib";
+import { Process, Action } from "system_types";
 
 // eslint-disable-next-line no-explicit-any
 export function isProcess(object: any): object is Process {
-  console.log("isProcess? ", object);
+  // console.log("isProcess? ", object);
 
   const debug = false;
   if (typeof object !== "object") {
@@ -123,7 +123,7 @@ export function isAction(object: any): object is Action {
 
 export function newAction(): Action {
   return {
-    _id: {$oid: ""},
+    _id: { $oid: "" },
     prompt: "",
     input_variables: [],
     output_variables: [],
@@ -134,7 +134,7 @@ export function newAction(): Action {
 
 export function newProcess(): Process {
   return {
-    _id: {$oid: ""},
+    _id: { $oid: "" },
     name: "",
     graph: new Graph(),
     description: "",

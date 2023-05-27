@@ -42,7 +42,7 @@ export type MongoId = {
 export type Process = {
   _id: MongoId;
   name: string;
-  graph: Graph | Object;
+  graph: Graph;
   description: string;
   topological_order: string[];
 };

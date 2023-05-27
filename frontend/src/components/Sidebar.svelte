@@ -4,23 +4,32 @@
   import BackgroundInfo from "./sidebarComponents/BackgroundInfo.svelte";
   import GraphStoreState from "./sidebarComponents/GraphStoreState.svelte";
   import GlobalVariables from "./sidebarComponents/GlobalVariables.svelte";
+  import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
 
   import { blur, fade } from "svelte/transition";
 
   let sections = [
     // { header: "Set API Key", component: SetOpenaiKey, open: true},
-    { header: "Explanation" , component: BackgroundInfo, open: false},
-    { header: "Create Process (graph: edges and nodes)" , component: CreateProcess, open: false},
+    { header: "Explanation", component: BackgroundInfo, open: false },
+    {
+      header: "Create Process (graph: edges and nodes)",
+      component: CreateProcess,
+      open: false,
+    },
     { header: "Create Action (node)", component: AddNodeButton, open: false },
-    { header: "View Graph State", component: GraphStoreState, open: false },
-    { header: "Global Variables", component: GlobalVariables, open: false}
+    {
+      header: "Edit Action or Process",
+      component: InteractWithActionsAndProcesses,
+      open: false,
+    },
+    { header: "Global Variables", component: GlobalVariables, open: false },
     // { header : "Edit Actions and Processes", component: InteractWithActionsAndProcesses, open: false},
   ];
 
   function toggleSection(clickedSection) {
-    sections = sections.map(section => {
-      if(section === clickedSection) {
-        return {...section, open: !section.open}; // just invert the `open` property of the clicked section
+    sections = sections.map((section) => {
+      if (section === clickedSection) {
+        return { ...section, open: !section.open }; // just invert the `open` property of the clicked section
       } else {
         return section; // don't modify other sections
       }
@@ -43,9 +52,11 @@
         {section.header}
       </div>
       {#if section.open}
-        <div class="section-content" 
-             in:fade={{duration: 700}} 
-             out:blur={{duration: 700, amount: 5}}>
+        <div
+          class="section-content"
+          in:fade={{ duration: 700 }}
+          out:blur={{ duration: 700, amount: 5 }}
+        >
           <svelte:component this={section.component} />
         </div>
       {/if}

@@ -154,26 +154,28 @@
     lastAction = value.lastAction;
 
     // Now update cytoscape graph based on graphlib graph
-    if (
-      cyInstance &&
-      (lastAction === "addNode" ||
-        lastAction === "addEdge" ||
-        lastAction === "removeEdge" ||
-        lastAction === "removeNode")
-    ) {
-      // show the id_map
-      // console.log("id_map: ", id_map);
-      cyInstance.elements().remove(); // clear the cytoscape graph
-      const elements: ElementDefinition[] = [];
-      g.nodes().forEach((node) => {
-        // console.log("Adding node: ", node, id_map.get(node));
-        elements.push({ data: { id: node, label: id_map.get(node) } });
-      });
-      g.edges().forEach((edge) => {
-        elements.push({ data: { source: edge.v, target: edge.w } });
-      });
-      cyInstance.add(elements); // add new elements
-    }
+    setTimeout(() => {
+      if (
+        cyInstance &&
+        (lastAction === "addNode" ||
+          lastAction === "addEdge" ||
+          lastAction === "removeEdge" ||
+          lastAction === "removeNode")
+      ) {
+        // show the id_map
+        // console.log("id_map: ", id_map);
+        cyInstance.elements().remove(); // clear the cytoscape graph
+        const elements: ElementDefinition[] = [];
+        g.nodes().forEach((node) => {
+          // console.log("Adding node: ", node, id_map.get(node));
+          elements.push({ data: { id: node, label: id_map.get(node) } });
+        });
+        g.edges().forEach((edge) => {
+          elements.push({ data: { source: edge.v, target: edge.w } });
+        });
+        cyInstance.add(elements); // add new elements
+      }
+    }, 0);
   });
 
   onMount(async () => {

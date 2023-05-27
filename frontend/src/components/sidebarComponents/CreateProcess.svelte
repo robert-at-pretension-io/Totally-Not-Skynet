@@ -99,7 +99,7 @@
           topologicalOrder
       );
 
-      let current_graph_string = json.write(current_graph);
+      let current_graph_string = JSON.stringify(json.write(current_graph));
 
       console.log("current_graph_string: " + current_graph_string);
       let process: Process = {
@@ -186,4 +186,4 @@
 <button class="remove-button" on:click={removeSelectedEdge}>Remove Edge</button>
 <button class="add-button" on:click={saveProcess}>Save Process</button>
 
-<InteractWithActionsAndProcesses />
+<!-- <InteractWithActionsAndProcesses /> -->

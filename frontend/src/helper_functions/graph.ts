@@ -106,6 +106,12 @@ export async function getNodeName(id: string): Promise<string | undefined> {
   }
 }
 
+export async function printEdge(edge: Edge) {
+  const sourceName = await getNodeName(edge.v);
+  const targetName = await getNodeName(edge.w);
+  console.log("edge: " + sourceName + " -> " + targetName);
+}
+
 export function getId(actionOrProcess: Process | Action): string {
   return actionOrProcess._id.$oid;
 }
@@ -129,7 +135,10 @@ export async function addNode(node_id: string): Promise<void> {
   const graphState = await getGraphState();
   // add the input and output variables to the graph state
 
-  graphState.graph.setNode(node_id);
+  //check if the node already exists in the graph
+  if (!graphState.graph.hasNode(node_id)) {
+    graphState.graph.setNode(node_id);
+  }
   graphState.lastAction = "addNode";
   const node_name = await getNodeName(node_id);
   if (node_name) {
@@ -163,17 +172,33 @@ export async function processToGraph(process: Process): Promise<void> {
 
   const my_edges = graph.edges();
 
+  const topOrder = topologicalSort(graph);
+
   console.log("edges: ", my_edges);
 
-  //loop through the edges
-  for (let i = 0; i < my_edges.length; i++) {
-    await addEdge(my_edges[i]);
+  for (const node of topOrder) {
+    // filter edges where the source node is the current node
+    const nodeEdges = my_edges.filter(edge => edge.v === node);
+
+    // iterate over the node's edges and add them
+    for (const edge of nodeEdges) {
+      // if edge does not exist, add it
+      await addEdge(edge); // assuming 'addEdge' is your helper function
+
+    }
   }
 }
 
 export async function addEdge(edge: Edge): Promise<void> {
+
+  await printEdge(edge);
+
   const graphState = await getGraphState();
-  graphState.graph.setEdge(edge);
+  // check if the edge already exists
+  const edgeExists = graphState.graph.hasEdge(edge);
+  if (!edgeExists) {
+    graphState.graph.setEdge(edge);
+  }
   graphState.lastAction = "addEdge";
   graphState.actedOn = edge;
   setGraphState(graphState);
@@ -294,7 +319,7 @@ export async function edges(): Promise<Edge[]> {
 
 // reset the graphState to a new empty graph
 export async function resetGraph(): Promise<void> {
-  console.log("resetting graph");
+  // console.log("resetting graph");
   const graphState = await getGraphState();
   graphState.graph = new Graph();
   graphState.lastAction = "resetGraph";
