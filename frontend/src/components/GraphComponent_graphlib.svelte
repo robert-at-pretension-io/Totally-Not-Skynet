@@ -8,9 +8,11 @@
       selectNode,
       resetLastAction,
       selectEdge,
+      getActionById,
       
     } from "../helper_functions/graph";
-    import graphlib from "graphlib";
+    import graphlib, { Graph } from "graphlib";
+    import { Action } from "system_types/index.js";
   
     setContext("graphSharedState", {
       getCyInstance: () => cyInstance,
@@ -22,6 +24,27 @@
     let id_map = new Map();
     let lastAction = "";
     let lastActionValid = false;
+
+    async function checkEdgeVariables(sourceNode: string, targetNode: string, globalVariables: string[]): boolean {
+      // Get the input variables of target action
+      ta;
+      const targetInputVariables = targetNode.input_variables;
+
+      // Get the output variables of source node
+      const sourceOutputVariables = sourceNode.output_variables;
+
+      // Get all ancestor nodes of the target node
+      const ancestorNodes = await getAncestorNodes(targetNode);
+
+      // Collect the output variables of all ancestor nodes
+      const ancestorOutputVariables = ancestorNodes.flatMap(node => node.output_variables);
+
+      // Combine the output variables of the source node, the ancestor nodes, and the global variables
+      const allValidInputs = [...sourceOutputVariables, ...ancestorOutputVariables, ...globalVariables];
+
+      // Ensure every input variable of the target node exists in the combined array of valid input variables
+      return targetInputVariables.every(variable => allValidInputs.includes(variable));
+    }
   
     graphStore.subscribe(async (value) => {
       // console.log("graphStore value: ", value);
@@ -31,10 +54,29 @@
         g.setNode(value.actedOn[0], value.actedOn[1]);
       } else if (
         value.lastAction === "addEdge" 
-        && value.actedOn != null
-        && !Array.isArray(value.actedOn)
+  && value.actedOn != null
+  && !Array.isArray(value.actedOn)
       ) {
-        g.setEdge(value.actedOn.v, value.actedOn.w, value.actedOn);
+        // Get the nodes of the edge to be added
+        const sourceNode = g.node(value.actedOn.v);
+        const targetNode = g.node(value.actedOn.w);
+
+        // Fetch the corresponding actions
+        const sourceAction = await getActionById(sourceNode);
+        const targetAction = await getActionById(targetNode);
+
+        // Check if the output variables of source node (sourceAction) are compatible with the input variables of target node (targetAction)
+        const isValidEdge = checkEdgeVariables(sourceAction.output_variables, targetAction.input_variables);
+  
+        if (isValidEdge) {
+          // Only add edge if it passes the constraint check
+          g.setEdge(value.actedOn.v, value.actedOn.w, value.actedOn);
+        } else {
+          // Otherwise, inform the user or handle invalid edge situation
+          console.error("Invalid edge. The output variables of the source node are incompatible with the input variables of the target node.");
+          // You could also set a variable 'lastActionValid' to false here and use it to show the error in your UI
+          lastActionValid = false;
+        }
       }
       else if (
         value.lastAction === "removeEdge" &&
@@ -112,13 +154,3 @@
     <slot />
   {/if}
 </div>
-
-<!-- <style>
-  .graph {
-    position: absolute;
-    left: 400px;
-    height: 100%;
-
-    right: 300px;
-  }
-</style> -->

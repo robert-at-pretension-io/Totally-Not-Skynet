@@ -21,95 +21,51 @@ export async function getGraphState(): Promise<GraphState> {
   });
 }
 
+export async function getAncestorNodes(node: string, graph: Graph): Promise<Action[]> {
+  const ancestors: Action[] = [];
+  const visitedNodes = new Set<string>();
+  const stack = [node];
+
+  while (stack.length) {
+    const currentNode = stack.pop()!;
+    visitedNodes.add(currentNode);
+
+    const parentNodes = graph.predecessors(currentNode);
+    if (parentNodes) {
+      parentNodes.forEach(async parentNode => {
+        if (!visitedNodes.has(parentNode)) {
+          const parentAction = await getActionById(parentNode);
+          if (parentAction) {
+            ancestors.push(parentAction);
+            stack.push(parentNode);
+          }
+
+        }
+      });
+    }
+  }
+
+  return ancestors;
+}
+
+export async function getActionById(id: string): Promise<Action | null> {
+  const aiSystemState = await getAiSystemState();
+  const action = aiSystemState.actions.find(action => getId(action) == id);
+  return action || null;
+}
+
+export async function getProcessById(id: string): Promise<Process | null> {
+  const aiSystemState = await getAiSystemState();
+  const process = aiSystemState.processes.find(process => getId(process) == id);
+  return process || null;
+}
+
 export async function getAiSystemState(): Promise<AiSystemState> {
   return new Promise((resolve, _) => {
     aiSystemStore.subscribe((aiSystemState: AiSystemState) => {
       resolve(aiSystemState);
     });
   });
-}
-
-export async function getAllInputVariables() : Promise<string[]>{
-  const graph_state = await getGraphState();
-  const graph = graph_state.graph;
-  const input_variables = [];
-  // for each node in the graph
-  const nodes = graph.nodes();
-  for (const node of nodes){
-    const input = await returnInputVariablesOfNode(node);
-    input_variables.push(...input);
-  }
-  return input_variables;
-}
-
-export async function getAllOutputVariables() : Promise<string[]>{
-  const graph_state = await getGraphState();
-  const graph = graph_state.graph;
-  const output_variables = [];
-  // for each node in the graph
-  const nodes = graph.nodes();
-  for (const node of nodes){
-    const output = await returnOutputVariablesOfNode(node);
-    output_variables.push(...output);
-  }
-  return output_variables;
-}
-
-export async function returnInputVariablesOfNode(node_id : string) {
-  const ai_system_state = await getAiSystemState();
-  // loop through the actions
-  for (let i = 0; i++; i< ai_system_state.actions.length) {
-    const current_action = ai_system_state.actions[i];
-    // if the node_id matches the id of the action then return the input_variables
-    if (current_action._id.$oid == node_id) {
-      return current_action.input_variables;
-    }
-  }
-  return [];
-}
-
-export async function returnOutputVariablesOfNode(node_id : string) {
-  const ai_system_state = await getAiSystemState();
-  // loop through the actions
-  for (let i = 0; i++; i< ai_system_state.actions.length) {
-    const current_action = ai_system_state.actions[i];
-    // if the node_id matches the id of the action then return the input_variables
-    if (current_action._id.$oid == node_id) {
-      return current_action.output_variables;
-    }
-  }
-  console.log("the node/action wasn't found");
-  return [];
-}
-
-export async function returnNodeWithMatchingInputVariable(graph: Graph, input_variable: string) {
-  const nodes = graph.nodes();
-
-  // loop through nodes
-  for (let i=0; i++; i < nodes.length) {
-    const test_node_id = nodes[i];
-    const test_input_variables = await returnInputVariablesOfNode(test_node_id);
-    if (test_input_variables.indexOf(input_variable) != -1){
-      return test_node_id;
-    }
-  }
-
-  return null;
-}
-
-export async function returnNodeWithMatchingOutputVariable(graph: Graph, input_variable: string) {
-  const nodes = graph.nodes();
-
-  // loop through nodes
-  for (let i=0; i++; i < nodes.length) {
-    const test_node_id = nodes[i];
-    const test_input_variables = await returnOutputVariablesOfNode(test_node_id);
-    if (test_input_variables.indexOf(input_variable) != -1){
-      return test_node_id;
-    }
-  }
-
-  return null;
 }
 
 // get the name of the action by using the id
@@ -133,11 +89,11 @@ export function getId(actionOrProcess: Process | Action): string {
 }
 
 export async function setGraphState(graphState: GraphState) {
-  const input_variables = await getAllInputVariables();
-  const output_variables = await getAllOutputVariables();
-  graphState.input_variables = input_variables;
-  graphState.output_variables = output_variables;
-  console.log("The graphstate is:\n ", graphState);
+  // const input_variables = await getAllInputVariables();
+  // const output_variables = await getAllOutputVariables();
+  // graphState.input_variables = input_variables;
+  // graphState.output_variables = output_variables;
+  // console.log("The graphstate is:\n ", graphState);
   graphStore.set(graphState);
 }
 

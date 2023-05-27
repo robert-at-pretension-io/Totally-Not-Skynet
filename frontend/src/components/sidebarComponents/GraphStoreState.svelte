@@ -1,8 +1,13 @@
 <script>
     import { graphStore } from "stores/graphStore";
 
-    let graphState = $graphStore;
-  </script>
+    let graphState;
+    
+    $: { graphState = $graphStore;
+
+      console.log("graphState is now: ", graphState);
+    }
+    </script>
   <aside>
     <h2>Graph Information</h2>
     
