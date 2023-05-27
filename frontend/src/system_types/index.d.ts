@@ -79,7 +79,14 @@ export type OpenaiKey = {
 
 export type Prompt = {
   prompt_text: string;
+  system: string,
+  action_id: string,
 };
+
+export type Response = {
+  response_text: string;
+  action_id: string;
+}
 
 export type UpdateAction = {
   action: Action;
@@ -92,6 +99,15 @@ export type CreateAction = {
 export type CreateProcess = {
   create_process: Process;
 };
+
+
+export type Execution = {
+  local_variables: Map<string, string>;
+  global_variables: Map<string, string>;
+  topological_order: string[];
+  prompts: Map<string, string>; // map from action id to prompt with filled in variables
+  responses: Map<string, string>; // map from action id to response (unparsed)
+}
 
 export type MessageTypes =
   | { type: "Goal"; data: Goal }

@@ -95,7 +95,15 @@ impl UserSettings {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Prompt {
+    action_id: String,
+    system: String,
     prompt_text: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Response {
+    action_id: String,
+    response_text: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -498,6 +506,7 @@ async fn start_message_sending_loop(
     mut client_rx: mpsc::Receiver<(Identity, String)>,
 ) {
     let mut runtime_settings: HashMap<Identity, RuntimeSettings> = HashMap::new();
+    let mut messages_thus_far: HashMap<Identity, Vec<String>> = HashMap::new();
 
     // get the database
 
@@ -635,12 +644,19 @@ async fn start_message_sending_loop(
                     }
                 );
 
+
+
                     let response = get_openai_completion(messages, openai_api_key.unwrap()).await;
 
                     match response {
                         Ok(res) => {
+
+                            let rez : Response = {
+                                action_id: prompt.action_id.clone(),
+                                response_text: res
+                            }
                             match tx
-                                .send((Identity::new(msg.0.name.to_string()), Message::Text(res)))
+                                .send((Identity::new(msg.0.name.to_string()), Message::Text(json!(rez).to_string())))
                             {
                                 Ok(_) => {}
                                 Err(e) => {

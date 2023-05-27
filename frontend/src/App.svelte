@@ -10,7 +10,11 @@
 
   import type { Action, Process, AiSystemState } from "./system_types";
 
-  import { isAction, isProcess } from "helper_functions/type_checker";
+  import {
+    isAction,
+    isProcess,
+    isResponse,
+  } from "helper_functions/type_checker";
 
   import { onMount } from "svelte";
   import websocketStore from "./stores/websocketStore";
@@ -128,6 +132,16 @@
 
           return state;
         });
+      }
+      if (isResponse(data)) {
+        let response: Response = data;
+
+        console.log("response: ", response);
+
+        // You can now do something with this response data
+        // For example, you might want to update some part of your state with the response
+        // or dispatch an action based on the received response
+        // This will depend on your specific application logic.
       } else if (Object.prototype.hasOwnProperty.call(data, "create_action")) {
         let action: Action = data.create_action;
         aiSystemStore.update((state: AiSystemState) => {

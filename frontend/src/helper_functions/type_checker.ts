@@ -13,6 +13,14 @@ export function isProcess(object: any): object is Process {
     return false;
   }
 
+  //check if object.topological_order is an array of strings
+  if (!Array.isArray(object.topological_order)) {
+    if (debug) {
+      console.log("The object does not have a `topological_order` property.");
+    }
+    return false;
+  }
+
   if (typeof object._id !== "object") {
     if (debug) {
       console.log("The object does not have an `_id` property.");
@@ -132,11 +140,16 @@ export function newAction(): Action {
   };
 }
 
+export function isResponse(object: any): object is Response {
+  return "response_text" in object && "action_id" in object;
+}
+
 export function newProcess(): Process {
   return {
     _id: { $oid: "" },
     name: "",
     graph: new Graph(),
     description: "",
+    topological_order: [],
   };
 }

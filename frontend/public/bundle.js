@@ -2652,6 +2652,10 @@ var app = (function () {
         if (typeof object !== "object") {
             return false;
         }
+        //check if object.topological_order is an array of strings
+        if (!Array.isArray(object.topological_order)) {
+            return false;
+        }
         if (typeof object._id !== "object") {
             return false;
         }
@@ -2711,12 +2715,16 @@ var app = (function () {
             system: "",
         };
     }
+    function isResponse(object) {
+        return "response_text" in object && "action_id" in object;
+    }
     function newProcess() {
         return {
             _id: { $oid: "" },
             name: "",
             graph: new graphlib_1$2(),
             description: "",
+            topological_order: [],
         };
     }
 
@@ -9078,6 +9086,51 @@ var app = (function () {
                     yield addEdge(edge); // assuming 'addEdge' is your helper function
                 }
             }
+        });
+    }
+    function checkEdgeVariables(sourceNode, targetNode, globalVariables, g) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // let sourceName = await getNodeName(sourceNode);
+            // let targetName = await getNodeName(targetNode);
+            // console.log(
+            //   "Checking edge variables between nodes ",
+            //   sourceName,
+            //   " and ",
+            //   targetName
+            // );
+            // Get the input variables of target action
+            const targetAction = yield getActionById(targetNode);
+            if (targetAction == null) {
+                console.log("targetAction is null");
+                return false;
+            }
+            const targetInputVariables = targetAction.input_variables;
+            // console.log("Target Action input variables: ", targetInputVariables);
+            // Get the output variables of source node
+            const sourceAction = yield getActionById(sourceNode);
+            if (sourceAction == null) {
+                console.log("sourceAction is null");
+                return false;
+            }
+            const sourceOutputVariables = sourceAction.output_variables;
+            // console.log("Source Action output variables: ", sourceOutputVariables);
+            // Get all ancestor nodes of the target node
+            const ancestorNodes = yield getAncestorNodes(targetNode, g);
+            // console.log("Ancestor Nodes of the target node: ", ancestorNodes);
+            // Collect the output variables of all ancestor nodes
+            const ancestorOutputVariables = ancestorNodes.flatMap((node) => node.output_variables);
+            console.log("Output variables of the ancestor nodes: ", ancestorOutputVariables);
+            // Combine the output variables of the source node, the ancestor nodes, and the global variables
+            const allValidInputs = [
+                ...sourceOutputVariables,
+                ...ancestorOutputVariables,
+                ...globalVariables,
+            ];
+            console.log("All valid inputs: ", allValidInputs);
+            // Ensure every input variable of the target node exists in the combined array of valid input variables
+            const isValid = targetInputVariables.every((variable) => allValidInputs.includes(variable));
+            console.log("Are all target input variables valid? ", isValid);
+            return isValid;
         });
     }
     function addEdge(edge) {
@@ -48009,7 +48062,7 @@ var printLayoutInfo;
     const { console: console_1$1 } = globals;
     const file$1 = "src/components/GraphComponent_graphlib.svelte";
 
-    // (168:2) {#if cyInstance}
+    // (129:2) {#if cyInstance}
     function create_if_block(ctx) {
     	let current;
     	const default_slot_template = /*#slots*/ ctx[3].default;
@@ -48060,7 +48113,7 @@ var printLayoutInfo;
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(168:2) {#if cyInstance}",
+    		source: "(129:2) {#if cyInstance}",
     		ctx
     	});
 
@@ -48077,7 +48130,7 @@ var printLayoutInfo;
     			div = element$1("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "graph");
-    			add_location(div, file$1, 166, 0, 7707);
+    			add_location(div, file$1, 127, 0, 5532);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -48187,57 +48240,6 @@ var printLayoutInfo;
     	let lastAction = "";
     	let lastActionValid = false;
 
-    	function checkEdgeVariables(sourceNode, targetNode, globalVariables) {
-    		return __awaiter(this, void 0, void 0, function* () {
-    			let sourceName = yield getNodeName(sourceNode);
-    			let targetName = yield getNodeName(targetNode);
-    			console.log("Checking edge variables between nodes ", sourceName, " and ", targetName);
-
-    			// Get the input variables of target action
-    			let targetAction = yield getActionById(targetNode);
-
-    			if (targetAction == null) {
-    				console.log("targetAction is null");
-    				return false;
-    			}
-
-    			const targetInputVariables = targetAction.input_variables;
-    			console.log("Target Action input variables: ", targetInputVariables);
-
-    			// Get the output variables of source node
-    			let sourceAction = yield getActionById(sourceNode);
-
-    			if (sourceAction == null) {
-    				console.log("sourceAction is null");
-    				return false;
-    			}
-
-    			const sourceOutputVariables = sourceAction.output_variables;
-    			console.log("Source Action output variables: ", sourceOutputVariables);
-
-    			// Get all ancestor nodes of the target node
-    			const ancestorNodes = yield getAncestorNodes(targetNode, g);
-
-    			console.log("Ancestor Nodes of the target node: ", ancestorNodes);
-
-    			// Collect the output variables of all ancestor nodes
-    			const ancestorOutputVariables = ancestorNodes.flatMap(node => node.output_variables);
-
-    			console.log("Output variables of the ancestor nodes: ", ancestorOutputVariables);
-
-    			// Combine the output variables of the source node, the ancestor nodes, and the global variables
-    			const allValidInputs = [...sourceOutputVariables, ...ancestorOutputVariables, ...globalVariables];
-
-    			console.log("All valid inputs: ", allValidInputs);
-
-    			// Ensure every input variable of the target node exists in the combined array of valid input variables
-    			const isValid = targetInputVariables.every(variable => allValidInputs.includes(variable));
-
-    			console.log("Are all target input variables valid? ", isValid);
-    			return isValid;
-    		});
-    	}
-
     	graphStore.subscribe(value => __awaiter(void 0, void 0, void 0, function* () {
     		// console.log("graphStore value: ", value);
     		if (value.lastAction === "addNode" && value.actedOn != null && Array.isArray(value.actedOn)) {
@@ -48256,7 +48258,7 @@ var printLayoutInfo;
     			let globalVariables = getGlobalVariableNames();
 
     			// Check if the output variables of source node (sourceAction) are compatible with the input variables of target node (targetAction)
-    			const isValidEdge = yield checkEdgeVariables(sourceNode, targetNode, globalVariables);
+    			const isValidEdge = yield checkEdgeVariables(sourceNode, targetNode, globalVariables, g);
 
     			if (isValidEdge) {
     				// Only add edge if it passes the constraint check
@@ -48283,31 +48285,32 @@ var printLayoutInfo;
     		lastAction = value.lastAction;
 
     		// Now update cytoscape graph based on graphlib graph
-    		setTimeout(
-    			() => {
-    				if (cyInstance && (lastAction === "addNode" || lastAction === "addEdge" || lastAction === "removeEdge" || lastAction === "removeNode")) {
-    					// show the id_map
-    					// console.log("id_map: ", id_map);
-    					cyInstance.elements().remove(); // clear the cytoscape graph
+    		if (cyInstance && (lastAction === "addNode" || lastAction === "addEdge" || lastAction === "removeEdge" || lastAction === "removeNode")) {
+    			console.log("Updating cytoscape graph");
 
-    					const elements = [];
+    			// show the id_map
+    			// console.log("id_map: ", id_map);
+    			cyInstance.elements().remove(); // clear the cytoscape graph
 
-    					g.nodes().forEach(node => {
-    						// console.log("Adding node: ", node, id_map.get(node));
-    						elements.push({
-    							data: { id: node, label: id_map.get(node) }
-    						});
-    					});
+    			const elements = [];
 
-    					g.edges().forEach(edge => {
-    						elements.push({ data: { source: edge.v, target: edge.w } });
-    					});
+    			g.nodes().forEach(node => {
+    				console.log("Adding node: ", node, id_map.get(node));
 
-    					cyInstance.add(elements); // add new elements
-    				}
-    			},
-    			0
-    		);
+    				elements.push({
+    					data: { id: node, label: id_map.get(node) }
+    				});
+    			});
+
+    			g.edges().forEach(edge => {
+    				console.log("Adding edge: ", edge);
+
+    				// await printEdge(edge);
+    				elements.push({ data: { source: edge.v, target: edge.w } });
+    			});
+
+    			cyInstance.add(elements); // add new elements
+    		}
     	}));
 
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
@@ -48363,18 +48366,15 @@ var printLayoutInfo;
     		selectNode,
     		resetLastAction,
     		selectEdge,
-    		getActionById,
-    		getAncestorNodes,
     		getGlobalVariableNames,
-    		getNodeName,
+    		checkEdgeVariables,
     		graphlib: graphlib$1,
     		refElement,
     		cyInstance,
     		g,
     		id_map,
     		lastAction,
-    		lastActionValid,
-    		checkEdgeVariables
+    		lastActionValid
     	});
 
     	$$self.$inject_state = $$props => {
@@ -48493,7 +48493,7 @@ var printLayoutInfo;
     			t = space();
     			create_component(graphcomponentgraphlib.$$.fragment);
     			attr_dev(div, "class", "app-container");
-    			add_location(div, file, 162, 0, 7606);
+    			add_location(div, file, 170, 0, 8038);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -48691,8 +48691,16 @@ var printLayoutInfo;
 
     					return state;
     				});
-    			} else if (Object.prototype.hasOwnProperty.call(data, "create_action")) {
-    				let action = data.create_action;
+    			}
+
+    			if (isResponse(data)) {
+    				let response = data;
+    				console.log("response: ", response);
+    			} else // For example, you might want to update some part of your state with the response
+    			// or dispatch an action based on the received response
+    			// This will depend on your specific application logic.
+    			if (Object.prototype.hasOwnProperty.call(data, "create_action")) {
+    				let action = data.create_action; // You can now do something with this response data
 
     				aiSystemStore.update(state => {
     					state.actions.push(action);
@@ -48748,6 +48756,7 @@ var printLayoutInfo;
     		json: graphlib_2,
     		isAction,
     		isProcess,
+    		isResponse,
     		onMount,
     		websocketStore,
     		aiSystemStore,

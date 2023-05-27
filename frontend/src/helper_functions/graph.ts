@@ -3,6 +3,7 @@ import type {
   AiSystemState,
   SystemState,
   Action,
+  Prompt,
 } from "../system_types";
 import { graphStore } from "../stores/graphStore";
 import { Process } from "../system_types";
@@ -11,6 +12,7 @@ import systemStateStore from "stores/systemStateStore";
 import { Graph } from "graphlib";
 import { Edge } from "@dagrejs/graphlib";
 import { alg } from "graphlib";
+import websocketStore from "stores/websocketStore";
 
 // Define the getter and setter
 
@@ -125,9 +127,9 @@ export async function setGraphState(graphState: GraphState) {
   graphStore.set(graphState);
 }
 
-export async function addGlobalVariable(variable_name: string) {
+export async function addGlobalVariable(variable_name: string, variable_value: string) {
   const current_state = await getGraphState();
-  current_state.global_variables.push(variable_name);
+  current_state.global_variables.set(variable_name, variable_value);
   await setGraphState(current_state);
 }
 
@@ -187,6 +189,76 @@ export async function processToGraph(process: Process): Promise<void> {
 
     }
   }
+}
+
+export async function sendPrompt(prompt: Prompt) {
+  // send via websocketstore
+  websocketStore.subscribe((ws: WebSocket) => {
+    ws.send(JSON.stringify(prompt));
+  });
+}
+
+export async function checkEdgeVariables(
+  sourceNode: string,
+  targetNode: string,
+  globalVariables: string[],
+  g: Graph
+): Promise<boolean> {
+  // let sourceName = await getNodeName(sourceNode);
+  // let targetName = await getNodeName(targetNode);
+  // console.log(
+  //   "Checking edge variables between nodes ",
+  //   sourceName,
+  //   " and ",
+  //   targetName
+  // );
+
+  // Get the input variables of target action
+  const targetAction = await getActionById(targetNode);
+  if (targetAction == null) {
+    console.log("targetAction is null");
+    return false;
+  }
+  const targetInputVariables = targetAction.input_variables;
+  // console.log("Target Action input variables: ", targetInputVariables);
+
+  // Get the output variables of source node
+  const sourceAction = await getActionById(sourceNode);
+  if (sourceAction == null) {
+    console.log("sourceAction is null");
+    return false;
+  }
+  const sourceOutputVariables = sourceAction.output_variables;
+  // console.log("Source Action output variables: ", sourceOutputVariables);
+
+  // Get all ancestor nodes of the target node
+  const ancestorNodes = await getAncestorNodes(targetNode, g);
+  // console.log("Ancestor Nodes of the target node: ", ancestorNodes);
+
+  // Collect the output variables of all ancestor nodes
+  const ancestorOutputVariables = ancestorNodes.flatMap(
+    (node) => node.output_variables
+  );
+  console.log(
+    "Output variables of the ancestor nodes: ",
+    ancestorOutputVariables
+  );
+
+  // Combine the output variables of the source node, the ancestor nodes, and the global variables
+  const allValidInputs = [
+    ...sourceOutputVariables,
+    ...ancestorOutputVariables,
+    ...globalVariables,
+  ];
+  console.log("All valid inputs: ", allValidInputs);
+
+  // Ensure every input variable of the target node exists in the combined array of valid input variables
+  const isValid = targetInputVariables.every((variable) =>
+    allValidInputs.includes(variable)
+  );
+  console.log("Are all target input variables valid? ", isValid);
+
+  return isValid;
 }
 
 export async function addEdge(edge: Edge): Promise<void> {

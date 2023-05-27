@@ -12,6 +12,8 @@
     getAncestorNodes,
     getGlobalVariableNames,
     getNodeName,
+    printEdge,
+    checkEdgeVariables,
   } from "../helper_functions/graph";
   import graphlib, { Graph } from "graphlib";
   import { Action } from "system_types/index.js";
@@ -26,68 +28,6 @@
   let id_map = new Map();
   let lastAction = "";
   let lastActionValid = false;
-
-  async function checkEdgeVariables(
-    sourceNode: string,
-    targetNode: string,
-    globalVariables: string[]
-  ): Promise<boolean> {
-    let sourceName = await getNodeName(sourceNode);
-    let targetName = await getNodeName(targetNode);
-    console.log(
-      "Checking edge variables between nodes ",
-      sourceName,
-      " and ",
-      targetName
-    );
-
-    // Get the input variables of target action
-    let targetAction = await getActionById(targetNode);
-    if (targetAction == null) {
-      console.log("targetAction is null");
-      return false;
-    }
-    const targetInputVariables = targetAction.input_variables;
-    console.log("Target Action input variables: ", targetInputVariables);
-
-    // Get the output variables of source node
-    let sourceAction = await getActionById(sourceNode);
-    if (sourceAction == null) {
-      console.log("sourceAction is null");
-      return false;
-    }
-    const sourceOutputVariables = sourceAction.output_variables;
-    console.log("Source Action output variables: ", sourceOutputVariables);
-
-    // Get all ancestor nodes of the target node
-    const ancestorNodes = await getAncestorNodes(targetNode, g);
-    console.log("Ancestor Nodes of the target node: ", ancestorNodes);
-
-    // Collect the output variables of all ancestor nodes
-    const ancestorOutputVariables = ancestorNodes.flatMap(
-      (node) => node.output_variables
-    );
-    console.log(
-      "Output variables of the ancestor nodes: ",
-      ancestorOutputVariables
-    );
-
-    // Combine the output variables of the source node, the ancestor nodes, and the global variables
-    const allValidInputs = [
-      ...sourceOutputVariables,
-      ...ancestorOutputVariables,
-      ...globalVariables,
-    ];
-    console.log("All valid inputs: ", allValidInputs);
-
-    // Ensure every input variable of the target node exists in the combined array of valid input variables
-    const isValid = targetInputVariables.every((variable) =>
-      allValidInputs.includes(variable)
-    );
-    console.log("Are all target input variables valid? ", isValid);
-
-    return isValid;
-  }
 
   graphStore.subscribe(async (value) => {
     // console.log("graphStore value: ", value);
@@ -117,7 +57,8 @@
       const isValidEdge = await checkEdgeVariables(
         sourceNode,
         targetNode,
-        globalVariables
+        globalVariables,
+        g
       );
 
       if (isValidEdge) {
@@ -154,28 +95,31 @@
     lastAction = value.lastAction;
 
     // Now update cytoscape graph based on graphlib graph
-    setTimeout(() => {
-      if (
-        cyInstance &&
-        (lastAction === "addNode" ||
-          lastAction === "addEdge" ||
-          lastAction === "removeEdge" ||
-          lastAction === "removeNode")
-      ) {
-        // show the id_map
-        // console.log("id_map: ", id_map);
-        cyInstance.elements().remove(); // clear the cytoscape graph
-        const elements: ElementDefinition[] = [];
-        g.nodes().forEach((node) => {
-          // console.log("Adding node: ", node, id_map.get(node));
-          elements.push({ data: { id: node, label: id_map.get(node) } });
-        });
-        g.edges().forEach((edge) => {
-          elements.push({ data: { source: edge.v, target: edge.w } });
-        });
-        cyInstance.add(elements); // add new elements
-      }
-    }, 0);
+
+    if (
+      cyInstance &&
+      (lastAction === "addNode" ||
+        lastAction === "addEdge" ||
+        lastAction === "removeEdge" ||
+        lastAction === "removeNode")
+    ) {
+      console.log("Updating cytoscape graph");
+
+      // show the id_map
+      // console.log("id_map: ", id_map);
+      cyInstance.elements().remove(); // clear the cytoscape graph
+      const elements: ElementDefinition[] = [];
+      g.nodes().forEach((node) => {
+        console.log("Adding node: ", node, id_map.get(node));
+        elements.push({ data: { id: node, label: id_map.get(node) } });
+      });
+      g.edges().forEach((edge) => {
+        console.log("Adding edge: ", edge);
+        // await printEdge(edge);
+        elements.push({ data: { source: edge.v, target: edge.w } });
+      });
+      cyInstance.add(elements); // add new elements
+    }
   });
 
   onMount(async () => {
