@@ -4,6 +4,8 @@
   // import RightSidebar from "./components/RightSidebar.svelte";
   import GraphComponentGraphlib from "./components/GraphComponent_graphlib.svelte";
 
+  import { Response } from "./system_types";
+
   import { json } from "graphlib";
 
   import "./global.css";
@@ -20,6 +22,7 @@
   import websocketStore from "./stores/websocketStore";
   import { aiSystemStore } from "stores/aiSystemStore";
   import systemStateStore from "stores/systemStateStore";
+  import { executionStore } from "stores/executionStore";
   import { processToGraph } from "helper_functions/graph";
   import {
     populateInputVariables,
@@ -137,6 +140,11 @@
         let response: Response = data;
 
         console.log("response: ", response);
+
+        $executionStore.responses.set(
+          response.action_id,
+          response.response_text
+        );
 
         // You can now do something with this response data
         // For example, you might want to update some part of your state with the response

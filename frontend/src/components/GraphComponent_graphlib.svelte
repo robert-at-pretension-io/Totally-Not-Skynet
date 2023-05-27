@@ -103,18 +103,18 @@
         lastAction === "removeEdge" ||
         lastAction === "removeNode")
     ) {
-      console.log("Updating cytoscape graph");
+      // console.log("Updating cytoscape graph");
 
       // show the id_map
       // console.log("id_map: ", id_map);
       cyInstance.elements().remove(); // clear the cytoscape graph
       const elements: ElementDefinition[] = [];
       g.nodes().forEach((node) => {
-        console.log("Adding node: ", node, id_map.get(node));
+        // console.log("Adding node: ", node, id_map.get(node));
         elements.push({ data: { id: node, label: id_map.get(node) } });
       });
       g.edges().forEach((edge) => {
-        console.log("Adding edge: ", edge);
+        // console.log("Adding edge: ", edge);
         // await printEdge(edge);
         elements.push({ data: { source: edge.v, target: edge.w } });
       });

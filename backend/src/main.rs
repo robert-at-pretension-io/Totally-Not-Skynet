@@ -636,7 +636,7 @@ async fn start_message_sending_loop(
                 if openai_api_key.is_some() {
                     let messages = vec!(ChatMessage {
                         role: Role::System,
-                        content: "You are a helpful assistant, you will help the user in any way they ask.".to_string()
+                        content: prompt.system.clone()
                     },
                     ChatMessage {
                         role: Role::User,
