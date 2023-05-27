@@ -651,10 +651,10 @@ async fn start_message_sending_loop(
                     match response {
                         Ok(res) => {
 
-                            let rez : Response = {
+                            let rez = Response {
                                 action_id: prompt.action_id.clone(),
                                 response_text: res
-                            }
+                            };
                             match tx
                                 .send((Identity::new(msg.0.name.to_string()), Message::Text(json!(rez).to_string())))
                             {
