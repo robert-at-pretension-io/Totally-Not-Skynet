@@ -9,7 +9,5 @@ export const graphStore = writable<GraphState>({
   actedOn: null,
   lastActedOn: null,
   name: null,
-  global_variables: [],
-  input_variables: [],
-  output_variables: []
+  global_variables: new Map<string, string>()
 });

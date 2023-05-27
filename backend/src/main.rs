@@ -42,6 +42,7 @@ struct Process {
     _id: Option<ObjectId>,
     name: String,
     graph: String,
+    topological_order: Vec<String>,
     description: String,
 }
 
@@ -189,6 +190,13 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .and_then(|v| v.as_str())
                         .unwrap_or("")
                         .to_string(),
+                    topological_order: create_process_obj
+                        .get("topological_order")
+                        .and_then(|v| v.as_array())
+                        .unwrap_or(&vec![])
+                        .iter()
+                        .map(|v| v.as_str().unwrap_or("").to_string())
+                        .collect(),
                 };
                 return Some(MessageTypes::CreateProcess(CreateProcess {
                     create_process: process,

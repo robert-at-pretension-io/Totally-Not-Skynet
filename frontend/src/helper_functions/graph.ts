@@ -4,12 +4,12 @@ import type {
   SystemState,
   Action,
 } from "../system_types";
-import {graphStore} from "../stores/graphStore";
-import {Process} from "../system_types";
-import {aiSystemStore} from "../stores/aiSystemStore";
+import { graphStore } from "../stores/graphStore";
+import { Process } from "../system_types";
+import { aiSystemStore } from "../stores/aiSystemStore";
 import systemStateStore from "stores/systemStateStore";
-import {Graph} from "graphlib";
-import {Edge} from "@dagrejs/graphlib";
+import { Graph } from "graphlib";
+import { Edge } from "@dagrejs/graphlib";
 
 // Define the getter and setter
 
@@ -19,6 +19,14 @@ export async function getGraphState(): Promise<GraphState> {
       resolve(graphState);
     });
   });
+}
+
+export function getGlobalVariableNames() {
+  let globalVariableNames: string[] = [];
+  graphStore.subscribe(store => {
+    globalVariableNames = Array.from(store.global_variables.keys());
+  })();
+  return globalVariableNames;
 }
 
 export async function getAncestorNodes(node: string, graph: Graph): Promise<Action[]> {
@@ -68,6 +76,37 @@ export async function getAiSystemState(): Promise<AiSystemState> {
   });
 }
 
+export function topologicalSort(graph) {
+  const visited = new Set();
+  const stack = [];
+
+  function visit(node) {
+    // Mark the node as visited
+    visited.add(node);
+
+    // Visit all neighbors
+    const neighbors = graph.neighbors(node) || [];
+    for (const neighbor of neighbors) {
+      if (!visited.has(neighbor)) {
+        visit(neighbor);
+      }
+    }
+
+    // Push the node to the stack after visiting all descendants
+    stack.push(node);
+  }
+
+  // Visit all nodes
+  graph.nodes().forEach(node => {
+    if (!visited.has(node)) {
+      visit(node);
+    }
+  });
+
+  // The stack now contains a topological ordering of the nodes
+  return stack.reverse();
+}
+
 // get the name of the action by using the id
 export async function getNodeName(id: string): Promise<string | undefined> {
   const res: AiSystemState = await new Promise((resolve, _) => {
@@ -97,7 +136,7 @@ export async function setGraphState(graphState: GraphState) {
   graphStore.set(graphState);
 }
 
-export async function addGlobalVariable(variable_name : string) {
+export async function addGlobalVariable(variable_name: string) {
   const current_state = await getGraphState();
   current_state.global_variables.push(variable_name);
   await setGraphState(current_state);
@@ -106,7 +145,7 @@ export async function addGlobalVariable(variable_name : string) {
 export async function addNode(node_id: string): Promise<void> {
   const graphState = await getGraphState();
   // add the input and output variables to the graph state
-  
+
   graphState.graph.setNode(node_id);
   graphState.lastAction = "addNode";
   const node_name = await getNodeName(node_id);
@@ -248,7 +287,7 @@ export async function selectEdge(
   const graphState = await getGraphState();
 
   graphState.lastAction = "selectEdge";
-  graphState.actedOn = {v: source, w: target};
+  graphState.actedOn = { v: source, w: target };
   graphState.name = null;
   setGraphState(graphState);
 }
