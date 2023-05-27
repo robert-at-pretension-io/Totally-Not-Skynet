@@ -10,6 +10,7 @@ import { aiSystemStore } from "../stores/aiSystemStore";
 import systemStateStore from "stores/systemStateStore";
 import { Graph } from "graphlib";
 import { Edge } from "@dagrejs/graphlib";
+import { alg } from "graphlib";
 
 // Define the getter and setter
 
@@ -76,35 +77,17 @@ export async function getAiSystemState(): Promise<AiSystemState> {
   });
 }
 
-export function topologicalSort(graph) {
-  const visited = new Set();
-  const stack = [];
+export function topologicalSort(graph: Graph) {
+  const sorted = alg.topsort(graph);
 
-  function visit(node) {
-    // Mark the node as visited
-    visited.add(node);
-
-    // Visit all neighbors
-    const neighbors = graph.neighbors(node) || [];
-    for (const neighbor of neighbors) {
-      if (!visited.has(neighbor)) {
-        visit(neighbor);
-      }
-    }
-
-    // Push the node to the stack after visiting all descendants
-    stack.push(node);
-  }
-
-  // Visit all nodes
-  graph.nodes().forEach(node => {
-    if (!visited.has(node)) {
-      visit(node);
-    }
+  // print out the nodes in the stack
+  sorted.forEach(async node => {
+    const name = await getNodeName(node);
+    console.log("node: " + name);
   });
 
   // The stack now contains a topological ordering of the nodes
-  return stack.reverse();
+  return sorted;
 }
 
 // get the name of the action by using the id

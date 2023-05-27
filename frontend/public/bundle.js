@@ -8924,7 +8924,7 @@ var app = (function () {
     };
     var graphlib_1$1 = graphlib$1.Graph;
     var graphlib_2 = graphlib$1.json;
-    graphlib$1.alg;
+    var graphlib_3 = graphlib$1.alg;
     graphlib$1.version;
 
     // Define the getter and setter
@@ -8985,29 +8985,14 @@ var app = (function () {
         });
     }
     function topologicalSort(graph) {
-        const visited = new Set();
-        const stack = [];
-        function visit(node) {
-            // Mark the node as visited
-            visited.add(node);
-            // Visit all neighbors
-            const neighbors = graph.neighbors(node) || [];
-            for (const neighbor of neighbors) {
-                if (!visited.has(neighbor)) {
-                    visit(neighbor);
-                }
-            }
-            // Push the node to the stack after visiting all descendants
-            stack.push(node);
-        }
-        // Visit all nodes
-        graph.nodes().forEach(node => {
-            if (!visited.has(node)) {
-                visit(node);
-            }
-        });
+        const sorted = graphlib_3.topsort(graph);
+        // print out the nodes in the stack
+        sorted.forEach((node) => __awaiter(this, void 0, void 0, function* () {
+            const name = yield getNodeName(node);
+            console.log("node: " + name);
+        }));
         // The stack now contains a topological ordering of the nodes
-        return stack.reverse();
+        return sorted;
     }
     // get the name of the action by using the id
     function getNodeName(id) {
