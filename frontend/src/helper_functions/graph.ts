@@ -24,6 +24,14 @@ export async function getGraphState(): Promise<GraphState> {
   });
 }
 
+export async function getInputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
+  // Get the action by ID
+  const action = await getActionById(nodeId);
+
+  // If action exists, return its input variables; else, return null
+  return action ? action.input_variables : null;
+}
+
 export function getGlobalVariableNames() {
   let globalVariableNames: string[] = [];
   graphStore.subscribe(store => {
