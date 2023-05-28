@@ -20,7 +20,7 @@
   let needed_variables: string[] = [];
   let ready_to_make_first_prompt = false;
 
-  function update_local_variables() {
+  async function update_local_variables() {
     selectedProcess = $systemStateStore.selectedProcess;
     console.log("Updated selectedProcess: ", selectedProcess);
     topological_order = selectedProcess.topological_order;
@@ -30,6 +30,41 @@
 
     possibleActions = $aiSystemStore.actions;
     console.log("Updated possibleActions: ", possibleActions);
+
+    let return_val = await processSelectedProcessAndActions(
+      selectedProcess,
+      possibleActions,
+      topological_order,
+      topological_order_names,
+      globalVariables
+    );
+
+    topological_order_names = return_val.topological_order_names;
+    ready_to_make_first_prompt = return_val.ready_to_make_first_prompt;
+    needed_variables = return_val.needed_variables;
+    console.log("Updated needed_variables: ", needed_variables);
+    console.log("Updated topological_order_names: ", topological_order_names);
+    console.log(
+      "Updated ready_to_make_first_prompt: ",
+      ready_to_make_first_prompt
+    );
+  }
+
+  function sendFirstPrompt(): void {
+    createFirstPrompt(
+      ready_to_make_first_prompt,
+      already_made_first_prompt,
+      topological_order,
+      possibleActions,
+      globalVariables
+    )
+      .then((result) => {
+        already_made_first_prompt = result.already_made_first_prompt;
+        update_local_variables();
+      })
+      .catch((err) => {
+        console.error("Error in sendFirstPrompt: ", err);
+      });
   }
 
   async function processSelectedProcessAndActions(
@@ -43,6 +78,7 @@
     ready_to_make_first_prompt: boolean;
     needed_variables: string[];
   }> {
+    console.log("Processing selected process and actions...");
     let ready_to_make_first_prompt = false;
     let needed_variables: string[] = [];
 
@@ -157,26 +193,12 @@
   async function handleFormSubmit(variableName, event) {
     event.preventDefault();
     if (newValues[variableName]) {
-      addGlobalVariable(variableName, newValues[variableName]);
+      await addGlobalVariable(variableName, newValues[variableName]);
     }
 
-    let return_val = await processSelectedProcessAndActions(
-      selectedProcess,
-      possibleActions,
-      topological_order,
-      topological_order_names,
-      globalVariables
-    );
-
-    topological_order_names = return_val.topological_order_names;
-    ready_to_make_first_prompt = return_val.ready_to_make_first_prompt;
-    needed_variables = return_val.needed_variables;
-    update_local_variables();
+    await update_local_variables();
   }
-  // Function to handle dropdown change events
   async function onDropdownChange() {
-    // console.log("onDropdownChange called: ", type, " selectedAction: ", selectedAction, " selectedProcess: ", selectedProcess);
-
     if (selectedProcess) {
       let this_process = $aiSystemStore.processes.find(
         (obj) => obj.name === selectedProcess
@@ -187,18 +209,7 @@
         $systemStateStore.selectedAction = newAction();
       }
 
-      let return_val = await processSelectedProcessAndActions(
-        selectedProcess,
-        possibleActions,
-        topological_order,
-        topological_order_names,
-        globalVariables
-      );
-
-      topological_order_names = return_val.topological_order_names;
-      ready_to_make_first_prompt = return_val.ready_to_make_first_prompt;
-      needed_variables = return_val.needed_variables;
-      update_local_variables();
+      await update_local_variables();
     }
   }
 </script>
@@ -206,7 +217,8 @@
 {#if selectedProcess}
   <div>
     <h2>Description: {selectedProcess.description}</h2>
-    <h2>Topological Order: {topological_order_names.join(", ")}</h2>
+    <h2>Topological Order:</h2>
+    <p>{topological_order_names.join(" -> ")}</p>
 
     <h2>Global Variables</h2>
     {#each [...globalVariables] as [key, value]}
@@ -214,7 +226,7 @@
     {/each}
 
     <!-- check if the needed variables array has length 0:-->
-    {#if needed_variables.length != 0}
+    {#if !ready_to_make_first_prompt}
       <h2>Needed Variables</h2>
       {#each needed_variables as needed_var (needed_var)}
         <form
@@ -228,6 +240,10 @@
           <button type="submit">Update</button>
         </form>
       {/each}
+    {:else if !already_made_first_prompt}
+      <button class="add-button" on:click={sendFirstPrompt}>Execute</button>
+    {:else}
+      <!-- Add the displaying of output log here -->
     {/if}
   </div>
 {:else}

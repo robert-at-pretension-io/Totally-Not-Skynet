@@ -10819,7 +10819,7 @@ var app = (function () {
     		if (dirty & /*mainObject*/ 1) show_if_1 = null;
     		if (dirty & /*mainObject*/ 1) show_if_2 = null;
     		if (show_if == null) show_if = !!(typeof /*value*/ ctx[8] === "boolean" && (isAction(/*mainObject*/ ctx[0]) || isProcess(/*mainObject*/ ctx[0])));
-    		if (show_if) return create_if_block_2;
+    		if (show_if) return create_if_block_2$1;
     		if (show_if_1 == null) show_if_1 = !!(typeof /*value*/ ctx[8] === "number" && (isAction(/*mainObject*/ ctx[0]) || isProcess(/*mainObject*/ ctx[0])));
     		if (show_if_1) return create_if_block_3;
     		if (show_if_2 == null) show_if_2 = !!(isAction(/*mainObject*/ ctx[0]) || isProcess(/*mainObject*/ ctx[0]));
@@ -11002,7 +11002,7 @@ var app = (function () {
     }
 
     // (27:10) {#if typeof value === "boolean" && (isAction(mainObject) || isProcess(mainObject))}
-    function create_if_block_2(ctx) {
+    function create_if_block_2$1(ctx) {
     	let input;
     	let input_id_value;
     	let mounted;
@@ -11048,7 +11048,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2.name,
+    		id: create_if_block_2$1.name,
     		type: "if",
     		source: "(27:10) {#if typeof value === \\\"boolean\\\" && (isAction(mainObject) || isProcess(mainObject))}",
     		ctx
@@ -11688,32 +11688,32 @@ var app = (function () {
 
     function get_each_context_2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[31] = list[i];
+    	child_ctx[32] = list[i];
     	return child_ctx;
     }
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[24] = list[i];
+    	child_ctx[25] = list[i];
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[27] = list[i][0];
-    	child_ctx[28] = list[i][1];
+    	child_ctx[28] = list[i][0];
+    	child_ctx[29] = list[i][1];
     	return child_ctx;
     }
 
-    // (178:0) {:else}
-    function create_else_block(ctx) {
+    // (193:0) {:else}
+    function create_else_block_1(ctx) {
     	let h1;
     	let t1;
     	let select;
     	let option;
     	let mounted;
     	let dispose;
-    	let each_value_2 = /*processes*/ ctx[4];
+    	let each_value_2 = /*processes*/ ctx[6];
     	validate_each_argument(each_value_2);
     	let each_blocks = [];
 
@@ -11734,12 +11734,12 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			add_location(h1, file$3, 178, 2, 8761);
+    			add_location(h1, file$3, 193, 2, 9211);
     			option.__value = "";
     			option.value = option.__value;
-    			add_location(option, file$3, 183, 4, 8894);
-    			if (/*selectedProcess*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[10].call(select));
-    			add_location(select, file$3, 179, 2, 8792);
+    			add_location(option, file$3, 198, 4, 9344);
+    			if (/*selectedProcess*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[13].call(select));
+    			add_location(select, file$3, 194, 2, 9242);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, h1, anchor);
@@ -11757,16 +11757,16 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(select, "change", /*select_change_handler*/ ctx[10]),
-    					listen_dev(select, "change", /*change_handler*/ ctx[11], false, false, false, false)
+    					listen_dev(select, "change", /*select_change_handler*/ ctx[13]),
+    					listen_dev(select, "change", /*change_handler*/ ctx[14], false, false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*processes*/ 16) {
-    				each_value_2 = /*processes*/ ctx[4];
+    			if (dirty[0] & /*processes*/ 64) {
+    				each_value_2 = /*processes*/ ctx[6];
     				validate_each_argument(each_value_2);
     				let i;
 
@@ -11789,7 +11789,7 @@ var app = (function () {
     				each_blocks.length = each_value_2.length;
     			}
 
-    			if (dirty[0] & /*selectedProcess, processes*/ 17) {
+    			if (dirty[0] & /*selectedProcess, processes*/ 65) {
     				select_option(select, /*selectedProcess*/ ctx[0]);
     			}
     		},
@@ -11805,16 +11805,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block.name,
+    		id: create_else_block_1.name,
     		type: "else",
-    		source: "(178:0) {:else}",
+    		source: "(193:0) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (151:0) {#if selectedProcess}
+    // (161:0) {#if selectedProcess}
     function create_if_block$2(ctx) {
     	let div;
     	let h20;
@@ -11823,13 +11823,14 @@ var app = (function () {
     	let t1;
     	let t2;
     	let h21;
-    	let t3;
-    	let t4_value = /*topological_order_names*/ ctx[2].join(", ") + "";
     	let t4;
+    	let p;
+    	let t5_value = /*topological_order_names*/ ctx[2].join(" -> ") + "";
     	let t5;
+    	let t6;
     	let h22;
-    	let t7;
     	let t8;
+    	let t9;
     	let each_value_1 = [.../*globalVariables*/ ctx[1]];
     	validate_each_argument(each_value_1);
     	let each_blocks = [];
@@ -11838,7 +11839,14 @@ var app = (function () {
     		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
     	}
 
-    	let if_block = /*needed_variables*/ ctx[3].length != 0 && create_if_block_1(ctx);
+    	function select_block_type_1(ctx, dirty) {
+    		if (!/*ready_to_make_first_prompt*/ ctx[5]) return create_if_block_1;
+    		if (!/*already_made_first_prompt*/ ctx[3]) return create_if_block_2;
+    		return create_else_block;
+    	}
+
+    	let current_block_type = select_block_type_1(ctx);
+    	let if_block = current_block_type(ctx);
 
     	const block = {
     		c: function create() {
@@ -11848,23 +11856,26 @@ var app = (function () {
     			t1 = text(t1_value);
     			t2 = space();
     			h21 = element$1("h2");
-    			t3 = text("Topological Order: ");
-    			t4 = text(t4_value);
-    			t5 = space();
+    			h21.textContent = "Topological Order:";
+    			t4 = space();
+    			p = element$1("p");
+    			t5 = text(t5_value);
+    			t6 = space();
     			h22 = element$1("h2");
     			h22.textContent = "Global Variables";
-    			t7 = space();
+    			t8 = space();
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			t8 = space();
-    			if (if_block) if_block.c();
-    			add_location(h20, file$3, 152, 4, 7932);
-    			add_location(h21, file$3, 153, 4, 7988);
-    			add_location(h22, file$3, 155, 4, 8058);
-    			add_location(div, file$3, 151, 2, 7922);
+    			t9 = space();
+    			if_block.c();
+    			add_location(h20, file$3, 162, 4, 8186);
+    			add_location(h21, file$3, 163, 4, 8242);
+    			add_location(p, file$3, 164, 4, 8274);
+    			add_location(h22, file$3, 166, 4, 8325);
+    			add_location(div, file$3, 161, 2, 8176);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -11873,11 +11884,12 @@ var app = (function () {
     			append_dev(h20, t1);
     			append_dev(div, t2);
     			append_dev(div, h21);
-    			append_dev(h21, t3);
-    			append_dev(h21, t4);
-    			append_dev(div, t5);
+    			append_dev(div, t4);
+    			append_dev(div, p);
+    			append_dev(p, t5);
+    			append_dev(div, t6);
     			append_dev(div, h22);
-    			append_dev(div, t7);
+    			append_dev(div, t8);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				if (each_blocks[i]) {
@@ -11885,12 +11897,12 @@ var app = (function () {
     				}
     			}
 
-    			append_dev(div, t8);
-    			if (if_block) if_block.m(div, null);
+    			append_dev(div, t9);
+    			if_block.m(div, null);
     		},
     		p: function update(ctx, dirty) {
     			if (dirty[0] & /*selectedProcess*/ 1 && t1_value !== (t1_value = /*selectedProcess*/ ctx[0].description + "")) set_data_dev(t1, t1_value);
-    			if (dirty[0] & /*topological_order_names*/ 4 && t4_value !== (t4_value = /*topological_order_names*/ ctx[2].join(", ") + "")) set_data_dev(t4, t4_value);
+    			if (dirty[0] & /*topological_order_names*/ 4 && t5_value !== (t5_value = /*topological_order_names*/ ctx[2].join(" -> ") + "")) set_data_dev(t5, t5_value);
 
     			if (dirty[0] & /*globalVariables*/ 2) {
     				each_value_1 = [.../*globalVariables*/ ctx[1]];
@@ -11905,7 +11917,7 @@ var app = (function () {
     					} else {
     						each_blocks[i] = create_each_block_1(child_ctx);
     						each_blocks[i].c();
-    						each_blocks[i].m(div, t8);
+    						each_blocks[i].m(div, t9);
     					}
     				}
 
@@ -11916,23 +11928,22 @@ var app = (function () {
     				each_blocks.length = each_value_1.length;
     			}
 
-    			if (/*needed_variables*/ ctx[3].length != 0) {
+    			if (current_block_type === (current_block_type = select_block_type_1(ctx)) && if_block) {
+    				if_block.p(ctx, dirty);
+    			} else {
+    				if_block.d(1);
+    				if_block = current_block_type(ctx);
+
     				if (if_block) {
-    					if_block.p(ctx, dirty);
-    				} else {
-    					if_block = create_if_block_1(ctx);
     					if_block.c();
     					if_block.m(div, null);
     				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
     			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
     			destroy_each(each_blocks, detaching);
-    			if (if_block) if_block.d();
+    			if_block.d();
     		}
     	};
 
@@ -11940,17 +11951,17 @@ var app = (function () {
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(151:0) {#if selectedProcess}",
+    		source: "(161:0) {#if selectedProcess}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (185:4) {#each processes as process}
+    // (200:4) {#each processes as process}
     function create_each_block_2(ctx) {
     	let option;
-    	let t_value = /*process*/ ctx[31].name + "";
+    	let t_value = /*process*/ ctx[32].name + "";
     	let t;
     	let option_value_value;
 
@@ -11958,18 +11969,18 @@ var app = (function () {
     		c: function create() {
     			option = element$1("option");
     			t = text(t_value);
-    			option.__value = option_value_value = /*process*/ ctx[31].name;
+    			option.__value = option_value_value = /*process*/ ctx[32].name;
     			option.value = option.__value;
-    			add_location(option, file$3, 185, 6, 8976);
+    			add_location(option, file$3, 200, 6, 9426);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
     			append_dev(option, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*processes*/ 16 && t_value !== (t_value = /*process*/ ctx[31].name + "")) set_data_dev(t, t_value);
+    			if (dirty[0] & /*processes*/ 64 && t_value !== (t_value = /*process*/ ctx[32].name + "")) set_data_dev(t, t_value);
 
-    			if (dirty[0] & /*processes*/ 16 && option_value_value !== (option_value_value = /*process*/ ctx[31].name)) {
+    			if (dirty[0] & /*processes*/ 64 && option_value_value !== (option_value_value = /*process*/ ctx[32].name)) {
     				prop_dev(option, "__value", option_value_value);
     				option.value = option.__value;
     			}
@@ -11983,20 +11994,20 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(185:4) {#each processes as process}",
+    		source: "(200:4) {#each processes as process}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (157:4) {#each [...globalVariables] as [key, value]}
+    // (168:4) {#each [...globalVariables] as [key, value]}
     function create_each_block_1(ctx) {
     	let p;
-    	let t0_value = /*key*/ ctx[27] + "";
+    	let t0_value = /*key*/ ctx[28] + "";
     	let t0;
     	let t1;
-    	let t2_value = /*value*/ ctx[28] + "";
+    	let t2_value = /*value*/ ctx[29] + "";
     	let t2;
 
     	const block = {
@@ -12005,7 +12016,7 @@ var app = (function () {
     			t0 = text(t0_value);
     			t1 = text(": ");
     			t2 = text(t2_value);
-    			add_location(p, file$3, 157, 6, 8139);
+    			add_location(p, file$3, 168, 6, 8406);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -12014,8 +12025,8 @@ var app = (function () {
     			append_dev(p, t2);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*globalVariables*/ 2 && t0_value !== (t0_value = /*key*/ ctx[27] + "")) set_data_dev(t0, t0_value);
-    			if (dirty[0] & /*globalVariables*/ 2 && t2_value !== (t2_value = /*value*/ ctx[28] + "")) set_data_dev(t2, t2_value);
+    			if (dirty[0] & /*globalVariables*/ 2 && t0_value !== (t0_value = /*key*/ ctx[28] + "")) set_data_dev(t0, t0_value);
+    			if (dirty[0] & /*globalVariables*/ 2 && t2_value !== (t2_value = /*value*/ ctx[29] + "")) set_data_dev(t2, t2_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(p);
@@ -12026,23 +12037,78 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(157:4) {#each [...globalVariables] as [key, value]}",
+    		source: "(168:4) {#each [...globalVariables] as [key, value]}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (162:4) {#if needed_variables.length != 0}
+    // (189:4) {:else}
+    function create_else_block(ctx) {
+    	const block = { c: noop$3, m: noop$3, p: noop$3, d: noop$3 };
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block.name,
+    		type: "else",
+    		source: "(189:4) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (187:41) 
+    function create_if_block_2(ctx) {
+    	let button;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			button = element$1("button");
+    			button.textContent = "Execute";
+    			attr_dev(button, "class", "add-button");
+    			add_location(button, file$3, 187, 6, 9046);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", /*sendFirstPrompt*/ ctx[7], false, false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: noop$3,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2.name,
+    		type: "if",
+    		source: "(187:41) ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (173:4) {#if !ready_to_make_first_prompt}
     function create_if_block_1(ctx) {
     	let h2;
     	let t1;
     	let each_blocks = [];
     	let each_1_lookup = new Map_1();
     	let each_1_anchor;
-    	let each_value = /*needed_variables*/ ctx[3];
+    	let each_value = /*needed_variables*/ ctx[4];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*needed_var*/ ctx[24];
+    	const get_key = ctx => /*needed_var*/ ctx[25];
     	validate_each_keys(ctx, each_value, get_each_context$1, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -12062,7 +12128,7 @@ var app = (function () {
     			}
 
     			each_1_anchor = empty();
-    			add_location(h2, file$3, 162, 6, 8281);
+    			add_location(h2, file$3, 173, 6, 8547);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, h2, anchor);
@@ -12077,8 +12143,8 @@ var app = (function () {
     			insert_dev(target, each_1_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*handleFormSubmit, needed_variables, handleInputChange*/ 104) {
-    				each_value = /*needed_variables*/ ctx[3];
+    			if (dirty[0] & /*handleFormSubmit, needed_variables, handleInputChange*/ 784) {
+    				each_value = /*needed_variables*/ ctx[4];
     				validate_each_argument(each_value);
     				validate_each_keys(ctx, each_value, get_each_context$1, get_key);
     				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, each_1_anchor.parentNode, destroy_block, create_each_block$1, each_1_anchor, get_each_context$1);
@@ -12100,18 +12166,18 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(162:4) {#if needed_variables.length != 0}",
+    		source: "(173:4) {#if !ready_to_make_first_prompt}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (164:6) {#each needed_variables as needed_var (needed_var)}
+    // (175:6) {#each needed_variables as needed_var (needed_var)}
     function create_each_block$1(key_1, ctx) {
     	let form;
     	let label;
-    	let t0_value = /*needed_var*/ ctx[24] + "";
+    	let t0_value = /*needed_var*/ ctx[25] + "";
     	let t0;
     	let label_for_value;
     	let t1;
@@ -12124,11 +12190,11 @@ var app = (function () {
     	let dispose;
 
     	function input_handler(...args) {
-    		return /*input_handler*/ ctx[8](/*needed_var*/ ctx[24], ...args);
+    		return /*input_handler*/ ctx[11](/*needed_var*/ ctx[25], ...args);
     	}
 
     	function submit_handler(...args) {
-    		return /*submit_handler*/ ctx[9](/*needed_var*/ ctx[24], ...args);
+    		return /*submit_handler*/ ctx[12](/*needed_var*/ ctx[25], ...args);
     	}
 
     	const block = {
@@ -12144,13 +12210,13 @@ var app = (function () {
     			button = element$1("button");
     			button.textContent = "Update";
     			t4 = space();
-    			attr_dev(label, "for", label_for_value = /*needed_var*/ ctx[24]);
-    			add_location(label, file$3, 167, 10, 8480);
-    			attr_dev(input, "id", input_id_value = /*needed_var*/ ctx[24]);
-    			add_location(input, file$3, 168, 10, 8535);
+    			attr_dev(label, "for", label_for_value = /*needed_var*/ ctx[25]);
+    			add_location(label, file$3, 178, 10, 8746);
+    			attr_dev(input, "id", input_id_value = /*needed_var*/ ctx[25]);
+    			add_location(input, file$3, 179, 10, 8801);
     			attr_dev(button, "type", "submit");
-    			add_location(button, file$3, 172, 10, 8664);
-    			add_location(form, file$3, 164, 8, 8373);
+    			add_location(button, file$3, 183, 10, 8930);
+    			add_location(form, file$3, 175, 8, 8639);
     			this.first = form;
     		},
     		m: function mount(target, anchor) {
@@ -12174,13 +12240,13 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty[0] & /*needed_variables*/ 8 && t0_value !== (t0_value = /*needed_var*/ ctx[24] + "")) set_data_dev(t0, t0_value);
+    			if (dirty[0] & /*needed_variables*/ 16 && t0_value !== (t0_value = /*needed_var*/ ctx[25] + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty[0] & /*needed_variables*/ 8 && label_for_value !== (label_for_value = /*needed_var*/ ctx[24])) {
+    			if (dirty[0] & /*needed_variables*/ 16 && label_for_value !== (label_for_value = /*needed_var*/ ctx[25])) {
     				attr_dev(label, "for", label_for_value);
     			}
 
-    			if (dirty[0] & /*needed_variables*/ 8 && input_id_value !== (input_id_value = /*needed_var*/ ctx[24])) {
+    			if (dirty[0] & /*needed_variables*/ 16 && input_id_value !== (input_id_value = /*needed_var*/ ctx[25])) {
     				attr_dev(input, "id", input_id_value);
     			}
     		},
@@ -12195,7 +12261,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(164:6) {#each needed_variables as needed_var (needed_var)}",
+    		source: "(175:6) {#each needed_variables as needed_var (needed_var)}",
     		ctx
     	});
 
@@ -12207,7 +12273,7 @@ var app = (function () {
 
     	function select_block_type(ctx, dirty) {
     		if (/*selectedProcess*/ ctx[0]) return create_if_block$2;
-    		return create_else_block;
+    		return create_else_block_1;
     	}
 
     	let current_block_type = select_block_type(ctx);
@@ -12262,11 +12328,11 @@ var app = (function () {
     	let $aiSystemStore;
     	let $graphStore;
     	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(16, $systemStateStore = $$value));
+    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(18, $systemStateStore = $$value));
     	validate_store(aiSystemStore, 'aiSystemStore');
-    	component_subscribe($$self, aiSystemStore, $$value => $$invalidate(17, $aiSystemStore = $$value));
+    	component_subscribe($$self, aiSystemStore, $$value => $$invalidate(19, $aiSystemStore = $$value));
     	validate_store(graphStore, 'graphStore');
-    	component_subscribe($$self, graphStore, $$value => $$invalidate(18, $graphStore = $$value));
+    	component_subscribe($$self, graphStore, $$value => $$invalidate(20, $graphStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Execution', slots, []);
 
@@ -12316,13 +12382,31 @@ var app = (function () {
     	let ready_to_make_first_prompt = false;
 
     	function update_local_variables() {
-    		$$invalidate(0, selectedProcess = $systemStateStore.selectedProcess);
-    		console.log("Updated selectedProcess: ", selectedProcess);
-    		topological_order = selectedProcess.topological_order;
-    		$$invalidate(1, globalVariables = $graphStore.global_variables);
-    		console.log("Updated globalVariables: ", [...globalVariables]);
-    		possibleActions = $aiSystemStore.actions;
-    		console.log("Updated possibleActions: ", possibleActions);
+    		return __awaiter(this, void 0, void 0, function* () {
+    			$$invalidate(0, selectedProcess = $systemStateStore.selectedProcess);
+    			console.log("Updated selectedProcess: ", selectedProcess);
+    			topological_order = selectedProcess.topological_order;
+    			$$invalidate(1, globalVariables = $graphStore.global_variables);
+    			console.log("Updated globalVariables: ", [...globalVariables]);
+    			possibleActions = $aiSystemStore.actions;
+    			console.log("Updated possibleActions: ", possibleActions);
+    			let return_val = yield processSelectedProcessAndActions(selectedProcess, possibleActions, topological_order, topological_order_names, globalVariables);
+    			$$invalidate(2, topological_order_names = return_val.topological_order_names);
+    			$$invalidate(5, ready_to_make_first_prompt = return_val.ready_to_make_first_prompt);
+    			$$invalidate(4, needed_variables = return_val.needed_variables);
+    			console.log("Updated needed_variables: ", needed_variables);
+    			console.log("Updated topological_order_names: ", topological_order_names);
+    			console.log("Updated ready_to_make_first_prompt: ", ready_to_make_first_prompt);
+    		});
+    	}
+
+    	function sendFirstPrompt() {
+    		createFirstPrompt(ready_to_make_first_prompt, already_made_first_prompt, topological_order, possibleActions, globalVariables).then(result => {
+    			$$invalidate(3, already_made_first_prompt = result.already_made_first_prompt);
+    			update_local_variables();
+    		}).catch(err => {
+    			console.error("Error in sendFirstPrompt: ", err);
+    		});
     	}
 
     	function processSelectedProcessAndActions(
@@ -12333,6 +12417,7 @@ var app = (function () {
     	globalVariables
     	) {
     		return __awaiter(this, void 0, void 0, function* () {
+    			console.log("Processing selected process and actions...");
     			let ready_to_make_first_prompt = false;
     			let needed_variables = [];
 
@@ -12442,21 +12527,15 @@ var app = (function () {
     			event.preventDefault();
 
     			if (newValues[variableName]) {
-    				addGlobalVariable(variableName, newValues[variableName]);
+    				yield addGlobalVariable(variableName, newValues[variableName]);
     			}
 
-    			let return_val = yield processSelectedProcessAndActions(selectedProcess, possibleActions, topological_order, topological_order_names, globalVariables);
-    			$$invalidate(2, topological_order_names = return_val.topological_order_names);
-    			ready_to_make_first_prompt = return_val.ready_to_make_first_prompt;
-    			$$invalidate(3, needed_variables = return_val.needed_variables);
-    			update_local_variables();
+    			yield update_local_variables();
     		});
     	}
 
-    	// Function to handle dropdown change events
     	function onDropdownChange() {
     		return __awaiter(this, void 0, void 0, function* () {
-    			// console.log("onDropdownChange called: ", type, " selectedAction: ", selectedAction, " selectedProcess: ", selectedProcess);
     			if (selectedProcess) {
     				let this_process = $aiSystemStore.processes.find(obj => obj.name === selectedProcess);
 
@@ -12465,11 +12544,7 @@ var app = (function () {
     					set_store_value(systemStateStore, $systemStateStore.selectedAction = newAction(), $systemStateStore);
     				}
 
-    				let return_val = yield processSelectedProcessAndActions(selectedProcess, possibleActions, topological_order, topological_order_names, globalVariables);
-    				$$invalidate(2, topological_order_names = return_val.topological_order_names);
-    				ready_to_make_first_prompt = return_val.ready_to_make_first_prompt;
-    				$$invalidate(3, needed_variables = return_val.needed_variables);
-    				update_local_variables();
+    				yield update_local_variables();
     			}
     		});
     	}
@@ -12486,7 +12561,7 @@ var app = (function () {
     	function select_change_handler() {
     		selectedProcess = select_value(this);
     		$$invalidate(0, selectedProcess);
-    		$$invalidate(4, processes);
+    		$$invalidate(6, processes);
     	}
 
     	const change_handler = async () => await onDropdownChange();
@@ -12511,6 +12586,7 @@ var app = (function () {
     		needed_variables,
     		ready_to_make_first_prompt,
     		update_local_variables,
+    		sendFirstPrompt,
     		processSelectedProcessAndActions,
     		createFirstPrompt,
     		processes,
@@ -12530,10 +12606,10 @@ var app = (function () {
     		if ('possibleActions' in $$props) possibleActions = $$props.possibleActions;
     		if ('topological_order' in $$props) topological_order = $$props.topological_order;
     		if ('topological_order_names' in $$props) $$invalidate(2, topological_order_names = $$props.topological_order_names);
-    		if ('already_made_first_prompt' in $$props) already_made_first_prompt = $$props.already_made_first_prompt;
-    		if ('needed_variables' in $$props) $$invalidate(3, needed_variables = $$props.needed_variables);
-    		if ('ready_to_make_first_prompt' in $$props) ready_to_make_first_prompt = $$props.ready_to_make_first_prompt;
-    		if ('processes' in $$props) $$invalidate(4, processes = $$props.processes);
+    		if ('already_made_first_prompt' in $$props) $$invalidate(3, already_made_first_prompt = $$props.already_made_first_prompt);
+    		if ('needed_variables' in $$props) $$invalidate(4, needed_variables = $$props.needed_variables);
+    		if ('ready_to_make_first_prompt' in $$props) $$invalidate(5, ready_to_make_first_prompt = $$props.ready_to_make_first_prompt);
+    		if ('processes' in $$props) $$invalidate(6, processes = $$props.processes);
     		if ('newValues' in $$props) newValues = $$props.newValues;
     	};
 
@@ -12545,8 +12621,11 @@ var app = (function () {
     		selectedProcess,
     		globalVariables,
     		topological_order_names,
+    		already_made_first_prompt,
     		needed_variables,
+    		ready_to_make_first_prompt,
     		processes,
+    		sendFirstPrompt,
     		handleInputChange,
     		handleFormSubmit,
     		onDropdownChange,
