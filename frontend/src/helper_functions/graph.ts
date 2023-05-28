@@ -17,7 +17,7 @@ import websocketStore from "stores/websocketStore";
 // Define the getter and setter
 
 export async function getGraphState(): Promise<GraphState> {
-  return new Promise((resolve, _) => {
+  return new Promise((resolve, _rej) => {
     graphStore.subscribe((graphState: GraphState) => {
       resolve(graphState);
     });
@@ -72,7 +72,7 @@ export async function getProcessById(id: string): Promise<Process | null> {
 }
 
 export async function getAiSystemState(): Promise<AiSystemState> {
-  return new Promise((resolve, _) => {
+  return new Promise((resolve, _rej) => {
     aiSystemStore.subscribe((aiSystemState: AiSystemState) => {
       resolve(aiSystemState);
     });
@@ -94,7 +94,7 @@ export function topologicalSort(graph: Graph) {
 
 // get the name of the action by using the id
 export async function getNodeName(id: string): Promise<string | undefined> {
-  const res: AiSystemState = await new Promise((resolve, _) => {
+  const res: AiSystemState = await new Promise((resolve, _rej) => {
     aiSystemStore.subscribe((aiSystemState: AiSystemState) => {
       resolve(aiSystemState);
     });
@@ -313,8 +313,8 @@ export async function removeSelectedEdge(): Promise<void> {
 }
 
 export async function removeEdge(
-  sourceId: string,
-  targetId: string
+  _sourceId: string,
+  _targetId: string
 ): Promise<void> {
   const graphState = await getGraphState();
   // find the id of the edge to remove

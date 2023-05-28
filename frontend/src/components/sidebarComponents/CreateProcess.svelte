@@ -13,8 +13,6 @@
   import { Graph } from "graphlib";
   import websocketStore from "stores/websocketStore";
 
-  import InteractWithActionsAndProcesses from "./InteractWithActionsAndProcesses.svelte";
-
   import { json } from "graphlib";
 
   let actions: Action[] = [];

@@ -83,7 +83,7 @@ export type Prompt = {
   action_id: string,
 };
 
-export type Response = {
+export type AIResponse = {
   response_text: string;
   action_id: string;
 }
@@ -99,7 +99,6 @@ export type CreateAction = {
 export type CreateProcess = {
   create_process: Process;
 };
-
 
 export type Execution = {
   local_variables: Map<string, string>;

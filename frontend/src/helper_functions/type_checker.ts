@@ -1,5 +1,5 @@
 import { Graph } from "@dagrejs/graphlib";
-import { Process, Action } from "system_types";
+import { Process, Action, AIResponse } from "system_types";
 
 // eslint-disable-next-line no-explicit-any
 export function isProcess(object: any): object is Process {
@@ -140,8 +140,8 @@ export function newAction(): Action {
   };
 }
 
-export function isResponse(object: any): object is Response {
-  return "response_text" in object && "action_id" in object;
+export function isResponse(object: any): object is AIResponse {
+  return object && "response_text" in object && "action_id" in object;
 }
 
 export function newProcess(): Process {

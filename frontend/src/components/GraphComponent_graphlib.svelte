@@ -8,15 +8,10 @@
     selectNode,
     resetLastAction,
     selectEdge,
-    getActionById,
-    getAncestorNodes,
     getGlobalVariableNames,
-    getNodeName,
-    printEdge,
     checkEdgeVariables,
   } from "../helper_functions/graph";
-  import graphlib, { Graph } from "graphlib";
-  import { Action } from "system_types/index.js";
+  import graphlib from "graphlib";
 
   setContext("graphSharedState", {
     getCyInstance: () => cyInstance,
@@ -27,7 +22,6 @@
   let g = new graphlib.Graph();
   let id_map = new Map();
   let lastAction = "";
-  let lastActionValid = false;
 
   graphStore.subscribe(async (value) => {
     // console.log("graphStore value: ", value);
@@ -72,8 +66,6 @@
         console.error(
           "Invalid edge. The output variables of the source node are incompatible with the input variables of the target node."
         );
-        // You could also set a variable 'lastActionValid' to false here and use it to show the error in your UI
-        lastActionValid = false;
       }
     } else if (
       value.lastAction === "removeEdge" &&
