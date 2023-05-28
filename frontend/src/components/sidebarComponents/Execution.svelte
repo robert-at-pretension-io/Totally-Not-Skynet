@@ -1,8 +1,5 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
-  import { graphStore } from "stores/graphStore";
-  import { aiSystemStore } from "stores/aiSystemStore";
-  import type { Action, Process, Prompt } from "./system_types";
   import {
     getInputVariablesByNodeId,
     getNodeName,
@@ -10,6 +7,7 @@
   } from "helper_functions/graph";
   import { isProcess, newAction } from "helper_functions/type_checker";
   import { addGlobalVariable } from "helper_functions/graph";
+  import type {Process, Action, Prompt} from "system_types";
 
   let selectedProcess: Process | null = null;
   let globalVariables = new Map<string, string>();
@@ -25,10 +23,10 @@
     console.log("Updated selectedProcess: ", selectedProcess);
     topological_order = selectedProcess.topological_order;
 
-    globalVariables = $graphStore.global_variables;
+    globalVariables = $systemStateStore.graphState.global_variables;
     console.log("Updated globalVariables: ", [...globalVariables]);
 
-    possibleActions = $aiSystemStore.actions;
+    possibleActions = $systemStateStore.aiSystemState.actions;
     console.log("Updated possibleActions: ", possibleActions);
 
     let return_val = await processSelectedProcessAndActions(
@@ -182,7 +180,7 @@
 
   let processes: Process[] = [];
 
-  processes = $aiSystemStore.processes;
+  processes = $systemStateStore.aiSystemState.processes;
 
   let newValues = {};
 
@@ -200,7 +198,7 @@
   }
   async function onDropdownChange() {
     if (selectedProcess) {
-      let this_process = $aiSystemStore.processes.find(
+      let this_process = $systemStateStore.aiSystemState.processes.find(
         (obj) => obj.name === selectedProcess
       );
 

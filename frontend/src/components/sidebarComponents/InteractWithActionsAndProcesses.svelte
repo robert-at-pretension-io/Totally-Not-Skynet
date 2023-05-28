@@ -1,5 +1,4 @@
 <script>
-  import { aiSystemStore } from "stores/aiSystemStore";
   import systemStateStore from "stores/systemStateStore";
   import JsonEditor from "./JsonEditor.svelte";
 
@@ -11,8 +10,8 @@
   let processes = [];
 
   $: {
-    actions = $aiSystemStore.actions;
-    processes = $aiSystemStore.processes;
+    actions = $systemStateStore.aiSystemState.actions;
+    processes = $systemStateStore.aiSystemState.processes;
   }
 
   // Function to handle dropdown change events
@@ -28,7 +27,7 @@
       // Set the selected action in the systemStateStore
       // it should get the action from the aiSystemStore
       // with the name selectedAction
-      let this_action = $aiSystemStore.actions.find(
+      let this_action = $systemStateStore.aiSystemState.actions.find(
         (obj) => obj.name === selectedAction
       );
       $systemStateStore.selectedAction = this_action;
@@ -38,7 +37,7 @@
       // Set the selected process in the systemStateStore
       // it should get the process from the aiSystemStore
       // with the name selectedProcess
-      let this_process = $aiSystemStore.processes.find(
+      let this_process = $systemStateStore.aiSystemState.processes.find(
         (obj) => obj.name === selectedProcess
       );
 

@@ -2,7 +2,6 @@
   import AddNodeButton from "./sidebarComponents/AddNodeButton.svelte";
   import CreateProcess from "./sidebarComponents/CreateProcess.svelte";
   import BackgroundInfo from "./sidebarComponents/BackgroundInfo.svelte";
-  import GlobalVariables from "./sidebarComponents/GlobalVariables.svelte";
   import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
   import Execution from "./sidebarComponents/Execution.svelte";
 
@@ -22,7 +21,7 @@
       component: InteractWithActionsAndProcesses,
       open: false,
     },
-    { header: "Global Variables", component: GlobalVariables, open: false },
+    // { header: "Global Variables", component: GlobalVariables, open: false },
     { header: "Execution of Processes", component: Execution, open: false },
     // { header : "Edit Actions and Processes", component: InteractWithActionsAndProcesses, open: false},
   ];
