@@ -1,6 +1,5 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
-  import websocketStore from "stores/websocketStore";
   import type { Action, Process, UpdateAction } from "../../system_types";
   import { isProcess, isAction } from "helper_functions/type_checker";
   let mainObject: Action | Process;
@@ -16,7 +15,7 @@
         action: mainObject,
       };
       // console.log("sending: " + JSON.stringify(updateAction));
-      $websocketStore.send(JSON.stringify(updateAction));
+      $systemStateStore.websocket.send(JSON.stringify(updateAction));
     }
   }
 </script>

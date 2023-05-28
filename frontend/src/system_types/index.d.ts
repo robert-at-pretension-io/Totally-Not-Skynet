@@ -42,7 +42,7 @@ export type MongoId = {
 export type Process = {
   _id: MongoId;
   name: string;
-  graph: Graph;
+  graph: Graph | string;
   description: string;
   topological_order: string[];
 };
@@ -63,6 +63,10 @@ export type SystemState = {
   websocketReady: boolean;
   selectedAction: Action;
   selectedProcess: Process;
+  graphState: GraphState;
+  websocket: WebSocket;
+  executionContext: ExecutionContext;
+  aiSystemState: AiSystemState;
 };
 
 export type Goal = {
@@ -100,7 +104,7 @@ export type CreateProcess = {
   create_process: Process;
 };
 
-export type Execution = {
+export type ExecutionContext = {
   local_variables: Map<string, string>;
   global_variables: Map<string, string>;
   topological_order: string[];

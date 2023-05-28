@@ -11,8 +11,8 @@
   import type {
     Action,
     Process,
-    AiSystemState,
     AIResponse,
+    SystemState,
   } from "./system_types";
   import {
     isAction,
@@ -20,12 +20,12 @@
     isResponse,
   } from "helper_functions/type_checker";
 
+  import {
+    processToGraph
+  } from "helper_functions/graph";
+
   import { onMount } from "svelte";
-  import websocketStore from "./stores/websocketStore";
-  import { aiSystemStore } from "stores/aiSystemStore";
   import systemStateStore from "stores/systemStateStore";
-  import { executionStore } from "stores/executionStore";
-  import { processToGraph } from "helper_functions/graph";
   import {
     populateInputVariables,
     populateOutputVariables,
@@ -35,25 +35,25 @@
 
   onMount(async () => {
     // start the websocket connection
-    $websocketStore.addEventListener("open", () => {
+    $systemStateStore.websocket.addEventListener("open", () => {
       console.log("websocket connection opened");
 
       let apiKey = localStorage.getItem("apiKey") || "Api Key";
       let mongo_uri = localStorage.getItem("mongo_uri") || "Mongo Uri";
       localStorage.setItem("apiKey", apiKey);
       localStorage.setItem("mongo_uri", mongo_uri);
-      $websocketStore.send(
+      $systemStateStore.websocket.send(
         JSON.stringify({ openai_api_key: apiKey, mongo_db_uri: mongo_uri })
       );
 
-      $websocketStore.send(
+      $systemStateStore.websocket.send(
         JSON.stringify({ initial_message: "initial message" })
       );
 
       console.log("Set api key to: " + apiKey);
       console.log("Set mongo uri to: " + mongo_uri);
     });
-    $websocketStore.addEventListener("message", (event) => {
+    $systemStateStore.websocket.addEventListener("message", (event) => {
       // console.log("websocket message received: ", event.data);
       let data: any;
       try {
@@ -71,9 +71,9 @@
       // check to see if the data has the shape of a Process or Action
       if (isProcess(data)) {
         let process: Process = data;
-        aiSystemStore.update((state: AiSystemState) => {
+        systemStateStore.update((state : SystemState) => {
           // Check if the process is already in the state
-          let processAlreadyInState = state.processes.find((process) => {
+          let processAlreadyInState = state.aiSystemState.processes.find((process) => {
             return process._id === data._id;
           });
           if (processAlreadyInState) {
@@ -81,14 +81,14 @@
             return state;
           } else {
             // console.log("Adding process to state:", process);
-            state.processes.push(process);
+            state.aiSystemState.processes.push(process);
             return state;
           }
         });
       } else if (isAction(data)) {
         let action: Action = data;
         // console.log(getId(action));
-        aiSystemStore.update((state: AiSystemState) => {
+        systemStateStore.update((state: SystemState) => {
           // console.log("Adding action to state:");
           let input_variables = populateInputVariables(action);
           // console.log("input_variables: ", input_variables);
@@ -122,17 +122,17 @@
           }
 
           if (invalid) {
-            $websocketStore.send(JSON.stringify({ action: action }));
+            $systemStateStore.websocket.send(JSON.stringify({ action: action }));
             return state;
           }
           // check if the action is already in the state by looking at the name
-          let actionIndex = state.actions.findIndex(
+          let actionIndex = state.aiSystemState.actions.findIndex(
             (a) => a.name === action.name
           );
           if (actionIndex === -1) {
-            state.actions.push(action);
+            state.aiSystemState.actions.push(action);
           } else {
-            state.actions[actionIndex] = action;
+            state.aiSystemState.actions[actionIndex] = action;
           }
 
           return state;
@@ -146,7 +146,7 @@
 
         console.log("response: ", response);
 
-        $executionStore.responses.set(
+        $systemStateStore.executionContext.responses.set(
           response.action_id,
           response.response_text
         );
@@ -157,8 +157,8 @@
         // This will depend on your specific application logic.
       } else if (Object.prototype.hasOwnProperty.call(data, "create_action")) {
         let action: Action = data.create_action;
-        aiSystemStore.update((state: AiSystemState) => {
-          state.actions.push(action);
+        systemStateStore.update((state: SystemState) => {
+          state.aiSystemState.actions.push(action);
           return state;
         });
       } else if (Object.prototype.hasOwnProperty.call(data, "create_process")) {
@@ -169,17 +169,17 @@
           process.graph = json.read(process.graph);
         }
 
-        aiSystemStore.update((state: AiSystemState) => {
+        systemStateStore.update((state: SystemState) => {
           if (process != null) {
             // only push if the process isn't already in the state:
-            let processAlreadyInState = state.processes.find((p) => {
+            let processAlreadyInState = state.aiSystemState.processes.find((p) => {
               return p._id === process._id;
             });
             if (processAlreadyInState) {
               console.log("Process already in state");
               return state;
             }
-            state.processes.push(process);
+            state.aiSystemState.processes.push(process);
             return state;
           }
           return state;

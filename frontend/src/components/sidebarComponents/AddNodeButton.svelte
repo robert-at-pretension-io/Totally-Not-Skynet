@@ -2,7 +2,7 @@
 
   import type { Action } from "../../system_types";
 
-  import websocketStore from "stores/websocketStore";
+  import systemStateStore from "stores/systemStateStore";
 
   let action: Action = {
     _id: { $oid: "" },
@@ -19,7 +19,7 @@
 
     // create the action in the database by sending a message to the backend
 
-    $websocketStore.send(JSON.stringify({create_action: action}));
+    $systemStateStore.websocket.send(JSON.stringify({create_action: action}));
 
   }
 </script>

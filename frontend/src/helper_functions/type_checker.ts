@@ -1,5 +1,5 @@
 import { Graph } from "@dagrejs/graphlib";
-import { Process, Action, AIResponse } from "system_types";
+import { Process, Action, AIResponse, GraphState, ExecutionContext } from "system_types";
 
 // eslint-disable-next-line no-explicit-any
 export function isProcess(object: any): object is Process {
@@ -157,5 +157,26 @@ export function newProcess(): Process {
     graph: new Graph(),
     description: "",
     topological_order: [],
+  };
+}
+
+export function newGraphState(): GraphState {
+  return {
+    graph: new Graph(), // replace with correct way to create a new Graph object
+    lastAction: "none",
+    actedOn: null,
+    lastActedOn: null,
+    name: null,
+    global_variables: new Map<string, string>(),
+  };
+}
+
+export function NewExecutionContext(): ExecutionContext {
+  return {
+    local_variables: new Map<string, string>(),
+    global_variables: new Map<string, string>(),
+    topological_order: [],
+    prompts: new Map<string, string>(),
+    responses: new Map<string, string>(),
   };
 }

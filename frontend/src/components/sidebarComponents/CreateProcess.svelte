@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { aiSystemStore } from "stores/aiSystemStore";
   import type { Action, Process } from "system_types";
   import {
     addEdge,
@@ -9,11 +8,10 @@
     removeSelectedNode,
     topologicalSort,
   } from "../../helper_functions/graph";
-  import { graphStore } from "../../stores/graphStore";
   import { Graph } from "graphlib";
-  import websocketStore from "stores/websocketStore";
-
   import { json } from "graphlib";
+
+  import systemStateStore from "stores/systemStateStore";
 
   let actions: Action[] = [];
   let selectedActions: Action[] = [];
@@ -22,19 +20,14 @@
   let description = "";
   let current_graph: Graph = new Graph();
 
-  graphStore.subscribe((value) => {
-    current_graph = value.graph;
-  });
+  $: {
+    current_graph = $systemStateStore.graphState.graph;
+    actions = $systemStateStore.aiSystemState.actions;
+  }
 
   onMount(async () => {
-    aiSystemStore.subscribe((value) => {
-      actions = value.actions;
-
-      // loop through the actions and print their values:
-      // for (let i = 0; i < actions.length; i++) {
-      //   console.log("Action " + i + ": " + JSON.stringify(actions[i]));
-      // }
-    });
+    current_graph = $systemStateStore.graphState.graph;
+    actions = $systemStateStore.aiSystemState.actions;
   });
 
   function localAddNodes() {
@@ -53,10 +46,8 @@
     let lastActedOn = null;
     let actedOn = null;
 
-    graphStore.subscribe((value) => {
-      lastActedOn = value.lastActedOn;
-      actedOn = value.actedOn;
-    });
+    lastActedOn = $systemStateStore.graphState.lastActedOn;
+    actedOn = $systemStateStore.graphState.actedOn;
 
     // check that lastActedOn and actedOn are not null and are arrays
     if (
@@ -108,7 +99,7 @@
         topological_order: topologicalOrder,
       };
       console.log("sending process: " + JSON.stringify(process));
-      $websocketStore.send(JSON.stringify({ create_process: process }));
+      $systemStateStore.websocket.send(JSON.stringify({ create_process: process }));
       selectedActions = [];
     }
   }

@@ -1,6 +1,5 @@
 <script lang="ts">
-
-    import websocketStore from "../../stores/websocketStore";
+    import systemStateStore from "stores/systemStateStore";
     let apiKey = localStorage.getItem("apiKey") || "Api Key";
     let mongo_uri = localStorage.getItem("mongo_uri") || "Mongo Uri";
 
@@ -8,9 +7,9 @@ function set_api_key() {
 
   localStorage.setItem("apiKey", apiKey);
   localStorage.setItem("mongo_uri", mongo_uri);
-  $websocketStore.send(JSON.stringify({openai_api_key: apiKey, mongo_db_uri: mongo_uri}));
+  $systemStateStore.websocket.send(JSON.stringify({openai_api_key: apiKey, mongo_db_uri: mongo_uri}));
 
-  $websocketStore.send(JSON.stringify({initial_message: "initial message"}));
+  $systemStateStore.websocket.send(JSON.stringify({initial_message: "initial message"}));
 
   // console.log("Set api key to: " + apiKey);
   // console.log("Set mongo uri to: " + mongo_uri);

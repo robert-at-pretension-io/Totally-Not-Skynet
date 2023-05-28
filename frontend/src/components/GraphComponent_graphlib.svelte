@@ -3,7 +3,7 @@
   import cytoscape, { Core, ElementDefinition } from "cytoscape";
   import dagre from "cytoscape-dagre";
   import GraphStyles from "./GraphStyles.js";
-  import { graphStore } from "../stores/graphStore";
+  import systemStateStore from "stores/systemStateStore.js";
   import {
     selectNode,
     resetLastAction,
@@ -12,6 +12,7 @@
     checkEdgeVariables,
   } from "../helper_functions/graph";
   import graphlib from "graphlib";
+  import { SystemState } from "system_types/index.js";
 
   setContext("graphSharedState", {
     getCyInstance: () => cyInstance,
@@ -23,8 +24,8 @@
   let id_map = new Map();
   let lastAction = "";
 
-  graphStore.subscribe(async (value) => {
-    // console.log("graphStore value: ", value);
+  systemStateStore.subscribe(async (new_value : SystemState) => {
+    let value = new_value.graphState;
     if (
       value.lastAction === "addNode" &&
       value.actedOn != null &&
