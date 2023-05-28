@@ -1,37 +1,44 @@
 {
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "extraFileExtensions": [".svelte", ".css"],
-      "ecmaVersion": 2019,
-      "sourceType": "module",
-      "ecmaFeatures": {
-        "jsx": true
-      },
-      "project": "./tsconfig.json"
-    },
-    "env": {
-      "es6": true,
-      "browser": true
-    },
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended"
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "extraFileExtensions": [
+      ".svelte",
+      ".css"
     ],
-    "plugins": [
-      "svelte3",
-      "@typescript-eslint"
-    ],
-    "overrides": [
-      {
-        "files": ["**/*.svelte"],
-        "processor": "svelte3/svelte3"
-      }
-    ],
-    "settings": {
-      "svelte3/typescript": true
+    "ecmaVersion": 2019,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
     },
-    "rules": {
-      // Add your custom rules here
+    "project": "./tsconfig.json"
+  },
+  "env": {
+    "es6": true,
+    "browser": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "plugins": [
+    "svelte3",
+    "@typescript-eslint"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "**/*.svelte"
+      ],
+      "processor": "svelte3/svelte3"
     }
+  ],
+  "settings": {
+    "svelte3/typescript": true
+  },
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-non-null-assertion": "off"
+    // other rules...
   }
-  
+}

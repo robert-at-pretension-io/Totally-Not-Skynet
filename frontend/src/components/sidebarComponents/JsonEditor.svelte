@@ -1,7 +1,7 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
   import websocketStore from "stores/websocketStore";
-  import { Action, Process, UpdateAction } from "../../system_types";
+  import type { Action, Process, UpdateAction } from "../../system_types";
   import { isProcess, isAction } from "helper_functions/type_checker";
   let mainObject: Action | Process;
 

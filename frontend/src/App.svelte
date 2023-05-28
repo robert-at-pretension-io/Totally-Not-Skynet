@@ -4,13 +4,16 @@
   // import RightSidebar from "./components/RightSidebar.svelte";
   import GraphComponentGraphlib from "./components/GraphComponent_graphlib.svelte";
 
-  import { AIResponse } from "./system_types";
-
   import { json } from "graphlib";
 
   import "./global.css";
 
-  import type { Action, Process, AiSystemState } from "./system_types";
+  import type {
+    Action,
+    Process,
+    AiSystemState,
+    AIResponse,
+  } from "./system_types";
   import {
     isAction,
     isProcess,
@@ -52,7 +55,7 @@
     });
     $websocketStore.addEventListener("message", (event) => {
       // console.log("websocket message received: ", event.data);
-      let data: object;
+      let data: any;
       try {
         data = JSON.parse(event.data);
       } catch {

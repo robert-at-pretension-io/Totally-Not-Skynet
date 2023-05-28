@@ -2,7 +2,7 @@
   import systemStateStore from "stores/systemStateStore";
   import { graphStore } from "stores/graphStore";
   import { aiSystemStore } from "stores/aiSystemStore";
-  import { Action, Process, Prompt } from "./system_types";
+  import type { Action, Process, Prompt } from "./system_types";
   import { sendPrompt } from "helper_functions/graph";
 
   let selectedProcess: Process | null = null;
@@ -87,26 +87,46 @@
       console.log("Conditions for creating first prompt not met.");
     }
   }
+
+  let processes: Process[] = [];
+
+  $: {
+    processes = $aiSystemStore.processes;
+  }
+
+  // Function to handle dropdown change events
+  function onDropdownChange(type) {
+    // console.log("onDropdownChange called: ", type, " selectedAction: ", selectedAction, " selectedProcess: ", selectedProcess);
+
+    if (selectedProcess) {
+      let this_process = $aiSystemStore.processes.find(
+        (obj) => obj.name === selectedProcess
+      );
+
+      $systemStateStore.selectedProcess = this_process;
+      $systemStateStore.selectedAction = null;
+    }
+  }
 </script>
 
 {#if selectedProcess}
   <div>
     <h1>Selected Process: {selectedProcess.name}</h1>
+    <select
+      bind:value={selectedProcess}
+      on:change={() => onDropdownChange("process")}
+    >
+      <option value="">Select a process</option>
+      {#each processes as process}
+        <option value={process.name}>{process.name}</option>
+      {/each}
+    </select>
     <h2>Description: {selectedProcess.description}</h2>
     <h2>Topological Order: {topological_order.join(", ")}</h2>
 
     <h2>Global Variables</h2>
     {#each [...globalVariables] as [key, value]}
       <p>{key}: {value}</p>
-    {/each}
-
-    <h2>Possible Actions</h2>
-    {#each possibleActions as action (action._id.$oid)}
-      <div>
-        <h3>Action Name: {action.name}</h3>
-        <p>Prompt: {action.prompt}</p>
-        <p>Description: {action.description}</p>
-      </div>
     {/each}
   </div>
 {:else}
