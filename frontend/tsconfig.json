@@ -3,6 +3,7 @@
       "allowJs": true,
       "lib": ["ES2022", "dom"],
       "baseUrl": "./src",
+      "sourceMap": true,
       "outDir": "./dist",
       "target": "es6",
       "module": "esnext",

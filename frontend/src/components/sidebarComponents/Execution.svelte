@@ -84,6 +84,8 @@
 
     if (selectedProcess && possibleActions) {
       if (topological_order.length > 0 && topological_order_names.length == 0) {
+        
+        $systemStateStore.executionContext.topological_order = topological_order;
         let promiseArray = topological_order.map(getNodeName);
 
         let local_topological_order_names = await Promise.all(promiseArray);

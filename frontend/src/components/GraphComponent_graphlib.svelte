@@ -12,7 +12,7 @@
     checkEdgeVariables,
   } from "../helper_functions/graph";
   import graphlib from "graphlib";
-  import { SystemState } from "system_types/index.js";
+  import type { SystemState } from "system_types/index.js";
 
   setContext("graphSharedState", {
     getCyInstance: () => cyInstance,

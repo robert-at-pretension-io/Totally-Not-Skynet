@@ -204,7 +204,9 @@ export async function processToGraph(process: Process): Promise<void> {
 
 export async function sendPrompt(prompt: Prompt) {
   const systemState = await getSystemState();
+  systemState.executionContext.prompts.set(prompt.action_id, prompt.prompt_text);
   systemState.websocket.send(JSON.stringify(prompt));
+  await setSystemState(systemState);
 }
 
 export async function sendWebsocketMessage(message: string) {

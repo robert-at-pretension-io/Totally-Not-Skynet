@@ -1,65 +1,141 @@
-html, body {
-  position: relative;
+* {
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+  color: #2c3e50;
+  /* Dark Blue */
+}
+
+.section-header {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.section-header:hover {
+  background-color: #f0f0f0;
+}
+
+.section-header::after {
+  content: "▼";
+  /* You can replace with any symbol or icon font you like */
+  margin-left: 5px;
+}
+
+textarea,
+input {
+  resize: vertical;
   width: 100%;
   height: 100%;
+  white-space: pre-wrap;
+  border-radius: 4px;
+  border: 2px solid #27ae60;
+  /* Green */
+  background-color: #ecf0f1;
+  /* Light Gray */
 }
 
-body {
-  color: #333;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+button.selected {
+  background-color: #2ecc71;
+  /* Green */
+  color: #ecf0f1;
+  /* Light Gray */
 }
 
-a {
-  color: rgb(0,100,200);
-  text-decoration: none;
+.add-button {
+  background-color: #16a085;
+  /* Green */
+  margin-top: 20px;
+  margin-bottom: 10px;
 }
 
-a:hover {
-  text-decoration: underline;
+.remove-button {
+  background-color: #c0392b;
+  /* Dark Red */
 }
 
-a:visited {
-  color: rgb(0,80,160);
+.section-content {
+  background-color: #ecf0f1;
+  /* Light Gray */
 }
 
-label {
-  display: block;
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
 }
 
-input, button, select, textarea {
-  font-family: inherit;
-  font-size: inherit;
-  padding: 0.4em;
-  margin: 0 0 0.5em 0;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 2px;
+/* Mobile Styles */
+@media (max-width: 800px) {
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .graph {
+    width: 100%;
+    /* height should take up rest of screen */
+    height: 60vh;
+    order: 2;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: 40vh;
+    min-height: 200px;
+    order: 1;
+    padding: 2vw;
+    overflow-y: auto;
+    outline: 2px solid #333;
+    /* Outline added */
+  }
+
+  .section {
+    margin-bottom: 2vh;
+    border-radius: 1vh;
+    background-color: #9b59b6;
+    /* Purple */
+  }
+
+  .section-header {
+    padding: 1vh;
+    background-color: #f1c40f;
+    /* Yellow */
+    border-radius: 1vh;
+  }
 }
 
-input:disabled {
-  color: #ccc;
-}
 
-input[type="range"] {
-  height: 0;
-}
 
-button {
-  background-color: #f4f4f4;
-  outline: none;
-}
+/* Larger screen styles */
+@media (min-width: 801px) {
 
-button:active {
-  background-color: #ddd;
-}
+  /* Styles specific to components */
+  .app-container {
+    display: grid;
+    grid-template-columns: 25vw 1fr;
+  }
 
-button:focus {
-  border-color: #666;
-}
 
-.graph {
-  height: 100%;
+  /* ./components/GraphComponent_graphlib.svelte */
+  .graph {
+    grid-column: 2;
+    height: 100%;
+  }
+
+  /* ./components/Sidebar.svelte */
+  .sidebar {
+    grid-column: 1;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    background-color: #2ecc71;
+    /* Green */
+    overflow-y: auto;
+    box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.541);
+    border-radius: 12px;
+  }
+
 }

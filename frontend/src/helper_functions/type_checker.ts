@@ -1,9 +1,7 @@
 import { Graph } from "@dagrejs/graphlib";
 import { Process, Action, AIResponse, GraphState, ExecutionContext } from "system_types";
 
-// eslint-disable-next-line no-explicit-any
 export function isProcess(object: any): object is Process {
-  // console.log("isProcess? ", object);
 
   const debug = false;
   if (typeof object !== "object") {
@@ -52,7 +50,6 @@ export function isProcess(object: any): object is Process {
   return true;
 }
 
-// eslint-disable-next-line no-explicit-any
 export function isAction(object: any): object is Action {
   const debug = false;
   if (typeof object !== "object") {

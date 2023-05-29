@@ -6,7 +6,7 @@
 
   import { json } from "graphlib";
 
-  import "./global.css";
+  import "../public/global.css";
 
   import type {
     Action,
@@ -36,7 +36,6 @@
   onMount(async () => {
     // start the websocket connection
     $systemStateStore.websocket.addEventListener("open", () => {
-      // console.log("websocket connection opened");
 
       let apiKey = localStorage.getItem("apiKey") || "Api Key";
       let mongo_uri = localStorage.getItem("mongo_uri") || "Mongo Uri";
@@ -50,8 +49,6 @@
         JSON.stringify({ initial_message: "initial message" })
       );
 
-      // console.log("Set api key to: " + apiKey);
-      // console.log("Set mongo uri to: " + mongo_uri);
     });
     $systemStateStore.websocket.addEventListener("message", (event) => {
       // console.log("websocket message received: ", event.data);
@@ -146,10 +143,13 @@
 
         console.log("Received response: ", response);
 
-        $systemStateStore.executionContext.responses.set(
-          response.action_id,
-          response.response_text
-        );
+        systemStateStore.update((state: SystemState) => {
+          state.executionContext.responses.set(
+            response.action_id,
+            response.response_text
+          );
+          return state;
+        });
 
         // You can now do something with this response data
         // For example, you might want to update some part of your state with the response
