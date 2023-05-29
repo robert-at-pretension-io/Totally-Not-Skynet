@@ -21,6 +21,7 @@
   } from "helper_functions/type_checker";
 
   import {
+    incrementCurrentNode,
     processToGraph
   } from "helper_functions/graph";
 
@@ -142,6 +143,11 @@
         };
 
         console.log("Received response: ", response);
+
+        incrementCurrentNode().then((currentNode) => {
+          console.log("currentNode: ", currentNode);
+          
+        });
 
         systemStateStore.update((state: SystemState) => {
           state.executionContext.responses.set(

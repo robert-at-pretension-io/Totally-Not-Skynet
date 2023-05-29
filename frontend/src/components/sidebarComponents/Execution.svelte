@@ -21,7 +21,7 @@
 
   async function update_local_variables() {
     selectedProcess = $systemStateStore.selectedProcess;
-    topological_order = selectedProcess.topological_order;
+    topological_order = $systemStateStore.selectedProcess.topological_order;
 
     globalVariables = $systemStateStore.graphState.global_variables;
     console.log("Updated globalVariables: ", [...globalVariables]);
@@ -86,6 +86,10 @@
       if (topological_order.length > 0 && topological_order_names.length == 0) {
         
         $systemStateStore.executionContext.topological_order = topological_order;
+        $systemStateStore.executionContext.current_node = topological_order[0];
+
+        console.log("here: ", $systemStateStore.executionContext);
+
         let promiseArray = topological_order.map(getNodeName);
 
         let local_topological_order_names = await Promise.all(promiseArray);

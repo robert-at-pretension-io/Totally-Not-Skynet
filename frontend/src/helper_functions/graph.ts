@@ -78,12 +78,6 @@ export async function getProcessById(id: string): Promise<Process | null> {
 export function topologicalSort(graph: Graph) {
   const sorted = alg.topsort(graph);
 
-  // print out the nodes in the stack
-  sorted.forEach(async node => {
-    const name = await getNodeName(node);
-    console.log("node: " + name);
-  });
-
   // The stack now contains a topological ordering of the nodes
   return sorted;
 }
@@ -165,7 +159,7 @@ export async function processToGraph(process: Process): Promise<void> {
     console.error("The graph is not of type Graph");
   }
 
-  console.log("nodes: ", nodes);
+  // console.log("nodes: ", nodes);
 
   // for each of the node ids stored in nodes, get the name of the action
 
@@ -206,6 +200,49 @@ export async function sendPrompt(prompt: Prompt) {
   const systemState = await getSystemState();
   systemState.executionContext.prompts.set(prompt.action_id, prompt.prompt_text);
   systemState.websocket.send(JSON.stringify(prompt));
+  await setSystemState(systemState);
+}
+
+export async function getParentOutputVariables(this_node_id: string): Promise<string[]> {
+  const systemState = await getSystemState();
+  const edges = systemState.graphState.graph.inEdges(this_node_id);
+  const parent_output_variables: string[] = [];
+  if (edges != null) {
+    for (const edge of edges) {
+      const parent_node_id = edge.v;
+      const parent_node = await getActionById(parent_node_id);
+      if (parent_node) {
+        const parent_output_variables = parent_node.output_variables;
+        for (const parent_output_variable of parent_output_variables) {
+          parent_output_variables.push(parent_output_variable);
+        }
+      }
+    }
+  }
+  return parent_output_variables;
+}
+
+export async function incrementCurrentNode() {
+  const systemState = await getSystemState();
+
+  // look at the topological order and the current_node and set the next node to be the current node
+  const topological_order = systemState.executionContext.topological_order;
+
+  // get the index of the current node
+  if (systemState.executionContext.current_node != null) {
+    const current_node_index = topological_order.indexOf(systemState.executionContext.current_node);
+    if (current_node_index + 1 < topological_order.length) {
+      systemState.executionContext.current_node = topological_order[current_node_index + 1];
+    }
+    else {
+      console.error("current node index is out of bounds");
+    }
+  }
+  else {
+    console.error("current node is null");
+    systemState.executionContext.current_node = topological_order[0];
+  }
+
   await setSystemState(systemState);
 }
 

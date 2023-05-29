@@ -174,6 +174,7 @@ export function NewExecutionContext(): ExecutionContext {
     global_variables: new Map<string, string>(),
     topological_order: [],
     topological_order_names: [],
+    current_node: null,
     prompts: new Map<string, string>(),
     responses: new Map<string, string>(),
   };
