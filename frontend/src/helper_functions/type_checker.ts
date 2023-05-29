@@ -176,6 +176,7 @@ export function NewExecutionContext(): ExecutionContext {
     local_variables: new Map<string, string>(),
     global_variables: new Map<string, string>(),
     topological_order: [],
+    topological_order_names: [],
     prompts: new Map<string, string>(),
     responses: new Map<string, string>(),
   };

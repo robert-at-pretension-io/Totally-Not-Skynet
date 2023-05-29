@@ -8,6 +8,7 @@
   import { isProcess, newAction } from "helper_functions/type_checker";
   import { addGlobalVariable } from "helper_functions/graph";
   import type {Process, Action, Prompt} from "system_types";
+  import Log from "./log.svelte";
 
   let selectedProcess: Process | null = null;
   let globalVariables = new Map<string, string>();
@@ -37,6 +38,8 @@
     );
 
     topological_order_names = return_val.topological_order_names;
+    $systemStateStore.executionContext.topological_order_names =
+      topological_order_names;
     ready_to_make_first_prompt = return_val.ready_to_make_first_prompt;
     needed_variables = return_val.needed_variables;
     console.log("Updated needed_variables: ", needed_variables);
@@ -241,6 +244,7 @@
       <button class="add-button" on:click={sendFirstPrompt}>Execute</button>
     {:else}
       <!-- Add the displaying of output log here -->
+      <Log></Log>
     {/if}
   </div>
 {:else}

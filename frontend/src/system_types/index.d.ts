@@ -108,6 +108,7 @@ export type ExecutionContext = {
   local_variables: Map<string, string>;
   global_variables: Map<string, string>;
   topological_order: string[];
+  topological_order_names: (string | undefined)[];
   prompts: Map<string, string>; // map from action id to prompt with filled in variables
   responses: Map<string, string>; // map from action id to response (unparsed)
 }

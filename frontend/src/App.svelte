@@ -144,6 +144,8 @@
           response_text: data.response_text,
         };
 
+        console.log("Received response: ", response);
+
         $systemStateStore.executionContext.responses.set(
           response.action_id,
           response.response_text
