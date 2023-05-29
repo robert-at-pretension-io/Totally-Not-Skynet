@@ -200,24 +200,42 @@ export async function sendPrompt(prompt: Prompt) {
 
 export async function getParentOutputVariables(this_node_id: string): Promise<string[]> {
   const systemState = await getSystemState();
-  const edges = systemState.graphState.graph.inEdges(this_node_id);
-  const parent_output_variables: string[] = [];
-  if (edges != null) {
-    for (const edge of edges) {
-      const parent_node_id = edge.v;
-      const parent_node = await getActionById(parent_node_id);
-      if (parent_node) {
-        const parent_output_variables = parent_node.output_variables;
-        for (const parent_output_variable of parent_output_variables) {
-          parent_output_variables.push(parent_output_variable);
-        }
-      }
-    }
-  }
+  
+  // get topological order
+  
+  const topological_order = systemState.executionContext.topological_order;
+  
+  // get parent node id
+  const parent_node_id = topological_order[topological_order.indexOf(this_node_id) - 1];
+
+  // get the output variables of the parent node
+  const parent_output_variables = systemState.aiSystemState.actions.find(action => getId(action) == parent_node_id)?.output_variables || [];
+
   return parent_output_variables;
 }
 
-export async function incrementCurrentNode() {
+export async function setLocalExecutionVariable(variable_name: string, variable_value: string) : Promise<Map<string, string>>{
+  const systemState = await getSystemState();
+  systemState.executionContext.local_variables.set(variable_name, variable_value);
+  await setSystemState(systemState);
+  return systemState.executionContext.local_variables; 
+}
+
+export async function setGlobalExecutionVariable(variable_name: string, variable_value: string) {
+  const systemState = await getSystemState();
+  systemState.executionContext.global_variables.set(variable_name, variable_value);
+  await setSystemState(systemState);
+}
+
+export function addVariablesToPrompt(prompt: string, variables: Map<string, string>) : string{
+  let new_prompt = prompt;
+  for (const [key, value] of variables) {
+    new_prompt = new_prompt.replace(key, value);
+  }
+  return new_prompt;
+}
+
+export async function incrementCurrentNode() : Promise<string>{
   const systemState = await getSystemState();
 
   // look at the topological order and the current_node and set the next node to be the current node
@@ -228,6 +246,11 @@ export async function incrementCurrentNode() {
     const current_node_index = topological_order.indexOf(systemState.executionContext.current_node);
     if (current_node_index + 1 < topological_order.length) {
       systemState.executionContext.current_node = topological_order[current_node_index + 1];
+
+      // get the prompt of the current_node
+      const prompt = await getPromptofAction(systemState.executionContext.current_node);
+
+      systemState.executionContext.prompts.set(systemState.executionContext.current_node, prompt);
     }
     else {
       console.error("current node index is out of bounds");
@@ -239,6 +262,14 @@ export async function incrementCurrentNode() {
   }
 
   await setSystemState(systemState);
+  return systemState.executionContext.current_node;
+}
+
+export async function getPromptofAction(action_id: string): Promise<string> {
+  const systemState = await getSystemState();
+  const prompt = systemState.aiSystemState.actions.filter(action => action._id.$oid === action_id)[0].prompt;
+
+  return prompt;
 }
 
 export async function sendWebsocketMessage(message: string) {

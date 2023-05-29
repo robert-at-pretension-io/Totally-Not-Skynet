@@ -24,10 +24,7 @@
     topological_order = $systemStateStore.selectedProcess.topological_order;
 
     globalVariables = $systemStateStore.graphState.global_variables;
-    console.log("Updated globalVariables: ", [...globalVariables]);
-
     possibleActions = $systemStateStore.aiSystemState.actions;
-    console.log("Updated possibleActions: ", possibleActions);
 
     let return_val = await processSelectedProcessAndActions(
       selectedProcess,
@@ -42,12 +39,6 @@
       topological_order_names;
     ready_to_make_first_prompt = return_val.ready_to_make_first_prompt;
     needed_variables = return_val.needed_variables;
-    console.log("Updated needed_variables: ", needed_variables);
-    console.log("Updated topological_order_names: ", topological_order_names);
-    console.log(
-      "Updated ready_to_make_first_prompt: ",
-      ready_to_make_first_prompt
-    );
   }
 
   function sendFirstPrompt(): void {
