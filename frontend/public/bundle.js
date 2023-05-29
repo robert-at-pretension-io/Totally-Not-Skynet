@@ -10869,11 +10869,6 @@ var app = (function () {
     }
     function setSystemState(systemState) {
         return __awaiter(this, void 0, void 0, function* () {
-            // const input_variables = await getAllInputVariables();
-            // const output_variables = await getAllOutputVariables();
-            // graphState.input_variables = input_variables;
-            // graphState.output_variables = output_variables;
-            // console.log("The graphstate is:\n ", graphState);
             systemStateStore.set(systemState);
         });
     }
@@ -14307,18 +14302,20 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[4] = list[i];
+    	child_ctx[5] = list[i];
+    	child_ctx[6] = list;
+    	child_ctx[7] = i;
     	return child_ctx;
     }
 
-    // (54:6) {#if section.open}
+    // (57:6) {#if section.open}
     function create_if_block$1(ctx) {
     	let div;
     	let switch_instance;
     	let div_intro;
     	let div_outro;
     	let current;
-    	var switch_value = /*section*/ ctx[4].component;
+    	var switch_value = /*section*/ ctx[5].component;
 
     	function switch_props(ctx) {
     		return { $$inline: true };
@@ -14333,7 +14330,7 @@ var app = (function () {
     			div = element$1("div");
     			if (switch_instance) create_component(switch_instance.$$.fragment);
     			attr_dev(div, "class", "section-content");
-    			add_location(div, file$2, 54, 8, 1934);
+    			add_location(div, file$2, 57, 8, 1894);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -14341,7 +14338,7 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*sections*/ 1 && switch_value !== (switch_value = /*section*/ ctx[4].component)) {
+    			if (dirty & /*sections*/ 1 && switch_value !== (switch_value = /*section*/ ctx[5].component)) {
     				if (switch_instance) {
     					group_outros();
     					const old_component = switch_instance;
@@ -14393,34 +14390,38 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(54:6) {#if section.open}",
+    		source: "(57:6) {#if section.open}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (41:2) {#each sections as section (section.header)}
+    // (44:2) {#each sections as section (section.header)}
     function create_each_block(key_1, ctx) {
     	let div1;
     	let div0;
-    	let t0_value = /*section*/ ctx[4].header + "";
+    	let t0_value = /*section*/ ctx[5].header + "";
     	let t0;
     	let t1;
     	let t2;
+    	let each_value = /*each_value*/ ctx[6];
+    	let section_index = /*section_index*/ ctx[7];
     	let current;
     	let mounted;
     	let dispose;
 
     	function keydown_handler(...args) {
-    		return /*keydown_handler*/ ctx[2](/*section*/ ctx[4], ...args);
+    		return /*keydown_handler*/ ctx[2](/*section*/ ctx[5], ...args);
     	}
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[3](/*section*/ ctx[4]);
+    		return /*click_handler*/ ctx[3](/*section*/ ctx[5]);
     	}
 
-    	let if_block = /*section*/ ctx[4].open && create_if_block$1(ctx);
+    	let if_block = /*section*/ ctx[5].open && create_if_block$1(ctx);
+    	const assign_div1 = () => /*div1_binding*/ ctx[4](div1, each_value, section_index);
+    	const unassign_div1 = () => /*div1_binding*/ ctx[4](null, each_value, section_index);
 
     	const block = {
     		key: key_1,
@@ -14433,9 +14434,9 @@ var app = (function () {
     			if (if_block) if_block.c();
     			t2 = space();
     			attr_dev(div0, "class", "section-header");
-    			add_location(div0, file$2, 42, 6, 1640);
+    			add_location(div0, file$2, 45, 6, 1600);
     			attr_dev(div1, "class", "section");
-    			add_location(div1, file$2, 41, 4, 1612);
+    			add_location(div1, file$2, 44, 4, 1548);
     			this.first = div1;
     		},
     		m: function mount(target, anchor) {
@@ -14445,6 +14446,7 @@ var app = (function () {
     			append_dev(div1, t1);
     			if (if_block) if_block.m(div1, null);
     			append_dev(div1, t2);
+    			assign_div1();
     			current = true;
 
     			if (!mounted) {
@@ -14458,9 +14460,9 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if ((!current || dirty & /*sections*/ 1) && t0_value !== (t0_value = /*section*/ ctx[4].header + "")) set_data_dev(t0, t0_value);
+    			if ((!current || dirty & /*sections*/ 1) && t0_value !== (t0_value = /*section*/ ctx[5].header + "")) set_data_dev(t0, t0_value);
 
-    			if (/*section*/ ctx[4].open) {
+    			if (/*section*/ ctx[5].open) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
 
@@ -14482,6 +14484,13 @@ var app = (function () {
 
     				check_outros();
     			}
+
+    			if (each_value !== /*each_value*/ ctx[6] || section_index !== /*section_index*/ ctx[7]) {
+    				unassign_div1();
+    				each_value = /*each_value*/ ctx[6];
+    				section_index = /*section_index*/ ctx[7];
+    				assign_div1();
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -14495,6 +14504,7 @@ var app = (function () {
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div1);
     			if (if_block) if_block.d();
+    			unassign_div1();
     			mounted = false;
     			run_all(dispose);
     		}
@@ -14504,7 +14514,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(41:2) {#each sections as section (section.header)}",
+    		source: "(44:2) {#each sections as section (section.header)}",
     		ctx
     	});
 
@@ -14518,7 +14528,7 @@ var app = (function () {
     	let current;
     	let each_value = /*sections*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*section*/ ctx[4].header;
+    	const get_key = ctx => /*section*/ ctx[5].header;
     	validate_each_keys(ctx, each_value, get_each_context, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -14536,7 +14546,7 @@ var app = (function () {
     			}
 
     			attr_dev(div, "class", "sidebar");
-    			add_location(div, file$2, 39, 0, 1539);
+    			add_location(div, file$2, 42, 0, 1475);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -14603,39 +14613,48 @@ var app = (function () {
     	validate_slots('Sidebar', slots, []);
 
     	let sections = [
-    		// { header: "Set API Key", component: SetOpenaiKey, open: true},
     		{
     			header: "Explanation",
     			component: BackgroundInfo,
-    			open: false
+    			open: false,
+    			ref: null
     		},
     		{
     			header: "Create Process (graph: edges and nodes)",
     			component: CreateProcess,
-    			open: false
+    			open: false,
+    			ref: null
     		},
     		{
     			header: "Create Action (node)",
     			component: AddNodeButton,
-    			open: false
+    			open: false,
+    			ref: null
     		},
     		{
     			header: "Edit Action or Process",
     			component: InteractWithActionsAndProcesses,
-    			open: false
+    			open: false,
+    			ref: null
     		},
-    		// { header: "Global Variables", component: GlobalVariables, open: false },
     		{
     			header: "Execution of Processes",
     			component: Execution,
-    			open: false
+    			open: false,
+    			ref: null
     		}
-    	]; // { header : "Edit Actions and Processes", component: InteractWithActionsAndProcesses, open: false},
+    	];
 
     	function toggleSection(clickedSection) {
     		$$invalidate(0, sections = sections.map(section => {
     			if (section === clickedSection) {
-    				return { ...section, open: !section.open }; // just invert the `open` property of the clicked section
+    				let open = !section.open;
+
+    				if (open && section.ref) {
+    					section.ref.scrollIntoView({ behavior: "smooth" });
+    				}
+
+    				return { ...section, open }; // just invert the `open` property of the clicked section
     			} else {
     				return section; // don't modify other sections
     			}
@@ -14655,6 +14674,13 @@ var app = (function () {
     	};
 
     	const click_handler = section => toggleSection(section);
+
+    	function div1_binding($$value, each_value, section_index) {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
+    			each_value[section_index].ref = $$value;
+    			$$invalidate(0, sections);
+    		});
+    	}
 
     	$$self.$capture_state = () => ({
     		AddNodeButton,
@@ -14676,7 +14702,7 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [sections, toggleSection, keydown_handler, click_handler];
+    	return [sections, toggleSection, keydown_handler, click_handler, div1_binding];
     }
 
     class Sidebar extends SvelteComponentDev {

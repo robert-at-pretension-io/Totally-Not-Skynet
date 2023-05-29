@@ -109,11 +109,6 @@ export function getId(actionOrProcess: Process | Action): string {
 }
 
 export async function setSystemState(systemState: SystemState) {
-  // const input_variables = await getAllInputVariables();
-  // const output_variables = await getAllOutputVariables();
-  // graphState.input_variables = input_variables;
-  // graphState.output_variables = output_variables;
-  // console.log("The graphstate is:\n ", graphState);
   systemStateStore.set(systemState);
 }
 

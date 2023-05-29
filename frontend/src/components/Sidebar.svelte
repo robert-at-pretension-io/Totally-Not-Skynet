@@ -8,28 +8,31 @@
   import { blur, fade } from "svelte/transition";
 
   let sections = [
-    // { header: "Set API Key", component: SetOpenaiKey, open: true},
-    { header: "Explanation", component: BackgroundInfo, open: false },
+    { header: "Explanation", component: BackgroundInfo, open: false, ref: null },
     {
       header: "Create Process (graph: edges and nodes)",
       component: CreateProcess,
       open: false,
+      ref: null,
     },
-    { header: "Create Action (node)", component: AddNodeButton, open: false },
+    { header: "Create Action (node)", component: AddNodeButton, open: false, ref: null },
     {
       header: "Edit Action or Process",
       component: InteractWithActionsAndProcesses,
       open: false,
+      ref: null,
     },
-    // { header: "Global Variables", component: GlobalVariables, open: false },
-    { header: "Execution of Processes", component: Execution, open: false },
-    // { header : "Edit Actions and Processes", component: InteractWithActionsAndProcesses, open: false},
+    { header: "Execution of Processes", component: Execution, open: false, ref: null },
   ];
 
   function toggleSection(clickedSection) {
     sections = sections.map((section) => {
       if (section === clickedSection) {
-        return { ...section, open: !section.open }; // just invert the `open` property of the clicked section
+        let open = !section.open;
+        if(open && section.ref) {
+          section.ref.scrollIntoView({ behavior: "smooth" });
+        }
+        return { ...section, open }; // just invert the `open` property of the clicked section
       } else {
         return section; // don't modify other sections
       }
@@ -39,7 +42,7 @@
 
 <div class="sidebar">
   {#each sections as section (section.header)}
-    <div class="section">
+    <div class="section" bind:this={section.ref}>
       <div
         class="section-header"
         on:keydown={(event) => {
