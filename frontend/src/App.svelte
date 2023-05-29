@@ -36,7 +36,7 @@
   onMount(async () => {
     // start the websocket connection
     $systemStateStore.websocket.addEventListener("open", () => {
-      console.log("websocket connection opened");
+      // console.log("websocket connection opened");
 
       let apiKey = localStorage.getItem("apiKey") || "Api Key";
       let mongo_uri = localStorage.getItem("mongo_uri") || "Mongo Uri";
@@ -50,8 +50,8 @@
         JSON.stringify({ initial_message: "initial message" })
       );
 
-      console.log("Set api key to: " + apiKey);
-      console.log("Set mongo uri to: " + mongo_uri);
+      // console.log("Set api key to: " + apiKey);
+      // console.log("Set mongo uri to: " + mongo_uri);
     });
     $systemStateStore.websocket.addEventListener("message", (event) => {
       // console.log("websocket message received: ", event.data);
@@ -110,13 +110,13 @@
 
           // This ensures that the input variables are always up-to-date
           if (union.size !== set1.size || union.size !== set2.size) {
-            console.log("invalid input variables");
+            console.error("invalid input variables");
             action.input_variables = input_variables;
             invalid = true;
           }
           // This ensures that the output variables are always up-to-date
           if (union2.size !== set3.size || union2.size !== set4.size) {
-            console.log("invalid output variables");
+            console.error("invalid output variables");
             action.output_variables = output_variables;
             invalid = true;
           }
@@ -143,8 +143,6 @@
           action_id: data.action_id,
           response_text: data.response_text,
         };
-
-        console.log("response: ", response);
 
         $systemStateStore.executionContext.responses.set(
           response.action_id,
@@ -176,7 +174,7 @@
               return p._id === process._id;
             });
             if (processAlreadyInState) {
-              console.log("Process already in state");
+              // console.log("Process already in state");
               return state;
             }
             state.aiSystemState.processes.push(process);
@@ -189,7 +187,7 @@
   });
 
   async function handleProcessChange(process: Process) {
-    console.log("selected process changed: ", process);
+    // console.log("selected process changed: ", process);
     await processToGraph(process);
   }
 

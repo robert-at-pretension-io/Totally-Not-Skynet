@@ -54,8 +54,8 @@
       {#if section.open}
         <div
           class="section-content"
-          in:fade={{ duration: 700 }}
-          out:blur={{ duration: 700, amount: 5 }}
+          in:fade={{ duration: 100 }}
+          out:blur={{ duration: 100, amount: 5 }}
         >
           <svelte:component this={section.component} />
         </div>

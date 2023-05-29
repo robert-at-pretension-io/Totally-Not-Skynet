@@ -15,22 +15,10 @@
 
   async function localAddNode() {
 
-    // The id should come from the mongod database after the creation of the action
-
-    // create the action in the database by sending a message to the backend
-
     $systemStateStore.websocket.send(JSON.stringify({create_action: action}));
 
   }
 </script>
-
-<!-- <style>
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-  }
-</style> -->
 
 <form on:submit|preventDefault={localAddNode}>
   <label for="prompt">Prompt</label>

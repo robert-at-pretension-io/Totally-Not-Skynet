@@ -66,31 +66,15 @@
   }
 
   function saveProcess() {
-    // create a process object
-
-    console.log(
-      "saveProcess with input name and description: ",
-      name,
-      description
-    );
-
     // create an alert message if either name or description are null
     if (name === null || description === null) {
       alert("Please enter a name and description for the process");
       return;
     } else {
       let topologicalOrder: string[] = topologicalSort(current_graph);
-
-      console.log(
-        "current_graph: " +
-          JSON.stringify(current_graph) +
-          "\nWith topological order: " +
-          topologicalOrder
-      );
-
       let current_graph_string = JSON.stringify(json.write(current_graph));
 
-      console.log("current_graph_string: " + current_graph_string);
+      // console.log("current_graph_string: " + current_graph_string);
       let process: Process = {
         _id: { $oid: "" },
         name: name,
@@ -98,7 +82,7 @@
         graph: current_graph_string,
         topological_order: topologicalOrder,
       };
-      console.log("sending process: " + JSON.stringify(process));
+      // console.log("sending process: " + JSON.stringify(process));
       $systemStateStore.websocket.send(JSON.stringify({ create_process: process }));
       selectedActions = [];
     }

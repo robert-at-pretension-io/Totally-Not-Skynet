@@ -20,7 +20,6 @@
 
   async function update_local_variables() {
     selectedProcess = $systemStateStore.selectedProcess;
-    console.log("Updated selectedProcess: ", selectedProcess);
     topological_order = selectedProcess.topological_order;
 
     globalVariables = $systemStateStore.graphState.global_variables;
