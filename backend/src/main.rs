@@ -18,14 +18,6 @@ use tokio::sync::{mpsc, Mutex};
 use tokio_tungstenite::tungstenite::Message;
 use uuid::Uuid;
 
-// Needed for setting up the docker container
-// use bollard::container::{Config, RemoveContainerOptions};
-// use bollard::Docker;
-
-// use bollard::exec::{CreateExecOptions, StartExecResults};
-// use bollard::image::CreateImageOptions;
-
-// const IMAGE: &str = "alpine:3";
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Action {
@@ -44,6 +36,21 @@ struct Process {
     graph: String,
     topological_order: Vec<String>,
     description: String,
+}
+
+enum NodeType {
+    Action(Action),
+    Process(Process),
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct Node {
+    _id: Option<ObjectId>,
+    node_type: NodeType,
+    input_variables: Vec<String>,
+    output_variable: Vec<String>,
+    name: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -65,10 +72,6 @@ pub trait SystemMessage: Serialize + Deserialize<'static> {}
 // Implement the Message trait for any type that implements Serialize and Deserialize
 impl<T> SystemMessage for T where T: Serialize + Deserialize<'static> {}
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Goal {
-    text: String,
-}
 
 #[derive(Serialize, Debug, Deserialize)]
 pub struct InitializeProject {
@@ -112,6 +115,18 @@ pub struct UpdateAction {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct RunCommand {
+    command: String
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CommandOutput {
+    command: String,
+    success: bool,
+    response: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct CreateAction {
     create_action: Action,
 }
@@ -123,13 +138,13 @@ pub struct CreateProcess {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum MessageTypes {
-    Goal(Goal),
     InitializeProject(InitializeProject), // Add more types here
     SetUserSettings(UserSettings),
     GetTextCompletion(Prompt),
     UpdateAction(UpdateAction),
     CreateAction(CreateAction),
     CreateProcess(CreateProcess),
+    LinuxCommand(RunCommand),
 }
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
@@ -231,6 +246,10 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
 
     if let Ok(msg) = serde_json::from_str::<UpdateAction>(message_str) {
         return Some(MessageTypes::UpdateAction(msg));
+    }
+
+    if let Ok(msg) = serde_json::from_str::<RunCommand>(message_str) {
+        return Some(MessageTypes::LinuxCommand(msg));
     }
 
     println!("Could not parse message: {}", message_str);
@@ -530,7 +549,6 @@ async fn start_message_sending_loop(
         }
 
         match message_contents {
-            MessageTypes::Goal(_) => todo!(),
             MessageTypes::InitializeProject(_) => {
                 // get the actions and processes from the db
 
