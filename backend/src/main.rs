@@ -18,6 +18,7 @@ use tokio::sync::{mpsc, Mutex};
 use tokio_tungstenite::tungstenite::Message;
 use uuid::Uuid;
 
+use bollard::Docker;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Action {
@@ -36,13 +37,23 @@ struct Process {
     graph: String,
     topological_order: Vec<String>,
     description: String,
+    output_variable: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct Conditional {
+    _id : Option<ObjectId>,
+    statement: String,
+    options: Map<String, ObjectId>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 enum NodeType {
     Action(Action),
     Process(Process),
+    Conditional(Conditional),
+    ExecuteCommand(LinuxCommand)
 }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Node {
@@ -71,7 +82,6 @@ pub trait SystemMessage: Serialize + Deserialize<'static> {}
 
 // Implement the Message trait for any type that implements Serialize and Deserialize
 impl<T> SystemMessage for T where T: Serialize + Deserialize<'static> {}
-
 
 #[derive(Serialize, Debug, Deserialize)]
 pub struct InitializeProject {
@@ -116,7 +126,7 @@ pub struct UpdateAction {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RunCommand {
-    command: String
+    command: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -226,10 +236,6 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                 }));
             }
         }
-    }
-
-    if let Ok(msg) = serde_json::from_str::<Goal>(message_str) {
-        return Some(MessageTypes::Goal(msg));
     }
 
     if let Ok(msg) = serde_json::from_str::<InitializeProject>(message_str) {
@@ -519,6 +525,11 @@ struct RuntimeSettings {
     mongo_db_uri: String,
 }
 
+use bollard::container::Config;
+use bollard::exec::{CreateExecOptions, StartExecResults};
+// use bollard::container::{CreateExecOptions, StartExecResults};
+
+
 async fn start_message_sending_loop(
     // docker: Docker,
     tx: UnboundedSender<(Identity, Message)>,
@@ -526,8 +537,10 @@ async fn start_message_sending_loop(
 ) {
     let mut runtime_settings: HashMap<Identity, RuntimeSettings> = HashMap::new();
     let mut messages_thus_far: HashMap<Identity, Vec<String>> = HashMap::new();
+    let mut docker_containers: HashMap<Identity, String> = HashMap::new();
 
-    // get the database
+    // startup the docker container here
+    let docker = Docker::connect_with_local_defaults().unwrap();
 
     //read messages from the client
     while let Some(msg) = client_rx.recv().await {
@@ -596,12 +609,26 @@ async fn start_message_sending_loop(
                     }
                 }
 
-                // let id = docker
-                //     .create_container::<&str, &str>(None, alpine_config.clone())
-                //     .await
-                //     .unwrap()
-                //     .id;
+                const IMAGE: &str = "alpine:3";
 
+                let alpine_config = Config {
+                    image: Some(IMAGE),
+                    tty: Some(true),
+                    attach_stdin: Some(true),
+                    attach_stdout: Some(true),
+                    attach_stderr: Some(true),
+                    open_stdin: Some(true),
+                    ..Default::default()
+                };
+
+                let id = docker
+                    .create_container::<&str, &str>(None, alpine_config.clone())
+                    .await
+                    .unwrap()
+                    .id;
+
+                println!("Created container with id: {}", id);
+                docker_containers.insert(msg.0.clone(), id);
                 //     docker_containers.push((msg.0, id));
             }
             MessageTypes::SetUserSettings(settings) => {
@@ -652,30 +679,29 @@ async fn start_message_sending_loop(
                 };
 
                 if openai_api_key.is_some() {
-                    let messages = vec!(ChatMessage {
-                        role: Role::System,
-                        content: prompt.system.clone()
-                    },
-                    ChatMessage {
-                        role: Role::User,
-                        content: prompt.prompt_text.clone()
-                    }
-                );
-
-
+                    let messages = vec![
+                        ChatMessage {
+                            role: Role::System,
+                            content: prompt.system.clone(),
+                        },
+                        ChatMessage {
+                            role: Role::User,
+                            content: prompt.prompt_text.clone(),
+                        },
+                    ];
 
                     let response = get_openai_completion(messages, openai_api_key.unwrap()).await;
 
                     match response {
                         Ok(res) => {
-
                             let rez = Response {
                                 action_id: prompt.action_id.clone(),
-                                response_text: res
+                                response_text: res,
                             };
-                            match tx
-                                .send((Identity::new(msg.0.name.to_string()), Message::Text(json!(rez).to_string())))
-                            {
+                            match tx.send((
+                                Identity::new(msg.0.name.to_string()),
+                                Message::Text(json!(rez).to_string()),
+                            )) {
                                 Ok(_) => {}
                                 Err(e) => {
                                     println!("Error sending message to client: {:?}", e);
@@ -805,6 +831,38 @@ async fn start_message_sending_loop(
                     }
                 }
             }
+            MessageTypes::LinuxCommand(command) => {
+                if let Some(container_id) = docker_containers.get(&msg.0) {
+                    let exec_options = CreateExecOptions {
+                        attach_stdout: Some(true),
+                        cmd: Some(vec!["sh", "-c", &command.command]),
+                        ..Default::default()
+                    };
+            
+                    let exec_created = docker.create_exec(container_id, exec_options).await.unwrap();
+            
+                    // Start the exec instance
+                    let exec_started = docker.start_exec(&exec_created.id, None).await.unwrap();
+            
+                    match exec_started {
+                        StartExecResults::Attached { mut output, .. } => {
+                            while let Some(item) = output.next().await {
+                                match item {
+                                    Ok(log) => println!("{:?}", log),
+                                    Err(e) => eprintln!("Error: {:?}", e),
+                                }
+                            }
+                        }
+                        StartExecResults::Detached => {
+                            println!("The exec instance completed execution and detached");
+                        }
+                    }
+                } else {
+                    println!("No container found for this client.");
+                }
+            }
+            
+            
         }
     }
 }
@@ -836,20 +894,6 @@ async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Action>, Vec<
 #[tokio::main]
 async fn main() {
     // setup docker client
-    // let docker = Docker::connect_with_local_defaults().unwrap();
-
-    // docker
-    //     .create_image(
-    //         Some(CreateImageOptions {
-    //             from_image: IMAGE,
-    //             ..Default::default()
-    //         }),
-    //         None,
-    //         None,
-    //     )
-    //     .try_collect::<Vec<_>>()
-    //     .await
-    //     .unwrap();
 
     let (tx, rx) = mpsc::unbounded_channel();
     let rx = Arc::new(Mutex::new(rx));
