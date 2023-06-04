@@ -42,26 +42,23 @@ struct Process {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Conditional {
-    _id : Option<ObjectId>,
+    _id: Option<ObjectId>,
+    system_variables: HashMap<String, String>,
     statement: String,
-    options: Map<String, ObjectId>,
+    options: HashMap<String, ObjectId>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 enum NodeType {
-    Action(Action),
-    Process(Process),
+    Prompt(Prompt),
     Conditional(Conditional),
-    ExecuteCommand(LinuxCommand)
+    ExecuteCommand(RunCommand),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct Node {
+pub struct Node {
     _id: Option<ObjectId>,
     node_type: NodeType,
-    input_variables: Vec<String>,
-    output_variable: Vec<String>,
-    name: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -106,7 +103,7 @@ impl UserSettings {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Prompt {
     action_id: String,
     system: String,
@@ -124,7 +121,7 @@ pub struct UpdateAction {
     action: Action,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RunCommand {
     command: String,
 }
@@ -150,11 +147,10 @@ pub struct CreateProcess {
 pub enum MessageTypes {
     InitializeProject(InitializeProject), // Add more types here
     SetUserSettings(UserSettings),
-    GetTextCompletion(Prompt),
+    HandleNode(Node),
     UpdateAction(UpdateAction),
     CreateAction(CreateAction),
     CreateProcess(CreateProcess),
-    LinuxCommand(RunCommand),
 }
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
@@ -230,6 +226,11 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .iter()
                         .map(|v| v.as_str().unwrap_or("").to_string())
                         .collect(),
+                    output_variable: create_process_obj
+                        .get("output_variable")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string(),
                 };
                 return Some(MessageTypes::CreateProcess(CreateProcess {
                     create_process: process,
@@ -246,16 +247,12 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
         return Some(MessageTypes::SetUserSettings(msg));
     }
 
-    if let Ok(msg) = serde_json::from_str::<Prompt>(message_str) {
-        return Some(MessageTypes::GetTextCompletion(msg));
+    if let Ok(msg) = serde_json::from_str::<Node>(message_str) {
+        return Some(MessageTypes::HandleNode(msg));
     }
 
     if let Ok(msg) = serde_json::from_str::<UpdateAction>(message_str) {
         return Some(MessageTypes::UpdateAction(msg));
-    }
-
-    if let Ok(msg) = serde_json::from_str::<RunCommand>(message_str) {
-        return Some(MessageTypes::LinuxCommand(msg));
     }
 
     println!("Could not parse message: {}", message_str);
@@ -320,8 +317,6 @@ impl fmt::Display for Role {
         }
     }
 }
-
-// Your existing type definitions here...
 
 async fn get_openai_completion(messages: Vec<ChatMessage>, api_key: String) -> Result<String> {
     // Define the URL for the API endpoint
@@ -518,8 +513,6 @@ async fn return_db(db_uri: String) -> mongodb::Database {
     }
 }
 
-// type DockerId = String;
-
 struct RuntimeSettings {
     openai_api_key: String,
     mongo_db_uri: String,
@@ -528,7 +521,6 @@ struct RuntimeSettings {
 use bollard::container::Config;
 use bollard::exec::{CreateExecOptions, StartExecResults};
 // use bollard::container::{CreateExecOptions, StartExecResults};
-
 
 async fn start_message_sending_loop(
     // docker: Docker,
@@ -668,53 +660,7 @@ async fn start_message_sending_loop(
                     }
                 }
             }
-            MessageTypes::GetTextCompletion(prompt) => {
-                // check to see if the client has an openai key
-                let openai_api_key = match runtime_settings.get(&msg.0) {
-                    Some(settings) => Some(settings.openai_api_key.clone()),
-                    None => {
-                        println!("No openai key set for {}", msg.0.name);
-                        None
-                    }
-                };
 
-                if openai_api_key.is_some() {
-                    let messages = vec![
-                        ChatMessage {
-                            role: Role::System,
-                            content: prompt.system.clone(),
-                        },
-                        ChatMessage {
-                            role: Role::User,
-                            content: prompt.prompt_text.clone(),
-                        },
-                    ];
-
-                    let response = get_openai_completion(messages, openai_api_key.unwrap()).await;
-
-                    match response {
-                        Ok(res) => {
-                            let rez = Response {
-                                action_id: prompt.action_id.clone(),
-                                response_text: res,
-                            };
-                            match tx.send((
-                                Identity::new(msg.0.name.to_string()),
-                                Message::Text(json!(rez).to_string()),
-                            )) {
-                                Ok(_) => {}
-                                Err(e) => {
-                                    println!("Error sending message to client: {:?}", e);
-                                    break;
-                                }
-                            }
-                        }
-                        Err(_) => todo!(),
-                    }
-                }
-
-                println!("Received text completion from {}", msg.0.name);
-            }
             MessageTypes::UpdateAction(update_action) => {
                 let updated_action = update_action.action;
 
@@ -831,38 +777,109 @@ async fn start_message_sending_loop(
                     }
                 }
             }
-            MessageTypes::LinuxCommand(command) => {
-                if let Some(container_id) = docker_containers.get(&msg.0) {
-                    let exec_options = CreateExecOptions {
-                        attach_stdout: Some(true),
-                        cmd: Some(vec!["sh", "-c", &command.command]),
-                        ..Default::default()
-                    };
-            
-                    let exec_created = docker.create_exec(container_id, exec_options).await.unwrap();
-            
-                    // Start the exec instance
-                    let exec_started = docker.start_exec(&exec_created.id, None).await.unwrap();
-            
-                    match exec_started {
-                        StartExecResults::Attached { mut output, .. } => {
-                            while let Some(item) = output.next().await {
-                                match item {
-                                    Ok(log) => println!("{:?}", log),
-                                    Err(e) => eprintln!("Error: {:?}", e),
+
+            MessageTypes::HandleNode(node) => {
+                match node.node_type {
+                    NodeType::Prompt(prompt) => {
+                        let openai_api_key = match runtime_settings.get(&msg.0) {
+                            Some(settings) => Some(settings.openai_api_key.clone()),
+                            None => {
+                                println!("No openai key set for {}", msg.0.name);
+                                None
+                            }
+                        };
+
+                        if openai_api_key.is_some() {
+                            let messages = vec![
+                                ChatMessage {
+                                    role: Role::System,
+                                    content: prompt.system.clone(),
+                                },
+                                ChatMessage {
+                                    role: Role::User,
+                                    content: prompt.prompt_text.clone(),
+                                },
+                            ];
+
+                            let response =
+                                get_openai_completion(messages, openai_api_key.unwrap()).await;
+
+                            match response {
+                                Ok(res) => {
+                                    let rez = Response {
+                                        action_id: prompt.action_id.clone(),
+                                        response_text: res,
+                                    };
+                                    match tx.send((
+                                        Identity::new(msg.0.name.to_string()),
+                                        Message::Text(json!(rez).to_string()),
+                                    )) {
+                                        Ok(_) => {}
+                                        Err(e) => {
+                                            println!("Error sending message to client: {:?}", e);
+                                            break;
+                                        }
+                                    }
                                 }
+                                Err(_) => todo!(),
                             }
                         }
-                        StartExecResults::Detached => {
-                            println!("The exec instance completed execution and detached");
+                    }
+                    NodeType::Conditional(conditional) => {}
+                    NodeType::ExecuteCommand(command) => {
+                        if let Some(container_id) = docker_containers.get(&msg.0) {
+                            let exec_options = CreateExecOptions {
+                                attach_stdout: Some(true),
+                                cmd: Some(vec!["sh", "-c", &command.command]),
+                                ..Default::default()
+                            };
+
+                            let exec_created = docker
+                                .create_exec(container_id, exec_options)
+                                .await
+                                .unwrap();
+
+                            // Start the exec instance
+                            let exec_started =
+                                docker.start_exec(&exec_created.id, None).await.unwrap();
+
+                            match exec_started {
+                                StartExecResults::Attached { mut output, .. } => {
+                                    let mut full_output = String::new(); // used to accumulate the output
+
+                                    while let Some(item) = output.next().await {
+                                        match item {
+                                            Ok(log) => {
+                                                println!("{:?}", log);
+                                                let log_str = log.to_string();
+                                                full_output.push_str(&log_str);
+                                                full_output.push('\n'); // add a newline between each piece of output
+                                            }
+                                            Err(e) => eprintln!("Error: {:?}", e),
+                                        }
+                                    }
+
+                                    // Once we've read all the output, send it to the client
+                                    match tx.send((
+                                        Identity::new(msg.0.name.to_string()),
+                                        Message::Text(full_output),
+                                    )) {
+                                        Ok(_) => {}
+                                        Err(e) => {
+                                            println!("Error sending message to client: {:?}", e);
+                                        }
+                                    }
+                                }
+                                StartExecResults::Detached => {
+                                    println!("The exec instance completed execution and detached");
+                                }
+                            }
+                        } else {
+                            println!("No container found for this client.");
                         }
                     }
-                } else {
-                    println!("No container found for this client.");
                 }
             }
-            
-            
         }
     }
 }
