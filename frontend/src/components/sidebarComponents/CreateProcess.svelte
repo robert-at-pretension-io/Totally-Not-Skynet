@@ -116,11 +116,6 @@
   }
 </script>
 
-<!--  name: string;
-  graph: Graph;
-  description: string;
-};-->
-
 <p>Please set a descriptive name for your process:</p>
 <input type="text" bind:value={name} />
 <p>

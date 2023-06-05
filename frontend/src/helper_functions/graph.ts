@@ -277,47 +277,6 @@ export async function sendWebsocketMessage(message: string) {
   systemState.websocket.send(message);
 }
 
-// Checks the graph, only allowing valid edges so that a topological sort can be performed
-export async function checkEdgeVariables(
-  sourceNode: string,
-  targetNode: string,
-  globalVariables: string[],
-  g: Graph
-): Promise<boolean> {
-  const targetAction = await getActionById(targetNode);
-  if (targetAction == null) {
-    console.log("targetAction is null");
-    return false;
-  }
-  const targetInputVariables = targetAction.input_variables;
-  const sourceAction = await getActionById(sourceNode);
-  if (sourceAction == null) {
-    console.log("sourceAction is null");
-    return false;
-  }
-  const sourceOutputVariables = sourceAction.output_variables;
-  const ancestorNodes = await getAncestorNodes(targetNode, g);
-
-  // Collect the output variables of all ancestor nodes
-  const ancestorOutputVariables = ancestorNodes.flatMap(
-    (node) => node.output_variables
-  );
-
-  // Combine the output variables of the source node, the ancestor nodes, and the global variables
-  const allValidInputs = [
-    ...sourceOutputVariables,
-    ...ancestorOutputVariables,
-    ...globalVariables,
-  ];
-  
-  // Ensure every input variable of the target node exists in the combined array of valid input variables
-  const isValid = targetInputVariables.every((variable) =>
-    allValidInputs.includes(variable)
-  );
-
-  return isValid;
-}
-
 export async function addEdge(edge: Edge): Promise<void> {
 
   await printEdge(edge);
@@ -390,29 +349,18 @@ export async function removeEdge(
 export async function selectNode(id: string): Promise<void> {
   const ai_system_state = (await getSystemState()).aiSystemState;
   const actions = ai_system_state.actions;
-  let specific_action: Action;
 
   const res = actions.find((action : Action) => {
     return getId(action) == id;
   });
-  if (res) {
-    specific_action = res;
-
-    systemStateStore.update((system_state: SystemState) => {
-      // Return a new SystemState object with the updated selectedAction property
-      return {
-        ...system_state,
-        selectedAction: specific_action,
-        currentlySelected: "action",
-      };
-    });
-
+  if (res){
     const systemState = await getSystemState();
-
+    systemState.selectedAction = res;
+    systemState.currentlySelected = "action";
     systemState.graphState.lastAction = "selectNode";
     systemState.graphState.lastActedOn = systemState.graphState.actedOn;
-    systemState.graphState.actedOn = [id, specific_action.name];
-    systemState.graphState.name = specific_action.name;
+    systemState.graphState.actedOn = [id, res.name];
+    systemState.graphState.name = res.name;
     setSystemState(systemState);
   }
 }

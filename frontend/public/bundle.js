@@ -3175,14 +3175,14 @@ var app = (function () {
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$2 = freeGlobal || freeSelf || Function('return this')();
+    var root$3 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$2;
+    var _root = root$3;
 
-    var root$1 = _root;
+    var root$2 = _root;
 
     /** Built-in value references. */
-    var Symbol$4 = root$1.Symbol;
+    var Symbol$4 = root$2.Symbol;
 
     var _Symbol = Symbol$4;
 
@@ -3550,21 +3550,13 @@ var app = (function () {
     	return _getNative;
     }
 
-    var _Map;
-    var hasRequired_Map;
+    var getNative$2 = require_getNative(),
+        root$1 = _root;
 
-    function require_Map () {
-    	if (hasRequired_Map) return _Map;
-    	hasRequired_Map = 1;
-    	var getNative = require_getNative(),
-    	    root = _root;
+    /* Built-in method references that are verified to be native. */
+    var Map$3 = getNative$2(root$1, 'Map');
 
-    	/* Built-in method references that are verified to be native. */
-    	var Map = getNative(root, 'Map');
-
-    	_Map = Map;
-    	return _Map;
-    }
+    var _Map = Map$3;
 
     var getNative$1 = require_getNative();
 
@@ -3722,7 +3714,7 @@ var app = (function () {
 
     var Hash = _Hash,
         ListCache = require_ListCache(),
-        Map$2 = require_Map();
+        Map$2 = _Map;
 
     /**
      * Removes all key-value entries from the map.
@@ -3894,7 +3886,7 @@ var app = (function () {
     	if (hasRequired_stackSet) return _stackSet;
     	hasRequired_stackSet = 1;
     	var ListCache = require_ListCache(),
-    	    Map = require_Map(),
+    	    Map = _Map,
     	    MapCache = _MapCache;
 
     	/** Used as the size to enable large array optimizations. */
@@ -5476,7 +5468,7 @@ var app = (function () {
     	if (hasRequired_getTag) return _getTag;
     	hasRequired_getTag = 1;
     	var DataView = require_DataView(),
-    	    Map = require_Map(),
+    	    Map = _Map,
     	    Promise = require_Promise(),
     	    Set = require_Set(),
     	    WeakMap = require_WeakMap(),
@@ -10797,37 +10789,6 @@ var app = (function () {
             return action ? action.input_variables : null;
         });
     }
-    function getGlobalVariableNames() {
-        let globalVariableNames = [];
-        systemStateStore.subscribe(store => {
-            globalVariableNames = Array.from(store.graphState.global_variables.keys());
-        })();
-        return globalVariableNames;
-    }
-    function getAncestorNodes(node, graph) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const ancestors = [];
-            const visitedNodes = new Set();
-            const stack = [node];
-            while (stack.length) {
-                const currentNode = stack.pop();
-                visitedNodes.add(currentNode);
-                const parentNodes = graph.predecessors(currentNode);
-                if (parentNodes) {
-                    parentNodes.forEach((parentNode) => __awaiter(this, void 0, void 0, function* () {
-                        if (!visitedNodes.has(parentNode)) {
-                            const parentAction = yield getActionById(parentNode);
-                            if (parentAction) {
-                                ancestors.push(parentAction);
-                                stack.push(parentNode);
-                            }
-                        }
-                    }));
-                }
-            }
-            return ancestors;
-        });
-    }
     function getActionById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const systemState = yield getSystemState();
@@ -11010,35 +10971,6 @@ var app = (function () {
             return prompt;
         });
     }
-    // Checks the graph, only allowing valid edges so that a topological sort can be performed
-    function checkEdgeVariables(sourceNode, targetNode, globalVariables, g) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const targetAction = yield getActionById(targetNode);
-            if (targetAction == null) {
-                console.log("targetAction is null");
-                return false;
-            }
-            const targetInputVariables = targetAction.input_variables;
-            const sourceAction = yield getActionById(sourceNode);
-            if (sourceAction == null) {
-                console.log("sourceAction is null");
-                return false;
-            }
-            const sourceOutputVariables = sourceAction.output_variables;
-            const ancestorNodes = yield getAncestorNodes(targetNode, g);
-            // Collect the output variables of all ancestor nodes
-            const ancestorOutputVariables = ancestorNodes.flatMap((node) => node.output_variables);
-            // Combine the output variables of the source node, the ancestor nodes, and the global variables
-            const allValidInputs = [
-                ...sourceOutputVariables,
-                ...ancestorOutputVariables,
-                ...globalVariables,
-            ];
-            // Ensure every input variable of the target node exists in the combined array of valid input variables
-            const isValid = targetInputVariables.every((variable) => allValidInputs.includes(variable));
-            return isValid;
-        });
-    }
     function addEdge(edge) {
         return __awaiter(this, void 0, void 0, function* () {
             yield printEdge(edge);
@@ -11106,21 +11038,17 @@ var app = (function () {
         return __awaiter(this, void 0, void 0, function* () {
             const ai_system_state = (yield getSystemState()).aiSystemState;
             const actions = ai_system_state.actions;
-            let specific_action;
             const res = actions.find((action) => {
                 return getId(action) == id;
             });
             if (res) {
-                specific_action = res;
-                systemStateStore.update((system_state) => {
-                    // Return a new SystemState object with the updated selectedAction property
-                    return Object.assign(Object.assign({}, system_state), { selectedAction: specific_action, currentlySelected: "action" });
-                });
                 const systemState = yield getSystemState();
+                systemState.selectedAction = res;
+                systemState.currentlySelected = "action";
                 systemState.graphState.lastAction = "selectNode";
                 systemState.graphState.lastActedOn = systemState.graphState.actedOn;
-                systemState.graphState.actedOn = [id, specific_action.name];
-                systemState.graphState.name = specific_action.name;
+                systemState.graphState.actedOn = [id, res.name];
+                systemState.graphState.name = res.name;
                 setSystemState(systemState);
             }
         });
@@ -11131,14 +11059,6 @@ var app = (function () {
             systemState.graphState.lastAction = "selectEdge";
             systemState.graphState.actedOn = { v: source, w: target };
             systemState.graphState.name = null;
-            setSystemState(systemState);
-        });
-    }
-    function resetLastAction() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const systemState = yield getSystemState();
-            systemState.graphState.lastAction = "none";
-            systemState.graphState.actedOn = null;
             setSystemState(systemState);
         });
     }
@@ -11170,7 +11090,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (119:2) {#each actions as action (action._id)}
+    // (114:2) {#each actions as action (action._id)}
     function create_each_block_1$2(key_1, ctx) {
     	let li;
     	let button;
@@ -11194,8 +11114,8 @@ var app = (function () {
     			t1 = space();
     			attr_dev(button, "type", "button");
     			toggle_class(button, "selected", /*isSelected*/ ctx[8](/*action*/ ctx[15]));
-    			add_location(button, file$8, 120, 6, 4623);
-    			add_location(li, file$8, 119, 4, 4612);
+    			add_location(button, file$8, 115, 6, 4557);
+    			add_location(li, file$8, 114, 4, 4546);
     			this.first = li;
     		},
     		m: function mount(target, anchor) {
@@ -11228,14 +11148,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1$2.name,
     		type: "each",
-    		source: "(119:2) {#each actions as action (action._id)}",
+    		source: "(114:2) {#each actions as action (action._id)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (132:0) {#each selectedActions as action (action._id)}
+    // (127:0) {#each selectedActions as action (action._id)}
     function create_each_block$5(key_1, ctx) {
     	let p;
     	let t_value = /*action*/ ctx[15].name + "";
@@ -11247,7 +11167,7 @@ var app = (function () {
     		c: function create() {
     			p = element$1("p");
     			t = text(t_value);
-    			add_location(p, file$8, 132, 2, 4873);
+    			add_location(p, file$8, 127, 2, 4807);
     			this.first = p;
     		},
     		m: function mount(target, anchor) {
@@ -11267,7 +11187,7 @@ var app = (function () {
     		block,
     		id: create_each_block$5.name,
     		type: "each",
-    		source: "(132:0) {#each selectedActions as action (action._id)}",
+    		source: "(127:0) {#each selectedActions as action (action._id)}",
     		ctx
     	});
 
@@ -11372,25 +11292,25 @@ var app = (function () {
     			t19 = space();
     			button4 = element$1("button");
     			button4.textContent = "Save Process";
-    			add_location(p0, file$8, 104, 0, 4192);
+    			add_location(p0, file$8, 99, 0, 4126);
     			attr_dev(input0, "type", "text");
-    			add_location(input0, file$8, 105, 0, 4247);
-    			add_location(p1, file$8, 106, 0, 4287);
+    			add_location(input0, file$8, 100, 0, 4181);
+    			add_location(p1, file$8, 101, 0, 4221);
     			attr_dev(input1, "type", "text");
-    			add_location(input1, file$8, 110, 0, 4385);
-    			add_location(p2, file$8, 112, 0, 4433);
-    			add_location(ul, file$8, 117, 0, 4562);
-    			add_location(h3, file$8, 129, 0, 4800);
+    			add_location(input1, file$8, 105, 0, 4319);
+    			add_location(p2, file$8, 107, 0, 4367);
+    			add_location(ul, file$8, 112, 0, 4496);
+    			add_location(h3, file$8, 124, 0, 4734);
     			attr_dev(button0, "class", "add-button");
-    			add_location(button0, file$8, 134, 0, 4902);
+    			add_location(button0, file$8, 129, 0, 4836);
     			attr_dev(button1, "class", "remove-button");
-    			add_location(button1, file$8, 135, 0, 4975);
+    			add_location(button1, file$8, 130, 0, 4909);
     			attr_dev(button2, "class", "add-button");
-    			add_location(button2, file$8, 138, 0, 5063);
+    			add_location(button2, file$8, 133, 0, 4997);
     			attr_dev(button3, "class", "remove-button");
-    			add_location(button3, file$8, 139, 0, 5132);
+    			add_location(button3, file$8, 134, 0, 5066);
     			attr_dev(button4, "class", "add-button");
-    			add_location(button4, file$8, 140, 0, 5213);
+    			add_location(button4, file$8, 135, 0, 5147);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -12925,7 +12845,7 @@ var app = (function () {
 
     /* src/components/sidebarComponents/log.svelte generated by Svelte v3.59.1 */
 
-    const { console: console_1$3 } = globals;
+    const { console: console_1$2 } = globals;
 
     const file$4 = "src/components/sidebarComponents/log.svelte";
 
@@ -13226,7 +13146,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$3.warn(`<Log> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<Log> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
@@ -13336,7 +13256,7 @@ var app = (function () {
 
     /* src/components/sidebarComponents/Execution.svelte generated by Svelte v3.59.1 */
 
-    const { Map: Map_1, console: console_1$2 } = globals;
+    const { Map: Map_1, console: console_1$1 } = globals;
     const file$3 = "src/components/sidebarComponents/Execution.svelte";
 
     function get_each_context_2(ctx, list, i) {
@@ -14285,7 +14205,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<Execution> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<Execution> was created with unknown prop '${key}'`);
     	});
 
     	const input_handler = (needed_var, event) => handleInputChange(needed_var, event);
@@ -52958,11 +52878,9 @@ var app = (function () {
     ];
 
     /* src/components/GraphComponent_graphlib.svelte generated by Svelte v3.59.1 */
-
-    const { console: console_1$1 } = globals;
     const file$1 = "src/components/GraphComponent_graphlib.svelte";
 
-    // (125:2) {#if cyInstance}
+    // (96:2) {#if cyInstance}
     function create_if_block(ctx) {
     	let current;
     	const default_slot_template = /*#slots*/ ctx[3].default;
@@ -53013,7 +52931,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(125:2) {#if cyInstance}",
+    		source: "(96:2) {#if cyInstance}",
     		ctx
     	});
 
@@ -53030,7 +52948,7 @@ var app = (function () {
     			div = element$1("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "graph");
-    			add_location(div, file$1, 123, 0, 5333);
+    			add_location(div, file$1, 94, 0, 3613);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -53137,75 +53055,65 @@ var app = (function () {
     	let cyInstance = null;
     	let g = new graphlib$1.Graph();
     	let id_map = new Map();
-    	let lastAction = "";
 
-    	systemStateStore.subscribe(new_value => __awaiter(void 0, void 0, void 0, function* () {
+    	systemStateStore.subscribe(new_value => {
     		let value = new_value.graphState;
 
     		if (value.lastAction === "addNode" && value.actedOn != null && Array.isArray(value.actedOn)) {
+    			// check if the node is already in the graph
+    			if (g.hasNode(value.actedOn[0])) {
+    				return;
+    			}
+
     			id_map = id_map.set(value.actedOn[0], value.actedOn[1]);
-
-    			// console.log("id_map: ", id_map);
     			g.setNode(value.actedOn[0], value.actedOn[1]);
+
+    			if (cyInstance) {
+    				cyInstance.add({
+    					data: {
+    						id: value.actedOn[0],
+    						label: value.actedOn[1]
+    					}
+    				});
+
+    				cyInstance.layout({ name: "dagre" }).run();
+    			}
     		} else if (value.lastAction === "addEdge" && value.actedOn != null && !Array.isArray(value.actedOn)) {
-    			// Get the nodes of the edge to be added
-    			// need to get the node id
-    			const sourceNode = value.actedOn.v;
+    			// check if the edge is already in the graph
+    			if (g.hasEdge(value.actedOn.v, value.actedOn.w)) {
+    				return;
+    			}
 
-    			const targetNode = value.actedOn.w;
+    			g.setEdge(value.actedOn.v, value.actedOn.w, value.actedOn);
 
-    			// Get the global variables
-    			let globalVariables = getGlobalVariableNames();
-
-    			// Check if the output variables of source node (sourceAction) are compatible with the input variables of target node (targetAction)
-    			const isValidEdge = yield checkEdgeVariables(sourceNode, targetNode, globalVariables, g);
-
-    			if (isValidEdge) {
-    				// Only add edge if it passes the constraint check
-    				g.setEdge(value.actedOn.v, value.actedOn.w, value.actedOn);
-    			} else {
-    				// Otherwise, inform the user or handle invalid edge situation
-    				alert("Invalid edge. The output variables of the source node are incompatible with the input variables of the target node.");
-
-    				console.error("Invalid edge. The output variables of the source node are incompatible with the input variables of the target node.");
+    			if (cyInstance) {
+    				cyInstance.add({
+    					data: {
+    						source: value.actedOn.v,
+    						target: value.actedOn.w
+    					}
+    				});
     			}
     		} else if (value.lastAction === "removeEdge" && value.actedOn != null && !Array.isArray(value.actedOn)) {
-    			// console.log("Removing edge: ", value.actedOn.v, value.actedOn.w);
     			g.removeEdge(value.actedOn.v, value.actedOn.w);
+
+    			if (cyInstance) {
+    				cyInstance.remove(cyInstance.$id(value.actedOn.v).edgesTo(cyInstance.$id(value.actedOn.w)));
+    			}
     		} else if (value.lastAction === "removeNode" && value.actedOn != null && Array.isArray(value.actedOn)) {
     			g.removeNode(value.actedOn[0]);
+
+    			if (cyInstance) {
+    				cyInstance.remove(cyInstance.$id(value.actedOn[0]));
+    			}
     		} else if (value.lastAction === "resetGraph") {
     			g = new graphlib$1.Graph(); // reset graph
-    			resetLastAction();
+
+    			if (cyInstance) {
+    				cyInstance.elements().remove();
+    			}
     		}
-
-    		lastAction = value.lastAction;
-
-    		// Now update cytoscape graph based on graphlib graph
-    		if (cyInstance && (lastAction === "addNode" || lastAction === "addEdge" || lastAction === "removeEdge" || lastAction === "removeNode")) {
-    			// console.log("Updating cytoscape graph");
-    			// show the id_map
-    			// console.log("id_map: ", id_map);
-    			cyInstance.elements().remove(); // clear the cytoscape graph
-
-    			const elements = [];
-
-    			g.nodes().forEach(node => {
-    				// console.log("Adding node: ", node, id_map.get(node));
-    				elements.push({
-    					data: { id: node, label: id_map.get(node) }
-    				});
-    			});
-
-    			g.edges().forEach(edge => {
-    				// console.log("Adding edge: ", edge);
-    				// await printEdge(edge);
-    				elements.push({ data: { source: edge.v, target: edge.w } });
-    			});
-
-    			cyInstance.add(elements); // add new elements
-    		}
-    	}));
+    	});
 
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
     		cytoscape$2.use(dagre);
@@ -53214,13 +53122,6 @@ var app = (function () {
     			container: refElement,
     			style: GraphStyles
     		}));
-
-    		cyInstance.on("add", () => {
-    			// console.log("add event fired, lastAction: ", lastAction);
-    			if (cyInstance && (lastAction === "addNode" || lastAction === "addEdge" || lastAction === "removeEdge" || lastAction === "removeNode")) {
-    				cyInstance.layout({ name: "dagre" }).run();
-    			}
-    		});
 
     		cyInstance.on("select", "node", evt => {
     			const selectedNode = evt.target.data();
@@ -53235,7 +53136,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<GraphComponent_graphlib> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<GraphComponent_graphlib> was created with unknown prop '${key}'`);
     	});
 
     	function div_binding($$value) {
@@ -53258,16 +53159,12 @@ var app = (function () {
     		GraphStyles,
     		systemStateStore,
     		selectNode,
-    		resetLastAction,
     		selectEdge,
-    		getGlobalVariableNames,
-    		checkEdgeVariables,
     		graphlib: graphlib$1,
     		refElement,
     		cyInstance,
     		g,
-    		id_map,
-    		lastAction
+    		id_map
     	});
 
     	$$self.$inject_state = $$props => {
@@ -53276,7 +53173,6 @@ var app = (function () {
     		if ('cyInstance' in $$props) $$invalidate(1, cyInstance = $$props.cyInstance);
     		if ('g' in $$props) g = $$props.g;
     		if ('id_map' in $$props) id_map = $$props.id_map;
-    		if ('lastAction' in $$props) lastAction = $$props.lastAction;
     	};
 
     	if ($$props && "$$inject" in $$props) {
