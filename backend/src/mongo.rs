@@ -14,16 +14,6 @@ pub struct Prompt {
     prompt_text: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct RunCommand {
-    command: String,
-}
-
-
-
-
-
-
 
 pub async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Action>, Vec<Process>) {
     let action_collection = db.collection::<Action>("actions");

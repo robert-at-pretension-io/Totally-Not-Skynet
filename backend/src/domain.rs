@@ -1,11 +1,7 @@
-
-use serde::{Deserialize, Serialize};
-use bson::oid::ObjectId;
-use std::collections::HashMap;
 use crate::settings::UserSettings;
-
-
-
+use bson::oid::ObjectId;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Action {
@@ -25,6 +21,8 @@ pub struct Process {
     topological_order: Vec<String>,
     description: String,
     output_variable: String,
+    is_loop: bool,
+    max_iterations: Option<u32>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -48,13 +46,15 @@ pub struct Node {
     node_type: NodeType,
 }
 
-
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct RunCommand {
+    command: String,
+}
 
 #[derive(Serialize, Debug, Deserialize)]
 pub struct InitializeProject {
     initial_message: String,
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Response {
@@ -66,8 +66,6 @@ pub struct Response {
 pub struct UpdateAction {
     action: Action,
 }
-
-
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CommandOutput {
