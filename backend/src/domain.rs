@@ -5,17 +5,15 @@ use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Action {
-    _id: Option<ObjectId>,
     prompt: String,
     input_variables: Vec<String>,
     output_variables: Vec<String>,
     name: String,
-    system: String,
+    system: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Process {
-    _id: Option<ObjectId>,
     name: String,
     graph: String,
     topological_order: Vec<String>,
@@ -23,6 +21,12 @@ pub struct Process {
     output_variable: String,
     is_loop: bool,
     max_iterations: Option<u32>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Graph {
+    nodes: Vec<Node>,
+    edges: Vec<Edge>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -35,9 +39,10 @@ pub struct Conditional {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum NodeType {
-    Prompt(Prompt),
+    Action(Action),
+    Process(Process),
     Conditional(Conditional),
-    ExecuteCommand(RunCommand),
+    Command(Command),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -84,6 +89,7 @@ pub struct CreateProcess {
     create_process: Process,
 }
 
+// Used for the websocket messages
 #[derive(Serialize, Deserialize, Debug)]
 pub enum MessageTypes {
     InitializeProject(InitializeProject), // Add more types here
