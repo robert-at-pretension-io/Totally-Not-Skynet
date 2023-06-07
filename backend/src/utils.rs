@@ -1,6 +1,6 @@
 use crate::domain::{Action, Process, MessageTypes, InitializeProject, Node };
 use crate::settings::{UserSettings};
-crate::domain::CreateAction;
+// crate::domain::CreateAction;
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
     use serde_json::Value;
@@ -13,7 +13,6 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
         if let Some(create_action_value) = obj.get("create_action") {
             if let Some(create_action_obj) = create_action_value.as_object() {
                 let action = Action {
-                    _id: None, // Assuming you have changed your struct field to `_id`
                     input_variables: create_action_obj
                         .get("input_variables")
                         .and_then(|v| v.as_array())
@@ -41,7 +40,6 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                     system: create_action_obj
                         .get("system")
                         .and_then(|v| v.as_str())
-                        .unwrap_or("")
                         .to_string(),
                 };
                 return Some(MessageTypes::CreateAction(CreateAction {
@@ -52,7 +50,14 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
         if let Some(create_process_value) = obj.get("create_process") {
             if let Some(create_process_obj) = create_process_value.as_object() {
                 let process = Process {
-                    _id: None, // Assuming you have changed your struct field to `_id`
+                    max_iterations: create_process_obj
+                        .get("max_iterations")
+                        .and_then(|v| v.as_u64())
+                        .map(|v| v as u32),
+                    is_loop: create_process_obj
+                        .get("is_loop")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false),
                     name: create_process_obj
                         .get("name")
                         .and_then(|v| v.as_str())

@@ -48,7 +48,7 @@ pub enum NodeType {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Node {
     _id: Option<ObjectId>,
-    node_type: NodeType,
+    pub node_type: NodeType,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -69,7 +69,7 @@ pub struct Response {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateAction {
-    action: Action,
+    pub action: Action,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -81,12 +81,12 @@ pub struct CommandOutput {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateAction {
-    create_action: Action,
+    pub create_action: Action,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateProcess {
-    create_process: Process,
+    pub create_process: Process,
 }
 
 // Used for the websocket messages

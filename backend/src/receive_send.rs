@@ -1,33 +1,30 @@
-use crate::openai::{ChatMessage, Role, get_openai_completion};
-use crate::mongo::{get_actions_and_processes,  return_db};
-use crate::domain::{Action, Process, MessageTypes};
-use crate::utils::{parse_message};
+use crate::domain::{Action, MessageTypes, Process};
+use crate::mongo::{get_actions_and_processes, return_db};
+use crate::openai::{get_openai_completion, ChatMessage, Role};
 use crate::settings::{RuntimeSettings, UserSettings};
+use crate::utils::parse_message;
 
 use bollard::container::Config;
 use bollard::exec::{CreateExecOptions, StartExecResults};
-use tokio::sync::mpsc::{UnboundedSender};
-use tokio::sync::mpsc;
-use std::collections::HashMap;
 use bollard::Docker;
-use serde::{Deserialize, Serialize};
-use tokio_tungstenite::tungstenite::Message;
 use futures_util::StreamExt;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
-
-
+use std::collections::HashMap;
+use tokio::sync::mpsc;
+use tokio::sync::mpsc::UnboundedSender;
+use tokio_tungstenite::tungstenite::Message;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Identity {
-    name: String,
+    pub name: String,
 }
 
 impl Identity {
-    fn new(name: String) -> Identity {
+    pub fn new(name: String) -> Identity {
         Identity { name }
     }
 }
-
 
 pub async fn start_message_sending_loop(
     // docker: Docker,
@@ -73,7 +70,6 @@ pub async fn start_message_sending_loop(
                 let (my_actions, my_processes) = get_actions_and_processes(&db).await;
 
                 for action in &my_actions.clone() {
-
                     send_message(&tx, msg.0, &action).await;
                 }
 
@@ -340,20 +336,8 @@ pub async fn start_message_sending_loop(
                                     }
 
                                     // Once we've read all the output, send it to the client
-                                    match tx.send((
-                                        Identity::new(msg.0.name.to_string()),
-                                        Message::Text(full_output),
-                                    )) {
-                                        Ok(_) => {}
-                                        Err(e) => {
-                                            println!("Error sending message to client: {:?}", e);
-                                        }
-                                    }
-                                    send_message(
-                                        &tx,
-                                        msg.0.clone(),
-                                        ,
-                                    )
+
+                                    send_message(&tx, msg.0.clone(), full_output)
                                 }
                                 StartExecResults::Detached => {
                                     println!("The exec instance completed execution and detached");
@@ -368,7 +352,6 @@ pub async fn start_message_sending_loop(
         }
     }
 }
-
 
 pub async fn send_message<T: Serialize + Sized>(
     tx: &UnboundedSender<(Identity, Message)>,
