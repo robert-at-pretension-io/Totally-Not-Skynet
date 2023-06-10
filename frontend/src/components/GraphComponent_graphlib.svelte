@@ -4,10 +4,7 @@
   import dagre from "cytoscape-dagre";
   import GraphStyles from "./GraphStyles.js";
   import systemStateStore from "stores/systemStateStore.js";
-  import {
-    selectNode,
-    selectEdge
-  } from "../helper_functions/graph";
+  import { selectNode, selectEdge } from "../helper_functions/graph";
   import graphlib from "graphlib";
   import type { SystemState } from "system_types/index.js";
 
@@ -20,9 +17,8 @@
   let g = new graphlib.Graph();
   let id_map = new Map();
 
-  systemStateStore.subscribe((new_value : SystemState) => {
+  systemStateStore.subscribe((new_value: SystemState) => {
     let value = new_value.graphState;
-
 
     if (
       value.lastAction === "addNode" &&
@@ -35,15 +31,16 @@
       }
       id_map = id_map.set(value.actedOn[0], value.actedOn[1]);
       g.setNode(value.actedOn[0], value.actedOn[1]);
-      if(cyInstance) {
-        cyInstance.add({  data: { id: value.actedOn[0], label: value.actedOn[1] } });
+      if (cyInstance) {
+        cyInstance.add({
+          data: { id: value.actedOn[0], label: value.actedOn[1] },
+        });
 
         cyInstance
           .layout({
             name: "dagre",
           })
           .run();
-        
       }
     } else if (
       value.lastAction === "addEdge" &&
@@ -55,8 +52,10 @@
         return;
       }
       g.setEdge(value.actedOn.v, value.actedOn.w, value.actedOn);
-      if(cyInstance) {
-        cyInstance.add({ data: { source: value.actedOn.v, target: value.actedOn.w } });
+      if (cyInstance) {
+        cyInstance.add({
+          data: { source: value.actedOn.v, target: value.actedOn.w },
+        });
       }
     } else if (
       value.lastAction === "removeEdge" &&
@@ -64,8 +63,12 @@
       !Array.isArray(value.actedOn)
     ) {
       g.removeEdge(value.actedOn.v, value.actedOn.w);
-      if(cyInstance) {
-        cyInstance.remove(cyInstance.$id(value.actedOn.v).edgesTo(cyInstance.$id(value.actedOn.w)));
+      if (cyInstance) {
+        cyInstance.remove(
+          cyInstance
+            .$id(value.actedOn.v)
+            .edgesTo(cyInstance.$id(value.actedOn.w))
+        );
       }
     } else if (
       value.lastAction === "removeNode" &&
@@ -73,16 +76,15 @@
       Array.isArray(value.actedOn)
     ) {
       g.removeNode(value.actedOn[0]);
-      if(cyInstance) {
+      if (cyInstance) {
         cyInstance.remove(cyInstance.$id(value.actedOn[0]));
       }
     } else if (value.lastAction === "resetGraph") {
       g = new graphlib.Graph(); // reset graph
-      if(cyInstance) {
+      if (cyInstance) {
         cyInstance.elements().remove();
       }
     }
-
   });
 
   onMount(async () => {

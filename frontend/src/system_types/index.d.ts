@@ -42,7 +42,7 @@ export type MongoId = {
 export type Process = {
   _id: MongoId;
   name: string;
-  graph: Graph | string;
+  graph: Graph | string; // this is a string when it has been deserialized from the database
   description: string;
   topological_order: string[];
 };
@@ -122,3 +122,11 @@ export type MessageTypes =
   | { type: "UpdateAction"; data: UpdateAction }
   | { type: "CreateAction"; data: CreateAction }
   | { type: "CreateProcess"; data: CreateProcess };
+
+export enum NodeType {
+  Action = "Action",
+  Process = "Process",
+  Command = "Command",
+  // variable?
+  Conditional = "Conditional"
+}

@@ -10,22 +10,17 @@ use uuid::Uuid;
 
 use bollard::Docker;
 
-mod openai;
-mod mongo;
-mod utils;
-mod protocol;
 mod domain;
-mod websocket;
+mod mongo;
+mod openai;
+mod protocol;
+mod receive_send;
 mod settings;
-mod send;
+mod utils;
+mod websocket;
 
-
+use crate::receive_send::start_message_sending_loop;
 use crate::websocket::start_websocket_server;
-use crate::send::start_message_sending_loop;
-
-
-
-
 
 // use bollard::container::{CreateExecOptions, StartExecResults};
 

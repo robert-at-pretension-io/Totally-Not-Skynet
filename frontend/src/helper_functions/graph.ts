@@ -14,7 +14,7 @@ import { alg } from "graphlib";
 
 export async function getSystemState(): Promise<SystemState> {
   return new Promise((resolve, _rej) => {
-    systemStateStore.subscribe((systemStateStore ) => {
+    systemStateStore.subscribe((systemStateStore) => {
       resolve(systemStateStore);
     });
   });
@@ -65,13 +65,13 @@ export async function getAncestorNodes(node: string, graph: Graph): Promise<Acti
 
 export async function getActionById(id: string): Promise<Action | null> {
   const systemState = await getSystemState();
-  const action = systemState.aiSystemState.actions.find((action : Action) => getId(action) == id);
+  const action = systemState.aiSystemState.actions.find((action: Action) => getId(action) == id);
   return action || null;
 }
 
 export async function getProcessById(id: string): Promise<Process | null> {
   const systemState = await getSystemState();
-  const process = systemState.aiSystemState.processes.find((process : Process) => getId(process) == id);
+  const process = systemState.aiSystemState.processes.find((process: Process) => getId(process) == id);
   return process || null;
 }
 
@@ -118,7 +118,7 @@ export async function addGlobalVariable(variable_name: string, variable_value: s
   await setSystemState(current_state);
 }
 
-export async function addNode(node_id: string): Promise<void> {
+export async function addNode(node_id: string, node_type: NodeType): Promise<void> {
   const systemState = await getSystemState();
   // add the input and output variables to the graph state
 
@@ -144,7 +144,7 @@ export async function processToGraph(process: Process): Promise<void> {
   // verify that all of the steps have corresponding actions
   const graph = process.graph;
 
-  let nodes : string[]= [];
+  let nodes: string[] = [];
 
   // check if graph has the type Graph
   if (graph instanceof Graph) {
@@ -166,13 +166,13 @@ export async function processToGraph(process: Process): Promise<void> {
     }
   }
 
-  let edges : Edge[] = [];
+  let edges: Edge[] = [];
 
   if (graph instanceof Graph) {
     edges = graph.edges();
   }
 
-  let topOrder : string[] = [];
+  let topOrder: string[] = [];
 
   if (graph instanceof Graph) {
     topOrder = topologicalSort(graph);
@@ -200,11 +200,11 @@ export async function sendPrompt(prompt: Prompt) {
 
 export async function getParentOutputVariables(this_node_id: string): Promise<string[]> {
   const systemState = await getSystemState();
-  
+
   // get topological order
-  
+
   const topological_order = systemState.executionContext.topological_order;
-  
+
   // get parent node id
   const parent_node_id = topological_order[topological_order.indexOf(this_node_id) - 1];
 
@@ -214,11 +214,11 @@ export async function getParentOutputVariables(this_node_id: string): Promise<st
   return parent_output_variables;
 }
 
-export async function setLocalExecutionVariable(variable_name: string, variable_value: string) : Promise<Map<string, string>>{
+export async function setLocalExecutionVariable(variable_name: string, variable_value: string): Promise<Map<string, string>> {
   const systemState = await getSystemState();
   systemState.executionContext.local_variables.set(variable_name, variable_value);
   await setSystemState(systemState);
-  return systemState.executionContext.local_variables; 
+  return systemState.executionContext.local_variables;
 }
 
 export async function setGlobalExecutionVariable(variable_name: string, variable_value: string) {
@@ -227,7 +227,7 @@ export async function setGlobalExecutionVariable(variable_name: string, variable
   await setSystemState(systemState);
 }
 
-export function addVariablesToPrompt(prompt: string, variables: Map<string, string>) : string{
+export function addVariablesToPrompt(prompt: string, variables: Map<string, string>): string {
   let new_prompt = prompt;
   for (const [key, value] of variables) {
     new_prompt = new_prompt.replace(key, value);
@@ -235,7 +235,7 @@ export function addVariablesToPrompt(prompt: string, variables: Map<string, stri
   return new_prompt;
 }
 
-export async function incrementCurrentNode() : Promise<string>{
+export async function incrementCurrentNode(): Promise<string> {
   const systemState = await getSystemState();
 
   // look at the topological order and the current_node and set the next node to be the current node
@@ -350,10 +350,10 @@ export async function selectNode(id: string): Promise<void> {
   const ai_system_state = (await getSystemState()).aiSystemState;
   const actions = ai_system_state.actions;
 
-  const res = actions.find((action : Action) => {
+  const res = actions.find((action: Action) => {
     return getId(action) == id;
   });
-  if (res){
+  if (res) {
     const systemState = await getSystemState();
     systemState.selectedAction = res;
     systemState.currentlySelected = "action";

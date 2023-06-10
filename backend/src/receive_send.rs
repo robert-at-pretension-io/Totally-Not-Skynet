@@ -69,6 +69,8 @@ pub async fn start_message_sending_loop(
 
                 let (my_actions, my_processes) = get_actions_and_processes(&db).await;
 
+                // create nodes from the actions and processes
+
                 for action in &my_actions.clone() {
                     send_message(&tx, msg.0, &action).await;
                 }
