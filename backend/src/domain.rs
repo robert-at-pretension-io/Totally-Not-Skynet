@@ -31,7 +31,6 @@ pub struct Graph {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Conditional {
-    _id: Option<ObjectId>,
     system_variables: HashMap<String, String>,
     statement: String,
     options: HashMap<String, ObjectId>,
@@ -43,16 +42,18 @@ pub enum NodeType {
     Process(Process),
     Conditional(Conditional),
     Command(Command),
+    // perhaps add flow control nodes (such as those required for loops)
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Node {
     _id: Option<ObjectId>,
-    pub node_type: NodeType,
+    pub type_name: String,
+    pub node_content: NodeType,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct RunCommand {
+pub struct Command {
     command: String,
 }
 

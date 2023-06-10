@@ -20,10 +20,7 @@
     isResponse,
   } from "helper_functions/type_checker";
 
-  import {
-    incrementCurrentNode,
-    processToGraph
-  } from "helper_functions/graph";
+  import { incrementCurrentNode, processToGraph } from "helper_functions/graph";
 
   import { onMount } from "svelte";
   import systemStateStore from "stores/systemStateStore";
@@ -37,7 +34,6 @@
   onMount(async () => {
     // start the websocket connection
     $systemStateStore.websocket.addEventListener("open", () => {
-
       let apiKey = localStorage.getItem("apiKey") || "Api Key";
       let mongo_uri = localStorage.getItem("mongo_uri") || "Mongo Uri";
       localStorage.setItem("apiKey", apiKey);
@@ -49,10 +45,9 @@
       $systemStateStore.websocket.send(
         JSON.stringify({ initial_message: "initial message" })
       );
-
     });
     $systemStateStore.websocket.addEventListener("message", (event) => {
-      // console.log("websocket message received: ", event.data);
+      console.log("websocket message received: ", event.data);
       let data: any;
       try {
         data = JSON.parse(event.data);
@@ -69,11 +64,13 @@
       // check to see if the data has the shape of a Process or Action
       if (isProcess(data)) {
         let process: Process = data;
-        systemStateStore.update((state : SystemState) => {
+        systemStateStore.update((state: SystemState) => {
           // Check if the process is already in the state
-          let processAlreadyInState = state.aiSystemState.processes.find((process) => {
-            return process._id === data._id;
-          });
+          let processAlreadyInState = state.aiSystemState.processes.find(
+            (process) => {
+              return process._id === data._id;
+            }
+          );
           if (processAlreadyInState) {
             console.log("Process already in state");
             return state;
@@ -120,7 +117,9 @@
           }
 
           if (invalid) {
-            $systemStateStore.websocket.send(JSON.stringify({ action: action }));
+            $systemStateStore.websocket.send(
+              JSON.stringify({ action: action })
+            );
             return state;
           }
           // check if the action is already in the state by looking at the name
@@ -146,7 +145,6 @@
 
         incrementCurrentNode().then((currentNode) => {
           console.log("currentNode: ", currentNode);
-          
         });
 
         systemStateStore.update((state: SystemState) => {
@@ -178,9 +176,11 @@
         systemStateStore.update((state: SystemState) => {
           if (process != null) {
             // only push if the process isn't already in the state:
-            let processAlreadyInState = state.aiSystemState.processes.find((p) => {
-              return p._id === process._id;
-            });
+            let processAlreadyInState = state.aiSystemState.processes.find(
+              (p) => {
+                return p._id === process._id;
+              }
+            );
             if (processAlreadyInState) {
               // console.log("Process already in state");
               return state;

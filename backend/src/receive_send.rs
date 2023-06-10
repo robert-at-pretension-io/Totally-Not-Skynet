@@ -1,5 +1,5 @@
 use crate::domain::{Action, MessageTypes, Process};
-use crate::mongo::{get_actions_and_processes, return_db};
+use crate::mongo::{get_actions_and_processes, get_nodes, return_db};
 use crate::openai::{get_openai_completion, ChatMessage, Role};
 use crate::settings::{RuntimeSettings, UserSettings};
 use crate::utils::parse_message;
@@ -67,16 +67,22 @@ pub async fn start_message_sending_loop(
 
                 let db = return_db(db_uri).await;
 
-                let (my_actions, my_processes) = get_actions_and_processes(&db).await;
+                // let (my_action, my_processes) = get_actions_and_processes(&db).await;
+
+                let nodes = get_nodes(&db).await;
 
                 // create nodes from the actions and processes
 
-                for action in &my_actions.clone() {
-                    send_message(&tx, msg.0, &action).await;
-                }
+                // for action in &my_actions.clone() {
+                //     send_message(&tx, msg.0, &action).await;
+                // }
 
-                for process in &my_processes.clone() {
-                    send_message(&tx, msg.0, &process).await;
+                // for process in &my_processes.clone() {
+                //     send_message(&tx, msg.0, &process).await;
+                // }
+
+                for node in &nodes {
+                    send_message(&tx, msg.0.clone(), &node).await;
                 }
 
                 const IMAGE: &str = "alpine:3";

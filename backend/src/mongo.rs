@@ -1,11 +1,11 @@
+use crate::domain::{Action, Conditional, Process};
+use bson::{doc, oid::ObjectId};
+use futures_util::StreamExt;
 use mongodb::{
     options::{ClientOptions, ServerApi, ServerApiVersion},
     Client,
 };
-use bson::{doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
-use crate::domain::{Action, Conditional,Process};
-use futures_util::StreamExt;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Prompt {
@@ -13,7 +13,6 @@ pub struct Prompt {
     system: String,
     prompt_text: String,
 }
-
 
 pub async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Action>, Vec<Process>) {
     let action_collection = db.collection::<Action>("actions");
@@ -39,6 +38,21 @@ pub async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Action>, 
     (actions, processes)
 }
 
+pub async fn get_nodes(db: &mongodb::Database) -> Vec<crate::domain::Node> {
+    let node_collection = db.collection::<crate::domain::Node>("nodes");
+
+    let mut node_cursor = node_collection.find(None, None).await.unwrap();
+
+    let mut nodes = Vec::new();
+
+    while let Some(node) = node_cursor.next().await {
+        if let Ok(node) = node {
+            nodes.push(node);
+        }
+    }
+
+    nodes
+}
 
 pub async fn return_db(db_uri: String) -> mongodb::Database {
     let client_options = ClientOptions::parse(db_uri).await;
