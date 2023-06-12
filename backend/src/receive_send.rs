@@ -360,16 +360,16 @@ pub async fn start_message_sending_loop(
                 }
             }
             MessageTypes::UpdateNode(_) => todo!(),
-            MessageTypes::CreateNode(update_node) => {
+            MessageTypes::CreateNode(create_node) => {
                     let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
     
                     let db = return_db(db_uri).await;
     
                     let action_collection = db.collection::<crate::domain::Node>("nodes");
     
-                    let mut node = create_node.create_action.clone();
+                    let mut node = create_node.node.clone();
     
-                //     action._id = Some(bson::oid::ObjectId::new());
+                    node._id = Some(bson::oid::ObjectId::new());
     
                 //     let insert_result = action_collection.insert_one(action, None).await.unwrap();
     
@@ -399,6 +399,7 @@ pub async fn start_message_sending_loop(
                 //         }
                 //     }
                 // }
+            }
         }
     }
 }

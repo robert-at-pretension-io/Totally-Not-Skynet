@@ -1,5 +1,4 @@
 use crate::domain::{Prompt, InitializeProject, MessageTypes, Node, Process};
-use crate::domain::{CreateAction, CreateProcess, UpdateAction};
 use crate::settings::UserSettings;
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
@@ -12,7 +11,7 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
     if let Some(obj) = value.as_object() {
         if let Some(create_action_value) = obj.get("create_action") {
             if let Some(create_action_obj) = create_action_value.as_object() {
-                let action = Prompt {
+                let prompt = Prompt {
                     input_variables: create_action_obj
                         .get("input_variables")
                         .and_then(|v| v.as_array())
@@ -39,12 +38,10 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .to_string(),
                     system: create_action_obj
                         .get("system")
-                        .and_then(|v| v.as_str())
-                        .to_string(),
-                };
-                return Some(MessageTypes::CreateAction(CreateAction {
-                    create_action: action,
-                }));
+                        .and_then(|v| v.as_str().map(f))               };
+                // return Some(MessageTypes::CreateNode(CreateAction {
+                //     create_action: action,
+                // }));
             }
         }
         if let Some(create_process_value) = obj.get("create_process") {
@@ -105,9 +102,6 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
         return Some(MessageTypes::HandleNode(msg));
     }
 
-    if let Ok(msg) = serde_json::from_str::<UpdateAction>(message_str) {
-        return Some(MessageTypes::UpdateAction(msg));
-    }
 
     println!("Could not parse message: {}", message_str);
 

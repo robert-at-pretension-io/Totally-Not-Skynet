@@ -100,21 +100,17 @@ pub struct UpdateNode {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct CreateNode {
+    pub node: Node,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct CommandOutput {
     command: String,
     success: bool,
     response: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct CreateAction {
-    pub create_action: Prompt,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct CreateProcess {
-    pub create_process: Process,
-}
 
 // Used for the websocket messages
 #[derive(Serialize, Deserialize, Debug)]
@@ -123,7 +119,5 @@ pub enum MessageTypes {
     SetUserSettings(UserSettings),
     HandleNode(Node),
     UpdateNode(UpdateNode),
-    CreateNode(UpdateNode),
-    // CreateAction(CreateAction),
-    // CreateProcess(CreateProcess),
+    CreateNode(CreateNode)
 }
