@@ -52,6 +52,26 @@ pub struct Node {
     pub node_content: NodeType,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Edge {
+    _id: Option<ObjectId>,
+    pub a: ObjectId,
+    pub b: ObjectId,
+}
+
+pub fn create_node(node: NodeType) -> Node {
+    Node {
+        _id: Some(bson::oid::ObjectId::new()),
+        type_name: match node {
+            NodeType::Action(_) => "Action".to_string(),
+            NodeType::Process(_) => "Process".to_string(),
+            NodeType::Conditional(_) => "Conditional".to_string(),
+            NodeType::Command(_) => "Command".to_string(),
+        },
+        node_content: node,
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Command {
     command: String,

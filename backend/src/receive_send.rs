@@ -1,5 +1,5 @@
-use crate::domain::{Action, MessageTypes, Process};
-use crate::mongo::{get_actions_and_processes, get_nodes, return_db};
+use crate::domain::{Action, MessageTypes, NodeType, Process, CreateAction, CreateProcess, Response};
+use crate::mongo::{get_nodes, return_db};
 use crate::openai::{get_openai_completion, ChatMessage, Role};
 use crate::settings::{RuntimeSettings, UserSettings};
 use crate::utils::parse_message;
@@ -7,6 +7,7 @@ use crate::utils::parse_message;
 use bollard::container::Config;
 use bollard::exec::{CreateExecOptions, StartExecResults};
 use bollard::Docker;
+use bson::{doc, oid::ObjectId};
 use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -263,7 +264,7 @@ pub async fn start_message_sending_loop(
             }
 
             MessageTypes::HandleNode(node) => {
-                match node.node_type {
+                match node.node_content {
                     NodeType::Prompt(prompt) => {
                         let openai_api_key = match runtime_settings.get(&msg.0) {
                             Some(settings) => Some(settings.openai_api_key.clone()),
@@ -345,7 +346,7 @@ pub async fn start_message_sending_loop(
 
                                     // Once we've read all the output, send it to the client
 
-                                    send_message(&tx, msg.0.clone(), full_output)
+                                    send_message(&tx, msg.0.clone(), full_output).await;
                                 }
                                 StartExecResults::Detached => {
                                     println!("The exec instance completed execution and detached");
