@@ -1,4 +1,4 @@
-use crate::domain::{Action, InitializeProject, MessageTypes, Node, Process};
+use crate::domain::{Prompt, InitializeProject, MessageTypes, Node, Process};
 use crate::domain::{CreateAction, CreateProcess, UpdateAction};
 use crate::settings::UserSettings;
 
@@ -12,7 +12,7 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
     if let Some(obj) = value.as_object() {
         if let Some(create_action_value) = obj.get("create_action") {
             if let Some(create_action_obj) = create_action_value.as_object() {
-                let action = Action {
+                let action = Prompt {
                     input_variables: create_action_obj
                         .get("input_variables")
                         .and_then(|v| v.as_array())

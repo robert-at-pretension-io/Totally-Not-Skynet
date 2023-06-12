@@ -4,12 +4,12 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Action {
-    prompt: String,
+pub struct Prompt {
+    pub prompt: String,
     input_variables: Vec<String>,
     output_variables: Vec<String>,
     name: String,
-    system: Option<String>,
+    pub system: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -38,7 +38,8 @@ pub struct Conditional {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum NodeType {
-    Action(Action),
+    // Action(Action),
+    Prompt(Prompt),
     Process(Process),
     Conditional(Conditional),
     Command(Command),
@@ -47,7 +48,7 @@ pub enum NodeType {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Node {
-    _id: Option<ObjectId>,
+    pub _id: Option<ObjectId>,
     pub type_name: String,
     pub node_content: NodeType,
 }
@@ -63,7 +64,7 @@ pub fn create_node(node: NodeType) -> Node {
     Node {
         _id: Some(bson::oid::ObjectId::new()),
         type_name: match node {
-            NodeType::Action(_) => "Action".to_string(),
+            NodeType::Prompt(_) => "Prompt".to_string(),
             NodeType::Process(_) => "Process".to_string(),
             NodeType::Conditional(_) => "Conditional".to_string(),
             NodeType::Command(_) => "Command".to_string(),
@@ -74,7 +75,7 @@ pub fn create_node(node: NodeType) -> Node {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Command {
-    command: String,
+    pub command: String,
 }
 
 #[derive(Serialize, Debug, Deserialize)]
@@ -90,7 +91,12 @@ pub struct Response {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateAction {
-    pub action: Action,
+    pub action: Prompt,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UpdateNode {
+    pub node: Node,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -102,7 +108,7 @@ pub struct CommandOutput {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateAction {
-    pub create_action: Action,
+    pub create_action: Prompt,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -116,7 +122,8 @@ pub enum MessageTypes {
     InitializeProject(InitializeProject), // Add more types here
     SetUserSettings(UserSettings),
     HandleNode(Node),
-    UpdateAction(UpdateAction),
-    CreateAction(CreateAction),
-    CreateProcess(CreateProcess),
+    UpdateNode(UpdateNode),
+    CreateNode(UpdateNode),
+    // CreateAction(CreateAction),
+    // CreateProcess(CreateProcess),
 }

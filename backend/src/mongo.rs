@@ -1,4 +1,4 @@
-use crate::domain::{Action, Process};
+use crate::domain::{Prompt, Process};
 use bson::{doc};
 use futures_util::StreamExt;
 use mongodb::{
@@ -7,15 +7,15 @@ use mongodb::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Prompt {
-    action_id: String,
-    system: String,
-    prompt_text: String,
-}
+// #[derive(Serialize, Deserialize, Debug, Clone)]
+// pub struct Prompt {
+//     action_id: String,
+//     system: String,
+//     prompt_text: String,
+// }
 
-pub async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Action>, Vec<Process>) {
-    let action_collection = db.collection::<Action>("actions");
+pub async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Prompt>, Vec<Process>) {
+    let action_collection = db.collection::<Prompt>("actions");
     let process_collection = db.collection::<Process>("processes");
 
     let mut actions_cursor = action_collection.find(None, None).await.unwrap();
