@@ -6,21 +6,21 @@ use std::collections::HashMap;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Prompt {
     pub prompt: String,
-    input_variables: Vec<String>,
-    output_variables: Vec<String>,
-    name: String,
+    pub input_variables: Vec<String>,
+    pub output_variables: Vec<String>,
+    pub name: String,
     pub system: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Process {
-    name: String,
-    graph: String,
-    topological_order: Vec<String>,
-    description: String,
-    output_variable: String,
-    is_loop: bool,
-    max_iterations: Option<u32>,
+    pub name: String,
+    pub graph: String,
+    pub topological_order: Vec<String>,
+    pub description: String,
+    pub output_variable: String,
+    pub is_loop: bool,
+    pub max_iterations: Option<u32>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -31,9 +31,9 @@ pub struct Graph {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Conditional {
-    system_variables: HashMap<String, String>,
-    statement: String,
-    options: HashMap<String, ObjectId>,
+    pub system_variables: HashMap<String, String>,
+    pub statement: String,
+    pub options: HashMap<String, ObjectId>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -111,7 +111,6 @@ pub struct CommandOutput {
     response: String,
 }
 
-
 // Used for the websocket messages
 #[derive(Serialize, Deserialize, Debug)]
 pub enum MessageTypes {
@@ -119,5 +118,5 @@ pub enum MessageTypes {
     SetUserSettings(UserSettings),
     HandleNode(Node),
     UpdateNode(UpdateNode),
-    CreateNode(CreateNode)
+    CreateNode(CreateNode),
 }

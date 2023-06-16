@@ -359,17 +359,104 @@ pub async fn start_message_sending_loop(
                     NodeType::Process(_) => todo!(),
                 }
             }
-            MessageTypes::UpdateNode(_) => todo!(),
+            MessageTypes::UpdateNode(update_node) => {
+                let updated_node = update_node.node.clone();
+            
+                let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
+            
+                let db = return_db(db_uri).await;
+            
+                let node_collection = db.collection::<Node>("nodes");
+            
+                let filter = doc! { "_id": updated_node._id.clone().unwrap() };
+            
+                let update = match updated_node.node_content {
+                    NodeType::Prompt(prompt) => {
+                        doc! {
+                            "$set": {
+                                "name": prompt.name.clone(),
+                                "prompt": prompt.prompt.clone(),
+                                "system": prompt.system.clone(),
+                                "input_variables": prompt.input_variables.clone(),
+                                "output_variables": prompt.output_variables.clone()
+                            }
+                        }
+                    }
+                    NodeType::Process(process) => {
+                        doc! {
+                            "$set": {
+                                "name": process.name.clone(),
+                                "graph": process.graph.clone(),
+                                "topological_order": process.topological_order.clone(),
+                                "description": process.description.clone(),
+                                "output_variable": process.output_variable.clone(),
+                                "is_loop": process.isloop,
+                                "max_iterations": process.max_iterations.clone()
+                            }
+                        }
+                    },
+                    NodeType::Conditional(conditional) => {
+                        let mut system_variables = doc! {};
+            
+                        for (key, value) in conditional.system_variables {
+                            system_variables.insert(key, value);
+                        }
+            
+                        doc! {
+                            "$set": {
+                                "system_variables": system_variables,
+                                "statement": conditional.statement.clone(),
+                                "options": conditional.options.clone()
+                            }
+                        }
+                    },
+                    NodeType::Command(command) => {
+                        doc! {
+                            "$set": {
+                                "command": command.command.clone()
+                            }
+                        }
+                    },
+                };
+            
+                let update_result = node_collection.update_one(filter, update, None).await.unwrap();
+            
+                if update_result.modified_count == 0 {
+                    println!("No nodes updated");
+                } else {
+                    println!("Updated {} nodes", update_result.modified_count);
+            
+                    match tx.send((
+                        Identity::new(msg.0.name.to_string()),
+                        Message::Text(json!(updated_node).to_string()),
+                    )) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            println!("Error sending message to client: {:?}", e);
+                            break;
+                        }
+                    }
+                }
+            }
+
+
             MessageTypes::CreateNode(create_node) => {
                     let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
     
                     let db = return_db(db_uri).await;
     
-                    let action_collection = db.collection::<crate::domain::Node>("nodes");
+                    let node_collection = db.collection::<crate::domain::Node>("nodes");
     
                     let mut node = create_node.node.clone();
     
                     node._id = Some(bson::oid::ObjectId::new());
+
+                    let insert_result = node_collection.insert_one(node, None).await.unwrap();
+
+                    println!("Inserted node: {}", insert_result);
+
+                    let inserted_node = node_collection.find_one( doc!{"id": insert_result.inserted_id.clone()}, None).await
+                    .unwrap().unwrap();
     
                 //     let insert_result = action_collection.insert_one(action, None).await.unwrap();
     
@@ -384,20 +471,20 @@ pub async fn start_message_sending_loop(
                 //     // send the created action back to the client
                 //     let created_action: Prompt = inserted_action;
     
-                //     let response = CreateAction {
-                //         create_action: created_action,
-                //     };
+                    let response = CreateNode {
+                        node: inserted_node,
+                    };
     
-                //     match tx.send((
-                //         Identity::new(msg.0.name.to_string()),
-                //         Message::Text(json!(response).to_string()),
-                //     )) {
-                //         Ok(_) => {}
-                //         Err(e) => {
-                //             println!("Error sending message to client: {:?}", e);
-                //             break;
-                //         }
-                //     }
+                    match tx.send((
+                        Identity::new(msg.0.name.to_string()),
+                        Message::Text(json!(response).to_string()),
+                    )) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            println!("Error sending message to client: {:?}", e);
+                            break;
+                        }
+                    }
                 // }
             }
         }

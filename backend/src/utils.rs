@@ -1,8 +1,9 @@
-use crate::domain::{Prompt, InitializeProject, MessageTypes, Node, Process};
+use crate::domain::{InitializeProject, MessageTypes, Node, Process, Prompt};
 use crate::settings::UserSettings;
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
     use serde_json::Value;
+
     let value: Value = match serde_json::from_str(message_str) {
         Ok(val) => val,
         Err(_) => return None, // or handle this error as you see fit
@@ -38,12 +39,16 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .to_string(),
                     system: create_action_obj
                         .get("system")
-                        .and_then(|v| v.as_str().map(f))               };
-                // return Some(MessageTypes::CreateNode(CreateAction {
-                //     create_action: action,
-                // }));
+                        .and_then(|v| v.as_str())
+                        .map(|v| v.to_string()),
+                };
+
+                return Some(MessageTypes::CreateNode(CreateNode {
+                    node: create_node(NodeType::Prompt(prompt)),
+                }));
             }
         }
+
         if let Some(create_process_value) = obj.get("create_process") {
             if let Some(create_process_obj) = create_process_value.as_object() {
                 let process = Process {
@@ -83,9 +88,16 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .unwrap_or("")
                         .to_string(),
                 };
-                return Some(MessageTypes::CreateProcess(CreateProcess {
-                    create_process: process,
+
+                return Some(MessageTypes::CreateNode(CreateNode {
+                    node: create_node(NodeType::Process(process)),
                 }));
+            }
+        }
+
+        if let Some(handle_node_value) = obj.get("handle_node") {
+            if let Some(handle_node_obj) = handle_node_value.as_object() {
+                if let Ok(node) = serde_json::from_value::<Node>(node_value.clone()) {
             }
         }
     }
@@ -97,11 +109,6 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
     if let Ok(msg) = serde_json::from_str::<UserSettings>(message_str) {
         return Some(MessageTypes::SetUserSettings(msg));
     }
-
-    if let Ok(msg) = serde_json::from_str::<Node>(message_str) {
-        return Some(MessageTypes::HandleNode(msg));
-    }
-
 
     println!("Could not parse message: {}", message_str);
 
