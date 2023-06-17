@@ -1,4 +1,4 @@
-use crate::domain::{ MessageTypes, NodeType, Response};
+use crate::domain::{ MessageTypes, NodeType, Response, Node, CreateNode};
 use crate::mongo::{get_nodes, return_db};
 use crate::openai::{get_openai_completion, ChatMessage, Role};
 use crate::settings::{RuntimeSettings, UserSettings};
@@ -278,7 +278,7 @@ pub async fn start_message_sending_loop(
                             let messages = vec![
                                 ChatMessage {
                                     role: Role::System,
-                                    content: prompt.system.unwrap_or(''.to_string()).clone(),
+                                    content: prompt.system.unwrap_or("".to_string()).clone(),
                                 },
                                 ChatMessage {
                                     role: Role::User,
@@ -390,7 +390,7 @@ pub async fn start_message_sending_loop(
                                 "topological_order": process.topological_order.clone(),
                                 "description": process.description.clone(),
                                 "output_variable": process.output_variable.clone(),
-                                "is_loop": process.isloop,
+                                "is_loop": process.is_loop,
                                 "max_iterations": process.max_iterations.clone()
                             }
                         }
@@ -453,7 +453,7 @@ pub async fn start_message_sending_loop(
 
                     let insert_result = node_collection.insert_one(node, None).await.unwrap();
 
-                    println!("Inserted node: {}", insert_result);
+                    println!("Inserted node: {:?}", insert_result);
 
                     let inserted_node = node_collection.find_one( doc!{"id": insert_result.inserted_id.clone()}, None).await
                     .unwrap().unwrap();

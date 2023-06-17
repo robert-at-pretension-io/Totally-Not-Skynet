@@ -1,5 +1,8 @@
-use crate::domain::{InitializeProject, MessageTypes, Node, Process, Prompt};
-use crate::settings::UserSettings;
+use crate::domain::{ MessageTypes, Node, Process, Prompt};
+use crate::domain::create_node;
+use crate::domain::CreateNode;
+use crate::domain::NodeType;
+
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
     use serde_json::Value;
@@ -27,7 +30,7 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .iter()
                         .map(|v| v.as_str().unwrap_or("").to_string())
                         .collect(),
-                    name: create_action_obj
+                        name: create_action_obj
                         .get("name")
                         .and_then(|v| v.as_str())
                         .unwrap_or("")
@@ -52,65 +55,62 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
         if let Some(create_process_value) = obj.get("create_process") {
             if let Some(create_process_obj) = create_process_value.as_object() {
                 let process = Process {
-                    max_iterations: create_process_obj
-                        .get("max_iterations")
-                        .and_then(|v| v.as_u64())
-                        .map(|v| v as u32),
-                    is_loop: create_process_obj
-                        .get("is_loop")
-                        .and_then(|v| v.as_bool())
-                        .unwrap_or(false),
-                    name: create_process_obj
-                        .get("name")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
-                    graph: create_process_obj
-                        .get("graph")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
-                    description: create_process_obj
-                        .get("description")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
-                    topological_order: create_process_obj
-                        .get("topological_order")
-                        .and_then(|v| v.as_array())
-                        .unwrap_or(&vec![])
-                        .iter()
-                        .map(|v| v.as_str().unwrap_or("").to_string())
-                        .collect(),
-                    output_variable: create_process_obj
-                        .get("output_variable")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
-                };
-
-                return Some(MessageTypes::CreateNode(CreateNode {
-                    node: create_node(NodeType::Process(process)),
-                }));
+                            max_iterations: create_process_obj
+                                .get("max_iterations")
+                                .and_then(|v| v.as_u64())
+                                .map(|v| v as u32),
+                            is_loop: create_process_obj
+                                .get("is_loop")
+                                .and_then(|v| v.as_bool())
+                                .unwrap_or(false),
+                            name: create_process_obj
+                                .get("name")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("")
+                                .to_string(),
+                            graph: create_process_obj
+                                .get("graph")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("")
+                                .to_string(),
+                            description: create_process_obj
+                                .get("description")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("")
+                                .to_string(),
+                            topological_order: create_process_obj
+                                .get("topological_order")
+                                .and_then(|v| v.as_array())
+                                .unwrap_or(&vec![])
+                                .iter()
+                                .map(|v| v.as_str().unwrap_or("").to_string())
+                                .collect(),
+                                output_variable: create_process_obj
+                                .get("output_variable")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("")
+                                .to_string(),
+                        };
+        
+                        return Some(MessageTypes::CreateNode(CreateNode {
+                            node: create_node(NodeType::Process(process)),
+                        }));
+                    }
+                }
+        
+                if let Some(handle_node_value) = obj.get("handle_node") {
+                    if let Some(handle_node_obj) = handle_node_value.as_object() {
+                        if let Ok(node) = serde_json::from_value::<Node>(node_value.clone()) {
+                            // Handle the node creation logic
+                        }
+                    }
+                }
+        
+                // Handle other conditions ...
+        
+                println!("Could not parse message: {}", message_str);
             }
+        
+            None
         }
-
-        if let Some(handle_node_value) = obj.get("handle_node") {
-            if let Some(handle_node_obj) = handle_node_value.as_object() {
-                if let Ok(node) = serde_json::from_value::<Node>(node_value.clone()) {
-            }
-        }
-    }
-
-    if let Ok(msg) = serde_json::from_str::<InitializeProject>(message_str) {
-        return Some(MessageTypes::InitializeProject(msg));
-    }
-
-    if let Ok(msg) = serde_json::from_str::<UserSettings>(message_str) {
-        return Some(MessageTypes::SetUserSettings(msg));
-    }
-
-    println!("Could not parse message: {}", message_str);
-
-    None
-}
+        

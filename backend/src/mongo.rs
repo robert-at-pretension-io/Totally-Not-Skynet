@@ -1,18 +1,10 @@
 use crate::domain::{Prompt, Process};
-use bson::{doc};
 use futures_util::StreamExt;
 use mongodb::{
     options::{ClientOptions, ServerApi, ServerApiVersion},
     Client,
 };
-use serde::{Deserialize, Serialize};
 
-// #[derive(Serialize, Deserialize, Debug, Clone)]
-// pub struct Prompt {
-//     action_id: String,
-//     system: String,
-//     prompt_text: String,
-// }
 
 pub async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Prompt>, Vec<Process>) {
     let action_collection = db.collection::<Prompt>("actions");

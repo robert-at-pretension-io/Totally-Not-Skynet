@@ -8,6 +8,11 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::{mpsc, Mutex};
 use tokio_tungstenite::tungstenite::Message;
 
+use futures_util::StreamExt;
+use futures_util::SinkExt;
+
+
+
 pub async fn start_websocket_server(
     rx: Arc<tokio::sync::Mutex<UnboundedReceiver<(Identity, Message)>>>,
     client_tx: mpsc::Sender<(Identity, String)>,
@@ -54,7 +59,7 @@ pub async fn start_websocket_server(
 
         // Spawn a new task for each incoming connection
         tokio::spawn(async move {
-            let id = Uuid::new_v4();
+            let id = Uuid::new();
 
             thread_safe_request_dispatcher_clone_3
                 .lock()
