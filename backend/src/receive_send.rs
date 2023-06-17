@@ -15,6 +15,7 @@ use std::collections::HashMap;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_tungstenite::tungstenite::Message;
+use bson::Bson;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Identity {
@@ -72,15 +73,6 @@ pub async fn start_message_sending_loop(
 
                 let nodes = get_nodes(&db).await;
 
-                // create nodes from the actions and processes
-
-                // for action in &my_actions.clone() {
-                //     send_message(&tx, msg.0, &action).await;
-                // }
-
-                // for process in &my_processes.clone() {
-                //     send_message(&tx, msg.0, &process).await;
-                // }
 
                 for node in &nodes {
                     send_message(&tx, msg.0.clone(), &node).await;
@@ -146,122 +138,6 @@ pub async fn start_message_sending_loop(
                 }
             }
 
-            // MessageTypes::UpdateAction(update_action) => {
-            //     let updated_action = update_action.action;
-
-            //     let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
-
-            //     let db = return_db(db_uri).await;
-
-            //     let action_collection = db.collection::<Node>("nodes");
-
-            //     let filter = doc! { "_id": updated_action._id.clone().unwrap() };
-
-            //     let update = doc! { "$set": { "name": updated_action.name.clone(), "prompt":
-
-            //         updated_action.prompt.clone(),  "system" : updated_action.system.clone(), "input_variables" : updated_action.input_variables.clone(), "output_variables": updated_action.output_variables.clone() }
-            //     };
-
-            //     let update_result = action_collection
-            //         .update_one(filter, update, None)
-            //         .await
-            //         .unwrap();
-
-            //     if update_result.modified_count == 0 {
-            //         println!("No actions updated");
-            //     } else {
-            //         println!("Updated {} actions", update_result.modified_count);
-
-            //         match tx.send((
-            //             Identity::new(msg.0.name.to_string()),
-            //             Message::Text(json!(updated_action).to_string()),
-            //         )) {
-            //             Ok(_) => {}
-            //             Err(e) => {
-            //                 println!("Error sending message to client: {:?}", e);
-            //                 break;
-            //             }
-            //         }
-            //     }
-            // }
-            // MessageTypes::CreateAction(create_action) => {
-            //     let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
-
-            //     let db = return_db(db_uri).await;
-
-            //     let action_collection = db.collection::<Prompt>("actions");
-
-            //     let mut action = create_action.create_action.clone();
-
-            //     action._id = Some(bson::oid::ObjectId::new());
-
-            //     let insert_result = action_collection.insert_one(action, None).await.unwrap();
-
-            //     println!("Inserted action: {}", insert_result.inserted_id);
-
-            //     let inserted_action = action_collection
-            //         .find_one(doc! { "_id": insert_result.inserted_id.clone() }, None)
-            //         .await
-            //         .unwrap()
-            //         .unwrap();
-
-            //     // send the created action back to the client
-            //     let created_action: Prompt = inserted_action;
-
-            //     let response = CreateAction {
-            //         create_action: created_action,
-            //     };
-
-            //     match tx.send((
-            //         Identity::new(msg.0.name.to_string()),
-            //         Message::Text(json!(response).to_string()),
-            //     )) {
-            //         Ok(_) => {}
-            //         Err(e) => {
-            //             println!("Error sending message to client: {:?}", e);
-            //             break;
-            //         }
-            //     }
-            // }
-            // MessageTypes::CreateProcess(create_process) => {
-            //     let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
-
-            //     let db = return_db(db_uri).await;
-
-            //     let process_collection = db.collection::<Process>("processes");
-
-            //     let mut process = create_process.create_process.clone();
-
-            //     process._id = Some(bson::oid::ObjectId::new());
-
-            //     let insert_result = process_collection.insert_one(process, None).await.unwrap();
-
-            //     println!("Inserted process: {}", insert_result.inserted_id);
-
-            //     let inserted_process = process_collection
-            //         .find_one(doc! { "_id": insert_result.inserted_id.clone() }, None)
-            //         .await
-            //         .unwrap()
-            //         .unwrap();
-
-            //     // send the created process back to the client
-            //     let created_process: Process = inserted_process;
-
-            //     let response = CreateProcess {
-            //         create_process: created_process,
-            //     };
-
-            //     match tx.send((
-            //         Identity::new(msg.0.name.to_string()),
-            //         Message::Text(json!(response).to_string()),
-            //     )) {
-            //         Ok(_) => {}
-            //         Err(e) => {
-            //             println!("Error sending message to client: {:?}", e);
-            //             break;
-            //         }
-            //     }
-            // }
 
             MessageTypes::HandleNode(node) => {
                 match node.node_content {
@@ -401,12 +277,17 @@ pub async fn start_message_sending_loop(
                         for (key, value) in conditional.system_variables {
                             system_variables.insert(key, value);
                         }
+
+                        let mut new_options = HashMap::new();
+for (key, value) in &conditional.options {
+    new_options.insert(key.clone(), Bson::from(value.clone()));
+}
             
                         doc! {
                             "$set": {
                                 "system_variables": system_variables,
                                 "statement": conditional.statement.clone(),
-                                "options": conditional.options.clone()
+                                "options": new_options
                             }
                         }
                     },
