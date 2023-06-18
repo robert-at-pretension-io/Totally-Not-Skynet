@@ -79,6 +79,8 @@ pub async fn start_message_sending_loop(
 
                 let nodes = get_nodes(&db).await;
 
+                println!("Found the following nodes: {:?}", nodes);
+
                 for node in &nodes {
                     send_message(&tx, msg.0.clone(), &node).await;
                 }
