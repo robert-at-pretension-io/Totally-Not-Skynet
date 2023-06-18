@@ -80,7 +80,7 @@ pub struct Command {
 
 #[derive(Serialize, Debug, Deserialize)]
 pub struct InitializeProject {
-    initial_message: String,
+    pub initial_message: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
