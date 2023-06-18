@@ -2504,7 +2504,6 @@ var app = (function () {
         };
     }
 
-    // Replace 'ws://example.com' with your WebSocket server URL
     const system_state = {
         websocketReady: false,
         currentlySelected: "action"  ,

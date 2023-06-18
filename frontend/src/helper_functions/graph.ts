@@ -3,6 +3,7 @@ import type {
   AiSystemState,
   Action,
   Prompt,
+  NodeType
 } from "../system_types";
 import { Process } from "../system_types";
 import systemStateStore from "stores/systemStateStore";

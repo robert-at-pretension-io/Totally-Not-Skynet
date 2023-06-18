@@ -3,6 +3,7 @@ use crate::domain::CreateNode;
 use crate::domain::InitializeProject;
 use crate::domain::NodeType;
 use crate::domain::{MessageTypes, Node, Process, Prompt};
+use crate::settings::UserSettings;
 
 pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
     use serde_json::Value;
@@ -104,6 +105,12 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
             }));
         }
 
+        if let Some(user_settings) = obj.get("openai_api_key") {
+            return Some(MessageTypes::SetUserSettings(UserSettings {
+                openai_api_key: "".to_string(),
+                mongo_db_uri: "".to_string(),
+            }));
+        }
         println!("Could not parse message: {}", message_str);
     }
 

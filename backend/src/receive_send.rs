@@ -9,6 +9,7 @@ use bollard::exec::{CreateExecOptions, StartExecResults};
 use bollard::Docker;
 use bson::doc;
 use bson::Bson;
+use bson::Document;
 use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -16,7 +17,6 @@ use std::collections::HashMap;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_tungstenite::tungstenite::Message;
-use bson::Document;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Identity {
@@ -39,7 +39,7 @@ pub async fn start_message_sending_loop(
     let mut docker_containers: HashMap<Identity, String> = HashMap::new();
 
     // startup the docker container here
-    let docker = Docker::connect_with_local_defaults().unwrap(); 
+    let docker = Docker::connect_with_local_defaults().unwrap();
     //read messages from the client
     while let Some(msg) = client_rx.recv().await {
         println!("Received a message from the client: {}", msg.1);
@@ -64,6 +64,12 @@ pub async fn start_message_sending_loop(
                 // get the actions and processes from the db
 
                 // send the actions to the client
+
+                println!("Initializing project for {}", msg.0.name);
+                println!(
+                    "Found the following settings: {:?}",
+                    runtime_settings.get(&msg.0)
+                );
 
                 let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
 
@@ -271,16 +277,16 @@ pub async fn start_message_sending_loop(
                     }
                     NodeType::Conditional(conditional) => {
                         let mut system_variables = doc! {};
-                    
+
                         for (key, value) in conditional.system_variables {
                             system_variables.insert(key, value);
                         }
-                    
+
                         let mut new_options = Document::new();
                         for (key, value) in &conditional.options {
                             new_options.insert(key.clone(), Bson::from(value.clone()));
                         }
-                    
+
                         doc! {
                             "$set": {
                                 "system_variables": system_variables,
