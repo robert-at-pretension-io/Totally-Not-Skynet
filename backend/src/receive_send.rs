@@ -1,4 +1,4 @@
-use crate::domain::{ MessageTypes, NodeType, Response, Node, CreateNode};
+use crate::domain::{CreateNode, MessageTypes, Node, NodeType, Response};
 use crate::mongo::{get_nodes, return_db};
 use crate::openai::{get_openai_completion, ChatMessage, Role};
 use crate::settings::{RuntimeSettings, UserSettings};
@@ -7,7 +7,8 @@ use crate::utils::parse_message;
 use bollard::container::Config;
 use bollard::exec::{CreateExecOptions, StartExecResults};
 use bollard::Docker;
-use bson::{doc};
+use bson::doc;
+use bson::Bson;
 use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -15,7 +16,7 @@ use std::collections::HashMap;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_tungstenite::tungstenite::Message;
-use bson::Bson;
+use bson::Document;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Identity {
@@ -38,8 +39,7 @@ pub async fn start_message_sending_loop(
     let mut docker_containers: HashMap<Identity, String> = HashMap::new();
 
     // startup the docker container here
-    let docker = Docker::connect_with_local_defaults().unwrap();
-
+    let docker = Docker::connect_with_local_defaults().unwrap(); 
     //read messages from the client
     while let Some(msg) = client_rx.recv().await {
         println!("Received a message from the client: {}", msg.1);
@@ -72,7 +72,6 @@ pub async fn start_message_sending_loop(
                 // let (my_action, my_processes) = get_actions_and_processes(&db).await;
 
                 let nodes = get_nodes(&db).await;
-
 
                 for node in &nodes {
                     send_message(&tx, msg.0.clone(), &node).await;
@@ -137,7 +136,6 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-
 
             MessageTypes::HandleNode(node) => {
                 match node.node_content {
@@ -237,16 +235,16 @@ pub async fn start_message_sending_loop(
             }
             MessageTypes::UpdateNode(update_node) => {
                 let updated_node = update_node.node.clone();
-            
+
                 let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
-            
+
                 let db = return_db(db_uri).await;
-            
+
                 let node_collection = db.collection::<Node>("nodes");
-            
+
                 let filter = doc! { "_id": updated_node._id.clone().unwrap() };
-            
-                let update = match updated_node.node_content {
+
+                let update = match updated_node.node_content.clone() {
                     NodeType::Prompt(prompt) => {
                         doc! {
                             "$set": {
@@ -270,19 +268,19 @@ pub async fn start_message_sending_loop(
                                 "max_iterations": process.max_iterations.clone()
                             }
                         }
-                    },
+                    }
                     NodeType::Conditional(conditional) => {
                         let mut system_variables = doc! {};
-            
+                    
                         for (key, value) in conditional.system_variables {
                             system_variables.insert(key, value);
                         }
-
-                        let mut new_options = HashMap::new();
-for (key, value) in &conditional.options {
-    new_options.insert(key.clone(), Bson::from(value.clone()));
-}
-            
+                    
+                        let mut new_options = Document::new();
+                        for (key, value) in &conditional.options {
+                            new_options.insert(key.clone(), Bson::from(value.clone()));
+                        }
+                    
                         doc! {
                             "$set": {
                                 "system_variables": system_variables,
@@ -290,23 +288,26 @@ for (key, value) in &conditional.options {
                                 "options": new_options
                             }
                         }
-                    },
+                    }
                     NodeType::Command(command) => {
                         doc! {
                             "$set": {
                                 "command": command.command.clone()
                             }
                         }
-                    },
+                    }
                 };
-            
-                let update_result = node_collection.update_one(filter, update, None).await.unwrap();
-            
+
+                let update_result = node_collection
+                    .update_one(filter, update, None)
+                    .await
+                    .unwrap();
+
                 if update_result.modified_count == 0 {
                     println!("No nodes updated");
                 } else {
                     println!("Updated {} nodes", update_result.modified_count);
-            
+
                     match tx.send((
                         Identity::new(msg.0.name.to_string()),
                         Message::Text(json!(updated_node).to_string()),
@@ -320,52 +321,41 @@ for (key, value) in &conditional.options {
                 }
             }
 
-
             MessageTypes::CreateNode(create_node) => {
-                    let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
-    
-                    let db = return_db(db_uri).await;
-    
-                    let node_collection = db.collection::<crate::domain::Node>("nodes");
-    
-                    let mut node = create_node.node.clone();
-    
-                    node._id = Some(bson::oid::ObjectId::new());
+                let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
 
-                    let insert_result = node_collection.insert_one(node, None).await.unwrap();
+                let db = return_db(db_uri).await;
 
-                    println!("Inserted node: {:?}", insert_result);
+                let node_collection = db.collection::<crate::domain::Node>("nodes");
 
-                    let inserted_node = node_collection.find_one( doc!{"id": insert_result.inserted_id.clone()}, None).await
-                    .unwrap().unwrap();
-    
-                //     let insert_result = action_collection.insert_one(action, None).await.unwrap();
-    
-                //     println!("Inserted action: {}", insert_result.inserted_id);
-    
-                //     let inserted_action = action_collection
-                //         .find_one(doc! { "_id": insert_result.inserted_id.clone() }, None)
-                //         .await
-                //         .unwrap()
-                //         .unwrap();
-    
-                //     // send the created action back to the client
-                //     let created_action: Prompt = inserted_action;
-    
-                    let response = CreateNode {
-                        node: inserted_node,
-                    };
-    
-                    match tx.send((
-                        Identity::new(msg.0.name.to_string()),
-                        Message::Text(json!(response).to_string()),
-                    )) {
-                        Ok(_) => {}
-                        Err(e) => {
-                            println!("Error sending message to client: {:?}", e);
-                            break;
-                        }
+                let mut node = create_node.node.clone();
+
+                node._id = Some(bson::oid::ObjectId::new());
+
+                let insert_result = node_collection.insert_one(node, None).await.unwrap();
+
+                println!("Inserted node: {:?}", insert_result);
+
+                let inserted_node = node_collection
+                    .find_one(doc! {"id": insert_result.inserted_id.clone()}, None)
+                    .await
+                    .unwrap()
+                    .unwrap();
+
+                let response = CreateNode {
+                    node: inserted_node,
+                };
+
+                match tx.send((
+                    Identity::new(msg.0.name.to_string()),
+                    Message::Text(json!(response).to_string()),
+                )) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        println!("Error sending message to client: {:?}", e);
+                        break;
                     }
+                }
                 // }
             }
         }

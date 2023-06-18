@@ -98,15 +98,6 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                     }
                 }
         
-                if let Some(handle_node_value) = obj.get("handle_node") {
-                    if let Some(handle_node_obj) = handle_node_value.as_object() {
-                        if let Ok(node) = serde_json::from_value::<Node>(node_value.clone()) {
-                            // Handle the node creation logic
-                        }
-                    }
-                }
-        
-                // Handle other conditions ...
         
                 println!("Could not parse message: {}", message_str);
             }

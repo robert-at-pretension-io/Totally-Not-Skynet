@@ -85,8 +85,8 @@ pub struct InitializeProject {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Response {
-    action_id: String,
-    response_text: String,
+    pub action_id: String,
+    pub response_text: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
