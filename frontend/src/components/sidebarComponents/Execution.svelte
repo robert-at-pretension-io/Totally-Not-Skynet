@@ -7,12 +7,12 @@
   } from "helper_functions/graph";
   import { isProcess, newAction } from "helper_functions/type_checker";
   import { addGlobalVariable } from "helper_functions/graph";
-  import type {Process, Action, Prompt} from "system_types";
+  import type {Process, Prompt, Prompt} from "system_types";
   import Log from "./log.svelte";
 
   let selectedProcess: Process | null = null;
   let globalVariables = new Map<string, string>();
-  let possibleActions: Action[] | null = null;
+  let possibleActions: Prompt[] | null = null;
   let topological_order: string[] = [];
   let topological_order_names: (string | undefined)[] = [];
   let already_made_first_prompt = false;
@@ -60,7 +60,7 @@
 
   async function processSelectedProcessAndActions(
     selectedProcess: Process | null,
-    possibleActions: Action[] | null,
+    possibleActions: Prompt[] | null,
     topological_order: string[],
     topological_order_names: (string | undefined)[],
     globalVariables: Map<string, string>
@@ -119,7 +119,7 @@
     ready_to_make_first_prompt: boolean,
     already_made_first_prompt: boolean,
     topological_order: string[],
-    possibleActions: Action[] | null,
+    possibleActions: Prompt[] | null,
     globalVariables: Map<string, string>
   ): Promise<{ already_made_first_prompt: boolean }> {
     if (ready_to_make_first_prompt && !already_made_first_prompt) {
@@ -128,7 +128,7 @@
       let first_action_id = topological_order[0];
       if (possibleActions != null) {
         let first_action = possibleActions.find(
-          (action: Action) => action._id.$oid === first_action_id
+          (action: Prompt) => action._id.$oid === first_action_id
         );
         if (first_action != null) {
           already_made_first_prompt = true;

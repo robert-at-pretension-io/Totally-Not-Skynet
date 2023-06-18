@@ -1,10 +1,10 @@
 <script lang="ts">
 
-  import type { Action } from "../../system_types";
+  import type { Prompt } from "../../system_types";
 
   import systemStateStore from "stores/systemStateStore";
 
-  let action: Action = {
+  let action: Prompt = {
     _id: { $oid: "" },
     prompt: "",
     name: "",

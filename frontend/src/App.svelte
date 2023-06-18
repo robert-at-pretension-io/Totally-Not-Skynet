@@ -9,7 +9,7 @@
   import "../public/global.css";
 
   import type {
-    Action,
+    Prompt,
     Process,
     AIResponse,
     SystemState,
@@ -81,7 +81,7 @@
           }
         });
       } else if (isAction(data)) {
-        let action: Action = data;
+        let action: Prompt = data;
         // console.log(getId(action));
         systemStateStore.update((state: SystemState) => {
           // console.log("Adding action to state:");
@@ -160,7 +160,7 @@
         // or dispatch an action based on the received response
         // This will depend on your specific application logic.
       } else if (Object.prototype.hasOwnProperty.call(data, "create_action")) {
-        let action: Action = data.create_action;
+        let action: Prompt = data.create_action;
         systemStateStore.update((state: SystemState) => {
           state.aiSystemState.actions.push(action);
           return state;

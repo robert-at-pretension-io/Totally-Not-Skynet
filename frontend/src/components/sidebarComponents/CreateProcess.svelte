@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { Action, Process } from "system_types";
+  import type { Prompt, Process } from "system_types";
   import {
     addEdge,
     addNode,
@@ -13,8 +13,8 @@
 
   import systemStateStore from "stores/systemStateStore";
 
-  let actions: Action[] = [];
-  let selectedActions: Action[] = [];
+  let actions: Prompt[] = [];
+  let selectedActions: Prompt[] = [];
 
   let name = "";
   let description = "";
@@ -88,7 +88,7 @@
     }
   }
 
-  function toggleSelect(action: Action) {
+  function toggleSelect(action: Prompt) {
     // console.log("toggleSelect called on action: ", action);
     const index = selectedActions.findIndex(
       (a) => a._id.$oid === action._id.$oid
@@ -105,7 +105,7 @@
     // console.log("selectedActions after toggleSelect:", selectedActions);
   }
 
-  function isSelected(action: Action) {
+  function isSelected(action: Prompt) {
     // console.log("isSelected called on action: ", action);
     let is_selected = selectedActions.some(
       (a) => a._id.$oid === action._id.$oid

@@ -1,5 +1,5 @@
 import { Graph } from "@dagrejs/graphlib";
-import { Process, Action, AIResponse, GraphState, ExecutionContext } from "system_types";
+import { Process, Prompt, AIResponse, GraphState, ExecutionContext } from "system_types";
 
 export function isProcess(object: any): object is Process {
 
@@ -50,7 +50,7 @@ export function isProcess(object: any): object is Process {
   return true;
 }
 
-export function isAction(object: any): object is Action {
+export function isAction(object: any): object is Prompt {
   const debug = false;
   if (typeof object !== "object") {
     if (debug) {
@@ -126,7 +126,7 @@ export function isAction(object: any): object is Action {
   return true;
 }
 
-export function newAction(): Action {
+export function newAction(): Prompt {
   return {
     _id: { $oid: "" },
     prompt: "",

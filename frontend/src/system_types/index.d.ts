@@ -1,5 +1,5 @@
 import { Edge } from "@dagrejs/graphlib";
-import type { Graph, json } from "graphlib";
+import type { Graph } from "graphlib";
 
 export type selectedGraphComponent = {
   type: "Node" | "Edge" | null;
@@ -26,7 +26,7 @@ export type GraphState = {
   global_variables: Map<string, string>;
 };
 
-export type Action = {
+export type Prompt = {
   _id: MongoId;
   prompt: string;
   input_variables: string[];
@@ -53,7 +53,7 @@ export type Message = {
 };
 
 export type AiSystemState = {
-  actions: Action[];
+  actions: Prompt[];
   processes: Process[];
   messages: Message[];
 };
@@ -61,7 +61,7 @@ export type AiSystemState = {
 export type SystemState = {
   currentlySelected: "action" | "process" | "none";
   websocketReady: boolean;
-  selectedAction: Action;
+  selectedAction: Prompt;
   selectedProcess: Process;
   graphState: GraphState;
   websocket: WebSocket;
@@ -93,11 +93,21 @@ export type AIResponse = {
 }
 
 export type UpdateAction = {
-  action: Action;
+  action: Prompt;
 };
 
+export type UpdateNode = {
+  node: AssertsIdentifierTypePredicate;
+};
+
+export type MyNode = {
+  id: MongoId;
+  type_name: string;
+  node_content: string;
+}
+
 export type CreateAction = {
-  create_action: Action;
+  create_action: Prompt;
 };
 
 export type CreateProcess = {
@@ -115,16 +125,16 @@ export type ExecutionContext = {
 }
 
 export type MessageTypes =
-  | { type: "Goal"; data: Goal }
   | { type: "InitializeProject"; data: InitializeProject }
-  | { type: "SetOpenAIKey"; data: OpenaiKey }
-  | { type: "Prompt"; data: Prompt }
-  | { type: "UpdateAction"; data: UpdateAction }
-  | { type: "CreateAction"; data: CreateAction }
-  | { type: "CreateProcess"; data: CreateProcess };
+  | { type: "SetOpenAIKey"; data: OpenaiKey } // Replace OpenaiKey with its actual TypeScript type
+  | { type: "UpdateNode"; data: UpdateNode }
+  | { type: "CreateNode"; data: CreateNode }
+  | { type: "Response"; data: Response }
+  | { type: "HandleNode"; data: Node };
+
 
 export enum NodeType {
-  Action = "Action",
+  Prompt = "Prompt",
   Process = "Process",
   Command = "Command",
   // variable?

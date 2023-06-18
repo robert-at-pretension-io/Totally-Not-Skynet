@@ -1,7 +1,7 @@
 import type {
   SystemState,
   AiSystemState,
-  Action,
+  Prompt,
   Prompt,
   NodeType
 } from "../system_types";
@@ -37,8 +37,8 @@ export function getGlobalVariableNames() {
   return globalVariableNames;
 }
 
-export async function getAncestorNodes(node: string, graph: Graph): Promise<Action[]> {
-  const ancestors: Action[] = [];
+export async function getAncestorNodes(node: string, graph: Graph): Promise<Prompt[]> {
+  const ancestors: Prompt[] = [];
   const visitedNodes = new Set<string>();
   const stack = [node];
 
@@ -64,9 +64,9 @@ export async function getAncestorNodes(node: string, graph: Graph): Promise<Acti
   return ancestors;
 }
 
-export async function getActionById(id: string): Promise<Action | null> {
+export async function getActionById(id: string): Promise<Prompt | null> {
   const systemState = await getSystemState();
-  const action = systemState.aiSystemState.actions.find((action: Action) => getId(action) == id);
+  const action = systemState.aiSystemState.actions.find((action: Prompt) => getId(action) == id);
   return action || null;
 }
 
@@ -105,7 +105,7 @@ export async function printEdge(edge: Edge) {
   console.log("edge: " + sourceName + " -> " + targetName);
 }
 
-export function getId(actionOrProcess: Process | Action): string {
+export function getId(actionOrProcess: Process | Prompt): string {
   return actionOrProcess._id.$oid;
 }
 
@@ -163,7 +163,7 @@ export async function processToGraph(process: Process): Promise<void> {
   for (let i = 0; i < nodes.length; i++) {
     const name = await getNodeName(nodes[i]);
     if (name) {
-      await addNode(nodes[i]);
+      await addNode(nodes[i], NodeType.Action);
     }
   }
 
@@ -351,7 +351,7 @@ export async function selectNode(id: string): Promise<void> {
   const ai_system_state = (await getSystemState()).aiSystemState;
   const actions = ai_system_state.actions;
 
-  const res = actions.find((action: Action) => {
+  const res = actions.find((action: Prompt) => {
     return getId(action) == id;
   });
   if (res) {

@@ -1,8 +1,8 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
-  import type { Action, Process, UpdateAction } from "../../system_types";
+  import type { Prompt, Process, UpdateAction } from "../../system_types";
   import { isProcess, isAction } from "helper_functions/type_checker";
-  let mainObject: Action | Process;
+  let mainObject: Prompt | Process;
 
   $: {
     mainObject =

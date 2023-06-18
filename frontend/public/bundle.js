@@ -3174,14 +3174,14 @@ var app = (function () {
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$2 = freeGlobal || freeSelf || Function('return this')();
+    var root$3 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$2;
+    var _root = root$3;
 
-    var root$1 = _root;
+    var root$2 = _root;
 
     /** Built-in value references. */
-    var Symbol$4 = root$1.Symbol;
+    var Symbol$4 = root$2.Symbol;
 
     var _Symbol = Symbol$4;
 
@@ -3549,21 +3549,13 @@ var app = (function () {
     	return _getNative;
     }
 
-    var _Map;
-    var hasRequired_Map;
+    var getNative$2 = require_getNative(),
+        root$1 = _root;
 
-    function require_Map () {
-    	if (hasRequired_Map) return _Map;
-    	hasRequired_Map = 1;
-    	var getNative = require_getNative(),
-    	    root = _root;
+    /* Built-in method references that are verified to be native. */
+    var Map$3 = getNative$2(root$1, 'Map');
 
-    	/* Built-in method references that are verified to be native. */
-    	var Map = getNative(root, 'Map');
-
-    	_Map = Map;
-    	return _Map;
-    }
+    var _Map = Map$3;
 
     var getNative$1 = require_getNative();
 
@@ -3721,7 +3713,7 @@ var app = (function () {
 
     var Hash = _Hash,
         ListCache = require_ListCache(),
-        Map$2 = require_Map();
+        Map$2 = _Map;
 
     /**
      * Removes all key-value entries from the map.
@@ -3893,7 +3885,7 @@ var app = (function () {
     	if (hasRequired_stackSet) return _stackSet;
     	hasRequired_stackSet = 1;
     	var ListCache = require_ListCache(),
-    	    Map = require_Map(),
+    	    Map = _Map,
     	    MapCache = _MapCache;
 
     	/** Used as the size to enable large array optimizations. */
@@ -5475,7 +5467,7 @@ var app = (function () {
     	if (hasRequired_getTag) return _getTag;
     	hasRequired_getTag = 1;
     	var DataView = require_DataView(),
-    	    Map = require_Map(),
+    	    Map = _Map,
     	    Promise = require_Promise(),
     	    Set = require_Set(),
     	    WeakMap = require_WeakMap(),
@@ -10887,7 +10879,7 @@ var app = (function () {
             for (let i = 0; i < nodes.length; i++) {
                 const name = yield getNodeName(nodes[i]);
                 if (name) {
-                    yield addNode(nodes[i]);
+                    yield addNode(nodes[i], NodeType.Action);
                 }
             }
             let edges = [];
