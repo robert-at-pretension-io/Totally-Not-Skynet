@@ -18,7 +18,7 @@ impl UserSettings {
         })
     }
 }
-
+#[derive(Serialize, Deserialize, Debug)]
 pub struct RuntimeSettings {
     pub openai_api_key: String,
     pub mongo_db_uri: String,
