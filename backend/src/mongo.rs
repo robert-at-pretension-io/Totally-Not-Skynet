@@ -1,10 +1,9 @@
-use crate::domain::{Prompt, Process};
+use crate::domain::{Process, Prompt};
 use futures_util::StreamExt;
 use mongodb::{
     options::{ClientOptions, ServerApi, ServerApiVersion},
     Client,
 };
-
 
 pub async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Prompt>, Vec<Process>) {
     let action_collection = db.collection::<Prompt>("actions");
@@ -33,13 +32,20 @@ pub async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Prompt>, 
 pub async fn get_nodes(db: &mongodb::Database) -> Vec<crate::domain::Node> {
     let node_collection = db.collection::<crate::domain::Node>("nodes");
 
-    let mut node_cursor = node_collection.find(None, None).await.unwrap();
+    let mut node_cursor = match node_collection.find(None, None).await {
+        Ok(cursor) => cursor,
+        Err(err) => {
+            eprintln!("Failed to execute find: {}", err);
+            return vec![];
+        }
+    };
 
     let mut nodes = Vec::new();
 
-    while let Some(node) = node_cursor.next().await {
-        if let Ok(node) = node {
-            nodes.push(node);
+    while let Some(result) = node_cursor.next().await {
+        match result {
+            Ok(node) => nodes.push(node),
+            Err(err) => eprintln!("Failed to deserialize node: {}", err),
         }
     }
 
