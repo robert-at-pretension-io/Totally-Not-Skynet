@@ -26,13 +26,15 @@ export type GraphState = {
   global_variables: Map<string, string>;
 };
 
-export type Prompt = {
-  _id: MongoId;
-  prompt: string;
-  input_variables: string[];
-  output_variables: string[];
-  name: string;
-  system: string;
+type Prompt = {
+  prompt: {
+    prompt: string;
+    input_variables: string[];
+    output_variables: string[];
+    name: string;
+    system: string;
+  }
+
 };
 
 export type MongoId = {
@@ -40,11 +42,12 @@ export type MongoId = {
 };
 
 export type Process = {
-  _id: MongoId;
-  name: string;
-  graph: Graph | string; // this is a string when it has been deserialized from the database
-  description: string;
-  topological_order: string[];
+  process: {
+    name: string;
+    graph: Graph | string; // this is a string when it has been deserialized from the database
+    description: string;
+    topological_order: string[];
+  }
 };
 
 export type Message = {
@@ -81,11 +84,11 @@ export type OpenaiKey = {
   key: string;
 };
 
-export type Prompt = {
-  prompt_text: string;
-  system: string,
-  action_id: string,
-};
+// export type Prompt = {
+//   prompt_text: string;
+//   system: string,
+//   action_id: string,
+// };
 
 export type AIResponse = {
   response_text: string;
@@ -97,14 +100,40 @@ export type UpdateAction = {
 };
 
 export type UpdateNode = {
-  node: AssertsIdentifierTypePredicate;
+  node: Node;
 };
 
-export type MyNode = {
-  id: MongoId;
-  type_name: string;
-  node_content: string;
+export type CreateNode = {
+  node: Node;
+};
+
+type NodeType = Prompt | Process | Conditional | Command;
+
+type NodeTypeNames = "Prompt" | "Process" | "Conditional" | "Command";
+
+type Conditional = {
+  conditional: {
+    system_variables: { [key: string]: string };
+    statement: string;
+    options: { [key: string]: string }; // ObjectId replaced with string
+  }
 }
+
+
+type Command = {
+  command: {
+    command: string;
+  }
+};
+
+
+
+export interface Node {
+  _id?: MongoId;
+  type_name: NodeTypeNames;
+  node_content: NodeType;
+}
+
 
 export type CreateAction = {
   create_action: Prompt;
@@ -132,11 +161,3 @@ export type MessageTypes =
   | { type: "Response"; data: Response }
   | { type: "HandleNode"; data: Node };
 
-
-export enum NodeType {
-  Prompt = "Prompt",
-  Process = "Process",
-  Command = "Command",
-  // variable?
-  Conditional = "Conditional"
-}

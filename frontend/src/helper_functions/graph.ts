@@ -2,7 +2,6 @@ import type {
   SystemState,
   AiSystemState,
   Prompt,
-  Prompt,
   NodeType
 } from "../system_types";
 import { Process } from "../system_types";
@@ -23,10 +22,10 @@ export async function getSystemState(): Promise<SystemState> {
 
 export async function getInputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
   // Get the action by ID
-  const action = await getActionById(nodeId);
+  const prompt = await getPromptById(nodeId);
 
   // If action exists, return its input variables; else, return null
-  return action ? action.input_variables : null;
+  return prompt ? prompt.prompt.input_variables : null;
 }
 
 export function getGlobalVariableNames() {
@@ -50,7 +49,7 @@ export async function getAncestorNodes(node: string, graph: Graph): Promise<Prom
     if (parentNodes) {
       parentNodes.forEach(async parentNode => {
         if (!visitedNodes.has(parentNode)) {
-          const parentAction = await getActionById(parentNode);
+          const parentAction = await getPromptById(parentNode);
           if (parentAction) {
             ancestors.push(parentAction);
             stack.push(parentNode);
@@ -64,7 +63,7 @@ export async function getAncestorNodes(node: string, graph: Graph): Promise<Prom
   return ancestors;
 }
 
-export async function getActionById(id: string): Promise<Prompt | null> {
+export async function getPromptById(id: string): Promise<Prompt | null> {
   const systemState = await getSystemState();
   const action = systemState.aiSystemState.actions.find((action: Prompt) => getId(action) == id);
   return action || null;
