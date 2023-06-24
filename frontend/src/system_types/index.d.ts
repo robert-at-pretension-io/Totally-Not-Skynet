@@ -31,7 +31,6 @@ type Prompt = {
     prompt: string;
     input_variables: string[];
     output_variables: string[];
-    name: string;
     system: string;
   }
 
@@ -43,7 +42,6 @@ export type MongoId = {
 
 export type Process = {
   process: {
-    name: string;
     graph: Graph | string; // this is a string when it has been deserialized from the database
     description: string;
     topological_order: string[];
@@ -55,11 +53,6 @@ export type Message = {
   content: string;
 };
 
-export type AiSystemState = {
-  actions: Prompt[];
-  processes: Process[];
-  messages: Message[];
-};
 
 export type SystemState = {
   currentlySelected: "action" | "process" | "none";
@@ -69,7 +62,7 @@ export type SystemState = {
   graphState: GraphState;
   websocket: WebSocket;
   executionContext: ExecutionContext;
-  aiSystemState: AiSystemState;
+  nodes: Node[];
 };
 
 export type Goal = {
@@ -130,6 +123,7 @@ type Command = {
 
 export interface Node {
   _id?: MongoId;
+  name: string;
   type_name: NodeTypeNames;
   node_content: NodeType;
 }

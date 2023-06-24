@@ -1,8 +1,8 @@
 import type {
   SystemState,
-  AiSystemState,
   Prompt,
-  NodeType
+  NodeType,
+  Node
 } from "../system_types";
 import { Process } from "../system_types";
 import systemStateStore from "stores/systemStateStore";
@@ -22,10 +22,23 @@ export async function getSystemState(): Promise<SystemState> {
 
 export async function getInputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
   // Get the action by ID
-  const prompt = await getPromptById(nodeId);
+  const node = await getNodeById(nodeId);
 
-  // If action exists, return its input variables; else, return null
-  return prompt ? prompt.prompt.input_variables : null;
+  if (node && node.type_name === "Prompt") {
+    let node_content = node.node_content as Prompt;
+    return node_content.prompt.input_variables;
+  }
+  return null;
+}
+
+export async function getOutputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
+  // Get the node by Id
+  const node = await getNodeById(nodeId);
+  if (node && node.type_name === "Prompt") {
+    let node_content = node.node_content as Prompt;
+    return node_content.prompt.output_variables;
+  }
+  return null;
 }
 
 export function getGlobalVariableNames() {
@@ -36,8 +49,8 @@ export function getGlobalVariableNames() {
   return globalVariableNames;
 }
 
-export async function getAncestorNodes(node: string, graph: Graph): Promise<Prompt[]> {
-  const ancestors: Prompt[] = [];
+export async function getAncestorNodes(node: string, graph: Graph): Promise<Node[]> {
+  const ancestors: Node[] = [];
   const visitedNodes = new Set<string>();
   const stack = [node];
 
@@ -49,9 +62,9 @@ export async function getAncestorNodes(node: string, graph: Graph): Promise<Prom
     if (parentNodes) {
       parentNodes.forEach(async parentNode => {
         if (!visitedNodes.has(parentNode)) {
-          const parentAction = await getPromptById(parentNode);
-          if (parentAction) {
-            ancestors.push(parentAction);
+          const parent_node = await getNodeById(parentNode);
+          if (parent_node) {
+            ancestors.push(parent_node);
             stack.push(parentNode);
           }
 
@@ -63,17 +76,16 @@ export async function getAncestorNodes(node: string, graph: Graph): Promise<Prom
   return ancestors;
 }
 
-export async function getPromptById(id: string): Promise<Prompt | null> {
+export async function getNodeById(id: string): Promise<Node | undefined> {
   const systemState = await getSystemState();
-  const action = systemState.aiSystemState.actions.find((action: Prompt) => getId(action) == id);
-  return action || null;
+  const prompt = systemState.nodes.find((node : Node) => {
+    if (node._id) {
+    return getId(node) == id;
+    }
+  });
+  return prompt
 }
 
-export async function getProcessById(id: string): Promise<Process | null> {
-  const systemState = await getSystemState();
-  const process = systemState.aiSystemState.processes.find((process: Process) => getId(process) == id);
-  return process || null;
-}
 
 export function topologicalSort(graph: Graph) {
   const sorted = alg.topsort(graph);
@@ -84,17 +96,16 @@ export function topologicalSort(graph: Graph) {
 
 // get the name of the action by using the id
 export async function getNodeName(id: string): Promise<string | undefined> {
-  const res: AiSystemState = await new Promise((resolve, _rej) => {
-    systemStateStore.subscribe((systemStateStore) => {
-      resolve(systemStateStore.aiSystemState);
-    });
+  let system_state = await getSystemState();
+  
+  let node = system_state.nodes.find((node : Node) => {
+    // get the node with the id:
+    if (node._id) {
+      return getId(node) == id;
+    }
   });
-  const action = await res.actions.find(action => {
-    return getId(action) == id;
-  });
-  if (action) {
-    // console.log("action name: " + action.name);
-    return action.name;
+  if (node) {
+    return node.name;
   }
 }
 
@@ -104,8 +115,12 @@ export async function printEdge(edge: Edge) {
   console.log("edge: " + sourceName + " -> " + targetName);
 }
 
-export function getId(actionOrProcess: Process | Prompt): string {
-  return actionOrProcess._id.$oid;
+export function getId(node: Node): string | undefined {
+  if (node) {
+    return node._id?.$oid;
+  }
+  return undefined;
+
 }
 
 export async function setSystemState(systemState: SystemState) {
@@ -118,7 +133,7 @@ export async function addGlobalVariable(variable_name: string, variable_value: s
   await setSystemState(current_state);
 }
 
-export async function addNode(node_id: string, node_type: NodeType): Promise<void> {
+export async function addNode(node_id: string): Promise<void> {
   const systemState = await getSystemState();
   // add the input and output variables to the graph state
 
@@ -142,7 +157,7 @@ export async function processToGraph(process: Process): Promise<void> {
   await resetGraph();
 
   // verify that all of the steps have corresponding actions
-  const graph = process.graph;
+  const graph = process.process.graph;
 
   let nodes: string[] = [];
 
@@ -162,7 +177,7 @@ export async function processToGraph(process: Process): Promise<void> {
   for (let i = 0; i < nodes.length; i++) {
     const name = await getNodeName(nodes[i]);
     if (name) {
-      await addNode(nodes[i], NodeType.Action);
+      await addNode(nodes[i]);
     }
   }
 
@@ -191,12 +206,12 @@ export async function processToGraph(process: Process): Promise<void> {
   }
 }
 
-export async function sendPrompt(prompt: Prompt) {
-  const systemState = await getSystemState();
-  systemState.executionContext.prompts.set(prompt.action_id, prompt.prompt_text);
-  systemState.websocket.send(JSON.stringify(prompt));
-  await setSystemState(systemState);
-}
+// export async function sendPrompt(prompt: Prompt) {
+//   const systemState = await getSystemState();
+//   systemState.executionContext.prompts.set(prompt.action_id, prompt.prompt_text);
+//   systemState.websocket.send(JSON.stringify(prompt));
+//   await setSystemState(systemState);
+// }
 
 export async function getParentOutputVariables(this_node_id: string): Promise<string[]> {
   const systemState = await getSystemState();
@@ -209,7 +224,7 @@ export async function getParentOutputVariables(this_node_id: string): Promise<st
   const parent_node_id = topological_order[topological_order.indexOf(this_node_id) - 1];
 
   // get the output variables of the parent node
-  const parent_output_variables = systemState.aiSystemState.actions.find(action => getId(action) == parent_node_id)?.output_variables || [];
+  const parent_output_variables = getOutputVariablesByNodeId(parent_node_id);
 
   return parent_output_variables;
 }

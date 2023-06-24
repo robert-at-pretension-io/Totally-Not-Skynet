@@ -3174,14 +3174,14 @@ var app = (function () {
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$3 = freeGlobal || freeSelf || Function('return this')();
+    var root$2 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$3;
+    var _root = root$2;
 
-    var root$2 = _root;
+    var root$1 = _root;
 
     /** Built-in value references. */
-    var Symbol$4 = root$2.Symbol;
+    var Symbol$4 = root$1.Symbol;
 
     var _Symbol = Symbol$4;
 
@@ -3549,13 +3549,21 @@ var app = (function () {
     	return _getNative;
     }
 
-    var getNative$2 = require_getNative(),
-        root$1 = _root;
+    var _Map;
+    var hasRequired_Map;
 
-    /* Built-in method references that are verified to be native. */
-    var Map$3 = getNative$2(root$1, 'Map');
+    function require_Map () {
+    	if (hasRequired_Map) return _Map;
+    	hasRequired_Map = 1;
+    	var getNative = require_getNative(),
+    	    root = _root;
 
-    var _Map = Map$3;
+    	/* Built-in method references that are verified to be native. */
+    	var Map = getNative(root, 'Map');
+
+    	_Map = Map;
+    	return _Map;
+    }
 
     var getNative$1 = require_getNative();
 
@@ -3713,7 +3721,7 @@ var app = (function () {
 
     var Hash = _Hash,
         ListCache = require_ListCache(),
-        Map$2 = _Map;
+        Map$2 = require_Map();
 
     /**
      * Removes all key-value entries from the map.
@@ -3885,7 +3893,7 @@ var app = (function () {
     	if (hasRequired_stackSet) return _stackSet;
     	hasRequired_stackSet = 1;
     	var ListCache = require_ListCache(),
-    	    Map = _Map,
+    	    Map = require_Map(),
     	    MapCache = _MapCache;
 
     	/** Used as the size to enable large array optimizations. */
@@ -5467,7 +5475,7 @@ var app = (function () {
     	if (hasRequired_getTag) return _getTag;
     	hasRequired_getTag = 1;
     	var DataView = require_DataView(),
-    	    Map = _Map,
+    	    Map = require_Map(),
     	    Promise = require_Promise(),
     	    Set = require_Set(),
     	    WeakMap = require_WeakMap(),
@@ -10783,12 +10791,12 @@ var app = (function () {
     function getInputVariablesByNodeId(nodeId) {
         return __awaiter(this, void 0, void 0, function* () {
             // Get the action by ID
-            const action = yield getActionById(nodeId);
+            const prompt = yield getPromptById(nodeId);
             // If action exists, return its input variables; else, return null
-            return action ? action.input_variables : null;
+            return prompt ? prompt.prompt.input_variables : null;
         });
     }
-    function getActionById(id) {
+    function getPromptById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const systemState = yield getSystemState();
             const action = systemState.aiSystemState.actions.find((action) => getId(action) == id);
@@ -10813,7 +10821,7 @@ var app = (function () {
             });
             if (action) {
                 // console.log("action name: " + action.name);
-                return action.name;
+                return action.prompt.name;
             }
         });
     }
