@@ -1,219 +1,41 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
-  import {
-    getInputVariablesByNodeId,
-    getNodeName,
-    sendPrompt,
-  } from "helper_functions/graph";
+  import { returnProcesses } from "helper_functions/graph";
   import { isProcess, newAction } from "helper_functions/type_checker";
-  import { addGlobalVariable } from "helper_functions/graph";
-  import type {Process, Prompt, Prompt} from "system_types";
+  import type { Node } from "system_types";
   import Log from "./log.svelte";
+  import { onMount } from "svelte";
 
-  let selectedProcess: Process | null = null;
-  let globalVariables = new Map<string, string>();
-  let possibleActions: Prompt[] | null = null;
-  let topological_order: string[] = [];
-  let topological_order_names: (string | undefined)[] = [];
-  let already_made_first_prompt = false;
-  let needed_variables: string[] = [];
-  let ready_to_make_first_prompt = false;
+  let selectedNode: Node | null = null;
+  let processes : Node[]= [];
 
-  async function update_local_variables() {
-    selectedProcess = $systemStateStore.selectedProcess;
-    topological_order = $systemStateStore.selectedProcess.topological_order;
-
-    globalVariables = $systemStateStore.graphState.global_variables;
-    possibleActions = $systemStateStore.aiSystemState.actions;
-
-    let return_val = await processSelectedProcessAndActions(
-      selectedProcess,
-      possibleActions,
-      topological_order,
-      topological_order_names,
-      globalVariables
-    );
-
-    topological_order_names = return_val.topological_order_names;
-    $systemStateStore.executionContext.topological_order_names =
-      topological_order_names;
-    ready_to_make_first_prompt = return_val.ready_to_make_first_prompt;
-    needed_variables = return_val.needed_variables;
-  }
-
-  function sendFirstPrompt(): void {
-    createFirstPrompt(
-      ready_to_make_first_prompt,
-      already_made_first_prompt,
-      topological_order,
-      possibleActions,
-      globalVariables
-    )
-      .then((result) => {
-        already_made_first_prompt = result.already_made_first_prompt;
-        update_local_variables();
-      })
-      .catch((err) => {
-        console.error("Error in sendFirstPrompt: ", err);
-      });
-  }
-
-  async function processSelectedProcessAndActions(
-    selectedProcess: Process | null,
-    possibleActions: Prompt[] | null,
-    topological_order: string[],
-    topological_order_names: (string | undefined)[],
-    globalVariables: Map<string, string>
-  ): Promise<{
-    topological_order_names: (string | undefined)[];
-    ready_to_make_first_prompt: boolean;
-    needed_variables: string[];
-  }> {
-    console.log("Processing selected process and actions...");
-    let ready_to_make_first_prompt = false;
-    let needed_variables: string[] = [];
-
-    if (selectedProcess && possibleActions) {
-      if (topological_order.length > 0 && topological_order_names.length == 0) {
-        
-        $systemStateStore.executionContext.topological_order = topological_order;
-        $systemStateStore.executionContext.current_node = topological_order[0];
-
-        console.log("here: ", $systemStateStore.executionContext);
-
-        let promiseArray = topological_order.map(getNodeName);
-
-        let local_topological_order_names = await Promise.all(promiseArray);
-
-        // Here, topological_order_names is an array with all the resolved values.
-        // remove all of the undefined values:
-        local_topological_order_names = local_topological_order_names.filter(
-          (value) => value != undefined
-        );
-
-        topological_order_names = local_topological_order_names;
-      }
-      console.log("Updated topological_order: ", topological_order);
-
-      let input_vars = await getInputVariablesByNodeId(topological_order[0]);
-
-      if (input_vars != null) {
-        needed_variables = input_vars.filter(
-          (input_var) => !globalVariables.has(input_var)
-        );
-
-        if (needed_variables.length == 0) {
-          ready_to_make_first_prompt = true;
-        }
-      }
-    }
-
-    return {
-      topological_order_names,
-      ready_to_make_first_prompt,
-      needed_variables,
-    };
-  }
-
-  async function createFirstPrompt(
-    ready_to_make_first_prompt: boolean,
-    already_made_first_prompt: boolean,
-    topological_order: string[],
-    possibleActions: Prompt[] | null,
-    globalVariables: Map<string, string>
-  ): Promise<{ already_made_first_prompt: boolean }> {
-    if (ready_to_make_first_prompt && !already_made_first_prompt) {
-      console.log("Creating first prompt...");
-
-      let first_action_id = topological_order[0];
-      if (possibleActions != null) {
-        let first_action = possibleActions.find(
-          (action: Prompt) => action._id.$oid === first_action_id
-        );
-        if (first_action != null) {
-          already_made_first_prompt = true;
-          console.log("Found first action: ", first_action);
-          console.log("First action prompt: ", first_action.prompt);
-
-          let prompt = first_action.prompt;
-          if (first_action.input_variables.length > 0) {
-            let input_variables = first_action.input_variables;
-            console.log("First action input variables: ", input_variables);
-
-            for (let i = 0; i < input_variables.length; i++) {
-              let input_variable = input_variables[i];
-              let global_variable = globalVariables.get(input_variable);
-              if (global_variable != null) {
-                prompt = prompt.replace(input_variable, global_variable);
-                console.log(
-                  `Replaced ${input_variable} with ${global_variable} in prompt.`
-                );
-                let send_prompt: Prompt = {
-                  prompt_text: prompt,
-                  system: first_action.system,
-                  action_id: first_action._id.$oid,
-                };
-                console.log("Sending prompt: ", send_prompt);
-                await sendPrompt(send_prompt);
-              } else {
-                console.log(
-                  "Global variable does not exist for input variable: ",
-                  input_variable
-                );
-                alert("global variable does not exist");
-              }
-            }
-          }
-        } else {
-          console.log("No action found for first action ID: ", first_action_id);
-        }
-      } else {
-        console.log("Possible actions is null.");
-      }
-    } else {
-      console.log("Conditions for creating first prompt not met.");
-    }
-
-    return { already_made_first_prompt };
-  }
-
-  let processes: Process[] = [];
-
-  processes = $systemStateStore.aiSystemState.processes;
+  onMount(async () => {
+    processes = await returnProcesses();
+  });
 
   let newValues = {};
 
-  function handleInputChange(variableName, event) {
-    newValues[variableName] = event.target.value;
+  function handleInputChange(event: Event) {
+    if (event.target) {
+      console.log("handleInputChange called: ", event.target);
+    }
   }
 
-  async function handleFormSubmit(variableName, event) {
-    event.preventDefault();
-    if (newValues[variableName]) {
-      await addGlobalVariable(variableName, newValues[variableName]);
-    }
-
-    await update_local_variables();
+  async function handleFormSubmit(event: Event) {
+    // should send the "HandleNode" action to the backend
+    console.log("handleFormSubmit called: ", selectedNode);
   }
   async function onDropdownChange() {
-    if (selectedProcess) {
-      let this_process = $systemStateStore.aiSystemState.processes.find(
-        (obj) => obj.name === selectedProcess
-      );
+    if (selectedNode) {
+      $systemStateStore.selectedNode = selectedNode;
 
-      if (isProcess(this_process)) {
-        $systemStateStore.selectedProcess = this_process;
-        $systemStateStore.selectedAction = newAction();
-      }
-
-      await update_local_variables();
     }
   }
 </script>
 
-{#if selectedProcess}
+{#if selectedNode}
   <div>
-    <h2>Description: {selectedProcess.description}</h2>
+    <h2>Description: {selectedNode.node_content.process.}</h2>
     <h2>Topological Order:</h2>
     <p>{topological_order_names.join(" -> ")}</p>
 
@@ -226,9 +48,7 @@
     {#if !ready_to_make_first_prompt}
       <h2>Needed Variables</h2>
       {#each needed_variables as needed_var (needed_var)}
-        <form
-          on:submit={async (event) => await handleFormSubmit(needed_var, event)}
-        >
+        <form on:submit={async (event) => await handleFormSubmit(event)}>
           <label for={needed_var}>{needed_var}</label>
           <input
             id={needed_var}
@@ -241,13 +61,13 @@
       <button class="add-button" on:click={sendFirstPrompt}>Execute</button>
     {:else}
       <!-- Add the displaying of output log here -->
-      <Log></Log>
+      <Log />
     {/if}
   </div>
 {:else}
   <h1>Selected a Process:</h1>
   <select
-    bind:value={selectedProcess}
+    bind:value={selectedNode}
     on:change={async () => await onDropdownChange()}
   >
     <option value="">Select a process</option>

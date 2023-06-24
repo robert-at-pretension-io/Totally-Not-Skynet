@@ -25,7 +25,7 @@ export async function getInputVariablesByNodeId(nodeId: string): Promise<string[
   const node = await getNodeById(nodeId);
 
   if (node && node.type_name === "Prompt") {
-    let node_content = node.node_content as Prompt;
+    const node_content = node.node_content as Prompt;
     return node_content.prompt.input_variables;
   }
   return null;
@@ -35,7 +35,7 @@ export async function getOutputVariablesByNodeId(nodeId: string): Promise<string
   // Get the node by Id
   const node = await getNodeById(nodeId);
   if (node && node.type_name === "Prompt") {
-    let node_content = node.node_content as Prompt;
+    const node_content = node.node_content as Prompt;
     return node_content.prompt.output_variables;
   }
   return null;
@@ -78,14 +78,13 @@ export async function getAncestorNodes(node: string, graph: Graph): Promise<Node
 
 export async function getNodeById(id: string): Promise<Node | undefined> {
   const systemState = await getSystemState();
-  const prompt = systemState.nodes.find((node : Node) => {
+  const prompt = systemState.nodes.find((node: Node) => {
     if (node._id) {
-    return getId(node) == id;
+      return getId(node) == id;
     }
   });
-  return prompt
+  return prompt;
 }
-
 
 export function topologicalSort(graph: Graph) {
   const sorted = alg.topsort(graph);
@@ -96,9 +95,9 @@ export function topologicalSort(graph: Graph) {
 
 // get the name of the action by using the id
 export async function getNodeName(id: string): Promise<string | undefined> {
-  let system_state = await getSystemState();
-  
-  let node = system_state.nodes.find((node : Node) => {
+  const system_state = await getSystemState();
+
+  const node = system_state.nodes.find((node: Node) => {
     // get the node with the id:
     if (node._id) {
       return getId(node) == id;
@@ -206,14 +205,7 @@ export async function processToGraph(process: Process): Promise<void> {
   }
 }
 
-// export async function sendPrompt(prompt: Prompt) {
-//   const systemState = await getSystemState();
-//   systemState.executionContext.prompts.set(prompt.action_id, prompt.prompt_text);
-//   systemState.websocket.send(JSON.stringify(prompt));
-//   await setSystemState(systemState);
-// }
-
-export async function getParentOutputVariables(this_node_id: string): Promise<string[]> {
+export async function getParentOutputVariables(this_node_id: string): Promise<string[] | null> {
   const systemState = await getSystemState();
 
   // get topological order
@@ -262,10 +254,6 @@ export async function incrementCurrentNode(): Promise<string> {
     if (current_node_index + 1 < topological_order.length) {
       systemState.executionContext.current_node = topological_order[current_node_index + 1];
 
-      // get the prompt of the current_node
-      const prompt = await getPromptofAction(systemState.executionContext.current_node);
-
-      systemState.executionContext.prompts.set(systemState.executionContext.current_node, prompt);
     }
     else {
       console.error("current node index is out of bounds");
@@ -278,13 +266,6 @@ export async function incrementCurrentNode(): Promise<string> {
 
   await setSystemState(systemState);
   return systemState.executionContext.current_node;
-}
-
-export async function getPromptofAction(action_id: string): Promise<string> {
-  const systemState = await getSystemState();
-  const prompt = systemState.aiSystemState.actions.filter(action => action._id.$oid === action_id)[0].prompt;
-
-  return prompt;
 }
 
 export async function sendWebsocketMessage(message: string) {
@@ -361,16 +342,37 @@ export async function removeEdge(
   setSystemState(systemState);
 }
 
-export async function selectNode(id: string): Promise<void> {
-  const ai_system_state = (await getSystemState()).aiSystemState;
-  const actions = ai_system_state.actions;
+export async function returnProcesses(): Promise<Node[]> {
+  const systemState = await getSystemState();
+  let nodes = systemState.nodes;
 
-  const res = actions.find((action: Prompt) => {
-    return getId(action) == id;
-  });
+  // filter out the prompts
+  nodes = nodes.filter((node: Node) => {
+    return node.type_name == "Process";
+  }
+  );
+
+  // let processes = nodes.map((node: Node) => {
+  //   return node.node_content as Process;
+  // }
+  // );
+
+  return nodes;
+}
+
+export async function selectNode(id: string): Promise<void> {
+  const system_state = await getSystemState();
+  const nodes = system_state.nodes;
+
+  // const res = actions.find((action: Prompt) => {
+  //   return getId(action) == id;
+  // });
+
+  const res = nodes.find((node: Node) => getId(node) == id);
+
   if (res) {
     const systemState = await getSystemState();
-    systemState.selectedAction = res;
+    systemState.selectedNode = res;
     systemState.currentlySelected = "action";
     systemState.graphState.lastAction = "selectNode";
     systemState.graphState.lastActedOn = systemState.graphState.actedOn;

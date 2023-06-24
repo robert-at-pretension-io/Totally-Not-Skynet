@@ -57,8 +57,7 @@ export type Message = {
 export type SystemState = {
   currentlySelected: "action" | "process" | "none";
   websocketReady: boolean;
-  selectedAction: Prompt;
-  selectedProcess: Process;
+  selectedNode: Node;
   graphState: GraphState;
   websocket: WebSocket;
   executionContext: ExecutionContext;
