@@ -256,7 +256,6 @@ pub async fn start_message_sending_loop(
                     NodeType::Prompt(prompt) => {
                         doc! {
                             "$set": {
-                                "name": prompt.name.clone(),
                                 "prompt": prompt.prompt.clone(),
                                 "system": prompt.system.clone(),
                                 "input_variables": prompt.input_variables.clone(),
@@ -267,7 +266,6 @@ pub async fn start_message_sending_loop(
                     NodeType::Process(process) => {
                         doc! {
                             "$set": {
-                                "name": process.name.clone(),
                                 "graph": process.graph.clone(),
                                 "topological_order": process.topological_order.clone(),
                                 "description": process.description.clone(),

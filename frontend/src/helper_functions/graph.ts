@@ -1,7 +1,6 @@
 import type {
   SystemState,
   Prompt,
-  NodeType,
   Node
 } from "../system_types";
 import { Process } from "../system_types";
@@ -9,6 +8,7 @@ import systemStateStore from "stores/systemStateStore";
 import { Graph } from "graphlib";
 import { Edge } from "@dagrejs/graphlib";
 import { alg } from "graphlib";
+import { some } from "fp-ts/lib/Option";
 
 // Define the getter and setter
 
@@ -372,8 +372,7 @@ export async function selectNode(id: string): Promise<void> {
 
   if (res) {
     const systemState = await getSystemState();
-    systemState.selectedNode = res;
-    systemState.currentlySelected = "action";
+    systemState.selectedNode = some(res);
     systemState.graphState.lastAction = "selectNode";
     systemState.graphState.lastActedOn = systemState.graphState.actedOn;
     systemState.graphState.actedOn = [id, res.name];

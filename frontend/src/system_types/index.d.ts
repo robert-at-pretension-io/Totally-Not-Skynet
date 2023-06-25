@@ -1,5 +1,6 @@
 import { Edge } from "@dagrejs/graphlib";
 import type { Graph } from "graphlib";
+import { Option } from 'fp-ts/Option'
 
 export type selectedGraphComponent = {
   type: "Node" | "Edge" | null;
@@ -55,9 +56,8 @@ export type Message = {
 
 
 export type SystemState = {
-  currentlySelected: "action" | "process" | "none";
   websocketReady: boolean;
-  selectedNode: Node;
+  selectedNode: Option<Node>;
   graphState: GraphState;
   websocket: WebSocket;
   executionContext: ExecutionContext;

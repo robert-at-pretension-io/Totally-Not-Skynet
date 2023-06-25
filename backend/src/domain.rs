@@ -1,20 +1,18 @@
 use crate::settings::UserSettings;
 use bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Prompt {
     pub prompt: String,
     pub input_variables: Vec<String>,
     pub output_variables: Vec<String>,
-    pub name: String,
     pub system: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Process {
-    pub name: String,
     pub graph: String,
     pub topological_order: Vec<String>,
     pub description: String,
@@ -49,6 +47,7 @@ pub enum NodeType {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Node {
     pub _id: Option<ObjectId>,
+    pub name: String,
     pub type_name: String,
     pub node_content: NodeType,
 }
@@ -60,7 +59,7 @@ pub struct Edge {
     pub b: ObjectId,
 }
 
-pub fn create_node(node: NodeType) -> Node {
+pub fn create_node(node: NodeType, name: String) -> Node {
     Node {
         _id: Some(bson::oid::ObjectId::new()),
         type_name: match node {
@@ -70,6 +69,7 @@ pub fn create_node(node: NodeType) -> Node {
             NodeType::Command(_) => "Command".to_string(),
         },
         node_content: node,
+        name: name,
     }
 }
 

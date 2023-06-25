@@ -5,6 +5,7 @@
   import type { Node } from "system_types";
   import Log from "./log.svelte";
   import { onMount } from "svelte";
+  import { some } from "fp-ts/lib/Option";
 
   let selectedNode: Node | null = null;
   let processes : Node[]= [];
@@ -27,7 +28,7 @@
   }
   async function onDropdownChange() {
     if (selectedNode) {
-      $systemStateStore.selectedNode = selectedNode;
+      $systemStateStore.selectedNode = some(selectedNode);
 
     }
   }
@@ -35,17 +36,14 @@
 
 {#if selectedNode}
   <div>
-    <h2>Description: {selectedNode.node_content.process.}</h2>
-    <h2>Topological Order:</h2>
-    <p>{topological_order_names.join(" -> ")}</p>
 
-    <h2>Global Variables</h2>
+    <!-- <h2>Global Variables</h2>
     {#each [...globalVariables] as [key, value]}
       <p>{key}: {value}</p>
-    {/each}
+    {/each} -->
 
     <!-- check if the needed variables array has length 0:-->
-    {#if !ready_to_make_first_prompt}
+    <!-- {#if !ready_to_make_first_prompt}
       <h2>Needed Variables</h2>
       {#each needed_variables as needed_var (needed_var)}
         <form on:submit={async (event) => await handleFormSubmit(event)}>
@@ -60,9 +58,10 @@
     {:else if !already_made_first_prompt}
       <button class="add-button" on:click={sendFirstPrompt}>Execute</button>
     {:else}
-      <!-- Add the displaying of output log here -->
+    -->
+      <!-- Add the displaying of output log here 
       <Log />
-    {/if}
+    {/if} -->
   </div>
 {:else}
   <h1>Selected a Process:</h1>

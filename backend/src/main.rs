@@ -5,7 +5,6 @@ use tokio::sync::{mpsc, Mutex};
 mod domain;
 mod mongo;
 mod openai;
-mod protocol;
 mod receive_send;
 mod settings;
 mod utils;

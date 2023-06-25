@@ -4,32 +4,16 @@
   // import RightSidebar from "./components/RightSidebar.svelte";
   import GraphComponentGraphlib from "./components/GraphComponent_graphlib.svelte";
 
-  import { json } from "graphlib";
-
   import "../public/global.css";
 
   import type {
-    Prompt,
     Process,
-    AIResponse,
-    SystemState,
   } from "./system_types";
-  import {
-    isAction,
-    isProcess,
-    isResponse,
-  } from "helper_functions/type_checker";
 
-  import { incrementCurrentNode, processToGraph } from "helper_functions/graph";
+  import { processToGraph } from "helper_functions/graph";
 
   import { onMount } from "svelte";
   import systemStateStore from "stores/systemStateStore";
-  import {
-    populateInputVariables,
-    populateOutputVariables,
-  } from "helper_functions/validation";
-
-  let lastSelectedProcess: Process | null = null;
 
   onMount(async () => {
     // start the websocket connection
@@ -55,164 +39,27 @@
         console.log("Error parsing websocket message");
       }
 
-      if (data && data.graph !== undefined && typeof data.graph === "string") {
-        // console.log("data.graph is a string: ", data);
-        data.graph = json.read(JSON.parse(data.graph));
-        // console.log("data.graph is now: ", data);
-      }
-
-      // check to see if the data has the shape of a Process or Action
-      if (isProcess(data)) {
-        let process: Process = data;
-        systemStateStore.update((state: SystemState) => {
-          // Check if the process is already in the state
-          let processAlreadyInState = state.aiSystemState.processes.find(
-            (process) => {
-              return process._id === data._id;
-            }
-          );
-          if (processAlreadyInState) {
-            console.log("Process already in state");
-            return state;
-          } else {
-            // console.log("Adding process to state:", process);
-            state.aiSystemState.processes.push(process);
-            return state;
-          }
-        });
-      } else if (isAction(data)) {
-        let action: Prompt = data;
-        // console.log(getId(action));
-        systemStateStore.update((state: SystemState) => {
-          // console.log("Adding action to state:");
-          let input_variables = populateInputVariables(action);
-          // console.log("input_variables: ", input_variables);
-          let output_variables = populateOutputVariables(action);
-          // console.log("output_variables: ", output_variables);
-          // check to see that the variables stored in the action are valid
-          let compareThese = action.input_variables;
-          let compareThese2 = action.output_variables;
-
-          let set1 = new Set(input_variables);
-          let set2 = new Set(compareThese);
-          let union = new Set([...set1, ...set2]);
-
-          let set3 = new Set(output_variables);
-          let set4 = new Set(compareThese2);
-          let union2 = new Set([...set3, ...set4]);
-
-          let invalid = false;
-
-          // This ensures that the input variables are always up-to-date
-          if (union.size !== set1.size || union.size !== set2.size) {
-            console.error("invalid input variables");
-            action.input_variables = input_variables;
-            invalid = true;
-          }
-          // This ensures that the output variables are always up-to-date
-          if (union2.size !== set3.size || union2.size !== set4.size) {
-            console.error("invalid output variables");
-            action.output_variables = output_variables;
-            invalid = true;
-          }
-
-          if (invalid) {
-            $systemStateStore.websocket.send(
-              JSON.stringify({ action: action })
-            );
-            return state;
-          }
-          // check if the action is already in the state by looking at the name
-          let actionIndex = state.aiSystemState.actions.findIndex(
-            (a) => a.name === action.name
-          );
-          if (actionIndex === -1) {
-            state.aiSystemState.actions.push(action);
-          } else {
-            state.aiSystemState.actions[actionIndex] = action;
-          }
-
-          return state;
-        });
-      }
-      if (isResponse(data)) {
-        let response: AIResponse = {
-          action_id: data.action_id,
-          response_text: data.response_text,
-        };
-
-        console.log("Received response: ", response);
-
-        incrementCurrentNode().then((currentNode) => {
-          console.log("currentNode: ", currentNode);
-        });
-
-        systemStateStore.update((state: SystemState) => {
-          state.executionContext.responses.set(
-            response.action_id,
-            response.response_text
-          );
-          return state;
-        });
-
-        // You can now do something with this response data
-        // For example, you might want to update some part of your state with the response
-        // or dispatch an action based on the received response
-        // This will depend on your specific application logic.
-      } else if (Object.prototype.hasOwnProperty.call(data, "create_action")) {
-        let action: Prompt = data.create_action;
-        systemStateStore.update((state: SystemState) => {
-          state.aiSystemState.actions.push(action);
-          return state;
-        });
-      } else if (Object.prototype.hasOwnProperty.call(data, "create_process")) {
-        let process: Process = data.create_process;
-
-        // check if process.graph is a string
-        if (typeof process.graph === "string") {
-          process.graph = json.read(process.graph);
-        }
-
-        systemStateStore.update((state: SystemState) => {
-          if (process != null) {
-            // only push if the process isn't already in the state:
-            let processAlreadyInState = state.aiSystemState.processes.find(
-              (p) => {
-                return p._id === process._id;
-              }
-            );
-            if (processAlreadyInState) {
-              // console.log("Process already in state");
-              return state;
-            }
-            state.aiSystemState.processes.push(process);
-            return state;
-          }
-          return state;
-        });
-      }
     });
   });
 
-  async function handleProcessChange(process: Process) {
-    // console.log("selected process changed: ", process);
-    await processToGraph(process);
-  }
+  // async function handleProcessChange(process: Process) {
+  //   // console.log("selected process changed: ", process);
+  //   await processToGraph(process);
+  // }
 
-  $: {
-    let process = $systemStateStore.selectedProcess;
-    if (
-      lastSelectedProcess == null ||
-      (process && process.name !== lastSelectedProcess.name)
-    ) {
-      handleProcessChange(process);
-      lastSelectedProcess = process;
-    }
-  }
+  // $: {
+  //   let process = $systemStateStore.selectedProcess;
+  //   if (
+  //     lastSelectedProcess == null ||
+  //     (process && process.name !== lastSelectedProcess.name)
+  //   ) {
+  //     handleProcessChange(process);
+  //     lastSelectedProcess = process;
+  //   }
+  // }
 </script>
 
 <div class="app-container">
   <Sidebar />
   <GraphComponentGraphlib />
-  <!-- <RightSidebar /> -->
 </div>

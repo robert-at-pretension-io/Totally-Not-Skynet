@@ -31,11 +31,7 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .iter()
                         .map(|v| v.as_str().unwrap_or("").to_string())
                         .collect(),
-                    name: create_action_obj
-                        .get("name")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
+                    
                     prompt: create_action_obj
                         .get("prompt")
                         .and_then(|v| v.as_str())
@@ -47,8 +43,14 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .map(|v| v.to_string()),
                 };
 
+                let name = create_action_obj
+                        .get("name")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string();
+
                 return Some(MessageTypes::CreateNode(CreateNode {
-                    node: create_node(NodeType::Prompt(prompt)),
+                    node: create_node(NodeType::Prompt(prompt), name),
                 }));
             }
         }
@@ -64,11 +66,6 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .get("is_loop")
                         .and_then(|v| v.as_bool())
                         .unwrap_or(false),
-                    name: create_process_obj
-                        .get("name")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
                     graph: create_process_obj
                         .get("graph")
                         .and_then(|v| v.as_str())
@@ -93,8 +90,14 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .to_string(),
                 };
 
+                let name = create_process_obj
+                        .get("name")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string();
+
                 return Some(MessageTypes::CreateNode(CreateNode {
-                    node: create_node(NodeType::Process(process)),
+                    node: create_node(NodeType::Process(process), name),
                 }));
             }
         }

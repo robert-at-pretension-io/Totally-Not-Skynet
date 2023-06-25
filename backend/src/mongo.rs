@@ -1,33 +1,10 @@
-use crate::domain::{Process, Prompt};
+
 use futures_util::StreamExt;
 use mongodb::{
     options::{ClientOptions, ServerApi, ServerApiVersion},
     Client,
 };
 
-pub async fn get_actions_and_processes(db: &mongodb::Database) -> (Vec<Prompt>, Vec<Process>) {
-    let action_collection = db.collection::<Prompt>("actions");
-    let process_collection = db.collection::<Process>("processes");
-
-    let mut actions_cursor = action_collection.find(None, None).await.unwrap();
-
-    let mut processes_cursor = process_collection.find(None, None).await.unwrap();
-
-    let mut actions = Vec::new();
-    let mut processes = Vec::new();
-
-    while let Some(action) = actions_cursor.next().await {
-        actions.push(action.unwrap());
-    }
-
-    while let Some(process) = processes_cursor.next().await {
-        if let Ok(process) = process {
-            processes.push(process);
-        }
-    }
-
-    (actions, processes)
-}
 
 pub async fn get_nodes(db: &mongodb::Database) -> Vec<crate::domain::Node> {
     let node_collection = db.collection::<crate::domain::Node>("nodes");
