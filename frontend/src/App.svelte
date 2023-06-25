@@ -6,11 +6,10 @@
 
   import "../public/global.css";
 
-  import type {
-    Process,
-  } from "./system_types";
+  import type { Node } from "./system_types";
+  import { RuntimeNode } from "./system_types";
 
-  import { processToGraph } from "helper_functions/graph";
+  import { fold } from "fp-ts/lib/Either";
 
   import { onMount } from "svelte";
   import systemStateStore from "stores/systemStateStore";
@@ -35,10 +34,22 @@
       let data: any;
       try {
         data = JSON.parse(event.data);
+
+        let validationResult = RuntimeNode.decode(data);
+
+        fold(
+          (errors) => {
+            console.log("Error decoding websocket message: ", errors);
+          },
+          (node: Node) => {
+            $systemStateStore.nodes.push(node);
+          }
+        )(validationResult);
       } catch {
         console.log("Error parsing websocket message");
       }
 
+      // if the websocket message is a node then add it to the system state store
     });
   });
 

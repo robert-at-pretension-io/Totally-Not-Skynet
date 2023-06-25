@@ -1,42 +1,26 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
   import { returnProcesses } from "helper_functions/graph";
-  import { isProcess, newAction } from "helper_functions/type_checker";
   import type { Node } from "system_types";
-  import Log from "./log.svelte";
   import { onMount } from "svelte";
   import { some } from "fp-ts/lib/Option";
 
   let selectedNode: Node | null = null;
-  let processes : Node[]= [];
+  let processes: Node[] = [];
 
   onMount(async () => {
     processes = await returnProcesses();
   });
 
-  let newValues = {};
-
-  function handleInputChange(event: Event) {
-    if (event.target) {
-      console.log("handleInputChange called: ", event.target);
-    }
-  }
-
-  async function handleFormSubmit(event: Event) {
-    // should send the "HandleNode" action to the backend
-    console.log("handleFormSubmit called: ", selectedNode);
-  }
   async function onDropdownChange() {
     if (selectedNode) {
       $systemStateStore.selectedNode = some(selectedNode);
-
     }
   }
 </script>
 
 {#if selectedNode}
   <div>
-
     <!-- <h2>Global Variables</h2>
     {#each [...globalVariables] as [key, value]}
       <p>{key}: {value}</p>
@@ -59,7 +43,7 @@
       <button class="add-button" on:click={sendFirstPrompt}>Execute</button>
     {:else}
     -->
-      <!-- Add the displaying of output log here 
+    <!-- Add the displaying of output log here 
       <Log />
     {/if} -->
   </div>
