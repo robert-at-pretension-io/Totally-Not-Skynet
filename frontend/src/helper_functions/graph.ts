@@ -156,16 +156,14 @@ export async function processToGraph(process: Process): Promise<void> {
   await resetGraph();
 
   // verify that all of the steps have corresponding actions
-  const graph = process.process.graph;
+  let graph : string | Graph= process.process.graph;
 
-  let nodes: string[] = [];
+  const nodes: string[] = [];
 
-  // check if graph has the type Graph
-  if (graph instanceof Graph) {
-    nodes = graph.nodes();
-  }
-  else {
-    console.error("The graph is not of type Graph");
+  // check if the graph is a string and if so, parse it into a graphlib Graph object
+  if (typeof graph === "string") {
+    const parsed_graph = JSON.parse(graph);
+    graph = new Graph(parsed_graph);
   }
 
   // console.log("nodes: ", nodes);
