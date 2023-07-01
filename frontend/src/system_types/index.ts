@@ -73,7 +73,7 @@ const RuntimeMongoId = t.type({
 });
 
 const RuntimePrompt = t.type({
-  prompt: t.type({
+  Prompt: t.type({
     prompt: t.string,
     input_variables: t.array(t.string),
     output_variables: t.array(t.string),
@@ -82,7 +82,7 @@ const RuntimePrompt = t.type({
 });
 
 const RuntimeProcess = t.type({
-  process: t.type({
+  Process: t.type({
     graph: t.string,
     description: t.string,
     topological_order: t.array(t.string),
@@ -90,7 +90,7 @@ const RuntimeProcess = t.type({
 });
 
 const RuntimeConditional = t.type({
-  conditional: t.type({
+  Conditional: t.type({
     system_variables: t.record(t.string, t.string),
     statement: t.string,
     options: t.record(t.string, t.string), // assuming ObjectId is replaced with string
@@ -98,7 +98,7 @@ const RuntimeConditional = t.type({
 });
 
 const RuntimeCommand = t.type({
-  command: t.type({
+  Command: t.type({
     command: t.string,
   }),
 });
@@ -106,7 +106,7 @@ const RuntimeCommand = t.type({
 const RuntimeNodeType = t.union([RuntimePrompt, RuntimeProcess, RuntimeConditional, RuntimeCommand]);
 
 const RuntimeNode = t.type({
-  _id: option(RuntimeMongoId),
+  _id: RuntimeMongoId,
   name: t.string,
   type_name: RuntimeNodeTypeNames,
   node_content: RuntimeNodeType,

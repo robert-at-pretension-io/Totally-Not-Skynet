@@ -4,7 +4,7 @@ var app = (function () {
     'use strict';
 
     function noop$2() { }
-    const identity$1 = x => x;
+    const identity$3 = x => x;
     function assign$3(tar, src) {
         // @ts-ignore
         for (const k in src)
@@ -208,9 +208,6 @@ var app = (function () {
         else if (node.getAttribute(attribute) !== value)
             node.setAttribute(attribute, value);
     }
-    function to_number(value) {
-        return value === '' ? null : +value;
-    }
     function children(element) {
         return Array.from(element.childNodes);
     }
@@ -327,17 +324,6 @@ var app = (function () {
      */
     function onMount(fn) {
         get_current_component().$$.on_mount.push(fn);
-    }
-    /**
-     * Schedules a callback to run immediately before the component is unmounted.
-     *
-     * Out of `onMount`, `beforeUpdate`, `afterUpdate` and `onDestroy`, this is the
-     * only one that runs inside a server-side component.
-     *
-     * https://svelte.dev/docs#run-time-svelte-ondestroy
-     */
-    function onDestroy(fn) {
-        get_current_component().$$.on_destroy.push(fn);
     }
     /**
      * Associates an arbitrary `context` object with the current component and the specified `key`
@@ -525,7 +511,7 @@ var app = (function () {
                 delete_rule(node, animation_name);
         }
         function go() {
-            const { delay = 0, duration = 300, easing = identity$1, tick = noop$2, css } = config || null_transition;
+            const { delay = 0, duration = 300, easing = identity$3, tick = noop$2, css } = config || null_transition;
             if (css)
                 animation_name = create_rule(node, 0, 1, duration, delay, easing, css, uid++);
             tick(0, 1);
@@ -585,7 +571,7 @@ var app = (function () {
         const group = outros;
         group.r += 1;
         function go() {
-            const { delay = 0, duration = 300, easing = identity$1, tick = noop$2, css } = config || null_transition;
+            const { delay = 0, duration = 300, easing = identity$3, tick = noop$2, css } = config || null_transition;
             if (css)
                 animation_name = create_rule(node, 1, 0, duration, delay, easing, css);
             const start_time = now$2() + delay;
@@ -2399,89 +2385,6 @@ var app = (function () {
       version: lib$2.version
     };
 
-    function isProcess(object) {
-        if (typeof object !== "object") {
-            return false;
-        }
-        //check if object.topological_order is an array of strings
-        if (!Array.isArray(object.topological_order)) {
-            return false;
-        }
-        if (typeof object._id !== "object") {
-            return false;
-        }
-        if (typeof object.name !== "string") {
-            return false;
-        }
-        if (typeof object.graph !== "object") {
-            return false;
-        }
-        if (typeof object.description !== "string") {
-            return false;
-        }
-        return true;
-    }
-    function isAction(object) {
-        if (typeof object !== "object") {
-            return false;
-        }
-        if (typeof object._id !== "object") {
-            return false;
-        }
-        if (typeof object.prompt !== "string") {
-            return false;
-        }
-        if (!Array.isArray(object.input_variables)) {
-            return false;
-        }
-        for (const varItem of object.input_variables) {
-            if (typeof varItem !== "string") {
-                return false;
-            }
-        }
-        if (!Array.isArray(object.output_variables)) {
-            return false;
-        }
-        for (const varItem of object.output_variables) {
-            if (typeof varItem !== "string") {
-                return false;
-            }
-        }
-        if (typeof object.name !== "string") {
-            return false;
-        }
-        if (typeof object.system !== "string") {
-            return false;
-        }
-        return true;
-    }
-    function newAction() {
-        return {
-            _id: { $oid: "" },
-            prompt: "",
-            input_variables: [],
-            output_variables: [],
-            name: "",
-            system: "",
-        };
-    }
-    function isResponse(object) {
-        if (object === null || object === undefined) {
-            return false;
-        }
-        else {
-            return object && "response_text" in object && "action_id" in object;
-        }
-    }
-    function newProcess() {
-        return {
-            _id: { $oid: "" },
-            name: "",
-            graph: new graphlib$2.Graph(),
-            description: "",
-            topological_order: [],
-        };
-    }
     function newGraphState() {
         return {
             graph: new graphlib$2.Graph(),
@@ -2504,26 +2407,3710 @@ var app = (function () {
         };
     }
 
+    var Option = {};
+
+    var Applicative = {};
+
+    var Apply = {};
+
+    var _function = {};
+
+    (function (exports) {
+    	var __spreadArray = (commonjsGlobal && commonjsGlobal.__spreadArray) || function (to, from, pack) {
+    	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+    	        if (ar || !(i in from)) {
+    	            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+    	            ar[i] = from[i];
+    	        }
+    	    }
+    	    return to.concat(ar || Array.prototype.slice.call(from));
+    	};
+    	Object.defineProperty(exports, "__esModule", { value: true });
+    	exports.dual = exports.getEndomorphismMonoid = exports.not = exports.SK = exports.hole = exports.pipe = exports.untupled = exports.tupled = exports.absurd = exports.decrement = exports.increment = exports.tuple = exports.flow = exports.flip = exports.constVoid = exports.constUndefined = exports.constNull = exports.constFalse = exports.constTrue = exports.constant = exports.unsafeCoerce = exports.identity = exports.apply = exports.getRing = exports.getSemiring = exports.getMonoid = exports.getSemigroup = exports.getBooleanAlgebra = void 0;
+    	// -------------------------------------------------------------------------------------
+    	// instances
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var getBooleanAlgebra = function (B) {
+    	    return function () { return ({
+    	        meet: function (x, y) { return function (a) { return B.meet(x(a), y(a)); }; },
+    	        join: function (x, y) { return function (a) { return B.join(x(a), y(a)); }; },
+    	        zero: function () { return B.zero; },
+    	        one: function () { return B.one; },
+    	        implies: function (x, y) { return function (a) { return B.implies(x(a), y(a)); }; },
+    	        not: function (x) { return function (a) { return B.not(x(a)); }; }
+    	    }); };
+    	};
+    	exports.getBooleanAlgebra = getBooleanAlgebra;
+    	/**
+    	 * Unary functions form a semigroup as long as you can provide a semigroup for the codomain.
+    	 *
+    	 * @example
+    	 * import { Predicate, getSemigroup } from 'fp-ts/function'
+    	 * import * as B from 'fp-ts/boolean'
+    	 *
+    	 * const f: Predicate<number> = (n) => n <= 2
+    	 * const g: Predicate<number> = (n) => n >= 0
+    	 *
+    	 * const S1 = getSemigroup(B.SemigroupAll)<number>()
+    	 *
+    	 * assert.deepStrictEqual(S1.concat(f, g)(1), true)
+    	 * assert.deepStrictEqual(S1.concat(f, g)(3), false)
+    	 *
+    	 * const S2 = getSemigroup(B.SemigroupAny)<number>()
+    	 *
+    	 * assert.deepStrictEqual(S2.concat(f, g)(1), true)
+    	 * assert.deepStrictEqual(S2.concat(f, g)(3), true)
+    	 *
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var getSemigroup = function (S) {
+    	    return function () { return ({
+    	        concat: function (f, g) { return function (a) { return S.concat(f(a), g(a)); }; }
+    	    }); };
+    	};
+    	exports.getSemigroup = getSemigroup;
+    	/**
+    	 * Unary functions form a monoid as long as you can provide a monoid for the codomain.
+    	 *
+    	 * @example
+    	 * import { Predicate } from 'fp-ts/Predicate'
+    	 * import { getMonoid } from 'fp-ts/function'
+    	 * import * as B from 'fp-ts/boolean'
+    	 *
+    	 * const f: Predicate<number> = (n) => n <= 2
+    	 * const g: Predicate<number> = (n) => n >= 0
+    	 *
+    	 * const M1 = getMonoid(B.MonoidAll)<number>()
+    	 *
+    	 * assert.deepStrictEqual(M1.concat(f, g)(1), true)
+    	 * assert.deepStrictEqual(M1.concat(f, g)(3), false)
+    	 *
+    	 * const M2 = getMonoid(B.MonoidAny)<number>()
+    	 *
+    	 * assert.deepStrictEqual(M2.concat(f, g)(1), true)
+    	 * assert.deepStrictEqual(M2.concat(f, g)(3), true)
+    	 *
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var getMonoid = function (M) {
+    	    var getSemigroupM = (0, exports.getSemigroup)(M);
+    	    return function () { return ({
+    	        concat: getSemigroupM().concat,
+    	        empty: function () { return M.empty; }
+    	    }); };
+    	};
+    	exports.getMonoid = getMonoid;
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var getSemiring = function (S) { return ({
+    	    add: function (f, g) { return function (x) { return S.add(f(x), g(x)); }; },
+    	    zero: function () { return S.zero; },
+    	    mul: function (f, g) { return function (x) { return S.mul(f(x), g(x)); }; },
+    	    one: function () { return S.one; }
+    	}); };
+    	exports.getSemiring = getSemiring;
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var getRing = function (R) {
+    	    var S = (0, exports.getSemiring)(R);
+    	    return {
+    	        add: S.add,
+    	        mul: S.mul,
+    	        one: S.one,
+    	        zero: S.zero,
+    	        sub: function (f, g) { return function (x) { return R.sub(f(x), g(x)); }; }
+    	    };
+    	};
+    	exports.getRing = getRing;
+    	// -------------------------------------------------------------------------------------
+    	// utils
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @since 2.11.0
+    	 */
+    	var apply = function (a) {
+    	    return function (f) {
+    	        return f(a);
+    	    };
+    	};
+    	exports.apply = apply;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	function identity(a) {
+    	    return a;
+    	}
+    	exports.identity = identity;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	exports.unsafeCoerce = identity;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	function constant(a) {
+    	    return function () { return a; };
+    	}
+    	exports.constant = constant;
+    	/**
+    	 * A thunk that returns always `true`.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.constTrue = constant(true);
+    	/**
+    	 * A thunk that returns always `false`.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.constFalse = constant(false);
+    	/**
+    	 * A thunk that returns always `null`.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.constNull = constant(null);
+    	/**
+    	 * A thunk that returns always `undefined`.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.constUndefined = constant(undefined);
+    	/**
+    	 * A thunk that returns always `void`.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.constVoid = exports.constUndefined;
+    	function flip(f) {
+    	    return function () {
+    	        var args = [];
+    	        for (var _i = 0; _i < arguments.length; _i++) {
+    	            args[_i] = arguments[_i];
+    	        }
+    	        if (args.length > 1) {
+    	            return f(args[1], args[0]);
+    	        }
+    	        return function (a) { return f(a)(args[0]); };
+    	    };
+    	}
+    	exports.flip = flip;
+    	function flow(ab, bc, cd, de, ef, fg, gh, hi, ij) {
+    	    switch (arguments.length) {
+    	        case 1:
+    	            return ab;
+    	        case 2:
+    	            return function () {
+    	                return bc(ab.apply(this, arguments));
+    	            };
+    	        case 3:
+    	            return function () {
+    	                return cd(bc(ab.apply(this, arguments)));
+    	            };
+    	        case 4:
+    	            return function () {
+    	                return de(cd(bc(ab.apply(this, arguments))));
+    	            };
+    	        case 5:
+    	            return function () {
+    	                return ef(de(cd(bc(ab.apply(this, arguments)))));
+    	            };
+    	        case 6:
+    	            return function () {
+    	                return fg(ef(de(cd(bc(ab.apply(this, arguments))))));
+    	            };
+    	        case 7:
+    	            return function () {
+    	                return gh(fg(ef(de(cd(bc(ab.apply(this, arguments)))))));
+    	            };
+    	        case 8:
+    	            return function () {
+    	                return hi(gh(fg(ef(de(cd(bc(ab.apply(this, arguments))))))));
+    	            };
+    	        case 9:
+    	            return function () {
+    	                return ij(hi(gh(fg(ef(de(cd(bc(ab.apply(this, arguments)))))))));
+    	            };
+    	    }
+    	    return;
+    	}
+    	exports.flow = flow;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	function tuple() {
+    	    var t = [];
+    	    for (var _i = 0; _i < arguments.length; _i++) {
+    	        t[_i] = arguments[_i];
+    	    }
+    	    return t;
+    	}
+    	exports.tuple = tuple;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	function increment(n) {
+    	    return n + 1;
+    	}
+    	exports.increment = increment;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	function decrement(n) {
+    	    return n - 1;
+    	}
+    	exports.decrement = decrement;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	function absurd(_) {
+    	    throw new Error('Called `absurd` function which should be uncallable');
+    	}
+    	exports.absurd = absurd;
+    	/**
+    	 * Creates a tupled version of this function: instead of `n` arguments, it accepts a single tuple argument.
+    	 *
+    	 * @example
+    	 * import { tupled } from 'fp-ts/function'
+    	 *
+    	 * const add = tupled((x: number, y: number): number => x + y)
+    	 *
+    	 * assert.strictEqual(add([1, 2]), 3)
+    	 *
+    	 * @since 2.4.0
+    	 */
+    	function tupled(f) {
+    	    return function (a) { return f.apply(void 0, a); };
+    	}
+    	exports.tupled = tupled;
+    	/**
+    	 * Inverse function of `tupled`
+    	 *
+    	 * @since 2.4.0
+    	 */
+    	function untupled(f) {
+    	    return function () {
+    	        var a = [];
+    	        for (var _i = 0; _i < arguments.length; _i++) {
+    	            a[_i] = arguments[_i];
+    	        }
+    	        return f(a);
+    	    };
+    	}
+    	exports.untupled = untupled;
+    	function pipe(a, ab, bc, cd, de, ef, fg, gh, hi) {
+    	    switch (arguments.length) {
+    	        case 1:
+    	            return a;
+    	        case 2:
+    	            return ab(a);
+    	        case 3:
+    	            return bc(ab(a));
+    	        case 4:
+    	            return cd(bc(ab(a)));
+    	        case 5:
+    	            return de(cd(bc(ab(a))));
+    	        case 6:
+    	            return ef(de(cd(bc(ab(a)))));
+    	        case 7:
+    	            return fg(ef(de(cd(bc(ab(a))))));
+    	        case 8:
+    	            return gh(fg(ef(de(cd(bc(ab(a)))))));
+    	        case 9:
+    	            return hi(gh(fg(ef(de(cd(bc(ab(a))))))));
+    	        default: {
+    	            var ret = arguments[0];
+    	            for (var i = 1; i < arguments.length; i++) {
+    	                ret = arguments[i](ret);
+    	            }
+    	            return ret;
+    	        }
+    	    }
+    	}
+    	exports.pipe = pipe;
+    	/**
+    	 * Type hole simulation
+    	 *
+    	 * @since 2.7.0
+    	 */
+    	exports.hole = absurd;
+    	/**
+    	 * @since 2.11.0
+    	 */
+    	var SK = function (_, b) { return b; };
+    	exports.SK = SK;
+    	/**
+    	 * Use `Predicate` module instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	function not(predicate) {
+    	    return function (a) { return !predicate(a); };
+    	}
+    	exports.not = not;
+    	/**
+    	 * Use `Endomorphism` module instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.10.0
+    	 * @deprecated
+    	 */
+    	var getEndomorphismMonoid = function () { return ({
+    	    concat: function (first, second) { return flow(first, second); },
+    	    empty: identity
+    	}); };
+    	exports.getEndomorphismMonoid = getEndomorphismMonoid;
+    	/** @internal */
+    	var dual = function (arity, body) {
+    	    var isDataFirst = typeof arity === 'number' ? function (args) { return args.length >= arity; } : arity;
+    	    return function () {
+    	        var args = Array.from(arguments);
+    	        if (isDataFirst(arguments)) {
+    	            return body.apply(this, args);
+    	        }
+    	        return function (self) { return body.apply(void 0, __spreadArray([self], args, false)); };
+    	    };
+    	};
+    	exports.dual = dual; 
+    } (_function));
+
+    var internal = {};
+
+    (function (exports) {
+    	var __spreadArray = (commonjsGlobal && commonjsGlobal.__spreadArray) || function (to, from, pack) {
+    	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+    	        if (ar || !(i in from)) {
+    	            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+    	            ar[i] = from[i];
+    	        }
+    	    }
+    	    return to.concat(ar || Array.prototype.slice.call(from));
+    	};
+    	Object.defineProperty(exports, "__esModule", { value: true });
+    	exports.flatMapReader = exports.flatMapTask = exports.flatMapIO = exports.flatMapEither = exports.flatMapOption = exports.flatMapNullable = exports.liftOption = exports.liftNullable = exports.fromReadonlyNonEmptyArray = exports.has = exports.emptyRecord = exports.emptyReadonlyArray = exports.tail = exports.head = exports.isNonEmpty = exports.singleton = exports.right = exports.left = exports.isRight = exports.isLeft = exports.some = exports.none = exports.isSome = exports.isNone = void 0;
+    	var function_1 = _function;
+    	// -------------------------------------------------------------------------------------
+    	// Option
+    	// -------------------------------------------------------------------------------------
+    	/** @internal */
+    	var isNone = function (fa) { return fa._tag === 'None'; };
+    	exports.isNone = isNone;
+    	/** @internal */
+    	var isSome = function (fa) { return fa._tag === 'Some'; };
+    	exports.isSome = isSome;
+    	/** @internal */
+    	exports.none = { _tag: 'None' };
+    	/** @internal */
+    	var some = function (a) { return ({ _tag: 'Some', value: a }); };
+    	exports.some = some;
+    	// -------------------------------------------------------------------------------------
+    	// Either
+    	// -------------------------------------------------------------------------------------
+    	/** @internal */
+    	var isLeft = function (ma) { return ma._tag === 'Left'; };
+    	exports.isLeft = isLeft;
+    	/** @internal */
+    	var isRight = function (ma) { return ma._tag === 'Right'; };
+    	exports.isRight = isRight;
+    	/** @internal */
+    	var left = function (e) { return ({ _tag: 'Left', left: e }); };
+    	exports.left = left;
+    	/** @internal */
+    	var right = function (a) { return ({ _tag: 'Right', right: a }); };
+    	exports.right = right;
+    	// -------------------------------------------------------------------------------------
+    	// ReadonlyNonEmptyArray
+    	// -------------------------------------------------------------------------------------
+    	/** @internal */
+    	var singleton = function (a) { return [a]; };
+    	exports.singleton = singleton;
+    	/** @internal */
+    	var isNonEmpty = function (as) { return as.length > 0; };
+    	exports.isNonEmpty = isNonEmpty;
+    	/** @internal */
+    	var head = function (as) { return as[0]; };
+    	exports.head = head;
+    	/** @internal */
+    	var tail = function (as) { return as.slice(1); };
+    	exports.tail = tail;
+    	// -------------------------------------------------------------------------------------
+    	// empty
+    	// -------------------------------------------------------------------------------------
+    	/** @internal */
+    	exports.emptyReadonlyArray = [];
+    	/** @internal */
+    	exports.emptyRecord = {};
+    	// -------------------------------------------------------------------------------------
+    	// Record
+    	// -------------------------------------------------------------------------------------
+    	/** @internal */
+    	exports.has = Object.prototype.hasOwnProperty;
+    	// -------------------------------------------------------------------------------------
+    	// NonEmptyArray
+    	// -------------------------------------------------------------------------------------
+    	/** @internal */
+    	var fromReadonlyNonEmptyArray = function (as) { return __spreadArray([as[0]], as.slice(1), true); };
+    	exports.fromReadonlyNonEmptyArray = fromReadonlyNonEmptyArray;
+    	/** @internal */
+    	var liftNullable = function (F) {
+    	    return function (f, onNullable) {
+    	        return function () {
+    	            var a = [];
+    	            for (var _i = 0; _i < arguments.length; _i++) {
+    	                a[_i] = arguments[_i];
+    	            }
+    	            var o = f.apply(void 0, a);
+    	            return F.fromEither(o == null ? (0, exports.left)(onNullable.apply(void 0, a)) : (0, exports.right)(o));
+    	        };
+    	    };
+    	};
+    	exports.liftNullable = liftNullable;
+    	/** @internal */
+    	var liftOption = function (F) {
+    	    return function (f, onNone) {
+    	        return function () {
+    	            var a = [];
+    	            for (var _i = 0; _i < arguments.length; _i++) {
+    	                a[_i] = arguments[_i];
+    	            }
+    	            var o = f.apply(void 0, a);
+    	            return F.fromEither((0, exports.isNone)(o) ? (0, exports.left)(onNone.apply(void 0, a)) : (0, exports.right)(o.value));
+    	        };
+    	    };
+    	};
+    	exports.liftOption = liftOption;
+    	/** @internal */
+    	var flatMapNullable = function (F, M) {
+    	     return (0, function_1.dual)(3, function (self, f, onNullable) {
+    	        return M.flatMap(self, (0, exports.liftNullable)(F)(f, onNullable));
+    	    });
+    	};
+    	exports.flatMapNullable = flatMapNullable;
+    	/** @internal */
+    	var flatMapOption = function (F, M) {
+    	     return (0, function_1.dual)(3, function (self, f, onNone) { return M.flatMap(self, (0, exports.liftOption)(F)(f, onNone)); });
+    	};
+    	exports.flatMapOption = flatMapOption;
+    	/** @internal */
+    	var flatMapEither = function (F, M) {
+    	     return (0, function_1.dual)(2, function (self, f) {
+    	        return M.flatMap(self, function (a) { return F.fromEither(f(a)); });
+    	    });
+    	};
+    	exports.flatMapEither = flatMapEither;
+    	/** @internal */
+    	var flatMapIO = function (F, M) {
+    	     return (0, function_1.dual)(2, function (self, f) {
+    	        return M.flatMap(self, function (a) { return F.fromIO(f(a)); });
+    	    });
+    	};
+    	exports.flatMapIO = flatMapIO;
+    	/** @internal */
+    	var flatMapTask = function (F, M) {
+    	     return (0, function_1.dual)(2, function (self, f) {
+    	        return M.flatMap(self, function (a) { return F.fromTask(f(a)); });
+    	    });
+    	};
+    	exports.flatMapTask = flatMapTask;
+    	/** @internal */
+    	var flatMapReader = function (F, M) {
+    	     return (0, function_1.dual)(2, function (self, f) {
+    	        return M.flatMap(self, function (a) { return F.fromReader(f(a)); });
+    	    });
+    	};
+    	exports.flatMapReader = flatMapReader; 
+    } (internal));
+
+    var __createBinding$2 = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        var desc = Object.getOwnPropertyDescriptor(m, k);
+        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+          desc = { enumerable: true, get: function() { return m[k]; } };
+        }
+        Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        o[k2] = m[k];
+    }));
+    var __setModuleDefault$2 = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
+        Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+        o["default"] = v;
+    });
+    var __importStar$2 = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding$2(result, mod, k);
+        __setModuleDefault$2(result, mod);
+        return result;
+    };
+    Object.defineProperty(Apply, "__esModule", { value: true });
+    Apply.sequenceS = Apply.sequenceT = Apply.getApplySemigroup = Apply.apS = Apply.apSecond = Apply.apFirst = Apply.ap = void 0;
+    /**
+     * The `Apply` class provides the `ap` which is used to apply a function to an argument under a type constructor.
+     *
+     * `Apply` can be used to lift functions of two or more arguments to work on values wrapped with the type constructor
+     * `f`.
+     *
+     * Instances must satisfy the following law in addition to the `Functor` laws:
+     *
+     * 1. Associative composition: `F.ap(F.ap(F.map(fbc, bc => ab => a => bc(ab(a))), fab), fa) <-> F.ap(fbc, F.ap(fab, fa))`
+     *
+     * Formally, `Apply` represents a strong lax semi-monoidal endofunctor.
+     *
+     * @example
+     * import * as O from 'fp-ts/Option'
+     * import { pipe } from 'fp-ts/function'
+     *
+     * const f = (a: string) => (b: number) => (c: boolean) => a + String(b) + String(c)
+     * const fa: O.Option<string> = O.some('s')
+     * const fb: O.Option<number> = O.some(1)
+     * const fc: O.Option<boolean> = O.some(true)
+     *
+     * assert.deepStrictEqual(
+     *   pipe(
+     *     // lift a function
+     *     O.some(f),
+     *     // apply the first argument
+     *     O.ap(fa),
+     *     // apply the second argument
+     *     O.ap(fb),
+     *     // apply the third argument
+     *     O.ap(fc)
+     *   ),
+     *   O.some('s1true')
+     * )
+     *
+     * @since 2.0.0
+     */
+    var function_1$3 = _function;
+    var _$e = __importStar$2(internal);
+    function ap(F, G) {
+        return function (fa) {
+            return function (fab) {
+                return F.ap(F.map(fab, function (gab) { return function (ga) { return G.ap(gab, ga); }; }), fa);
+            };
+        };
+    }
+    Apply.ap = ap;
+    function apFirst(A) {
+        return function (second) { return function (first) {
+            return A.ap(A.map(first, function (a) { return function () { return a; }; }), second);
+        }; };
+    }
+    Apply.apFirst = apFirst;
+    function apSecond(A) {
+        return function (second) {
+            return function (first) {
+                return A.ap(A.map(first, function () { return function (b) { return b; }; }), second);
+            };
+        };
+    }
+    Apply.apSecond = apSecond;
+    function apS(F) {
+        return function (name, fb) {
+            return function (fa) {
+                return F.ap(F.map(fa, function (a) { return function (b) {
+                    var _a;
+                    return Object.assign({}, a, (_a = {}, _a[name] = b, _a));
+                }; }), fb);
+            };
+        };
+    }
+    Apply.apS = apS;
+    function getApplySemigroup(F) {
+        return function (S) { return ({
+            concat: function (first, second) {
+                return F.ap(F.map(first, function (x) { return function (y) { return S.concat(x, y); }; }), second);
+            }
+        }); };
+    }
+    Apply.getApplySemigroup = getApplySemigroup;
+    function curried(f, n, acc) {
+        return function (x) {
+            var combined = Array(acc.length + 1);
+            for (var i = 0; i < acc.length; i++) {
+                combined[i] = acc[i];
+            }
+            combined[acc.length] = x;
+            return n === 0 ? f.apply(null, combined) : curried(f, n - 1, combined);
+        };
+    }
+    var tupleConstructors = {
+        1: function (a) { return [a]; },
+        2: function (a) { return function (b) { return [a, b]; }; },
+        3: function (a) { return function (b) { return function (c) { return [a, b, c]; }; }; },
+        4: function (a) { return function (b) { return function (c) { return function (d) { return [a, b, c, d]; }; }; }; },
+        5: function (a) { return function (b) { return function (c) { return function (d) { return function (e) { return [a, b, c, d, e]; }; }; }; }; }
+    };
+    function getTupleConstructor(len) {
+        if (!_$e.has.call(tupleConstructors, len)) {
+            tupleConstructors[len] = curried(function_1$3.tuple, len - 1, []);
+        }
+        return tupleConstructors[len];
+    }
+    function sequenceT(F) {
+        return function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var len = args.length;
+            var f = getTupleConstructor(len);
+            var fas = F.map(args[0], f);
+            for (var i = 1; i < len; i++) {
+                fas = F.ap(fas, args[i]);
+            }
+            return fas;
+        };
+    }
+    Apply.sequenceT = sequenceT;
+    function getRecordConstructor(keys) {
+        var len = keys.length;
+        switch (len) {
+            case 1:
+                return function (a) {
+                    var _a;
+                    return (_a = {}, _a[keys[0]] = a, _a);
+                };
+            case 2:
+                return function (a) { return function (b) {
+                    var _a;
+                    return (_a = {}, _a[keys[0]] = a, _a[keys[1]] = b, _a);
+                }; };
+            case 3:
+                return function (a) { return function (b) { return function (c) {
+                    var _a;
+                    return (_a = {}, _a[keys[0]] = a, _a[keys[1]] = b, _a[keys[2]] = c, _a);
+                }; }; };
+            case 4:
+                return function (a) { return function (b) { return function (c) { return function (d) {
+                    var _a;
+                    return (_a = {},
+                        _a[keys[0]] = a,
+                        _a[keys[1]] = b,
+                        _a[keys[2]] = c,
+                        _a[keys[3]] = d,
+                        _a);
+                }; }; }; };
+            case 5:
+                return function (a) { return function (b) { return function (c) { return function (d) { return function (e) {
+                    var _a;
+                    return (_a = {},
+                        _a[keys[0]] = a,
+                        _a[keys[1]] = b,
+                        _a[keys[2]] = c,
+                        _a[keys[3]] = d,
+                        _a[keys[4]] = e,
+                        _a);
+                }; }; }; }; };
+            default:
+                return curried(function () {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
+                    }
+                    var r = {};
+                    for (var i = 0; i < len; i++) {
+                        r[keys[i]] = args[i];
+                    }
+                    return r;
+                }, len - 1, []);
+        }
+    }
+    function sequenceS(F) {
+        return function (r) {
+            var keys = Object.keys(r);
+            var len = keys.length;
+            var f = getRecordConstructor(keys);
+            var fr = F.map(r[keys[0]], f);
+            for (var i = 1; i < len; i++) {
+                fr = F.ap(fr, r[keys[i]]);
+            }
+            return fr;
+        };
+    }
+    Apply.sequenceS = sequenceS;
+
+    var Functor$1 = {};
+
+    Object.defineProperty(Functor$1, "__esModule", { value: true });
+    Functor$1.asUnit = Functor$1.as = Functor$1.getFunctorComposition = Functor$1.let = Functor$1.bindTo = Functor$1.flap = Functor$1.map = void 0;
+    /**
+     * A `Functor` is a type constructor which supports a mapping operation `map`.
+     *
+     * `map` can be used to turn functions `a -> b` into functions `f a -> f b` whose argument and return types use the type
+     * constructor `f` to represent some computational context.
+     *
+     * Instances must satisfy the following laws:
+     *
+     * 1. Identity: `F.map(fa, a => a) <-> fa`
+     * 2. Composition: `F.map(fa, a => bc(ab(a))) <-> F.map(F.map(fa, ab), bc)`
+     *
+     * @since 2.0.0
+     */
+    var function_1$2 = _function;
+    function map$1(F, G) {
+        return function (f) { return function (fa) { return F.map(fa, function (ga) { return G.map(ga, f); }); }; };
+    }
+    Functor$1.map = map$1;
+    function flap(F) {
+        return function (a) { return function (fab) { return F.map(fab, function (f) { return f(a); }); }; };
+    }
+    Functor$1.flap = flap;
+    function bindTo(F) {
+        return function (name) { return function (fa) { return F.map(fa, function (a) {
+            var _a;
+            return (_a = {}, _a[name] = a, _a);
+        }); }; };
+    }
+    Functor$1.bindTo = bindTo;
+    function let_(F) {
+        return function (name, f) { return function (fa) { return F.map(fa, function (a) {
+            var _a;
+            return Object.assign({}, a, (_a = {}, _a[name] = f(a), _a));
+        }); }; };
+    }
+    Functor$1.let = let_;
+    /** @deprecated */
+    function getFunctorComposition(F, G) {
+        var _map = map$1(F, G);
+        return {
+            map: function (fga, f) { return (0, function_1$2.pipe)(fga, _map(f)); }
+        };
+    }
+    Functor$1.getFunctorComposition = getFunctorComposition;
+    /** @internal */
+    function as$1(F) {
+        return function (self, b) { return F.map(self, function () { return b; }); };
+    }
+    Functor$1.as = as$1;
+    /** @internal */
+    function asUnit(F) {
+        var asM = as$1(F);
+        return function (self) { return asM(self, undefined); };
+    }
+    Functor$1.asUnit = asUnit;
+
+    Object.defineProperty(Applicative, "__esModule", { value: true });
+    Applicative.getApplicativeComposition = Applicative.getApplicativeMonoid = void 0;
+    /**
+     * The `Applicative` type class extends the `Apply` type class with a `of` function, which can be used to create values
+     * of type `f a` from values of type `a`.
+     *
+     * Where `Apply` provides the ability to lift functions of two or more arguments to functions whose arguments are
+     * wrapped using `f`, and `Functor` provides the ability to lift functions of one argument, `pure` can be seen as the
+     * function which lifts functions of _zero_ arguments. That is, `Applicative` functors support a lifting operation for
+     * any number of function arguments.
+     *
+     * Instances must satisfy the following laws in addition to the `Apply` laws:
+     *
+     * 1. Identity: `A.ap(A.of(a => a), fa) <-> fa`
+     * 2. Homomorphism: `A.ap(A.of(ab), A.of(a)) <-> A.of(ab(a))`
+     * 3. Interchange: `A.ap(fab, A.of(a)) <-> A.ap(A.of(ab => ab(a)), fab)`
+     *
+     * Note. `Functor`'s `map` can be derived: `A.map(x, f) = A.ap(A.of(f), x)`
+     *
+     * @since 2.0.0
+     */
+    var Apply_1 = Apply;
+    var function_1$1 = _function;
+    var Functor_1 = Functor$1;
+    function getApplicativeMonoid(F) {
+        var f = (0, Apply_1.getApplySemigroup)(F);
+        return function (M) { return ({
+            concat: f(M).concat,
+            empty: F.of(M.empty)
+        }); };
+    }
+    Applicative.getApplicativeMonoid = getApplicativeMonoid;
+    /** @deprecated */
+    function getApplicativeComposition(F, G) {
+        var map = (0, Functor_1.getFunctorComposition)(F, G).map;
+        var _ap = (0, Apply_1.ap)(F, G);
+        return {
+            map: map,
+            of: function (a) { return F.of(G.of(a)); },
+            ap: function (fgab, fga) { return (0, function_1$1.pipe)(fgab, _ap(fga)); }
+        };
+    }
+    Applicative.getApplicativeComposition = getApplicativeComposition;
+
+    var Chain = {};
+
+    Object.defineProperty(Chain, "__esModule", { value: true });
+    Chain.bind = Chain.tap = Chain.chainFirst = void 0;
+    function chainFirst(M) {
+        var tapM = tap(M);
+        return function (f) { return function (first) { return tapM(first, f); }; };
+    }
+    Chain.chainFirst = chainFirst;
+    /** @internal */
+    function tap(M) {
+        return function (first, f) { return M.chain(first, function (a) { return M.map(f(a), function () { return a; }); }); };
+    }
+    Chain.tap = tap;
+    function bind(M) {
+        return function (name, f) { return function (ma) { return M.chain(ma, function (a) { return M.map(f(a), function (b) {
+            var _a;
+            return Object.assign({}, a, (_a = {}, _a[name] = b, _a));
+        }); }); }; };
+    }
+    Chain.bind = bind;
+
+    var FromEither$1 = {};
+
+    /**
+     * The `FromEither` type class represents those data types which support errors.
+     *
+     * @since 2.10.0
+     */
+    var __createBinding$1 = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        var desc = Object.getOwnPropertyDescriptor(m, k);
+        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+          desc = { enumerable: true, get: function() { return m[k]; } };
+        }
+        Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        o[k2] = m[k];
+    }));
+    var __setModuleDefault$1 = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
+        Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+        o["default"] = v;
+    });
+    var __importStar$1 = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding$1(result, mod, k);
+        __setModuleDefault$1(result, mod);
+        return result;
+    };
+    Object.defineProperty(FromEither$1, "__esModule", { value: true });
+    FromEither$1.tapEither = FromEither$1.filterOrElse = FromEither$1.chainFirstEitherK = FromEither$1.chainEitherK = FromEither$1.fromEitherK = FromEither$1.chainOptionK = FromEither$1.fromOptionK = FromEither$1.fromPredicate = FromEither$1.fromOption = void 0;
+    var Chain_1 = Chain;
+    var function_1 = _function;
+    var _$d = __importStar$1(internal);
+    function fromOption(F) {
+        return function (onNone) { return function (ma) { return F.fromEither(_$d.isNone(ma) ? _$d.left(onNone()) : _$d.right(ma.value)); }; };
+    }
+    FromEither$1.fromOption = fromOption;
+    function fromPredicate(F) {
+        return function (predicate, onFalse) {
+            return function (a) {
+                return F.fromEither(predicate(a) ? _$d.right(a) : _$d.left(onFalse(a)));
+            };
+        };
+    }
+    FromEither$1.fromPredicate = fromPredicate;
+    function fromOptionK(F) {
+        var fromOptionF = fromOption(F);
+        return function (onNone) {
+            var from = fromOptionF(onNone);
+            return function (f) { return (0, function_1.flow)(f, from); };
+        };
+    }
+    FromEither$1.fromOptionK = fromOptionK;
+    function chainOptionK(F, M) {
+        var fromOptionKF = fromOptionK(F);
+        return function (onNone) {
+            var from = fromOptionKF(onNone);
+            return function (f) { return function (ma) { return M.chain(ma, from(f)); }; };
+        };
+    }
+    FromEither$1.chainOptionK = chainOptionK;
+    function fromEitherK(F) {
+        return function (f) { return (0, function_1.flow)(f, F.fromEither); };
+    }
+    FromEither$1.fromEitherK = fromEitherK;
+    function chainEitherK(F, M) {
+        var fromEitherKF = fromEitherK(F);
+        return function (f) { return function (ma) { return M.chain(ma, fromEitherKF(f)); }; };
+    }
+    FromEither$1.chainEitherK = chainEitherK;
+    function chainFirstEitherK(F, M) {
+        var tapEitherM = tapEither(F, M);
+        return function (f) { return function (ma) { return tapEitherM(ma, f); }; };
+    }
+    FromEither$1.chainFirstEitherK = chainFirstEitherK;
+    function filterOrElse(F, M) {
+        return function (predicate, onFalse) {
+            return function (ma) {
+                return M.chain(ma, function (a) { return F.fromEither(predicate(a) ? _$d.right(a) : _$d.left(onFalse(a))); });
+            };
+        };
+    }
+    FromEither$1.filterOrElse = filterOrElse;
+    /** @internal */
+    function tapEither(F, M) {
+        var fromEither = fromEitherK(F);
+        var tapM = (0, Chain_1.tap)(M);
+        return function (self, f) { return tapM(self, fromEither(f)); };
+    }
+    FromEither$1.tapEither = tapEither;
+
+    var Predicate = {};
+
+    (function (exports) {
+    	Object.defineProperty(exports, "__esModule", { value: true });
+    	exports.and = exports.or = exports.not = exports.Contravariant = exports.getMonoidAll = exports.getSemigroupAll = exports.getMonoidAny = exports.getSemigroupAny = exports.URI = exports.contramap = void 0;
+    	var function_1 = _function;
+    	var contramap_ = function (predicate, f) { return (0, function_1.pipe)(predicate, (0, exports.contramap)(f)); };
+    	/**
+    	 * @since 2.11.0
+    	 */
+    	var contramap = function (f) {
+    	    return function (predicate) {
+    	        return (0, function_1.flow)(f, predicate);
+    	    };
+    	};
+    	exports.contramap = contramap;
+    	/**
+    	 * @category type lambdas
+    	 * @since 2.11.0
+    	 */
+    	exports.URI = 'Predicate';
+    	/**
+    	 * @category instances
+    	 * @since 2.11.0
+    	 */
+    	var getSemigroupAny = function () { return ({
+    	    concat: function (first, second) { return (0, function_1.pipe)(first, (0, exports.or)(second)); }
+    	}); };
+    	exports.getSemigroupAny = getSemigroupAny;
+    	/**
+    	 * @category instances
+    	 * @since 2.11.0
+    	 */
+    	var getMonoidAny = function () { return ({
+    	    concat: (0, exports.getSemigroupAny)().concat,
+    	    empty: function_1.constFalse
+    	}); };
+    	exports.getMonoidAny = getMonoidAny;
+    	/**
+    	 * @category instances
+    	 * @since 2.11.0
+    	 */
+    	var getSemigroupAll = function () { return ({
+    	    concat: function (first, second) { return (0, function_1.pipe)(first, (0, exports.and)(second)); }
+    	}); };
+    	exports.getSemigroupAll = getSemigroupAll;
+    	/**
+    	 * @category instances
+    	 * @since 2.11.0
+    	 */
+    	var getMonoidAll = function () { return ({
+    	    concat: (0, exports.getSemigroupAll)().concat,
+    	    empty: function_1.constTrue
+    	}); };
+    	exports.getMonoidAll = getMonoidAll;
+    	/**
+    	 * @category instances
+    	 * @since 2.11.0
+    	 */
+    	exports.Contravariant = {
+    	    URI: exports.URI,
+    	    contramap: contramap_
+    	};
+    	// -------------------------------------------------------------------------------------
+    	// utils
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @since 2.11.0
+    	 */
+    	var not = function (predicate) {
+    	    return function (a) {
+    	        return !predicate(a);
+    	    };
+    	};
+    	exports.not = not;
+    	/**
+    	 * @since 2.11.0
+    	 */
+    	var or = function (second) {
+    	    return function (first) {
+    	        return function (a) {
+    	            return first(a) || second(a);
+    	        };
+    	    };
+    	};
+    	exports.or = or;
+    	/**
+    	 * @since 2.11.0
+    	 */
+    	var and = function (second) {
+    	    return function (first) {
+    	        return function (a) {
+    	            return first(a) && second(a);
+    	        };
+    	    };
+    	};
+    	exports.and = and; 
+    } (Predicate));
+
+    var Semigroup = {};
+
+    var Magma = {};
+
+    /**
+     * A `Magma` is a pair `(A, concat)` in which `A` is a non-empty set and `concat` is a binary operation on `A`
+     *
+     * See [Semigroup](https://gcanti.github.io/fp-ts/modules/Semigroup.ts.html) for some instances.
+     *
+     * @since 2.0.0
+     */
+    Object.defineProperty(Magma, "__esModule", { value: true });
+    Magma.concatAll = Magma.endo = Magma.filterSecond = Magma.filterFirst = Magma.reverse = void 0;
+    // -------------------------------------------------------------------------------------
+    // combinators
+    // -------------------------------------------------------------------------------------
+    /**
+     * The dual of a `Magma`, obtained by swapping the arguments of `concat`.
+     *
+     * @example
+     * import { reverse, concatAll } from 'fp-ts/Magma'
+     * import * as N from 'fp-ts/number'
+     *
+     * const subAll = concatAll(reverse(N.MagmaSub))(0)
+     *
+     * assert.deepStrictEqual(subAll([1, 2, 3]), 2)
+     *
+     * @since 2.11.0
+     */
+    var reverse = function (M) { return ({
+        concat: function (first, second) { return M.concat(second, first); }
+    }); };
+    Magma.reverse = reverse;
+    /**
+     * @since 2.11.0
+     */
+    var filterFirst = function (predicate) {
+        return function (M) { return ({
+            concat: function (first, second) { return (predicate(first) ? M.concat(first, second) : second); }
+        }); };
+    };
+    Magma.filterFirst = filterFirst;
+    /**
+     * @since 2.11.0
+     */
+    var filterSecond = function (predicate) {
+        return function (M) { return ({
+            concat: function (first, second) { return (predicate(second) ? M.concat(first, second) : first); }
+        }); };
+    };
+    Magma.filterSecond = filterSecond;
+    /**
+     * @since 2.11.0
+     */
+    var endo = function (f) {
+        return function (M) { return ({
+            concat: function (first, second) { return M.concat(f(first), f(second)); }
+        }); };
+    };
+    Magma.endo = endo;
+    // -------------------------------------------------------------------------------------
+    // utils
+    // -------------------------------------------------------------------------------------
+    /**
+     * Given a sequence of `as`, concat them and return the total.
+     *
+     * If `as` is empty, return the provided `startWith` value.
+     *
+     * @example
+     * import { concatAll } from 'fp-ts/Magma'
+     * import * as N from 'fp-ts/number'
+     *
+     * const subAll = concatAll(N.MagmaSub)(0)
+     *
+     * assert.deepStrictEqual(subAll([1, 2, 3]), -6)
+     *
+     * @since 2.11.0
+     */
+    var concatAll = function (M) {
+        return function (startWith) {
+            return function (as) {
+                return as.reduce(function (a, acc) { return M.concat(a, acc); }, startWith);
+            };
+        };
+    };
+    Magma.concatAll = concatAll;
+
+    var Ord = {};
+
+    var Eq = {};
+
+    (function (exports) {
+    	Object.defineProperty(exports, "__esModule", { value: true });
+    	exports.eqDate = exports.eqNumber = exports.eqString = exports.eqBoolean = exports.eq = exports.strictEqual = exports.getStructEq = exports.getTupleEq = exports.Contravariant = exports.getMonoid = exports.getSemigroup = exports.eqStrict = exports.URI = exports.contramap = exports.tuple = exports.struct = exports.fromEquals = void 0;
+    	var function_1 = _function;
+    	// -------------------------------------------------------------------------------------
+    	// constructors
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @category constructors
+    	 * @since 2.0.0
+    	 */
+    	var fromEquals = function (equals) { return ({
+    	    equals: function (x, y) { return x === y || equals(x, y); }
+    	}); };
+    	exports.fromEquals = fromEquals;
+    	// -------------------------------------------------------------------------------------
+    	// combinators
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @since 2.10.0
+    	 */
+    	var struct = function (eqs) {
+    	    return (0, exports.fromEquals)(function (first, second) {
+    	        for (var key in eqs) {
+    	            if (!eqs[key].equals(first[key], second[key])) {
+    	                return false;
+    	            }
+    	        }
+    	        return true;
+    	    });
+    	};
+    	exports.struct = struct;
+    	/**
+    	 * Given a tuple of `Eq`s returns a `Eq` for the tuple
+    	 *
+    	 * @example
+    	 * import { tuple } from 'fp-ts/Eq'
+    	 * import * as S from 'fp-ts/string'
+    	 * import * as N from 'fp-ts/number'
+    	 * import * as B from 'fp-ts/boolean'
+    	 *
+    	 * const E = tuple(S.Eq, N.Eq, B.Eq)
+    	 * assert.strictEqual(E.equals(['a', 1, true], ['a', 1, true]), true)
+    	 * assert.strictEqual(E.equals(['a', 1, true], ['b', 1, true]), false)
+    	 * assert.strictEqual(E.equals(['a', 1, true], ['a', 2, true]), false)
+    	 * assert.strictEqual(E.equals(['a', 1, true], ['a', 1, false]), false)
+    	 *
+    	 * @since 2.10.0
+    	 */
+    	var tuple = function () {
+    	    var eqs = [];
+    	    for (var _i = 0; _i < arguments.length; _i++) {
+    	        eqs[_i] = arguments[_i];
+    	    }
+    	    return (0, exports.fromEquals)(function (first, second) { return eqs.every(function (E, i) { return E.equals(first[i], second[i]); }); });
+    	};
+    	exports.tuple = tuple;
+    	/* istanbul ignore next */
+    	var contramap_ = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.contramap)(f)); };
+    	/**
+    	 * A typical use case for `contramap` would be like, given some `User` type, to construct an `Eq<User>`.
+    	 *
+    	 * We can do so with a function from `User -> X` where `X` is some value that we know how to compare
+    	 * for equality (meaning we have an `Eq<X>`)
+    	 *
+    	 * For example, given the following `User` type, we want to construct an `Eq<User>` that just looks at the `key` field
+    	 * for each user (since it's known to be unique).
+    	 *
+    	 * If we have a way of comparing `UUID`s for equality (`eqUUID: Eq<UUID>`) and we know how to go from `User -> UUID`,
+    	 * using `contramap` we can do this
+    	 *
+    	 * @example
+    	 * import { contramap, Eq } from 'fp-ts/Eq'
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import * as S from 'fp-ts/string'
+    	 *
+    	 * type UUID = string
+    	 *
+    	 * interface User {
+    	 *   readonly key: UUID
+    	 *   readonly firstName: string
+    	 *   readonly lastName: string
+    	 * }
+    	 *
+    	 * const eqUUID: Eq<UUID> = S.Eq
+    	 *
+    	 * const eqUserByKey: Eq<User> = pipe(
+    	 *   eqUUID,
+    	 *   contramap((user) => user.key)
+    	 * )
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   eqUserByKey.equals(
+    	 *     { key: 'k1', firstName: 'a1', lastName: 'b1' },
+    	 *     { key: 'k2', firstName: 'a1', lastName: 'b1' }
+    	 *   ),
+    	 *   false
+    	 * )
+    	 * assert.deepStrictEqual(
+    	 *   eqUserByKey.equals(
+    	 *     { key: 'k1', firstName: 'a1', lastName: 'b1' },
+    	 *     { key: 'k1', firstName: 'a2', lastName: 'b1' }
+    	 *   ),
+    	 *   true
+    	 * )
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var contramap = function (f) { return function (fa) {
+    	    return (0, exports.fromEquals)(function (x, y) { return fa.equals(f(x), f(y)); });
+    	}; };
+    	exports.contramap = contramap;
+    	/**
+    	 * @category type lambdas
+    	 * @since 2.0.0
+    	 */
+    	exports.URI = 'Eq';
+    	/**
+    	 * @category instances
+    	 * @since 2.5.0
+    	 */
+    	exports.eqStrict = {
+    	    equals: function (a, b) { return a === b; }
+    	};
+    	var empty = {
+    	    equals: function () { return true; }
+    	};
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var getSemigroup = function () { return ({
+    	    concat: function (x, y) { return (0, exports.fromEquals)(function (a, b) { return x.equals(a, b) && y.equals(a, b); }); }
+    	}); };
+    	exports.getSemigroup = getSemigroup;
+    	/**
+    	 * @category instances
+    	 * @since 2.6.0
+    	 */
+    	var getMonoid = function () { return ({
+    	    concat: (0, exports.getSemigroup)().concat,
+    	    empty: empty
+    	}); };
+    	exports.getMonoid = getMonoid;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Contravariant = {
+    	    URI: exports.URI,
+    	    contramap: contramap_
+    	};
+    	// -------------------------------------------------------------------------------------
+    	// deprecated
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Use [`tuple`](#tuple) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getTupleEq = exports.tuple;
+    	/**
+    	 * Use [`struct`](#struct) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getStructEq = exports.struct;
+    	/**
+    	 * Use [`eqStrict`](#eqstrict) instead
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.strictEqual = exports.eqStrict.equals;
+    	/**
+    	 * This instance is deprecated, use small, specific instances instead.
+    	 * For example if a function needs a `Contravariant` instance, pass `E.Contravariant` instead of `E.eq`
+    	 * (where `E` is from `import E from 'fp-ts/Eq'`)
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.eq = exports.Contravariant;
+    	/**
+    	 * Use [`Eq`](./boolean.ts.html#eq) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.eqBoolean = exports.eqStrict;
+    	/**
+    	 * Use [`Eq`](./string.ts.html#eq) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.eqString = exports.eqStrict;
+    	/**
+    	 * Use [`Eq`](./number.ts.html#eq) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.eqNumber = exports.eqStrict;
+    	/**
+    	 * Use [`Eq`](./Date.ts.html#eq) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.eqDate = {
+    	    equals: function (first, second) { return first.valueOf() === second.valueOf(); }
+    	}; 
+    } (Eq));
+
+    (function (exports) {
+    	Object.defineProperty(exports, "__esModule", { value: true });
+    	exports.ordDate = exports.ordNumber = exports.ordString = exports.ordBoolean = exports.ord = exports.getDualOrd = exports.getTupleOrd = exports.between = exports.clamp = exports.max = exports.min = exports.geq = exports.leq = exports.gt = exports.lt = exports.equals = exports.trivial = exports.Contravariant = exports.getMonoid = exports.getSemigroup = exports.URI = exports.contramap = exports.reverse = exports.tuple = exports.fromCompare = exports.equalsDefault = void 0;
+    	var Eq_1 = Eq;
+    	var function_1 = _function;
+    	// -------------------------------------------------------------------------------------
+    	// defaults
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @category defaults
+    	 * @since 2.10.0
+    	 */
+    	var equalsDefault = function (compare) {
+    	    return function (first, second) {
+    	        return first === second || compare(first, second) === 0;
+    	    };
+    	};
+    	exports.equalsDefault = equalsDefault;
+    	// -------------------------------------------------------------------------------------
+    	// constructors
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @category constructors
+    	 * @since 2.0.0
+    	 */
+    	var fromCompare = function (compare) { return ({
+    	    equals: (0, exports.equalsDefault)(compare),
+    	    compare: function (first, second) { return (first === second ? 0 : compare(first, second)); }
+    	}); };
+    	exports.fromCompare = fromCompare;
+    	// -------------------------------------------------------------------------------------
+    	// combinators
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Given a tuple of `Ord`s returns an `Ord` for the tuple.
+    	 *
+    	 * @example
+    	 * import { tuple } from 'fp-ts/Ord'
+    	 * import * as B from 'fp-ts/boolean'
+    	 * import * as S from 'fp-ts/string'
+    	 * import * as N from 'fp-ts/number'
+    	 *
+    	 * const O = tuple(S.Ord, N.Ord, B.Ord)
+    	 * assert.strictEqual(O.compare(['a', 1, true], ['b', 2, true]), -1)
+    	 * assert.strictEqual(O.compare(['a', 1, true], ['a', 2, true]), -1)
+    	 * assert.strictEqual(O.compare(['a', 1, true], ['a', 1, false]), 1)
+    	 *
+    	 * @since 2.10.0
+    	 */
+    	var tuple = function () {
+    	    var ords = [];
+    	    for (var _i = 0; _i < arguments.length; _i++) {
+    	        ords[_i] = arguments[_i];
+    	    }
+    	    return (0, exports.fromCompare)(function (first, second) {
+    	        var i = 0;
+    	        for (; i < ords.length - 1; i++) {
+    	            var r = ords[i].compare(first[i], second[i]);
+    	            if (r !== 0) {
+    	                return r;
+    	            }
+    	        }
+    	        return ords[i].compare(first[i], second[i]);
+    	    });
+    	};
+    	exports.tuple = tuple;
+    	/**
+    	 * @since 2.10.0
+    	 */
+    	var reverse = function (O) { return (0, exports.fromCompare)(function (first, second) { return O.compare(second, first); }); };
+    	exports.reverse = reverse;
+    	/* istanbul ignore next */
+    	var contramap_ = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.contramap)(f)); };
+    	/**
+    	 * A typical use case for `contramap` would be like, given some `User` type, to construct an `Ord<User>`.
+    	 *
+    	 * We can do so with a function from `User -> X` where `X` is some value that we know how to compare
+    	 * for ordering (meaning we have an `Ord<X>`)
+    	 *
+    	 * For example, given the following `User` type, there are lots of possible choices for `X`,
+    	 * but let's say we want to sort a list of users by `lastName`.
+    	 *
+    	 * If we have a way of comparing `lastName`s for ordering (`ordLastName: Ord<string>`) and we know how to go from `User -> string`,
+    	 * using `contramap` we can do this
+    	 *
+    	 * @example
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import { contramap, Ord } from 'fp-ts/Ord'
+    	 * import * as RA from 'fp-ts/ReadonlyArray'
+    	 * import * as S from 'fp-ts/string'
+    	 *
+    	 * interface User {
+    	 *   readonly firstName: string
+    	 *   readonly lastName: string
+    	 * }
+    	 *
+    	 * const ordLastName: Ord<string> = S.Ord
+    	 *
+    	 * const ordByLastName: Ord<User> = pipe(
+    	 *   ordLastName,
+    	 *   contramap((user) => user.lastName)
+    	 * )
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   RA.sort(ordByLastName)([
+    	 *     { firstName: 'a', lastName: 'd' },
+    	 *     { firstName: 'c', lastName: 'b' }
+    	 *   ]),
+    	 *   [
+    	 *     { firstName: 'c', lastName: 'b' },
+    	 *     { firstName: 'a', lastName: 'd' }
+    	 *   ]
+    	 * )
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var contramap = function (f) { return function (fa) {
+    	    return (0, exports.fromCompare)(function (first, second) { return fa.compare(f(first), f(second)); });
+    	}; };
+    	exports.contramap = contramap;
+    	/**
+    	 * @category type lambdas
+    	 * @since 2.0.0
+    	 */
+    	exports.URI = 'Ord';
+    	/**
+    	 * A typical use case for the `Semigroup` instance of `Ord` is merging two or more orderings.
+    	 *
+    	 * For example the following snippet builds an `Ord` for a type `User` which
+    	 * sorts by `created` date descending, and **then** `lastName`
+    	 *
+    	 * @example
+    	 * import * as D from 'fp-ts/Date'
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import { contramap, getSemigroup, Ord, reverse } from 'fp-ts/Ord'
+    	 * import * as RA from 'fp-ts/ReadonlyArray'
+    	 * import * as S from 'fp-ts/string'
+    	 *
+    	 * interface User {
+    	 *   readonly id: string
+    	 *   readonly lastName: string
+    	 *   readonly created: Date
+    	 * }
+    	 *
+    	 * const ordByLastName: Ord<User> = pipe(
+    	 *   S.Ord,
+    	 *   contramap((user) => user.lastName)
+    	 * )
+    	 *
+    	 * const ordByCreated: Ord<User> = pipe(
+    	 *   D.Ord,
+    	 *   contramap((user) => user.created)
+    	 * )
+    	 *
+    	 * const ordUserByCreatedDescThenLastName = getSemigroup<User>().concat(
+    	 *   reverse(ordByCreated),
+    	 *   ordByLastName
+    	 * )
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   RA.sort(ordUserByCreatedDescThenLastName)([
+    	 *     { id: 'c', lastName: 'd', created: new Date(1973, 10, 30) },
+    	 *     { id: 'a', lastName: 'b', created: new Date(1973, 10, 30) },
+    	 *     { id: 'e', lastName: 'f', created: new Date(1980, 10, 30) }
+    	 *   ]),
+    	 *   [
+    	 *     { id: 'e', lastName: 'f', created: new Date(1980, 10, 30) },
+    	 *     { id: 'a', lastName: 'b', created: new Date(1973, 10, 30) },
+    	 *     { id: 'c', lastName: 'd', created: new Date(1973, 10, 30) }
+    	 *   ]
+    	 * )
+    	 *
+    	 * @category instances
+    	 * @since 2.0.0
+    	 */
+    	var getSemigroup = function () { return ({
+    	    concat: function (first, second) {
+    	        return (0, exports.fromCompare)(function (a, b) {
+    	            var ox = first.compare(a, b);
+    	            return ox !== 0 ? ox : second.compare(a, b);
+    	        });
+    	    }
+    	}); };
+    	exports.getSemigroup = getSemigroup;
+    	/**
+    	 * Returns a `Monoid` such that:
+    	 *
+    	 * - its `concat(ord1, ord2)` operation will order first by `ord1`, and then by `ord2`
+    	 * - its `empty` value is an `Ord` that always considers compared elements equal
+    	 *
+    	 * @example
+    	 * import { sort } from 'fp-ts/Array'
+    	 * import { contramap, reverse, getMonoid } from 'fp-ts/Ord'
+    	 * import * as S from 'fp-ts/string'
+    	 * import * as B from 'fp-ts/boolean'
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import { concatAll } from 'fp-ts/Monoid'
+    	 * import * as N from 'fp-ts/number'
+    	 *
+    	 * interface User {
+    	 *   readonly id: number
+    	 *   readonly name: string
+    	 *   readonly age: number
+    	 *   readonly rememberMe: boolean
+    	 * }
+    	 *
+    	 * const byName = pipe(
+    	 *   S.Ord,
+    	 *   contramap((p: User) => p.name)
+    	 * )
+    	 *
+    	 * const byAge = pipe(
+    	 *   N.Ord,
+    	 *   contramap((p: User) => p.age)
+    	 * )
+    	 *
+    	 * const byRememberMe = pipe(
+    	 *   B.Ord,
+    	 *   contramap((p: User) => p.rememberMe)
+    	 * )
+    	 *
+    	 * const M = getMonoid<User>()
+    	 *
+    	 * const users: Array<User> = [
+    	 *   { id: 1, name: 'Guido', age: 47, rememberMe: false },
+    	 *   { id: 2, name: 'Guido', age: 46, rememberMe: true },
+    	 *   { id: 3, name: 'Giulio', age: 44, rememberMe: false },
+    	 *   { id: 4, name: 'Giulio', age: 44, rememberMe: true }
+    	 * ]
+    	 *
+    	 * // sort by name, then by age, then by `rememberMe`
+    	 * const O1 = concatAll(M)([byName, byAge, byRememberMe])
+    	 * assert.deepStrictEqual(sort(O1)(users), [
+    	 *   { id: 3, name: 'Giulio', age: 44, rememberMe: false },
+    	 *   { id: 4, name: 'Giulio', age: 44, rememberMe: true },
+    	 *   { id: 2, name: 'Guido', age: 46, rememberMe: true },
+    	 *   { id: 1, name: 'Guido', age: 47, rememberMe: false }
+    	 * ])
+    	 *
+    	 * // now `rememberMe = true` first, then by name, then by age
+    	 * const O2 = concatAll(M)([reverse(byRememberMe), byName, byAge])
+    	 * assert.deepStrictEqual(sort(O2)(users), [
+    	 *   { id: 4, name: 'Giulio', age: 44, rememberMe: true },
+    	 *   { id: 2, name: 'Guido', age: 46, rememberMe: true },
+    	 *   { id: 3, name: 'Giulio', age: 44, rememberMe: false },
+    	 *   { id: 1, name: 'Guido', age: 47, rememberMe: false }
+    	 * ])
+    	 *
+    	 * @category instances
+    	 * @since 2.4.0
+    	 */
+    	var getMonoid = function () { return ({
+    	    concat: (0, exports.getSemigroup)().concat,
+    	    empty: (0, exports.fromCompare)(function () { return 0; })
+    	}); };
+    	exports.getMonoid = getMonoid;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Contravariant = {
+    	    URI: exports.URI,
+    	    contramap: contramap_
+    	};
+    	// -------------------------------------------------------------------------------------
+    	// utils
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @since 2.11.0
+    	 */
+    	exports.trivial = {
+    	    equals: function_1.constTrue,
+    	    compare: /*#__PURE__*/ (0, function_1.constant)(0)
+    	};
+    	/**
+    	 * @since 2.11.0
+    	 */
+    	var equals = function (O) {
+    	    return function (second) {
+    	        return function (first) {
+    	            return first === second || O.compare(first, second) === 0;
+    	        };
+    	    };
+    	};
+    	exports.equals = equals;
+    	// TODO: curry in v3
+    	/**
+    	 * Test whether one value is _strictly less than_ another
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var lt = function (O) {
+    	    return function (first, second) {
+    	        return O.compare(first, second) === -1;
+    	    };
+    	};
+    	exports.lt = lt;
+    	// TODO: curry in v3
+    	/**
+    	 * Test whether one value is _strictly greater than_ another
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var gt = function (O) {
+    	    return function (first, second) {
+    	        return O.compare(first, second) === 1;
+    	    };
+    	};
+    	exports.gt = gt;
+    	// TODO: curry in v3
+    	/**
+    	 * Test whether one value is _non-strictly less than_ another
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var leq = function (O) {
+    	    return function (first, second) {
+    	        return O.compare(first, second) !== 1;
+    	    };
+    	};
+    	exports.leq = leq;
+    	// TODO: curry in v3
+    	/**
+    	 * Test whether one value is _non-strictly greater than_ another
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var geq = function (O) {
+    	    return function (first, second) {
+    	        return O.compare(first, second) !== -1;
+    	    };
+    	};
+    	exports.geq = geq;
+    	// TODO: curry in v3
+    	/**
+    	 * Take the minimum of two values. If they are considered equal, the first argument is chosen
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var min = function (O) {
+    	    return function (first, second) {
+    	        return first === second || O.compare(first, second) < 1 ? first : second;
+    	    };
+    	};
+    	exports.min = min;
+    	// TODO: curry in v3
+    	/**
+    	 * Take the maximum of two values. If they are considered equal, the first argument is chosen
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var max = function (O) {
+    	    return function (first, second) {
+    	        return first === second || O.compare(first, second) > -1 ? first : second;
+    	    };
+    	};
+    	exports.max = max;
+    	/**
+    	 * Clamp a value between a minimum and a maximum
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var clamp = function (O) {
+    	    var minO = (0, exports.min)(O);
+    	    var maxO = (0, exports.max)(O);
+    	    return function (low, hi) { return function (a) { return maxO(minO(a, hi), low); }; };
+    	};
+    	exports.clamp = clamp;
+    	/**
+    	 * Test whether a value is between a minimum and a maximum (inclusive)
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var between = function (O) {
+    	    var ltO = (0, exports.lt)(O);
+    	    var gtO = (0, exports.gt)(O);
+    	    return function (low, hi) { return function (a) { return ltO(a, low) || gtO(a, hi) ? false : true; }; };
+    	};
+    	exports.between = between;
+    	// -------------------------------------------------------------------------------------
+    	// deprecated
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Use [`tuple`](#tuple) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getTupleOrd = exports.tuple;
+    	/**
+    	 * Use [`reverse`](#reverse) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getDualOrd = exports.reverse;
+    	/**
+    	 * Use [`Contravariant`](#contravariant) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.ord = exports.Contravariant;
+    	// default compare for primitive types
+    	function compare(first, second) {
+    	    return first < second ? -1 : first > second ? 1 : 0;
+    	}
+    	var strictOrd = {
+    	    equals: Eq_1.eqStrict.equals,
+    	    compare: compare
+    	};
+    	/**
+    	 * Use [`Ord`](./boolean.ts.html#ord) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.ordBoolean = strictOrd;
+    	/**
+    	 * Use [`Ord`](./string.ts.html#ord) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.ordString = strictOrd;
+    	/**
+    	 * Use [`Ord`](./number.ts.html#ord) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.ordNumber = strictOrd;
+    	/**
+    	 * Use [`Ord`](./Date.ts.html#ord) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.ordDate = (0, function_1.pipe)(exports.ordNumber, 
+    	/*#__PURE__*/
+    	(0, exports.contramap)(function (date) { return date.valueOf(); })); 
+    } (Ord));
+
+    (function (exports) {
+    	var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    	    if (k2 === undefined) k2 = k;
+    	    var desc = Object.getOwnPropertyDescriptor(m, k);
+    	    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+    	      desc = { enumerable: true, get: function() { return m[k]; } };
+    	    }
+    	    Object.defineProperty(o, k2, desc);
+    	}) : (function(o, m, k, k2) {
+    	    if (k2 === undefined) k2 = k;
+    	    o[k2] = m[k];
+    	}));
+    	var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
+    	    Object.defineProperty(o, "default", { enumerable: true, value: v });
+    	}) : function(o, v) {
+    	    o["default"] = v;
+    	});
+    	var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
+    	    if (mod && mod.__esModule) return mod;
+    	    var result = {};
+    	    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    	    __setModuleDefault(result, mod);
+    	    return result;
+    	};
+    	Object.defineProperty(exports, "__esModule", { value: true });
+    	exports.semigroupProduct = exports.semigroupSum = exports.semigroupString = exports.getFunctionSemigroup = exports.semigroupAny = exports.semigroupAll = exports.fold = exports.getIntercalateSemigroup = exports.getMeetSemigroup = exports.getJoinSemigroup = exports.getDualSemigroup = exports.getStructSemigroup = exports.getTupleSemigroup = exports.getFirstSemigroup = exports.getLastSemigroup = exports.getObjectSemigroup = exports.semigroupVoid = exports.concatAll = exports.last = exports.first = exports.intercalate = exports.tuple = exports.struct = exports.reverse = exports.constant = exports.max = exports.min = void 0;
+    	/**
+    	 * If a type `A` can form a `Semigroup` it has an **associative** binary operation.
+    	 *
+    	 * ```ts
+    	 * interface Semigroup<A> {
+    	 *   readonly concat: (x: A, y: A) => A
+    	 * }
+    	 * ```
+    	 *
+    	 * Associativity means the following equality must hold for any choice of `x`, `y`, and `z`.
+    	 *
+    	 * ```ts
+    	 * concat(x, concat(y, z)) = concat(concat(x, y), z)
+    	 * ```
+    	 *
+    	 * A common example of a semigroup is the type `string` with the operation `+`.
+    	 *
+    	 * ```ts
+    	 * import { Semigroup } from 'fp-ts/Semigroup'
+    	 *
+    	 * const semigroupString: Semigroup<string> = {
+    	 *   concat: (x, y) => x + y
+    	 * }
+    	 *
+    	 * const x = 'x'
+    	 * const y = 'y'
+    	 * const z = 'z'
+    	 *
+    	 * semigroupString.concat(x, y) // 'xy'
+    	 *
+    	 * semigroupString.concat(x, semigroupString.concat(y, z)) // 'xyz'
+    	 *
+    	 * semigroupString.concat(semigroupString.concat(x, y), z) // 'xyz'
+    	 * ```
+    	 *
+    	 * *Adapted from https://typelevel.org/cats*
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var function_1 = _function;
+    	var _ = __importStar(internal);
+    	var M = __importStar(Magma);
+    	var Or = __importStar(Ord);
+    	// -------------------------------------------------------------------------------------
+    	// constructors
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Get a semigroup where `concat` will return the minimum, based on the provided order.
+    	 *
+    	 * @example
+    	 * import * as N from 'fp-ts/number'
+    	 * import * as S from 'fp-ts/Semigroup'
+    	 *
+    	 * const S1 = S.min(N.Ord)
+    	 *
+    	 * assert.deepStrictEqual(S1.concat(1, 2), 1)
+    	 *
+    	 * @category constructors
+    	 * @since 2.10.0
+    	 */
+    	var min = function (O) { return ({
+    	    concat: Or.min(O)
+    	}); };
+    	exports.min = min;
+    	/**
+    	 * Get a semigroup where `concat` will return the maximum, based on the provided order.
+    	 *
+    	 * @example
+    	 * import * as N from 'fp-ts/number'
+    	 * import * as S from 'fp-ts/Semigroup'
+    	 *
+    	 * const S1 = S.max(N.Ord)
+    	 *
+    	 * assert.deepStrictEqual(S1.concat(1, 2), 2)
+    	 *
+    	 * @category constructors
+    	 * @since 2.10.0
+    	 */
+    	var max = function (O) { return ({
+    	    concat: Or.max(O)
+    	}); };
+    	exports.max = max;
+    	/**
+    	 * @category constructors
+    	 * @since 2.10.0
+    	 */
+    	var constant = function (a) { return ({
+    	    concat: function () { return a; }
+    	}); };
+    	exports.constant = constant;
+    	// -------------------------------------------------------------------------------------
+    	// combinators
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * The dual of a `Semigroup`, obtained by swapping the arguments of `concat`.
+    	 *
+    	 * @example
+    	 * import { reverse } from 'fp-ts/Semigroup'
+    	 * import * as S from 'fp-ts/string'
+    	 *
+    	 * assert.deepStrictEqual(reverse(S.Semigroup).concat('a', 'b'), 'ba')
+    	 *
+    	 * @since 2.10.0
+    	 */
+    	exports.reverse = M.reverse;
+    	/**
+    	 * Given a struct of semigroups returns a semigroup for the struct.
+    	 *
+    	 * @example
+    	 * import { struct } from 'fp-ts/Semigroup'
+    	 * import * as N from 'fp-ts/number'
+    	 *
+    	 * interface Point {
+    	 *   readonly x: number
+    	 *   readonly y: number
+    	 * }
+    	 *
+    	 * const S = struct<Point>({
+    	 *   x: N.SemigroupSum,
+    	 *   y: N.SemigroupSum
+    	 * })
+    	 *
+    	 * assert.deepStrictEqual(S.concat({ x: 1, y: 2 }, { x: 3, y: 4 }), { x: 4, y: 6 })
+    	 *
+    	 * @since 2.10.0
+    	 */
+    	var struct = function (semigroups) { return ({
+    	    concat: function (first, second) {
+    	        var r = {};
+    	        for (var k in semigroups) {
+    	            if (_.has.call(semigroups, k)) {
+    	                r[k] = semigroups[k].concat(first[k], second[k]);
+    	            }
+    	        }
+    	        return r;
+    	    }
+    	}); };
+    	exports.struct = struct;
+    	/**
+    	 * Given a tuple of semigroups returns a semigroup for the tuple.
+    	 *
+    	 * @example
+    	 * import { tuple } from 'fp-ts/Semigroup'
+    	 * import * as B from 'fp-ts/boolean'
+    	 * import * as N from 'fp-ts/number'
+    	 * import * as S from 'fp-ts/string'
+    	 *
+    	 * const S1 = tuple(S.Semigroup, N.SemigroupSum)
+    	 * assert.deepStrictEqual(S1.concat(['a', 1], ['b', 2]), ['ab', 3])
+    	 *
+    	 * const S2 = tuple(S.Semigroup, N.SemigroupSum, B.SemigroupAll)
+    	 * assert.deepStrictEqual(S2.concat(['a', 1, true], ['b', 2, false]), ['ab', 3, false])
+    	 *
+    	 * @since 2.10.0
+    	 */
+    	var tuple = function () {
+    	    var semigroups = [];
+    	    for (var _i = 0; _i < arguments.length; _i++) {
+    	        semigroups[_i] = arguments[_i];
+    	    }
+    	    return ({
+    	        concat: function (first, second) { return semigroups.map(function (s, i) { return s.concat(first[i], second[i]); }); }
+    	    });
+    	};
+    	exports.tuple = tuple;
+    	/**
+    	 * Between each pair of elements insert `middle`.
+    	 *
+    	 * @example
+    	 * import { intercalate } from 'fp-ts/Semigroup'
+    	 * import * as S from 'fp-ts/string'
+    	 * import { pipe } from 'fp-ts/function'
+    	 *
+    	 * const S1 = pipe(S.Semigroup, intercalate(' + '))
+    	 *
+    	 * assert.strictEqual(S1.concat('a', 'b'), 'a + b')
+    	 *
+    	 * @since 2.10.0
+    	 */
+    	var intercalate = function (middle) {
+    	    return function (S) { return ({
+    	        concat: function (x, y) { return S.concat(x, S.concat(middle, y)); }
+    	    }); };
+    	};
+    	exports.intercalate = intercalate;
+    	// -------------------------------------------------------------------------------------
+    	// instances
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Always return the first argument.
+    	 *
+    	 * @example
+    	 * import * as S from 'fp-ts/Semigroup'
+    	 *
+    	 * assert.deepStrictEqual(S.first<number>().concat(1, 2), 1)
+    	 *
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var first = function () { return ({ concat: function_1.identity }); };
+    	exports.first = first;
+    	/**
+    	 * Always return the last argument.
+    	 *
+    	 * @example
+    	 * import * as S from 'fp-ts/Semigroup'
+    	 *
+    	 * assert.deepStrictEqual(S.last<number>().concat(1, 2), 2)
+    	 *
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var last = function () { return ({ concat: function (_, y) { return y; } }); };
+    	exports.last = last;
+    	// -------------------------------------------------------------------------------------
+    	// utils
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Given a sequence of `as`, concat them and return the total.
+    	 *
+    	 * If `as` is empty, return the provided `startWith` value.
+    	 *
+    	 * @example
+    	 * import { concatAll } from 'fp-ts/Semigroup'
+    	 * import * as N from 'fp-ts/number'
+    	 *
+    	 * const sum = concatAll(N.SemigroupSum)(0)
+    	 *
+    	 * assert.deepStrictEqual(sum([1, 2, 3]), 6)
+    	 * assert.deepStrictEqual(sum([]), 0)
+    	 *
+    	 * @since 2.10.0
+    	 */
+    	exports.concatAll = M.concatAll;
+    	// -------------------------------------------------------------------------------------
+    	// deprecated
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Use `void` module instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.semigroupVoid = (0, exports.constant)(undefined);
+    	/**
+    	 * Use [`getAssignSemigroup`](./struct.ts.html#getAssignSemigroup) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	var getObjectSemigroup = function () { return ({
+    	    concat: function (first, second) { return Object.assign({}, first, second); }
+    	}); };
+    	exports.getObjectSemigroup = getObjectSemigroup;
+    	/**
+    	 * Use [`last`](#last) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getLastSemigroup = exports.last;
+    	/**
+    	 * Use [`first`](#first) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getFirstSemigroup = exports.first;
+    	/**
+    	 * Use [`tuple`](#tuple) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getTupleSemigroup = exports.tuple;
+    	/**
+    	 * Use [`struct`](#struct) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getStructSemigroup = exports.struct;
+    	/**
+    	 * Use [`reverse`](#reverse) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getDualSemigroup = exports.reverse;
+    	/**
+    	 * Use [`max`](#max) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getJoinSemigroup = exports.max;
+    	/**
+    	 * Use [`min`](#min) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getMeetSemigroup = exports.min;
+    	/**
+    	 * Use [`intercalate`](#intercalate) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.5.0
+    	 * @deprecated
+    	 */
+    	exports.getIntercalateSemigroup = exports.intercalate;
+    	function fold(S) {
+    	    var concatAllS = (0, exports.concatAll)(S);
+    	    return function (startWith, as) { return (as === undefined ? concatAllS(startWith) : concatAllS(startWith)(as)); };
+    	}
+    	exports.fold = fold;
+    	/**
+    	 * Use [`SemigroupAll`](./boolean.ts.html#SemigroupAll) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.semigroupAll = {
+    	    concat: function (x, y) { return x && y; }
+    	};
+    	/**
+    	 * Use [`SemigroupAny`](./boolean.ts.html#SemigroupAny) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.semigroupAny = {
+    	    concat: function (x, y) { return x || y; }
+    	};
+    	/**
+    	 * Use [`getSemigroup`](./function.ts.html#getSemigroup) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getFunctionSemigroup = function_1.getSemigroup;
+    	/**
+    	 * Use [`Semigroup`](./string.ts.html#Semigroup) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.semigroupString = {
+    	    concat: function (x, y) { return x + y; }
+    	};
+    	/**
+    	 * Use [`SemigroupSum`](./number.ts.html#SemigroupSum) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.semigroupSum = {
+    	    concat: function (x, y) { return x + y; }
+    	};
+    	/**
+    	 * Use [`SemigroupProduct`](./number.ts.html#SemigroupProduct) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.semigroupProduct = {
+    	    concat: function (x, y) { return x * y; }
+    	}; 
+    } (Semigroup));
+
+    var Separated = {};
+
+    (function (exports) {
+    	/**
+    	 * ```ts
+    	 * interface Separated<E, A> {
+    	 *    readonly left: E
+    	 *    readonly right: A
+    	 * }
+    	 * ```
+    	 *
+    	 * Represents a result of separating a whole into two parts.
+    	 *
+    	 * @since 2.10.0
+    	 */
+    	Object.defineProperty(exports, "__esModule", { value: true });
+    	exports.right = exports.left = exports.flap = exports.Functor = exports.Bifunctor = exports.URI = exports.bimap = exports.mapLeft = exports.map = exports.separated = void 0;
+    	var function_1 = _function;
+    	var Functor_1 = Functor$1;
+    	// -------------------------------------------------------------------------------------
+    	// constructors
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @category constructors
+    	 * @since 2.10.0
+    	 */
+    	var separated = function (left, right) { return ({ left: left, right: right }); };
+    	exports.separated = separated;
+    	var _map = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.map)(f)); };
+    	var _mapLeft = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.mapLeft)(f)); };
+    	var _bimap = function (fa, g, f) { return (0, function_1.pipe)(fa, (0, exports.bimap)(g, f)); };
+    	/**
+    	 * `map` can be used to turn functions `(a: A) => B` into functions `(fa: F<A>) => F<B>` whose argument and return types
+    	 * use the type constructor `F` to represent some computational context.
+    	 *
+    	 * @category mapping
+    	 * @since 2.10.0
+    	 */
+    	var map = function (f) {
+    	    return function (fa) {
+    	        return (0, exports.separated)((0, exports.left)(fa), f((0, exports.right)(fa)));
+    	    };
+    	};
+    	exports.map = map;
+    	/**
+    	 * Map a function over the first type argument of a bifunctor.
+    	 *
+    	 * @category error handling
+    	 * @since 2.10.0
+    	 */
+    	var mapLeft = function (f) {
+    	    return function (fa) {
+    	        return (0, exports.separated)(f((0, exports.left)(fa)), (0, exports.right)(fa));
+    	    };
+    	};
+    	exports.mapLeft = mapLeft;
+    	/**
+    	 * Map a pair of functions over the two type arguments of the bifunctor.
+    	 *
+    	 * @category mapping
+    	 * @since 2.10.0
+    	 */
+    	var bimap = function (f, g) {
+    	    return function (fa) {
+    	        return (0, exports.separated)(f((0, exports.left)(fa)), g((0, exports.right)(fa)));
+    	    };
+    	};
+    	exports.bimap = bimap;
+    	/**
+    	 * @category type lambdas
+    	 * @since 2.10.0
+    	 */
+    	exports.URI = 'Separated';
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	exports.Bifunctor = {
+    	    URI: exports.URI,
+    	    mapLeft: _mapLeft,
+    	    bimap: _bimap
+    	};
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	exports.Functor = {
+    	    URI: exports.URI,
+    	    map: _map
+    	};
+    	/**
+    	 * @category mapping
+    	 * @since 2.10.0
+    	 */
+    	exports.flap = (0, Functor_1.flap)(exports.Functor);
+    	// -------------------------------------------------------------------------------------
+    	// utils
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @since 2.10.0
+    	 */
+    	var left = function (s) { return s.left; };
+    	exports.left = left;
+    	/**
+    	 * @since 2.10.0
+    	 */
+    	var right = function (s) { return s.right; };
+    	exports.right = right; 
+    } (Separated));
+
+    var Witherable = {};
+
+    var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        var desc = Object.getOwnPropertyDescriptor(m, k);
+        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+          desc = { enumerable: true, get: function() { return m[k]; } };
+        }
+        Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+        if (k2 === undefined) k2 = k;
+        o[k2] = m[k];
+    }));
+    var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
+        Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+        o["default"] = v;
+    });
+    var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+    Object.defineProperty(Witherable, "__esModule", { value: true });
+    Witherable.filterE = Witherable.witherDefault = Witherable.wiltDefault = void 0;
+    var _$c = __importStar(internal);
+    function wiltDefault(T, C) {
+        return function (F) {
+            var traverseF = T.traverse(F);
+            return function (wa, f) { return F.map(traverseF(wa, f), C.separate); };
+        };
+    }
+    Witherable.wiltDefault = wiltDefault;
+    function witherDefault(T, C) {
+        return function (F) {
+            var traverseF = T.traverse(F);
+            return function (wa, f) { return F.map(traverseF(wa, f), C.compact); };
+        };
+    }
+    Witherable.witherDefault = witherDefault;
+    function filterE(W) {
+        return function (F) {
+            var witherF = W.wither(F);
+            return function (predicate) { return function (ga) { return witherF(ga, function (a) { return F.map(predicate(a), function (b) { return (b ? _$c.some(a) : _$c.none); }); }); }; };
+        };
+    }
+    Witherable.filterE = filterE;
+
+    var Zero = {};
+
+    Object.defineProperty(Zero, "__esModule", { value: true });
+    Zero.guard = void 0;
+    function guard(F, P) {
+        return function (b) { return (b ? P.of(undefined) : F.zero()); };
+    }
+    Zero.guard = guard;
+
+    (function (exports) {
+    	var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    	    if (k2 === undefined) k2 = k;
+    	    var desc = Object.getOwnPropertyDescriptor(m, k);
+    	    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+    	      desc = { enumerable: true, get: function() { return m[k]; } };
+    	    }
+    	    Object.defineProperty(o, k2, desc);
+    	}) : (function(o, m, k, k2) {
+    	    if (k2 === undefined) k2 = k;
+    	    o[k2] = m[k];
+    	}));
+    	var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
+    	    Object.defineProperty(o, "default", { enumerable: true, value: v });
+    	}) : function(o, v) {
+    	    o["default"] = v;
+    	});
+    	var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
+    	    if (mod && mod.__esModule) return mod;
+    	    var result = {};
+    	    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    	    __setModuleDefault(result, mod);
+    	    return result;
+    	};
+    	Object.defineProperty(exports, "__esModule", { value: true });
+    	exports.Witherable = exports.wilt = exports.wither = exports.Traversable = exports.sequence = exports.traverse = exports.Filterable = exports.partitionMap = exports.partition = exports.filterMap = exports.filter = exports.Compactable = exports.separate = exports.compact = exports.Extend = exports.extend = exports.Alternative = exports.guard = exports.Zero = exports.zero = exports.Alt = exports.alt = exports.altW = exports.orElse = exports.Foldable = exports.reduceRight = exports.foldMap = exports.reduce = exports.Monad = exports.Chain = exports.flatMap = exports.Applicative = exports.Apply = exports.ap = exports.Pointed = exports.of = exports.asUnit = exports.as = exports.Functor = exports.map = exports.getMonoid = exports.getOrd = exports.getEq = exports.getShow = exports.URI = exports.getRight = exports.getLeft = exports.fromPredicate = exports.some = exports.none = void 0;
+    	exports.getFirstMonoid = exports.getApplyMonoid = exports.getApplySemigroup = exports.option = exports.mapNullable = exports.getRefinement = exports.chainFirst = exports.chain = exports.sequenceArray = exports.traverseArray = exports.traverseArrayWithIndex = exports.traverseReadonlyArrayWithIndex = exports.traverseReadonlyNonEmptyArrayWithIndex = exports.ApT = exports.apS = exports.bind = exports.let = exports.bindTo = exports.Do = exports.exists = exports.elem = exports.toUndefined = exports.toNullable = exports.chainNullableK = exports.fromNullableK = exports.tryCatchK = exports.tryCatch = exports.fromNullable = exports.chainFirstEitherK = exports.chainEitherK = exports.fromEitherK = exports.duplicate = exports.tapEither = exports.tap = exports.flatten = exports.apSecond = exports.apFirst = exports.flap = exports.getOrElse = exports.getOrElseW = exports.fold = exports.match = exports.foldW = exports.matchW = exports.isNone = exports.isSome = exports.FromEither = exports.fromEither = exports.MonadThrow = exports.throwError = void 0;
+    	exports.getLastMonoid = void 0;
+    	var Applicative_1 = Applicative;
+    	var Apply_1 = Apply;
+    	var chainable = __importStar(Chain);
+    	var FromEither_1 = FromEither$1;
+    	var function_1 = _function;
+    	var Functor_1 = Functor$1;
+    	var _ = __importStar(internal);
+    	var Predicate_1 = Predicate;
+    	var Semigroup_1 = Semigroup;
+    	var Separated_1 = Separated;
+    	var Witherable_1 = Witherable;
+    	var Zero_1 = Zero;
+    	// -------------------------------------------------------------------------------------
+    	// constructors
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * `None` doesn't have a constructor, instead you can use it directly as a value. Represents a missing value.
+    	 *
+    	 * @category constructors
+    	 * @since 2.0.0
+    	 */
+    	exports.none = _.none;
+    	/**
+    	 * Constructs a `Some`. Represents an optional value that exists.
+    	 *
+    	 * @category constructors
+    	 * @since 2.0.0
+    	 */
+    	exports.some = _.some;
+    	function fromPredicate(predicate) {
+    	    return function (a) { return (predicate(a) ? (0, exports.some)(a) : exports.none); };
+    	}
+    	exports.fromPredicate = fromPredicate;
+    	/**
+    	 * Returns the `Left` value of an `Either` if possible.
+    	 *
+    	 * @example
+    	 * import { getLeft, none, some } from 'fp-ts/Option'
+    	 * import { right, left } from 'fp-ts/Either'
+    	 *
+    	 * assert.deepStrictEqual(getLeft(right(1)), none)
+    	 * assert.deepStrictEqual(getLeft(left('a')), some('a'))
+    	 *
+    	 * @category constructors
+    	 * @since 2.0.0
+    	 */
+    	var getLeft = function (ma) { return (ma._tag === 'Right' ? exports.none : (0, exports.some)(ma.left)); };
+    	exports.getLeft = getLeft;
+    	/**
+    	 * Returns the `Right` value of an `Either` if possible.
+    	 *
+    	 * @example
+    	 * import { getRight, none, some } from 'fp-ts/Option'
+    	 * import { right, left } from 'fp-ts/Either'
+    	 *
+    	 * assert.deepStrictEqual(getRight(right(1)), some(1))
+    	 * assert.deepStrictEqual(getRight(left('a')), none)
+    	 *
+    	 * @category constructors
+    	 * @since 2.0.0
+    	 */
+    	var getRight = function (ma) { return (ma._tag === 'Left' ? exports.none : (0, exports.some)(ma.right)); };
+    	exports.getRight = getRight;
+    	var _map = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.map)(f)); };
+    	var _ap = function (fab, fa) { return (0, function_1.pipe)(fab, (0, exports.ap)(fa)); };
+    	var _reduce = function (fa, b, f) { return (0, function_1.pipe)(fa, (0, exports.reduce)(b, f)); };
+    	var _foldMap = function (M) {
+    	    var foldMapM = (0, exports.foldMap)(M);
+    	    return function (fa, f) { return (0, function_1.pipe)(fa, foldMapM(f)); };
+    	};
+    	var _reduceRight = function (fa, b, f) { return (0, function_1.pipe)(fa, (0, exports.reduceRight)(b, f)); };
+    	var _traverse = function (F) {
+    	    var traverseF = (0, exports.traverse)(F);
+    	    return function (ta, f) { return (0, function_1.pipe)(ta, traverseF(f)); };
+    	};
+    	/* istanbul ignore next */
+    	var _alt = function (fa, that) { return (0, function_1.pipe)(fa, (0, exports.alt)(that)); };
+    	var _filter = function (fa, predicate) { return (0, function_1.pipe)(fa, (0, exports.filter)(predicate)); };
+    	/* istanbul ignore next */
+    	var _filterMap = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.filterMap)(f)); };
+    	/* istanbul ignore next */
+    	var _extend = function (wa, f) { return (0, function_1.pipe)(wa, (0, exports.extend)(f)); };
+    	/* istanbul ignore next */
+    	var _partition = function (fa, predicate) {
+    	    return (0, function_1.pipe)(fa, (0, exports.partition)(predicate));
+    	};
+    	/* istanbul ignore next */
+    	var _partitionMap = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.partitionMap)(f)); };
+    	/**
+    	 * @category type lambdas
+    	 * @since 2.0.0
+    	 */
+    	exports.URI = 'Option';
+    	/**
+    	 * @category instances
+    	 * @since 2.0.0
+    	 */
+    	var getShow = function (S) { return ({
+    	    show: function (ma) { return ((0, exports.isNone)(ma) ? 'none' : "some(".concat(S.show(ma.value), ")")); }
+    	}); };
+    	exports.getShow = getShow;
+    	/**
+    	 * @example
+    	 * import { none, some, getEq } from 'fp-ts/Option'
+    	 * import * as N from 'fp-ts/number'
+    	 *
+    	 * const E = getEq(N.Eq)
+    	 * assert.strictEqual(E.equals(none, none), true)
+    	 * assert.strictEqual(E.equals(none, some(1)), false)
+    	 * assert.strictEqual(E.equals(some(1), none), false)
+    	 * assert.strictEqual(E.equals(some(1), some(2)), false)
+    	 * assert.strictEqual(E.equals(some(1), some(1)), true)
+    	 *
+    	 * @category instances
+    	 * @since 2.0.0
+    	 */
+    	var getEq = function (E) { return ({
+    	    equals: function (x, y) { return x === y || ((0, exports.isNone)(x) ? (0, exports.isNone)(y) : (0, exports.isNone)(y) ? false : E.equals(x.value, y.value)); }
+    	}); };
+    	exports.getEq = getEq;
+    	/**
+    	 * The `Ord` instance allows `Option` values to be compared with
+    	 * `compare`, whenever there is an `Ord` instance for
+    	 * the type the `Option` contains.
+    	 *
+    	 * `None` is considered to be less than any `Some` value.
+    	 *
+    	 *
+    	 * @example
+    	 * import { none, some, getOrd } from 'fp-ts/Option'
+    	 * import * as N from 'fp-ts/number'
+    	 *
+    	 * const O = getOrd(N.Ord)
+    	 * assert.strictEqual(O.compare(none, none), 0)
+    	 * assert.strictEqual(O.compare(none, some(1)), -1)
+    	 * assert.strictEqual(O.compare(some(1), none), 1)
+    	 * assert.strictEqual(O.compare(some(1), some(2)), -1)
+    	 * assert.strictEqual(O.compare(some(1), some(1)), 0)
+    	 *
+    	 * @category instances
+    	 * @since 2.0.0
+    	 */
+    	var getOrd = function (O) { return ({
+    	    equals: (0, exports.getEq)(O).equals,
+    	    compare: function (x, y) { return (x === y ? 0 : (0, exports.isSome)(x) ? ((0, exports.isSome)(y) ? O.compare(x.value, y.value) : 1) : -1); }
+    	}); };
+    	exports.getOrd = getOrd;
+    	/**
+    	 * Monoid returning the left-most non-`None` value. If both operands are `Some`s then the inner values are
+    	 * concatenated using the provided `Semigroup`
+    	 *
+    	 * | x       | y       | concat(x, y)       |
+    	 * | ------- | ------- | ------------------ |
+    	 * | none    | none    | none               |
+    	 * | some(a) | none    | some(a)            |
+    	 * | none    | some(b) | some(b)            |
+    	 * | some(a) | some(b) | some(concat(a, b)) |
+    	 *
+    	 * @example
+    	 * import { getMonoid, some, none } from 'fp-ts/Option'
+    	 * import { SemigroupSum } from 'fp-ts/number'
+    	 *
+    	 * const M = getMonoid(SemigroupSum)
+    	 * assert.deepStrictEqual(M.concat(none, none), none)
+    	 * assert.deepStrictEqual(M.concat(some(1), none), some(1))
+    	 * assert.deepStrictEqual(M.concat(none, some(1)), some(1))
+    	 * assert.deepStrictEqual(M.concat(some(1), some(2)), some(3))
+    	 *
+    	 * @category instances
+    	 * @since 2.0.0
+    	 */
+    	var getMonoid = function (S) { return ({
+    	    concat: function (x, y) { return ((0, exports.isNone)(x) ? y : (0, exports.isNone)(y) ? x : (0, exports.some)(S.concat(x.value, y.value))); },
+    	    empty: exports.none
+    	}); };
+    	exports.getMonoid = getMonoid;
+    	/**
+    	 * @category mapping
+    	 * @since 2.0.0
+    	 */
+    	var map = function (f) { return function (fa) {
+    	    return (0, exports.isNone)(fa) ? exports.none : (0, exports.some)(f(fa.value));
+    	}; };
+    	exports.map = map;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Functor = {
+    	    URI: exports.URI,
+    	    map: _map
+    	};
+    	/**
+    	 * Maps the `Some` value of this `Option` to the specified constant value.
+    	 *
+    	 * @category mapping
+    	 * @since 2.16.0
+    	 */
+    	exports.as = (0, function_1.dual)(2, (0, Functor_1.as)(exports.Functor));
+    	/**
+    	 * Maps the `Some` value of this `Option` to the void constant value.
+    	 *
+    	 * @category mapping
+    	 * @since 2.16.0
+    	 */
+    	exports.asUnit = (0, Functor_1.asUnit)(exports.Functor);
+    	/**
+    	 * @category constructors
+    	 * @since 2.7.0
+    	 */
+    	exports.of = exports.some;
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	exports.Pointed = {
+    	    URI: exports.URI,
+    	    of: exports.of
+    	};
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	var ap = function (fa) { return function (fab) {
+    	    return (0, exports.isNone)(fab) ? exports.none : (0, exports.isNone)(fa) ? exports.none : (0, exports.some)(fab.value(fa.value));
+    	}; };
+    	exports.ap = ap;
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	exports.Apply = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    ap: _ap
+    	};
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Applicative = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    ap: _ap,
+    	    of: exports.of
+    	};
+    	/**
+    	 * @category sequencing
+    	 * @since 2.14.0
+    	 */
+    	exports.flatMap = (0, function_1.dual)(2, function (ma, f) { return ((0, exports.isNone)(ma) ? exports.none : f(ma.value)); });
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	exports.Chain = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    ap: _ap,
+    	    chain: exports.flatMap
+    	};
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Monad = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    ap: _ap,
+    	    of: exports.of,
+    	    chain: exports.flatMap
+    	};
+    	/**
+    	 * @category folding
+    	 * @since 2.0.0
+    	 */
+    	var reduce = function (b, f) { return function (fa) {
+    	    return (0, exports.isNone)(fa) ? b : f(b, fa.value);
+    	}; };
+    	exports.reduce = reduce;
+    	/**
+    	 * @category folding
+    	 * @since 2.0.0
+    	 */
+    	var foldMap = function (M) { return function (f) { return function (fa) {
+    	    return (0, exports.isNone)(fa) ? M.empty : f(fa.value);
+    	}; }; };
+    	exports.foldMap = foldMap;
+    	/**
+    	 * @category folding
+    	 * @since 2.0.0
+    	 */
+    	var reduceRight = function (b, f) { return function (fa) {
+    	    return (0, exports.isNone)(fa) ? b : f(fa.value, b);
+    	}; };
+    	exports.reduceRight = reduceRight;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Foldable = {
+    	    URI: exports.URI,
+    	    reduce: _reduce,
+    	    foldMap: _foldMap,
+    	    reduceRight: _reduceRight
+    	};
+    	/**
+    	 * Returns the provided `Option` `that` if `self` is `None`, otherwise returns `self`.
+    	 *
+    	 * @param self - The first `Option` to be checked.
+    	 * @param that - The `Option` to return if `self` is `None`.
+    	 *
+    	 * @example
+    	 * import * as O from "fp-ts/Option"
+    	 *
+    	 * assert.deepStrictEqual(O.orElse(O.none, () => O.none), O.none)
+    	 * assert.deepStrictEqual(O.orElse(O.some(1), () => O.none), O.some(1))
+    	 * assert.deepStrictEqual(O.orElse(O.none, () => O.some('b')), O.some('b'))
+    	 * assert.deepStrictEqual(O.orElse(O.some(1), () => O.some('b')), O.some(1))
+    	 *
+    	 * @category error handling
+    	 * @since 2.16.0
+    	 */
+    	exports.orElse = (0, function_1.dual)(2, function (self, that) { return ((0, exports.isNone)(self) ? that() : self); });
+    	/**
+    	 * Alias of `orElse`.
+    	 *
+    	 * Less strict version of [`alt`](#alt).
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the return types will be merged.
+    	 *
+    	 * @category legacy
+    	 * @since 2.9.0
+    	 */
+    	exports.altW = exports.orElse;
+    	/**
+    	 * Alias of `orElse`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.0.0
+    	 */
+    	exports.alt = exports.orElse;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Alt = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    alt: _alt
+    	};
+    	/**
+    	 * @since 2.7.0
+    	 */
+    	var zero = function () { return exports.none; };
+    	exports.zero = zero;
+    	/**
+    	 * @category instances
+    	 * @since 2.11.0
+    	 */
+    	exports.Zero = {
+    	    URI: exports.URI,
+    	    zero: exports.zero
+    	};
+    	/**
+    	 * @category do notation
+    	 * @since 2.11.0
+    	 */
+    	exports.guard = (0, Zero_1.guard)(exports.Zero, exports.Pointed);
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Alternative = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    ap: _ap,
+    	    of: exports.of,
+    	    alt: _alt,
+    	    zero: exports.zero
+    	};
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	var extend = function (f) { return function (wa) {
+    	    return (0, exports.isNone)(wa) ? exports.none : (0, exports.some)(f(wa));
+    	}; };
+    	exports.extend = extend;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Extend = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    extend: _extend
+    	};
+    	/**
+    	 * @category filtering
+    	 * @since 2.0.0
+    	 */
+    	exports.compact = (0, exports.flatMap)(function_1.identity);
+    	var defaultSeparated = /*#__PURE__*/ (0, Separated_1.separated)(exports.none, exports.none);
+    	/**
+    	 * @category filtering
+    	 * @since 2.0.0
+    	 */
+    	var separate = function (ma) {
+    	    return (0, exports.isNone)(ma) ? defaultSeparated : (0, Separated_1.separated)((0, exports.getLeft)(ma.value), (0, exports.getRight)(ma.value));
+    	};
+    	exports.separate = separate;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Compactable = {
+    	    URI: exports.URI,
+    	    compact: exports.compact,
+    	    separate: exports.separate
+    	};
+    	/**
+    	 * @category filtering
+    	 * @since 2.0.0
+    	 */
+    	var filter = function (predicate) {
+    	    return function (fa) {
+    	        return (0, exports.isNone)(fa) ? exports.none : predicate(fa.value) ? fa : exports.none;
+    	    };
+    	};
+    	exports.filter = filter;
+    	/**
+    	 * @category filtering
+    	 * @since 2.0.0
+    	 */
+    	var filterMap = function (f) { return function (fa) {
+    	    return (0, exports.isNone)(fa) ? exports.none : f(fa.value);
+    	}; };
+    	exports.filterMap = filterMap;
+    	/**
+    	 * @category filtering
+    	 * @since 2.0.0
+    	 */
+    	var partition = function (predicate) {
+    	    return function (fa) {
+    	        return (0, Separated_1.separated)(_filter(fa, (0, Predicate_1.not)(predicate)), _filter(fa, predicate));
+    	    };
+    	};
+    	exports.partition = partition;
+    	/**
+    	 * @category filtering
+    	 * @since 2.0.0
+    	 */
+    	var partitionMap = function (f) { return (0, function_1.flow)((0, exports.map)(f), exports.separate); };
+    	exports.partitionMap = partitionMap;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Filterable = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    compact: exports.compact,
+    	    separate: exports.separate,
+    	    filter: _filter,
+    	    filterMap: _filterMap,
+    	    partition: _partition,
+    	    partitionMap: _partitionMap
+    	};
+    	/**
+    	 * @category traversing
+    	 * @since 2.6.3
+    	 */
+    	var traverse = function (F) {
+    	    return function (f) {
+    	        return function (ta) {
+    	            return (0, exports.isNone)(ta) ? F.of(exports.none) : F.map(f(ta.value), exports.some);
+    	        };
+    	    };
+    	};
+    	exports.traverse = traverse;
+    	/**
+    	 * @category traversing
+    	 * @since 2.6.3
+    	 */
+    	var sequence = function (F) {
+    	    return function (ta) {
+    	        return (0, exports.isNone)(ta) ? F.of(exports.none) : F.map(ta.value, exports.some);
+    	    };
+    	};
+    	exports.sequence = sequence;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Traversable = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    reduce: _reduce,
+    	    foldMap: _foldMap,
+    	    reduceRight: _reduceRight,
+    	    traverse: _traverse,
+    	    sequence: exports.sequence
+    	};
+    	var _wither = /*#__PURE__*/ (0, Witherable_1.witherDefault)(exports.Traversable, exports.Compactable);
+    	var _wilt = /*#__PURE__*/ (0, Witherable_1.wiltDefault)(exports.Traversable, exports.Compactable);
+    	/**
+    	 * @category filtering
+    	 * @since 2.6.5
+    	 */
+    	var wither = function (F) {
+    	    var _witherF = _wither(F);
+    	    return function (f) { return function (fa) { return _witherF(fa, f); }; };
+    	};
+    	exports.wither = wither;
+    	/**
+    	 * @category filtering
+    	 * @since 2.6.5
+    	 */
+    	var wilt = function (F) {
+    	    var _wiltF = _wilt(F);
+    	    return function (f) { return function (fa) { return _wiltF(fa, f); }; };
+    	};
+    	exports.wilt = wilt;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Witherable = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    reduce: _reduce,
+    	    foldMap: _foldMap,
+    	    reduceRight: _reduceRight,
+    	    traverse: _traverse,
+    	    sequence: exports.sequence,
+    	    compact: exports.compact,
+    	    separate: exports.separate,
+    	    filter: _filter,
+    	    filterMap: _filterMap,
+    	    partition: _partition,
+    	    partitionMap: _partitionMap,
+    	    wither: _wither,
+    	    wilt: _wilt
+    	};
+    	/**
+    	 * @since 2.7.0
+    	 */
+    	var throwError = function () { return exports.none; };
+    	exports.throwError = throwError;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.MonadThrow = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    ap: _ap,
+    	    of: exports.of,
+    	    chain: exports.flatMap,
+    	    throwError: exports.throwError
+    	};
+    	/**
+    	 * Transforms an `Either` to an `Option` discarding the error.
+    	 *
+    	 * Alias of [getRight](#getright)
+    	 *
+    	 * @category conversions
+    	 * @since 2.0.0
+    	 */
+    	exports.fromEither = exports.getRight;
+    	/**
+    	 * @category instances
+    	 * @since 2.11.0
+    	 */
+    	exports.FromEither = {
+    	    URI: exports.URI,
+    	    fromEither: exports.fromEither
+    	};
+    	// -------------------------------------------------------------------------------------
+    	// refinements
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Returns `true` if the option is an instance of `Some`, `false` otherwise.
+    	 *
+    	 * @example
+    	 * import { some, none, isSome } from 'fp-ts/Option'
+    	 *
+    	 * assert.strictEqual(isSome(some(1)), true)
+    	 * assert.strictEqual(isSome(none), false)
+    	 *
+    	 * @category refinements
+    	 * @since 2.0.0
+    	 */
+    	exports.isSome = _.isSome;
+    	/**
+    	 * Returns `true` if the option is `None`, `false` otherwise.
+    	 *
+    	 * @example
+    	 * import { some, none, isNone } from 'fp-ts/Option'
+    	 *
+    	 * assert.strictEqual(isNone(some(1)), false)
+    	 * assert.strictEqual(isNone(none), true)
+    	 *
+    	 * @category refinements
+    	 * @since 2.0.0
+    	 */
+    	var isNone = function (fa) { return fa._tag === 'None'; };
+    	exports.isNone = isNone;
+    	/**
+    	 * Less strict version of [`match`](#match).
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the handler return types will be merged.
+    	 *
+    	 * @category pattern matching
+    	 * @since 2.10.0
+    	 */
+    	var matchW = function (onNone, onSome) {
+    	    return function (ma) {
+    	        return (0, exports.isNone)(ma) ? onNone() : onSome(ma.value);
+    	    };
+    	};
+    	exports.matchW = matchW;
+    	/**
+    	 * Alias of [`matchW`](#matchw).
+    	 *
+    	 * @category pattern matching
+    	 * @since 2.10.0
+    	 */
+    	exports.foldW = exports.matchW;
+    	/**
+    	 * Takes a (lazy) default value, a function, and an `Option` value, if the `Option` value is `None` the default value is
+    	 * returned, otherwise the function is applied to the value inside the `Some` and the result is returned.
+    	 *
+    	 * @example
+    	 * import { some, none, match } from 'fp-ts/Option'
+    	 * import { pipe } from 'fp-ts/function'
+    	 *
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     some(1),
+    	 *     match(() => 'a none', a => `a some containing ${a}`)
+    	 *   ),
+    	 *   'a some containing 1'
+    	 * )
+    	 *
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     none,
+    	 *     match(() => 'a none', a => `a some containing ${a}`)
+    	 *   ),
+    	 *   'a none'
+    	 * )
+    	 *
+    	 * @category pattern matching
+    	 * @since 2.10.0
+    	 */
+    	exports.match = exports.matchW;
+    	/**
+    	 * Alias of [`match`](#match).
+    	 *
+    	 * @category pattern matching
+    	 * @since 2.0.0
+    	 */
+    	exports.fold = exports.match;
+    	/**
+    	 * Less strict version of [`getOrElse`](#getorelse).
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the handler return type will be merged.
+    	 *
+    	 * @category error handling
+    	 * @since 2.6.0
+    	 */
+    	var getOrElseW = function (onNone) {
+    	    return function (ma) {
+    	        return (0, exports.isNone)(ma) ? onNone() : ma.value;
+    	    };
+    	};
+    	exports.getOrElseW = getOrElseW;
+    	/**
+    	 * Extracts the value out of the structure, if it exists. Otherwise returns the given default value
+    	 *
+    	 * @example
+    	 * import { some, none, getOrElse } from 'fp-ts/Option'
+    	 * import { pipe } from 'fp-ts/function'
+    	 *
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     some(1),
+    	 *     getOrElse(() => 0)
+    	 *   ),
+    	 *   1
+    	 * )
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     none,
+    	 *     getOrElse(() => 0)
+    	 *   ),
+    	 *   0
+    	 * )
+    	 *
+    	 * @category error handling
+    	 * @since 2.0.0
+    	 */
+    	exports.getOrElse = exports.getOrElseW;
+    	/**
+    	 * @category mapping
+    	 * @since 2.10.0
+    	 */
+    	exports.flap = (0, Functor_1.flap)(exports.Functor);
+    	/**
+    	 * Combine two effectful actions, keeping only the result of the first.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.apFirst = (0, Apply_1.apFirst)(exports.Apply);
+    	/**
+    	 * Combine two effectful actions, keeping only the result of the second.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.apSecond = (0, Apply_1.apSecond)(exports.Apply);
+    	/**
+    	 * @category sequencing
+    	 * @since 2.0.0
+    	 */
+    	exports.flatten = exports.compact;
+    	/**
+    	 * Composes computations in sequence, using the return value of one computation to determine the next computation and
+    	 * keeping only the result of the first.
+    	 *
+    	 * @category combinators
+    	 * @since 2.15.0
+    	 */
+    	exports.tap = (0, function_1.dual)(2, chainable.tap(exports.Chain));
+    	/**
+    	 * Composes computations in sequence, using the return value of one computation to determine the next computation and
+    	 * keeping only the result of the first.
+    	 *
+    	 * @example
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import * as O from 'fp-ts/Option'
+    	 * import * as E from 'fp-ts/Either'
+    	 *
+    	 * const compute = (value: number) => pipe(
+    	 *   O.of(value),
+    	 *   O.tapEither((value) => value > 0 ? E.right('ok') : E.left('error')),
+    	 * )
+    	 *
+    	 * assert.deepStrictEqual(compute(1), O.of(1))
+    	 * assert.deepStrictEqual(compute(-42), O.none)
+    	 *
+    	 * @category combinators
+    	 * @since 2.16.0
+    	 */
+    	exports.tapEither = (0, function_1.dual)(2, (0, FromEither_1.tapEither)(exports.FromEither, exports.Chain));
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	exports.duplicate = (0, exports.extend)(function_1.identity);
+    	/**
+    	 * @category lifting
+    	 * @since 2.11.0
+    	 */
+    	exports.fromEitherK = (0, FromEither_1.fromEitherK)(exports.FromEither);
+    	/**
+    	 * @category sequencing
+    	 * @since 2.11.0
+    	 */
+    	exports.chainEitherK = 
+    	/*#__PURE__*/ (0, FromEither_1.chainEitherK)(exports.FromEither, exports.Chain);
+    	/**
+    	 * Alias of `tapEither`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.12.0
+    	 */
+    	exports.chainFirstEitherK = exports.tapEither;
+    	/**
+    	 * Constructs a new `Option` from a nullable type. If the value is `null` or `undefined`, returns `None`, otherwise
+    	 * returns the value wrapped in a `Some`.
+    	 *
+    	 * @example
+    	 * import { none, some, fromNullable } from 'fp-ts/Option'
+    	 *
+    	 * assert.deepStrictEqual(fromNullable(undefined), none)
+    	 * assert.deepStrictEqual(fromNullable(null), none)
+    	 * assert.deepStrictEqual(fromNullable(1), some(1))
+    	 *
+    	 * @category conversions
+    	 * @since 2.0.0
+    	 */
+    	var fromNullable = function (a) { return (a == null ? exports.none : (0, exports.some)(a)); };
+    	exports.fromNullable = fromNullable;
+    	/**
+    	 * Transforms an exception into an `Option`. If `f` throws, returns `None`, otherwise returns the output wrapped in a
+    	 * `Some`.
+    	 *
+    	 * See also [`tryCatchK`](#trycatchk).
+    	 *
+    	 * @example
+    	 * import { none, some, tryCatch } from 'fp-ts/Option'
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   tryCatch(() => {
+    	 *     throw new Error()
+    	 *   }),
+    	 *   none
+    	 * )
+    	 * assert.deepStrictEqual(tryCatch(() => 1), some(1))
+    	 *
+    	 * @category interop
+    	 * @since 2.0.0
+    	 */
+    	var tryCatch = function (f) {
+    	    try {
+    	        return (0, exports.some)(f());
+    	    }
+    	    catch (e) {
+    	        return exports.none;
+    	    }
+    	};
+    	exports.tryCatch = tryCatch;
+    	/**
+    	 * Converts a function that may throw to one returning a `Option`.
+    	 *
+    	 * @category interop
+    	 * @since 2.10.0
+    	 */
+    	var tryCatchK = function (f) {
+    	    return function () {
+    	        var a = [];
+    	        for (var _i = 0; _i < arguments.length; _i++) {
+    	            a[_i] = arguments[_i];
+    	        }
+    	        return (0, exports.tryCatch)(function () { return f.apply(void 0, a); });
+    	    };
+    	};
+    	exports.tryCatchK = tryCatchK;
+    	/**
+    	 * Returns a *smart constructor* from a function that returns a nullable value.
+    	 *
+    	 * @example
+    	 * import { fromNullableK, none, some } from 'fp-ts/Option'
+    	 *
+    	 * const f = (s: string): number | undefined => {
+    	 *   const n = parseFloat(s)
+    	 *   return isNaN(n) ? undefined : n
+    	 * }
+    	 *
+    	 * const g = fromNullableK(f)
+    	 *
+    	 * assert.deepStrictEqual(g('1'), some(1))
+    	 * assert.deepStrictEqual(g('a'), none)
+    	 *
+    	 * @category lifting
+    	 * @since 2.9.0
+    	 */
+    	var fromNullableK = function (f) { return (0, function_1.flow)(f, exports.fromNullable); };
+    	exports.fromNullableK = fromNullableK;
+    	/**
+    	 * This is `chain` + `fromNullable`, useful when working with optional values.
+    	 *
+    	 * @example
+    	 * import { some, none, fromNullable, chainNullableK } from 'fp-ts/Option'
+    	 * import { pipe } from 'fp-ts/function'
+    	 *
+    	 * interface Employee {
+    	 *   readonly company?: {
+    	 *     readonly address?: {
+    	 *       readonly street?: {
+    	 *         readonly name?: string
+    	 *       }
+    	 *     }
+    	 *   }
+    	 * }
+    	 *
+    	 * const employee1: Employee = { company: { address: { street: { name: 'high street' } } } }
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     fromNullable(employee1.company),
+    	 *     chainNullableK(company => company.address),
+    	 *     chainNullableK(address => address.street),
+    	 *     chainNullableK(street => street.name)
+    	 *   ),
+    	 *   some('high street')
+    	 * )
+    	 *
+    	 * const employee2: Employee = { company: { address: { street: {} } } }
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     fromNullable(employee2.company),
+    	 *     chainNullableK(company => company.address),
+    	 *     chainNullableK(address => address.street),
+    	 *     chainNullableK(street => street.name)
+    	 *   ),
+    	 *   none
+    	 * )
+    	 *
+    	 * @category sequencing
+    	 * @since 2.9.0
+    	 */
+    	var chainNullableK = function (f) {
+    	    return function (ma) {
+    	        return (0, exports.isNone)(ma) ? exports.none : (0, exports.fromNullable)(f(ma.value));
+    	    };
+    	};
+    	exports.chainNullableK = chainNullableK;
+    	/**
+    	 * Extracts the value out of the structure, if it exists. Otherwise returns `null`.
+    	 *
+    	 * @example
+    	 * import { some, none, toNullable } from 'fp-ts/Option'
+    	 * import { pipe } from 'fp-ts/function'
+    	 *
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     some(1),
+    	 *     toNullable
+    	 *   ),
+    	 *   1
+    	 * )
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     none,
+    	 *     toNullable
+    	 *   ),
+    	 *   null
+    	 * )
+    	 *
+    	 * @category conversions
+    	 * @since 2.0.0
+    	 */
+    	exports.toNullable = (0, exports.match)(function_1.constNull, function_1.identity);
+    	/**
+    	 * Extracts the value out of the structure, if it exists. Otherwise returns `undefined`.
+    	 *
+    	 * @example
+    	 * import { some, none, toUndefined } from 'fp-ts/Option'
+    	 * import { pipe } from 'fp-ts/function'
+    	 *
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     some(1),
+    	 *     toUndefined
+    	 *   ),
+    	 *   1
+    	 * )
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     none,
+    	 *     toUndefined
+    	 *   ),
+    	 *   undefined
+    	 * )
+    	 *
+    	 * @category conversions
+    	 * @since 2.0.0
+    	 */
+    	exports.toUndefined = (0, exports.match)(function_1.constUndefined, function_1.identity);
+    	function elem(E) {
+    	    return function (a, ma) {
+    	        if (ma === undefined) {
+    	            var elemE_1 = elem(E);
+    	            return function (ma) { return elemE_1(a, ma); };
+    	        }
+    	        return (0, exports.isNone)(ma) ? false : E.equals(a, ma.value);
+    	    };
+    	}
+    	exports.elem = elem;
+    	/**
+    	 * Returns `true` if the predicate is satisfied by the wrapped value
+    	 *
+    	 * @example
+    	 * import { some, none, exists } from 'fp-ts/Option'
+    	 * import { pipe } from 'fp-ts/function'
+    	 *
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     some(1),
+    	 *     exists(n => n > 0)
+    	 *   ),
+    	 *   true
+    	 * )
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     some(1),
+    	 *     exists(n => n > 1)
+    	 *   ),
+    	 *   false
+    	 * )
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     none,
+    	 *     exists(n => n > 0)
+    	 *   ),
+    	 *   false
+    	 * )
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var exists = function (predicate) {
+    	    return function (ma) {
+    	        return (0, exports.isNone)(ma) ? false : predicate(ma.value);
+    	    };
+    	};
+    	exports.exists = exists;
+    	// -------------------------------------------------------------------------------------
+    	// do notation
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @category do notation
+    	 * @since 2.9.0
+    	 */
+    	exports.Do = (0, exports.of)(_.emptyRecord);
+    	/**
+    	 * @category do notation
+    	 * @since 2.8.0
+    	 */
+    	exports.bindTo = (0, Functor_1.bindTo)(exports.Functor);
+    	var let_ = /*#__PURE__*/ (0, Functor_1.let)(exports.Functor);
+    	exports.let = let_;
+    	/**
+    	 * @category do notation
+    	 * @since 2.8.0
+    	 */
+    	exports.bind = chainable.bind(exports.Chain);
+    	/**
+    	 * @category do notation
+    	 * @since 2.8.0
+    	 */
+    	exports.apS = (0, Apply_1.apS)(exports.Apply);
+    	/**
+    	 * @since 2.11.0
+    	 */
+    	exports.ApT = (0, exports.of)(_.emptyReadonlyArray);
+    	// -------------------------------------------------------------------------------------
+    	// array utils
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Equivalent to `ReadonlyNonEmptyArray#traverseWithIndex(Applicative)`.
+    	 *
+    	 * @category traversing
+    	 * @since 2.11.0
+    	 */
+    	var traverseReadonlyNonEmptyArrayWithIndex = function (f) {
+    	    return function (as) {
+    	        var o = f(0, _.head(as));
+    	        if ((0, exports.isNone)(o)) {
+    	            return exports.none;
+    	        }
+    	        var out = [o.value];
+    	        for (var i = 1; i < as.length; i++) {
+    	            var o_1 = f(i, as[i]);
+    	            if ((0, exports.isNone)(o_1)) {
+    	                return exports.none;
+    	            }
+    	            out.push(o_1.value);
+    	        }
+    	        return (0, exports.some)(out);
+    	    };
+    	};
+    	exports.traverseReadonlyNonEmptyArrayWithIndex = traverseReadonlyNonEmptyArrayWithIndex;
+    	/**
+    	 * Equivalent to `ReadonlyArray#traverseWithIndex(Applicative)`.
+    	 *
+    	 * @category traversing
+    	 * @since 2.11.0
+    	 */
+    	var traverseReadonlyArrayWithIndex = function (f) {
+    	    var g = (0, exports.traverseReadonlyNonEmptyArrayWithIndex)(f);
+    	    return function (as) { return (_.isNonEmpty(as) ? g(as) : exports.ApT); };
+    	};
+    	exports.traverseReadonlyArrayWithIndex = traverseReadonlyArrayWithIndex;
+    	/**
+    	 * Equivalent to `ReadonlyArray#traverseWithIndex(Applicative)`.
+    	 *
+    	 * @category traversing
+    	 * @since 2.9.0
+    	 */
+    	exports.traverseArrayWithIndex = exports.traverseReadonlyArrayWithIndex;
+    	/**
+    	 * Equivalent to `ReadonlyArray#traverse(Applicative)`.
+    	 *
+    	 * @category traversing
+    	 * @since 2.9.0
+    	 */
+    	var traverseArray = function (f) {
+    	    return (0, exports.traverseReadonlyArrayWithIndex)(function (_, a) { return f(a); });
+    	};
+    	exports.traverseArray = traverseArray;
+    	/**
+    	 * Equivalent to `ReadonlyArray#sequence(Applicative)`.
+    	 *
+    	 * @category traversing
+    	 * @since 2.9.0
+    	 */
+    	exports.sequenceArray = 
+    	/*#__PURE__*/ (0, exports.traverseArray)(function_1.identity);
+    	// -------------------------------------------------------------------------------------
+    	// legacy
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Alias of `flatMap`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.0.0
+    	 */
+    	exports.chain = exports.flatMap;
+    	/**
+    	 * Alias of `tap`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.0.0
+    	 */
+    	exports.chainFirst = exports.tap;
+    	// -------------------------------------------------------------------------------------
+    	// deprecated
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Use `Refinement` module instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	function getRefinement(getOption) {
+    	    return function (a) { return (0, exports.isSome)(getOption(a)); };
+    	}
+    	exports.getRefinement = getRefinement;
+    	/**
+    	 * Use [`chainNullableK`](#chainnullablek) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.mapNullable = exports.chainNullableK;
+    	/**
+    	 * This instance is deprecated, use small, specific instances instead.
+    	 * For example if a function needs a `Functor` instance, pass `O.Functor` instead of `O.option`
+    	 * (where `O` is from `import O from 'fp-ts/Option'`)
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.option = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    of: exports.of,
+    	    ap: _ap,
+    	    chain: exports.flatMap,
+    	    reduce: _reduce,
+    	    foldMap: _foldMap,
+    	    reduceRight: _reduceRight,
+    	    traverse: _traverse,
+    	    sequence: exports.sequence,
+    	    zero: exports.zero,
+    	    alt: _alt,
+    	    extend: _extend,
+    	    compact: exports.compact,
+    	    separate: exports.separate,
+    	    filter: _filter,
+    	    filterMap: _filterMap,
+    	    partition: _partition,
+    	    partitionMap: _partitionMap,
+    	    wither: _wither,
+    	    wilt: _wilt,
+    	    throwError: exports.throwError
+    	};
+    	/**
+    	 * Use [`getApplySemigroup`](./Apply.ts.html#getapplysemigroup) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getApplySemigroup = (0, Apply_1.getApplySemigroup)(exports.Apply);
+    	/**
+    	 * Use [`getApplicativeMonoid`](./Applicative.ts.html#getapplicativemonoid) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getApplyMonoid = (0, Applicative_1.getApplicativeMonoid)(exports.Applicative);
+    	/**
+    	 * Use
+    	 *
+    	 * ```ts
+    	 * import { first } from 'fp-ts/Semigroup'
+    	 * import { getMonoid } from 'fp-ts/Option'
+    	 *
+    	 * getMonoid(first())
+    	 * ```
+    	 *
+    	 * instead.
+    	 *
+    	 * Monoid returning the left-most non-`None` value
+    	 *
+    	 * | x       | y       | concat(x, y) |
+    	 * | ------- | ------- | ------------ |
+    	 * | none    | none    | none         |
+    	 * | some(a) | none    | some(a)      |
+    	 * | none    | some(b) | some(b)      |
+    	 * | some(a) | some(b) | some(a)      |
+    	 *
+    	 * @example
+    	 * import { getFirstMonoid, some, none } from 'fp-ts/Option'
+    	 *
+    	 * const M = getFirstMonoid<number>()
+    	 * assert.deepStrictEqual(M.concat(none, none), none)
+    	 * assert.deepStrictEqual(M.concat(some(1), none), some(1))
+    	 * assert.deepStrictEqual(M.concat(none, some(2)), some(2))
+    	 * assert.deepStrictEqual(M.concat(some(1), some(2)), some(1))
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	var getFirstMonoid = function () { return (0, exports.getMonoid)((0, Semigroup_1.first)()); };
+    	exports.getFirstMonoid = getFirstMonoid;
+    	/**
+    	 * Use
+    	 *
+    	 * ```ts
+    	 * import { last } from 'fp-ts/Semigroup'
+    	 * import { getMonoid } from 'fp-ts/Option'
+    	 *
+    	 * getMonoid(last())
+    	 * ```
+    	 *
+    	 * instead.
+    	 *
+    	 * Monoid returning the right-most non-`None` value
+    	 *
+    	 * | x       | y       | concat(x, y) |
+    	 * | ------- | ------- | ------------ |
+    	 * | none    | none    | none         |
+    	 * | some(a) | none    | some(a)      |
+    	 * | none    | some(b) | some(b)      |
+    	 * | some(a) | some(b) | some(b)      |
+    	 *
+    	 * @example
+    	 * import { getLastMonoid, some, none } from 'fp-ts/Option'
+    	 *
+    	 * const M = getLastMonoid<number>()
+    	 * assert.deepStrictEqual(M.concat(none, none), none)
+    	 * assert.deepStrictEqual(M.concat(some(1), none), some(1))
+    	 * assert.deepStrictEqual(M.concat(none, some(2)), some(2))
+    	 * assert.deepStrictEqual(M.concat(some(1), some(2)), some(2))
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	var getLastMonoid = function () { return (0, exports.getMonoid)((0, Semigroup_1.last)()); };
+    	exports.getLastMonoid = getLastMonoid; 
+    } (Option));
+
     const system_state = {
         websocketReady: false,
-        currentlySelected: "action"  ,
-        selectedAction: newAction(),
-        selectedProcess: newProcess(),
+        selectedNode: Option.none,
         graphState: newGraphState(),
         websocket: new WebSocket("ws://157.245.243.205:8080"),
         executionContext: NewExecutionContext(),
-        aiSystemState: {
-            actions: [],
-            processes: [],
-            messages: [],
-        }
+        nodes: [],
     };
     const systemStateStore = writable(system_state);
 
     /* src/components/sidebarComponents/AddNodeButton.svelte generated by Svelte v3.59.1 */
-    const file$9 = "src/components/sidebarComponents/AddNodeButton.svelte";
+    const file$7 = "src/components/sidebarComponents/AddNodeButton.svelte";
 
-    function create_fragment$9(ctx) {
+    function create_fragment$7(ctx) {
     	let form;
     	let label0;
     	let t1;
@@ -2562,26 +6149,26 @@ var app = (function () {
     			button = element$1("button");
     			button.textContent = "Submit";
     			attr_dev(label0, "for", "prompt");
-    			add_location(label0, file$9, 26, 2, 1132);
+    			add_location(label0, file$7, 26, 2, 1132);
     			attr_dev(input0, "id", "prompt");
     			attr_dev(input0, "type", "text");
     			input0.required = true;
-    			add_location(input0, file$9, 27, 2, 1169);
+    			add_location(input0, file$7, 27, 2, 1169);
     			attr_dev(label1, "for", "name");
-    			add_location(label1, file$9, 29, 2, 1240);
+    			add_location(label1, file$7, 29, 2, 1240);
     			attr_dev(input1, "id", "name");
     			attr_dev(input1, "type", "text");
     			input1.required = true;
-    			add_location(input1, file$9, 30, 2, 1273);
+    			add_location(input1, file$7, 30, 2, 1273);
     			attr_dev(label2, "for", "system");
-    			add_location(label2, file$9, 32, 2, 1340);
+    			add_location(label2, file$7, 32, 2, 1340);
     			attr_dev(input2, "id", "system");
     			attr_dev(input2, "type", "text");
     			input2.required = true;
-    			add_location(input2, file$9, 33, 2, 1377);
+    			add_location(input2, file$7, 33, 2, 1377);
     			attr_dev(button, "type", "submit");
-    			add_location(button, file$9, 35, 2, 1448);
-    			add_location(form, file$9, 25, 0, 1083);
+    			add_location(button, file$7, 35, 2, 1448);
+    			add_location(form, file$7, 25, 0, 1083);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2640,7 +6227,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$9.name,
+    		id: create_fragment$7.name,
     		type: "component",
     		source: "",
     		ctx
@@ -2649,7 +6236,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$9($$self, $$props, $$invalidate) {
+    function instance$7($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
     	component_subscribe($$self, systemStateStore, $$value => $$invalidate(5, $systemStateStore = $$value));
@@ -2757,13 +6344,13 @@ var app = (function () {
     class AddNodeButton extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$9, create_fragment$9, safe_not_equal, {});
+    		init(this, options, instance$7, create_fragment$7, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "AddNodeButton",
     			options,
-    			id: create_fragment$9.name
+    			id: create_fragment$7.name
     		});
     	}
     }
@@ -3174,31 +6761,31 @@ var app = (function () {
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$2 = freeGlobal || freeSelf || Function('return this')();
+    var root$3 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$2;
+    var _root = root$3;
 
-    var root$1 = _root;
+    var root$2 = _root;
 
     /** Built-in value references. */
-    var Symbol$4 = root$1.Symbol;
+    var Symbol$4 = root$2.Symbol;
 
     var _Symbol = Symbol$4;
 
     var Symbol$3 = _Symbol;
 
     /** Used for built-in method references. */
-    var objectProto$4 = Object.prototype;
+    var objectProto$5 = Object.prototype;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty$3 = objectProto$4.hasOwnProperty;
+    var hasOwnProperty$5 = objectProto$5.hasOwnProperty;
 
     /**
      * Used to resolve the
      * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
      * of values.
      */
-    var nativeObjectToString$1 = objectProto$4.toString;
+    var nativeObjectToString$1 = objectProto$5.toString;
 
     /** Built-in value references. */
     var symToStringTag$1 = Symbol$3 ? Symbol$3.toStringTag : undefined;
@@ -3211,7 +6798,7 @@ var app = (function () {
      * @returns {string} Returns the raw `toStringTag`.
      */
     function getRawTag$1(value) {
-      var isOwn = hasOwnProperty$3.call(value, symToStringTag$1),
+      var isOwn = hasOwnProperty$5.call(value, symToStringTag$1),
           tag = value[symToStringTag$1];
 
       try {
@@ -3234,14 +6821,14 @@ var app = (function () {
 
     /** Used for built-in method references. */
 
-    var objectProto$3 = Object.prototype;
+    var objectProto$4 = Object.prototype;
 
     /**
      * Used to resolve the
      * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
      * of values.
      */
-    var nativeObjectToString = objectProto$3.toString;
+    var nativeObjectToString = objectProto$4.toString;
 
     /**
      * Converts `value` to a string using `Object.prototype.toString`.
@@ -3311,12 +6898,12 @@ var app = (function () {
      * // => false
      */
 
-    function isObject$3(value) {
+    function isObject$4(value) {
       var type = typeof value;
       return value != null && (type == 'object' || type == 'function');
     }
 
-    var isObject_1 = isObject$3;
+    var isObject_1 = isObject$4;
 
     var isFunction_1;
     var hasRequiredIsFunction;
@@ -3364,49 +6951,33 @@ var app = (function () {
     	return isFunction_1;
     }
 
-    var _coreJsData;
-    var hasRequired_coreJsData;
+    var root$1 = _root;
 
-    function require_coreJsData () {
-    	if (hasRequired_coreJsData) return _coreJsData;
-    	hasRequired_coreJsData = 1;
-    	var root = _root;
+    /** Used to detect overreaching core-js shims. */
+    var coreJsData$1 = root$1['__core-js_shared__'];
 
-    	/** Used to detect overreaching core-js shims. */
-    	var coreJsData = root['__core-js_shared__'];
+    var _coreJsData = coreJsData$1;
 
-    	_coreJsData = coreJsData;
-    	return _coreJsData;
+    var coreJsData = _coreJsData;
+
+    /** Used to detect methods masquerading as native. */
+    var maskSrcKey = (function() {
+      var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+      return uid ? ('Symbol(src)_1.' + uid) : '';
+    }());
+
+    /**
+     * Checks if `func` has its source masked.
+     *
+     * @private
+     * @param {Function} func The function to check.
+     * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+     */
+    function isMasked$1(func) {
+      return !!maskSrcKey && (maskSrcKey in func);
     }
 
-    var _isMasked;
-    var hasRequired_isMasked;
-
-    function require_isMasked () {
-    	if (hasRequired_isMasked) return _isMasked;
-    	hasRequired_isMasked = 1;
-    	var coreJsData = require_coreJsData();
-
-    	/** Used to detect methods masquerading as native. */
-    	var maskSrcKey = (function() {
-    	  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
-    	  return uid ? ('Symbol(src)_1.' + uid) : '';
-    	}());
-
-    	/**
-    	 * Checks if `func` has its source masked.
-    	 *
-    	 * @private
-    	 * @param {Function} func The function to check.
-    	 * @returns {boolean} Returns `true` if `func` is masked, else `false`.
-    	 */
-    	function isMasked(func) {
-    	  return !!maskSrcKey && (maskSrcKey in func);
-    	}
-
-    	_isMasked = isMasked;
-    	return _isMasked;
-    }
+    var _isMasked = isMasked$1;
 
     /** Used for built-in method references. */
 
@@ -3444,61 +7015,53 @@ var app = (function () {
     	return _toSource;
     }
 
-    var _baseIsNative;
-    var hasRequired_baseIsNative;
+    var isFunction = requireIsFunction(),
+        isMasked = _isMasked,
+        isObject$3 = isObject_1,
+        toSource = require_toSource();
 
-    function require_baseIsNative () {
-    	if (hasRequired_baseIsNative) return _baseIsNative;
-    	hasRequired_baseIsNative = 1;
-    	var isFunction = requireIsFunction(),
-    	    isMasked = require_isMasked(),
-    	    isObject = isObject_1,
-    	    toSource = require_toSource();
+    /**
+     * Used to match `RegExp`
+     * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+     */
+    var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
 
-    	/**
-    	 * Used to match `RegExp`
-    	 * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
-    	 */
-    	var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+    /** Used to detect host constructors (Safari). */
+    var reIsHostCtor = /^\[object .+?Constructor\]$/;
 
-    	/** Used to detect host constructors (Safari). */
-    	var reIsHostCtor = /^\[object .+?Constructor\]$/;
+    /** Used for built-in method references. */
+    var funcProto = Function.prototype,
+        objectProto$3 = Object.prototype;
 
-    	/** Used for built-in method references. */
-    	var funcProto = Function.prototype,
-    	    objectProto = Object.prototype;
+    /** Used to resolve the decompiled source of functions. */
+    var funcToString = funcProto.toString;
 
-    	/** Used to resolve the decompiled source of functions. */
-    	var funcToString = funcProto.toString;
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$4 = objectProto$3.hasOwnProperty;
 
-    	/** Used to check objects for own properties. */
-    	var hasOwnProperty = objectProto.hasOwnProperty;
+    /** Used to detect if a method is native. */
+    var reIsNative = RegExp('^' +
+      funcToString.call(hasOwnProperty$4).replace(reRegExpChar, '\\$&')
+      .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+    );
 
-    	/** Used to detect if a method is native. */
-    	var reIsNative = RegExp('^' +
-    	  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
-    	  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-    	);
-
-    	/**
-    	 * The base implementation of `_.isNative` without bad shim checks.
-    	 *
-    	 * @private
-    	 * @param {*} value The value to check.
-    	 * @returns {boolean} Returns `true` if `value` is a native function,
-    	 *  else `false`.
-    	 */
-    	function baseIsNative(value) {
-    	  if (!isObject(value) || isMasked(value)) {
-    	    return false;
-    	  }
-    	  var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
-    	  return pattern.test(toSource(value));
-    	}
-
-    	_baseIsNative = baseIsNative;
-    	return _baseIsNative;
+    /**
+     * The base implementation of `_.isNative` without bad shim checks.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a native function,
+     *  else `false`.
+     */
+    function baseIsNative$1(value) {
+      if (!isObject$3(value) || isMasked(value)) {
+        return false;
+      }
+      var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
+      return pattern.test(toSource(value));
     }
+
+    var _baseIsNative = baseIsNative$1;
 
     /**
      * Gets the value at `key` of `object`.
@@ -3509,45 +7072,29 @@ var app = (function () {
      * @returns {*} Returns the property value.
      */
 
-    var _getValue;
-    var hasRequired_getValue;
-
-    function require_getValue () {
-    	if (hasRequired_getValue) return _getValue;
-    	hasRequired_getValue = 1;
-    	function getValue(object, key) {
-    	  return object == null ? undefined : object[key];
-    	}
-
-    	_getValue = getValue;
-    	return _getValue;
+    function getValue$2(object, key) {
+      return object == null ? undefined : object[key];
     }
 
-    var _getNative;
-    var hasRequired_getNative;
+    var _getValue = getValue$2;
 
-    function require_getNative () {
-    	if (hasRequired_getNative) return _getNative;
-    	hasRequired_getNative = 1;
-    	var baseIsNative = require_baseIsNative(),
-    	    getValue = require_getValue();
+    var baseIsNative = _baseIsNative,
+        getValue$1 = _getValue;
 
-    	/**
-    	 * Gets the native function at `key` of `object`.
-    	 *
-    	 * @private
-    	 * @param {Object} object The object to query.
-    	 * @param {string} key The key of the method to get.
-    	 * @returns {*} Returns the function if it's native, else `undefined`.
-    	 */
-    	function getNative(object, key) {
-    	  var value = getValue(object, key);
-    	  return baseIsNative(value) ? value : undefined;
-    	}
-
-    	_getNative = getNative;
-    	return _getNative;
+    /**
+     * Gets the native function at `key` of `object`.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @param {string} key The key of the method to get.
+     * @returns {*} Returns the function if it's native, else `undefined`.
+     */
+    function getNative$2(object, key) {
+      var value = getValue$1(object, key);
+      return baseIsNative(value) ? value : undefined;
     }
+
+    var _getNative = getNative$2;
 
     var _Map;
     var hasRequired_Map;
@@ -3555,7 +7102,7 @@ var app = (function () {
     function require_Map () {
     	if (hasRequired_Map) return _Map;
     	hasRequired_Map = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -3565,7 +7112,7 @@ var app = (function () {
     	return _Map;
     }
 
-    var getNative$1 = require_getNative();
+    var getNative$1 = _getNative;
 
     /* Built-in method references that are verified to be native. */
     var nativeCreate$4 = getNative$1(Object, 'create');
@@ -3616,7 +7163,7 @@ var app = (function () {
     var objectProto$2 = Object.prototype;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty$2 = objectProto$2.hasOwnProperty;
+    var hasOwnProperty$3 = objectProto$2.hasOwnProperty;
 
     /**
      * Gets the hash value for `key`.
@@ -3633,7 +7180,7 @@ var app = (function () {
         var result = data[key];
         return result === HASH_UNDEFINED$1 ? undefined : result;
       }
-      return hasOwnProperty$2.call(data, key) ? data[key] : undefined;
+      return hasOwnProperty$3.call(data, key) ? data[key] : undefined;
     }
 
     var _hashGet = hashGet$1;
@@ -3644,7 +7191,7 @@ var app = (function () {
     var objectProto$1 = Object.prototype;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty$1 = objectProto$1.hasOwnProperty;
+    var hasOwnProperty$2 = objectProto$1.hasOwnProperty;
 
     /**
      * Checks if a hash value for `key` exists.
@@ -3657,7 +7204,7 @@ var app = (function () {
      */
     function hashHas$1(key) {
       var data = this.__data__;
-      return nativeCreate$1 ? (data[key] !== undefined) : hasOwnProperty$1.call(data, key);
+      return nativeCreate$1 ? (data[key] !== undefined) : hasOwnProperty$2.call(data, key);
     }
 
     var _hashHas = hashHas$1;
@@ -3997,7 +7544,7 @@ var app = (function () {
     	return _arrayEach;
     }
 
-    var getNative = require_getNative();
+    var getNative = _getNative;
 
     var defineProperty$1 = (function() {
       try {
@@ -4042,7 +7589,7 @@ var app = (function () {
     var objectProto = Object.prototype;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty = objectProto.hasOwnProperty;
+    var hasOwnProperty$1 = objectProto.hasOwnProperty;
 
     /**
      * Assigns `value` to `key` of `object` if the existing value is not equivalent
@@ -4056,7 +7603,7 @@ var app = (function () {
      */
     function assignValue$1(object, key, value) {
       var objValue = object[key];
-      if (!(hasOwnProperty.call(object, key) && eq(objValue, value)) ||
+      if (!(hasOwnProperty$1.call(object, key) && eq(objValue, value)) ||
           (value === undefined && !(key in object))) {
         baseAssignValue(object, key, value);
       }
@@ -5410,7 +8957,7 @@ var app = (function () {
     function require_DataView () {
     	if (hasRequired_DataView) return _DataView;
     	hasRequired_DataView = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -5426,7 +8973,7 @@ var app = (function () {
     function require_Promise () {
     	if (hasRequired_Promise) return _Promise;
     	hasRequired_Promise = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -5442,7 +8989,7 @@ var app = (function () {
     function require_Set () {
     	if (hasRequired_Set) return _Set;
     	hasRequired_Set = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -5458,7 +9005,7 @@ var app = (function () {
     function require_WeakMap () {
     	if (hasRequired_WeakMap) return _WeakMap;
     	hasRequired_WeakMap = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -10788,21 +14335,6 @@ var app = (function () {
             });
         });
     }
-    function getInputVariablesByNodeId(nodeId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            // Get the action by ID
-            const prompt = yield getPromptById(nodeId);
-            // If action exists, return its input variables; else, return null
-            return prompt ? prompt.prompt.input_variables : null;
-        });
-    }
-    function getPromptById(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const systemState = yield getSystemState();
-            const action = systemState.aiSystemState.actions.find((action) => getId(action) == id);
-            return action || null;
-        });
-    }
     function topologicalSort(graph) {
         const sorted = graphlib.alg.topsort(graph);
         // The stack now contains a topological ordering of the nodes
@@ -10811,17 +14343,15 @@ var app = (function () {
     // get the name of the action by using the id
     function getNodeName(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const res = yield new Promise((resolve, _rej) => {
-                systemStateStore.subscribe((systemStateStore) => {
-                    resolve(systemStateStore.aiSystemState);
-                });
+            const system_state = yield getSystemState();
+            const node = system_state.nodes.find((node) => {
+                // get the node with the id:
+                if (node._id) {
+                    return getId(node) == id;
+                }
             });
-            const action = yield res.actions.find(action => {
-                return getId(action) == id;
-            });
-            if (action) {
-                // console.log("action name: " + action.name);
-                return action.prompt.name;
+            if (node) {
+                return node.name;
             }
         });
     }
@@ -10832,22 +14362,19 @@ var app = (function () {
             console.log("edge: " + sourceName + " -> " + targetName);
         });
     }
-    function getId(actionOrProcess) {
-        return actionOrProcess._id.$oid;
+    function getId(node) {
+        var _a;
+        if (node) {
+            return (_a = node._id) === null || _a === void 0 ? void 0 : _a.$oid;
+        }
+        return undefined;
     }
     function setSystemState(systemState) {
         return __awaiter(this, void 0, void 0, function* () {
             systemStateStore.set(systemState);
         });
     }
-    function addGlobalVariable(variable_name, variable_value) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const current_state = yield getSystemState();
-            current_state.graphState.global_variables.set(variable_name, variable_value);
-            yield setSystemState(current_state);
-        });
-    }
-    function addNode(node_id, node_type) {
+    function addNode(node_id) {
         return __awaiter(this, void 0, void 0, function* () {
             const systemState = yield getSystemState();
             // add the input and output variables to the graph state
@@ -10865,117 +14392,6 @@ var app = (function () {
                 systemState.graphState.actedOn = [node_id, ""];
             }
             setSystemState(systemState);
-        });
-    }
-    // function for converting a process to a graph
-    function processToGraph(process) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield resetGraph();
-            // verify that all of the steps have corresponding actions
-            const graph = process.graph;
-            let nodes = [];
-            // check if graph has the type Graph
-            if (graph instanceof graphlib.Graph) {
-                nodes = graph.nodes();
-            }
-            else {
-                console.error("The graph is not of type Graph");
-            }
-            // console.log("nodes: ", nodes);
-            // for each of the node ids stored in nodes, get the name of the action
-            //loop through the nodes
-            for (let i = 0; i < nodes.length; i++) {
-                const name = yield getNodeName(nodes[i]);
-                if (name) {
-                    yield addNode(nodes[i], NodeType.Action);
-                }
-            }
-            let edges = [];
-            if (graph instanceof graphlib.Graph) {
-                edges = graph.edges();
-            }
-            let topOrder = [];
-            if (graph instanceof graphlib.Graph) {
-                topOrder = topologicalSort(graph);
-            }
-            for (const node of topOrder) {
-                // filter edges where the source node is the current node
-                const nodeEdges = edges.filter(this_edge => this_edge.v === node);
-                // iterate over the node's edges and add them
-                for (const edge of nodeEdges) {
-                    // if edge does not exist, add it
-                    yield addEdge(edge); // assuming 'addEdge' is your helper function
-                }
-            }
-        });
-    }
-    function sendPrompt(prompt) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const systemState = yield getSystemState();
-            systemState.executionContext.prompts.set(prompt.action_id, prompt.prompt_text);
-            systemState.websocket.send(JSON.stringify(prompt));
-            yield setSystemState(systemState);
-        });
-    }
-    function getParentOutputVariables(this_node_id) {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
-            const systemState = yield getSystemState();
-            // get topological order
-            const topological_order = systemState.executionContext.topological_order;
-            // get parent node id
-            const parent_node_id = topological_order[topological_order.indexOf(this_node_id) - 1];
-            // get the output variables of the parent node
-            const parent_output_variables = ((_a = systemState.aiSystemState.actions.find(action => getId(action) == parent_node_id)) === null || _a === void 0 ? void 0 : _a.output_variables) || [];
-            return parent_output_variables;
-        });
-    }
-    function setLocalExecutionVariable(variable_name, variable_value) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const systemState = yield getSystemState();
-            systemState.executionContext.local_variables.set(variable_name, variable_value);
-            yield setSystemState(systemState);
-            return systemState.executionContext.local_variables;
-        });
-    }
-    function addVariablesToPrompt(prompt, variables) {
-        let new_prompt = prompt;
-        for (const [key, value] of variables) {
-            new_prompt = new_prompt.replace(key, value);
-        }
-        return new_prompt;
-    }
-    function incrementCurrentNode() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const systemState = yield getSystemState();
-            // look at the topological order and the current_node and set the next node to be the current node
-            const topological_order = systemState.executionContext.topological_order;
-            // get the index of the current node
-            if (systemState.executionContext.current_node != null) {
-                const current_node_index = topological_order.indexOf(systemState.executionContext.current_node);
-                if (current_node_index + 1 < topological_order.length) {
-                    systemState.executionContext.current_node = topological_order[current_node_index + 1];
-                    // get the prompt of the current_node
-                    const prompt = yield getPromptofAction(systemState.executionContext.current_node);
-                    systemState.executionContext.prompts.set(systemState.executionContext.current_node, prompt);
-                }
-                else {
-                    console.error("current node index is out of bounds");
-                }
-            }
-            else {
-                console.error("current node is null");
-                systemState.executionContext.current_node = topological_order[0];
-            }
-            yield setSystemState(systemState);
-            return systemState.executionContext.current_node;
-        });
-    }
-    function getPromptofAction(action_id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const systemState = yield getSystemState();
-            const prompt = systemState.aiSystemState.actions.filter(action => action._id.$oid === action_id)[0].prompt;
-            return prompt;
         });
     }
     function addEdge(edge) {
@@ -11041,17 +14457,32 @@ var app = (function () {
             setSystemState(systemState);
         });
     }
+    function returnProcesses() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const systemState = yield getSystemState();
+            let nodes = systemState.nodes;
+            // filter out the prompts
+            nodes = nodes.filter((node) => {
+                return node.type_name == "Process";
+            });
+            // let processes = nodes.map((node: Node) => {
+            //   return node.node_content as Process;
+            // }
+            // );
+            return nodes;
+        });
+    }
     function selectNode(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const ai_system_state = (yield getSystemState()).aiSystemState;
-            const actions = ai_system_state.actions;
-            const res = actions.find((action) => {
-                return getId(action) == id;
-            });
+            const system_state = yield getSystemState();
+            const nodes = system_state.nodes;
+            // const res = actions.find((action: Prompt) => {
+            //   return getId(action) == id;
+            // });
+            const res = nodes.find((node) => getId(node) == id);
             if (res) {
                 const systemState = yield getSystemState();
-                systemState.selectedAction = res;
-                systemState.currentlySelected = "action";
+                systemState.selectedNode = Option.some(res);
                 systemState.graphState.lastAction = "selectNode";
                 systemState.graphState.lastActedOn = systemState.graphState.actedOn;
                 systemState.graphState.actedOn = [id, res.name];
@@ -11069,46 +14500,34 @@ var app = (function () {
             setSystemState(systemState);
         });
     }
-    // reset the graphState to a new empty graph
-    function resetGraph() {
-        return __awaiter(this, void 0, void 0, function* () {
-            // console.log("resetting graph");
-            const systemState = yield getSystemState();
-            systemState.graphState.graph = new graphlib.Graph();
-            systemState.graphState.lastAction = "resetGraph";
-            systemState.graphState.actedOn = null;
-            systemState.graphState.name = null;
-            setSystemState(systemState);
-        });
-    }
 
     /* src/components/sidebarComponents/CreateProcess.svelte generated by Svelte v3.59.1 */
-    const file$8 = "src/components/sidebarComponents/CreateProcess.svelte";
+    const file$6 = "src/components/sidebarComponents/CreateProcess.svelte";
 
-    function get_each_context$5(ctx, list, i) {
+    function get_each_context$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[15] = list[i];
+    	child_ctx[13] = list[i];
     	return child_ctx;
     }
 
-    function get_each_context_1$2(ctx, list, i) {
+    function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[15] = list[i];
+    	child_ctx[13] = list[i];
     	return child_ctx;
     }
 
     // (114:2) {#each actions as action (action._id)}
-    function create_each_block_1$2(key_1, ctx) {
+    function create_each_block_1(key_1, ctx) {
     	let li;
     	let button;
-    	let t0_value = /*action*/ ctx[15].name + "";
+    	let t0_value = /*action*/ ctx[13].name + "";
     	let t0;
     	let t1;
     	let mounted;
     	let dispose;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[12](/*action*/ ctx[15]);
+    		return /*click_handler*/ ctx[8](/*action*/ ctx[13]);
     	}
 
     	const block = {
@@ -11120,9 +14539,9 @@ var app = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(button, "type", "button");
-    			toggle_class(button, "selected", /*isSelected*/ ctx[8](/*action*/ ctx[15]));
-    			add_location(button, file$8, 115, 6, 4557);
-    			add_location(li, file$8, 114, 4, 4546);
+    			toggle_class(button, "selected", isSelected(/*action*/ ctx[13]));
+    			add_location(button, file$6, 115, 6, 4517);
+    			add_location(li, file$6, 114, 4, 4506);
     			this.first = li;
     		},
     		m: function mount(target, anchor) {
@@ -11138,10 +14557,9 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*actions*/ 1 && t0_value !== (t0_value = /*action*/ ctx[15].name + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty & /*isSelected, actions*/ 257) {
-    				toggle_class(button, "selected", /*isSelected*/ ctx[8](/*action*/ ctx[15]));
+    			if (dirty & /*isSelected, actions*/ 0) {
+    				toggle_class(button, "selected", isSelected(/*action*/ ctx[13]));
     			}
     		},
     		d: function destroy(detaching) {
@@ -11153,7 +14571,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_1$2.name,
+    		id: create_each_block_1.name,
     		type: "each",
     		source: "(114:2) {#each actions as action (action._id)}",
     		ctx
@@ -11163,9 +14581,9 @@ var app = (function () {
     }
 
     // (127:0) {#each selectedActions as action (action._id)}
-    function create_each_block$5(key_1, ctx) {
+    function create_each_block$3(key_1, ctx) {
     	let p;
-    	let t_value = /*action*/ ctx[15].name + "";
+    	let t_value = /*action*/ ctx[13].name + "";
     	let t;
 
     	const block = {
@@ -11174,7 +14592,7 @@ var app = (function () {
     		c: function create() {
     			p = element$1("p");
     			t = text(t_value);
-    			add_location(p, file$8, 127, 2, 4807);
+    			add_location(p, file$6, 127, 2, 4767);
     			this.first = p;
     		},
     		m: function mount(target, anchor) {
@@ -11183,7 +14601,6 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*selectedActions*/ 2 && t_value !== (t_value = /*action*/ ctx[15].name + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(p);
@@ -11192,7 +14609,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$5.name,
+    		id: create_each_block$3.name,
     		type: "each",
     		source: "(127:0) {#each selectedActions as action (action._id)}",
     		ctx
@@ -11201,7 +14618,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$8(ctx) {
+    function create_fragment$6(ctx) {
     	let p0;
     	let t1;
     	let input0;
@@ -11232,26 +14649,26 @@ var app = (function () {
     	let button4;
     	let mounted;
     	let dispose;
-    	let each_value_1 = /*actions*/ ctx[0];
+    	let each_value_1 = actions;
     	validate_each_argument(each_value_1);
-    	const get_key = ctx => /*action*/ ctx[15]._id;
-    	validate_each_keys(ctx, each_value_1, get_each_context_1$2, get_key);
+    	const get_key = ctx => /*action*/ ctx[13]._id;
+    	validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
-    		let child_ctx = get_each_context_1$2(ctx, each_value_1, i);
+    		let child_ctx = get_each_context_1(ctx, each_value_1, i);
     		let key = get_key(child_ctx);
-    		each0_lookup.set(key, each_blocks_1[i] = create_each_block_1$2(key, child_ctx));
+    		each0_lookup.set(key, each_blocks_1[i] = create_each_block_1(key, child_ctx));
     	}
 
-    	let each_value = /*selectedActions*/ ctx[1];
+    	let each_value = selectedActions;
     	validate_each_argument(each_value);
-    	const get_key_1 = ctx => /*action*/ ctx[15]._id;
-    	validate_each_keys(ctx, each_value, get_each_context$5, get_key_1);
+    	const get_key_1 = ctx => /*action*/ ctx[13]._id;
+    	validate_each_keys(ctx, each_value, get_each_context$3, get_key_1);
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		let child_ctx = get_each_context$5(ctx, each_value, i);
+    		let child_ctx = get_each_context$3(ctx, each_value, i);
     		let key = get_key_1(child_ctx);
-    		each1_lookup.set(key, each_blocks[i] = create_each_block$5(key, child_ctx));
+    		each1_lookup.set(key, each_blocks[i] = create_each_block$3(key, child_ctx));
     	}
 
     	const block = {
@@ -11299,25 +14716,25 @@ var app = (function () {
     			t19 = space();
     			button4 = element$1("button");
     			button4.textContent = "Save Process";
-    			add_location(p0, file$8, 99, 0, 4126);
+    			add_location(p0, file$6, 99, 0, 4086);
     			attr_dev(input0, "type", "text");
-    			add_location(input0, file$8, 100, 0, 4181);
-    			add_location(p1, file$8, 101, 0, 4221);
+    			add_location(input0, file$6, 100, 0, 4141);
+    			add_location(p1, file$6, 101, 0, 4181);
     			attr_dev(input1, "type", "text");
-    			add_location(input1, file$8, 105, 0, 4319);
-    			add_location(p2, file$8, 107, 0, 4367);
-    			add_location(ul, file$8, 112, 0, 4496);
-    			add_location(h3, file$8, 124, 0, 4734);
+    			add_location(input1, file$6, 105, 0, 4279);
+    			add_location(p2, file$6, 107, 0, 4327);
+    			add_location(ul, file$6, 112, 0, 4456);
+    			add_location(h3, file$6, 124, 0, 4694);
     			attr_dev(button0, "class", "add-button");
-    			add_location(button0, file$8, 129, 0, 4836);
+    			add_location(button0, file$6, 129, 0, 4796);
     			attr_dev(button1, "class", "remove-button");
-    			add_location(button1, file$8, 130, 0, 4909);
+    			add_location(button1, file$6, 130, 0, 4869);
     			attr_dev(button2, "class", "add-button");
-    			add_location(button2, file$8, 133, 0, 4997);
+    			add_location(button2, file$6, 133, 0, 4957);
     			attr_dev(button3, "class", "remove-button");
-    			add_location(button3, file$8, 134, 0, 5066);
+    			add_location(button3, file$6, 134, 0, 5026);
     			attr_dev(button4, "class", "add-button");
-    			add_location(button4, file$8, 135, 0, 5147);
+    			add_location(button4, file$6, 135, 0, 5107);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -11326,12 +14743,12 @@ var app = (function () {
     			insert_dev(target, p0, anchor);
     			insert_dev(target, t1, anchor);
     			insert_dev(target, input0, anchor);
-    			set_input_value(input0, /*name*/ ctx[2]);
+    			set_input_value(input0, /*name*/ ctx[0]);
     			insert_dev(target, t2, anchor);
     			insert_dev(target, p1, anchor);
     			insert_dev(target, t4, anchor);
     			insert_dev(target, input1, anchor);
-    			set_input_value(input1, /*description*/ ctx[3]);
+    			set_input_value(input1, /*description*/ ctx[1]);
     			insert_dev(target, t5, anchor);
     			insert_dev(target, p2, anchor);
     			insert_dev(target, t7, anchor);
@@ -11366,39 +14783,39 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[10]),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[11]),
-    					listen_dev(button0, "click", /*localAddNodes*/ ctx[4], false, false, false, false),
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[6]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[7]),
+    					listen_dev(button0, "click", /*localAddNodes*/ ctx[2], false, false, false, false),
     					listen_dev(button1, "click", removeSelectedNode, false, false, false, false),
-    					listen_dev(button2, "click", /*localAddEdge*/ ctx[5], false, false, false, false),
+    					listen_dev(button2, "click", /*localAddEdge*/ ctx[3], false, false, false, false),
     					listen_dev(button3, "click", removeSelectedEdge, false, false, false, false),
-    					listen_dev(button4, "click", /*saveProcess*/ ctx[6], false, false, false, false)
+    					listen_dev(button4, "click", /*saveProcess*/ ctx[4], false, false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*name*/ 4 && input0.value !== /*name*/ ctx[2]) {
-    				set_input_value(input0, /*name*/ ctx[2]);
+    			if (dirty & /*name*/ 1 && input0.value !== /*name*/ ctx[0]) {
+    				set_input_value(input0, /*name*/ ctx[0]);
     			}
 
-    			if (dirty & /*description*/ 8 && input1.value !== /*description*/ ctx[3]) {
-    				set_input_value(input1, /*description*/ ctx[3]);
+    			if (dirty & /*description*/ 2 && input1.value !== /*description*/ ctx[1]) {
+    				set_input_value(input1, /*description*/ ctx[1]);
     			}
 
-    			if (dirty & /*isSelected, actions, toggleSelect*/ 385) {
-    				each_value_1 = /*actions*/ ctx[0];
+    			if (dirty & /*isSelected, actions, toggleSelect*/ 0) {
+    				each_value_1 = actions;
     				validate_each_argument(each_value_1);
-    				validate_each_keys(ctx, each_value_1, get_each_context_1$2, get_key);
-    				each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx, each_value_1, each0_lookup, ul, destroy_block, create_each_block_1$2, null, get_each_context_1$2);
+    				validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
+    				each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx, each_value_1, each0_lookup, ul, destroy_block, create_each_block_1, null, get_each_context_1);
     			}
 
-    			if (dirty & /*selectedActions*/ 2) {
-    				each_value = /*selectedActions*/ ctx[1];
+    			if (dirty & /*selectedActions*/ 0) {
+    				each_value = selectedActions;
     				validate_each_argument(each_value);
-    				validate_each_keys(ctx, each_value, get_each_context$5, get_key_1);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key_1, 1, ctx, each_value, each1_lookup, t11.parentNode, destroy_block, create_each_block$5, t11, get_each_context$5);
+    				validate_each_keys(ctx, each_value, get_each_context$3, get_key_1);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key_1, 1, ctx, each_value, each1_lookup, t11.parentNode, destroy_block, create_each_block$3, t11, get_each_context$3);
     			}
     		},
     		i: noop$2,
@@ -11445,7 +14862,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$8.name,
+    		id: create_fragment$6.name,
     		type: "component",
     		source: "",
     		ctx
@@ -11454,10 +14871,32 @@ var app = (function () {
     	return block;
     }
 
-    function instance$8($$self, $$props, $$invalidate) {
+    function toggleSelect(action) {
+    	// console.log("toggleSelect called on action: ", action);
+    	const index = selectedActions.findIndex(a => a._id.$oid === action._id.$oid);
+
+    	if (index !== -1) {
+    		// action is currently selected, remove it
+    		selectedActions = selectedActions.filter(a => a._id.$oid !== action._id.$oid);
+    	} else {
+    		// action is not currently selected, add it
+    		selectedActions = [...selectedActions, action];
+    	}
+    } // console.log("selectedActions after toggleSelect:", selectedActions);
+
+    function isSelected(action) {
+    	// console.log("isSelected called on action: ", action);
+    	let is_selected = selectedActions.some(a => a._id.$oid === action._id.$oid);
+
+    	// console.log("selectedActions during isSelected:", selectedActions);
+    	// console.log("isSelected returning: ", is_selected);
+    	return is_selected;
+    }
+
+    function instance$6($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(9, $systemStateStore = $$value));
+    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(5, $systemStateStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('CreateProcess', slots, []);
 
@@ -11497,15 +14936,15 @@ var app = (function () {
     			});
     	};
 
-    	let actions = [];
-    	let selectedActions = [];
+    	let nodes = [];
+    	let selectedNodes = [];
     	let name = "";
     	let description = "";
     	let current_graph = new graphlib.Graph();
 
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
     		current_graph = $systemStateStore.graphState.graph;
-    		$$invalidate(0, actions = $systemStateStore.aiSystemState.actions);
+    		nodes = $systemStateStore.nodes;
     	}));
 
     	function localAddNodes() {
@@ -11516,7 +14955,7 @@ var app = (function () {
     		});
 
     		// clear out the selected actions
-    		$$invalidate(1, selectedActions = []);
+    		selectedActions = [];
     	}
 
     	function localAddEdge() {
@@ -11557,30 +14996,8 @@ var app = (function () {
     			// console.log("sending process: " + JSON.stringify(process));
     			$systemStateStore.websocket.send(JSON.stringify({ create_process: process }));
 
-    			$$invalidate(1, selectedActions = []);
+    			selectedActions = [];
     		}
-    	}
-
-    	function toggleSelect(action) {
-    		// console.log("toggleSelect called on action: ", action);
-    		const index = selectedActions.findIndex(a => a._id.$oid === action._id.$oid);
-
-    		if (index !== -1) {
-    			// action is currently selected, remove it
-    			$$invalidate(1, selectedActions = selectedActions.filter(a => a._id.$oid !== action._id.$oid));
-    		} else {
-    			// action is not currently selected, add it
-    			$$invalidate(1, selectedActions = [...selectedActions, action]);
-    		}
-    	} // console.log("selectedActions after toggleSelect:", selectedActions);
-
-    	function isSelected(action) {
-    		// console.log("isSelected called on action: ", action);
-    		let is_selected = selectedActions.some(a => a._id.$oid === action._id.$oid);
-
-    		// console.log("selectedActions during isSelected:", selectedActions);
-    		// console.log("isSelected returning: ", is_selected);
-    		return is_selected;
     	}
 
     	const writable_props = [];
@@ -11591,12 +15008,12 @@ var app = (function () {
 
     	function input0_input_handler() {
     		name = this.value;
-    		$$invalidate(2, name);
+    		$$invalidate(0, name);
     	}
 
     	function input1_input_handler() {
     		description = this.value;
-    		$$invalidate(3, description);
+    		$$invalidate(1, description);
     	}
 
     	const click_handler = action => toggleSelect(action);
@@ -11612,8 +15029,8 @@ var app = (function () {
     		Graph: graphlib.Graph,
     		json: graphlib.json,
     		systemStateStore,
-    		actions,
-    		selectedActions,
+    		nodes,
+    		selectedNodes,
     		name,
     		description,
     		current_graph,
@@ -11627,10 +15044,10 @@ var app = (function () {
 
     	$$self.$inject_state = $$props => {
     		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
-    		if ('actions' in $$props) $$invalidate(0, actions = $$props.actions);
-    		if ('selectedActions' in $$props) $$invalidate(1, selectedActions = $$props.selectedActions);
-    		if ('name' in $$props) $$invalidate(2, name = $$props.name);
-    		if ('description' in $$props) $$invalidate(3, description = $$props.description);
+    		if ('nodes' in $$props) nodes = $$props.nodes;
+    		if ('selectedNodes' in $$props) selectedNodes = $$props.selectedNodes;
+    		if ('name' in $$props) $$invalidate(0, name = $$props.name);
+    		if ('description' in $$props) $$invalidate(1, description = $$props.description);
     		if ('current_graph' in $$props) current_graph = $$props.current_graph;
     	};
 
@@ -11639,24 +15056,20 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$systemStateStore*/ 512) {
+    		if ($$self.$$.dirty & /*$systemStateStore*/ 32) {
     			{
     				current_graph = $systemStateStore.graphState.graph;
-    				$$invalidate(0, actions = $systemStateStore.aiSystemState.actions);
+    				nodes = $systemStateStore.nodes;
     			}
     		}
     	};
 
     	return [
-    		actions,
-    		selectedActions,
     		name,
     		description,
     		localAddNodes,
     		localAddEdge,
     		saveProcess,
-    		toggleSelect,
-    		isSelected,
     		$systemStateStore,
     		input0_input_handler,
     		input1_input_handler,
@@ -11667,22 +15080,22 @@ var app = (function () {
     class CreateProcess extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$8, create_fragment$8, safe_not_equal, {});
+    		init(this, options, instance$6, create_fragment$6, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "CreateProcess",
     			options,
-    			id: create_fragment$8.name
+    			id: create_fragment$6.name
     		});
     	}
     }
 
     /* src/components/sidebarComponents/BackgroundInfo.svelte generated by Svelte v3.59.1 */
 
-    const file$7 = "src/components/sidebarComponents/BackgroundInfo.svelte";
+    const file$5 = "src/components/sidebarComponents/BackgroundInfo.svelte";
 
-    function create_fragment$7(ctx) {
+    function create_fragment$5(ctx) {
     	let h10;
     	let t1;
     	let p0;
@@ -11766,23 +15179,23 @@ var app = (function () {
     			t29 = space();
     			p6 = element$1("p");
     			p6.textContent = "In short, the Node Graph System allows for the handling of complex workflows in a way that is scalable, manageable, and easy to understand.";
-    			add_location(h10, file$7, 0, 0, 0);
-    			add_location(p0, file$7, 2, 0, 54);
-    			add_location(p1, file$7, 6, 0, 313);
-    			add_location(h20, file$7, 10, 0, 377);
-    			add_location(p2, file$7, 11, 0, 396);
-    			add_location(h21, file$7, 15, 0, 645);
-    			add_location(p3, file$7, 16, 0, 664);
-    			add_location(h22, file$7, 20, 0, 955);
-    			add_location(p4, file$7, 21, 0, 974);
-    			add_location(h11, file$7, 25, 0, 1171);
-    			add_location(p5, file$7, 27, 0, 1219);
-    			add_location(li0, file$7, 32, 4, 1376);
-    			add_location(li1, file$7, 33, 4, 1442);
-    			add_location(li2, file$7, 34, 4, 1512);
-    			add_location(li3, file$7, 35, 4, 1593);
-    			add_location(ul, file$7, 31, 0, 1367);
-    			add_location(p6, file$7, 38, 0, 1693);
+    			add_location(h10, file$5, 0, 0, 0);
+    			add_location(p0, file$5, 2, 0, 54);
+    			add_location(p1, file$5, 6, 0, 313);
+    			add_location(h20, file$5, 10, 0, 377);
+    			add_location(p2, file$5, 11, 0, 396);
+    			add_location(h21, file$5, 15, 0, 645);
+    			add_location(p3, file$5, 16, 0, 664);
+    			add_location(h22, file$5, 20, 0, 955);
+    			add_location(p4, file$5, 21, 0, 974);
+    			add_location(h11, file$5, 25, 0, 1171);
+    			add_location(p5, file$5, 27, 0, 1219);
+    			add_location(li0, file$5, 32, 4, 1376);
+    			add_location(li1, file$5, 33, 4, 1442);
+    			add_location(li2, file$5, 34, 4, 1512);
+    			add_location(li3, file$5, 35, 4, 1593);
+    			add_location(ul, file$5, 31, 0, 1367);
+    			add_location(p6, file$5, 38, 0, 1693);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -11855,7 +15268,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$7.name,
+    		id: create_fragment$5.name,
     		type: "component",
     		source: "",
     		ctx
@@ -11864,7 +15277,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$7($$self, $$props) {
+    function instance$5($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('BackgroundInfo', slots, []);
     	const writable_props = [];
@@ -11879,982 +15292,127 @@ var app = (function () {
     class BackgroundInfo extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$7, create_fragment$7, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "BackgroundInfo",
-    			options,
-    			id: create_fragment$7.name
-    		});
-    	}
-    }
-
-    /* src/components/sidebarComponents/JsonEditor.svelte generated by Svelte v3.59.1 */
-
-    const { Object: Object_1$1 } = globals;
-    const file$6 = "src/components/sidebarComponents/JsonEditor.svelte";
-
-    function get_each_context$4(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[6] = list[i][0];
-    	child_ctx[7] = list[i][1];
-    	child_ctx[8] = list;
-    	child_ctx[9] = i;
-    	return child_ctx;
-    }
-
-    // (20:2) {#if mainObject !== null && Object.keys(mainObject).length > 0}
-    function create_if_block$4(ctx) {
-    	let each_blocks = [];
-    	let each_1_lookup = new Map();
-    	let t0;
-    	let button;
-    	let mounted;
-    	let dispose;
-    	let each_value = Object.entries(/*mainObject*/ ctx[0]);
-    	validate_each_argument(each_value);
-    	const get_key = ctx => /*index*/ ctx[9];
-    	validate_each_keys(ctx, each_value, get_each_context$4, get_key);
-
-    	for (let i = 0; i < each_value.length; i += 1) {
-    		let child_ctx = get_each_context$4(ctx, each_value, i);
-    		let key = get_key(child_ctx);
-    		each_1_lookup.set(key, each_blocks[i] = create_each_block$4(key, child_ctx));
-    	}
-
-    	const block = {
-    		c: function create() {
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			t0 = space();
-    			button = element$1("button");
-    			button.textContent = "Save";
-    			add_location(button, file$6, 47, 4, 1619);
-    		},
-    		m: function mount(target, anchor) {
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				if (each_blocks[i]) {
-    					each_blocks[i].m(target, anchor);
-    				}
-    			}
-
-    			insert_dev(target, t0, anchor);
-    			insert_dev(target, button, anchor);
-
-    			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*save*/ ctx[1], false, false, false, false);
-    				mounted = true;
-    			}
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*Object, mainObject, isAction, isProcess*/ 1) {
-    				each_value = Object.entries(/*mainObject*/ ctx[0]);
-    				validate_each_argument(each_value);
-    				validate_each_keys(ctx, each_value, get_each_context$4, get_key);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, t0.parentNode, destroy_block, create_each_block$4, t0, get_each_context$4);
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].d(detaching);
-    			}
-
-    			if (detaching) detach_dev(t0);
-    			if (detaching) detach_dev(button);
-    			mounted = false;
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block$4.name,
-    		type: "if",
-    		source: "(20:2) {#if mainObject !== null && Object.keys(mainObject).length > 0}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (22:6) {#if key !== "_id" && key != "graph"}
-    function create_if_block_1$2(ctx) {
-    	let div;
-    	let label;
-    	let t0_value = /*key*/ ctx[6] + "";
-    	let t0;
-    	let t1;
-    	let label_for_value;
-    	let t2;
-    	let show_if;
-    	let show_if_1;
-    	let show_if_2;
-
-    	function select_block_type(ctx, dirty) {
-    		if (dirty & /*mainObject*/ 1) show_if = null;
-    		if (dirty & /*mainObject*/ 1) show_if_1 = null;
-    		if (dirty & /*mainObject*/ 1) show_if_2 = null;
-    		if (show_if == null) show_if = !!(typeof /*value*/ ctx[7] === "boolean" && (isAction(/*mainObject*/ ctx[0]) || isProcess(/*mainObject*/ ctx[0])));
-    		if (show_if) return create_if_block_2$1;
-    		if (show_if_1 == null) show_if_1 = !!(typeof /*value*/ ctx[7] === "number" && (isAction(/*mainObject*/ ctx[0]) || isProcess(/*mainObject*/ ctx[0])));
-    		if (show_if_1) return create_if_block_3;
-    		if (show_if_2 == null) show_if_2 = !!(isAction(/*mainObject*/ ctx[0]) || isProcess(/*mainObject*/ ctx[0]));
-    		if (show_if_2) return create_if_block_4;
-    	}
-
-    	let current_block_type = select_block_type(ctx, -1);
-    	let if_block = current_block_type && current_block_type(ctx);
-
-    	const block = {
-    		c: function create() {
-    			div = element$1("div");
-    			label = element$1("label");
-    			t0 = text(t0_value);
-    			t1 = text(":");
-    			t2 = space();
-    			if (if_block) if_block.c();
-    			attr_dev(label, "for", label_for_value = "input-" + /*index*/ ctx[9]);
-    			add_location(label, file$6, 24, 10, 843);
-    			attr_dev(div, "class", "object-field");
-    			add_location(div, file$6, 23, 8, 806);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			append_dev(div, label);
-    			append_dev(label, t0);
-    			append_dev(label, t1);
-    			append_dev(div, t2);
-    			if (if_block) if_block.m(div, null);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*mainObject*/ 1 && t0_value !== (t0_value = /*key*/ ctx[6] + "")) set_data_dev(t0, t0_value);
-
-    			if (dirty & /*mainObject*/ 1 && label_for_value !== (label_for_value = "input-" + /*index*/ ctx[9])) {
-    				attr_dev(label, "for", label_for_value);
-    			}
-
-    			if (current_block_type === (current_block_type = select_block_type(ctx, dirty)) && if_block) {
-    				if_block.p(ctx, dirty);
-    			} else {
-    				if (if_block) if_block.d(1);
-    				if_block = current_block_type && current_block_type(ctx);
-
-    				if (if_block) {
-    					if_block.c();
-    					if_block.m(div, null);
-    				}
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-
-    			if (if_block) {
-    				if_block.d();
-    			}
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_1$2.name,
-    		type: "if",
-    		source: "(22:6) {#if key !== \\\"_id\\\" && key != \\\"graph\\\"}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (38:66) 
-    function create_if_block_4(ctx) {
-    	let textarea;
-    	let textarea_id_value;
-    	let mounted;
-    	let dispose;
-
-    	function textarea_input_handler() {
-    		/*textarea_input_handler*/ ctx[5].call(textarea, /*key*/ ctx[6]);
-    	}
-
-    	const block = {
-    		c: function create() {
-    			textarea = element$1("textarea");
-    			attr_dev(textarea, "id", textarea_id_value = "input-" + /*index*/ ctx[9]);
-    			attr_dev(textarea, "rows", "1");
-    			add_location(textarea, file$6, 38, 12, 1436);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, textarea, anchor);
-    			set_input_value(textarea, /*mainObject*/ ctx[0][/*key*/ ctx[6]]);
-
-    			if (!mounted) {
-    				dispose = listen_dev(textarea, "input", textarea_input_handler);
-    				mounted = true;
-    			}
-    		},
-    		p: function update(new_ctx, dirty) {
-    			ctx = new_ctx;
-
-    			if (dirty & /*mainObject*/ 1 && textarea_id_value !== (textarea_id_value = "input-" + /*index*/ ctx[9])) {
-    				attr_dev(textarea, "id", textarea_id_value);
-    			}
-
-    			if (dirty & /*mainObject, Object*/ 1) {
-    				set_input_value(textarea, /*mainObject*/ ctx[0][/*key*/ ctx[6]]);
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(textarea);
-    			mounted = false;
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_4.name,
-    		type: "if",
-    		source: "(38:66) ",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (32:97) 
-    function create_if_block_3(ctx) {
-    	let input;
-    	let input_id_value;
-    	let mounted;
-    	let dispose;
-
-    	function input_input_handler() {
-    		/*input_input_handler*/ ctx[4].call(input, /*key*/ ctx[6]);
-    	}
-
-    	const block = {
-    		c: function create() {
-    			input = element$1("input");
-    			attr_dev(input, "id", input_id_value = "input-" + /*index*/ ctx[9]);
-    			attr_dev(input, "type", "number");
-    			add_location(input, file$6, 32, 12, 1231);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, input, anchor);
-    			set_input_value(input, /*mainObject*/ ctx[0][/*key*/ ctx[6]]);
-
-    			if (!mounted) {
-    				dispose = listen_dev(input, "input", input_input_handler);
-    				mounted = true;
-    			}
-    		},
-    		p: function update(new_ctx, dirty) {
-    			ctx = new_ctx;
-
-    			if (dirty & /*mainObject*/ 1 && input_id_value !== (input_id_value = "input-" + /*index*/ ctx[9])) {
-    				attr_dev(input, "id", input_id_value);
-    			}
-
-    			if (dirty & /*mainObject, Object*/ 1 && to_number(input.value) !== /*mainObject*/ ctx[0][/*key*/ ctx[6]]) {
-    				set_input_value(input, /*mainObject*/ ctx[0][/*key*/ ctx[6]]);
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(input);
-    			mounted = false;
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_3.name,
-    		type: "if",
-    		source: "(32:97) ",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (26:10) {#if typeof value === "boolean" && (isAction(mainObject) || isProcess(mainObject))}
-    function create_if_block_2$1(ctx) {
-    	let input;
-    	let input_id_value;
-    	let mounted;
-    	let dispose;
-
-    	function input_change_handler() {
-    		/*input_change_handler*/ ctx[3].call(input, /*key*/ ctx[6]);
-    	}
-
-    	const block = {
-    		c: function create() {
-    			input = element$1("input");
-    			attr_dev(input, "id", input_id_value = "input-" + /*index*/ ctx[9]);
-    			attr_dev(input, "type", "checkbox");
-    			add_location(input, file$6, 26, 12, 991);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, input, anchor);
-    			input.checked = /*mainObject*/ ctx[0][/*key*/ ctx[6]];
-
-    			if (!mounted) {
-    				dispose = listen_dev(input, "change", input_change_handler);
-    				mounted = true;
-    			}
-    		},
-    		p: function update(new_ctx, dirty) {
-    			ctx = new_ctx;
-
-    			if (dirty & /*mainObject*/ 1 && input_id_value !== (input_id_value = "input-" + /*index*/ ctx[9])) {
-    				attr_dev(input, "id", input_id_value);
-    			}
-
-    			if (dirty & /*mainObject, Object*/ 1) {
-    				input.checked = /*mainObject*/ ctx[0][/*key*/ ctx[6]];
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(input);
-    			mounted = false;
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_2$1.name,
-    		type: "if",
-    		source: "(26:10) {#if typeof value === \\\"boolean\\\" && (isAction(mainObject) || isProcess(mainObject))}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (21:4) {#each Object.entries(mainObject) as [key, value], index (index)}
-    function create_each_block$4(key_1, ctx) {
-    	let first;
-    	let if_block_anchor;
-    	let if_block = /*key*/ ctx[6] !== "_id" && /*key*/ ctx[6] != "graph" && create_if_block_1$2(ctx);
-
-    	const block = {
-    		key: key_1,
-    		first: null,
-    		c: function create() {
-    			first = empty();
-    			if (if_block) if_block.c();
-    			if_block_anchor = empty();
-    			this.first = first;
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, first, anchor);
-    			if (if_block) if_block.m(target, anchor);
-    			insert_dev(target, if_block_anchor, anchor);
-    		},
-    		p: function update(new_ctx, dirty) {
-    			ctx = new_ctx;
-
-    			if (/*key*/ ctx[6] !== "_id" && /*key*/ ctx[6] != "graph") {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
-    				} else {
-    					if_block = create_if_block_1$2(ctx);
-    					if_block.c();
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
-    				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(first);
-    			if (if_block) if_block.d(detaching);
-    			if (detaching) detach_dev(if_block_anchor);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_each_block$4.name,
-    		type: "each",
-    		source: "(21:4) {#each Object.entries(mainObject) as [key, value], index (index)}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment$6(ctx) {
-    	let div;
-    	let show_if = /*mainObject*/ ctx[0] !== null && Object.keys(/*mainObject*/ ctx[0]).length > 0;
-    	let if_block = show_if && create_if_block$4(ctx);
-
-    	const block = {
-    		c: function create() {
-    			div = element$1("div");
-    			if (if_block) if_block.c();
-    			attr_dev(div, "class", "json-editor");
-    			add_location(div, file$6, 18, 0, 543);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			if (if_block) if_block.m(div, null);
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*mainObject*/ 1) show_if = /*mainObject*/ ctx[0] !== null && Object.keys(/*mainObject*/ ctx[0]).length > 0;
-
-    			if (show_if) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
-    				} else {
-    					if_block = create_if_block$4(ctx);
-    					if_block.c();
-    					if_block.m(div, null);
-    				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
-    			}
-    		},
-    		i: noop$2,
-    		o: noop$2,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			if (if_block) if_block.d();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$6.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$6($$self, $$props, $$invalidate) {
-    	let $systemStateStore;
-    	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(2, $systemStateStore = $$value));
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('JsonEditor', slots, []);
-    	let mainObject;
-
-    	function save() {
-    		if (isAction(mainObject)) {
-    			let updateAction = { action: mainObject };
-
-    			// console.log("sending: " + JSON.stringify(updateAction));
-    			$systemStateStore.websocket.send(JSON.stringify(updateAction));
-    		}
-    	}
-
-    	const writable_props = [];
-
-    	Object_1$1.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<JsonEditor> was created with unknown prop '${key}'`);
-    	});
-
-    	function input_change_handler(key) {
-    		mainObject[key] = this.checked;
-    		($$invalidate(0, mainObject), $$invalidate(2, $systemStateStore));
-    	}
-
-    	function input_input_handler(key) {
-    		mainObject[key] = to_number(this.value);
-    		($$invalidate(0, mainObject), $$invalidate(2, $systemStateStore));
-    	}
-
-    	function textarea_input_handler(key) {
-    		mainObject[key] = this.value;
-    		($$invalidate(0, mainObject), $$invalidate(2, $systemStateStore));
-    	}
-
-    	$$self.$capture_state = () => ({
-    		systemStateStore,
-    		isProcess,
-    		isAction,
-    		mainObject,
-    		save,
-    		$systemStateStore
-    	});
-
-    	$$self.$inject_state = $$props => {
-    		if ('mainObject' in $$props) $$invalidate(0, mainObject = $$props.mainObject);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$systemStateStore*/ 4) {
-    			{
-    				$$invalidate(0, mainObject = $systemStateStore.selectedAction || $systemStateStore.selectedProcess);
-    			}
-    		}
-    	};
-
-    	return [
-    		mainObject,
-    		save,
-    		$systemStateStore,
-    		input_change_handler,
-    		input_input_handler,
-    		textarea_input_handler
-    	];
-    }
-
-    class JsonEditor extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$6, create_fragment$6, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "JsonEditor",
-    			options,
-    			id: create_fragment$6.name
-    		});
-    	}
-    }
-
-    /* src/components/sidebarComponents/InteractWithActionsAndProcesses.svelte generated by Svelte v3.59.1 */
-    const file$5 = "src/components/sidebarComponents/InteractWithActionsAndProcesses.svelte";
-
-    function get_each_context$3(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[10] = list[i];
-    	return child_ctx;
-    }
-
-    function get_each_context_1$1(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[13] = list[i];
-    	return child_ctx;
-    }
-
-    // (58:2) {#each actions as action}
-    function create_each_block_1$1(ctx) {
-    	let option;
-    	let t_value = /*action*/ ctx[13].name + "";
-    	let t;
-    	let option_value_value;
-
-    	const block = {
-    		c: function create() {
-    			option = element$1("option");
-    			t = text(t_value);
-    			option.__value = option_value_value = /*action*/ ctx[13].name;
-    			option.value = option.__value;
-    			add_location(option, file$5, 58, 4, 1816);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, option, anchor);
-    			append_dev(option, t);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*actions*/ 4 && t_value !== (t_value = /*action*/ ctx[13].name + "")) set_data_dev(t, t_value);
-
-    			if (dirty & /*actions*/ 4 && option_value_value !== (option_value_value = /*action*/ ctx[13].name)) {
-    				prop_dev(option, "__value", option_value_value);
-    				option.value = option.__value;
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(option);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_each_block_1$1.name,
-    		type: "each",
-    		source: "(58:2) {#each actions as action}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (69:2) {#each processes as process}
-    function create_each_block$3(ctx) {
-    	let option;
-    	let t_value = /*process*/ ctx[10].name + "";
-    	let t;
-    	let option_value_value;
-
-    	const block = {
-    		c: function create() {
-    			option = element$1("option");
-    			t = text(t_value);
-    			option.__value = option_value_value = /*process*/ ctx[10].name;
-    			option.value = option.__value;
-    			add_location(option, file$5, 69, 4, 2094);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, option, anchor);
-    			append_dev(option, t);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*processes*/ 8 && t_value !== (t_value = /*process*/ ctx[10].name + "")) set_data_dev(t, t_value);
-
-    			if (dirty & /*processes*/ 8 && option_value_value !== (option_value_value = /*process*/ ctx[10].name)) {
-    				prop_dev(option, "__value", option_value_value);
-    				option.value = option.__value;
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(option);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_each_block$3.name,
-    		type: "each",
-    		source: "(69:2) {#each processes as process}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment$5(ctx) {
-    	let select0;
-    	let option0;
-    	let t1;
-    	let select1;
-    	let option1;
-    	let t3;
-    	let jsoneditor;
-    	let current;
-    	let mounted;
-    	let dispose;
-    	let each_value_1 = /*actions*/ ctx[2];
-    	validate_each_argument(each_value_1);
-    	let each_blocks_1 = [];
-
-    	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks_1[i] = create_each_block_1$1(get_each_context_1$1(ctx, each_value_1, i));
-    	}
-
-    	let each_value = /*processes*/ ctx[3];
-    	validate_each_argument(each_value);
-    	let each_blocks = [];
-
-    	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$3(get_each_context$3(ctx, each_value, i));
-    	}
-
-    	jsoneditor = new JsonEditor({ $$inline: true });
-
-    	const block = {
-    		c: function create() {
-    			select0 = element$1("select");
-    			option0 = element$1("option");
-    			option0.textContent = "Select an action";
-
-    			for (let i = 0; i < each_blocks_1.length; i += 1) {
-    				each_blocks_1[i].c();
-    			}
-
-    			t1 = space();
-    			select1 = element$1("select");
-    			option1 = element$1("option");
-    			option1.textContent = "Select a process";
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			t3 = space();
-    			create_component(jsoneditor.$$.fragment);
-    			option0.__value = "";
-    			option0.value = option0.__value;
-    			add_location(option0, file$5, 56, 2, 1741);
-    			if (/*selectedAction*/ ctx[0] === void 0) add_render_callback(() => /*select0_change_handler*/ ctx[6].call(select0));
-    			add_location(select0, file$5, 52, 0, 1652);
-    			option1.__value = "";
-    			option1.value = option1.__value;
-    			add_location(option1, file$5, 67, 2, 2016);
-    			if (/*selectedProcess*/ ctx[1] === void 0) add_render_callback(() => /*select1_change_handler*/ ctx[8].call(select1));
-    			add_location(select1, file$5, 63, 0, 1925);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, select0, anchor);
-    			append_dev(select0, option0);
-
-    			for (let i = 0; i < each_blocks_1.length; i += 1) {
-    				if (each_blocks_1[i]) {
-    					each_blocks_1[i].m(select0, null);
-    				}
-    			}
-
-    			select_option(select0, /*selectedAction*/ ctx[0], true);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, select1, anchor);
-    			append_dev(select1, option1);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				if (each_blocks[i]) {
-    					each_blocks[i].m(select1, null);
-    				}
-    			}
-
-    			select_option(select1, /*selectedProcess*/ ctx[1], true);
-    			insert_dev(target, t3, anchor);
-    			mount_component(jsoneditor, target, anchor);
-    			current = true;
-
-    			if (!mounted) {
-    				dispose = [
-    					listen_dev(select0, "change", /*select0_change_handler*/ ctx[6]),
-    					listen_dev(select0, "change", /*change_handler*/ ctx[7], false, false, false, false),
-    					listen_dev(select1, "change", /*select1_change_handler*/ ctx[8]),
-    					listen_dev(select1, "change", /*change_handler_1*/ ctx[9], false, false, false, false)
-    				];
-
-    				mounted = true;
-    			}
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*actions*/ 4) {
-    				each_value_1 = /*actions*/ ctx[2];
-    				validate_each_argument(each_value_1);
-    				let i;
-
-    				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1$1(ctx, each_value_1, i);
-
-    					if (each_blocks_1[i]) {
-    						each_blocks_1[i].p(child_ctx, dirty);
-    					} else {
-    						each_blocks_1[i] = create_each_block_1$1(child_ctx);
-    						each_blocks_1[i].c();
-    						each_blocks_1[i].m(select0, null);
-    					}
-    				}
-
-    				for (; i < each_blocks_1.length; i += 1) {
-    					each_blocks_1[i].d(1);
-    				}
-
-    				each_blocks_1.length = each_value_1.length;
-    			}
-
-    			if (dirty & /*selectedAction, actions*/ 5) {
-    				select_option(select0, /*selectedAction*/ ctx[0]);
-    			}
-
-    			if (dirty & /*processes*/ 8) {
-    				each_value = /*processes*/ ctx[3];
-    				validate_each_argument(each_value);
-    				let i;
-
-    				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$3(ctx, each_value, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
-    					} else {
-    						each_blocks[i] = create_each_block$3(child_ctx);
-    						each_blocks[i].c();
-    						each_blocks[i].m(select1, null);
-    					}
-    				}
-
-    				for (; i < each_blocks.length; i += 1) {
-    					each_blocks[i].d(1);
-    				}
-
-    				each_blocks.length = each_value.length;
-    			}
-
-    			if (dirty & /*selectedProcess, processes*/ 10) {
-    				select_option(select1, /*selectedProcess*/ ctx[1]);
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(jsoneditor.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(jsoneditor.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(select0);
-    			destroy_each(each_blocks_1, detaching);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(select1);
-    			destroy_each(each_blocks, detaching);
-    			if (detaching) detach_dev(t3);
-    			destroy_component(jsoneditor, detaching);
-    			mounted = false;
-    			run_all(dispose);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$5.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$5($$self, $$props, $$invalidate) {
-    	let $systemStateStore;
-    	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(5, $systemStateStore = $$value));
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('InteractWithActionsAndProcesses', slots, []);
-    	let selectedAction = "";
-    	let selectedProcess = "";
-
-    	// Subscribe to the graphStore to get the latest values
-    	let actions = [];
-
-    	let processes = [];
-
-    	// Function to handle dropdown change events
-    	function onDropdownChange(type) {
-    		// console.log("onDropdownChange called: ", type, " selectedAction: ", selectedAction, " selectedProcess: ", selectedProcess);
-    		if (type === "action") {
-    			$$invalidate(1, selectedProcess = "");
-    		} else {
-    			$$invalidate(0, selectedAction = "");
-    		}
-
-    		if (selectedAction) {
-    			// Set the selected action in the systemStateStore
-    			// it should get the action from the aiSystemStore
-    			// with the name selectedAction
-    			let this_action = $systemStateStore.aiSystemState.actions.find(obj => obj.name === selectedAction);
-
-    			set_store_value(systemStateStore, $systemStateStore.selectedAction = this_action, $systemStateStore);
-    			set_store_value(systemStateStore, $systemStateStore.selectedProcess = null, $systemStateStore);
-    		}
-
-    		if (selectedProcess) {
-    			// Set the selected process in the systemStateStore
-    			// it should get the process from the aiSystemStore
-    			// with the name selectedProcess
-    			let this_process = $systemStateStore.aiSystemState.processes.find(obj => obj.name === selectedProcess);
-
-    			// console.log("this_process: ", this_process);
-    			set_store_value(systemStateStore, $systemStateStore.selectedProcess = this_process, $systemStateStore);
-
-    			set_store_value(systemStateStore, $systemStateStore.selectedAction = null, $systemStateStore);
-    		}
-    	}
-
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<InteractWithActionsAndProcesses> was created with unknown prop '${key}'`);
-    	});
-
-    	function select0_change_handler() {
-    		selectedAction = select_value(this);
-    		$$invalidate(0, selectedAction);
-    		($$invalidate(2, actions), $$invalidate(5, $systemStateStore));
-    	}
-
-    	const change_handler = () => onDropdownChange("action");
-
-    	function select1_change_handler() {
-    		selectedProcess = select_value(this);
-    		$$invalidate(1, selectedProcess);
-    		($$invalidate(3, processes), $$invalidate(5, $systemStateStore));
-    	}
-
-    	const change_handler_1 = () => onDropdownChange("process");
-
-    	$$self.$capture_state = () => ({
-    		systemStateStore,
-    		JsonEditor,
-    		selectedAction,
-    		selectedProcess,
-    		actions,
-    		processes,
-    		onDropdownChange,
-    		$systemStateStore
-    	});
-
-    	$$self.$inject_state = $$props => {
-    		if ('selectedAction' in $$props) $$invalidate(0, selectedAction = $$props.selectedAction);
-    		if ('selectedProcess' in $$props) $$invalidate(1, selectedProcess = $$props.selectedProcess);
-    		if ('actions' in $$props) $$invalidate(2, actions = $$props.actions);
-    		if ('processes' in $$props) $$invalidate(3, processes = $$props.processes);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$systemStateStore*/ 32) {
-    			{
-    				$$invalidate(2, actions = $systemStateStore.aiSystemState.actions);
-    				$$invalidate(3, processes = $systemStateStore.aiSystemState.processes);
-    			}
-    		}
-    	};
-
-    	return [
-    		selectedAction,
-    		selectedProcess,
-    		actions,
-    		processes,
-    		onDropdownChange,
-    		$systemStateStore,
-    		select0_change_handler,
-    		change_handler,
-    		select1_change_handler,
-    		change_handler_1
-    	];
-    }
-
-    class InteractWithActionsAndProcesses extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
     		init(this, options, instance$5, create_fragment$5, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "InteractWithActionsAndProcesses",
+    			tagName: "BackgroundInfo",
     			options,
     			id: create_fragment$5.name
     		});
     	}
     }
 
-    /* src/components/sidebarComponents/log.svelte generated by Svelte v3.59.1 */
+    var __spreadArray$1 = (undefined && undefined.__spreadArray) || function (to, from, pack) {
+        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+            if (ar || !(i in from)) {
+                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+                ar[i] = from[i];
+            }
+        }
+        return to.concat(ar || Array.prototype.slice.call(from));
+    };
+    /**
+     * @since 2.0.0
+     */
+    function identity$2(a) {
+        return a;
+    }
+    function pipe(a, ab, bc, cd, de, ef, fg, gh, hi) {
+        switch (arguments.length) {
+            case 1:
+                return a;
+            case 2:
+                return ab(a);
+            case 3:
+                return bc(ab(a));
+            case 4:
+                return cd(bc(ab(a)));
+            case 5:
+                return de(cd(bc(ab(a))));
+            case 6:
+                return ef(de(cd(bc(ab(a)))));
+            case 7:
+                return fg(ef(de(cd(bc(ab(a))))));
+            case 8:
+                return gh(fg(ef(de(cd(bc(ab(a)))))));
+            case 9:
+                return hi(gh(fg(ef(de(cd(bc(ab(a))))))));
+            default: {
+                var ret = arguments[0];
+                for (var i = 1; i < arguments.length; i++) {
+                    ret = arguments[i](ret);
+                }
+                return ret;
+            }
+        }
+    }
+    /** @internal */
+    var dual = function (arity, body) {
+        var isDataFirst = typeof arity === 'number' ? function (args) { return args.length >= arity; } : arity;
+        return function () {
+            var args = Array.from(arguments);
+            if (isDataFirst(arguments)) {
+                return body.apply(this, args);
+            }
+            return function (self) { return body.apply(void 0, __spreadArray$1([self], args, false)); };
+        };
+    };
 
-    const { console: console_1$2 } = globals;
+    (undefined && undefined.__spreadArray) || function (to, from, pack) {
+        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+            if (ar || !(i in from)) {
+                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+                ar[i] = from[i];
+            }
+        }
+        return to.concat(ar || Array.prototype.slice.call(from));
+    };
+    /** @internal */
+    var none$1 = { _tag: 'None' };
+    // -------------------------------------------------------------------------------------
+    // Either
+    // -------------------------------------------------------------------------------------
+    /** @internal */
+    var isLeft$1 = function (ma) { return ma._tag === 'Left'; };
+    /** @internal */
+    var left$1 = function (e) { return ({ _tag: 'Left', left: e }); };
+    /** @internal */
+    var right$1 = function (a) { return ({ _tag: 'Right', right: a }); };
 
-    const file$4 = "src/components/sidebarComponents/log.svelte";
+    /**
+     * A `Functor` is a type constructor which supports a mapping operation `map`.
+     *
+     * `map` can be used to turn functions `a -> b` into functions `f a -> f b` whose argument and return types use the type
+     * constructor `f` to represent some computational context.
+     *
+     * Instances must satisfy the following laws:
+     *
+     * 1. Identity: `F.map(fa, a => a) <-> fa`
+     * 2. Composition: `F.map(fa, a => bc(ab(a))) <-> F.map(F.map(fa, ab), bc)`
+     *
+     * @since 2.0.0
+     */
+    /** @internal */
+    function as(F) {
+        return function (self, b) { return F.map(self, function () { return b; }); };
+    }
+
+    // -------------------------------------------------------------------------------------
+    // constructors
+    // -------------------------------------------------------------------------------------
+    /**
+     * `None` doesn't have a constructor, instead you can use it directly as a value. Represents a missing value.
+     *
+     * @category constructors
+     * @since 2.0.0
+     */
+    var none = none$1;
+
+    /* src/components/sidebarComponents/InteractWithActionsAndProcesses.svelte generated by Svelte v3.59.1 */
+
+    const { console: console_1$1 } = globals;
+    const file$4 = "src/components/sidebarComponents/InteractWithActionsAndProcesses.svelte";
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
@@ -12862,185 +15420,35 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (72:6) {#if prompts.has(node)}
-    function create_if_block_1$1(ctx) {
-    	let div;
-    	let h3;
-    	let t0_value = /*node*/ ctx[6] + "";
-    	let t0;
-    	let t1;
-    	let p;
-    	let t2_value = /*prompts*/ ctx[1].get(/*node*/ ctx[6]) + "";
-    	let t2;
-
-    	const block = {
-    		c: function create() {
-    			div = element$1("div");
-    			h3 = element$1("h3");
-    			t0 = text(t0_value);
-    			t1 = space();
-    			p = element$1("p");
-    			t2 = text(t2_value);
-    			add_location(h3, file$4, 73, 14, 3685);
-    			add_location(p, file$4, 74, 14, 3715);
-    			attr_dev(div, "class", "prompt");
-    			add_location(div, file$4, 72, 10, 3650);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			append_dev(div, h3);
-    			append_dev(h3, t0);
-    			append_dev(div, t1);
-    			append_dev(div, p);
-    			append_dev(p, t2);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*topological_order*/ 4 && t0_value !== (t0_value = /*node*/ ctx[6] + "")) set_data_dev(t0, t0_value);
-    			if (dirty & /*prompts, topological_order*/ 6 && t2_value !== (t2_value = /*prompts*/ ctx[1].get(/*node*/ ctx[6]) + "")) set_data_dev(t2, t2_value);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_1$1.name,
-    		type: "if",
-    		source: "(72:6) {#if prompts.has(node)}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (78:6) {#if responses.has(node)}
-    function create_if_block$3(ctx) {
-    	let div;
-    	let h3;
-    	let t0_value = /*node*/ ctx[6] + "";
-    	let t0;
-    	let t1;
-    	let p;
-    	let t2_value = /*responses*/ ctx[0].get(/*node*/ ctx[6]) + "";
-    	let t2;
-    	let t3;
-
-    	const block = {
-    		c: function create() {
-    			div = element$1("div");
-    			h3 = element$1("h3");
-    			t0 = text(t0_value);
-    			t1 = space();
-    			p = element$1("p");
-    			t2 = text(t2_value);
-    			t3 = space();
-    			add_location(h3, file$4, 79, 10, 3842);
-    			add_location(p, file$4, 80, 10, 3868);
-    			attr_dev(div, "class", "response");
-    			add_location(div, file$4, 78, 6, 3809);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			append_dev(div, h3);
-    			append_dev(h3, t0);
-    			append_dev(div, t1);
-    			append_dev(div, p);
-    			append_dev(p, t2);
-    			append_dev(div, t3);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*topological_order*/ 4 && t0_value !== (t0_value = /*node*/ ctx[6] + "")) set_data_dev(t0, t0_value);
-    			if (dirty & /*responses, topological_order*/ 5 && t2_value !== (t2_value = /*responses*/ ctx[0].get(/*node*/ ctx[6]) + "")) set_data_dev(t2, t2_value);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block$3.name,
-    		type: "if",
-    		source: "(78:6) {#if responses.has(node)}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (70:2) {#each topological_order as node}
+    // (23:2) {#each nodes as node}
     function create_each_block$2(ctx) {
-    	let h2;
-    	let t0_value = /*node*/ ctx[6] + "";
-    	let t0;
-    	let t1;
-    	let show_if_1 = /*prompts*/ ctx[1].has(/*node*/ ctx[6]);
-    	let t2;
-    	let show_if = /*responses*/ ctx[0].has(/*node*/ ctx[6]);
-    	let if_block1_anchor;
-    	let if_block0 = show_if_1 && create_if_block_1$1(ctx);
-    	let if_block1 = show_if && create_if_block$3(ctx);
+    	let option;
+    	let t_value = /*node*/ ctx[6].name + "";
+    	let t;
+    	let option_value_value;
 
     	const block = {
     		c: function create() {
-    			h2 = element$1("h2");
-    			t0 = text(t0_value);
-    			t1 = space();
-    			if (if_block0) if_block0.c();
-    			t2 = space();
-    			if (if_block1) if_block1.c();
-    			if_block1_anchor = empty();
-    			add_location(h2, file$4, 70, 6, 3594);
+    			option = element$1("option");
+    			t = text(t_value);
+    			option.__value = option_value_value = /*node*/ ctx[6];
+    			option.value = option.__value;
+    			add_location(option, file$4, 23, 4, 676);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, h2, anchor);
-    			append_dev(h2, t0);
-    			insert_dev(target, t1, anchor);
-    			if (if_block0) if_block0.m(target, anchor);
-    			insert_dev(target, t2, anchor);
-    			if (if_block1) if_block1.m(target, anchor);
-    			insert_dev(target, if_block1_anchor, anchor);
+    			insert_dev(target, option, anchor);
+    			append_dev(option, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*topological_order*/ 4 && t0_value !== (t0_value = /*node*/ ctx[6] + "")) set_data_dev(t0, t0_value);
-    			if (dirty & /*prompts, topological_order*/ 6) show_if_1 = /*prompts*/ ctx[1].has(/*node*/ ctx[6]);
+    			if (dirty & /*nodes*/ 2 && t_value !== (t_value = /*node*/ ctx[6].name + "")) set_data_dev(t, t_value);
 
-    			if (show_if_1) {
-    				if (if_block0) {
-    					if_block0.p(ctx, dirty);
-    				} else {
-    					if_block0 = create_if_block_1$1(ctx);
-    					if_block0.c();
-    					if_block0.m(t2.parentNode, t2);
-    				}
-    			} else if (if_block0) {
-    				if_block0.d(1);
-    				if_block0 = null;
-    			}
-
-    			if (dirty & /*responses, topological_order*/ 5) show_if = /*responses*/ ctx[0].has(/*node*/ ctx[6]);
-
-    			if (show_if) {
-    				if (if_block1) {
-    					if_block1.p(ctx, dirty);
-    				} else {
-    					if_block1 = create_if_block$3(ctx);
-    					if_block1.c();
-    					if_block1.m(if_block1_anchor.parentNode, if_block1_anchor);
-    				}
-    			} else if (if_block1) {
-    				if_block1.d(1);
-    				if_block1 = null;
+    			if (dirty & /*nodes*/ 2 && option_value_value !== (option_value_value = /*node*/ ctx[6])) {
+    				prop_dev(option, "__value", option_value_value);
+    				option.value = option.__value;
     			}
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(h2);
-    			if (detaching) detach_dev(t1);
-    			if (if_block0) if_block0.d(detaching);
-    			if (detaching) detach_dev(t2);
-    			if (if_block1) if_block1.d(detaching);
-    			if (detaching) detach_dev(if_block1_anchor);
+    			if (detaching) detach_dev(option);
     		}
     	};
 
@@ -13048,7 +15456,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(70:2) {#each topological_order as node}",
+    		source: "(23:2) {#each nodes as node}",
     		ctx
     	});
 
@@ -13056,8 +15464,11 @@ var app = (function () {
     }
 
     function create_fragment$4(ctx) {
-    	let each_1_anchor;
-    	let each_value = /*topological_order*/ ctx[2];
+    	let select;
+    	let option;
+    	let mounted;
+    	let dispose;
+    	let each_value = /*nodes*/ ctx[1];
     	validate_each_argument(each_value);
     	let each_blocks = [];
 
@@ -13067,27 +15478,47 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
+    			select = element$1("select");
+    			option = element$1("option");
+    			option.textContent = "Select an action";
+
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			each_1_anchor = empty();
+    			option.__value = "";
+    			option.value = option.__value;
+    			add_location(option, file$4, 21, 2, 605);
+    			if (/*selectedNode*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[4].call(select));
+    			add_location(select, file$4, 17, 0, 526);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
+    			insert_dev(target, select, anchor);
+    			append_dev(select, option);
+
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				if (each_blocks[i]) {
-    					each_blocks[i].m(target, anchor);
+    					each_blocks[i].m(select, null);
     				}
     			}
 
-    			insert_dev(target, each_1_anchor, anchor);
+    			select_option(select, /*selectedNode*/ ctx[0], true);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(select, "change", /*select_change_handler*/ ctx[4]),
+    					listen_dev(select, "change", /*change_handler*/ ctx[5], false, false, false, false)
+    				];
+
+    				mounted = true;
+    			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*responses, topological_order, prompts*/ 7) {
-    				each_value = /*topological_order*/ ctx[2];
+    			if (dirty & /*nodes*/ 2) {
+    				each_value = /*nodes*/ ctx[1];
     				validate_each_argument(each_value);
     				let i;
 
@@ -13099,7 +15530,7 @@ var app = (function () {
     					} else {
     						each_blocks[i] = create_each_block$2(child_ctx);
     						each_blocks[i].c();
-    						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
+    						each_blocks[i].m(select, null);
     					}
     				}
 
@@ -13109,12 +15540,18 @@ var app = (function () {
 
     				each_blocks.length = each_value.length;
     			}
+
+    			if (dirty & /*selectedNode, nodes*/ 3) {
+    				select_option(select, /*selectedNode*/ ctx[0]);
+    			}
     		},
     		i: noop$2,
     		o: noop$2,
     		d: function destroy(detaching) {
+    			if (detaching) detach_dev(select);
     			destroy_each(each_blocks, detaching);
-    			if (detaching) detach_dev(each_1_anchor);
+    			mounted = false;
+    			run_all(dispose);
     		}
     	};
 
@@ -13130,53 +15567,48 @@ var app = (function () {
     }
 
     function instance$4($$self, $$props, $$invalidate) {
+    	let $systemStateStore;
+    	validate_store(systemStateStore, 'systemStateStore');
+    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(3, $systemStateStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Log', slots, []);
-    	let responses = new Map();
-    	let prompts = new Map();
-    	let topological_order = [];
-    	let current_node = "";
-    	let local_variables = new Map();
+    	validate_slots('InteractWithActionsAndProcesses', slots, []);
+    	let selectedNode = none;
 
-    	const unsubscribe = systemStateStore.subscribe(value => {
-    		$$invalidate(0, responses = value.executionContext.responses);
-    		$$invalidate(1, prompts = value.executionContext.prompts);
-    		$$invalidate(2, topological_order = value.executionContext.topological_order);
-    		$$invalidate(3, current_node = value.executionContext.current_node);
-    		$$invalidate(4, local_variables = value.executionContext.local_variables);
-    	});
+    	// Subscribe to the graphStore to get the latest values
+    	let nodes = [];
 
-    	onDestroy(() => {
-    		unsubscribe();
-    	});
+    	// Function to handle dropdown change events
+    	function onDropdownChange() {
+    		set_store_value(systemStateStore, $systemStateStore.selectedNode = selectedNode, $systemStateStore);
+    		console.log("selectedNode: ", selectedNode);
+    	}
 
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<Log> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<InteractWithActionsAndProcesses> was created with unknown prop '${key}'`);
     	});
 
+    	function select_change_handler() {
+    		selectedNode = select_value(this);
+    		($$invalidate(0, selectedNode), $$invalidate(3, $systemStateStore));
+    		($$invalidate(1, nodes), $$invalidate(3, $systemStateStore));
+    	}
+
+    	const change_handler = () => onDropdownChange();
+
     	$$self.$capture_state = () => ({
-    		onDestroy,
     		systemStateStore,
-    		getParentOutputVariables,
-    		setLocalExecutionVariable,
-    		addVariablesToPrompt,
-    		sendPrompt,
-    		responses,
-    		prompts,
-    		topological_order,
-    		current_node,
-    		local_variables,
-    		unsubscribe
+    		none,
+    		selectedNode,
+    		nodes,
+    		onDropdownChange,
+    		$systemStateStore
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('responses' in $$props) $$invalidate(0, responses = $$props.responses);
-    		if ('prompts' in $$props) $$invalidate(1, prompts = $$props.prompts);
-    		if ('topological_order' in $$props) $$invalidate(2, topological_order = $$props.topological_order);
-    		if ('current_node' in $$props) $$invalidate(3, current_node = $$props.current_node);
-    		if ('local_variables' in $$props) $$invalidate(4, local_variables = $$props.local_variables);
+    		if ('selectedNode' in $$props) $$invalidate(0, selectedNode = $$props.selectedNode);
+    		if ('nodes' in $$props) $$invalidate(1, nodes = $$props.nodes);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -13184,77 +15616,32 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*current_node, topological_order, responses, prompts, local_variables*/ 31) {
-    			// do something when the current_node changes
-    			if (current_node != null) {
-    				// if the current_node is not the first in the topological order
-    				if (topological_order.indexOf(current_node) > 0) {
-    					// get the previous node
-    					let previous_node = topological_order[topological_order.indexOf(current_node) - 1];
-
-    					// if the previous node has a response
-    					if (responses.has(previous_node)) {
-    						console.log("response has previous_node: ", previous_node);
-
-    						// get the prompt for the current node
-    						// and if the current node has a prompt
-    						if (prompts.has(current_node) && !responses.has(current_node)) {
-    							// send the response to the backend
-    							//$systemStateStore.websocket.send(JSON.stringify({ response: responses.get(previous_node) }));
-    							console.log("sending response here: ", responses.get(previous_node));
-
-    							getParentOutputVariables(current_node).then(output_variables => {
-    								console.log("output_variables: ", output_variables);
-
-    								output_variables.forEach(variable => {
-    									if (!local_variables.has(variable)) {
-    										setLocalExecutionVariable(variable, responses.get(previous_node) || "").then(value => {
-    											console.log("setLocalExecutionVariable: ", value);
-
-    											// now we are ready to send the new prompt
-    											// first we need to replace the variables in the prompt
-    											if (current_node != null) {
-    												let prompt = prompts.get(current_node);
-
-    												if (prompt != undefined) {
-    													let this_prompt_text = addVariablesToPrompt(prompt, value);
-
-    													// send the prompt to the backend
-    													let prompt_object = {
-    														prompt_text: this_prompt_text,
-    														action_id: current_node,
-    														system: "test"
-    													};
-
-    													sendPrompt(prompt_object).then(value => {
-    														console.log("sent prompt: ", value);
-    													});
-    												}
-    											}
-    										});
-    									}
-    								});
-    							});
-    						}
-    					} // send the response to the backend
-    				}
-
-    				console.log("current_node: ", current_node);
+    		if ($$self.$$.dirty & /*$systemStateStore*/ 8) {
+    			{
+    				$$invalidate(1, nodes = $systemStateStore.nodes);
+    				$$invalidate(0, selectedNode = $systemStateStore.selectedNode);
     			}
     		}
     	};
 
-    	return [responses, prompts, topological_order, current_node, local_variables];
+    	return [
+    		selectedNode,
+    		nodes,
+    		onDropdownChange,
+    		$systemStateStore,
+    		select_change_handler,
+    		change_handler
+    	];
     }
 
-    class Log extends SvelteComponentDev {
+    class InteractWithActionsAndProcesses extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
     		init(this, options, instance$4, create_fragment$4, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "Log",
+    			tagName: "InteractWithActionsAndProcesses",
     			options,
     			id: create_fragment$4.name
     		});
@@ -13262,43 +15649,28 @@ var app = (function () {
     }
 
     /* src/components/sidebarComponents/Execution.svelte generated by Svelte v3.59.1 */
-
-    const { Map: Map_1, console: console_1$1 } = globals;
     const file$3 = "src/components/sidebarComponents/Execution.svelte";
-
-    function get_each_context_2(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[30] = list[i];
-    	return child_ctx;
-    }
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[23] = list[i];
+    	child_ctx[7] = list[i];
     	return child_ctx;
     }
 
-    function get_each_context_1(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[26] = list[i][0];
-    	child_ctx[27] = list[i][1];
-    	return child_ctx;
-    }
-
-    // (192:0) {:else}
-    function create_else_block_1(ctx) {
+    // (56:0) {:else}
+    function create_else_block(ctx) {
     	let h1;
     	let t1;
     	let select;
     	let option;
     	let mounted;
     	let dispose;
-    	let each_value_2 = /*processes*/ ctx[6];
-    	validate_each_argument(each_value_2);
+    	let each_value = /*processes*/ ctx[1];
+    	validate_each_argument(each_value);
     	let each_blocks = [];
 
-    	for (let i = 0; i < each_value_2.length; i += 1) {
-    		each_blocks[i] = create_each_block_2(get_each_context_2(ctx, each_value_2, i));
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
     	}
 
     	const block = {
@@ -13314,12 +15686,12 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			add_location(h1, file$3, 192, 2, 9157);
+    			add_location(h1, file$3, 56, 2, 2175);
     			option.__value = "";
     			option.value = option.__value;
-    			add_location(option, file$3, 197, 4, 9290);
-    			if (/*selectedProcess*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[13].call(select));
-    			add_location(select, file$3, 193, 2, 9188);
+    			add_location(option, file$3, 61, 4, 2305);
+    			if (/*selectedNode*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[3].call(select));
+    			add_location(select, file$3, 57, 2, 2206);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, h1, anchor);
@@ -13333,30 +15705,30 @@ var app = (function () {
     				}
     			}
 
-    			select_option(select, /*selectedProcess*/ ctx[0], true);
+    			select_option(select, /*selectedNode*/ ctx[0], true);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(select, "change", /*select_change_handler*/ ctx[13]),
-    					listen_dev(select, "change", /*change_handler*/ ctx[14], false, false, false, false)
+    					listen_dev(select, "change", /*select_change_handler*/ ctx[3]),
+    					listen_dev(select, "change", /*change_handler*/ ctx[4], false, false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*processes*/ 64) {
-    				each_value_2 = /*processes*/ ctx[6];
-    				validate_each_argument(each_value_2);
+    			if (dirty & /*processes*/ 2) {
+    				each_value = /*processes*/ ctx[1];
+    				validate_each_argument(each_value);
     				let i;
 
-    				for (i = 0; i < each_value_2.length; i += 1) {
-    					const child_ctx = get_each_context_2(ctx, each_value_2, i);
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context$1(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block_2(child_ctx);
+    						each_blocks[i] = create_each_block$1(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(select, null);
     					}
@@ -13366,15 +15738,13 @@ var app = (function () {
     					each_blocks[i].d(1);
     				}
 
-    				each_blocks.length = each_value_2.length;
+    				each_blocks.length = each_value.length;
     			}
 
-    			if (dirty[0] & /*selectedProcess, processes*/ 65) {
-    				select_option(select, /*selectedProcess*/ ctx[0]);
+    			if (dirty & /*selectedNode, processes*/ 3) {
+    				select_option(select, /*selectedNode*/ ctx[0]);
     			}
     		},
-    		i: noop$2,
-    		o: noop$2,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(h1);
     			if (detaching) detach_dev(t1);
@@ -13387,175 +15757,30 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block_1.name,
+    		id: create_else_block.name,
     		type: "else",
-    		source: "(192:0) {:else}",
+    		source: "(56:0) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (159:0) {#if selectedProcess}
+    // (28:0) {#if selectedNode}
     function create_if_block$2(ctx) {
     	let div;
-    	let h20;
-    	let t0;
-    	let t1_value = /*selectedProcess*/ ctx[0].description + "";
-    	let t1;
-    	let t2;
-    	let h21;
-    	let t4;
-    	let p;
-    	let t5_value = /*topological_order_names*/ ctx[2].join(" -> ") + "";
-    	let t5;
-    	let t6;
-    	let h22;
-    	let t8;
-    	let t9;
-    	let current_block_type_index;
-    	let if_block;
-    	let current;
-    	let each_value_1 = [.../*globalVariables*/ ctx[1]];
-    	validate_each_argument(each_value_1);
-    	let each_blocks = [];
-
-    	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
-    	}
-
-    	const if_block_creators = [create_if_block_1, create_if_block_2, create_else_block];
-    	const if_blocks = [];
-
-    	function select_block_type_1(ctx, dirty) {
-    		if (!/*ready_to_make_first_prompt*/ ctx[5]) return 0;
-    		if (!/*already_made_first_prompt*/ ctx[3]) return 1;
-    		return 2;
-    	}
-
-    	current_block_type_index = select_block_type_1(ctx);
-    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
 
     	const block = {
     		c: function create() {
     			div = element$1("div");
-    			h20 = element$1("h2");
-    			t0 = text("Description: ");
-    			t1 = text(t1_value);
-    			t2 = space();
-    			h21 = element$1("h2");
-    			h21.textContent = "Topological Order:";
-    			t4 = space();
-    			p = element$1("p");
-    			t5 = text(t5_value);
-    			t6 = space();
-    			h22 = element$1("h2");
-    			h22.textContent = "Global Variables";
-    			t8 = space();
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			t9 = space();
-    			if_block.c();
-    			add_location(h20, file$3, 160, 4, 8114);
-    			add_location(h21, file$3, 161, 4, 8170);
-    			add_location(p, file$3, 162, 4, 8202);
-    			add_location(h22, file$3, 164, 4, 8253);
-    			add_location(div, file$3, 159, 2, 8104);
+    			add_location(div, file$3, 28, 2, 1275);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
-    			append_dev(div, h20);
-    			append_dev(h20, t0);
-    			append_dev(h20, t1);
-    			append_dev(div, t2);
-    			append_dev(div, h21);
-    			append_dev(div, t4);
-    			append_dev(div, p);
-    			append_dev(p, t5);
-    			append_dev(div, t6);
-    			append_dev(div, h22);
-    			append_dev(div, t8);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				if (each_blocks[i]) {
-    					each_blocks[i].m(div, null);
-    				}
-    			}
-
-    			append_dev(div, t9);
-    			if_blocks[current_block_type_index].m(div, null);
-    			current = true;
     		},
-    		p: function update(ctx, dirty) {
-    			if ((!current || dirty[0] & /*selectedProcess*/ 1) && t1_value !== (t1_value = /*selectedProcess*/ ctx[0].description + "")) set_data_dev(t1, t1_value);
-    			if ((!current || dirty[0] & /*topological_order_names*/ 4) && t5_value !== (t5_value = /*topological_order_names*/ ctx[2].join(" -> ") + "")) set_data_dev(t5, t5_value);
-
-    			if (dirty[0] & /*globalVariables*/ 2) {
-    				each_value_1 = [.../*globalVariables*/ ctx[1]];
-    				validate_each_argument(each_value_1);
-    				let i;
-
-    				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
-    					} else {
-    						each_blocks[i] = create_each_block_1(child_ctx);
-    						each_blocks[i].c();
-    						each_blocks[i].m(div, t9);
-    					}
-    				}
-
-    				for (; i < each_blocks.length; i += 1) {
-    					each_blocks[i].d(1);
-    				}
-
-    				each_blocks.length = each_value_1.length;
-    			}
-
-    			let previous_block_index = current_block_type_index;
-    			current_block_type_index = select_block_type_1(ctx);
-
-    			if (current_block_type_index === previous_block_index) {
-    				if_blocks[current_block_type_index].p(ctx, dirty);
-    			} else {
-    				group_outros();
-
-    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
-    					if_blocks[previous_block_index] = null;
-    				});
-
-    				check_outros();
-    				if_block = if_blocks[current_block_type_index];
-
-    				if (!if_block) {
-    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
-    					if_block.c();
-    				} else {
-    					if_block.p(ctx, dirty);
-    				}
-
-    				transition_in(if_block, 1);
-    				if_block.m(div, null);
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(if_block);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(if_block);
-    			current = false;
-    		},
+    		p: noop$2,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
-    			destroy_each(each_blocks, detaching);
-    			if_blocks[current_block_type_index].d();
     		}
     	};
 
@@ -13563,17 +15788,17 @@ var app = (function () {
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(159:0) {#if selectedProcess}",
+    		source: "(28:0) {#if selectedNode}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (199:4) {#each processes as process}
-    function create_each_block_2(ctx) {
+    // (63:4) {#each processes as process}
+    function create_each_block$1(ctx) {
     	let option;
-    	let t_value = /*process*/ ctx[30].name + "";
+    	let t_value = /*process*/ ctx[7].name + "";
     	let t;
     	let option_value_value;
 
@@ -13581,18 +15806,18 @@ var app = (function () {
     		c: function create() {
     			option = element$1("option");
     			t = text(t_value);
-    			option.__value = option_value_value = /*process*/ ctx[30].name;
+    			option.__value = option_value_value = /*process*/ ctx[7].name;
     			option.value = option.__value;
-    			add_location(option, file$3, 199, 6, 9372);
+    			add_location(option, file$3, 63, 6, 2387);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
     			append_dev(option, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*processes*/ 64 && t_value !== (t_value = /*process*/ ctx[30].name + "")) set_data_dev(t, t_value);
+    			if (dirty & /*processes*/ 2 && t_value !== (t_value = /*process*/ ctx[7].name + "")) set_data_dev(t, t_value);
 
-    			if (dirty[0] & /*processes*/ 64 && option_value_value !== (option_value_value = /*process*/ ctx[30].name)) {
+    			if (dirty & /*processes*/ 2 && option_value_value !== (option_value_value = /*process*/ ctx[7].name)) {
     				prop_dev(option, "__value", option_value_value);
     				option.value = option.__value;
     			}
@@ -13604,305 +15829,9 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_2.name,
-    		type: "each",
-    		source: "(199:4) {#each processes as process}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (166:4) {#each [...globalVariables] as [key, value]}
-    function create_each_block_1(ctx) {
-    	let p;
-    	let t0_value = /*key*/ ctx[26] + "";
-    	let t0;
-    	let t1;
-    	let t2_value = /*value*/ ctx[27] + "";
-    	let t2;
-
-    	const block = {
-    		c: function create() {
-    			p = element$1("p");
-    			t0 = text(t0_value);
-    			t1 = text(": ");
-    			t2 = text(t2_value);
-    			add_location(p, file$3, 166, 6, 8334);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, p, anchor);
-    			append_dev(p, t0);
-    			append_dev(p, t1);
-    			append_dev(p, t2);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*globalVariables*/ 2 && t0_value !== (t0_value = /*key*/ ctx[26] + "")) set_data_dev(t0, t0_value);
-    			if (dirty[0] & /*globalVariables*/ 2 && t2_value !== (t2_value = /*value*/ ctx[27] + "")) set_data_dev(t2, t2_value);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(p);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_each_block_1.name,
-    		type: "each",
-    		source: "(166:4) {#each [...globalVariables] as [key, value]}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (187:4) {:else}
-    function create_else_block(ctx) {
-    	let log;
-    	let current;
-    	log = new Log({ $$inline: true });
-
-    	const block = {
-    		c: function create() {
-    			create_component(log.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(log, target, anchor);
-    			current = true;
-    		},
-    		p: noop$2,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(log.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(log.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(log, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_else_block.name,
-    		type: "else",
-    		source: "(187:4) {:else}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (185:41) 
-    function create_if_block_2(ctx) {
-    	let button;
-    	let mounted;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			button = element$1("button");
-    			button.textContent = "Execute";
-    			attr_dev(button, "class", "add-button");
-    			add_location(button, file$3, 185, 6, 8974);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, button, anchor);
-
-    			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*sendFirstPrompt*/ ctx[7], false, false, false, false);
-    				mounted = true;
-    			}
-    		},
-    		p: noop$2,
-    		i: noop$2,
-    		o: noop$2,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(button);
-    			mounted = false;
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_2.name,
-    		type: "if",
-    		source: "(185:41) ",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (171:4) {#if !ready_to_make_first_prompt}
-    function create_if_block_1(ctx) {
-    	let h2;
-    	let t1;
-    	let each_blocks = [];
-    	let each_1_lookup = new Map_1();
-    	let each_1_anchor;
-    	let each_value = /*needed_variables*/ ctx[4];
-    	validate_each_argument(each_value);
-    	const get_key = ctx => /*needed_var*/ ctx[23];
-    	validate_each_keys(ctx, each_value, get_each_context$1, get_key);
-
-    	for (let i = 0; i < each_value.length; i += 1) {
-    		let child_ctx = get_each_context$1(ctx, each_value, i);
-    		let key = get_key(child_ctx);
-    		each_1_lookup.set(key, each_blocks[i] = create_each_block$1(key, child_ctx));
-    	}
-
-    	const block = {
-    		c: function create() {
-    			h2 = element$1("h2");
-    			h2.textContent = "Needed Variables";
-    			t1 = space();
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			each_1_anchor = empty();
-    			add_location(h2, file$3, 171, 6, 8475);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, h2, anchor);
-    			insert_dev(target, t1, anchor);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				if (each_blocks[i]) {
-    					each_blocks[i].m(target, anchor);
-    				}
-    			}
-
-    			insert_dev(target, each_1_anchor, anchor);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*handleFormSubmit, needed_variables, handleInputChange*/ 784) {
-    				each_value = /*needed_variables*/ ctx[4];
-    				validate_each_argument(each_value);
-    				validate_each_keys(ctx, each_value, get_each_context$1, get_key);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, each_1_anchor.parentNode, destroy_block, create_each_block$1, each_1_anchor, get_each_context$1);
-    			}
-    		},
-    		i: noop$2,
-    		o: noop$2,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(h2);
-    			if (detaching) detach_dev(t1);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].d(detaching);
-    			}
-
-    			if (detaching) detach_dev(each_1_anchor);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_1.name,
-    		type: "if",
-    		source: "(171:4) {#if !ready_to_make_first_prompt}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (173:6) {#each needed_variables as needed_var (needed_var)}
-    function create_each_block$1(key_1, ctx) {
-    	let form;
-    	let label;
-    	let t0_value = /*needed_var*/ ctx[23] + "";
-    	let t0;
-    	let label_for_value;
-    	let t1;
-    	let input;
-    	let input_id_value;
-    	let t2;
-    	let button;
-    	let t4;
-    	let mounted;
-    	let dispose;
-
-    	function input_handler(...args) {
-    		return /*input_handler*/ ctx[11](/*needed_var*/ ctx[23], ...args);
-    	}
-
-    	function submit_handler(...args) {
-    		return /*submit_handler*/ ctx[12](/*needed_var*/ ctx[23], ...args);
-    	}
-
-    	const block = {
-    		key: key_1,
-    		first: null,
-    		c: function create() {
-    			form = element$1("form");
-    			label = element$1("label");
-    			t0 = text(t0_value);
-    			t1 = space();
-    			input = element$1("input");
-    			t2 = space();
-    			button = element$1("button");
-    			button.textContent = "Update";
-    			t4 = space();
-    			attr_dev(label, "for", label_for_value = /*needed_var*/ ctx[23]);
-    			add_location(label, file$3, 176, 10, 8674);
-    			attr_dev(input, "id", input_id_value = /*needed_var*/ ctx[23]);
-    			add_location(input, file$3, 177, 10, 8729);
-    			attr_dev(button, "type", "submit");
-    			add_location(button, file$3, 181, 10, 8858);
-    			add_location(form, file$3, 173, 8, 8567);
-    			this.first = form;
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, form, anchor);
-    			append_dev(form, label);
-    			append_dev(label, t0);
-    			append_dev(form, t1);
-    			append_dev(form, input);
-    			append_dev(form, t2);
-    			append_dev(form, button);
-    			append_dev(form, t4);
-
-    			if (!mounted) {
-    				dispose = [
-    					listen_dev(input, "input", input_handler, false, false, false, false),
-    					listen_dev(form, "submit", submit_handler, false, false, false, false)
-    				];
-
-    				mounted = true;
-    			}
-    		},
-    		p: function update(new_ctx, dirty) {
-    			ctx = new_ctx;
-    			if (dirty[0] & /*needed_variables*/ 16 && t0_value !== (t0_value = /*needed_var*/ ctx[23] + "")) set_data_dev(t0, t0_value);
-
-    			if (dirty[0] & /*needed_variables*/ 16 && label_for_value !== (label_for_value = /*needed_var*/ ctx[23])) {
-    				attr_dev(label, "for", label_for_value);
-    			}
-
-    			if (dirty[0] & /*needed_variables*/ 16 && input_id_value !== (input_id_value = /*needed_var*/ ctx[23])) {
-    				attr_dev(input, "id", input_id_value);
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(form);
-    			mounted = false;
-    			run_all(dispose);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(173:6) {#each needed_variables as needed_var (needed_var)}",
+    		source: "(63:4) {#each processes as process}",
     		ctx
     	});
 
@@ -13910,20 +15839,15 @@ var app = (function () {
     }
 
     function create_fragment$3(ctx) {
-    	let current_block_type_index;
-    	let if_block;
     	let if_block_anchor;
-    	let current;
-    	const if_block_creators = [create_if_block$2, create_else_block_1];
-    	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*selectedProcess*/ ctx[0]) return 0;
-    		return 1;
+    		if (/*selectedNode*/ ctx[0]) return create_if_block$2;
+    		return create_else_block;
     	}
 
-    	current_block_type_index = select_block_type(ctx);
-    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    	let current_block_type = select_block_type(ctx);
+    	let if_block = current_block_type(ctx);
 
     	const block = {
     		c: function create() {
@@ -13934,48 +15858,26 @@ var app = (function () {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			if_blocks[current_block_type_index].m(target, anchor);
+    			if_block.m(target, anchor);
     			insert_dev(target, if_block_anchor, anchor);
-    			current = true;
     		},
-    		p: function update(ctx, dirty) {
-    			let previous_block_index = current_block_type_index;
-    			current_block_type_index = select_block_type(ctx);
-
-    			if (current_block_type_index === previous_block_index) {
-    				if_blocks[current_block_type_index].p(ctx, dirty);
+    		p: function update(ctx, [dirty]) {
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
+    				if_block.p(ctx, dirty);
     			} else {
-    				group_outros();
+    				if_block.d(1);
+    				if_block = current_block_type(ctx);
 
-    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
-    					if_blocks[previous_block_index] = null;
-    				});
-
-    				check_outros();
-    				if_block = if_blocks[current_block_type_index];
-
-    				if (!if_block) {
-    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    				if (if_block) {
     					if_block.c();
-    				} else {
-    					if_block.p(ctx, dirty);
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
-
-    				transition_in(if_block, 1);
-    				if_block.m(if_block_anchor.parentNode, if_block_anchor);
     			}
     		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(if_block);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(if_block);
-    			current = false;
-    		},
+    		i: noop$2,
+    		o: noop$2,
     		d: function destroy(detaching) {
-    			if_blocks[current_block_type_index].d(detaching);
+    			if_block.d(detaching);
     			if (detaching) detach_dev(if_block_anchor);
     		}
     	};
@@ -13994,7 +15896,7 @@ var app = (function () {
     function instance$3($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(18, $systemStateStore = $$value));
+    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(5, $systemStateStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Execution', slots, []);
 
@@ -14034,177 +15936,17 @@ var app = (function () {
     			});
     	};
 
-    	let selectedProcess = null;
-    	let globalVariables = new Map();
-    	let possibleActions = null;
-    	let topological_order = [];
-    	let topological_order_names = [];
-    	let already_made_first_prompt = false;
-    	let needed_variables = [];
-    	let ready_to_make_first_prompt = false;
-
-    	function update_local_variables() {
-    		return __awaiter(this, void 0, void 0, function* () {
-    			$$invalidate(0, selectedProcess = $systemStateStore.selectedProcess);
-    			topological_order = $systemStateStore.selectedProcess.topological_order;
-    			$$invalidate(1, globalVariables = $systemStateStore.graphState.global_variables);
-    			possibleActions = $systemStateStore.aiSystemState.actions;
-    			let return_val = yield processSelectedProcessAndActions(selectedProcess, possibleActions, topological_order, topological_order_names, globalVariables);
-    			$$invalidate(2, topological_order_names = return_val.topological_order_names);
-    			set_store_value(systemStateStore, $systemStateStore.executionContext.topological_order_names = topological_order_names, $systemStateStore);
-    			$$invalidate(5, ready_to_make_first_prompt = return_val.ready_to_make_first_prompt);
-    			$$invalidate(4, needed_variables = return_val.needed_variables);
-    		});
-    	}
-
-    	function sendFirstPrompt() {
-    		createFirstPrompt(ready_to_make_first_prompt, already_made_first_prompt, topological_order, possibleActions, globalVariables).then(result => {
-    			$$invalidate(3, already_made_first_prompt = result.already_made_first_prompt);
-    			update_local_variables();
-    		}).catch(err => {
-    			console.error("Error in sendFirstPrompt: ", err);
-    		});
-    	}
-
-    	function processSelectedProcessAndActions(
-    		selectedProcess,
-    	possibleActions,
-    	topological_order,
-    	topological_order_names,
-    	globalVariables
-    	) {
-    		return __awaiter(this, void 0, void 0, function* () {
-    			console.log("Processing selected process and actions...");
-    			let ready_to_make_first_prompt = false;
-    			let needed_variables = [];
-
-    			if (selectedProcess && possibleActions) {
-    				if (topological_order.length > 0 && topological_order_names.length == 0) {
-    					set_store_value(systemStateStore, $systemStateStore.executionContext.topological_order = topological_order, $systemStateStore);
-    					set_store_value(systemStateStore, $systemStateStore.executionContext.current_node = topological_order[0], $systemStateStore);
-    					console.log("here: ", $systemStateStore.executionContext);
-    					let promiseArray = topological_order.map(getNodeName);
-    					let local_topological_order_names = yield Promise.all(promiseArray);
-
-    					// Here, topological_order_names is an array with all the resolved values.
-    					// remove all of the undefined values:
-    					local_topological_order_names = local_topological_order_names.filter(value => value != undefined);
-
-    					topological_order_names = local_topological_order_names;
-    				}
-
-    				console.log("Updated topological_order: ", topological_order);
-    				let input_vars = yield getInputVariablesByNodeId(topological_order[0]);
-
-    				if (input_vars != null) {
-    					needed_variables = input_vars.filter(input_var => !globalVariables.has(input_var));
-
-    					if (needed_variables.length == 0) {
-    						ready_to_make_first_prompt = true;
-    					}
-    				}
-    			}
-
-    			return {
-    				topological_order_names,
-    				ready_to_make_first_prompt,
-    				needed_variables
-    			};
-    		});
-    	}
-
-    	function createFirstPrompt(
-    		ready_to_make_first_prompt,
-    	already_made_first_prompt,
-    	topological_order,
-    	possibleActions,
-    	globalVariables
-    	) {
-    		return __awaiter(this, void 0, void 0, function* () {
-    			if (ready_to_make_first_prompt && !already_made_first_prompt) {
-    				console.log("Creating first prompt...");
-    				let first_action_id = topological_order[0];
-
-    				if (possibleActions != null) {
-    					let first_action = possibleActions.find(action => action._id.$oid === first_action_id);
-
-    					if (first_action != null) {
-    						already_made_first_prompt = true;
-    						console.log("Found first action: ", first_action);
-    						console.log("First action prompt: ", first_action.prompt);
-    						let prompt = first_action.prompt;
-
-    						if (first_action.input_variables.length > 0) {
-    							let input_variables = first_action.input_variables;
-    							console.log("First action input variables: ", input_variables);
-
-    							for (let i = 0; i < input_variables.length; i++) {
-    								let input_variable = input_variables[i];
-    								let global_variable = globalVariables.get(input_variable);
-
-    								if (global_variable != null) {
-    									prompt = prompt.replace(input_variable, global_variable);
-    									console.log(`Replaced ${input_variable} with ${global_variable} in prompt.`);
-
-    									let send_prompt = {
-    										prompt_text: prompt,
-    										system: first_action.system,
-    										action_id: first_action._id.$oid
-    									};
-
-    									console.log("Sending prompt: ", send_prompt);
-    									yield sendPrompt(send_prompt);
-    								} else {
-    									console.log("Global variable does not exist for input variable: ", input_variable);
-    									alert("global variable does not exist");
-    								}
-    							}
-    						}
-    					} else {
-    						console.log("No action found for first action ID: ", first_action_id);
-    					}
-    				} else {
-    					console.log("Possible actions is null.");
-    				}
-    			} else {
-    				console.log("Conditions for creating first prompt not met.");
-    			}
-
-    			return { already_made_first_prompt };
-    		});
-    	}
-
+    	let selectedNode = null;
     	let processes = [];
-    	processes = $systemStateStore.aiSystemState.processes;
-    	let newValues = {};
 
-    	function handleInputChange(variableName, event) {
-    		newValues[variableName] = event.target.value;
-    	}
-
-    	function handleFormSubmit(variableName, event) {
-    		return __awaiter(this, void 0, void 0, function* () {
-    			event.preventDefault();
-
-    			if (newValues[variableName]) {
-    				yield addGlobalVariable(variableName, newValues[variableName]);
-    			}
-
-    			yield update_local_variables();
-    		});
-    	}
+    	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
+    		$$invalidate(1, processes = yield returnProcesses());
+    	}));
 
     	function onDropdownChange() {
     		return __awaiter(this, void 0, void 0, function* () {
-    			if (selectedProcess) {
-    				let this_process = $systemStateStore.aiSystemState.processes.find(obj => obj.name === selectedProcess);
-
-    				if (isProcess(this_process)) {
-    					set_store_value(systemStateStore, $systemStateStore.selectedProcess = this_process, $systemStateStore);
-    					set_store_value(systemStateStore, $systemStateStore.selectedAction = newAction(), $systemStateStore);
-    				}
-
-    				yield update_local_variables();
+    			if (selectedNode) {
+    				set_store_value(systemStateStore, $systemStateStore.selectedNode = Option.some(selectedNode), $systemStateStore);
     			}
     		});
     	}
@@ -14212,16 +15954,13 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<Execution> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Execution> was created with unknown prop '${key}'`);
     	});
 
-    	const input_handler = (needed_var, event) => handleInputChange(needed_var, event);
-    	const submit_handler = async (needed_var, event) => await handleFormSubmit(needed_var, event);
-
     	function select_change_handler() {
-    		selectedProcess = select_value(this);
-    		$$invalidate(0, selectedProcess);
-    		$$invalidate(6, processes);
+    		selectedNode = select_value(this);
+    		$$invalidate(0, selectedNode);
+    		$$invalidate(1, processes);
     	}
 
     	const change_handler = async () => await onDropdownChange();
@@ -14229,45 +15968,19 @@ var app = (function () {
     	$$self.$capture_state = () => ({
     		__awaiter,
     		systemStateStore,
-    		getInputVariablesByNodeId,
-    		getNodeName,
-    		sendPrompt,
-    		isProcess,
-    		newAction,
-    		addGlobalVariable,
-    		Log,
-    		selectedProcess,
-    		globalVariables,
-    		possibleActions,
-    		topological_order,
-    		topological_order_names,
-    		already_made_first_prompt,
-    		needed_variables,
-    		ready_to_make_first_prompt,
-    		update_local_variables,
-    		sendFirstPrompt,
-    		processSelectedProcessAndActions,
-    		createFirstPrompt,
+    		returnProcesses,
+    		onMount,
+    		some: Option.some,
+    		selectedNode,
     		processes,
-    		newValues,
-    		handleInputChange,
-    		handleFormSubmit,
     		onDropdownChange,
     		$systemStateStore
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
-    		if ('selectedProcess' in $$props) $$invalidate(0, selectedProcess = $$props.selectedProcess);
-    		if ('globalVariables' in $$props) $$invalidate(1, globalVariables = $$props.globalVariables);
-    		if ('possibleActions' in $$props) possibleActions = $$props.possibleActions;
-    		if ('topological_order' in $$props) topological_order = $$props.topological_order;
-    		if ('topological_order_names' in $$props) $$invalidate(2, topological_order_names = $$props.topological_order_names);
-    		if ('already_made_first_prompt' in $$props) $$invalidate(3, already_made_first_prompt = $$props.already_made_first_prompt);
-    		if ('needed_variables' in $$props) $$invalidate(4, needed_variables = $$props.needed_variables);
-    		if ('ready_to_make_first_prompt' in $$props) $$invalidate(5, ready_to_make_first_prompt = $$props.ready_to_make_first_prompt);
-    		if ('processes' in $$props) $$invalidate(6, processes = $$props.processes);
-    		if ('newValues' in $$props) newValues = $$props.newValues;
+    		if ('selectedNode' in $$props) $$invalidate(0, selectedNode = $$props.selectedNode);
+    		if ('processes' in $$props) $$invalidate(1, processes = $$props.processes);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -14275,19 +15988,9 @@ var app = (function () {
     	}
 
     	return [
-    		selectedProcess,
-    		globalVariables,
-    		topological_order_names,
-    		already_made_first_prompt,
-    		needed_variables,
-    		ready_to_make_first_prompt,
+    		selectedNode,
     		processes,
-    		sendFirstPrompt,
-    		handleInputChange,
-    		handleFormSubmit,
     		onDropdownChange,
-    		input_handler,
-    		submit_handler,
     		select_change_handler,
     		change_handler
     	];
@@ -14296,7 +15999,7 @@ var app = (function () {
     class Execution extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {}, null, [-1, -1]);
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -14324,7 +16027,7 @@ var app = (function () {
             css: (_t, u) => `opacity: ${target_opacity - (od * u)}; filter: ${f} blur(${u * value}${unit});`
         };
     }
-    function fade(node, { delay = 0, duration = 400, easing = identity$1 } = {}) {
+    function fade(node, { delay = 0, duration = 400, easing = identity$3 } = {}) {
         const o = +getComputedStyle(node).opacity;
         return {
             delay,
@@ -15744,17 +17447,17 @@ var app = (function () {
       return obj && obj.instanceString && fn$6(obj.instanceString) ? obj.instanceString() : null;
     };
 
-    var string = function string(obj) {
+    var string$1 = function string(obj) {
       return obj != null && _typeof(obj) == typeofstr;
     };
     var fn$6 = function fn(obj) {
       return obj != null && _typeof(obj) === typeoffn;
     };
-    var array = function array(obj) {
+    var array$1 = function array(obj) {
       return !elementOrCollection(obj) && (Array.isArray ? Array.isArray(obj) : obj != null && obj instanceof Array);
     };
     var plainObject = function plainObject(obj) {
-      return obj != null && _typeof(obj) === typeofobj && !array(obj) && obj.constructor === Object;
+      return obj != null && _typeof(obj) === typeofobj && !array$1(obj) && obj.constructor === Object;
     };
     var object = function object(obj) {
       return obj != null && _typeof(obj) === typeofobj;
@@ -15877,11 +17580,11 @@ var app = (function () {
       return str.charAt(0).toUpperCase() + str.substring(1);
     };
 
-    var number = '(?:[-+]?(?:(?:\\d+|\\d*\\.\\d+)(?:[Ee][+-]?\\d+)?))';
-    var rgba = 'rgb[a]?\\((' + number + '[%]?)\\s*,\\s*(' + number + '[%]?)\\s*,\\s*(' + number + '[%]?)(?:\\s*,\\s*(' + number + '))?\\)';
-    var rgbaNoBackRefs = 'rgb[a]?\\((?:' + number + '[%]?)\\s*,\\s*(?:' + number + '[%]?)\\s*,\\s*(?:' + number + '[%]?)(?:\\s*,\\s*(?:' + number + '))?\\)';
-    var hsla = 'hsl[a]?\\((' + number + ')\\s*,\\s*(' + number + '[%])\\s*,\\s*(' + number + '[%])(?:\\s*,\\s*(' + number + '))?\\)';
-    var hslaNoBackRefs = 'hsl[a]?\\((?:' + number + ')\\s*,\\s*(?:' + number + '[%])\\s*,\\s*(?:' + number + '[%])(?:\\s*,\\s*(?:' + number + '))?\\)';
+    var number$2 = '(?:[-+]?(?:(?:\\d+|\\d*\\.\\d+)(?:[Ee][+-]?\\d+)?))';
+    var rgba = 'rgb[a]?\\((' + number$2 + '[%]?)\\s*,\\s*(' + number$2 + '[%]?)\\s*,\\s*(' + number$2 + '[%]?)(?:\\s*,\\s*(' + number$2 + '))?\\)';
+    var rgbaNoBackRefs = 'rgb[a]?\\((?:' + number$2 + '[%]?)\\s*,\\s*(?:' + number$2 + '[%]?)\\s*,\\s*(?:' + number$2 + '[%]?)(?:\\s*,\\s*(?:' + number$2 + '))?\\)';
+    var hsla = 'hsl[a]?\\((' + number$2 + ')\\s*,\\s*(' + number$2 + '[%])\\s*,\\s*(' + number$2 + '[%])(?:\\s*,\\s*(' + number$2 + '))?\\)';
+    var hslaNoBackRefs = 'hsl[a]?\\((?:' + number$2 + ')\\s*,\\s*(?:' + number$2 + '[%])\\s*,\\s*(?:' + number$2 + '[%])(?:\\s*,\\s*(?:' + number$2 + '))?\\)';
     var hex3 = '\\#[0-9a-fA-F]{3}';
     var hex6 = '\\#[0-9a-fA-F]{6}';
 
@@ -16072,7 +17775,7 @@ var app = (function () {
       return colors[color.toLowerCase()];
     };
     var color2tuple = function color2tuple(color) {
-      return (array(color) ? color : null) || colorname2tuple(color) || hex2tuple(color) || rgb2tuple(color) || hsl2tuple(color);
+      return (array$1(color) ? color : null) || colorname2tuple(color) || hex2tuple(color) || rgb2tuple(color) || hsl2tuple(color);
     };
     var colors = {
       // special colour names
@@ -16472,7 +18175,7 @@ var app = (function () {
         return obj;
       }
 
-      if (array(obj)) {
+      if (array$1(obj)) {
         return obj.slice();
       } else if (plainObject(obj)) {
         return clone(obj);
@@ -16819,9 +18522,9 @@ var app = (function () {
 
       var classes = [];
 
-      if (array(params.classes)) {
+      if (array$1(params.classes)) {
         classes = params.classes;
-      } else if (string(params.classes)) {
+      } else if (string$1(params.classes)) {
         classes = params.classes.split(/\s+/);
       }
 
@@ -16867,7 +18570,7 @@ var app = (function () {
         directed = arguments.length === 2 && !fn$6(fn) ? fn : directed;
         fn = fn$6(fn) ? fn : function () {};
         var cy = this._private.cy;
-        var v = roots = string(roots) ? this.filter(roots) : roots;
+        var v = roots = string$1(roots) ? this.filter(roots) : roots;
         var Q = [];
         var connectedNodes = [];
         var connectedBy = {};
@@ -17018,7 +18721,7 @@ var app = (function () {
 
         var eles = this;
         var weightFn = weight;
-        var source = string(root) ? this.filter(root)[0] : root[0];
+        var source = string$1(root) ? this.filter(root)[0] : root[0];
         var dist = {};
         var prev = {};
         var knownDist = {};
@@ -17104,11 +18807,11 @@ var app = (function () {
 
         return {
           distanceTo: function distanceTo(node) {
-            var target = string(node) ? nodes.filter(node)[0] : node[0];
+            var target = string$1(node) ? nodes.filter(node)[0] : node[0];
             return knownDist[target.id()];
           },
           pathTo: function pathTo(node) {
-            var target = string(node) ? nodes.filter(node)[0] : node[0];
+            var target = string$1(node) ? nodes.filter(node)[0] : node[0];
             var S = [];
             var u = target;
             var uid = u.id();
@@ -17456,7 +19159,7 @@ var app = (function () {
         }
 
         var getArgEle = function getArgEle(ele) {
-          return (string(ele) ? cy.filter(ele) : ele)[0];
+          return (string$1(ele) ? cy.filter(ele) : ele)[0];
         };
 
         var indexOfArgEle = function indexOfArgEle(ele) {
@@ -17551,7 +19254,7 @@ var app = (function () {
         };
 
         var getNodeFromTo = function getNodeFromTo(to) {
-          return (string(to) ? cy.$(to) : to)[0];
+          return (string$1(to) ? cy.$(to) : to)[0];
         };
 
         var distanceTo = function distanceTo(to) {
@@ -19259,7 +20962,7 @@ var app = (function () {
                 return 0;
               }
 
-              if (string(node)) {
+              if (string$1(node)) {
                 // from is a selector string
                 node = cy.filter(node);
               }
@@ -19295,7 +20998,7 @@ var app = (function () {
                 return 0;
               }
 
-              if (string(node)) {
+              if (string$1(node)) {
                 // from is a selector string
                 node = cy.filter(node);
               }
@@ -19307,7 +21010,7 @@ var app = (function () {
                 return 0;
               }
 
-              if (string(node)) {
+              if (string$1(node)) {
                 // from is a selector string
                 node = cy.filter(node);
               }
@@ -19436,7 +21139,7 @@ var app = (function () {
               return 0;
             }
 
-            if (string(node)) {
+            if (string$1(node)) {
               // from is a selector string
               node = cy.filter(node)[0].id();
             } else {
@@ -19895,7 +21598,7 @@ var app = (function () {
 
     // Common distance metrics for clustering algorithms
 
-    var identity = function identity(x) {
+    var identity$1 = function identity(x) {
       return x;
     };
 
@@ -19920,7 +21623,7 @@ var app = (function () {
     };
 
     var getDistance = function getDistance(length, getP, getQ, init, visit) {
-      var post = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : identity;
+      var post = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : identity$1;
       var ret = init;
       var p, q;
 
@@ -21111,7 +22814,7 @@ var app = (function () {
         var oddIn;
         var oddOut;
         var startVertex;
-        if (root) startVertex = string(root) ? this.filter(root)[0].id() : root[0].id();
+        if (root) startVertex = string$1(root) ? this.filter(root)[0].id() : root[0].id();
         var nodes = {};
         var edges = {};
 
@@ -22232,7 +23935,7 @@ var app = (function () {
 
           var single = selfIsArrayLike ? self[0] : self; // .data('foo', ...)
 
-          if (string(name)) {
+          if (string$1(name)) {
             // set or get property
             var isPathLike = name.indexOf('.') !== -1; // there might be a normal field with a dot 
 
@@ -22362,7 +24065,7 @@ var app = (function () {
           var all = selfIsArrayLike ? self : [self]; // put in array if not array-like
           // .removeData('foo bar')
 
-          if (string(names)) {
+          if (string$1(names)) {
             // then get the list of keys, and delete them
             var keys = names.split(/\s+/);
             var l = keys.length;
@@ -22468,7 +24171,7 @@ var app = (function () {
           });
 
           return ret;
-        } else if (!array(_classes)) {
+        } else if (!array$1(_classes)) {
           // extract classes from string
           _classes = (_classes || '').match(/\S+/g) || [];
         }
@@ -22518,7 +24221,7 @@ var app = (function () {
         return ele != null && ele._private.classes.has(className);
       },
       toggleClass: function toggleClass(classes, toggle) {
-        if (!array(classes)) {
+        if (!array$1(classes)) {
           // extract classes from string
           classes = classes.match(/\S+/g) || [];
         }
@@ -22591,7 +24294,7 @@ var app = (function () {
       // boolean (unary) operators (used in data selectors)
       string: '"(?:\\\\"|[^"])*"' + '|' + "'(?:\\\\'|[^'])*'",
       // string literals (used in data selectors) -- doublequotes | singlequotes
-      number: number,
+      number: number$2,
       // number literal (used in data selectors) --- e.g. 0.1234, 1234, 12e123
       meta: 'degree|indegree|outdegree',
       // allowed metadata fields (i.e. allowed functions to use from Collection)
@@ -22658,7 +24361,7 @@ var app = (function () {
      * A check type enum-like object.  Uses integer values for fast match() lookup.
      * The ordering does not matter as long as the ints are unique.
      */
-    var Type = {
+    var Type$1 = {
       /** E.g. node */
       GROUP: 0,
 
@@ -22922,7 +24625,7 @@ var app = (function () {
             group = _ref2[0];
 
         query.checks.push({
-          type: Type.GROUP,
+          type: Type$1.GROUP,
           value: group === '*' ? group : group + 's'
         });
       }
@@ -22935,7 +24638,7 @@ var app = (function () {
             state = _ref4[0];
 
         query.checks.push({
-          type: Type.STATE,
+          type: Type$1.STATE,
           value: state
         });
       }
@@ -22948,7 +24651,7 @@ var app = (function () {
             id = _ref6[0];
 
         query.checks.push({
-          type: Type.ID,
+          type: Type$1.ID,
           value: cleanMetaChars(id)
         });
       }
@@ -22961,7 +24664,7 @@ var app = (function () {
             className = _ref8[0];
 
         query.checks.push({
-          type: Type.CLASS,
+          type: Type$1.CLASS,
           value: cleanMetaChars(className)
         });
       }
@@ -22974,7 +24677,7 @@ var app = (function () {
             variable = _ref10[0];
 
         query.checks.push({
-          type: Type.DATA_EXIST,
+          type: Type$1.DATA_EXIST,
           field: cleanMetaChars(variable)
         });
       }
@@ -22997,7 +24700,7 @@ var app = (function () {
         }
 
         query.checks.push({
-          type: Type.DATA_COMPARE,
+          type: Type$1.DATA_COMPARE,
           field: cleanMetaChars(variable),
           operator: comparatorOp,
           value: value
@@ -23013,7 +24716,7 @@ var app = (function () {
             variable = _ref14[1];
 
         query.checks.push({
-          type: Type.DATA_BOOL,
+          type: Type$1.DATA_BOOL,
           field: cleanMetaChars(variable),
           operator: boolOp
         });
@@ -23029,7 +24732,7 @@ var app = (function () {
             number = _ref16[2];
 
         query.checks.push({
-          type: Type.META_COMPARE,
+          type: Type$1.META_COMPARE,
           field: cleanMetaChars(meta),
           operator: comparatorOp,
           value: parseFloat(number)
@@ -23069,7 +24772,7 @@ var app = (function () {
           var source = query;
           var target = newQuery();
           edgeQuery.checks.push({
-            type: Type.DIRECTED_EDGE,
+            type: Type$1.DIRECTED_EDGE,
             source: source,
             target: target
           }); // the query in the selector should be the edge rather than the source
@@ -23086,7 +24789,7 @@ var app = (function () {
           var _target = newQuery();
 
           srcTgtQ.checks.push({
-            type: Type.NODE_SOURCE,
+            type: Type$1.NODE_SOURCE,
             source: _source,
             target: _target
           }); // the query in the selector should be the neighbourhood rather than the node
@@ -23107,7 +24810,7 @@ var app = (function () {
           var source = query;
           var target = newQuery();
           edgeQuery.checks.push({
-            type: Type.UNDIRECTED_EDGE,
+            type: Type$1.UNDIRECTED_EDGE,
             nodes: [source, target]
           }); // the query in the selector should be the edge rather than the source
 
@@ -23121,7 +24824,7 @@ var app = (function () {
           var node = query;
           var neighbor = newQuery();
           nhoodQ.checks.push({
-            type: Type.NODE_NEIGHBOR,
+            type: Type$1.NODE_NEIGHBOR,
             node: node,
             neighbor: neighbor
           }); // the query in the selector should be the neighbourhood rather than the node
@@ -23141,7 +24844,7 @@ var app = (function () {
           var child = newQuery();
           var parent = selector[selector.length - 1];
           parentChildQuery.checks.push({
-            type: Type.CHILD,
+            type: Type$1.CHILD,
             parent: parent,
             child: child
           }); // the query in the selector should be the '>' itself
@@ -23163,7 +24866,7 @@ var app = (function () {
 
 
           compound.checks.push({
-            type: Type.COMPOUND_SPLIT,
+            type: Type$1.COMPOUND_SPLIT,
             left: left,
             right: right,
             subject: subject
@@ -23172,17 +24875,17 @@ var app = (function () {
           subject.checks = query.checks; // take the checks from the left
 
           query.checks = [{
-            type: Type.TRUE
+            type: Type$1.TRUE
           }]; // checks under left refs the subject implicitly
           // set up the right q
 
           _parent.checks.push({
-            type: Type.TRUE
+            type: Type$1.TRUE
           }); // parent implicitly refs the subject
 
 
           right.checks.push({
-            type: Type.PARENT,
+            type: Type$1.PARENT,
             // type is swapped on right side queries
             parent: _parent,
             child: _child // empty for now
@@ -23201,7 +24904,7 @@ var app = (function () {
           var _child2 = newQuery();
 
           var pcQChecks = [{
-            type: Type.PARENT,
+            type: Type$1.PARENT,
             parent: _parent2,
             child: _child2
           }]; // the parent-child query takes the place of the query previously being populated
@@ -23225,7 +24928,7 @@ var app = (function () {
           var descendant = newQuery();
           var ancestor = selector[selector.length - 1];
           ancChQuery.checks.push({
-            type: Type.DESCENDANT,
+            type: Type$1.DESCENDANT,
             ancestor: ancestor,
             descendant: descendant
           }); // the query in the selector should be the '>' itself
@@ -23247,7 +24950,7 @@ var app = (function () {
 
 
           compound.checks.push({
-            type: Type.COMPOUND_SPLIT,
+            type: Type$1.COMPOUND_SPLIT,
             left: left,
             right: right,
             subject: subject
@@ -23256,17 +24959,17 @@ var app = (function () {
           subject.checks = query.checks; // take the checks from the left
 
           query.checks = [{
-            type: Type.TRUE
+            type: Type$1.TRUE
           }]; // checks under left refs the subject implicitly
           // set up the right q
 
           _ancestor.checks.push({
-            type: Type.TRUE
+            type: Type$1.TRUE
           }); // ancestor implicitly refs the subject
 
 
           right.checks.push({
-            type: Type.ANCESTOR,
+            type: Type$1.ANCESTOR,
             // type is swapped on right side queries
             ancestor: _ancestor,
             descendant: _descendant // empty for now
@@ -23285,7 +24988,7 @@ var app = (function () {
           var _descendant2 = newQuery();
 
           var adQChecks = [{
-            type: Type.ANCESTOR,
+            type: Type$1.ANCESTOR,
             ancestor: _ancestor2,
             descendant: _descendant2
           }]; // the parent-child query takes the place of the query previously being populated
@@ -23313,14 +25016,14 @@ var app = (function () {
         var topChk = topQ.checks[0];
         var topType = topChk == null ? null : topChk.type;
 
-        if (topType === Type.DIRECTED_EDGE) {
+        if (topType === Type$1.DIRECTED_EDGE) {
           // directed edge with subject on the target
           // change to target node check
-          topChk.type = Type.NODE_TARGET;
-        } else if (topType === Type.UNDIRECTED_EDGE) {
+          topChk.type = Type$1.NODE_TARGET;
+        } else if (topType === Type$1.UNDIRECTED_EDGE) {
           // undirected edge with subject on the second node
           // change to neighbor check
-          topChk.type = Type.NODE_NEIGHBOR;
+          topChk.type = Type$1.NODE_NEIGHBOR;
           topChk.node = topChk.nodes[1]; // second node is subject
 
           topChk.neighbor = topChk.nodes[0]; // clean up unused fields for new type
@@ -23470,7 +25173,7 @@ var app = (function () {
       };
 
       var cleanVal = function cleanVal(val) {
-        if (string(val)) {
+        if (string$1(val)) {
           return '"' + val + '"';
         } else {
           return clean(val);
@@ -23486,67 +25189,67 @@ var app = (function () {
             value = check.value;
 
         switch (type) {
-          case Type.GROUP:
+          case Type$1.GROUP:
             {
               var group = clean(value);
               return group.substring(0, group.length - 1);
             }
 
-          case Type.DATA_COMPARE:
+          case Type$1.DATA_COMPARE:
             {
               var field = check.field,
                   operator = check.operator;
               return '[' + field + space(clean(operator)) + cleanVal(value) + ']';
             }
 
-          case Type.DATA_BOOL:
+          case Type$1.DATA_BOOL:
             {
               var _operator = check.operator,
                   _field = check.field;
               return '[' + clean(_operator) + _field + ']';
             }
 
-          case Type.DATA_EXIST:
+          case Type$1.DATA_EXIST:
             {
               var _field2 = check.field;
               return '[' + _field2 + ']';
             }
 
-          case Type.META_COMPARE:
+          case Type$1.META_COMPARE:
             {
               var _operator2 = check.operator,
                   _field3 = check.field;
               return '[[' + _field3 + space(clean(_operator2)) + cleanVal(value) + ']]';
             }
 
-          case Type.STATE:
+          case Type$1.STATE:
             {
               return value;
             }
 
-          case Type.ID:
+          case Type$1.ID:
             {
               return '#' + value;
             }
 
-          case Type.CLASS:
+          case Type$1.CLASS:
             {
               return '.' + value;
             }
 
-          case Type.PARENT:
-          case Type.CHILD:
+          case Type$1.PARENT:
+          case Type$1.CHILD:
             {
               return queryToString(check.parent, subject) + space('>') + queryToString(check.child, subject);
             }
 
-          case Type.ANCESTOR:
-          case Type.DESCENDANT:
+          case Type$1.ANCESTOR:
+          case Type$1.DESCENDANT:
             {
               return queryToString(check.ancestor, subject) + ' ' + queryToString(check.descendant, subject);
             }
 
-          case Type.COMPOUND_SPLIT:
+          case Type$1.COMPOUND_SPLIT:
             {
               var lhs = queryToString(check.left, subject);
               var sub = queryToString(check.subject, subject);
@@ -23554,7 +25257,7 @@ var app = (function () {
               return lhs + (lhs.length > 0 ? ' ' : '') + sub + rhs;
             }
 
-          case Type.TRUE:
+          case Type$1.TRUE:
             {
               return '';
             }
@@ -23588,9 +25291,9 @@ var app = (function () {
 
     var valCmp = function valCmp(fieldVal, operator, value) {
       var matches;
-      var isFieldStr = string(fieldVal);
+      var isFieldStr = string$1(fieldVal);
       var isFieldNum = number$1(fieldVal);
-      var isValStr = string(value);
+      var isValStr = string$1(value);
       var fieldStr, valStr;
       var caseInsensitive = false;
       var notExpr = false;
@@ -23704,53 +25407,53 @@ var app = (function () {
       });
     };
 
-    match[Type.GROUP] = function (check, ele) {
+    match[Type$1.GROUP] = function (check, ele) {
       var group = check.value;
       return group === '*' || group === ele.group();
     };
 
-    match[Type.STATE] = function (check, ele) {
+    match[Type$1.STATE] = function (check, ele) {
       var stateSelector = check.value;
       return stateSelectorMatches(stateSelector, ele);
     };
 
-    match[Type.ID] = function (check, ele) {
+    match[Type$1.ID] = function (check, ele) {
       var id = check.value;
       return ele.id() === id;
     };
 
-    match[Type.CLASS] = function (check, ele) {
+    match[Type$1.CLASS] = function (check, ele) {
       var cls = check.value;
       return ele.hasClass(cls);
     };
 
-    match[Type.META_COMPARE] = function (check, ele) {
+    match[Type$1.META_COMPARE] = function (check, ele) {
       var field = check.field,
           operator = check.operator,
           value = check.value;
       return valCmp(meta(ele, field), operator, value);
     };
 
-    match[Type.DATA_COMPARE] = function (check, ele) {
+    match[Type$1.DATA_COMPARE] = function (check, ele) {
       var field = check.field,
           operator = check.operator,
           value = check.value;
       return valCmp(data$1(ele, field), operator, value);
     };
 
-    match[Type.DATA_BOOL] = function (check, ele) {
+    match[Type$1.DATA_BOOL] = function (check, ele) {
       var field = check.field,
           operator = check.operator;
       return boolCmp(data$1(ele, field), operator);
     };
 
-    match[Type.DATA_EXIST] = function (check, ele) {
+    match[Type$1.DATA_EXIST] = function (check, ele) {
       var field = check.field;
           check.operator;
       return existCmp(data$1(ele, field));
     };
 
-    match[Type.UNDIRECTED_EDGE] = function (check, ele) {
+    match[Type$1.UNDIRECTED_EDGE] = function (check, ele) {
       var qA = check.nodes[0];
       var qB = check.nodes[1];
       var src = ele.source();
@@ -23758,64 +25461,64 @@ var app = (function () {
       return matches$1(qA, src) && matches$1(qB, tgt) || matches$1(qB, src) && matches$1(qA, tgt);
     };
 
-    match[Type.NODE_NEIGHBOR] = function (check, ele) {
+    match[Type$1.NODE_NEIGHBOR] = function (check, ele) {
       return matches$1(check.node, ele) && ele.neighborhood().some(function (n) {
         return n.isNode() && matches$1(check.neighbor, n);
       });
     };
 
-    match[Type.DIRECTED_EDGE] = function (check, ele) {
+    match[Type$1.DIRECTED_EDGE] = function (check, ele) {
       return matches$1(check.source, ele.source()) && matches$1(check.target, ele.target());
     };
 
-    match[Type.NODE_SOURCE] = function (check, ele) {
+    match[Type$1.NODE_SOURCE] = function (check, ele) {
       return matches$1(check.source, ele) && ele.outgoers().some(function (n) {
         return n.isNode() && matches$1(check.target, n);
       });
     };
 
-    match[Type.NODE_TARGET] = function (check, ele) {
+    match[Type$1.NODE_TARGET] = function (check, ele) {
       return matches$1(check.target, ele) && ele.incomers().some(function (n) {
         return n.isNode() && matches$1(check.source, n);
       });
     };
 
-    match[Type.CHILD] = function (check, ele) {
+    match[Type$1.CHILD] = function (check, ele) {
       return matches$1(check.child, ele) && matches$1(check.parent, ele.parent());
     };
 
-    match[Type.PARENT] = function (check, ele) {
+    match[Type$1.PARENT] = function (check, ele) {
       return matches$1(check.parent, ele) && ele.children().some(function (c) {
         return matches$1(check.child, c);
       });
     };
 
-    match[Type.DESCENDANT] = function (check, ele) {
+    match[Type$1.DESCENDANT] = function (check, ele) {
       return matches$1(check.descendant, ele) && ele.ancestors().some(function (a) {
         return matches$1(check.ancestor, a);
       });
     };
 
-    match[Type.ANCESTOR] = function (check, ele) {
+    match[Type$1.ANCESTOR] = function (check, ele) {
       return matches$1(check.ancestor, ele) && ele.descendants().some(function (d) {
         return matches$1(check.descendant, d);
       });
     };
 
-    match[Type.COMPOUND_SPLIT] = function (check, ele) {
+    match[Type$1.COMPOUND_SPLIT] = function (check, ele) {
       return matches$1(check.subject, ele) && matches$1(check.left, ele) && matches$1(check.right, ele);
     };
 
-    match[Type.TRUE] = function () {
+    match[Type$1.TRUE] = function () {
       return true;
     };
 
-    match[Type.COLLECTION] = function (check, ele) {
+    match[Type$1.COLLECTION] = function (check, ele) {
       var collection = check.value;
       return collection.has(ele);
     };
 
-    match[Type.FILTER] = function (check, ele) {
+    match[Type$1.FILTER] = function (check, ele) {
       var filter = check.value;
       return filter(ele);
     };
@@ -23823,7 +25526,7 @@ var app = (function () {
     var filter = function filter(collection) {
       var self = this; // for 1 id #foo queries, just get the element
 
-      if (self.length === 1 && self[0].checks.length === 1 && self[0].checks[0].type === Type.ID) {
+      if (self.length === 1 && self[0].checks.length === 1 && self[0].checks[0].type === Type$1.ID) {
         return collection.getElementById(self[0].checks[0].value).collection();
       }
 
@@ -23877,21 +25580,21 @@ var app = (function () {
       this.edgeCount = 0;
       this.length = 0;
 
-      if (selector == null || string(selector) && selector.match(/^\s*$/)) ; else if (elementOrCollection(selector)) {
+      if (selector == null || string$1(selector) && selector.match(/^\s*$/)) ; else if (elementOrCollection(selector)) {
         this.addQuery({
           checks: [{
-            type: Type.COLLECTION,
+            type: Type$1.COLLECTION,
             value: selector.collection()
           }]
         });
       } else if (fn$6(selector)) {
         this.addQuery({
           checks: [{
-            type: Type.FILTER,
+            type: Type$1.FILTER,
             value: selector
           }]
         });
-      } else if (string(selector)) {
+      } else if (string$1(selector)) {
         if (!this.parse(selector)) {
           this.invalid = true;
         }
@@ -24531,7 +26234,7 @@ var app = (function () {
             y: number$1(dim.y) ? dim.y : 0
           };
           silent = val;
-        } else if (string(dim) && number$1(val)) {
+        } else if (string$1(dim) && number$1(val)) {
           delta = {
             x: 0,
             y: 0
@@ -24571,7 +26274,7 @@ var app = (function () {
       silentShift: function silentShift(dim, val) {
         if (plainObject(dim)) {
           this.shift(dim, true);
-        } else if (string(dim) && number$1(val)) {
+        } else if (string$1(dim) && number$1(val)) {
           this.shift(dim, val, true);
         }
 
@@ -24584,7 +26287,7 @@ var app = (function () {
         var zoom = cy.zoom();
         var pan = cy.pan();
         var rpos = plainObject(dim) ? dim : undefined;
-        var setting = rpos !== undefined || val !== undefined && string(dim);
+        var setting = rpos !== undefined || val !== undefined && string$1(dim);
 
         if (ele && ele.isNode()) {
           // must have an element and must be a node to return position
@@ -24624,7 +26327,7 @@ var app = (function () {
         var ele = this[0];
         var cy = this.cy();
         var ppos = plainObject(dim) ? dim : undefined;
-        var setting = ppos !== undefined || val !== undefined && string(dim);
+        var setting = ppos !== undefined || val !== undefined && string$1(dim);
         var hasCompoundNodes = cy.hasCompoundNodes();
 
         if (ele && ele.isNode()) {
@@ -26029,7 +27732,7 @@ var app = (function () {
         }
       }
 
-      var eventList = array(events) ? events : events.split(/\s+/);
+      var eventList = array$1(events) ? events : events.split(/\s+/);
 
       for (var i = 0; i < eventList.length; i++) {
         var evt = eventList[i];
@@ -26067,7 +27770,7 @@ var app = (function () {
         return;
       }
 
-      var eventList = array(events) ? events : events.split(/\s+/);
+      var eventList = array$1(events) ? events : events.split(/\s+/);
 
       for (var i = 0; i < eventList.length; i++) {
         var evt = eventList[i];
@@ -26156,7 +27859,7 @@ var app = (function () {
       var numListenersBeforeEmit = listeners.length;
       this.emitting++;
 
-      if (!array(extraParams)) {
+      if (!array$1(extraParams)) {
         extraParams = [extraParams];
       }
 
@@ -26254,7 +27957,7 @@ var app = (function () {
     };
 
     var argSelector$1 = function argSelector(arg) {
-      if (string(arg)) {
+      if (string$1(arg)) {
         return new Selector(arg);
       } else {
         return arg;
@@ -26384,7 +28087,7 @@ var app = (function () {
         if (_filter === undefined) {
           // check this first b/c it's the most common/performant case
           return this;
-        } else if (string(_filter) || elementOrCollection(_filter)) {
+        } else if (string$1(_filter) || elementOrCollection(_filter)) {
           return new Selector(_filter).filter(this);
         } else if (fn$6(_filter)) {
           var filterEles = this.spawn();
@@ -26408,7 +28111,7 @@ var app = (function () {
         if (!toRemove) {
           return this;
         } else {
-          if (string(toRemove)) {
+          if (string$1(toRemove)) {
             toRemove = this.filter(toRemove);
           }
 
@@ -26432,7 +28135,7 @@ var app = (function () {
       },
       intersect: function intersect(other) {
         // if a selector is specified, then filter by it instead
-        if (string(other)) {
+        if (string$1(other)) {
           var selector = other;
           return this.filter(selector);
         }
@@ -26457,7 +28160,7 @@ var app = (function () {
       xor: function xor(other) {
         var cy = this._private.cy;
 
-        if (string(other)) {
+        if (string$1(other)) {
           other = cy.$(other);
         }
 
@@ -26484,7 +28187,7 @@ var app = (function () {
       diff: function diff(other) {
         var cy = this._private.cy;
 
-        if (string(other)) {
+        if (string$1(other)) {
           other = cy.$(other);
         }
 
@@ -26523,7 +28226,7 @@ var app = (function () {
           return this;
         }
 
-        if (string(toAdd)) {
+        if (string$1(toAdd)) {
           var selector = toAdd;
           toAdd = cy.mutableElements().filter(selector);
         }
@@ -26550,7 +28253,7 @@ var app = (function () {
           return this;
         }
 
-        if (toAdd && string(toAdd)) {
+        if (toAdd && string$1(toAdd)) {
           var selector = toAdd;
           toAdd = cy.mutableElements().filter(selector);
         }
@@ -26624,7 +28327,7 @@ var app = (function () {
           return this;
         }
 
-        if (toRemove && string(toRemove)) {
+        if (toRemove && string$1(toRemove)) {
           var selector = toRemove;
           toRemove = cy.mutableElements().filter(selector);
         }
@@ -27352,7 +29055,7 @@ var app = (function () {
           var props = name;
           style.applyBypass(this, props, updateTransitions);
           this.emitAndNotify('style'); // let the renderer know we've updated style
-        } else if (string(name)) {
+        } else if (string$1(name)) {
           if (value === undefined) {
             // then get the property from the style
             var ele = this[0];
@@ -27600,7 +29303,7 @@ var app = (function () {
           this.on(params.event, _handler);
         } // e.g. cy.nodes().select()
         // e.g. (private) cy.nodes().select(['tapselect'])
-        else if (args.length === 0 || args.length === 1 && array(args[0])) {
+        else if (args.length === 0 || args.length === 1 && array$1(args[0])) {
           var addlEvents = args.length === 1 ? args[0] : null;
 
           for (var i = 0; i < this.length; i++) {
@@ -27984,7 +29687,7 @@ var app = (function () {
         var cy = this._private.cy;
         var p = params || {}; // get elements if a selector is specified
 
-        if (string(otherNodes)) {
+        if (string$1(otherNodes)) {
           otherNodes = cy.$(otherNodes);
         }
 
@@ -28551,7 +30254,7 @@ var app = (function () {
           _data3.id = uuid();
         } else if (number$1(_data3.id)) {
           _data3.id = '' + _data3.id; // now it's a string
-        } else if (emptyString(_data3.id) || !string(_data3.id)) {
+        } else if (emptyString(_data3.id) || !string$1(_data3.id)) {
           error('Can not create element with invalid string ID `' + _data3.id + '`'); // can't create element if it has empty string as id or non-string id
 
           removeFromElements();
@@ -29010,11 +30713,11 @@ var app = (function () {
             elements = new Collection(cy, jsons);
           }
         } // specify an array of options
-        else if (array(opts)) {
+        else if (array$1(opts)) {
           var _jsons = opts;
           elements = new Collection(cy, _jsons);
         } // specify via opts.nodes and opts.edges
-        else if (plainObject(opts) && (array(opts.nodes) || array(opts.edges))) {
+        else if (plainObject(opts) && (array$1(opts.nodes) || array$1(opts.edges))) {
           var elesByGroup = opts;
           var _jsons2 = [];
           var grs = ['nodes', 'edges'];
@@ -29023,7 +30726,7 @@ var app = (function () {
             var group = grs[_i];
             var elesArray = elesByGroup[group];
 
-            if (array(elesArray)) {
+            if (array$1(elesArray)) {
               for (var j = 0, jl = elesArray.length; j < jl; j++) {
                 var json = extend({
                   group: group
@@ -29044,7 +30747,7 @@ var app = (function () {
         return elements;
       },
       remove: function remove(collection) {
-        if (elementOrCollection(collection)) ; else if (string(collection)) {
+        if (elementOrCollection(collection)) ; else if (string$1(collection)) {
           var selector = collection;
           collection = this.$(selector);
         }
@@ -29425,7 +31128,7 @@ var app = (function () {
 
       if (number$1(start) && number$1(end)) {
         return getEasedValue(type, start, end, percent, easingFn);
-      } else if (array(start) && array(end)) {
+      } else if (array$1(start) && array$1(end)) {
         var easedArr = [];
 
         for (var i = 0; i < end.length; i++) {
@@ -29463,7 +31166,7 @@ var app = (function () {
           // then define w/ name
           var easingVals;
 
-          if (string(pEasing)) {
+          if (string$1(pEasing)) {
             var easingProp = style.parse('transition-timing-function', pEasing);
             easingVals = easingProp.value;
           } else {
@@ -29473,7 +31176,7 @@ var app = (function () {
 
           var name, args;
 
-          if (string(easingVals)) {
+          if (string$1(easingVals)) {
             name = easingVals;
             args = [];
           } else {
@@ -29806,7 +31509,7 @@ var app = (function () {
     };
 
     var argSelector = function argSelector(arg) {
-      if (string(arg)) {
+      if (string$1(arg)) {
         return new Selector(arg);
       } else {
         return arg;
@@ -29897,7 +31600,7 @@ var app = (function () {
 
         var eles;
 
-        if (string(options.eles)) {
+        if (string$1(options.eles)) {
           eles = cy.$(options.eles);
         } else {
           eles = options.eles != null ? options.eles : cy.$();
@@ -30111,11 +31814,11 @@ var app = (function () {
       // - collection of elements in the graph on selector arg
       // - guarantee a returned collection when elements or collection specified
       collection: function collection(eles, opts) {
-        if (string(eles)) {
+        if (string$1(eles)) {
           return this.$(eles);
         } else if (elementOrCollection(eles)) {
           return eles.collection();
-        } else if (array(eles)) {
+        } else if (array$1(eles)) {
           if (!opts) {
             opts = {};
           }
@@ -30915,7 +32618,7 @@ var app = (function () {
             diff = toProp.value - fromProp.value; // nonzero is truthy
 
             initVal = fromProp.value + initDt * diff; // consider colour values
-          } else if (array(fromProp.value) && array(toProp.value)) {
+          } else if (array$1(fromProp.value) && array$1(toProp.value)) {
             diff = fromProp.value[0] !== toProp.value[0] || fromProp.value[1] !== toProp.value[1] || fromProp.value[2] !== toProp.value[2];
             initVal = fromProp.strValue;
           } // the previous value is good for an animation only if it's different
@@ -31029,7 +32732,7 @@ var app = (function () {
             }
           }
         }
-      } else if (string(name)) {
+      } else if (string$1(name)) {
         // then parse the single property
         var _parsedProp = this.parse(name, value, true);
 
@@ -31277,7 +32980,7 @@ var app = (function () {
               return getRenderedValue(val) + units;
             };
 
-            var isArrayValue = array(value);
+            var isArrayValue = array$1(value);
             var haveUnits = isArrayValue ? units.every(function (u) {
               return u != null;
             }) : units != null;
@@ -31293,7 +32996,7 @@ var app = (function () {
             } else {
               if (isArrayValue) {
                 return value.map(function (v) {
-                  return string(v) ? v : '' + getRenderedValue(v);
+                  return string$1(v) ? v : '' + getRenderedValue(v);
                 }).join(' ');
               } else {
                 return '' + getRenderedValue(value);
@@ -31578,7 +33281,7 @@ var app = (function () {
     var styfn$2 = {};
 
     (function () {
-      var number$1 = number;
+      var number$1 = number$2;
       var rgba = rgbaNoBackRefs;
       var hsla = hslaNoBackRefs;
       var hex3$1 = hex3;
@@ -31899,7 +33602,7 @@ var app = (function () {
 
               case 1:
                 // can be enum, deg, or rad only
-                return string(valArr[0]) || unitsArr[0] === 'deg' || unitsArr[0] === 'rad';
+                return string$1(valArr[0]) || unitsArr[0] === 'deg' || unitsArr[0] === 'rad';
 
               default:
                 return false;
@@ -32954,7 +34657,7 @@ var app = (function () {
         name = property.name;
       }
 
-      var valueIsString = string(value);
+      var valueIsString = string$1(value);
 
       if (valueIsString) {
         // trim the value to make parsing easier
@@ -33080,7 +34783,7 @@ var app = (function () {
 
         if (valueIsString) {
           vals = value.split(/\s+/);
-        } else if (array(value)) {
+        } else if (array$1(value)) {
           vals = value;
         } else {
           vals = [value];
@@ -33098,7 +34801,7 @@ var app = (function () {
 
         for (var i = 0; i < vals.length; i++) {
           var p = self.parse(name, vals[i], propIsBypass, 'multiple');
-          hasEnum = hasEnum || string(p.value);
+          hasEnum = hasEnum || string$1(p.value);
           valArr.push(p.value);
           pfValArr.push(p.pfValue != null ? p.pfValue : p.value);
           unitsArr.push(p.units);
@@ -33110,7 +34813,7 @@ var app = (function () {
         }
 
         if (type.singleEnum && hasEnum) {
-          if (valArr.length === 1 && string(valArr[0])) {
+          if (valArr.length === 1 && string$1(valArr[0])) {
             return {
               name: name,
               value: valArr[0],
@@ -33173,7 +34876,7 @@ var app = (function () {
             } // only allow explicit units if so set
 
 
-            var match = value.match('^(' + number + ')(' + unitsRegex + ')?' + '$');
+            var match = value.match('^(' + number$2 + ')(' + unitsRegex + ')?' + '$');
 
             if (match) {
               value = match[1];
@@ -33459,9 +35162,9 @@ var app = (function () {
     styfn.append = function (style) {
       if (stylesheet(style)) {
         style.appendToStyle(this);
-      } else if (array(style)) {
+      } else if (array$1(style)) {
         this.appendFromJson(style);
-      } else if (string(style)) {
+      } else if (string$1(style)) {
         this.appendFromString(style);
       } // you probably wouldn't want to append a Style, since you'd duplicate the default parts
 
@@ -33503,9 +35206,9 @@ var app = (function () {
 
         if (stylesheet(style)) {
           _p.style = style.generateStyle(this);
-        } else if (array(style)) {
+        } else if (array$1(style)) {
           _p.style = Style.fromJson(this, style);
-        } else if (string(style)) {
+        } else if (string$1(style)) {
           _p.style = Style.fromString(this, style);
         } else {
           _p.style = Style(this);
@@ -33621,7 +35324,7 @@ var app = (function () {
             return pan;
 
           case 1:
-            if (string(args[0])) {
+            if (string$1(args[0])) {
               // .pan('x')
               dim = args[0];
               return pan[dim];
@@ -33742,7 +35445,7 @@ var app = (function () {
 
         var bb;
 
-        if (string(elements)) {
+        if (string$1(elements)) {
           var sel = elements;
           elements = this.$(sel);
         } else if (boundingBox(elements)) {
@@ -33996,7 +35699,7 @@ var app = (function () {
           return;
         }
 
-        if (string(elements)) {
+        if (string$1(elements)) {
           var selector = elements;
           elements = this.mutableElements().filter(selector);
         } else if (!elementOrCollection(elements)) {
@@ -34274,7 +35977,7 @@ var app = (function () {
         }
 
         if (elements != null) {
-          if (plainObject(elements) || array(elements)) {
+          if (plainObject(elements) || array$1(elements)) {
             cy.add(elements);
           }
         }
@@ -34487,7 +36190,7 @@ var app = (function () {
               }
             };
 
-            if (array(obj.elements)) {
+            if (array$1(obj.elements)) {
               // elements: []
               updateEles(obj.elements);
             } else {
@@ -34498,7 +36201,7 @@ var app = (function () {
                 var gr = grs[i];
                 var elements = obj.elements[gr];
 
-                if (array(elements)) {
+                if (array$1(elements)) {
                   updateEles(elements, gr);
                 }
               }
@@ -34694,7 +36397,7 @@ var app = (function () {
 
       if (elementOrCollection(options.roots)) {
         roots = options.roots;
-      } else if (array(options.roots)) {
+      } else if (array$1(options.roots)) {
         var rootsArray = [];
 
         for (var i = 0; i < options.roots.length; i++) {
@@ -34704,7 +36407,7 @@ var app = (function () {
         }
 
         roots = cy.collection(rootsArray);
-      } else if (string(options.roots)) {
+      } else if (string$1(options.roots)) {
         roots = cy.$(options.roots);
       } else {
         if (directed) {
@@ -37110,7 +38813,7 @@ var app = (function () {
       };
 
       var defineArrowShape = function defineArrowShape(name, defn) {
-        if (string(defn)) {
+        if (string$1(defn)) {
           defn = arrowShapes[defn];
         }
 
@@ -47445,7 +49148,7 @@ var app = (function () {
     sheetfn.css = function (name, value) {
       var i = this.length - 1;
 
-      if (string(name)) {
+      if (string$1(name)) {
         this[i].properties.push({
           name: name,
           value: value
@@ -47516,7 +49219,7 @@ var app = (function () {
       if (plainObject(options)) {
         return new Core(options);
       } // allow for registration of extensions
-      else if (string(options)) {
+      else if (string$1(options)) {
         return extension.apply(extension, arguments);
       }
     }; // e.g. cytoscape.use( require('cytoscape-foo'), bar )
@@ -53233,43 +54936,2924 @@ var app = (function () {
     var css_248z = "* {\n  box-sizing: border-box;\n  font-family: 'Roboto', sans-serif;\n  color: #2c3e50;\n  /* Dark Blue */\n}\n\n.section-header {\n  cursor: pointer;\n  transition: background-color 0.2s ease;\n  padding: 10px;\n  border-radius: 4px;\n}\n\n.section-header:hover {\n  background-color: #f0f0f0;\n}\n\n.section-header::after {\n  content: \"▼\";\n  /* You can replace with any symbol or icon font you like */\n  margin-left: 5px;\n}\n\ntextarea,\ninput {\n  resize: vertical;\n  width: 100%;\n  height: 100%;\n  white-space: pre-wrap;\n  border-radius: 4px;\n  border: 2px solid #27ae60;\n  /* Green */\n  background-color: #ecf0f1;\n  /* Light Gray */\n}\n\nbutton.selected {\n  background-color: #2ecc71;\n  /* Green */\n  color: #ecf0f1;\n  /* Light Gray */\n}\n\n.add-button {\n  background-color: #16a085;\n  /* Green */\n  margin-top: 20px;\n  margin-bottom: 10px;\n}\n\n.remove-button {\n  background-color: #c0392b;\n  /* Dark Red */\n}\n\n.section-content {\n  background-color: #ecf0f1;\n  /* Light Gray */\n}\n\n\nform {\n  display: flex;\n  flex-direction: column;\n  gap: 1em;\n}\n\n/* Mobile Styles */\n@media (max-width: 800px) {\n  .app-container {\n    display: flex;\n    flex-direction: column;\n    height: 100vh;\n  }\n\n  .graph {\n    width: 100%;\n    /* height should take up rest of screen */\n    height: 60vh;\n    order: 2;\n  }\n\n  .sidebar {\n    width: 100%;\n    height: 40vh;\n    min-height: 200px;\n    order: 1;\n    padding: 2vw;\n    overflow-y: auto;\n    outline: 2px solid #333;\n    /* Outline added */\n  }\n\n  .section {\n    margin-bottom: 2vh;\n    border-radius: 1vh;\n    background-color: #9b59b6;\n    /* Purple */\n  }\n\n  .section-header {\n    padding: 1vh;\n    background-color: #f1c40f;\n    /* Yellow */\n    border-radius: 1vh;\n  }\n}\n\n\n\n/* Larger screen styles */\n@media (min-width: 801px) {\n\n  /* Styles specific to components */\n  .app-container {\n    display: grid;\n    grid-template-columns: 25vw 1fr;\n  }\n\n\n  /* ./components/GraphComponent_graphlib.svelte */\n  .graph {\n    grid-column: 2;\n    height: 100%;\n  }\n\n  /* ./components/Sidebar.svelte */\n  .sidebar {\n    grid-column: 1;\n    position: sticky;\n    top: 0;\n    height: 100vh;\n    background-color: #2ecc71;\n    /* Green */\n    overflow-y: auto;\n    box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.541);\n    border-radius: 12px;\n  }\n\n}";
     styleInject(css_248z);
 
-    function populateInputVariables(action) {
-        const tagPattern = /\[(.*?)\](.*?)\[\/\1\]/gs;
-        const regex = /\[(.*?)\]/g;
-        const filteredInput = action.prompt.replace(tagPattern, "");
-        let match;
-        const variables = [];
-        while ((match = regex.exec(filteredInput)) !== null) {
-            // This is necessary to avoid infinite loops with zero-width matches
-            if (match.index === regex.lastIndex) {
-                regex.lastIndex++;
+    // -------------------------------------------------------------------------------------
+    // constructors
+    // -------------------------------------------------------------------------------------
+    /**
+     * Constructs a new `Either` holding a `Left` value. This usually represents a failure, due to the right-bias of this
+     * structure.
+     *
+     * @category constructors
+     * @since 2.0.0
+     */
+    var left = left$1;
+    /**
+     * Constructs a new `Either` holding a `Right` value. This usually represents a successful value due to the right bias
+     * of this structure.
+     *
+     * @category constructors
+     * @since 2.0.0
+     */
+    var right = right$1;
+    var _map = function (fa, f) { return pipe(fa, map(f)); };
+    /**
+     * @category type lambdas
+     * @since 2.0.0
+     */
+    var URI = 'Either';
+    /**
+     * @category mapping
+     * @since 2.0.0
+     */
+    var map = function (f) { return function (fa) {
+        return isLeft(fa) ? fa : right(f(fa.right));
+    }; };
+    /**
+     * @category instances
+     * @since 2.7.0
+     */
+    var Functor = {
+        URI: URI,
+        map: _map
+    };
+    /**
+     * Maps the `Right` value of this `Either` to the specified constant value.
+     *
+     * @category mapping
+     * @since 2.16.0
+     */
+    dual(2, as(Functor));
+    /**
+     * @category instances
+     * @since 2.10.0
+     */
+    var FromEither = {
+        URI: URI,
+        fromEither: identity$2
+    };
+    // -------------------------------------------------------------------------------------
+    // refinements
+    // -------------------------------------------------------------------------------------
+    /**
+     * Returns `true` if the either is an instance of `Left`, `false` otherwise.
+     *
+     * @category refinements
+     * @since 2.0.0
+     */
+    var isLeft = isLeft$1;
+    /** @internal */
+    ({
+        fromEither: FromEither.fromEither
+    });
+
+    var __extends = (undefined && undefined.__extends) || (function () {
+        var extendStatics = function (d, b) {
+            extendStatics = Object.setPrototypeOf ||
+                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+                function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+            return extendStatics(d, b);
+        };
+        return function (d, b) {
+            if (typeof b !== "function" && b !== null)
+                throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+            extendStatics(d, b);
+            function __() { this.constructor = d; }
+            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        };
+    })();
+    var __assign = (undefined && undefined.__assign) || function () {
+        __assign = Object.assign || function(t) {
+            for (var s, i = 1, n = arguments.length; i < n; i++) {
+                s = arguments[i];
+                for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                    t[p] = s[p];
             }
-            // The result can be accessed through the `match`-variable.
-            match.forEach((tag, groupIndex) => {
-                if (groupIndex === 1) { // Ignore the full match, just add the capture group
-                    variables.push(tag);
-                }
-            });
+            return t;
+        };
+        return __assign.apply(this, arguments);
+    };
+    var __spreadArray = (undefined && undefined.__spreadArray) || function (to, from, pack) {
+        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+            if (ar || !(i in from)) {
+                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+                ar[i] = from[i];
+            }
         }
-        return variables;
+        return to.concat(ar || Array.prototype.slice.call(from));
+    };
+    /**
+     * @category Decode error
+     * @since 1.0.0
+     */
+    var failures = left;
+    /**
+     * @category Decode error
+     * @since 1.0.0
+     */
+    var failure = function (value, context, message) {
+        return failures([{ value: value, context: context, message: message }]);
+    };
+    /**
+     * @category Decode error
+     * @since 1.0.0
+     */
+    var success = right;
+    /**
+     * @category Codec
+     * @since 1.0.0
+     */
+    var Type = /** @class */ (function () {
+        function Type(
+        /** a unique name for this codec */
+        name, 
+        /** a custom type guard */
+        is, 
+        /** succeeds if a value of type I can be decoded to a value of type A */
+        validate, 
+        /** converts a value of type A to a value of type O */
+        encode) {
+            this.name = name;
+            this.is = is;
+            this.validate = validate;
+            this.encode = encode;
+            this.decode = this.decode.bind(this);
+        }
+        /**
+         * @since 1.0.0
+         */
+        Type.prototype.pipe = function (ab, name) {
+            var _this = this;
+            if (name === void 0) { name = "pipe(".concat(this.name, ", ").concat(ab.name, ")"); }
+            return new Type(name, ab.is, function (i, c) {
+                var e = _this.validate(i, c);
+                if (isLeft(e)) {
+                    return e;
+                }
+                return ab.validate(e.right, c);
+            }, this.encode === identity && ab.encode === identity ? identity : function (b) { return _this.encode(ab.encode(b)); });
+        };
+        /**
+         * @since 1.0.0
+         */
+        Type.prototype.asDecoder = function () {
+            return this;
+        };
+        /**
+         * @since 1.0.0
+         */
+        Type.prototype.asEncoder = function () {
+            return this;
+        };
+        /**
+         * a version of `validate` with a default context
+         * @since 1.0.0
+         */
+        Type.prototype.decode = function (i) {
+            return this.validate(i, [{ key: '', type: this, actual: i }]);
+        };
+        return Type;
+    }());
+    // -------------------------------------------------------------------------------------
+    // utils
+    // -------------------------------------------------------------------------------------
+    /**
+     * @since 1.0.0
+     */
+    var identity = function (a) { return a; };
+    /**
+     * @since 1.0.0
+     */
+    function getFunctionName(f) {
+        return f.displayName || f.name || "<function".concat(f.length, ">");
     }
-    function populateOutputVariables(action) {
-        const input = action.prompt;
-        const exampleTagPattern = /\[example\][\s\S]*?\[\/example\]/g;
-        const tagPattern = /\[(.*?)\](.*?)\[\/\1\]/gs;
-        // Remove content within [example] tags
-        const filteredInput = input.replace(exampleTagPattern, "");
-        // Find all tags in the remaining text
-        const matches = [...filteredInput.matchAll(tagPattern)];
-        // Extract the tag names from the matches
-        const tags = matches.map(match => match[1]);
-        return tags;
+    /**
+     * @since 1.0.0
+     */
+    function appendContext(c, key, decoder, actual) {
+        var len = c.length;
+        var r = Array(len + 1);
+        for (var i = 0; i < len; i++) {
+            r[i] = c[i];
+        }
+        r[len] = { key: key, type: decoder, actual: actual };
+        return r;
     }
+    function pushAll(xs, ys) {
+        var l = ys.length;
+        for (var i = 0; i < l; i++) {
+            xs.push(ys[i]);
+        }
+    }
+    var hasOwnProperty = Object.prototype.hasOwnProperty;
+    function getNameFromProps(props) {
+        return Object.keys(props)
+            .map(function (k) { return "".concat(k, ": ").concat(props[k].name); })
+            .join(', ');
+    }
+    function useIdentity(codecs) {
+        for (var i = 0; i < codecs.length; i++) {
+            if (codecs[i].encode !== identity) {
+                return false;
+            }
+        }
+        return true;
+    }
+    function getInterfaceTypeName(props) {
+        return "{ ".concat(getNameFromProps(props), " }");
+    }
+    function enumerableRecord(keys, domain, codomain, name) {
+        if (name === void 0) { name = "{ [K in ".concat(domain.name, "]: ").concat(codomain.name, " }"); }
+        var len = keys.length;
+        return new DictionaryType(name, function (u) { return UnknownRecord.is(u) && keys.every(function (k) { return codomain.is(u[k]); }); }, function (u, c) {
+            var e = UnknownRecord.validate(u, c);
+            if (isLeft(e)) {
+                return e;
+            }
+            var o = e.right;
+            var a = {};
+            var errors = [];
+            var changed = false;
+            for (var i = 0; i < len; i++) {
+                var k = keys[i];
+                var ok = o[k];
+                var codomainResult = codomain.validate(ok, appendContext(c, k, codomain, ok));
+                if (isLeft(codomainResult)) {
+                    pushAll(errors, codomainResult.left);
+                }
+                else {
+                    var vok = codomainResult.right;
+                    changed = changed || vok !== ok;
+                    a[k] = vok;
+                }
+            }
+            return errors.length > 0 ? failures(errors) : success((changed || Object.keys(o).length !== len ? a : o));
+        }, codomain.encode === identity
+            ? identity
+            : function (a) {
+                var s = {};
+                for (var i = 0; i < len; i++) {
+                    var k = keys[i];
+                    s[k] = codomain.encode(a[k]);
+                }
+                return s;
+            }, domain, codomain);
+    }
+    /**
+     * @internal
+     */
+    function getDomainKeys(domain) {
+        var _a;
+        if (isLiteralC(domain)) {
+            var literal_1 = domain.value;
+            if (string.is(literal_1)) {
+                return _a = {}, _a[literal_1] = null, _a;
+            }
+        }
+        else if (isKeyofC(domain)) {
+            return domain.keys;
+        }
+        else if (isUnionC(domain)) {
+            var keys = domain.types.map(function (type) { return getDomainKeys(type); });
+            return keys.some(undefinedType.is) ? undefined : Object.assign.apply(Object, __spreadArray([{}], keys, false));
+        }
+        return undefined;
+    }
+    function nonEnumerableRecord(domain, codomain, name) {
+        if (name === void 0) { name = "{ [K in ".concat(domain.name, "]: ").concat(codomain.name, " }"); }
+        return new DictionaryType(name, function (u) {
+            if (UnknownRecord.is(u)) {
+                return Object.keys(u).every(function (k) { return domain.is(k) && codomain.is(u[k]); });
+            }
+            return isAnyC(codomain) && Array.isArray(u);
+        }, function (u, c) {
+            if (UnknownRecord.is(u)) {
+                var a = {};
+                var errors = [];
+                var keys = Object.keys(u);
+                var len = keys.length;
+                var changed = false;
+                for (var i = 0; i < len; i++) {
+                    var k = keys[i];
+                    var ok = u[k];
+                    var domainResult = domain.validate(k, appendContext(c, k, domain, k));
+                    if (isLeft(domainResult)) {
+                        pushAll(errors, domainResult.left);
+                    }
+                    else {
+                        var vk = domainResult.right;
+                        changed = changed || vk !== k;
+                        k = vk;
+                        var codomainResult = codomain.validate(ok, appendContext(c, k, codomain, ok));
+                        if (isLeft(codomainResult)) {
+                            pushAll(errors, codomainResult.left);
+                        }
+                        else {
+                            var vok = codomainResult.right;
+                            changed = changed || vok !== ok;
+                            a[k] = vok;
+                        }
+                    }
+                }
+                return errors.length > 0 ? failures(errors) : success((changed ? a : u));
+            }
+            if (isAnyC(codomain) && Array.isArray(u)) {
+                return success(u);
+            }
+            return failure(u, c);
+        }, domain.encode === identity && codomain.encode === identity
+            ? identity
+            : function (a) {
+                var s = {};
+                var keys = Object.keys(a);
+                var len = keys.length;
+                for (var i = 0; i < len; i++) {
+                    var k = keys[i];
+                    s[String(domain.encode(k))] = codomain.encode(a[k]);
+                }
+                return s;
+            }, domain, codomain);
+    }
+    function getUnionName(codecs) {
+        return '(' + codecs.map(function (type) { return type.name; }).join(' | ') + ')';
+    }
+    function isNonEmpty(as) {
+        return as.length > 0;
+    }
+    /**
+     * @internal
+     */
+    var emptyTags = {};
+    function intersect(a, b) {
+        var r = [];
+        for (var _i = 0, a_1 = a; _i < a_1.length; _i++) {
+            var v = a_1[_i];
+            if (b.indexOf(v) !== -1) {
+                r.push(v);
+            }
+        }
+        return r;
+    }
+    function mergeTags(a, b) {
+        if (a === emptyTags) {
+            return b;
+        }
+        if (b === emptyTags) {
+            return a;
+        }
+        var r = Object.assign({}, a);
+        for (var k in b) {
+            if (hasOwnProperty.call(a, k)) {
+                var intersection_1 = intersect(a[k], b[k]);
+                if (isNonEmpty(intersection_1)) {
+                    r[k] = intersection_1;
+                }
+                else {
+                    r = emptyTags;
+                    break;
+                }
+            }
+            else {
+                r[k] = b[k];
+            }
+        }
+        return r;
+    }
+    function intersectTags(a, b) {
+        if (a === emptyTags || b === emptyTags) {
+            return emptyTags;
+        }
+        var r = emptyTags;
+        for (var k in a) {
+            if (hasOwnProperty.call(b, k)) {
+                var intersection_2 = intersect(a[k], b[k]);
+                if (intersection_2.length === 0) {
+                    if (r === emptyTags) {
+                        r = {};
+                    }
+                    r[k] = a[k].concat(b[k]);
+                }
+            }
+        }
+        return r;
+    }
+    // tslint:disable-next-line: deprecation
+    function isAnyC(codec) {
+        return codec._tag === 'AnyType';
+    }
+    function isLiteralC(codec) {
+        return codec._tag === 'LiteralType';
+    }
+    function isKeyofC(codec) {
+        return codec._tag === 'KeyofType';
+    }
+    function isTypeC(codec) {
+        return codec._tag === 'InterfaceType';
+    }
+    // tslint:disable-next-line: deprecation
+    function isStrictC(codec) {
+        return codec._tag === 'StrictType';
+    }
+    function isExactC(codec) {
+        return codec._tag === 'ExactType';
+    }
+    // tslint:disable-next-line: deprecation
+    function isRefinementC(codec) {
+        return codec._tag === 'RefinementType';
+    }
+    function isIntersectionC(codec) {
+        return codec._tag === 'IntersectionType';
+    }
+    function isUnionC(codec) {
+        return codec._tag === 'UnionType';
+    }
+    function isRecursiveC(codec) {
+        return codec._tag === 'RecursiveType';
+    }
+    var lazyCodecs = [];
+    /**
+     * @internal
+     */
+    function getTags(codec) {
+        if (lazyCodecs.indexOf(codec) !== -1) {
+            return emptyTags;
+        }
+        if (isTypeC(codec) || isStrictC(codec)) {
+            var index = emptyTags;
+            // tslint:disable-next-line: forin
+            for (var k in codec.props) {
+                var prop = codec.props[k];
+                if (isLiteralC(prop)) {
+                    if (index === emptyTags) {
+                        index = {};
+                    }
+                    index[k] = [prop.value];
+                }
+            }
+            return index;
+        }
+        else if (isExactC(codec) || isRefinementC(codec)) {
+            return getTags(codec.type);
+        }
+        else if (isIntersectionC(codec)) {
+            return codec.types.reduce(function (tags, codec) { return mergeTags(tags, getTags(codec)); }, emptyTags);
+        }
+        else if (isUnionC(codec)) {
+            return codec.types.slice(1).reduce(function (tags, codec) { return intersectTags(tags, getTags(codec)); }, getTags(codec.types[0]));
+        }
+        else if (isRecursiveC(codec)) {
+            lazyCodecs.push(codec);
+            var tags = getTags(codec.type);
+            lazyCodecs.pop();
+            return tags;
+        }
+        return emptyTags;
+    }
+    /**
+     * @internal
+     */
+    function getIndex(codecs) {
+        var tags = getTags(codecs[0]);
+        var keys = Object.keys(tags);
+        var len = codecs.length;
+        var _loop_1 = function (k) {
+            var all = tags[k].slice();
+            var index = [tags[k]];
+            for (var i = 1; i < len; i++) {
+                var codec = codecs[i];
+                var ctags = getTags(codec);
+                var values = ctags[k];
+                // tslint:disable-next-line: strict-type-predicates
+                if (values === undefined) {
+                    return "continue-keys";
+                }
+                else {
+                    if (values.some(function (v) { return all.indexOf(v) !== -1; })) {
+                        return "continue-keys";
+                    }
+                    else {
+                        all.push.apply(all, values);
+                        index.push(values);
+                    }
+                }
+            }
+            return { value: [k, index] };
+        };
+        keys: for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
+            var k = keys_1[_i];
+            var state_1 = _loop_1(k);
+            if (typeof state_1 === "object")
+                return state_1.value;
+            switch (state_1) {
+                case "continue-keys": continue keys;
+            }
+        }
+        return undefined;
+    }
+    // -------------------------------------------------------------------------------------
+    // primitives
+    // -------------------------------------------------------------------------------------
+    /**
+     * @since 1.0.0
+     */
+    var NullType = /** @class */ (function (_super) {
+        __extends(NullType, _super);
+        function NullType() {
+            var _this = _super.call(this, 'null', function (u) { return u === null; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'NullType';
+            return _this;
+        }
+        return NullType;
+    }(Type));
+    /**
+     * @category primitives
+     * @since 1.0.0
+     */
+    new NullType();
+    /**
+     * @since 1.0.0
+     */
+    var UndefinedType = /** @class */ (function (_super) {
+        __extends(UndefinedType, _super);
+        function UndefinedType() {
+            var _this = _super.call(this, 'undefined', function (u) { return u === void 0; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'UndefinedType';
+            return _this;
+        }
+        return UndefinedType;
+    }(Type));
+    var undefinedType = new UndefinedType();
+    /**
+     * @since 1.2.0
+     */
+    var VoidType = /** @class */ (function (_super) {
+        __extends(VoidType, _super);
+        function VoidType() {
+            var _this = _super.call(this, 'void', undefinedType.is, undefinedType.validate, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'VoidType';
+            return _this;
+        }
+        return VoidType;
+    }(Type));
+    /**
+     * @category primitives
+     * @since 1.2.0
+     */
+    new VoidType();
+    /**
+     * @since 1.5.0
+     */
+    var UnknownType = /** @class */ (function (_super) {
+        __extends(UnknownType, _super);
+        function UnknownType() {
+            var _this = _super.call(this, 'unknown', function (_) { return true; }, success, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'UnknownType';
+            return _this;
+        }
+        return UnknownType;
+    }(Type));
+    /**
+     * @category primitives
+     * @since 1.5.0
+     */
+    new UnknownType();
+    /**
+     * @since 1.0.0
+     */
+    var StringType = /** @class */ (function (_super) {
+        __extends(StringType, _super);
+        function StringType() {
+            var _this = _super.call(this, 'string', function (u) { return typeof u === 'string'; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'StringType';
+            return _this;
+        }
+        return StringType;
+    }(Type));
+    /**
+     * @category primitives
+     * @since 1.0.0
+     */
+    var string = new StringType();
+    /**
+     * @since 1.0.0
+     */
+    var NumberType = /** @class */ (function (_super) {
+        __extends(NumberType, _super);
+        function NumberType() {
+            var _this = _super.call(this, 'number', function (u) { return typeof u === 'number'; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'NumberType';
+            return _this;
+        }
+        return NumberType;
+    }(Type));
+    /**
+     * @category primitives
+     * @since 1.0.0
+     */
+    var number = new NumberType();
+    /**
+     * @since 2.1.0
+     */
+    var BigIntType = /** @class */ (function (_super) {
+        __extends(BigIntType, _super);
+        function BigIntType() {
+            var _this = _super.call(this, 'bigint', 
+            // tslint:disable-next-line: valid-typeof
+            function (u) { return typeof u === 'bigint'; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'BigIntType';
+            return _this;
+        }
+        return BigIntType;
+    }(Type));
+    /**
+     * @category primitives
+     * @since 2.1.0
+     */
+    new BigIntType();
+    /**
+     * @since 1.0.0
+     */
+    var BooleanType = /** @class */ (function (_super) {
+        __extends(BooleanType, _super);
+        function BooleanType() {
+            var _this = _super.call(this, 'boolean', function (u) { return typeof u === 'boolean'; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'BooleanType';
+            return _this;
+        }
+        return BooleanType;
+    }(Type));
+    /**
+     * @category primitives
+     * @since 1.0.0
+     */
+    new BooleanType();
+    /**
+     * @since 1.0.0
+     */
+    var AnyArrayType = /** @class */ (function (_super) {
+        __extends(AnyArrayType, _super);
+        function AnyArrayType() {
+            var _this = _super.call(this, 'UnknownArray', Array.isArray, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'AnyArrayType';
+            return _this;
+        }
+        return AnyArrayType;
+    }(Type));
+    /**
+     * @category primitives
+     * @since 1.7.1
+     */
+    var UnknownArray = new AnyArrayType();
+    /**
+     * @since 1.0.0
+     */
+    var AnyDictionaryType = /** @class */ (function (_super) {
+        __extends(AnyDictionaryType, _super);
+        function AnyDictionaryType() {
+            var _this = _super.call(this, 'UnknownRecord', function (u) { return u !== null && typeof u === 'object' && !Array.isArray(u); }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'AnyDictionaryType';
+            return _this;
+        }
+        return AnyDictionaryType;
+    }(Type));
+    /**
+     * @category primitives
+     * @since 1.7.1
+     */
+    var UnknownRecord = new AnyDictionaryType();
+    /**
+     * @since 1.0.0
+     */
+    /** @class */ ((function (_super) {
+        __extends(LiteralType, _super);
+        function LiteralType(name, is, validate, encode, value) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.value = value;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'LiteralType';
+            return _this;
+        }
+        return LiteralType;
+    })(Type));
+    /**
+     * @since 1.0.0
+     */
+    var KeyofType = /** @class */ (function (_super) {
+        __extends(KeyofType, _super);
+        function KeyofType(name, is, validate, encode, keys) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.keys = keys;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'KeyofType';
+            return _this;
+        }
+        return KeyofType;
+    }(Type));
+    /**
+     * @category constructors
+     * @since 1.0.0
+     */
+    function keyof(keys, name) {
+        if (name === void 0) { name = Object.keys(keys)
+            .map(function (k) { return JSON.stringify(k); })
+            .join(' | '); }
+        var is = function (u) { return string.is(u) && hasOwnProperty.call(keys, u); };
+        return new KeyofType(name, is, function (u, c) { return (is(u) ? success(u) : failure(u, c)); }, identity, keys);
+    }
+    // -------------------------------------------------------------------------------------
+    // combinators
+    // -------------------------------------------------------------------------------------
+    /**
+     * @since 1.0.0
+     */
+    var RefinementType = /** @class */ (function (_super) {
+        __extends(RefinementType, _super);
+        function RefinementType(name, is, validate, encode, type, predicate) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.type = type;
+            _this.predicate = predicate;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'RefinementType';
+            return _this;
+        }
+        return RefinementType;
+    }(Type));
+    /**
+     * @category combinators
+     * @since 1.8.1
+     */
+    function brand(codec, predicate, name) {
+        return refinement(codec, predicate, name);
+    }
+    /**
+     * A branded codec representing an integer
+     *
+     * @category primitives
+     * @since 1.8.1
+     */
+    brand(number, function (n) { return Number.isInteger(n); }, 'Int');
+    /**
+     * @since 1.0.0
+     */
+    var RecursiveType = /** @class */ (function (_super) {
+        __extends(RecursiveType, _super);
+        function RecursiveType(name, is, validate, encode, runDefinition) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.runDefinition = runDefinition;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'RecursiveType';
+            return _this;
+        }
+        return RecursiveType;
+    }(Type));
+    Object.defineProperty(RecursiveType.prototype, 'type', {
+        get: function () {
+            return this.runDefinition();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * @since 1.0.0
+     */
+    var ArrayType = /** @class */ (function (_super) {
+        __extends(ArrayType, _super);
+        function ArrayType(name, is, validate, encode, type) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.type = type;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'ArrayType';
+            return _this;
+        }
+        return ArrayType;
+    }(Type));
+    /**
+     * @category combinators
+     * @since 1.0.0
+     */
+    function array(item, name) {
+        if (name === void 0) { name = "Array<".concat(item.name, ">"); }
+        return new ArrayType(name, function (u) { return UnknownArray.is(u) && u.every(item.is); }, function (u, c) {
+            var e = UnknownArray.validate(u, c);
+            if (isLeft(e)) {
+                return e;
+            }
+            var us = e.right;
+            var len = us.length;
+            var as = us;
+            var errors = [];
+            for (var i = 0; i < len; i++) {
+                var ui = us[i];
+                var result = item.validate(ui, appendContext(c, String(i), item, ui));
+                if (isLeft(result)) {
+                    pushAll(errors, result.left);
+                }
+                else {
+                    var ai = result.right;
+                    if (ai !== ui) {
+                        if (as === us) {
+                            as = us.slice();
+                        }
+                        as[i] = ai;
+                    }
+                }
+            }
+            return errors.length > 0 ? failures(errors) : success(as);
+        }, item.encode === identity ? identity : function (a) { return a.map(item.encode); }, item);
+    }
+    /**
+     * @since 1.0.0
+     */
+    var InterfaceType = /** @class */ (function (_super) {
+        __extends(InterfaceType, _super);
+        function InterfaceType(name, is, validate, encode, props) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.props = props;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'InterfaceType';
+            return _this;
+        }
+        return InterfaceType;
+    }(Type));
+    /**
+     * @category combinators
+     * @since 1.0.0
+     */
+    function type(props, name) {
+        if (name === void 0) { name = getInterfaceTypeName(props); }
+        var keys = Object.keys(props);
+        var types = keys.map(function (key) { return props[key]; });
+        var len = keys.length;
+        return new InterfaceType(name, function (u) {
+            if (UnknownRecord.is(u)) {
+                for (var i = 0; i < len; i++) {
+                    var k = keys[i];
+                    var uk = u[k];
+                    if ((uk === undefined && !hasOwnProperty.call(u, k)) || !types[i].is(uk)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }, function (u, c) {
+            var e = UnknownRecord.validate(u, c);
+            if (isLeft(e)) {
+                return e;
+            }
+            var o = e.right;
+            var a = o;
+            var errors = [];
+            for (var i = 0; i < len; i++) {
+                var k = keys[i];
+                var ak = a[k];
+                var type_1 = types[i];
+                var result = type_1.validate(ak, appendContext(c, k, type_1, ak));
+                if (isLeft(result)) {
+                    pushAll(errors, result.left);
+                }
+                else {
+                    var vak = result.right;
+                    if (vak !== ak || (vak === undefined && !hasOwnProperty.call(a, k))) {
+                        /* istanbul ignore next */
+                        if (a === o) {
+                            a = __assign({}, o);
+                        }
+                        a[k] = vak;
+                    }
+                }
+            }
+            return errors.length > 0 ? failures(errors) : success(a);
+        }, useIdentity(types)
+            ? identity
+            : function (a) {
+                var s = __assign({}, a);
+                for (var i = 0; i < len; i++) {
+                    var k = keys[i];
+                    var encode = types[i].encode;
+                    if (encode !== identity) {
+                        s[k] = encode(a[k]);
+                    }
+                }
+                return s;
+            }, props);
+    }
+    /**
+     * @since 1.0.0
+     */
+    /** @class */ ((function (_super) {
+        __extends(PartialType, _super);
+        function PartialType(name, is, validate, encode, props) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.props = props;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'PartialType';
+            return _this;
+        }
+        return PartialType;
+    })(Type));
+    /**
+     * @since 1.0.0
+     */
+    var DictionaryType = /** @class */ (function (_super) {
+        __extends(DictionaryType, _super);
+        function DictionaryType(name, is, validate, encode, domain, codomain) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.domain = domain;
+            _this.codomain = codomain;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'DictionaryType';
+            return _this;
+        }
+        return DictionaryType;
+    }(Type));
+    /**
+     * @category combinators
+     * @since 1.7.1
+     */
+    function record(domain, codomain, name) {
+        var keys = getDomainKeys(domain);
+        return keys
+            ? enumerableRecord(Object.keys(keys), domain, codomain, name)
+            : nonEnumerableRecord(domain, codomain, name);
+    }
+    /**
+     * @since 1.0.0
+     */
+    var UnionType = /** @class */ (function (_super) {
+        __extends(UnionType, _super);
+        function UnionType(name, is, validate, encode, types) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.types = types;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'UnionType';
+            return _this;
+        }
+        return UnionType;
+    }(Type));
+    /**
+     * @category combinators
+     * @since 1.0.0
+     */
+    function union(codecs, name) {
+        if (name === void 0) { name = getUnionName(codecs); }
+        var index = getIndex(codecs);
+        if (index !== undefined && codecs.length > 0) {
+            var tag_1 = index[0], groups_1 = index[1];
+            var len_1 = groups_1.length;
+            var find_1 = function (value) {
+                for (var i = 0; i < len_1; i++) {
+                    if (groups_1[i].indexOf(value) !== -1) {
+                        return i;
+                    }
+                }
+                return undefined;
+            };
+            // tslint:disable-next-line: deprecation
+            return new TaggedUnionType(name, function (u) {
+                if (UnknownRecord.is(u)) {
+                    var i = find_1(u[tag_1]);
+                    return i !== undefined ? codecs[i].is(u) : false;
+                }
+                return false;
+            }, function (u, c) {
+                var e = UnknownRecord.validate(u, c);
+                if (isLeft(e)) {
+                    return e;
+                }
+                var r = e.right;
+                var i = find_1(r[tag_1]);
+                if (i === undefined) {
+                    return failure(u, c);
+                }
+                var codec = codecs[i];
+                return codec.validate(r, appendContext(c, String(i), codec, r));
+            }, useIdentity(codecs)
+                ? identity
+                : function (a) {
+                    var i = find_1(a[tag_1]);
+                    if (i === undefined) {
+                        // https://github.com/gcanti/io-ts/pull/305
+                        throw new Error("no codec found to encode value in union codec ".concat(name));
+                    }
+                    else {
+                        return codecs[i].encode(a);
+                    }
+                }, codecs, tag_1);
+        }
+        else {
+            return new UnionType(name, function (u) { return codecs.some(function (type) { return type.is(u); }); }, function (u, c) {
+                var errors = [];
+                for (var i = 0; i < codecs.length; i++) {
+                    var codec = codecs[i];
+                    var result = codec.validate(u, appendContext(c, String(i), codec, u));
+                    if (isLeft(result)) {
+                        pushAll(errors, result.left);
+                    }
+                    else {
+                        return success(result.right);
+                    }
+                }
+                return failures(errors);
+            }, useIdentity(codecs)
+                ? identity
+                : function (a) {
+                    for (var _i = 0, codecs_1 = codecs; _i < codecs_1.length; _i++) {
+                        var codec = codecs_1[_i];
+                        if (codec.is(a)) {
+                            return codec.encode(a);
+                        }
+                    }
+                    // https://github.com/gcanti/io-ts/pull/305
+                    throw new Error("no codec found to encode value in union type ".concat(name));
+                }, codecs);
+        }
+    }
+    /**
+     * @since 1.0.0
+     */
+    /** @class */ ((function (_super) {
+        __extends(IntersectionType, _super);
+        function IntersectionType(name, is, validate, encode, types) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.types = types;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'IntersectionType';
+            return _this;
+        }
+        return IntersectionType;
+    })(Type));
+    /**
+     * @since 1.0.0
+     */
+    /** @class */ ((function (_super) {
+        __extends(TupleType, _super);
+        function TupleType(name, is, validate, encode, types) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.types = types;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'TupleType';
+            return _this;
+        }
+        return TupleType;
+    })(Type));
+    /**
+     * @since 1.0.0
+     */
+    /** @class */ ((function (_super) {
+        __extends(ReadonlyType, _super);
+        function ReadonlyType(name, is, validate, encode, type) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.type = type;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'ReadonlyType';
+            return _this;
+        }
+        return ReadonlyType;
+    })(Type));
+    /**
+     * @since 1.0.0
+     */
+    /** @class */ ((function (_super) {
+        __extends(ReadonlyArrayType, _super);
+        function ReadonlyArrayType(name, is, validate, encode, type) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.type = type;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'ReadonlyArrayType';
+            return _this;
+        }
+        return ReadonlyArrayType;
+    })(Type));
+    /**
+     * @since 1.1.0
+     */
+    /** @class */ ((function (_super) {
+        __extends(ExactType, _super);
+        function ExactType(name, is, validate, encode, type) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.type = type;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'ExactType';
+            return _this;
+        }
+        return ExactType;
+    })(Type));
+    /**
+     * @since 1.0.0
+     */
+    var FunctionType = /** @class */ (function (_super) {
+        __extends(FunctionType, _super);
+        function FunctionType() {
+            var _this = _super.call(this, 'Function', 
+            // tslint:disable-next-line:strict-type-predicates
+            function (u) { return typeof u === 'function'; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'FunctionType';
+            return _this;
+        }
+        return FunctionType;
+    }(Type));
+    /**
+     * @category primitives
+     * @since 1.0.0
+     */
+    new FunctionType();
+    /**
+     * @since 1.0.0
+     */
+    var NeverType = /** @class */ (function (_super) {
+        __extends(NeverType, _super);
+        function NeverType() {
+            var _this = _super.call(this, 'never', function (_) { return false; }, function (u, c) { return failure(u, c); }, 
+            /* istanbul ignore next */
+            function () {
+                throw new Error('cannot encode never');
+            }) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'NeverType';
+            return _this;
+        }
+        return NeverType;
+    }(Type));
+    /**
+     * @category primitives
+     * @since 1.0.0
+     */
+    new NeverType();
+    /**
+     * @since 1.0.0
+     */
+    var AnyType = /** @class */ (function (_super) {
+        __extends(AnyType, _super);
+        function AnyType() {
+            var _this = _super.call(this, 'any', function (_) { return true; }, success, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'AnyType';
+            return _this;
+        }
+        return AnyType;
+    }(Type));
+    /**
+     * @category primitives
+     * @since 1.0.0
+     */
+    new AnyType();
+    function refinement(codec, predicate, name) {
+        if (name === void 0) { name = "(".concat(codec.name, " | ").concat(getFunctionName(predicate), ")"); }
+        return new RefinementType(name, function (u) { return codec.is(u) && predicate(u); }, function (i, c) {
+            var e = codec.validate(i, c);
+            if (isLeft(e)) {
+                return e;
+            }
+            var a = e.right;
+            return predicate(a) ? success(a) : failure(a, c);
+        }, codec.encode, codec, predicate);
+    }
+    /**
+     * @category primitives
+     * @since 1.0.0
+     */
+    refinement(number, Number.isInteger, 'Integer');
+    // -------------------------------------------------------------------------------------
+    // deprecated
+    // -------------------------------------------------------------------------------------
+    /**
+     * @since 1.3.0
+     * @deprecated
+     */
+    var TaggedUnionType = /** @class */ (function (_super) {
+        __extends(TaggedUnionType, _super);
+        function TaggedUnionType(name, 
+        // tslint:disable-next-line: deprecation
+        is, 
+        // tslint:disable-next-line: deprecation
+        validate, 
+        // tslint:disable-next-line: deprecation
+        encode, codecs, tag) {
+            var _this = _super.call(this, name, is, validate, encode, codecs) /* istanbul ignore next */ // <= workaround for https://github.com/Microsoft/TypeScript/issues/13455
+             || this;
+            _this.tag = tag;
+            return _this;
+        }
+        return TaggedUnionType;
+    }(UnionType));
+    /**
+     * @since 1.0.0
+     * @deprecated
+     */
+    var ObjectType = /** @class */ (function (_super) {
+        __extends(ObjectType, _super);
+        function ObjectType() {
+            var _this = _super.call(this, 'object', function (u) { return u !== null && typeof u === 'object'; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'ObjectType';
+            return _this;
+        }
+        return ObjectType;
+    }(Type));
+    /**
+     * Use `UnknownRecord` instead.
+     *
+     * @category primitives
+     * @since 1.0.0
+     * @deprecated
+     */
+    // tslint:disable-next-line: deprecation
+    new ObjectType();
+    /**
+     * @since 1.0.0
+     * @deprecated
+     */
+    /** @class */ ((function (_super) {
+        __extends(StrictType, _super);
+        function StrictType(name, 
+        // tslint:disable-next-line: deprecation
+        is, 
+        // tslint:disable-next-line: deprecation
+        validate, 
+        // tslint:disable-next-line: deprecation
+        encode, props) {
+            var _this = _super.call(this, name, is, validate, encode) || this;
+            _this.props = props;
+            /**
+             * @since 1.0.0
+             */
+            _this._tag = 'StrictType';
+            return _this;
+        }
+        return StrictType;
+    })(Type));
+
+    const RuntimeNodeTypeNames = keyof({
+        "Prompt": null,
+        "Process": null,
+        "Conditional": null,
+        "Command": null
+    });
+    const RuntimeMongoId = type({
+        $oid: string,
+    });
+    const RuntimePrompt = type({
+        Prompt: type({
+            prompt: string,
+            input_variables: array(string),
+            output_variables: array(string),
+            system: string,
+        }),
+    });
+    const RuntimeProcess = type({
+        Process: type({
+            graph: string,
+            description: string,
+            topological_order: array(string),
+        }),
+    });
+    const RuntimeConditional = type({
+        Conditional: type({
+            system_variables: record(string, string),
+            statement: string,
+            options: record(string, string), // assuming ObjectId is replaced with string
+        }),
+    });
+    const RuntimeCommand = type({
+        Command: type({
+            command: string,
+        }),
+    });
+    const RuntimeNodeType = union([RuntimePrompt, RuntimeProcess, RuntimeConditional, RuntimeCommand]);
+    const RuntimeNode = type({
+        _id: RuntimeMongoId,
+        name: string,
+        type_name: RuntimeNodeTypeNames,
+        node_content: RuntimeNodeType,
+    });
+
+    var Either = {};
+
+    var ChainRec = {};
+
+    Object.defineProperty(ChainRec, "__esModule", { value: true });
+    ChainRec.tailRec = void 0;
+    /**
+     * @since 2.0.0
+     */
+    var tailRec = function (startWith, f) {
+        var ab = f(startWith);
+        while (ab._tag === 'Left') {
+            ab = f(ab.left);
+        }
+        return ab.right;
+    };
+    ChainRec.tailRec = tailRec;
+
+    (function (exports) {
+    	var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    	    if (k2 === undefined) k2 = k;
+    	    var desc = Object.getOwnPropertyDescriptor(m, k);
+    	    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+    	      desc = { enumerable: true, get: function() { return m[k]; } };
+    	    }
+    	    Object.defineProperty(o, k2, desc);
+    	}) : (function(o, m, k, k2) {
+    	    if (k2 === undefined) k2 = k;
+    	    o[k2] = m[k];
+    	}));
+    	var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
+    	    Object.defineProperty(o, "default", { enumerable: true, value: v });
+    	}) : function(o, v) {
+    	    o["default"] = v;
+    	});
+    	var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
+    	    if (mod && mod.__esModule) return mod;
+    	    var result = {};
+    	    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    	    __setModuleDefault(result, mod);
+    	    return result;
+    	};
+    	Object.defineProperty(exports, "__esModule", { value: true });
+    	exports.match = exports.foldW = exports.matchW = exports.isRight = exports.isLeft = exports.fromOption = exports.fromPredicate = exports.FromEither = exports.MonadThrow = exports.throwError = exports.ChainRec = exports.Extend = exports.extend = exports.Alt = exports.alt = exports.altW = exports.Bifunctor = exports.mapLeft = exports.bimap = exports.Traversable = exports.sequence = exports.traverse = exports.Foldable = exports.reduceRight = exports.foldMap = exports.reduce = exports.Monad = exports.Chain = exports.Applicative = exports.Apply = exports.ap = exports.apW = exports.Pointed = exports.of = exports.asUnit = exports.as = exports.Functor = exports.map = exports.getAltValidation = exports.getApplicativeValidation = exports.getWitherable = exports.getFilterable = exports.getCompactable = exports.getSemigroup = exports.getEq = exports.getShow = exports.URI = exports.flatMap = exports.right = exports.left = void 0;
+    	exports.chainFirstW = exports.chainFirst = exports.chain = exports.chainW = exports.sequenceArray = exports.traverseArray = exports.traverseArrayWithIndex = exports.traverseReadonlyArrayWithIndex = exports.traverseReadonlyNonEmptyArrayWithIndex = exports.ApT = exports.apSW = exports.apS = exports.bindW = exports.bind = exports.let = exports.bindTo = exports.Do = exports.exists = exports.elem = exports.toError = exports.toUnion = exports.chainNullableK = exports.fromNullableK = exports.tryCatchK = exports.tryCatch = exports.fromNullable = exports.orElse = exports.orElseW = exports.swap = exports.filterOrElseW = exports.filterOrElse = exports.flatMapOption = exports.flatMapNullable = exports.liftOption = exports.liftNullable = exports.chainOptionKW = exports.chainOptionK = exports.fromOptionK = exports.duplicate = exports.flatten = exports.flattenW = exports.tap = exports.apSecondW = exports.apSecond = exports.apFirstW = exports.apFirst = exports.flap = exports.getOrElse = exports.getOrElseW = exports.fold = void 0;
+    	exports.getValidation = exports.getValidationMonoid = exports.getValidationSemigroup = exports.getApplyMonoid = exports.getApplySemigroup = exports.either = exports.stringifyJSON = exports.parseJSON = void 0;
+    	var Applicative_1 = Applicative;
+    	var Apply_1 = Apply;
+    	var chainable = __importStar(Chain);
+    	var ChainRec_1 = ChainRec;
+    	var FromEither_1 = FromEither$1;
+    	var function_1 = _function;
+    	var Functor_1 = Functor$1;
+    	var _ = __importStar(internal);
+    	var Separated_1 = Separated;
+    	var Witherable_1 = Witherable;
+    	// -------------------------------------------------------------------------------------
+    	// constructors
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Constructs a new `Either` holding a `Left` value. This usually represents a failure, due to the right-bias of this
+    	 * structure.
+    	 *
+    	 * @category constructors
+    	 * @since 2.0.0
+    	 */
+    	exports.left = _.left;
+    	/**
+    	 * Constructs a new `Either` holding a `Right` value. This usually represents a successful value due to the right bias
+    	 * of this structure.
+    	 *
+    	 * @category constructors
+    	 * @since 2.0.0
+    	 */
+    	exports.right = _.right;
+    	/**
+    	 * @category sequencing
+    	 * @since 2.14.0
+    	 */
+    	exports.flatMap = (0, function_1.dual)(2, function (ma, f) { return ((0, exports.isLeft)(ma) ? ma : f(ma.right)); });
+    	var _map = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.map)(f)); };
+    	var _ap = function (fab, fa) { return (0, function_1.pipe)(fab, (0, exports.ap)(fa)); };
+    	/* istanbul ignore next */
+    	var _reduce = function (fa, b, f) { return (0, function_1.pipe)(fa, (0, exports.reduce)(b, f)); };
+    	/* istanbul ignore next */
+    	var _foldMap = function (M) { return function (fa, f) {
+    	    var foldMapM = (0, exports.foldMap)(M);
+    	    return (0, function_1.pipe)(fa, foldMapM(f));
+    	}; };
+    	/* istanbul ignore next */
+    	var _reduceRight = function (fa, b, f) { return (0, function_1.pipe)(fa, (0, exports.reduceRight)(b, f)); };
+    	var _traverse = function (F) {
+    	    var traverseF = (0, exports.traverse)(F);
+    	    return function (ta, f) { return (0, function_1.pipe)(ta, traverseF(f)); };
+    	};
+    	var _bimap = function (fa, f, g) { return (0, function_1.pipe)(fa, (0, exports.bimap)(f, g)); };
+    	var _mapLeft = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.mapLeft)(f)); };
+    	/* istanbul ignore next */
+    	var _alt = function (fa, that) { return (0, function_1.pipe)(fa, (0, exports.alt)(that)); };
+    	/* istanbul ignore next */
+    	var _extend = function (wa, f) { return (0, function_1.pipe)(wa, (0, exports.extend)(f)); };
+    	var _chainRec = function (a, f) {
+    	    return (0, ChainRec_1.tailRec)(f(a), function (e) {
+    	        return (0, exports.isLeft)(e) ? (0, exports.right)((0, exports.left)(e.left)) : (0, exports.isLeft)(e.right) ? (0, exports.left)(f(e.right.left)) : (0, exports.right)((0, exports.right)(e.right.right));
+    	    });
+    	};
+    	/**
+    	 * @category type lambdas
+    	 * @since 2.0.0
+    	 */
+    	exports.URI = 'Either';
+    	/**
+    	 * @category instances
+    	 * @since 2.0.0
+    	 */
+    	var getShow = function (SE, SA) { return ({
+    	    show: function (ma) { return ((0, exports.isLeft)(ma) ? "left(".concat(SE.show(ma.left), ")") : "right(".concat(SA.show(ma.right), ")")); }
+    	}); };
+    	exports.getShow = getShow;
+    	/**
+    	 * @category instances
+    	 * @since 2.0.0
+    	 */
+    	var getEq = function (EL, EA) { return ({
+    	    equals: function (x, y) {
+    	        return x === y || ((0, exports.isLeft)(x) ? (0, exports.isLeft)(y) && EL.equals(x.left, y.left) : (0, exports.isRight)(y) && EA.equals(x.right, y.right));
+    	    }
+    	}); };
+    	exports.getEq = getEq;
+    	/**
+    	 * Semigroup returning the left-most non-`Left` value. If both operands are `Right`s then the inner values are
+    	 * concatenated using the provided `Semigroup`
+    	 *
+    	 * @example
+    	 * import { getSemigroup, left, right } from 'fp-ts/Either'
+    	 * import { SemigroupSum } from 'fp-ts/number'
+    	 *
+    	 * const S = getSemigroup<string, number>(SemigroupSum)
+    	 * assert.deepStrictEqual(S.concat(left('a'), left('b')), left('a'))
+    	 * assert.deepStrictEqual(S.concat(left('a'), right(2)), right(2))
+    	 * assert.deepStrictEqual(S.concat(right(1), left('b')), right(1))
+    	 * assert.deepStrictEqual(S.concat(right(1), right(2)), right(3))
+    	 *
+    	 * @category instances
+    	 * @since 2.0.0
+    	 */
+    	var getSemigroup = function (S) { return ({
+    	    concat: function (x, y) { return ((0, exports.isLeft)(y) ? x : (0, exports.isLeft)(x) ? y : (0, exports.right)(S.concat(x.right, y.right))); }
+    	}); };
+    	exports.getSemigroup = getSemigroup;
+    	/**
+    	 * Builds a `Compactable` instance for `Either` given `Monoid` for the left side.
+    	 *
+    	 * @category filtering
+    	 * @since 2.10.0
+    	 */
+    	var getCompactable = function (M) {
+    	    var empty = (0, exports.left)(M.empty);
+    	    return {
+    	        URI: exports.URI,
+    	        _E: undefined,
+    	        compact: function (ma) { return ((0, exports.isLeft)(ma) ? ma : ma.right._tag === 'None' ? empty : (0, exports.right)(ma.right.value)); },
+    	        separate: function (ma) {
+    	            return (0, exports.isLeft)(ma)
+    	                ? (0, Separated_1.separated)(ma, ma)
+    	                : (0, exports.isLeft)(ma.right)
+    	                    ? (0, Separated_1.separated)((0, exports.right)(ma.right.left), empty)
+    	                    : (0, Separated_1.separated)(empty, (0, exports.right)(ma.right.right));
+    	        }
+    	    };
+    	};
+    	exports.getCompactable = getCompactable;
+    	/**
+    	 * Builds a `Filterable` instance for `Either` given `Monoid` for the left side
+    	 *
+    	 * @category filtering
+    	 * @since 2.10.0
+    	 */
+    	var getFilterable = function (M) {
+    	    var empty = (0, exports.left)(M.empty);
+    	    var _a = (0, exports.getCompactable)(M), compact = _a.compact, separate = _a.separate;
+    	    var filter = function (ma, predicate) {
+    	        return (0, exports.isLeft)(ma) ? ma : predicate(ma.right) ? ma : empty;
+    	    };
+    	    var partition = function (ma, p) {
+    	        return (0, exports.isLeft)(ma)
+    	            ? (0, Separated_1.separated)(ma, ma)
+    	            : p(ma.right)
+    	                ? (0, Separated_1.separated)(empty, (0, exports.right)(ma.right))
+    	                : (0, Separated_1.separated)((0, exports.right)(ma.right), empty);
+    	    };
+    	    return {
+    	        URI: exports.URI,
+    	        _E: undefined,
+    	        map: _map,
+    	        compact: compact,
+    	        separate: separate,
+    	        filter: filter,
+    	        filterMap: function (ma, f) {
+    	            if ((0, exports.isLeft)(ma)) {
+    	                return ma;
+    	            }
+    	            var ob = f(ma.right);
+    	            return ob._tag === 'None' ? empty : (0, exports.right)(ob.value);
+    	        },
+    	        partition: partition,
+    	        partitionMap: function (ma, f) {
+    	            if ((0, exports.isLeft)(ma)) {
+    	                return (0, Separated_1.separated)(ma, ma);
+    	            }
+    	            var e = f(ma.right);
+    	            return (0, exports.isLeft)(e) ? (0, Separated_1.separated)((0, exports.right)(e.left), empty) : (0, Separated_1.separated)(empty, (0, exports.right)(e.right));
+    	        }
+    	    };
+    	};
+    	exports.getFilterable = getFilterable;
+    	/**
+    	 * Builds `Witherable` instance for `Either` given `Monoid` for the left side
+    	 *
+    	 * @category filtering
+    	 * @since 2.0.0
+    	 */
+    	var getWitherable = function (M) {
+    	    var F_ = (0, exports.getFilterable)(M);
+    	    var C = (0, exports.getCompactable)(M);
+    	    return {
+    	        URI: exports.URI,
+    	        _E: undefined,
+    	        map: _map,
+    	        compact: F_.compact,
+    	        separate: F_.separate,
+    	        filter: F_.filter,
+    	        filterMap: F_.filterMap,
+    	        partition: F_.partition,
+    	        partitionMap: F_.partitionMap,
+    	        traverse: _traverse,
+    	        sequence: exports.sequence,
+    	        reduce: _reduce,
+    	        foldMap: _foldMap,
+    	        reduceRight: _reduceRight,
+    	        wither: (0, Witherable_1.witherDefault)(exports.Traversable, C),
+    	        wilt: (0, Witherable_1.wiltDefault)(exports.Traversable, C)
+    	    };
+    	};
+    	exports.getWitherable = getWitherable;
+    	/**
+    	 * The default [`Applicative`](#applicative) instance returns the first error, if you want to
+    	 * get all errors you need to provide a way to concatenate them via a `Semigroup`.
+    	 *
+    	 * @example
+    	 * import * as A from 'fp-ts/Apply'
+    	 * import * as E from 'fp-ts/Either'
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import * as S from 'fp-ts/Semigroup'
+    	 * import * as string from 'fp-ts/string'
+    	 *
+    	 * const parseString = (u: unknown): E.Either<string, string> =>
+    	 *   typeof u === 'string' ? E.right(u) : E.left('not a string')
+    	 *
+    	 * const parseNumber = (u: unknown): E.Either<string, number> =>
+    	 *   typeof u === 'number' ? E.right(u) : E.left('not a number')
+    	 *
+    	 * interface Person {
+    	 *   readonly name: string
+    	 *   readonly age: number
+    	 * }
+    	 *
+    	 * const parsePerson = (
+    	 *   input: Record<string, unknown>
+    	 * ): E.Either<string, Person> =>
+    	 *   pipe(
+    	 *     E.Do,
+    	 *     E.apS('name', parseString(input.name)),
+    	 *     E.apS('age', parseNumber(input.age))
+    	 *   )
+    	 *
+    	 * assert.deepStrictEqual(parsePerson({}), E.left('not a string')) // <= first error
+    	 *
+    	 * const Applicative = E.getApplicativeValidation(
+    	 *   pipe(string.Semigroup, S.intercalate(', '))
+    	 * )
+    	 *
+    	 * const apS = A.apS(Applicative)
+    	 *
+    	 * const parsePersonAll = (
+    	 *   input: Record<string, unknown>
+    	 * ): E.Either<string, Person> =>
+    	 *   pipe(
+    	 *     E.Do,
+    	 *     apS('name', parseString(input.name)),
+    	 *     apS('age', parseNumber(input.age))
+    	 *   )
+    	 *
+    	 * assert.deepStrictEqual(parsePersonAll({}), E.left('not a string, not a number')) // <= all errors
+    	 *
+    	 * @category error handling
+    	 * @since 2.7.0
+    	 */
+    	var getApplicativeValidation = function (SE) { return ({
+    	    URI: exports.URI,
+    	    _E: undefined,
+    	    map: _map,
+    	    ap: function (fab, fa) {
+    	        return (0, exports.isLeft)(fab)
+    	            ? (0, exports.isLeft)(fa)
+    	                ? (0, exports.left)(SE.concat(fab.left, fa.left))
+    	                : fab
+    	            : (0, exports.isLeft)(fa)
+    	                ? fa
+    	                : (0, exports.right)(fab.right(fa.right));
+    	    },
+    	    of: exports.of
+    	}); };
+    	exports.getApplicativeValidation = getApplicativeValidation;
+    	/**
+    	 * The default [`Alt`](#alt) instance returns the last error, if you want to
+    	 * get all errors you need to provide a way to concatenate them via a `Semigroup`.
+    	 *
+    	 * @example
+    	 * import * as E from 'fp-ts/Either'
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import * as S from 'fp-ts/Semigroup'
+    	 * import * as string from 'fp-ts/string'
+    	 *
+    	 * const parseString = (u: unknown): E.Either<string, string> =>
+    	 *   typeof u === 'string' ? E.right(u) : E.left('not a string')
+    	 *
+    	 * const parseNumber = (u: unknown): E.Either<string, number> =>
+    	 *   typeof u === 'number' ? E.right(u) : E.left('not a number')
+    	 *
+    	 * const parse = (u: unknown): E.Either<string, string | number> =>
+    	 *   pipe(
+    	 *     parseString(u),
+    	 *     E.alt<string, string | number>(() => parseNumber(u))
+    	 *   )
+    	 *
+    	 * assert.deepStrictEqual(parse(true), E.left('not a number')) // <= last error
+    	 *
+    	 * const Alt = E.getAltValidation(pipe(string.Semigroup, S.intercalate(', ')))
+    	 *
+    	 * const parseAll = (u: unknown): E.Either<string, string | number> =>
+    	 *   Alt.alt<string | number>(parseString(u), () => parseNumber(u))
+    	 *
+    	 * assert.deepStrictEqual(parseAll(true), E.left('not a string, not a number')) // <= all errors
+    	 *
+    	 * @category error handling
+    	 * @since 2.7.0
+    	 */
+    	var getAltValidation = function (SE) { return ({
+    	    URI: exports.URI,
+    	    _E: undefined,
+    	    map: _map,
+    	    alt: function (me, that) {
+    	        if ((0, exports.isRight)(me)) {
+    	            return me;
+    	        }
+    	        var ea = that();
+    	        return (0, exports.isLeft)(ea) ? (0, exports.left)(SE.concat(me.left, ea.left)) : ea;
+    	    }
+    	}); };
+    	exports.getAltValidation = getAltValidation;
+    	/**
+    	 * @category mapping
+    	 * @since 2.0.0
+    	 */
+    	var map = function (f) { return function (fa) {
+    	    return (0, exports.isLeft)(fa) ? fa : (0, exports.right)(f(fa.right));
+    	}; };
+    	exports.map = map;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Functor = {
+    	    URI: exports.URI,
+    	    map: _map
+    	};
+    	/**
+    	 * Maps the `Right` value of this `Either` to the specified constant value.
+    	 *
+    	 * @category mapping
+    	 * @since 2.16.0
+    	 */
+    	exports.as = (0, function_1.dual)(2, (0, Functor_1.as)(exports.Functor));
+    	/**
+    	 * Maps the `Right` value of this `Either` to the void constant value.
+    	 *
+    	 * @category mapping
+    	 * @since 2.16.0
+    	 */
+    	exports.asUnit = (0, Functor_1.asUnit)(exports.Functor);
+    	/**
+    	 * @category constructors
+    	 * @since 2.7.0
+    	 */
+    	exports.of = exports.right;
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	exports.Pointed = {
+    	    URI: exports.URI,
+    	    of: exports.of
+    	};
+    	/**
+    	 * Less strict version of [`ap`](#ap).
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
+    	 *
+    	 * @since 2.8.0
+    	 */
+    	var apW = function (fa) { return function (fab) {
+    	    return (0, exports.isLeft)(fab) ? fab : (0, exports.isLeft)(fa) ? fa : (0, exports.right)(fab.right(fa.right));
+    	}; };
+    	exports.apW = apW;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	exports.ap = exports.apW;
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	exports.Apply = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    ap: _ap
+    	};
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Applicative = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    ap: _ap,
+    	    of: exports.of
+    	};
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	exports.Chain = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    ap: _ap,
+    	    chain: exports.flatMap
+    	};
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Monad = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    ap: _ap,
+    	    of: exports.of,
+    	    chain: exports.flatMap
+    	};
+    	/**
+    	 * Left-associative fold of a structure.
+    	 *
+    	 * @example
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import * as E from 'fp-ts/Either'
+    	 *
+    	 * const startWith = 'prefix'
+    	 * const concat = (a: string, b: string) => `${a}:${b}`
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(E.right('a'), E.reduce(startWith, concat)),
+    	 *   'prefix:a'
+    	 * )
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(E.left('e'), E.reduce(startWith, concat)),
+    	 *   'prefix'
+    	 * )
+    	 *
+    	 * @category folding
+    	 * @since 2.0.0
+    	 */
+    	var reduce = function (b, f) { return function (fa) {
+    	    return (0, exports.isLeft)(fa) ? b : f(b, fa.right);
+    	}; };
+    	exports.reduce = reduce;
+    	/**
+    	 * Map each element of the structure to a monoid, and combine the results.
+    	 *
+    	 * @example
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import * as E from 'fp-ts/Either'
+    	 * import * as S from 'fp-ts/string'
+    	 *
+    	 * const yell = (a: string) => `${a}!`
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(E.right('a'), E.foldMap(S.Monoid)(yell)),
+    	 *   'a!'
+    	 * )
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(E.left('e'), E.foldMap(S.Monoid)(yell)),
+    	 *   S.Monoid.empty
+    	 * )
+    	 *
+    	 * @category folding
+    	 * @since 2.0.0
+    	 */
+    	var foldMap = function (M) { return function (f) { return function (fa) {
+    	    return (0, exports.isLeft)(fa) ? M.empty : f(fa.right);
+    	}; }; };
+    	exports.foldMap = foldMap;
+    	/**
+    	 * Right-associative fold of a structure.
+    	 *
+    	 * @example
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import * as E from 'fp-ts/Either'
+    	 *
+    	 * const startWith = 'postfix'
+    	 * const concat = (a: string, b: string) => `${a}:${b}`
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(E.right('a'), E.reduceRight(startWith, concat)),
+    	 *   'a:postfix'
+    	 * )
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(E.left('e'), E.reduceRight(startWith, concat)),
+    	 *   'postfix'
+    	 * )
+    	 *
+    	 * @category folding
+    	 * @since 2.0.0
+    	 */
+    	var reduceRight = function (b, f) { return function (fa) {
+    	    return (0, exports.isLeft)(fa) ? b : f(fa.right, b);
+    	}; };
+    	exports.reduceRight = reduceRight;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Foldable = {
+    	    URI: exports.URI,
+    	    reduce: _reduce,
+    	    foldMap: _foldMap,
+    	    reduceRight: _reduceRight
+    	};
+    	/**
+    	 * Map each element of a structure to an action, evaluate these actions from left to right, and collect the results.
+    	 *
+    	 * @example
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import * as RA from 'fp-ts/ReadonlyArray'
+    	 * import * as E from 'fp-ts/Either'
+    	 * import * as O from 'fp-ts/Option'
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(E.right(['a']), E.traverse(O.Applicative)(RA.head)),
+    	 *   O.some(E.right('a'))
+    	 *  )
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(E.right([]), E.traverse(O.Applicative)(RA.head)),
+    	 *   O.none
+    	 * )
+    	 *
+    	 * @category traversing
+    	 * @since 2.6.3
+    	 */
+    	var traverse = function (F) {
+    	    return function (f) {
+    	        return function (ta) {
+    	            return (0, exports.isLeft)(ta) ? F.of((0, exports.left)(ta.left)) : F.map(f(ta.right), exports.right);
+    	        };
+    	    };
+    	};
+    	exports.traverse = traverse;
+    	/**
+    	 * Evaluate each monadic action in the structure from left to right, and collect the results.
+    	 *
+    	 * @example
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import * as E from 'fp-ts/Either'
+    	 * import * as O from 'fp-ts/Option'
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(E.right(O.some('a')), E.sequence(O.Applicative)),
+    	 *   O.some(E.right('a'))
+    	 *  )
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(E.right(O.none), E.sequence(O.Applicative)),
+    	 *   O.none
+    	 * )
+    	 *
+    	 * @category traversing
+    	 * @since 2.6.3
+    	 */
+    	var sequence = function (F) {
+    	    return function (ma) {
+    	        return (0, exports.isLeft)(ma) ? F.of((0, exports.left)(ma.left)) : F.map(ma.right, exports.right);
+    	    };
+    	};
+    	exports.sequence = sequence;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Traversable = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    reduce: _reduce,
+    	    foldMap: _foldMap,
+    	    reduceRight: _reduceRight,
+    	    traverse: _traverse,
+    	    sequence: exports.sequence
+    	};
+    	/**
+    	 * Map a pair of functions over the two type arguments of the bifunctor.
+    	 *
+    	 * @category mapping
+    	 * @since 2.0.0
+    	 */
+    	var bimap = function (f, g) { return function (fa) {
+    	    return (0, exports.isLeft)(fa) ? (0, exports.left)(f(fa.left)) : (0, exports.right)(g(fa.right));
+    	}; };
+    	exports.bimap = bimap;
+    	/**
+    	 * Map a function over the first type argument of a bifunctor.
+    	 *
+    	 * @category error handling
+    	 * @since 2.0.0
+    	 */
+    	var mapLeft = function (f) { return function (fa) {
+    	    return (0, exports.isLeft)(fa) ? (0, exports.left)(f(fa.left)) : fa;
+    	}; };
+    	exports.mapLeft = mapLeft;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Bifunctor = {
+    	    URI: exports.URI,
+    	    bimap: _bimap,
+    	    mapLeft: _mapLeft
+    	};
+    	/**
+    	 * Less strict version of [`alt`](#alt).
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the error and the return types will be merged.
+    	 *
+    	 * @category error handling
+    	 * @since 2.9.0
+    	 */
+    	var altW = function (that) { return function (fa) {
+    	    return (0, exports.isLeft)(fa) ? that() : fa;
+    	}; };
+    	exports.altW = altW;
+    	/**
+    	 * Identifies an associative operation on a type constructor. It is similar to `Semigroup`, except that it applies to
+    	 * types of kind `* -> *`.
+    	 *
+    	 * In case of `Either` returns the left-most non-`Left` value (or the right-most `Left` value if both values are `Left`).
+    	 *
+    	 * | x        | y        | pipe(x, alt(() => y) |
+    	 * | -------- | -------- | -------------------- |
+    	 * | left(a)  | left(b)  | left(b)              |
+    	 * | left(a)  | right(2) | right(2)             |
+    	 * | right(1) | left(b)  | right(1)             |
+    	 * | right(1) | right(2) | right(1)             |
+    	 *
+    	 * @example
+    	 * import * as E from 'fp-ts/Either'
+    	 * import { pipe } from 'fp-ts/function'
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     E.left('a'),
+    	 *     E.alt(() => E.left('b'))
+    	 *   ),
+    	 *   E.left('b')
+    	 * )
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     E.left('a'),
+    	 *     E.alt(() => E.right(2))
+    	 *   ),
+    	 *   E.right(2)
+    	 * )
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     E.right(1),
+    	 *     E.alt(() => E.left('b'))
+    	 *   ),
+    	 *   E.right(1)
+    	 * )
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     E.right(1),
+    	 *     E.alt(() => E.right(2))
+    	 *   ),
+    	 *   E.right(1)
+    	 * )
+    	 *
+    	 * @category error handling
+    	 * @since 2.0.0
+    	 */
+    	exports.alt = exports.altW;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Alt = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    alt: _alt
+    	};
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	var extend = function (f) { return function (wa) {
+    	    return (0, exports.isLeft)(wa) ? wa : (0, exports.right)(f(wa));
+    	}; };
+    	exports.extend = extend;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.Extend = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    extend: _extend
+    	};
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.ChainRec = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    ap: _ap,
+    	    chain: exports.flatMap,
+    	    chainRec: _chainRec
+    	};
+    	/**
+    	 * @since 2.6.3
+    	 */
+    	exports.throwError = exports.left;
+    	/**
+    	 * @category instances
+    	 * @since 2.7.0
+    	 */
+    	exports.MonadThrow = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    ap: _ap,
+    	    of: exports.of,
+    	    chain: exports.flatMap,
+    	    throwError: exports.throwError
+    	};
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	exports.FromEither = {
+    	    URI: exports.URI,
+    	    fromEither: function_1.identity
+    	};
+    	/**
+    	 * @example
+    	 * import { fromPredicate, left, right } from 'fp-ts/Either'
+    	 * import { pipe } from 'fp-ts/function'
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     1,
+    	 *     fromPredicate(
+    	 *       (n) => n > 0,
+    	 *       () => 'error'
+    	 *     )
+    	 *   ),
+    	 *   right(1)
+    	 * )
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     -1,
+    	 *     fromPredicate(
+    	 *       (n) => n > 0,
+    	 *       () => 'error'
+    	 *     )
+    	 *   ),
+    	 *   left('error')
+    	 * )
+    	 *
+    	 * @category lifting
+    	 * @since 2.0.0
+    	 */
+    	exports.fromPredicate = (0, FromEither_1.fromPredicate)(exports.FromEither);
+    	// -------------------------------------------------------------------------------------
+    	// conversions
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @example
+    	 * import * as E from 'fp-ts/Either'
+    	 * import { pipe } from 'fp-ts/function'
+    	 * import * as O from 'fp-ts/Option'
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     O.some(1),
+    	 *     E.fromOption(() => 'error')
+    	 *   ),
+    	 *   E.right(1)
+    	 * )
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     O.none,
+    	 *     E.fromOption(() => 'error')
+    	 *   ),
+    	 *   E.left('error')
+    	 * )
+    	 *
+    	 * @category conversions
+    	 * @since 2.0.0
+    	 */
+    	exports.fromOption = 
+    	/*#__PURE__*/ (0, FromEither_1.fromOption)(exports.FromEither);
+    	// -------------------------------------------------------------------------------------
+    	// refinements
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Returns `true` if the either is an instance of `Left`, `false` otherwise.
+    	 *
+    	 * @category refinements
+    	 * @since 2.0.0
+    	 */
+    	exports.isLeft = _.isLeft;
+    	/**
+    	 * Returns `true` if the either is an instance of `Right`, `false` otherwise.
+    	 *
+    	 * @category refinements
+    	 * @since 2.0.0
+    	 */
+    	exports.isRight = _.isRight;
+    	/**
+    	 * Less strict version of [`match`](#match).
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the handler return types will be merged.
+    	 *
+    	 * @category pattern matching
+    	 * @since 2.10.0
+    	 */
+    	var matchW = function (onLeft, onRight) {
+    	    return function (ma) {
+    	        return (0, exports.isLeft)(ma) ? onLeft(ma.left) : onRight(ma.right);
+    	    };
+    	};
+    	exports.matchW = matchW;
+    	/**
+    	 * Alias of [`matchW`](#matchw).
+    	 *
+    	 * @category pattern matching
+    	 * @since 2.10.0
+    	 */
+    	exports.foldW = exports.matchW;
+    	/**
+    	 * Takes two functions and an `Either` value, if the value is a `Left` the inner value is applied to the first function,
+    	 * if the value is a `Right` the inner value is applied to the second function.
+    	 *
+    	 * @example
+    	 * import { match, left, right } from 'fp-ts/Either'
+    	 * import { pipe } from 'fp-ts/function'
+    	 *
+    	 * function onLeft(errors: Array<string>): string {
+    	 *   return `Errors: ${errors.join(', ')}`
+    	 * }
+    	 *
+    	 * function onRight(value: number): string {
+    	 *   return `Ok: ${value}`
+    	 * }
+    	 *
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     right(1),
+    	 *     match(onLeft, onRight)
+    	 *   ),
+    	 *   'Ok: 1'
+    	 * )
+    	 * assert.strictEqual(
+    	 *   pipe(
+    	 *     left(['error 1', 'error 2']),
+    	 *     match(onLeft, onRight)
+    	 *   ),
+    	 *   'Errors: error 1, error 2'
+    	 * )
+    	 *
+    	 * @category pattern matching
+    	 * @since 2.10.0
+    	 */
+    	exports.match = exports.matchW;
+    	/**
+    	 * Alias of [`match`](#match).
+    	 *
+    	 * @category pattern matching
+    	 * @since 2.0.0
+    	 */
+    	exports.fold = exports.match;
+    	/**
+    	 * Less strict version of [`getOrElse`](#getorelse).
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the handler return type will be merged.
+    	 *
+    	 * @category error handling
+    	 * @since 2.6.0
+    	 */
+    	var getOrElseW = function (onLeft) {
+    	    return function (ma) {
+    	        return (0, exports.isLeft)(ma) ? onLeft(ma.left) : ma.right;
+    	    };
+    	};
+    	exports.getOrElseW = getOrElseW;
+    	/**
+    	 * Returns the wrapped value if it's a `Right` or a default value if is a `Left`.
+    	 *
+    	 * @example
+    	 * import { getOrElse, left, right } from 'fp-ts/Either'
+    	 * import { pipe } from 'fp-ts/function'
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     right(1),
+    	 *     getOrElse(() => 0)
+    	 *   ),
+    	 *   1
+    	 * )
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     left('error'),
+    	 *     getOrElse(() => 0)
+    	 *   ),
+    	 *   0
+    	 * )
+    	 *
+    	 * @category error handling
+    	 * @since 2.0.0
+    	 */
+    	exports.getOrElse = exports.getOrElseW;
+    	// -------------------------------------------------------------------------------------
+    	// combinators
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @category mapping
+    	 * @since 2.10.0
+    	 */
+    	exports.flap = (0, Functor_1.flap)(exports.Functor);
+    	/**
+    	 * Combine two effectful actions, keeping only the result of the first.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.apFirst = (0, Apply_1.apFirst)(exports.Apply);
+    	/**
+    	 * Less strict version of [`apFirst`](#apfirst)
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
+    	 *
+    	 * @since 2.12.0
+    	 */
+    	exports.apFirstW = exports.apFirst;
+    	/**
+    	 * Combine two effectful actions, keeping only the result of the second.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.apSecond = (0, Apply_1.apSecond)(exports.Apply);
+    	/**
+    	 * Less strict version of [`apSecond`](#apsecond)
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
+    	 *
+    	 * @since 2.12.0
+    	 */
+    	exports.apSecondW = exports.apSecond;
+    	/**
+    	 * Composes computations in sequence, using the return value of one computation to determine the next computation and
+    	 * keeping only the result of the first.
+    	 *
+    	 * @category combinators
+    	 * @since 2.15.0
+    	 */
+    	exports.tap = (0, function_1.dual)(2, chainable.tap(exports.Chain));
+    	/**
+    	 * Less strict version of [`flatten`](#flatten).
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
+    	 *
+    	 * @category sequencing
+    	 * @since 2.11.0
+    	 */
+    	exports.flattenW = 
+    	/*#__PURE__*/ (0, exports.flatMap)(function_1.identity);
+    	/**
+    	 * The `flatten` function is the conventional monad join operator. It is used to remove one level of monadic structure, projecting its bound argument into the outer level.
+    	 *
+    	 * @example
+    	 * import * as E from 'fp-ts/Either'
+    	 *
+    	 * assert.deepStrictEqual(E.flatten(E.right(E.right('a'))), E.right('a'))
+    	 * assert.deepStrictEqual(E.flatten(E.right(E.left('e'))), E.left('e'))
+    	 * assert.deepStrictEqual(E.flatten(E.left('e')), E.left('e'))
+    	 *
+    	 * @category sequencing
+    	 * @since 2.0.0
+    	 */
+    	exports.flatten = exports.flattenW;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	exports.duplicate = (0, exports.extend)(function_1.identity);
+    	/**
+    	 * Use `liftOption`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.10.0
+    	 */
+    	exports.fromOptionK = 
+    	/*#__PURE__*/ (0, FromEither_1.fromOptionK)(exports.FromEither);
+    	/**
+    	 * Use `flatMapOption`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.11.0
+    	 */
+    	exports.chainOptionK = (0, FromEither_1.chainOptionK)(exports.FromEither, exports.Chain);
+    	/**
+    	 * Use `flatMapOption`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.13.2
+    	 */
+    	exports.chainOptionKW = exports.chainOptionK;
+    	/** @internal */
+    	var _FromEither = {
+    	    fromEither: exports.FromEither.fromEither
+    	};
+    	/**
+    	 * @category lifting
+    	 * @since 2.15.0
+    	 */
+    	exports.liftNullable = _.liftNullable(_FromEither);
+    	/**
+    	 * @category lifting
+    	 * @since 2.15.0
+    	 */
+    	exports.liftOption = _.liftOption(_FromEither);
+    	/** @internal */
+    	var _FlatMap = {
+    	    flatMap: exports.flatMap
+    	};
+    	/**
+    	 * @category sequencing
+    	 * @since 2.15.0
+    	 */
+    	exports.flatMapNullable = _.flatMapNullable(_FromEither, _FlatMap);
+    	/**
+    	 * @category sequencing
+    	 * @since 2.15.0
+    	 */
+    	exports.flatMapOption = _.flatMapOption(_FromEither, _FlatMap);
+    	/**
+    	 * @example
+    	 * import * as E from 'fp-ts/Either'
+    	 * import { pipe } from 'fp-ts/function'
+    	 *
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     E.right(1),
+    	 *     E.filterOrElse(
+    	 *       (n) => n > 0,
+    	 *       () => 'error'
+    	 *     )
+    	 *   ),
+    	 *   E.right(1)
+    	 * )
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     E.right(-1),
+    	 *     E.filterOrElse(
+    	 *       (n) => n > 0,
+    	 *       () => 'error'
+    	 *     )
+    	 *   ),
+    	 *   E.left('error')
+    	 * )
+    	 * assert.deepStrictEqual(
+    	 *   pipe(
+    	 *     E.left('a'),
+    	 *     E.filterOrElse(
+    	 *       (n) => n > 0,
+    	 *       () => 'error'
+    	 *     )
+    	 *   ),
+    	 *   E.left('a')
+    	 * )
+    	 *
+    	 * @category filtering
+    	 * @since 2.0.0
+    	 */
+    	exports.filterOrElse = (0, FromEither_1.filterOrElse)(exports.FromEither, exports.Chain);
+    	/**
+    	 * Less strict version of [`filterOrElse`](#filterorelse).
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
+    	 *
+    	 * @category filtering
+    	 * @since 2.9.0
+    	 */
+    	exports.filterOrElseW = exports.filterOrElse;
+    	/**
+    	 * Returns a `Right` if is a `Left` (and vice versa).
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var swap = function (ma) { return ((0, exports.isLeft)(ma) ? (0, exports.right)(ma.left) : (0, exports.left)(ma.right)); };
+    	exports.swap = swap;
+    	/**
+    	 * Less strict version of [`orElse`](#orelse).
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the return types will be merged.
+    	 *
+    	 * @category error handling
+    	 * @since 2.10.0
+    	 */
+    	var orElseW = function (onLeft) {
+    	    return function (ma) {
+    	        return (0, exports.isLeft)(ma) ? onLeft(ma.left) : ma;
+    	    };
+    	};
+    	exports.orElseW = orElseW;
+    	/**
+    	 * Useful for recovering from errors.
+    	 *
+    	 * @category error handling
+    	 * @since 2.0.0
+    	 */
+    	exports.orElse = exports.orElseW;
+    	/**
+    	 * Takes a default and a nullable value, if the value is not nully, turn it into a `Right`, if the value is nully use
+    	 * the provided default as a `Left`.
+    	 *
+    	 * @example
+    	 * import { fromNullable, left, right } from 'fp-ts/Either'
+    	 *
+    	 * const parse = fromNullable('nully')
+    	 *
+    	 * assert.deepStrictEqual(parse(1), right(1))
+    	 * assert.deepStrictEqual(parse(null), left('nully'))
+    	 *
+    	 * @category conversions
+    	 * @since 2.0.0
+    	 */
+    	var fromNullable = function (e) {
+    	    return function (a) {
+    	        return a == null ? (0, exports.left)(e) : (0, exports.right)(a);
+    	    };
+    	};
+    	exports.fromNullable = fromNullable;
+    	/**
+    	 * Constructs a new `Either` from a function that might throw.
+    	 *
+    	 * See also [`tryCatchK`](#trycatchk).
+    	 *
+    	 * @example
+    	 * import * as E from 'fp-ts/Either'
+    	 *
+    	 * const unsafeHead = <A>(as: ReadonlyArray<A>): A => {
+    	 *   if (as.length > 0) {
+    	 *     return as[0]
+    	 *   } else {
+    	 *     throw new Error('empty array')
+    	 *   }
+    	 * }
+    	 *
+    	 * const head = <A>(as: ReadonlyArray<A>): E.Either<Error, A> =>
+    	 *   E.tryCatch(() => unsafeHead(as), e => (e instanceof Error ? e : new Error('unknown error')))
+    	 *
+    	 * assert.deepStrictEqual(head([]), E.left(new Error('empty array')))
+    	 * assert.deepStrictEqual(head([1, 2, 3]), E.right(1))
+    	 *
+    	 * @category interop
+    	 * @since 2.0.0
+    	 */
+    	var tryCatch = function (f, onThrow) {
+    	    try {
+    	        return (0, exports.right)(f());
+    	    }
+    	    catch (e) {
+    	        return (0, exports.left)(onThrow(e));
+    	    }
+    	};
+    	exports.tryCatch = tryCatch;
+    	/**
+    	 * Converts a function that may throw to one returning a `Either`.
+    	 *
+    	 * @category interop
+    	 * @since 2.10.0
+    	 */
+    	var tryCatchK = function (f, onThrow) {
+    	    return function () {
+    	        var a = [];
+    	        for (var _i = 0; _i < arguments.length; _i++) {
+    	            a[_i] = arguments[_i];
+    	        }
+    	        return (0, exports.tryCatch)(function () { return f.apply(void 0, a); }, onThrow);
+    	    };
+    	};
+    	exports.tryCatchK = tryCatchK;
+    	/**
+    	 * Use `liftNullable`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.9.0
+    	 */
+    	var fromNullableK = function (e) {
+    	    var from = (0, exports.fromNullable)(e);
+    	    return function (f) { return (0, function_1.flow)(f, from); };
+    	};
+    	exports.fromNullableK = fromNullableK;
+    	/**
+    	 * Use `flatMapNullable`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.9.0
+    	 */
+    	var chainNullableK = function (e) {
+    	    var from = (0, exports.fromNullableK)(e);
+    	    return function (f) { return (0, exports.flatMap)(from(f)); };
+    	};
+    	exports.chainNullableK = chainNullableK;
+    	/**
+    	 * @category conversions
+    	 * @since 2.10.0
+    	 */
+    	exports.toUnion = (0, exports.foldW)(function_1.identity, function_1.identity);
+    	// -------------------------------------------------------------------------------------
+    	// utils
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Default value for the `onError` argument of `tryCatch`
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	function toError(e) {
+    	    return e instanceof Error ? e : new Error(String(e));
+    	}
+    	exports.toError = toError;
+    	function elem(E) {
+    	    return function (a, ma) {
+    	        if (ma === undefined) {
+    	            var elemE_1 = elem(E);
+    	            return function (ma) { return elemE_1(a, ma); };
+    	        }
+    	        return (0, exports.isLeft)(ma) ? false : E.equals(a, ma.right);
+    	    };
+    	}
+    	exports.elem = elem;
+    	/**
+    	 * Returns `false` if `Left` or returns the result of the application of the given predicate to the `Right` value.
+    	 *
+    	 * @example
+    	 * import { exists, left, right } from 'fp-ts/Either'
+    	 *
+    	 * const gt2 = exists((n: number) => n > 2)
+    	 *
+    	 * assert.strictEqual(gt2(left('a')), false)
+    	 * assert.strictEqual(gt2(right(1)), false)
+    	 * assert.strictEqual(gt2(right(3)), true)
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	var exists = function (predicate) {
+    	    return function (ma) {
+    	        return (0, exports.isLeft)(ma) ? false : predicate(ma.right);
+    	    };
+    	};
+    	exports.exists = exists;
+    	// -------------------------------------------------------------------------------------
+    	// do notation
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @category do notation
+    	 * @since 2.9.0
+    	 */
+    	exports.Do = (0, exports.of)(_.emptyRecord);
+    	/**
+    	 * @category do notation
+    	 * @since 2.8.0
+    	 */
+    	exports.bindTo = (0, Functor_1.bindTo)(exports.Functor);
+    	var let_ = /*#__PURE__*/ (0, Functor_1.let)(exports.Functor);
+    	exports.let = let_;
+    	/**
+    	 * @category do notation
+    	 * @since 2.8.0
+    	 */
+    	exports.bind = chainable.bind(exports.Chain);
+    	/**
+    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
+    	 *
+    	 * @category do notation
+    	 * @since 2.8.0
+    	 */
+    	exports.bindW = exports.bind;
+    	/**
+    	 * @category do notation
+    	 * @since 2.8.0
+    	 */
+    	exports.apS = (0, Apply_1.apS)(exports.Apply);
+    	/**
+    	 * Less strict version of [`apS`](#aps).
+    	 *
+    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
+    	 *
+    	 * @category do notation
+    	 * @since 2.8.0
+    	 */
+    	exports.apSW = exports.apS;
+    	/**
+    	 * @since 2.11.0
+    	 */
+    	exports.ApT = (0, exports.of)(_.emptyReadonlyArray);
+    	// -------------------------------------------------------------------------------------
+    	// array utils
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Equivalent to `ReadonlyNonEmptyArray#traverseWithIndex(Applicative)`.
+    	 *
+    	 * @category traversing
+    	 * @since 2.11.0
+    	 */
+    	var traverseReadonlyNonEmptyArrayWithIndex = function (f) {
+    	    return function (as) {
+    	        var e = f(0, _.head(as));
+    	        if ((0, exports.isLeft)(e)) {
+    	            return e;
+    	        }
+    	        var out = [e.right];
+    	        for (var i = 1; i < as.length; i++) {
+    	            var e_1 = f(i, as[i]);
+    	            if ((0, exports.isLeft)(e_1)) {
+    	                return e_1;
+    	            }
+    	            out.push(e_1.right);
+    	        }
+    	        return (0, exports.right)(out);
+    	    };
+    	};
+    	exports.traverseReadonlyNonEmptyArrayWithIndex = traverseReadonlyNonEmptyArrayWithIndex;
+    	/**
+    	 * Equivalent to `ReadonlyArray#traverseWithIndex(Applicative)`.
+    	 *
+    	 * @category traversing
+    	 * @since 2.11.0
+    	 */
+    	var traverseReadonlyArrayWithIndex = function (f) {
+    	    var g = (0, exports.traverseReadonlyNonEmptyArrayWithIndex)(f);
+    	    return function (as) { return (_.isNonEmpty(as) ? g(as) : exports.ApT); };
+    	};
+    	exports.traverseReadonlyArrayWithIndex = traverseReadonlyArrayWithIndex;
+    	/**
+    	 * Equivalent to `ReadonlyArray#traverseWithIndex(Applicative)`.
+    	 *
+    	 * @category traversing
+    	 * @since 2.9.0
+    	 */
+    	exports.traverseArrayWithIndex = exports.traverseReadonlyArrayWithIndex;
+    	/**
+    	 * Equivalent to `ReadonlyArray#traverse(Applicative)`.
+    	 *
+    	 * @category traversing
+    	 * @since 2.9.0
+    	 */
+    	var traverseArray = function (f) { return (0, exports.traverseReadonlyArrayWithIndex)(function (_, a) { return f(a); }); };
+    	exports.traverseArray = traverseArray;
+    	/**
+    	 * Equivalent to `ReadonlyArray#sequence(Applicative)`.
+    	 *
+    	 * @category traversing
+    	 * @since 2.9.0
+    	 */
+    	exports.sequenceArray = 
+    	/*#__PURE__*/ (0, exports.traverseArray)(function_1.identity);
+    	// -------------------------------------------------------------------------------------
+    	// legacy
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * Alias of `flatMap`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.6.0
+    	 */
+    	exports.chainW = exports.flatMap;
+    	/**
+    	 * Alias of `flatMap`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.0.0
+    	 */
+    	exports.chain = exports.flatMap;
+    	/**
+    	 * Alias of `tap`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.0.0
+    	 */
+    	exports.chainFirst = exports.tap;
+    	/**
+    	 * Alias of `tap`.
+    	 *
+    	 * @category legacy
+    	 * @since 2.8.0
+    	 */
+    	exports.chainFirstW = exports.tap;
+    	/**
+    	 * Use [`parse`](./Json.ts.html#parse) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	function parseJSON(s, onError) {
+    	    return (0, exports.tryCatch)(function () { return JSON.parse(s); }, onError);
+    	}
+    	exports.parseJSON = parseJSON;
+    	/**
+    	 * Use [`stringify`](./Json.ts.html#stringify) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	var stringifyJSON = function (u, onError) {
+    	    return (0, exports.tryCatch)(function () {
+    	        var s = JSON.stringify(u);
+    	        if (typeof s !== 'string') {
+    	            throw new Error('Converting unsupported structure to JSON');
+    	        }
+    	        return s;
+    	    }, onError);
+    	};
+    	exports.stringifyJSON = stringifyJSON;
+    	/**
+    	 * This instance is deprecated, use small, specific instances instead.
+    	 * For example if a function needs a `Functor` instance, pass `E.Functor` instead of `E.either`
+    	 * (where `E` is from `import E from 'fp-ts/Either'`)
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.either = {
+    	    URI: exports.URI,
+    	    map: _map,
+    	    of: exports.of,
+    	    ap: _ap,
+    	    chain: exports.flatMap,
+    	    reduce: _reduce,
+    	    foldMap: _foldMap,
+    	    reduceRight: _reduceRight,
+    	    traverse: _traverse,
+    	    sequence: exports.sequence,
+    	    bimap: _bimap,
+    	    mapLeft: _mapLeft,
+    	    alt: _alt,
+    	    extend: _extend,
+    	    chainRec: _chainRec,
+    	    throwError: exports.throwError
+    	};
+    	/**
+    	 * Use [`getApplySemigroup`](./Apply.ts.html#getapplysemigroup) instead.
+    	 *
+    	 * Semigroup returning the left-most `Left` value. If both operands are `Right`s then the inner values
+    	 * are concatenated using the provided `Semigroup`
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getApplySemigroup = 
+    	/*#__PURE__*/ (0, Apply_1.getApplySemigroup)(exports.Apply);
+    	/**
+    	 * Use [`getApplicativeMonoid`](./Applicative.ts.html#getapplicativemonoid) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	exports.getApplyMonoid = 
+    	/*#__PURE__*/ (0, Applicative_1.getApplicativeMonoid)(exports.Applicative);
+    	/**
+    	 * Use [`getApplySemigroup`](./Apply.ts.html#getapplysemigroup) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	var getValidationSemigroup = function (SE, SA) {
+    	    return (0, Apply_1.getApplySemigroup)((0, exports.getApplicativeValidation)(SE))(SA);
+    	};
+    	exports.getValidationSemigroup = getValidationSemigroup;
+    	/**
+    	 * Use [`getApplicativeMonoid`](./Applicative.ts.html#getapplicativemonoid) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	var getValidationMonoid = function (SE, MA) {
+    	    return (0, Applicative_1.getApplicativeMonoid)((0, exports.getApplicativeValidation)(SE))(MA);
+    	};
+    	exports.getValidationMonoid = getValidationMonoid;
+    	/**
+    	 * Use [`getApplicativeValidation`](#getapplicativevalidation) and [`getAltValidation`](#getaltvalidation) instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	function getValidation(SE) {
+    	    var ap = (0, exports.getApplicativeValidation)(SE).ap;
+    	    var alt = (0, exports.getAltValidation)(SE).alt;
+    	    return {
+    	        URI: exports.URI,
+    	        _E: undefined,
+    	        map: _map,
+    	        of: exports.of,
+    	        chain: exports.flatMap,
+    	        bimap: _bimap,
+    	        mapLeft: _mapLeft,
+    	        reduce: _reduce,
+    	        foldMap: _foldMap,
+    	        reduceRight: _reduceRight,
+    	        extend: _extend,
+    	        traverse: _traverse,
+    	        sequence: exports.sequence,
+    	        chainRec: _chainRec,
+    	        throwError: exports.throwError,
+    	        ap: ap,
+    	        alt: alt
+    	    };
+    	}
+    	exports.getValidation = getValidation; 
+    } (Either));
 
     /* src/App.svelte generated by Svelte v3.59.1 */
 
-    const { Object: Object_1, console: console_1 } = globals;
-
+    const { console: console_1 } = globals;
     const file = "src/App.svelte";
 
     function create_fragment(ctx) {
@@ -53288,7 +57872,7 @@ var app = (function () {
     			t = space();
     			create_component(graphcomponentgraphlib.$$.fragment);
     			attr_dev(div, "class", "app-container");
-    			add_location(div, file, 175, 0, 8435);
+    			add_location(div, file, 62, 0, 2926);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -53333,7 +57917,7 @@ var app = (function () {
     function instance($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(1, $systemStateStore = $$value));
+    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(0, $systemStateStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
 
@@ -53373,8 +57957,6 @@ var app = (function () {
     			});
     	};
 
-    	let lastSelectedProcess = null;
-
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
     		// start the websocket connection
     		$systemStateStore.websocket.addEventListener("open", () => {
@@ -53397,157 +57979,25 @@ var app = (function () {
 
     			try {
     				data = JSON.parse(event.data);
+    				let validationResult = RuntimeNode.decode(data);
+
+    				Either.fold(
+    					errors => {
+    						console.log("Error decoding websocket message: ", errors);
+    					},
+    					node => {
+    						$systemStateStore.nodes.push(node);
+    					}
+    				)(validationResult);
     			} catch(_a) {
     				console.log("Error parsing websocket message");
     			}
-
-    			if (data && data.graph !== undefined && typeof data.graph === "string") {
-    				// console.log("data.graph is a string: ", data);
-    				data.graph = graphlib.json.read(JSON.parse(data.graph));
-    			} // console.log("data.graph is now: ", data);
-
-    			// check to see if the data has the shape of a Process or Action
-    			if (isProcess(data)) {
-    				let process = data;
-
-    				systemStateStore.update(state => {
-    					// Check if the process is already in the state
-    					let processAlreadyInState = state.aiSystemState.processes.find(process => {
-    						return process._id === data._id;
-    					});
-
-    					if (processAlreadyInState) {
-    						console.log("Process already in state");
-    						return state;
-    					} else {
-    						// console.log("Adding process to state:", process);
-    						state.aiSystemState.processes.push(process);
-
-    						return state;
-    					}
-    				});
-    			} else if (isAction(data)) {
-    				let action = data;
-
-    				// console.log(getId(action));
-    				systemStateStore.update(state => {
-    					// console.log("Adding action to state:");
-    					let input_variables = populateInputVariables(action);
-
-    					// console.log("input_variables: ", input_variables);
-    					let output_variables = populateOutputVariables(action);
-
-    					// console.log("output_variables: ", output_variables);
-    					// check to see that the variables stored in the action are valid
-    					let compareThese = action.input_variables;
-
-    					let compareThese2 = action.output_variables;
-    					let set1 = new Set(input_variables);
-    					let set2 = new Set(compareThese);
-    					let union = new Set([...set1, ...set2]);
-    					let set3 = new Set(output_variables);
-    					let set4 = new Set(compareThese2);
-    					let union2 = new Set([...set3, ...set4]);
-    					let invalid = false;
-
-    					// This ensures that the input variables are always up-to-date
-    					if (union.size !== set1.size || union.size !== set2.size) {
-    						console.error("invalid input variables");
-    						action.input_variables = input_variables;
-    						invalid = true;
-    					}
-
-    					// This ensures that the output variables are always up-to-date
-    					if (union2.size !== set3.size || union2.size !== set4.size) {
-    						console.error("invalid output variables");
-    						action.output_variables = output_variables;
-    						invalid = true;
-    					}
-
-    					if (invalid) {
-    						$systemStateStore.websocket.send(JSON.stringify({ action }));
-    						return state;
-    					}
-
-    					// check if the action is already in the state by looking at the name
-    					let actionIndex = state.aiSystemState.actions.findIndex(a => a.name === action.name);
-
-    					if (actionIndex === -1) {
-    						state.aiSystemState.actions.push(action);
-    					} else {
-    						state.aiSystemState.actions[actionIndex] = action;
-    					}
-
-    					return state;
-    				});
-    			}
-
-    			if (isResponse(data)) {
-    				let response = {
-    					action_id: data.action_id,
-    					response_text: data.response_text
-    				};
-
-    				console.log("Received response: ", response);
-
-    				incrementCurrentNode().then(currentNode => {
-    					console.log("currentNode: ", currentNode);
-    				});
-
-    				systemStateStore.update(state => {
-    					state.executionContext.responses.set(response.action_id, response.response_text);
-    					return state;
-    				});
-    			} else // For example, you might want to update some part of your state with the response
-    			// or dispatch an action based on the received response
-    			// This will depend on your specific application logic.
-    			if (Object.prototype.hasOwnProperty.call(data, "create_action")) {
-    				let action = data.create_action; // You can now do something with this response data
-
-    				systemStateStore.update(state => {
-    					state.aiSystemState.actions.push(action);
-    					return state;
-    				});
-    			} else if (Object.prototype.hasOwnProperty.call(data, "create_process")) {
-    				let process = data.create_process;
-
-    				// check if process.graph is a string
-    				if (typeof process.graph === "string") {
-    					process.graph = graphlib.json.read(process.graph);
-    				}
-
-    				systemStateStore.update(state => {
-    					if (process != null) {
-    						// only push if the process isn't already in the state:
-    						let processAlreadyInState = state.aiSystemState.processes.find(p => {
-    							return p._id === process._id;
-    						});
-
-    						if (processAlreadyInState) {
-    							// console.log("Process already in state");
-    							return state;
-    						}
-
-    						state.aiSystemState.processes.push(process);
-    						return state;
-    					}
-
-    					return state;
-    				});
-    			}
-    		});
+    		}); // if the websocket message is a node then add it to the system state store
     	}));
-
-    	function handleProcessChange(process) {
-    		return __awaiter(this, void 0, void 0, function* () {
-    			// console.log("selected process changed: ", process);
-    			yield processToGraph(process);
-    		});
-    	}
 
     	const writable_props = [];
 
-    	Object_1.keys($$props).forEach(key => {
+    	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
@@ -53555,44 +58005,22 @@ var app = (function () {
     		__awaiter,
     		Sidebar,
     		GraphComponentGraphlib: GraphComponent_graphlib,
-    		json: graphlib.json,
-    		isAction,
-    		isProcess,
-    		isResponse,
-    		incrementCurrentNode,
-    		processToGraph,
+    		RuntimeNode,
+    		fold: Either.fold,
     		onMount,
     		systemStateStore,
-    		populateInputVariables,
-    		populateOutputVariables,
-    		lastSelectedProcess,
-    		handleProcessChange,
     		$systemStateStore
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
-    		if ('lastSelectedProcess' in $$props) $$invalidate(0, lastSelectedProcess = $$props.lastSelectedProcess);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$systemStateStore, lastSelectedProcess*/ 3) {
-    			{
-    				let process = $systemStateStore.selectedProcess;
-
-    				if (lastSelectedProcess == null || process && process.name !== lastSelectedProcess.name) {
-    					handleProcessChange(process);
-    					$$invalidate(0, lastSelectedProcess = process);
-    				}
-    			}
-    		}
-    	};
-
-    	return [lastSelectedProcess, $systemStateStore];
+    	return [];
     }
 
     class App extends SvelteComponentDev {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { Prompt, Process } from "system_types";
+  import type { Prompt, Process, Node } from "system_types";
   import {
     addEdge,
     addNode,
@@ -13,8 +13,8 @@
 
   import systemStateStore from "stores/systemStateStore";
 
-  let actions: Prompt[] = [];
-  let selectedActions: Prompt[] = [];
+  let nodes: Node[] = [];
+  let selectedNodes: Node[] = [];
 
   let name = "";
   let description = "";
@@ -22,12 +22,12 @@
 
   $: {
     current_graph = $systemStateStore.graphState.graph;
-    actions = $systemStateStore.aiSystemState.actions;
+    nodes = $systemStateStore.nodes;
   }
 
   onMount(async () => {
     current_graph = $systemStateStore.graphState.graph;
-    actions = $systemStateStore.aiSystemState.actions;
+    nodes = $systemStateStore.nodes;
   });
 
   function localAddNodes() {

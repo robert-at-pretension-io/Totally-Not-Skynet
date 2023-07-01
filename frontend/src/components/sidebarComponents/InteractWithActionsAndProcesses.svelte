@@ -1,74 +1,34 @@
-<script>
+<script lang="ts">
   import systemStateStore from "stores/systemStateStore";
-  import JsonEditor from "./JsonEditor.svelte";
+  import { Option, none } from "fp-ts/Option";
+  import type { Node } from "system_types";
 
-  let selectedAction = "";
-  let selectedProcess = "";
+  let selectedNode : Option<Node> = none;
 
   // Subscribe to the graphStore to get the latest values
-  let actions = [];
-  let processes = [];
+  let nodes : Node[]= [];
 
   $: {
-    actions = $systemStateStore.aiSystemState.actions;
-    processes = $systemStateStore.aiSystemState.processes;
+    nodes = $systemStateStore.nodes;
+    selectedNode = $systemStateStore.selectedNode;
   }
 
   // Function to handle dropdown change events
-  function onDropdownChange(type) {
-    // console.log("onDropdownChange called: ", type, " selectedAction: ", selectedAction, " selectedProcess: ", selectedProcess);
-    if (type === "action") {
-      selectedProcess = "";
-    } else {
-      selectedAction = "";
-    }
+  function onDropdownChange() {
 
-    if (selectedAction) {
-      // Set the selected action in the systemStateStore
-      // it should get the action from the aiSystemStore
-      // with the name selectedAction
-      let this_action = $systemStateStore.aiSystemState.actions.find(
-        (obj) => obj.name === selectedAction
-      );
-      $systemStateStore.selectedAction = this_action;
-      $systemStateStore.selectedProcess = null;
-    }
-    if (selectedProcess) {
-      // Set the selected process in the systemStateStore
-      // it should get the process from the aiSystemStore
-      // with the name selectedProcess
-      let this_process = $systemStateStore.aiSystemState.processes.find(
-        (obj) => obj.name === selectedProcess
-      );
+    $systemStateStore.selectedNode = selectedNode;
 
-      // console.log("this_process: ", this_process);
-
-      $systemStateStore.selectedProcess = this_process;
-      $systemStateStore.selectedAction = null;
-    }
+    console.log("selectedNode: ", selectedNode);
   }
 </script>
 
 <!-- Dropdown menu for actions -->
 <select
-  bind:value={selectedAction}
-  on:change={() => onDropdownChange("action")}
+  bind:value={selectedNode}
+  on:change={() => onDropdownChange()}
 >
   <option value="">Select an action</option>
-  {#each actions as action}
-    <option value={action.name}>{action.name}</option>
+  {#each nodes as node}
+    <option value={node}>{node.name}</option>
   {/each}
 </select>
-
-<!-- Dropdown menu for processes -->
-<select
-  bind:value={selectedProcess}
-  on:change={() => onDropdownChange("process")}
->
-  <option value="">Select a process</option>
-  {#each processes as process}
-    <option value={process.name}>{process.name}</option>
-  {/each}
-</select>
-
-<JsonEditor />
