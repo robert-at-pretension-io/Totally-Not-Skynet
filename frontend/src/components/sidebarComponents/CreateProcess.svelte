@@ -32,13 +32,13 @@
 
   function localAddNodes() {
     // for each of the selected actions, add a node to the graph
-    selectedActions.forEach((action) => {
+    selectedNodes.forEach((node) => {
       // console.log("local");
-      addNode(action._id.$oid);
+      addNode(node._id.$oid);
     });
 
     // clear out the selected actions
-    selectedActions = [];
+    selectedNodes = [];
   }
 
   function localAddEdge() {

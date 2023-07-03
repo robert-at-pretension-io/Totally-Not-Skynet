@@ -14540,8 +14540,8 @@ var app = (function () {
     			t1 = space();
     			attr_dev(button, "type", "button");
     			toggle_class(button, "selected", isSelected(/*action*/ ctx[13]));
-    			add_location(button, file$6, 115, 6, 4517);
-    			add_location(li, file$6, 114, 4, 4506);
+    			add_location(button, file$6, 115, 6, 4509);
+    			add_location(li, file$6, 114, 4, 4498);
     			this.first = li;
     		},
     		m: function mount(target, anchor) {
@@ -14592,7 +14592,7 @@ var app = (function () {
     		c: function create() {
     			p = element$1("p");
     			t = text(t_value);
-    			add_location(p, file$6, 127, 2, 4767);
+    			add_location(p, file$6, 127, 2, 4759);
     			this.first = p;
     		},
     		m: function mount(target, anchor) {
@@ -14716,25 +14716,25 @@ var app = (function () {
     			t19 = space();
     			button4 = element$1("button");
     			button4.textContent = "Save Process";
-    			add_location(p0, file$6, 99, 0, 4086);
+    			add_location(p0, file$6, 99, 0, 4078);
     			attr_dev(input0, "type", "text");
-    			add_location(input0, file$6, 100, 0, 4141);
-    			add_location(p1, file$6, 101, 0, 4181);
+    			add_location(input0, file$6, 100, 0, 4133);
+    			add_location(p1, file$6, 101, 0, 4173);
     			attr_dev(input1, "type", "text");
-    			add_location(input1, file$6, 105, 0, 4279);
-    			add_location(p2, file$6, 107, 0, 4327);
-    			add_location(ul, file$6, 112, 0, 4456);
-    			add_location(h3, file$6, 124, 0, 4694);
+    			add_location(input1, file$6, 105, 0, 4271);
+    			add_location(p2, file$6, 107, 0, 4319);
+    			add_location(ul, file$6, 112, 0, 4448);
+    			add_location(h3, file$6, 124, 0, 4686);
     			attr_dev(button0, "class", "add-button");
-    			add_location(button0, file$6, 129, 0, 4796);
+    			add_location(button0, file$6, 129, 0, 4788);
     			attr_dev(button1, "class", "remove-button");
-    			add_location(button1, file$6, 130, 0, 4869);
+    			add_location(button1, file$6, 130, 0, 4861);
     			attr_dev(button2, "class", "add-button");
-    			add_location(button2, file$6, 133, 0, 4957);
+    			add_location(button2, file$6, 133, 0, 4949);
     			attr_dev(button3, "class", "remove-button");
-    			add_location(button3, file$6, 134, 0, 5026);
+    			add_location(button3, file$6, 134, 0, 5018);
     			attr_dev(button4, "class", "add-button");
-    			add_location(button4, file$6, 135, 0, 5107);
+    			add_location(button4, file$6, 135, 0, 5099);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -14949,13 +14949,13 @@ var app = (function () {
 
     	function localAddNodes() {
     		// for each of the selected actions, add a node to the graph
-    		selectedActions.forEach(action => {
+    		selectedNodes.forEach(node => {
     			// console.log("local");
-    			addNode(action._id.$oid);
+    			addNode(node._id.$oid);
     		});
 
     		// clear out the selected actions
-    		selectedActions = [];
+    		selectedNodes = [];
     	}
 
     	function localAddEdge() {
