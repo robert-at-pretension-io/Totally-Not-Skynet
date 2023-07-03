@@ -64,13 +64,13 @@ impl fmt::Display for Role {
     }
 }
 
-pub async fn get_openai_completion(messages: Vec<ChatMessage>, api_key: String) -> Result<String> {
+pub async fn get_openai_completion(messages: Vec<ChatMessage>, api_key: String, model : String) -> Result<String> {
     // Define the URL for the API endpoint
     let url = "https://api.openai.com/v1/chat/completions";
 
     // Define the initial request body
     let mut body: JsonValue = json!({
-        "model": "gpt-3.5-turbo",
+        "model": model,
         "messages": messages,
         "temperature": 0.7
     });

@@ -89,10 +89,6 @@ pub struct Response {
     pub response_text: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UpdateAction {
-    pub action: Prompt,
-}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateNode {
