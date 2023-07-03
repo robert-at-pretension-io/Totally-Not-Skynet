@@ -18,6 +18,10 @@ use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_tungstenite::tungstenite::Message;
 
+// create a "models" type that can be used to select the model to use
+// it should be one of a couple of strings: "gpt-4", "gpt3.5-turbo", etc
+let default_model = "gpt-4" 
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Identity {
     pub name: String,
@@ -169,7 +173,7 @@ pub async fn start_message_sending_loop(
                             ];
 
                             let response =
-                                get_openai_completion(messages, openai_api_key.unwrap()).await;
+                                get_openai_completion(messages, openai_api_key.unwrap(), default_model).await;
 
                             match response {
                                 Ok(res) => {
@@ -256,22 +260,26 @@ pub async fn start_message_sending_loop(
                     NodeType::Prompt(prompt) => {
                         doc! {
                             "$set": {
+                                "Prompt": {
                                 "prompt": prompt.prompt.clone(),
                                 "system": prompt.system.clone(),
                                 "input_variables": prompt.input_variables.clone(),
                                 "output_variables": prompt.output_variables.clone()
+                                }
                             }
                         }
                     }
                     NodeType::Process(process) => {
                         doc! {
                             "$set": {
+                                "Process": {
                                 "graph": process.graph.clone(),
                                 "topological_order": process.topological_order.clone(),
                                 "description": process.description.clone(),
                                 "output_variable": process.output_variable.clone(),
                                 "is_loop": process.is_loop,
                                 "max_iterations": process.max_iterations.clone()
+                                }
                             }
                         }
                     }
@@ -289,16 +297,20 @@ pub async fn start_message_sending_loop(
 
                         doc! {
                             "$set": {
+                                "Conditional": {
                                 "system_variables": system_variables,
                                 "statement": conditional.statement.clone(),
                                 "options": new_options
+                                }
                             }
                         }
                     }
                     NodeType::Command(command) => {
                         doc! {
                             "$set": {
+                                "Command": {
                                 "command": command.command.clone()
+                                }
                             }
                         }
                     }
