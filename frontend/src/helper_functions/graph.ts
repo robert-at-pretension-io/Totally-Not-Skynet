@@ -1,7 +1,8 @@
 import type {
   SystemState,
   Prompt,
-  Node
+  Node,
+  MongoId
 } from "../system_types";
 import { Process } from "../system_types";
 import systemStateStore from "stores/systemStateStore";
@@ -29,6 +30,61 @@ export async function getInputVariablesByNodeId(nodeId: string): Promise<string[
     return node_content.prompt.input_variables;
   }
   return null;
+}
+
+export async function validateGraph(): Promise<MongoId[]> {
+  const systemState = await getSystemState();
+  const graph = systemState.graphState.graph;
+
+  let test_orders: string[][] = getAllTopologicalOrders(graph);
+
+  for (let i = 0; i++; i < test_orders.length) {
+    let current_order = test_orders[i];
+
+
+  }
+}
+
+export function getAllTopologicalOrders(graph: Graph): string[][] {
+  // check that there is a single component (that the graph is connected) AND
+  // that there are no cycles in the graph
+
+  if (!alg.isAcyclic(graph) || alg.components(graph).length !== 1) {
+    return [];
+  }
+
+
+  let edges = graph.edges();
+
+  let n = graph.nodes().length;
+
+  let topological_orders: string[][] = [];
+  let paths: string[][] = [];
+  let discovered: string[] = [];
+
+  paths = generateAllPaths(graph, paths, discovered);
+
+
+}
+
+export function generateAllPaths(graph: Graph, paths: string[][], discovered: string[], current_path: string[], current_node: string): string[][] {
+  // get the children of the current node
+  let children = graph.successors(current_node);
+
+  // add the current node to the current path
+  current_path.push(current_node);
+
+  // if the current node has no children, add the current path to the paths
+  if (children && children.length == 0) {
+    paths.push(current_path);
+  }
+
+  // for each of the children, call the function recursively
+  for (let i = 0; i < children.length; i++) {
+    generateAllPaths(graph, paths, discovered, current_path, children[i]);
+  }
+
+  return paths;
 }
 
 export async function getOutputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
@@ -156,7 +212,7 @@ export async function processToGraph(process: Process): Promise<void> {
   await resetGraph();
 
   // verify that all of the steps have corresponding actions
-  let graph : string | Graph= process.process.graph;
+  let graph: string | Graph = process.process.graph;
 
   const nodes: string[] = [];
 
