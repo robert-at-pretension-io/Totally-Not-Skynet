@@ -1,6 +1,7 @@
 import { Edge } from "@dagrejs/graphlib";
 import type { Graph } from "graphlib";
-import { Option } from "fp-ts/Option";
+import { Option, isSome } from "fp-ts/Option";
+import { unsafeCoerce } from 'fp-ts/lib/function';
 
 export type selectedGraphComponent = {
   type: "Node" | "Edge" | null;
@@ -75,8 +76,6 @@ const RuntimeMongoId = t.type({
 const RuntimePrompt = t.type({
   Prompt: t.type({
     prompt: t.string,
-    input_variables: t.array(t.string),
-    output_variables: t.array(t.string),
     system: t.string,
   }),
 });
@@ -85,6 +84,7 @@ const RuntimeProcess = t.type({
   Process: t.type({
     graph: t.string,
     description: t.string,
+    initial_variables: t.array(t.string),
     topological_order: t.array(t.string),
   }),
 });
@@ -110,6 +110,9 @@ const RuntimeNode = t.type({
   name: t.string,
   type_name: RuntimeNodeTypeNames,
   node_content: RuntimeNodeType,
+  description: t.string,
+  input_variables: t.array(t.string),
+  output_variables: t.array(t.string),
 });
 
 type NodeTypeNames = TypeOf<typeof RuntimeNodeTypeNames>;

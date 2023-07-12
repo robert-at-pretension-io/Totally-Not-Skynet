@@ -6,8 +6,6 @@ use std::{collections::HashMap};
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Prompt {
     pub prompt: String,
-    pub input_variables: Vec<String>,
-    pub output_variables: Vec<String>,
     pub system: Option<String>,
 }
 
@@ -15,10 +13,8 @@ pub struct Prompt {
 pub struct Process {
     pub graph: String,
     pub topological_order: Vec<String>,
-    pub description: String,
-    pub output_variable: String,
+    pub initial_variables: Vec<String>,
     pub is_loop: bool,
-    pub max_iterations: Option<u32>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -50,6 +46,9 @@ pub struct Node {
     pub name: String,
     pub type_name: String,
     pub node_content: NodeType,
+    pub description: String,
+    pub input_variables: Vec<String>,
+    pub output_variables: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

@@ -10,6 +10,8 @@ import { Graph } from "graphlib";
 import { Edge } from "@dagrejs/graphlib";
 import { alg } from "graphlib";
 import { some } from "fp-ts/lib/Option";
+import { Option, isSome } from "fp-ts/Option";
+import { unsafeCoerce } from 'fp-ts/lib/function';
 
 // Define the getter and setter
 
@@ -32,17 +34,64 @@ export async function getInputVariablesByNodeId(nodeId: string): Promise<string[
   return null;
 }
 
-export async function validateGraph(): Promise<MongoId[]> {
+export async function validateGraph(): Promise<string[] | boolean> {
   const systemState = await getSystemState();
   const graph = systemState.graphState.graph;
 
-  let test_orders: string[][] = getAllTopologicalOrders(graph);
 
-  for (let i = 0; i++; i < test_orders.length) {
-    let current_order = test_orders[i];
+  if (isSome(systemState.selectedNode)) {
+    let selected_node: Node = unsafeCoerce(systemState.selectedNode);
+    if (selected_node.type_name == "Process") {
+      let process: Process = selected_node.node_content as Process;
+      let initial_variables = process.Process.initial_variables;
 
+      let test_orders: string[][] = getAllTopologicalOrders(graph);
 
+      for (let i = 0; i++; i < test_orders.length) {
+        let current_order = test_orders[i];
+
+        // to test the order we need to keep track of which variables have already been defined by collecting the output variables in an array as we go, then we only need to determine if the input variables are in the array
+
+        let agregate_variables = initial_variables;
+
+        for (let j = 0; j++; j < current_order.length) {
+          let current_node = current_order[j];
+          let node = await getNodeById(current_node);
+          if (node) {
+            let input_variables = node.input_variables;
+            let output_variables = node.output_variables;
+
+            // check if all of the input variables are in the agregate_variables array
+            let input_variables_in_agregate = input_variables.every((variable) => {
+              return agregate_variables.includes(variable);
+            });
+
+            // if the input variables are in the agregate_variables array, then add the output variables to the agregate_variables array
+            if (input_variables_in_agregate) {
+              agregate_variables.push(...output_variables);
+              // if we are on the last node, then we have a valid order
+              if (j == current_order.length - 1) {
+                return current_order;
+              }
+            }
+            else {
+              return false;
+            }
+          }
+          else {
+            return false;
+          }
+
+        }
+
+      }
+
+    }
+    else {
+      return false;
+    }
   }
+  return false;
 }
 
 export function getAllTopologicalOrders(graph: Graph): string[][] {
@@ -190,6 +239,14 @@ export async function getNodeById(id: string): Promise<Node | undefined> {
     }
   });
   return prompt;
+}
+
+export async function getNodeInputVariables(node_id: string): Promise<string[] | null> {
+  const node = await getNodeById(node_id);
+  if (node) {
+    return node.input_variables
+  }
+  else return null;
 }
 
 export function topologicalSort(graph: Graph) {
