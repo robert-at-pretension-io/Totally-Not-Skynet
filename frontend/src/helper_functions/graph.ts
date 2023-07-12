@@ -53,39 +53,89 @@ export function getAllTopologicalOrders(graph: Graph): string[][] {
     return [];
   }
 
+  // get the local graph
+  let local_graph = graphToLocalGraph(graph);
 
-  let edges = graph.edges();
-
-  let n = graph.nodes().length;
-
-  let topological_orders: string[][] = [];
-  let paths: string[][] = [];
-  let discovered: string[] = [];
-
-  paths = generateAllPaths(graph, paths, discovered);
-
+  return allTopologicalSorts(local_graph);
 
 }
 
-export function generateAllPaths(graph: Graph, paths: string[][], discovered: string[], current_path: string[], current_node: string): string[][] {
-  // get the children of the current node
-  let children = graph.successors(current_node);
 
-  // add the current node to the current path
-  current_path.push(current_node);
-
-  // if the current node has no children, add the current path to the paths
-  if (children && children.length == 0) {
-    paths.push(current_path);
-  }
-
-  // for each of the children, call the function recursively
-  for (let i = 0; i < children.length; i++) {
-    generateAllPaths(graph, paths, discovered, current_path, children[i]);
-  }
-
-  return paths;
+interface LocalGraph {
+  [key: string]: string[];
 }
+
+export function graphToLocalGraph(graph: Graph): LocalGraph {
+  let local_graph: LocalGraph = {};
+
+  let my_nodes = graph.nodes();
+
+  for (let i = 0; i < my_nodes.length; i++) {
+    let node = my_nodes[i];
+    let neighbors = graph.successors(node);
+    if (neighbors) {
+      local_graph[node] = neighbors;
+    }
+  }
+
+  return local_graph;
+}
+
+
+
+function allTopologicalSorts(graph: LocalGraph): string[][] {
+  let allOrderings: string[][] = [];
+  let indegreeMap = calculateIndegreeForAllVertex(graph);
+  let startNodes = Array.from(Object.keys(indegreeMap)).filter((node) => indegreeMap[node] === 0);
+  let visited: { [node: string]: boolean } = {};
+
+  for (let node in graph) {
+    visited[node] = false;
+  }
+
+  function helper(node: string, indegreeMap: { [node: string]: number }, visited: { [node: string]: boolean }, stack: string[]): void {
+    visited[node] = true;
+    stack.push(node);
+
+    if (stack.length === Object.keys(graph).length) {
+      allOrderings.push([...stack]);
+    } else {
+      for (let neighbor of graph[node]) {
+        indegreeMap[neighbor]--;
+        if (indegreeMap[neighbor] === 0 && !visited[neighbor]) {
+          helper(neighbor, indegreeMap, visited, stack);
+        }
+        indegreeMap[neighbor]++;
+      }
+    }
+
+    visited[node] = false;
+    stack.pop();
+  }
+
+  for (let node of startNodes) {
+    helper(node, { ...indegreeMap }, { ...visited }, []);
+  }
+
+  return allOrderings;
+}
+
+function calculateIndegreeForAllVertex(graph: LocalGraph): { [node: string]: number } {
+  let indegreeMap: { [node: string]: number } = {};
+
+  for (let node in graph) {
+    indegreeMap[node] = 0;
+  }
+
+  for (let node in graph) {
+    for (let neighbor of graph[node]) {
+      indegreeMap[neighbor]++;
+    }
+  }
+
+  return indegreeMap;
+}
+
 
 export async function getOutputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
   // Get the node by Id
