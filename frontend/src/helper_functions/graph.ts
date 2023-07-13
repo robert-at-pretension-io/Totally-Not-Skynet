@@ -85,6 +85,7 @@ export async function validateGraph(): Promise<string[] | boolean> {
         }
 
       }
+      return false;
 
     }
     else {

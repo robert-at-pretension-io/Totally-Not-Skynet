@@ -83,7 +83,6 @@ const RuntimePrompt = t.type({
 const RuntimeProcess = t.type({
   Process: t.type({
     graph: t.string,
-    description: t.string,
     initial_variables: t.array(t.string),
     topological_order: t.array(t.string),
   }),
