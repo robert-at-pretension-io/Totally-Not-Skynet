@@ -69,6 +69,12 @@ const RuntimeNodeTypeNames = t.keyof({
   "Command": null
 });
 
+const RuntimeVerbTypeNames = t.keyof({
+  "POST": null,
+  "PUT": null,
+  "PATCH": null,
+});
+
 const RuntimeMongoId = t.type({
   $oid: t.string,
 });

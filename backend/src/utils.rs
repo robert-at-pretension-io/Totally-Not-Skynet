@@ -17,21 +17,7 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
         if let Some(create_action_value) = obj.get("create_action") {
             if let Some(create_action_obj) = create_action_value.as_object() {
                 let prompt = Prompt {
-                    input_variables: create_action_obj
-                        .get("input_variables")
-                        .and_then(|v| v.as_array())
-                        .unwrap_or(&vec![])
-                        .iter()
-                        .map(|v| v.as_str().unwrap_or("").to_string())
-                        .collect(),
-                    output_variables: create_action_obj
-                        .get("output_variables")
-                        .and_then(|v| v.as_array())
-                        .unwrap_or(&vec![])
-                        .iter()
-                        .map(|v| v.as_str().unwrap_or("").to_string())
-                        .collect(),
-                    
+                                        
                     prompt: create_action_obj
                         .get("prompt")
                         .and_then(|v| v.as_str())
@@ -71,11 +57,6 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .and_then(|v| v.as_str())
                         .unwrap_or("")
                         .to_string(),
-                    description: create_process_obj
-                        .get("description")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
                     topological_order: create_process_obj
                         .get("topological_order")
                         .and_then(|v| v.as_array())
@@ -83,11 +64,6 @@ pub fn parse_message(message_str: &str) -> Option<MessageTypes> {
                         .iter()
                         .map(|v| v.as_str().unwrap_or("").to_string())
                         .collect(),
-                    output_variable: create_process_obj
-                        .get("output_variable")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
                 };
 
                 let name = create_process_obj

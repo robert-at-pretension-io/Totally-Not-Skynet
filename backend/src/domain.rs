@@ -58,7 +58,7 @@ pub struct Edge {
     pub b: ObjectId,
 }
 
-pub fn create_node(node: NodeType, name: String) -> Node {
+pub fn create_node(node: NodeType, name: String, description: String, input_variables: Vec<String>, output_variables: Vec<String>) -> Node {
     Node {
         _id: Some(bson::oid::ObjectId::new()),
         type_name: match node {
@@ -69,6 +69,9 @@ pub fn create_node(node: NodeType, name: String) -> Node {
         },
         node_content: node,
         name: name,
+        description: description,
+        input_variables: input_variables,
+        output_variables: output_variables,
     }
 }
 
