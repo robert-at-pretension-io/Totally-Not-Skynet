@@ -20,7 +20,7 @@ use tokio_tungstenite::tungstenite::Message;
 
 // create a "models" type that can be used to select the model to use
 // it should be one of a couple of strings: "gpt-4", "gpt3.5-turbo", etc
-let default_model = "gpt-4" 
+const default_model = "gpt-4" 
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Identity {

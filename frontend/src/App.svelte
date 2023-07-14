@@ -6,8 +6,10 @@
 
   import "../public/global.css";
 
-  import type { Node } from "./system_types";
-  import { RuntimeNode } from "./system_types";
+  import { sendWebsocketMessage } from "helper_functions/graph";
+
+  import type { CrudBundle, Node } from "./system_types";
+  import { RuntimeNode, RuntimeCrudBundle } from "./system_types";
 
   import { fold } from "fp-ts/lib/Either";
 
@@ -21,13 +23,26 @@
       let mongo_uri = localStorage.getItem("mongo_uri") || "Mongo Uri";
       localStorage.setItem("apiKey", apiKey);
       localStorage.setItem("mongo_uri", mongo_uri);
-      $systemStateStore.websocket.send(
-        JSON.stringify({ openai_api_key: apiKey, mongo_db_uri: mongo_uri })
-      );
 
-      $systemStateStore.websocket.send(
-        JSON.stringify({ initial_message: "initial message" })
-      );
+      let user_settings: CrudBundle = {
+        verb: "POST",
+        object: {
+          openai_api_key: "",
+          mongo_db_uri: "",
+        },
+      };
+
+      sendWebsocketMessage(user_settings);
+
+      const initial_message: CrudBundle = {
+        verb: "POST",
+        object: {
+          initial_message: "",
+        },
+        s,
+      };
+
+      sendWebsocketMessage(initial_message);
     });
     $systemStateStore.websocket.addEventListener("message", (event) => {
       console.log("websocket message received: ", event.data);
@@ -35,7 +50,7 @@
       try {
         data = JSON.parse(event.data);
 
-        let validationResult = RuntimeNode.decode(data);
+        let validationResult = RuntimeCrudBundle.decode(data);
 
         fold(
           (errors) => {

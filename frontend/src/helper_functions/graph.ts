@@ -2,7 +2,8 @@ import type {
   SystemState,
   Prompt,
   Node,
-  MongoId
+  MongoId,
+  CrudBundle
 } from "../system_types";
 import { Process } from "../system_types";
 import systemStateStore from "stores/systemStateStore";
@@ -430,9 +431,10 @@ export async function incrementCurrentNode(): Promise<string> {
   return systemState.executionContext.current_node;
 }
 
-export async function sendWebsocketMessage(message: string) {
+export async function sendWebsocketMessage(message: CrudBundle) {
   const systemState = await getSystemState();
-  systemState.websocket.send(message);
+  let message_string = JSON.stringify(message);
+  systemState.websocket.send(message_string);
 }
 
 export async function addEdge(edge: Edge): Promise<void> {

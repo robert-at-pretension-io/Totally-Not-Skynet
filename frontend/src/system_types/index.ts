@@ -28,10 +28,6 @@ export type GraphState = {
   global_variables: Map<string, string>;
 };
 
-export type Message = {
-  role: string;
-  content: string;
-};
 
 export type SystemState = {
   websocketReady: boolean;
@@ -42,21 +38,6 @@ export type SystemState = {
   nodes: Node[];
 };
 
-export type InitializeProject = {
-  initial_message: string;
-};
-
-export type OpenaiKey = {
-  key: string;
-};
-
-export type UpdateNode = {
-  node: Node;
-};
-
-export type CreateNode = {
-  node: Node;
-};
 
 import * as t from "io-ts";
 import { option } from "io-ts-types";
@@ -73,6 +54,8 @@ const RuntimeVerbTypeNames = t.keyof({
   "POST": null,
   "PUT": null,
   "PATCH": null,
+  "DELETE": null,
+  "GET": null,
 });
 
 const RuntimeMongoId = t.type({
@@ -120,6 +103,23 @@ const RuntimeNode = t.type({
   output_variables: t.array(t.string),
 });
 
+const RuntimeInitialMessage = t.type({
+  initial_message: t.string,
+});
+
+const RuntimeUserSettings = t.type({
+  openai_api_key: t.string,
+  mongo_db_uri: t.string,
+});
+
+
+const RuntimeCrudBundle = t.type({
+  verb: RuntimeVerbTypeNames,
+  object: t.union([RuntimeNode, RuntimeInitialMessage, RuntimeUserSettings]),
+});
+
+
+
 type NodeTypeNames = TypeOf<typeof RuntimeNodeTypeNames>;
 type MongoId = TypeOf<typeof RuntimeMongoId>;
 type Prompt = TypeOf<typeof RuntimePrompt>;
@@ -128,11 +128,16 @@ type Conditional = TypeOf<typeof RuntimeConditional>;
 type Command = TypeOf<typeof RuntimeCommand>;
 type NodeType = TypeOf<typeof RuntimeNodeType>;
 type Node = TypeOf<typeof RuntimeNode>;
+type CrudBundle = TypeOf<typeof RuntimeCrudBundle>;
+type VerbTypeNames = TypeOf<typeof RuntimeVerbTypeNames>;
+type InitialMessage = TypeOf<typeof RuntimeInitialMessage>;
+type UserSettings = TypeOf<typeof RuntimeUserSettings>;
+
 
 // Export static types
-export type { NodeTypeNames, MongoId, Prompt, NodeType, Node, Process, Conditional, Command };
+export type { CrudBundle, VerbTypeNames, InitialMessage, NodeTypeNames, MongoId, Prompt, NodeType, Node, Process, Conditional, Command, UserSettings };
 
-export { RuntimeNodeTypeNames, RuntimeMongoId, RuntimePrompt, RuntimeNodeType, RuntimeNode, RuntimeProcess, RuntimeConditional, RuntimeCommand };
+export { RuntimeCrudBundle, RuntimeVerbTypeNames, RuntimeInitialMessage, RuntimeNodeTypeNames, RuntimeMongoId, RuntimePrompt, RuntimeNodeType, RuntimeNode, RuntimeProcess, RuntimeConditional, RuntimeCommand, RuntimeUserSettings };
 
 export type ExecutionContext = {
   local_variables: Map<string, string>;
@@ -143,11 +148,3 @@ export type ExecutionContext = {
   prompts: Map<string, string>; // map from action id to prompt with filled in variables
   responses: Map<string, string>; // map from action id to response (unparsed)
 }
-
-export type MessageTypes =
-  | { type: "InitializeProject"; data: InitializeProject }
-  | { type: "SetOpenAIKey"; data: OpenaiKey } // Replace OpenaiKey with its actual TypeScript type
-  | { type: "UpdateNode"; data: UpdateNode }
-  | { type: "CreateNode"; data: CreateNode }
-  | { type: "Response"; data: Response }
-  | { type: "HandleNode"; data: Node };

@@ -18,12 +18,6 @@ pub struct Process {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Graph {
-    nodes: Vec<Node>,
-    edges: Vec<Edge>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Conditional {
     pub system_variables: HashMap<String, String>,
     pub statement: String,
@@ -32,19 +26,17 @@ pub struct Conditional {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum NodeType {
-    // Action(Action),
     Prompt(Prompt),
     Process(Process),
     Conditional(Conditional),
     Command(Command),
-    // perhaps add flow control nodes (such as those required for loops)
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Node {
     pub _id: Option<ObjectId>,
     pub name: String,
-    pub type_name: String,
+    pub type_name: NodeTypeName,
     pub node_content: NodeType,
     pub description: String,
     pub input_variables: Vec<String>,
@@ -52,27 +44,11 @@ pub struct Node {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Edge {
-    _id: Option<ObjectId>,
-    pub a: ObjectId,
-    pub b: ObjectId,
-}
-
-pub fn create_node(node: NodeType, name: String, description: String, input_variables: Vec<String>, output_variables: Vec<String>) -> Node {
-    Node {
-        _id: Some(bson::oid::ObjectId::new()),
-        type_name: match node {
-            NodeType::Prompt(_) => "Prompt".to_string(),
-            NodeType::Process(_) => "Process".to_string(),
-            NodeType::Conditional(_) => "Conditional".to_string(),
-            NodeType::Command(_) => "Command".to_string(),
-        },
-        node_content: node,
-        name: name,
-        description: description,
-        input_variables: input_variables,
-        output_variables: output_variables,
-    }
+pub enum NodeTypeName {
+    Prompt,
+    Process,
+    Conditional,
+    Command,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -85,22 +61,34 @@ pub struct InitializeProject {
     pub initial_message: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Response {
-    pub action_id: String,
-    pub response_text: String,
-}
-
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UpdateNode {
-    pub node: Node,
+#[derive(Debug, Serialize, Deserialize)]
+pub enum VerbTypeNames {
+     POST,
+     PUT,
+     PATCH,
+     DELETE,
+     GET,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct CreateNode {
-    pub node: Node,
+pub struct UserSettings {
+    pub openai_api_key: String,
+    pub mongo_db_uri: String,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum CrudBundleObject {
+    Node(Node),
+    InitialMessage(InitialMessage),
+    UserSettings(UserSettings),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CrudBundle {
+    pub verb: VerbTypeNames,
+    pub object: CrudBundleObject,
+}
+
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CommandOutput {
@@ -109,12 +97,4 @@ pub struct CommandOutput {
     response: String,
 }
 
-// Used for the websocket messages
-#[derive(Serialize, Deserialize, Debug)]
-pub enum MessageTypes {
-    InitializeProject(InitializeProject), // Add more types here
-    SetUserSettings(UserSettings),
-    HandleNode(Node),
-    UpdateNode(UpdateNode),
-    CreateNode(CreateNode),
-}
+

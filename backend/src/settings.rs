@@ -1,11 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::env;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UserSettings {
-    pub openai_api_key: String,
-    pub mongo_db_uri: String,
-}
+
 
 impl UserSettings {
     pub fn new() -> Option<UserSettings> {
@@ -17,9 +13,4 @@ impl UserSettings {
             mongo_db_uri,
         })
     }
-}
-#[derive(Serialize, Deserialize, Debug)]
-pub struct RuntimeSettings {
-    pub openai_api_key: String,
-    pub mongo_db_uri: String,
 }
