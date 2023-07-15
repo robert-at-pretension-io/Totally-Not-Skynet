@@ -1,7 +1,7 @@
 use crate::settings::UserSettings;
 use bson::oid::ObjectId;
-use serde::{Deserialize, Serialize};
-use std::{collections::HashMap};
+use serde::{ Deserialize, Serialize };
+use std::{ collections::HashMap };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Prompt {
@@ -63,11 +63,11 @@ pub struct InitializeProject {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum VerbTypeNames {
-     POST,
-     PUT,
-     PATCH,
-     DELETE,
-     GET,
+    POST,
+    PUT,
+    PATCH,
+    DELETE,
+    GET,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -76,11 +76,21 @@ pub struct UserSettings {
     pub mongo_db_uri: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ExecutionContext {
+    pub topological_order: Vec<String>,
+    pub current_node: Node,
+    pub variables: HashMap<String, String>,
+    pub execution_id: String,
+    pub return_execution_id: Option<String>,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub enum CrudBundleObject {
     Node(Node),
     InitialMessage(InitialMessage),
     UserSettings(UserSettings),
+    ExecutionContext(ExecutionContext),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -89,12 +99,9 @@ pub struct CrudBundle {
     pub object: CrudBundleObject,
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CommandOutput {
     command: String,
     success: bool,
     response: String,
 }
-
-

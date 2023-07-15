@@ -39,7 +39,6 @@
         object: {
           initial_message: "",
         },
-        s,
       };
 
       sendWebsocketMessage(initial_message);
