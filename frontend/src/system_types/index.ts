@@ -1,7 +1,10 @@
 import { Edge } from "@dagrejs/graphlib";
 import type { Graph } from "graphlib";
 import { Option, isSome } from "fp-ts/Option";
-import { unsafeCoerce } from 'fp-ts/lib/function';
+import * as t from 'io-ts';
+import { record } from 'io-ts';
+import { option } from "io-ts-types";
+import { TypeOf } from "io-ts";
 
 export type selectedGraphComponent = {
   type: "Node" | "Edge" | null;
@@ -37,11 +40,6 @@ export type SystemState = {
   executionContext: ExecutionContext;
   nodes: Node[];
 };
-
-
-import * as t from "io-ts";
-import { option } from "io-ts-types";
-import { TypeOf } from "io-ts";
 
 const RuntimeNodeTypeNames = t.keyof({
   "Prompt": null,
@@ -103,6 +101,14 @@ const RuntimeNode = t.type({
   output_variables: t.array(t.string),
 });
 
+const RuntimeExecutionContext = t.type({
+  topological_order: t.array(t.string),
+  current_node: RuntimeNode, // Use your actual Node type here
+  variables: record(t.string, t.string),
+  execution_id: t.string,
+  return_execution_id: option(t.string),
+});
+
 const RuntimeInitialMessage = t.type({
   initial_message: t.string,
 });
@@ -112,13 +118,10 @@ const RuntimeUserSettings = t.type({
   mongo_db_uri: t.string,
 });
 
-
 const RuntimeCrudBundle = t.type({
   verb: RuntimeVerbTypeNames,
   object: t.union([RuntimeNode, RuntimeInitialMessage, RuntimeUserSettings]),
 });
-
-
 
 type NodeTypeNames = TypeOf<typeof RuntimeNodeTypeNames>;
 type MongoId = TypeOf<typeof RuntimeMongoId>;
@@ -132,19 +135,10 @@ type CrudBundle = TypeOf<typeof RuntimeCrudBundle>;
 type VerbTypeNames = TypeOf<typeof RuntimeVerbTypeNames>;
 type InitialMessage = TypeOf<typeof RuntimeInitialMessage>;
 type UserSettings = TypeOf<typeof RuntimeUserSettings>;
-
+type ExecutionContext = TypeOf<typeof RuntimeExecutionContext>;
 
 // Export static types
-export type { CrudBundle, VerbTypeNames, InitialMessage, NodeTypeNames, MongoId, Prompt, NodeType, Node, Process, Conditional, Command, UserSettings };
+export type { ExecutionContext, CrudBundle, VerbTypeNames, InitialMessage, NodeTypeNames, MongoId, Prompt, NodeType, Node, Process, Conditional, Command, UserSettings };
 
-export { RuntimeCrudBundle, RuntimeVerbTypeNames, RuntimeInitialMessage, RuntimeNodeTypeNames, RuntimeMongoId, RuntimePrompt, RuntimeNodeType, RuntimeNode, RuntimeProcess, RuntimeConditional, RuntimeCommand, RuntimeUserSettings };
+export { RuntimeExecutionContext, RuntimeCrudBundle, RuntimeVerbTypeNames, RuntimeInitialMessage, RuntimeNodeTypeNames, RuntimeMongoId, RuntimePrompt, RuntimeNodeType, RuntimeNode, RuntimeProcess, RuntimeConditional, RuntimeCommand, RuntimeUserSettings };
 
-export type ExecutionContext = {
-  local_variables: Map<string, string>;
-  global_variables: Map<string, string>;
-  current_node: string | null;
-  topological_order: string[];
-  topological_order_names: (string | undefined)[];
-  prompts: Map<string, string>; // map from action id to prompt with filled in variables
-  responses: Map<string, string>; // map from action id to response (unparsed)
-}

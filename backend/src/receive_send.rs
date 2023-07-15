@@ -1,4 +1,4 @@
-use crate::domain::{ CrudBundle, Node, NodeType, Response, CrudBundleObject, VerbTypeNames };
+use crate::domain::{ CrudBundle, Node, NodeType, Response, CrudBundleObject, VerbTypeNames, ResponseObject };
 use crate::mongo::{ get_nodes, return_db };
 use crate::openai::{ get_openai_completion, ChatMessage, Role };
 use crate::settings::{ RuntimeSettings, UserSettings };
@@ -356,13 +356,7 @@ pub async fn start_message_sending_loop(
                         }
                     }
                     NodeType::Process(_) => {
-                        match verb {
-                            VerbTypeNames::POST => todo!(),
-                            VerbTypeNames::PUT => todo!(),
-                            VerbTypeNames::PATCH => todo!(),
-                            VerbTypeNames::DELETE => todo!(),
-                            VerbTypeNames::GET => todo!(),
-                        }
+                        println!("Processes cannot be executed directly. Instead, the frontend should break the process into nodes and send a execution context to the backend.")
                     }
                     NodeType::Conditional(_) => todo!("Conditional not implemented yet"),
                     NodeType::Command(command) => {
@@ -428,7 +422,7 @@ pub async fn start_message_sending_loop(
 pub async fn send_message<T: Serialize + Sized>(
     tx: &UnboundedSender<(Identity, Message)>,
     identity: Identity,
-    message: T
+    message: ResponseObject
 ) {
     match tx.send((identity, Message::Text(json!(message).to_string()))) {
         Ok(_) => {}

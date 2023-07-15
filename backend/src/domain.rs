@@ -1,12 +1,16 @@
 use crate::settings::UserSettings;
 use bson::oid::ObjectId;
 use serde::{ Deserialize, Serialize };
-use std::{ collections::HashMap };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Prompt {
     pub prompt: String,
     pub system: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PromptResponse {
+    pub response: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -22,6 +26,11 @@ pub struct Conditional {
     pub system_variables: HashMap<String, String>,
     pub statement: String,
     pub options: HashMap<String, ObjectId>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ConditionalResponse {
+    pub chosen_option: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -56,6 +65,19 @@ pub struct Command {
     pub command: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct CommandResponse {
+    pub error: String,
+    pub output: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum NodeExecutionResponse {
+    Prompt(PromptResponse),
+    Command(CommandResponse),
+    Conditional(ConditionalResponse),
+}
+
 #[derive(Serialize, Debug, Deserialize)]
 pub struct InitializeProject {
     pub initial_message: String,
@@ -82,7 +104,16 @@ pub struct ExecutionContext {
     pub current_node: Node,
     pub variables: HashMap<String, String>,
     pub execution_id: String,
-    pub return_execution_id: Option<String>,
+    pub container_execution_id: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ExecutionResponse {
+    pub execution_id: String,
+    pub container_execution_id: Option<String>,
+    pub current_node_id: String,
+    pub current_node_type: NodeTypeName,
+    pub response: NodeExecutionResponse,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -91,6 +122,14 @@ pub enum CrudBundleObject {
     InitialMessage(InitialMessage),
     UserSettings(UserSettings),
     ExecutionContext(ExecutionContext),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum ResponseObject {
+    Node(Node),
+    InitialMessage(InitialMessage),
+    UserSettings(UserSettings),
+    ExecutionContext(ExecutionResponse),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
