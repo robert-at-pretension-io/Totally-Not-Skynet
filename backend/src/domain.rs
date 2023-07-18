@@ -79,7 +79,7 @@ pub enum NodeExecutionResponse {
 }
 
 #[derive(Serialize, Debug, Deserialize)]
-pub struct InitializeProject {
+pub struct InitialMessage {
     pub initial_message: String,
 }
 
@@ -120,7 +120,7 @@ pub struct ExecutionResponse {
 pub enum CrudBundleObject {
     Node(Node),
     InitialMessage(InitialMessage),
-    UserSettings(UserSettings),
+    UserSettings,
     ExecutionContext(ExecutionContext),
 }
 

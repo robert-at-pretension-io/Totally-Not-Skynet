@@ -1,8 +1,19 @@
-use crate::domain::{ CrudBundle, Node, NodeType, Response, CrudBundleObject, VerbTypeNames, ResponseObject };
+use crate::domain::{
+    CrudBundle,
+    Node,
+    NodeType,
+    Response,
+    CrudBundleObject,
+    VerbTypeNames,
+    ResponseObject,
+    ExecutionResponse,
+    CommandResponse,
+    ExecutionContext,
+};
 use crate::mongo::{ get_nodes, return_db };
 use crate::openai::{ get_openai_completion, ChatMessage, Role };
 use crate::settings::{ RuntimeSettings, UserSettings };
-use crate::utils::parse_message;
+use crate::utils::{ parse_message, create_node_response_object };
 
 use bollard::container::Config;
 use bollard::exec::{ CreateExecOptions, StartExecResults };
@@ -85,23 +96,9 @@ pub async fn start_message_sending_loop(
                             .unwrap()
                             .unwrap();
 
-                        let response = CreateNode {
-                            node: inserted_node,
-                        };
+                        let response_object = ResponseObject::Node(inserted_node);
 
-                        match
-                            tx.send((
-                                Identity::new(msg.0.name.to_string()),
-                                Message::Text(json!(response).to_string()),
-                            ))
-                        {
-                            Ok(_) => {}
-                            Err(e) => {
-                                println!("Error sending message to client: {:?}", e);
-                                break;
-                            }
-                        }
-                        // }
+                        send_message(&tx, msg.0.clone(), response_object);
                     }
                     VerbTypeNames::PUT => {
                         let updated_node = update_node.node.clone();
@@ -183,18 +180,7 @@ pub async fn start_message_sending_loop(
                         } else {
                             println!("Updated {} nodes", update_result.modified_count);
 
-                            match
-                                tx.send((
-                                    Identity::new(msg.0.name.to_string()),
-                                    Message::Text(json!(updated_node).to_string()),
-                                ))
-                            {
-                                Ok(_) => {}
-                                Err(e) => {
-                                    println!("Error sending message to client: {:?}", e);
-                                    break;
-                                }
-                            }
+                            send_message(&tx, msg.0.clone(), updated_node);
                         }
                     }
                     _ => {
@@ -215,15 +201,19 @@ pub async fn start_message_sending_loop(
 
                         let db = return_db(db_uri).await;
 
-                        // let (my_action, my_processes) = get_actions_and_processes(&db).await;
-
                         let nodes = get_nodes(&db).await;
 
                         println!("Found the following nodes: {:?}", nodes);
 
                         for node in &nodes {
-                            send_message(&tx, msg.0.clone(), &node).await;
+                            send_message(
+                                &tx,
+                                msg.0.clone(),
+                                ResponseObject::Node(node.clone())
+                            ).await;
                         }
+
+                        // need to send an additional message to the client to let them know that the project has been initialized
 
                         const IMAGE: &str = "alpine:3";
 
@@ -243,6 +233,8 @@ pub async fn start_message_sending_loop(
 
                         println!("Created container with id: {}", id);
                         docker_containers.insert(msg.0.clone(), id);
+
+                        send_message(&tx, msg.0.clone(), ResponseObject::InitialMessage).await;
                     }
                     _ => {
                         println!("Verb not supported for initial message: {:?}", verb);
@@ -252,10 +244,10 @@ pub async fn start_message_sending_loop(
             CrudBundleObject::UserSettings(user_settings) => {
                 match verb {
                     VerbTypeNames::GET => {
-                        println!("Setting openai key for {}", msg.0.name);
+                        println!("Setting user settings for {}", msg.0.name);
 
                         // attempt to set them from environment variables
-                        let user_settings = UserSettings::new();
+                        let system_settings = UserSettings::new();
 
                         if user_settings.is_some() {
                             let user_settings = user_settings.unwrap();
@@ -264,25 +256,21 @@ pub async fn start_message_sending_loop(
                                 mongo_db_uri: user_settings.mongo_db_uri,
                             });
                         } else {
+                            let settings = system_settings.unwrap();
                             runtime_settings.insert(msg.0.clone(), RuntimeSettings {
                                 openai_api_key: settings.openai_api_key,
                                 mongo_db_uri: settings.mongo_db_uri,
                             });
                         }
 
+                        let users_runtime_settings = runtime_settings.get(&msg.0).unwrap();
+
                         // respond to the client
-                        match
-                            tx.send((
-                                Identity::new(msg.0.name.to_string()),
-                                Message::Text("Settings received".to_string()),
-                            ))
-                        {
-                            Ok(_) => {}
-                            Err(e) => {
-                                println!("Error sending message to client: {:?}", e);
-                                break;
-                            }
-                        }
+                        send_message(
+                            &tx,
+                            msg.0.clone(),
+                            ResponseObject::UserSettings(users_runtime_settings)
+                        );
                     }
                     _ => {
                         println!("Verb not supported for user settings: {:?}", verb);
@@ -291,6 +279,7 @@ pub async fn start_message_sending_loop(
             }
             CrudBundleObject::ExecutionContext(execution_context) => {
                 let node = execution_context.current_node.clone();
+                let execution_clone: ExecutionContext = execution_context.clone();
 
                 match node.node_content {
                     NodeType::Prompt(prompt) => {
@@ -321,30 +310,19 @@ pub async fn start_message_sending_loop(
                                     let response = get_openai_completion(
                                         messages,
                                         openai_api_key.unwrap(),
-                                        default_model
+                                        default_model.to_string()
                                     ).await;
 
                                     match response {
                                         Ok(res) => {
-                                            let rez = Response {
-                                                action_id: node._id.clone().unwrap().to_string(),
-                                                response_text: res,
-                                            };
-                                            match
-                                                tx.send((
-                                                    Identity::new(msg.0.name.to_string()),
-                                                    Message::Text(json!(rez).to_string()),
-                                                ))
-                                            {
-                                                Ok(_) => {}
-                                                Err(e) => {
-                                                    println!(
-                                                        "Error sending message to client: {:?}",
-                                                        e
-                                                    );
-                                                    break;
-                                                }
-                                            }
+                                            response_object = create_node_response_object(
+                                                execution_clone,
+                                                NodeExecutionResponse::Prompt(PromptResponse {
+                                                    response: res,
+                                                })
+                                            );
+
+                                            send_message(&tx, msg.0.clone(), response_object).await;
                                         }
                                         Err(_) => todo!(),
                                     }
@@ -356,7 +334,9 @@ pub async fn start_message_sending_loop(
                         }
                     }
                     NodeType::Process(_) => {
-                        println!("Processes cannot be executed directly. Instead, the frontend should break the process into nodes and send a execution context to the backend.")
+                        println!(
+                            "Processes cannot be executed directly. Instead, the frontend should break the process into nodes and send a execution context to the backend."
+                        );
                     }
                     NodeType::Conditional(_) => todo!("Conditional not implemented yet"),
                     NodeType::Command(command) => {
@@ -396,7 +376,19 @@ pub async fn start_message_sending_loop(
 
                                             // Once we've read all the output, send it to the client
 
-                                            send_message(&tx, msg.0.clone(), full_output).await;
+                                            let node_execution_response =
+                                                NodeExecutionResponse::Command(CommandResponse {
+                                                    error: "".to_string(),
+                                                    output: full_output,
+                                                });
+
+                                            let response_object: ResponseObject =
+                                                create_node_response_object(
+                                                    execution_clone,
+                                                    node_execution_response
+                                                );
+
+                                            send_message(&tx, msg.0.clone(), response_object).await;
                                         }
                                         StartExecResults::Detached => {
                                             println!(
