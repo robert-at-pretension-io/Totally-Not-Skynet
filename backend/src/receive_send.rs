@@ -2,17 +2,17 @@ use crate::domain::{
     CrudBundle,
     Node,
     NodeType,
-    Response,
     CrudBundleObject,
     VerbTypeNames,
     ResponseObject,
-    ExecutionResponse,
     CommandResponse,
     ExecutionContext,
+    NodeExecutionResponse,
+    PromptResponse,
+    UserSettings,
 };
 use crate::mongo::{ get_nodes, return_db };
 use crate::openai::{ get_openai_completion, ChatMessage, Role };
-use crate::settings::{ RuntimeSettings, UserSettings };
 use crate::utils::{ parse_message, create_node_response_object };
 
 use bollard::container::Config;
@@ -31,7 +31,7 @@ use tokio_tungstenite::tungstenite::Message;
 
 // create a "models" type that can be used to select the model to use
 // it should be one of a couple of strings: "gpt-4", "gpt3.5-turbo", etc
-const default_model = "gpt-4";
+const DEFAULT_MODEL: &str = "gpt-4";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Identity {
@@ -83,8 +83,6 @@ pub async fn start_message_sending_loop(
 
                         let node_collection = db.collection::<crate::domain::Node>("nodes");
 
-                        let mut node = node.node_content.clone();
-
                         node._id = Some(bson::oid::ObjectId::new());
 
                         let insert_result = node_collection.insert_one(node, None).await.unwrap();
@@ -101,7 +99,7 @@ pub async fn start_message_sending_loop(
                         send_message(&tx, msg.0.clone(), response_object);
                     }
                     VerbTypeNames::PUT => {
-                        let updated_node = update_node.node.clone();
+                        let updated_node = node.clone();
 
                         let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
 
@@ -118,8 +116,6 @@ pub async fn start_message_sending_loop(
                                 "Prompt": {
                                 "prompt": prompt.prompt.clone(),
                                 "system": prompt.system.clone(),
-                                "input_variables": prompt.input_variables.clone(),
-                                "output_variables": prompt.output_variables.clone()
                                 }
                             }
                         }
@@ -129,11 +125,9 @@ pub async fn start_message_sending_loop(
                             "$set": {
                                 "Process": {
                                 "graph": process.graph.clone(),
+                                "initial_variables": process.initial_variables.clone(),
                                 "topological_order": process.topological_order.clone(),
-                                "description": process.description.clone(),
-                                "output_variable": process.output_variable.clone(),
                                 "is_loop": process.is_loop,
-                                "max_iterations": process.max_iterations.clone()
                                 }
                             }
                         }
@@ -213,8 +207,6 @@ pub async fn start_message_sending_loop(
                             ).await;
                         }
 
-                        // need to send an additional message to the client to let them know that the project has been initialized
-
                         const IMAGE: &str = "alpine:3";
 
                         let alpine_config = Config {
@@ -234,6 +226,8 @@ pub async fn start_message_sending_loop(
                         println!("Created container with id: {}", id);
                         docker_containers.insert(msg.0.clone(), id);
 
+                        // need to send an additional message to the client to let them know that the project has been initialized
+
                         send_message(&tx, msg.0.clone(), ResponseObject::InitialMessage).await;
                     }
                     _ => {
@@ -250,7 +244,7 @@ pub async fn start_message_sending_loop(
                         let system_settings = UserSettings::new();
 
                         if user_settings.is_some() {
-                            let user_settings = user_settings.unwrap();
+                            let user_settings = system_settings.unwrap();
                             runtime_settings.insert(msg.0.clone(), RuntimeSettings {
                                 openai_api_key: user_settings.openai_api_key,
                                 mongo_db_uri: user_settings.mongo_db_uri,
@@ -269,7 +263,7 @@ pub async fn start_message_sending_loop(
                         send_message(
                             &tx,
                             msg.0.clone(),
-                            ResponseObject::UserSettings(users_runtime_settings)
+                            ResponseObject::UserSettings(users_runtime_settings.clone())
                         );
                     }
                     _ => {
@@ -310,12 +304,12 @@ pub async fn start_message_sending_loop(
                                     let response = get_openai_completion(
                                         messages,
                                         openai_api_key.unwrap(),
-                                        default_model.to_string()
+                                        DEFAULT_MODEL.to_string()
                                     ).await;
 
                                     match response {
                                         Ok(res) => {
-                                            response_object = create_node_response_object(
+                                            let response_object = create_node_response_object(
                                                 execution_clone,
                                                 NodeExecutionResponse::Prompt(PromptResponse {
                                                     response: res,

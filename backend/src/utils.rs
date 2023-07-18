@@ -2,19 +2,13 @@ use crate::domain::ExecutionContext;
 use crate::domain::ExecutionResponse;
 use crate::domain::NodeExecutionResponse;
 use crate::domain::ResponseObject;
-use crate::domain::create_node;
-use crate::domain::CreateNode;
-use crate::domain::InitializeProject;
-use crate::domain::NodeType;
-use crate::domain::{ CrudBundle, Process, Prompt };
-use crate::settings::UserSettings;
+use crate::domain::CrudBundle;
+use crate::domain::UserSettings;
 
 pub fn create_node_response_object(
     execution_clone: ExecutionContext,
     node_execution_response: NodeExecutionResponse
 ) -> ResponseObject {
-    let mut response_object = ResponseObject::new();
-
     let execution_response: ExecutionResponse = ExecutionResponse {
         execution_id: execution_clone.execution_id,
         container_execution_id: execution_clone.container_execution_id,

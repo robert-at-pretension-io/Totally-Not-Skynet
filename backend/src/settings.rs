@@ -1,7 +1,5 @@
-use serde::{Deserialize, Serialize};
 use std::env;
-
-
+use crate::domain::UserSettings;
 
 impl UserSettings {
     pub fn new() -> Option<UserSettings> {

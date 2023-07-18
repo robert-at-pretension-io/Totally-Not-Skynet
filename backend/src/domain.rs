@@ -1,6 +1,7 @@
 use crate::settings::UserSettings;
 use bson::oid::ObjectId;
 use serde::{ Deserialize, Serialize };
+use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Prompt {
@@ -83,7 +84,7 @@ pub struct InitialMessage {
     pub initial_message: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum VerbTypeNames {
     POST,
     PUT,
@@ -98,7 +99,7 @@ pub struct UserSettings {
     pub mongo_db_uri: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ExecutionContext {
     pub topological_order: Vec<String>,
     pub current_node: Node,
@@ -120,14 +121,14 @@ pub struct ExecutionResponse {
 pub enum CrudBundleObject {
     Node(Node),
     InitialMessage(InitialMessage),
-    UserSettings,
+    UserSettings(UserSettings),
     ExecutionContext(ExecutionContext),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ResponseObject {
     Node(Node),
-    InitialMessage(InitialMessage),
+    InitialMessage,
     UserSettings(UserSettings),
     ExecutionContext(ExecutionResponse),
 }
