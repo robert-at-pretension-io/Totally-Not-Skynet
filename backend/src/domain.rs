@@ -128,7 +128,7 @@ pub enum CrudBundleObject {
 pub enum ResponseObject {
     Node(Node),
     InitialMessage,
-    UserSettings(UserSettings),
+    UserSettings,
     ExecutionContext(ExecutionResponse),
 }
 

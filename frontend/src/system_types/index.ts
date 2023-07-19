@@ -91,13 +91,15 @@ const RuntimeCommand = t.type({
 const RuntimeNodeType = t.union([RuntimePrompt, RuntimeProcess, RuntimeConditional, RuntimeCommand]);
 
 const RuntimeNode = t.type({
-  _id: RuntimeMongoId,
-  name: t.string,
-  type_name: RuntimeNodeTypeNames,
-  node_content: RuntimeNodeType,
-  description: t.string,
-  input_variables: t.array(t.string),
-  output_variables: t.array(t.string),
+  Node: t.type({
+    _id: RuntimeMongoId,
+    name: t.string,
+    type_name: RuntimeNodeTypeNames,
+    node_content: RuntimeNodeType,
+    description: t.string,
+    input_variables: t.array(t.string),
+    output_variables: t.array(t.string),
+  });
 });
 
 const RuntimeExecutionContext = t.type({

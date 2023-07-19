@@ -275,19 +275,16 @@ pub async fn start_message_sending_loop(
                         }
 
 
-                        
-
-                        let users_runtime_settings = runtime_settings.get(&msg.0).unwrap();
-
+                    
                         // respond to the client
                         send_message(
                             &tx,
                             msg.0.clone(),
-                            ResponseObject::UserSettings(users_runtime_settings.clone())
+                            ResponseObject::UserSettings
                         ).await;
                     }
                     _ => {
-                        println!("Verb not supported for user settings: {:?}", verb);
+                        println!("\n-------------------\nVerb not supported for user settings: {:?}\n-------------------\n", verb);
                     }
                 }
             }

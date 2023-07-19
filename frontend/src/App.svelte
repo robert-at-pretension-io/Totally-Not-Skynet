@@ -28,7 +28,7 @@
       localStorage.setItem("mongo_uri", mongo_uri);
 
       let user_settings: CrudBundle = {
-        verb: "POST",
+        verb: "GET",
         object: {
           UserSettings:
           {openai_api_key: "",
