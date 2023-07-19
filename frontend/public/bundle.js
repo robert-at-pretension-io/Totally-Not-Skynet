@@ -1701,7 +1701,7 @@ var app = (function () {
     var version$3 = '2.1.13';
 
     // Includes only the "core" of graphlib
-    var lib$2 = {
+    var lib$3 = {
       Graph: graph$1,
       version: version$3
     };
@@ -2368,13 +2368,13 @@ var app = (function () {
      * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      */
 
-    var lib$1 = lib$2;
+    var lib$2 = lib$3;
 
     var graphlib$2 = {
-      Graph: lib$1.Graph,
+      Graph: lib$2.Graph,
       json: json$1,
       alg: alg$1,
-      version: lib$1.version
+      version: lib$2.version
     };
 
     function newGraphState() {
@@ -6429,11 +6429,19 @@ var app = (function () {
      * // => true
      */
 
-    function eq$1(value, other) {
-      return value === other || (value !== value && other !== other);
-    }
+    var eq_1;
+    var hasRequiredEq;
 
-    var eq_1 = eq$1;
+    function requireEq () {
+    	if (hasRequiredEq) return eq_1;
+    	hasRequiredEq = 1;
+    	function eq(value, other) {
+    	  return value === other || (value !== value && other !== other);
+    	}
+
+    	eq_1 = eq;
+    	return eq_1;
+    }
 
     var _assocIndexOf;
     var hasRequired_assocIndexOf;
@@ -6441,7 +6449,7 @@ var app = (function () {
     function require_assocIndexOf () {
     	if (hasRequired_assocIndexOf) return _assocIndexOf;
     	hasRequired_assocIndexOf = 1;
-    	var eq = eq_1;
+    	var eq = requireEq();
 
     	/**
     	 * Gets the index at which the `key` is found in `array` of key-value pairs.
@@ -6597,38 +6605,46 @@ var app = (function () {
     	return _listCacheSet;
     }
 
-    var listCacheClear = require_listCacheClear(),
-        listCacheDelete = require_listCacheDelete(),
-        listCacheGet = require_listCacheGet(),
-        listCacheHas = require_listCacheHas(),
-        listCacheSet = require_listCacheSet();
+    var _ListCache;
+    var hasRequired_ListCache;
 
-    /**
-     * Creates an list cache object.
-     *
-     * @private
-     * @constructor
-     * @param {Array} [entries] The key-value pairs to cache.
-     */
-    function ListCache$1(entries) {
-      var index = -1,
-          length = entries == null ? 0 : entries.length;
+    function require_ListCache () {
+    	if (hasRequired_ListCache) return _ListCache;
+    	hasRequired_ListCache = 1;
+    	var listCacheClear = require_listCacheClear(),
+    	    listCacheDelete = require_listCacheDelete(),
+    	    listCacheGet = require_listCacheGet(),
+    	    listCacheHas = require_listCacheHas(),
+    	    listCacheSet = require_listCacheSet();
 
-      this.clear();
-      while (++index < length) {
-        var entry = entries[index];
-        this.set(entry[0], entry[1]);
-      }
+    	/**
+    	 * Creates an list cache object.
+    	 *
+    	 * @private
+    	 * @constructor
+    	 * @param {Array} [entries] The key-value pairs to cache.
+    	 */
+    	function ListCache(entries) {
+    	  var index = -1,
+    	      length = entries == null ? 0 : entries.length;
+
+    	  this.clear();
+    	  while (++index < length) {
+    	    var entry = entries[index];
+    	    this.set(entry[0], entry[1]);
+    	  }
+    	}
+
+    	// Add methods to `ListCache`.
+    	ListCache.prototype.clear = listCacheClear;
+    	ListCache.prototype['delete'] = listCacheDelete;
+    	ListCache.prototype.get = listCacheGet;
+    	ListCache.prototype.has = listCacheHas;
+    	ListCache.prototype.set = listCacheSet;
+
+    	_ListCache = ListCache;
+    	return _ListCache;
     }
-
-    // Add methods to `ListCache`.
-    ListCache$1.prototype.clear = listCacheClear;
-    ListCache$1.prototype['delete'] = listCacheDelete;
-    ListCache$1.prototype.get = listCacheGet;
-    ListCache$1.prototype.has = listCacheHas;
-    ListCache$1.prototype.set = listCacheSet;
-
-    var _ListCache = ListCache$1;
 
     var _stackClear;
     var hasRequired_stackClear;
@@ -6636,7 +6652,7 @@ var app = (function () {
     function require_stackClear () {
     	if (hasRequired_stackClear) return _stackClear;
     	hasRequired_stackClear = 1;
-    	var ListCache = _ListCache;
+    	var ListCache = require_ListCache();
 
     	/**
     	 * Removes all key-value entries from the stack.
@@ -6732,101 +6748,141 @@ var app = (function () {
 
     /** Detect free variable `global` from Node.js. */
 
-    var freeGlobal$1 = typeof commonjsGlobal == 'object' && commonjsGlobal && commonjsGlobal.Object === Object && commonjsGlobal;
+    var _freeGlobal;
+    var hasRequired_freeGlobal;
 
-    var _freeGlobal = freeGlobal$1;
+    function require_freeGlobal () {
+    	if (hasRequired_freeGlobal) return _freeGlobal;
+    	hasRequired_freeGlobal = 1;
+    	var freeGlobal = typeof commonjsGlobal == 'object' && commonjsGlobal && commonjsGlobal.Object === Object && commonjsGlobal;
 
-    var freeGlobal = _freeGlobal;
-
-    /** Detect free variable `self`. */
-    var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
-
-    /** Used as a reference to the global object. */
-    var root$4 = freeGlobal || freeSelf || Function('return this')();
-
-    var _root = root$4;
-
-    var root$3 = _root;
-
-    /** Built-in value references. */
-    var Symbol$4 = root$3.Symbol;
-
-    var _Symbol = Symbol$4;
-
-    var Symbol$3 = _Symbol;
-
-    /** Used for built-in method references. */
-    var objectProto$5 = Object.prototype;
-
-    /** Used to check objects for own properties. */
-    var hasOwnProperty$5 = objectProto$5.hasOwnProperty;
-
-    /**
-     * Used to resolve the
-     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
-     * of values.
-     */
-    var nativeObjectToString$1 = objectProto$5.toString;
-
-    /** Built-in value references. */
-    var symToStringTag$1 = Symbol$3 ? Symbol$3.toStringTag : undefined;
-
-    /**
-     * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
-     *
-     * @private
-     * @param {*} value The value to query.
-     * @returns {string} Returns the raw `toStringTag`.
-     */
-    function getRawTag$1(value) {
-      var isOwn = hasOwnProperty$5.call(value, symToStringTag$1),
-          tag = value[symToStringTag$1];
-
-      try {
-        value[symToStringTag$1] = undefined;
-        var unmasked = true;
-      } catch (e) {}
-
-      var result = nativeObjectToString$1.call(value);
-      if (unmasked) {
-        if (isOwn) {
-          value[symToStringTag$1] = tag;
-        } else {
-          delete value[symToStringTag$1];
-        }
-      }
-      return result;
+    	_freeGlobal = freeGlobal;
+    	return _freeGlobal;
     }
 
-    var _getRawTag = getRawTag$1;
+    var _root;
+    var hasRequired_root;
+
+    function require_root () {
+    	if (hasRequired_root) return _root;
+    	hasRequired_root = 1;
+    	var freeGlobal = require_freeGlobal();
+
+    	/** Detect free variable `self`. */
+    	var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+    	/** Used as a reference to the global object. */
+    	var root = freeGlobal || freeSelf || Function('return this')();
+
+    	_root = root;
+    	return _root;
+    }
+
+    var _Symbol;
+    var hasRequired_Symbol;
+
+    function require_Symbol () {
+    	if (hasRequired_Symbol) return _Symbol;
+    	hasRequired_Symbol = 1;
+    	var root = require_root();
+
+    	/** Built-in value references. */
+    	var Symbol = root.Symbol;
+
+    	_Symbol = Symbol;
+    	return _Symbol;
+    }
+
+    var _getRawTag;
+    var hasRequired_getRawTag;
+
+    function require_getRawTag () {
+    	if (hasRequired_getRawTag) return _getRawTag;
+    	hasRequired_getRawTag = 1;
+    	var Symbol = require_Symbol();
+
+    	/** Used for built-in method references. */
+    	var objectProto = Object.prototype;
+
+    	/** Used to check objects for own properties. */
+    	var hasOwnProperty = objectProto.hasOwnProperty;
+
+    	/**
+    	 * Used to resolve the
+    	 * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+    	 * of values.
+    	 */
+    	var nativeObjectToString = objectProto.toString;
+
+    	/** Built-in value references. */
+    	var symToStringTag = Symbol ? Symbol.toStringTag : undefined;
+
+    	/**
+    	 * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to query.
+    	 * @returns {string} Returns the raw `toStringTag`.
+    	 */
+    	function getRawTag(value) {
+    	  var isOwn = hasOwnProperty.call(value, symToStringTag),
+    	      tag = value[symToStringTag];
+
+    	  try {
+    	    value[symToStringTag] = undefined;
+    	    var unmasked = true;
+    	  } catch (e) {}
+
+    	  var result = nativeObjectToString.call(value);
+    	  if (unmasked) {
+    	    if (isOwn) {
+    	      value[symToStringTag] = tag;
+    	    } else {
+    	      delete value[symToStringTag];
+    	    }
+    	  }
+    	  return result;
+    	}
+
+    	_getRawTag = getRawTag;
+    	return _getRawTag;
+    }
 
     /** Used for built-in method references. */
 
-    var objectProto$4 = Object.prototype;
+    var _objectToString;
+    var hasRequired_objectToString;
 
-    /**
-     * Used to resolve the
-     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
-     * of values.
-     */
-    var nativeObjectToString = objectProto$4.toString;
+    function require_objectToString () {
+    	if (hasRequired_objectToString) return _objectToString;
+    	hasRequired_objectToString = 1;
+    	var objectProto = Object.prototype;
 
-    /**
-     * Converts `value` to a string using `Object.prototype.toString`.
-     *
-     * @private
-     * @param {*} value The value to convert.
-     * @returns {string} Returns the converted string.
-     */
-    function objectToString$1(value) {
-      return nativeObjectToString.call(value);
+    	/**
+    	 * Used to resolve the
+    	 * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+    	 * of values.
+    	 */
+    	var nativeObjectToString = objectProto.toString;
+
+    	/**
+    	 * Converts `value` to a string using `Object.prototype.toString`.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to convert.
+    	 * @returns {string} Returns the converted string.
+    	 */
+    	function objectToString(value) {
+    	  return nativeObjectToString.call(value);
+    	}
+
+    	_objectToString = objectToString;
+    	return _objectToString;
     }
 
-    var _objectToString = objectToString$1;
-
-    var Symbol$2 = _Symbol,
-        getRawTag = _getRawTag,
-        objectToString = _objectToString;
+    var Symbol$2 = require_Symbol(),
+        getRawTag = require_getRawTag(),
+        objectToString = require_objectToString();
 
     /** `Object#toString` result references. */
     var nullTag = '[object Null]',
@@ -6879,12 +6935,20 @@ var app = (function () {
      * // => false
      */
 
-    function isObject$4(value) {
-      var type = typeof value;
-      return value != null && (type == 'object' || type == 'function');
-    }
+    var isObject_1;
+    var hasRequiredIsObject;
 
-    var isObject_1 = isObject$4;
+    function requireIsObject () {
+    	if (hasRequiredIsObject) return isObject_1;
+    	hasRequiredIsObject = 1;
+    	function isObject(value) {
+    	  var type = typeof value;
+    	  return value != null && (type == 'object' || type == 'function');
+    	}
+
+    	isObject_1 = isObject;
+    	return isObject_1;
+    }
 
     var isFunction_1;
     var hasRequiredIsFunction;
@@ -6893,7 +6957,7 @@ var app = (function () {
     	if (hasRequiredIsFunction) return isFunction_1;
     	hasRequiredIsFunction = 1;
     	var baseGetTag = _baseGetTag,
-    	    isObject = isObject_1;
+    	    isObject = requireIsObject();
 
     	/** `Object#toString` result references. */
     	var asyncTag = '[object AsyncFunction]',
@@ -6932,33 +6996,49 @@ var app = (function () {
     	return isFunction_1;
     }
 
-    var root$2 = _root;
+    var _coreJsData;
+    var hasRequired_coreJsData;
 
-    /** Used to detect overreaching core-js shims. */
-    var coreJsData$1 = root$2['__core-js_shared__'];
+    function require_coreJsData () {
+    	if (hasRequired_coreJsData) return _coreJsData;
+    	hasRequired_coreJsData = 1;
+    	var root = require_root();
 
-    var _coreJsData = coreJsData$1;
+    	/** Used to detect overreaching core-js shims. */
+    	var coreJsData = root['__core-js_shared__'];
 
-    var coreJsData = _coreJsData;
-
-    /** Used to detect methods masquerading as native. */
-    var maskSrcKey = (function() {
-      var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
-      return uid ? ('Symbol(src)_1.' + uid) : '';
-    }());
-
-    /**
-     * Checks if `func` has its source masked.
-     *
-     * @private
-     * @param {Function} func The function to check.
-     * @returns {boolean} Returns `true` if `func` is masked, else `false`.
-     */
-    function isMasked$1(func) {
-      return !!maskSrcKey && (maskSrcKey in func);
+    	_coreJsData = coreJsData;
+    	return _coreJsData;
     }
 
-    var _isMasked = isMasked$1;
+    var _isMasked;
+    var hasRequired_isMasked;
+
+    function require_isMasked () {
+    	if (hasRequired_isMasked) return _isMasked;
+    	hasRequired_isMasked = 1;
+    	var coreJsData = require_coreJsData();
+
+    	/** Used to detect methods masquerading as native. */
+    	var maskSrcKey = (function() {
+    	  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+    	  return uid ? ('Symbol(src)_1.' + uid) : '';
+    	}());
+
+    	/**
+    	 * Checks if `func` has its source masked.
+    	 *
+    	 * @private
+    	 * @param {Function} func The function to check.
+    	 * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+    	 */
+    	function isMasked(func) {
+    	  return !!maskSrcKey && (maskSrcKey in func);
+    	}
+
+    	_isMasked = isMasked;
+    	return _isMasked;
+    }
 
     /** Used for built-in method references. */
 
@@ -6996,53 +7076,61 @@ var app = (function () {
     	return _toSource;
     }
 
-    var isFunction = requireIsFunction(),
-        isMasked = _isMasked,
-        isObject$3 = isObject_1,
-        toSource = require_toSource();
+    var _baseIsNative;
+    var hasRequired_baseIsNative;
 
-    /**
-     * Used to match `RegExp`
-     * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
-     */
-    var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+    function require_baseIsNative () {
+    	if (hasRequired_baseIsNative) return _baseIsNative;
+    	hasRequired_baseIsNative = 1;
+    	var isFunction = requireIsFunction(),
+    	    isMasked = require_isMasked(),
+    	    isObject = requireIsObject(),
+    	    toSource = require_toSource();
 
-    /** Used to detect host constructors (Safari). */
-    var reIsHostCtor = /^\[object .+?Constructor\]$/;
+    	/**
+    	 * Used to match `RegExp`
+    	 * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+    	 */
+    	var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
 
-    /** Used for built-in method references. */
-    var funcProto = Function.prototype,
-        objectProto$3 = Object.prototype;
+    	/** Used to detect host constructors (Safari). */
+    	var reIsHostCtor = /^\[object .+?Constructor\]$/;
 
-    /** Used to resolve the decompiled source of functions. */
-    var funcToString = funcProto.toString;
+    	/** Used for built-in method references. */
+    	var funcProto = Function.prototype,
+    	    objectProto = Object.prototype;
 
-    /** Used to check objects for own properties. */
-    var hasOwnProperty$4 = objectProto$3.hasOwnProperty;
+    	/** Used to resolve the decompiled source of functions. */
+    	var funcToString = funcProto.toString;
 
-    /** Used to detect if a method is native. */
-    var reIsNative = RegExp('^' +
-      funcToString.call(hasOwnProperty$4).replace(reRegExpChar, '\\$&')
-      .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-    );
+    	/** Used to check objects for own properties. */
+    	var hasOwnProperty = objectProto.hasOwnProperty;
 
-    /**
-     * The base implementation of `_.isNative` without bad shim checks.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a native function,
-     *  else `false`.
-     */
-    function baseIsNative$1(value) {
-      if (!isObject$3(value) || isMasked(value)) {
-        return false;
-      }
-      var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
-      return pattern.test(toSource(value));
+    	/** Used to detect if a method is native. */
+    	var reIsNative = RegExp('^' +
+    	  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
+    	  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+    	);
+
+    	/**
+    	 * The base implementation of `_.isNative` without bad shim checks.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to check.
+    	 * @returns {boolean} Returns `true` if `value` is a native function,
+    	 *  else `false`.
+    	 */
+    	function baseIsNative(value) {
+    	  if (!isObject(value) || isMasked(value)) {
+    	    return false;
+    	  }
+    	  var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
+    	  return pattern.test(toSource(value));
+    	}
+
+    	_baseIsNative = baseIsNative;
+    	return _baseIsNative;
     }
-
-    var _baseIsNative = baseIsNative$1;
 
     /**
      * Gets the value at `key` of `object`.
@@ -7053,60 +7141,100 @@ var app = (function () {
      * @returns {*} Returns the property value.
      */
 
-    function getValue$2(object, key) {
-      return object == null ? undefined : object[key];
+    var _getValue;
+    var hasRequired_getValue;
+
+    function require_getValue () {
+    	if (hasRequired_getValue) return _getValue;
+    	hasRequired_getValue = 1;
+    	function getValue(object, key) {
+    	  return object == null ? undefined : object[key];
+    	}
+
+    	_getValue = getValue;
+    	return _getValue;
     }
 
-    var _getValue = getValue$2;
+    var _getNative;
+    var hasRequired_getNative;
 
-    var baseIsNative = _baseIsNative,
-        getValue$1 = _getValue;
+    function require_getNative () {
+    	if (hasRequired_getNative) return _getNative;
+    	hasRequired_getNative = 1;
+    	var baseIsNative = require_baseIsNative(),
+    	    getValue = require_getValue();
 
-    /**
-     * Gets the native function at `key` of `object`.
-     *
-     * @private
-     * @param {Object} object The object to query.
-     * @param {string} key The key of the method to get.
-     * @returns {*} Returns the function if it's native, else `undefined`.
-     */
-    function getNative$3(object, key) {
-      var value = getValue$1(object, key);
-      return baseIsNative(value) ? value : undefined;
+    	/**
+    	 * Gets the native function at `key` of `object`.
+    	 *
+    	 * @private
+    	 * @param {Object} object The object to query.
+    	 * @param {string} key The key of the method to get.
+    	 * @returns {*} Returns the function if it's native, else `undefined`.
+    	 */
+    	function getNative(object, key) {
+    	  var value = getValue(object, key);
+    	  return baseIsNative(value) ? value : undefined;
+    	}
+
+    	_getNative = getNative;
+    	return _getNative;
     }
 
-    var _getNative = getNative$3;
+    var _Map;
+    var hasRequired_Map;
 
-    var getNative$2 = _getNative,
-        root$1 = _root;
+    function require_Map () {
+    	if (hasRequired_Map) return _Map;
+    	hasRequired_Map = 1;
+    	var getNative = require_getNative(),
+    	    root = require_root();
 
-    /* Built-in method references that are verified to be native. */
-    var Map$3 = getNative$2(root$1, 'Map');
+    	/* Built-in method references that are verified to be native. */
+    	var Map = getNative(root, 'Map');
 
-    var _Map = Map$3;
-
-    var getNative$1 = _getNative;
-
-    /* Built-in method references that are verified to be native. */
-    var nativeCreate$4 = getNative$1(Object, 'create');
-
-    var _nativeCreate = nativeCreate$4;
-
-    var nativeCreate$3 = _nativeCreate;
-
-    /**
-     * Removes all key-value entries from the hash.
-     *
-     * @private
-     * @name clear
-     * @memberOf Hash
-     */
-    function hashClear$1() {
-      this.__data__ = nativeCreate$3 ? nativeCreate$3(null) : {};
-      this.size = 0;
+    	_Map = Map;
+    	return _Map;
     }
 
-    var _hashClear = hashClear$1;
+    var _nativeCreate;
+    var hasRequired_nativeCreate;
+
+    function require_nativeCreate () {
+    	if (hasRequired_nativeCreate) return _nativeCreate;
+    	hasRequired_nativeCreate = 1;
+    	var getNative = require_getNative();
+
+    	/* Built-in method references that are verified to be native. */
+    	var nativeCreate = getNative(Object, 'create');
+
+    	_nativeCreate = nativeCreate;
+    	return _nativeCreate;
+    }
+
+    var _hashClear;
+    var hasRequired_hashClear;
+
+    function require_hashClear () {
+    	if (hasRequired_hashClear) return _hashClear;
+    	hasRequired_hashClear = 1;
+    	var nativeCreate = require_nativeCreate();
+
+    	/**
+    	 * Removes all key-value entries from the hash.
+    	 *
+    	 * @private
+    	 * @name clear
+    	 * @memberOf Hash
+    	 */
+    	function hashClear() {
+    	  this.__data__ = nativeCreate ? nativeCreate(null) : {};
+    	  this.size = 0;
+    	}
+
+    	_hashClear = hashClear;
+    	return _hashClear;
+    }
 
     /**
      * Removes `key` and its value from the hash.
@@ -7119,147 +7247,195 @@ var app = (function () {
      * @returns {boolean} Returns `true` if the entry was removed, else `false`.
      */
 
-    function hashDelete$1(key) {
-      var result = this.has(key) && delete this.__data__[key];
-      this.size -= result ? 1 : 0;
-      return result;
+    var _hashDelete;
+    var hasRequired_hashDelete;
+
+    function require_hashDelete () {
+    	if (hasRequired_hashDelete) return _hashDelete;
+    	hasRequired_hashDelete = 1;
+    	function hashDelete(key) {
+    	  var result = this.has(key) && delete this.__data__[key];
+    	  this.size -= result ? 1 : 0;
+    	  return result;
+    	}
+
+    	_hashDelete = hashDelete;
+    	return _hashDelete;
     }
 
-    var _hashDelete = hashDelete$1;
+    var _hashGet;
+    var hasRequired_hashGet;
 
-    var nativeCreate$2 = _nativeCreate;
+    function require_hashGet () {
+    	if (hasRequired_hashGet) return _hashGet;
+    	hasRequired_hashGet = 1;
+    	var nativeCreate = require_nativeCreate();
 
-    /** Used to stand-in for `undefined` hash values. */
-    var HASH_UNDEFINED$1 = '__lodash_hash_undefined__';
+    	/** Used to stand-in for `undefined` hash values. */
+    	var HASH_UNDEFINED = '__lodash_hash_undefined__';
 
-    /** Used for built-in method references. */
-    var objectProto$2 = Object.prototype;
+    	/** Used for built-in method references. */
+    	var objectProto = Object.prototype;
 
-    /** Used to check objects for own properties. */
-    var hasOwnProperty$3 = objectProto$2.hasOwnProperty;
+    	/** Used to check objects for own properties. */
+    	var hasOwnProperty = objectProto.hasOwnProperty;
 
-    /**
-     * Gets the hash value for `key`.
-     *
-     * @private
-     * @name get
-     * @memberOf Hash
-     * @param {string} key The key of the value to get.
-     * @returns {*} Returns the entry value.
-     */
-    function hashGet$1(key) {
-      var data = this.__data__;
-      if (nativeCreate$2) {
-        var result = data[key];
-        return result === HASH_UNDEFINED$1 ? undefined : result;
-      }
-      return hasOwnProperty$3.call(data, key) ? data[key] : undefined;
+    	/**
+    	 * Gets the hash value for `key`.
+    	 *
+    	 * @private
+    	 * @name get
+    	 * @memberOf Hash
+    	 * @param {string} key The key of the value to get.
+    	 * @returns {*} Returns the entry value.
+    	 */
+    	function hashGet(key) {
+    	  var data = this.__data__;
+    	  if (nativeCreate) {
+    	    var result = data[key];
+    	    return result === HASH_UNDEFINED ? undefined : result;
+    	  }
+    	  return hasOwnProperty.call(data, key) ? data[key] : undefined;
+    	}
+
+    	_hashGet = hashGet;
+    	return _hashGet;
     }
 
-    var _hashGet = hashGet$1;
+    var _hashHas;
+    var hasRequired_hashHas;
 
-    var nativeCreate$1 = _nativeCreate;
+    function require_hashHas () {
+    	if (hasRequired_hashHas) return _hashHas;
+    	hasRequired_hashHas = 1;
+    	var nativeCreate = require_nativeCreate();
 
-    /** Used for built-in method references. */
-    var objectProto$1 = Object.prototype;
+    	/** Used for built-in method references. */
+    	var objectProto = Object.prototype;
 
-    /** Used to check objects for own properties. */
-    var hasOwnProperty$2 = objectProto$1.hasOwnProperty;
+    	/** Used to check objects for own properties. */
+    	var hasOwnProperty = objectProto.hasOwnProperty;
 
-    /**
-     * Checks if a hash value for `key` exists.
-     *
-     * @private
-     * @name has
-     * @memberOf Hash
-     * @param {string} key The key of the entry to check.
-     * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
-     */
-    function hashHas$1(key) {
-      var data = this.__data__;
-      return nativeCreate$1 ? (data[key] !== undefined) : hasOwnProperty$2.call(data, key);
+    	/**
+    	 * Checks if a hash value for `key` exists.
+    	 *
+    	 * @private
+    	 * @name has
+    	 * @memberOf Hash
+    	 * @param {string} key The key of the entry to check.
+    	 * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+    	 */
+    	function hashHas(key) {
+    	  var data = this.__data__;
+    	  return nativeCreate ? (data[key] !== undefined) : hasOwnProperty.call(data, key);
+    	}
+
+    	_hashHas = hashHas;
+    	return _hashHas;
     }
 
-    var _hashHas = hashHas$1;
+    var _hashSet;
+    var hasRequired_hashSet;
 
-    var nativeCreate = _nativeCreate;
+    function require_hashSet () {
+    	if (hasRequired_hashSet) return _hashSet;
+    	hasRequired_hashSet = 1;
+    	var nativeCreate = require_nativeCreate();
 
-    /** Used to stand-in for `undefined` hash values. */
-    var HASH_UNDEFINED = '__lodash_hash_undefined__';
+    	/** Used to stand-in for `undefined` hash values. */
+    	var HASH_UNDEFINED = '__lodash_hash_undefined__';
 
-    /**
-     * Sets the hash `key` to `value`.
-     *
-     * @private
-     * @name set
-     * @memberOf Hash
-     * @param {string} key The key of the value to set.
-     * @param {*} value The value to set.
-     * @returns {Object} Returns the hash instance.
-     */
-    function hashSet$1(key, value) {
-      var data = this.__data__;
-      this.size += this.has(key) ? 0 : 1;
-      data[key] = (nativeCreate && value === undefined) ? HASH_UNDEFINED : value;
-      return this;
+    	/**
+    	 * Sets the hash `key` to `value`.
+    	 *
+    	 * @private
+    	 * @name set
+    	 * @memberOf Hash
+    	 * @param {string} key The key of the value to set.
+    	 * @param {*} value The value to set.
+    	 * @returns {Object} Returns the hash instance.
+    	 */
+    	function hashSet(key, value) {
+    	  var data = this.__data__;
+    	  this.size += this.has(key) ? 0 : 1;
+    	  data[key] = (nativeCreate && value === undefined) ? HASH_UNDEFINED : value;
+    	  return this;
+    	}
+
+    	_hashSet = hashSet;
+    	return _hashSet;
     }
 
-    var _hashSet = hashSet$1;
+    var _Hash;
+    var hasRequired_Hash;
 
-    var hashClear = _hashClear,
-        hashDelete = _hashDelete,
-        hashGet = _hashGet,
-        hashHas = _hashHas,
-        hashSet = _hashSet;
+    function require_Hash () {
+    	if (hasRequired_Hash) return _Hash;
+    	hasRequired_Hash = 1;
+    	var hashClear = require_hashClear(),
+    	    hashDelete = require_hashDelete(),
+    	    hashGet = require_hashGet(),
+    	    hashHas = require_hashHas(),
+    	    hashSet = require_hashSet();
 
-    /**
-     * Creates a hash object.
-     *
-     * @private
-     * @constructor
-     * @param {Array} [entries] The key-value pairs to cache.
-     */
-    function Hash$1(entries) {
-      var index = -1,
-          length = entries == null ? 0 : entries.length;
+    	/**
+    	 * Creates a hash object.
+    	 *
+    	 * @private
+    	 * @constructor
+    	 * @param {Array} [entries] The key-value pairs to cache.
+    	 */
+    	function Hash(entries) {
+    	  var index = -1,
+    	      length = entries == null ? 0 : entries.length;
 
-      this.clear();
-      while (++index < length) {
-        var entry = entries[index];
-        this.set(entry[0], entry[1]);
-      }
+    	  this.clear();
+    	  while (++index < length) {
+    	    var entry = entries[index];
+    	    this.set(entry[0], entry[1]);
+    	  }
+    	}
+
+    	// Add methods to `Hash`.
+    	Hash.prototype.clear = hashClear;
+    	Hash.prototype['delete'] = hashDelete;
+    	Hash.prototype.get = hashGet;
+    	Hash.prototype.has = hashHas;
+    	Hash.prototype.set = hashSet;
+
+    	_Hash = Hash;
+    	return _Hash;
     }
 
-    // Add methods to `Hash`.
-    Hash$1.prototype.clear = hashClear;
-    Hash$1.prototype['delete'] = hashDelete;
-    Hash$1.prototype.get = hashGet;
-    Hash$1.prototype.has = hashHas;
-    Hash$1.prototype.set = hashSet;
+    var _mapCacheClear;
+    var hasRequired_mapCacheClear;
 
-    var _Hash = Hash$1;
+    function require_mapCacheClear () {
+    	if (hasRequired_mapCacheClear) return _mapCacheClear;
+    	hasRequired_mapCacheClear = 1;
+    	var Hash = require_Hash(),
+    	    ListCache = require_ListCache(),
+    	    Map = require_Map();
 
-    var Hash = _Hash,
-        ListCache = _ListCache,
-        Map$2 = _Map;
+    	/**
+    	 * Removes all key-value entries from the map.
+    	 *
+    	 * @private
+    	 * @name clear
+    	 * @memberOf MapCache
+    	 */
+    	function mapCacheClear() {
+    	  this.size = 0;
+    	  this.__data__ = {
+    	    'hash': new Hash,
+    	    'map': new (Map || ListCache),
+    	    'string': new Hash
+    	  };
+    	}
 
-    /**
-     * Removes all key-value entries from the map.
-     *
-     * @private
-     * @name clear
-     * @memberOf MapCache
-     */
-    function mapCacheClear$1() {
-      this.size = 0;
-      this.__data__ = {
-        'hash': new Hash,
-        'map': new (Map$2 || ListCache),
-        'string': new Hash
-      };
+    	_mapCacheClear = mapCacheClear;
+    	return _mapCacheClear;
     }
-
-    var _mapCacheClear = mapCacheClear$1;
 
     /**
      * Checks if `value` is suitable for use as unique object key.
@@ -7269,115 +7445,163 @@ var app = (function () {
      * @returns {boolean} Returns `true` if `value` is suitable, else `false`.
      */
 
-    function isKeyable$1(value) {
-      var type = typeof value;
-      return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
-        ? (value !== '__proto__')
-        : (value === null);
+    var _isKeyable;
+    var hasRequired_isKeyable;
+
+    function require_isKeyable () {
+    	if (hasRequired_isKeyable) return _isKeyable;
+    	hasRequired_isKeyable = 1;
+    	function isKeyable(value) {
+    	  var type = typeof value;
+    	  return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
+    	    ? (value !== '__proto__')
+    	    : (value === null);
+    	}
+
+    	_isKeyable = isKeyable;
+    	return _isKeyable;
     }
 
-    var _isKeyable = isKeyable$1;
+    var _getMapData;
+    var hasRequired_getMapData;
 
-    var isKeyable = _isKeyable;
+    function require_getMapData () {
+    	if (hasRequired_getMapData) return _getMapData;
+    	hasRequired_getMapData = 1;
+    	var isKeyable = require_isKeyable();
 
-    /**
-     * Gets the data for `map`.
-     *
-     * @private
-     * @param {Object} map The map to query.
-     * @param {string} key The reference key.
-     * @returns {*} Returns the map data.
-     */
-    function getMapData$4(map, key) {
-      var data = map.__data__;
-      return isKeyable(key)
-        ? data[typeof key == 'string' ? 'string' : 'hash']
-        : data.map;
+    	/**
+    	 * Gets the data for `map`.
+    	 *
+    	 * @private
+    	 * @param {Object} map The map to query.
+    	 * @param {string} key The reference key.
+    	 * @returns {*} Returns the map data.
+    	 */
+    	function getMapData(map, key) {
+    	  var data = map.__data__;
+    	  return isKeyable(key)
+    	    ? data[typeof key == 'string' ? 'string' : 'hash']
+    	    : data.map;
+    	}
+
+    	_getMapData = getMapData;
+    	return _getMapData;
     }
 
-    var _getMapData = getMapData$4;
+    var _mapCacheDelete;
+    var hasRequired_mapCacheDelete;
 
-    var getMapData$3 = _getMapData;
+    function require_mapCacheDelete () {
+    	if (hasRequired_mapCacheDelete) return _mapCacheDelete;
+    	hasRequired_mapCacheDelete = 1;
+    	var getMapData = require_getMapData();
 
-    /**
-     * Removes `key` and its value from the map.
-     *
-     * @private
-     * @name delete
-     * @memberOf MapCache
-     * @param {string} key The key of the value to remove.
-     * @returns {boolean} Returns `true` if the entry was removed, else `false`.
-     */
-    function mapCacheDelete$1(key) {
-      var result = getMapData$3(this, key)['delete'](key);
-      this.size -= result ? 1 : 0;
-      return result;
+    	/**
+    	 * Removes `key` and its value from the map.
+    	 *
+    	 * @private
+    	 * @name delete
+    	 * @memberOf MapCache
+    	 * @param {string} key The key of the value to remove.
+    	 * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+    	 */
+    	function mapCacheDelete(key) {
+    	  var result = getMapData(this, key)['delete'](key);
+    	  this.size -= result ? 1 : 0;
+    	  return result;
+    	}
+
+    	_mapCacheDelete = mapCacheDelete;
+    	return _mapCacheDelete;
     }
 
-    var _mapCacheDelete = mapCacheDelete$1;
+    var _mapCacheGet;
+    var hasRequired_mapCacheGet;
 
-    var getMapData$2 = _getMapData;
+    function require_mapCacheGet () {
+    	if (hasRequired_mapCacheGet) return _mapCacheGet;
+    	hasRequired_mapCacheGet = 1;
+    	var getMapData = require_getMapData();
 
-    /**
-     * Gets the map value for `key`.
-     *
-     * @private
-     * @name get
-     * @memberOf MapCache
-     * @param {string} key The key of the value to get.
-     * @returns {*} Returns the entry value.
-     */
-    function mapCacheGet$1(key) {
-      return getMapData$2(this, key).get(key);
+    	/**
+    	 * Gets the map value for `key`.
+    	 *
+    	 * @private
+    	 * @name get
+    	 * @memberOf MapCache
+    	 * @param {string} key The key of the value to get.
+    	 * @returns {*} Returns the entry value.
+    	 */
+    	function mapCacheGet(key) {
+    	  return getMapData(this, key).get(key);
+    	}
+
+    	_mapCacheGet = mapCacheGet;
+    	return _mapCacheGet;
     }
 
-    var _mapCacheGet = mapCacheGet$1;
+    var _mapCacheHas;
+    var hasRequired_mapCacheHas;
 
-    var getMapData$1 = _getMapData;
+    function require_mapCacheHas () {
+    	if (hasRequired_mapCacheHas) return _mapCacheHas;
+    	hasRequired_mapCacheHas = 1;
+    	var getMapData = require_getMapData();
 
-    /**
-     * Checks if a map value for `key` exists.
-     *
-     * @private
-     * @name has
-     * @memberOf MapCache
-     * @param {string} key The key of the entry to check.
-     * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
-     */
-    function mapCacheHas$1(key) {
-      return getMapData$1(this, key).has(key);
+    	/**
+    	 * Checks if a map value for `key` exists.
+    	 *
+    	 * @private
+    	 * @name has
+    	 * @memberOf MapCache
+    	 * @param {string} key The key of the entry to check.
+    	 * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+    	 */
+    	function mapCacheHas(key) {
+    	  return getMapData(this, key).has(key);
+    	}
+
+    	_mapCacheHas = mapCacheHas;
+    	return _mapCacheHas;
     }
 
-    var _mapCacheHas = mapCacheHas$1;
+    var _mapCacheSet;
+    var hasRequired_mapCacheSet;
 
-    var getMapData = _getMapData;
+    function require_mapCacheSet () {
+    	if (hasRequired_mapCacheSet) return _mapCacheSet;
+    	hasRequired_mapCacheSet = 1;
+    	var getMapData = require_getMapData();
 
-    /**
-     * Sets the map `key` to `value`.
-     *
-     * @private
-     * @name set
-     * @memberOf MapCache
-     * @param {string} key The key of the value to set.
-     * @param {*} value The value to set.
-     * @returns {Object} Returns the map cache instance.
-     */
-    function mapCacheSet$1(key, value) {
-      var data = getMapData(this, key),
-          size = data.size;
+    	/**
+    	 * Sets the map `key` to `value`.
+    	 *
+    	 * @private
+    	 * @name set
+    	 * @memberOf MapCache
+    	 * @param {string} key The key of the value to set.
+    	 * @param {*} value The value to set.
+    	 * @returns {Object} Returns the map cache instance.
+    	 */
+    	function mapCacheSet(key, value) {
+    	  var data = getMapData(this, key),
+    	      size = data.size;
 
-      data.set(key, value);
-      this.size += data.size == size ? 0 : 1;
-      return this;
+    	  data.set(key, value);
+    	  this.size += data.size == size ? 0 : 1;
+    	  return this;
+    	}
+
+    	_mapCacheSet = mapCacheSet;
+    	return _mapCacheSet;
     }
 
-    var _mapCacheSet = mapCacheSet$1;
-
-    var mapCacheClear = _mapCacheClear,
-        mapCacheDelete = _mapCacheDelete,
-        mapCacheGet = _mapCacheGet,
-        mapCacheHas = _mapCacheHas,
-        mapCacheSet = _mapCacheSet;
+    var mapCacheClear = require_mapCacheClear(),
+        mapCacheDelete = require_mapCacheDelete(),
+        mapCacheGet = require_mapCacheGet(),
+        mapCacheHas = require_mapCacheHas(),
+        mapCacheSet = require_mapCacheSet();
 
     /**
      * Creates a map cache object to store key-value pairs.
@@ -7412,8 +7636,8 @@ var app = (function () {
     function require_stackSet () {
     	if (hasRequired_stackSet) return _stackSet;
     	hasRequired_stackSet = 1;
-    	var ListCache = _ListCache,
-    	    Map = _Map,
+    	var ListCache = require_ListCache(),
+    	    Map = require_Map(),
     	    MapCache = _MapCache;
 
     	/** Used as the size to enable large array optimizations. */
@@ -7455,7 +7679,7 @@ var app = (function () {
     function require_Stack () {
     	if (hasRequired_Stack) return _Stack;
     	hasRequired_Stack = 1;
-    	var ListCache = _ListCache,
+    	var ListCache = require_ListCache(),
     	    stackClear = require_stackClear(),
     	    stackDelete = require_stackDelete(),
     	    stackGet = require_stackGet(),
@@ -7517,46 +7741,62 @@ var app = (function () {
     	return _arrayEach;
     }
 
-    var getNative = _getNative;
+    var _defineProperty$1;
+    var hasRequired_defineProperty;
 
-    var defineProperty$1 = (function() {
-      try {
-        var func = getNative(Object, 'defineProperty');
-        func({}, '', {});
-        return func;
-      } catch (e) {}
-    }());
+    function require_defineProperty () {
+    	if (hasRequired_defineProperty) return _defineProperty$1;
+    	hasRequired_defineProperty = 1;
+    	var getNative = require_getNative();
 
-    var _defineProperty$1 = defineProperty$1;
+    	var defineProperty = (function() {
+    	  try {
+    	    var func = getNative(Object, 'defineProperty');
+    	    func({}, '', {});
+    	    return func;
+    	  } catch (e) {}
+    	}());
 
-    var defineProperty = _defineProperty$1;
-
-    /**
-     * The base implementation of `assignValue` and `assignMergeValue` without
-     * value checks.
-     *
-     * @private
-     * @param {Object} object The object to modify.
-     * @param {string} key The key of the property to assign.
-     * @param {*} value The value to assign.
-     */
-    function baseAssignValue$1(object, key, value) {
-      if (key == '__proto__' && defineProperty) {
-        defineProperty(object, key, {
-          'configurable': true,
-          'enumerable': true,
-          'value': value,
-          'writable': true
-        });
-      } else {
-        object[key] = value;
-      }
+    	_defineProperty$1 = defineProperty;
+    	return _defineProperty$1;
     }
 
-    var _baseAssignValue = baseAssignValue$1;
+    var _baseAssignValue;
+    var hasRequired_baseAssignValue;
 
-    var baseAssignValue = _baseAssignValue,
-        eq = eq_1;
+    function require_baseAssignValue () {
+    	if (hasRequired_baseAssignValue) return _baseAssignValue;
+    	hasRequired_baseAssignValue = 1;
+    	var defineProperty = require_defineProperty();
+
+    	/**
+    	 * The base implementation of `assignValue` and `assignMergeValue` without
+    	 * value checks.
+    	 *
+    	 * @private
+    	 * @param {Object} object The object to modify.
+    	 * @param {string} key The key of the property to assign.
+    	 * @param {*} value The value to assign.
+    	 */
+    	function baseAssignValue(object, key, value) {
+    	  if (key == '__proto__' && defineProperty) {
+    	    defineProperty(object, key, {
+    	      'configurable': true,
+    	      'enumerable': true,
+    	      'value': value,
+    	      'writable': true
+    	    });
+    	  } else {
+    	    object[key] = value;
+    	  }
+    	}
+
+    	_baseAssignValue = baseAssignValue;
+    	return _baseAssignValue;
+    }
+
+    var baseAssignValue = require_baseAssignValue(),
+        eq = requireEq();
 
     /** Used for built-in method references. */
     var objectProto = Object.prototype;
@@ -7591,7 +7831,7 @@ var app = (function () {
     	if (hasRequired_copyObject) return _copyObject;
     	hasRequired_copyObject = 1;
     	var assignValue = _assignValue,
-    	    baseAssignValue = _baseAssignValue;
+    	    baseAssignValue = require_baseAssignValue();
 
     	/**
     	 * Copies properties of `source` to `object`.
@@ -7688,11 +7928,19 @@ var app = (function () {
      * // => false
      */
 
-    function isObjectLike$1(value) {
-      return value != null && typeof value == 'object';
-    }
+    var isObjectLike_1;
+    var hasRequiredIsObjectLike;
 
-    var isObjectLike_1 = isObjectLike$1;
+    function requireIsObjectLike () {
+    	if (hasRequiredIsObjectLike) return isObjectLike_1;
+    	hasRequiredIsObjectLike = 1;
+    	function isObjectLike(value) {
+    	  return value != null && typeof value == 'object';
+    	}
+
+    	isObjectLike_1 = isObjectLike;
+    	return isObjectLike_1;
+    }
 
     var _baseIsArguments;
     var hasRequired_baseIsArguments;
@@ -7701,7 +7949,7 @@ var app = (function () {
     	if (hasRequired_baseIsArguments) return _baseIsArguments;
     	hasRequired_baseIsArguments = 1;
     	var baseGetTag = _baseGetTag,
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/** `Object#toString` result references. */
     	var argsTag = '[object Arguments]';
@@ -7728,7 +7976,7 @@ var app = (function () {
     	if (hasRequiredIsArguments) return isArguments_1;
     	hasRequiredIsArguments = 1;
     	var baseIsArguments = require_baseIsArguments(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/** Used for built-in method references. */
     	var objectProto = Object.prototype;
@@ -7790,9 +8038,17 @@ var app = (function () {
      * // => false
      */
 
-    var isArray$4 = Array.isArray;
+    var isArray_1;
+    var hasRequiredIsArray;
 
-    var isArray_1 = isArray$4;
+    function requireIsArray () {
+    	if (hasRequiredIsArray) return isArray_1;
+    	hasRequiredIsArray = 1;
+    	var isArray = Array.isArray;
+
+    	isArray_1 = isArray;
+    	return isArray_1;
+    }
 
     var isBuffer = {exports: {}};
 
@@ -7832,7 +8088,7 @@ var app = (function () {
     	if (hasRequiredIsBuffer) return isBuffer.exports;
     	hasRequiredIsBuffer = 1;
     	(function (module, exports) {
-    		var root = _root,
+    		var root = require_root(),
     		    stubFalse = requireStubFalse();
 
     		/** Detect free variable `exports`. */
@@ -7876,30 +8132,38 @@ var app = (function () {
 
     /** Used as references for various `Number` constants. */
 
-    var MAX_SAFE_INTEGER = 9007199254740991;
+    var _isIndex;
+    var hasRequired_isIndex;
 
-    /** Used to detect unsigned integer values. */
-    var reIsUint = /^(?:0|[1-9]\d*)$/;
+    function require_isIndex () {
+    	if (hasRequired_isIndex) return _isIndex;
+    	hasRequired_isIndex = 1;
+    	var MAX_SAFE_INTEGER = 9007199254740991;
 
-    /**
-     * Checks if `value` is a valid array-like index.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
-     * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
-     */
-    function isIndex$1(value, length) {
-      var type = typeof value;
-      length = length == null ? MAX_SAFE_INTEGER : length;
+    	/** Used to detect unsigned integer values. */
+    	var reIsUint = /^(?:0|[1-9]\d*)$/;
 
-      return !!length &&
-        (type == 'number' ||
-          (type != 'symbol' && reIsUint.test(value))) &&
-            (value > -1 && value % 1 == 0 && value < length);
+    	/**
+    	 * Checks if `value` is a valid array-like index.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to check.
+    	 * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+    	 * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+    	 */
+    	function isIndex(value, length) {
+    	  var type = typeof value;
+    	  length = length == null ? MAX_SAFE_INTEGER : length;
+
+    	  return !!length &&
+    	    (type == 'number' ||
+    	      (type != 'symbol' && reIsUint.test(value))) &&
+    	        (value > -1 && value % 1 == 0 && value < length);
+    	}
+
+    	_isIndex = isIndex;
+    	return _isIndex;
     }
-
-    var _isIndex = isIndex$1;
 
     /** Used as references for various `Number` constants. */
 
@@ -7954,7 +8218,7 @@ var app = (function () {
     	hasRequired_baseIsTypedArray = 1;
     	var baseGetTag = _baseGetTag,
     	    isLength = requireIsLength(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/** `Object#toString` result references. */
     	var argsTag = '[object Arguments]',
@@ -8049,7 +8313,7 @@ var app = (function () {
     	if (hasRequired_nodeUtil) return _nodeUtil.exports;
     	hasRequired_nodeUtil = 1;
     	(function (module, exports) {
-    		var freeGlobal = _freeGlobal;
+    		var freeGlobal = require_freeGlobal();
 
     		/** Detect free variable `exports`. */
     		var freeExports = exports && !exports.nodeType && exports;
@@ -8127,9 +8391,9 @@ var app = (function () {
     	hasRequired_arrayLikeKeys = 1;
     	var baseTimes = require_baseTimes(),
     	    isArguments = requireIsArguments(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    isBuffer = requireIsBuffer(),
-    	    isIndex = _isIndex,
+    	    isIndex = require_isIndex(),
     	    isTypedArray = requireIsTypedArray();
 
     	/** Used for built-in method references. */
@@ -8434,7 +8698,7 @@ var app = (function () {
     function require_baseKeysIn () {
     	if (hasRequired_baseKeysIn) return _baseKeysIn;
     	hasRequired_baseKeysIn = 1;
-    	var isObject = isObject_1,
+    	var isObject = requireIsObject(),
     	    isPrototype = require_isPrototype(),
     	    nativeKeysIn = require_nativeKeysIn();
 
@@ -8547,7 +8811,7 @@ var app = (function () {
     	if (hasRequired_cloneBuffer) return _cloneBuffer.exports;
     	hasRequired_cloneBuffer = 1;
     	(function (module, exports) {
-    		var root = _root;
+    		var root = require_root();
 
     		/** Detect free variable `exports`. */
     		var freeExports = exports && !exports.nodeType && exports;
@@ -8595,18 +8859,26 @@ var app = (function () {
      * @returns {Array} Returns `array`.
      */
 
-    function copyArray$2(source, array) {
-      var index = -1,
-          length = source.length;
+    var _copyArray;
+    var hasRequired_copyArray;
 
-      array || (array = Array(length));
-      while (++index < length) {
-        array[index] = source[index];
-      }
-      return array;
+    function require_copyArray () {
+    	if (hasRequired_copyArray) return _copyArray;
+    	hasRequired_copyArray = 1;
+    	function copyArray(source, array) {
+    	  var index = -1,
+    	      length = source.length;
+
+    	  array || (array = Array(length));
+    	  while (++index < length) {
+    	    array[index] = source[index];
+    	  }
+    	  return array;
+    	}
+
+    	_copyArray = copyArray;
+    	return _copyArray;
     }
-
-    var _copyArray = copyArray$2;
 
     /**
      * A specialized version of `_.filter` for arrays without support for
@@ -8851,7 +9123,7 @@ var app = (function () {
     	if (hasRequired_baseGetAllKeys) return _baseGetAllKeys;
     	hasRequired_baseGetAllKeys = 1;
     	var arrayPush = require_arrayPush(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/**
     	 * The base implementation of `getAllKeys` and `getAllKeysIn` which uses
@@ -8930,8 +9202,8 @@ var app = (function () {
     function require_DataView () {
     	if (hasRequired_DataView) return _DataView;
     	hasRequired_DataView = 1;
-    	var getNative = _getNative,
-    	    root = _root;
+    	var getNative = require_getNative(),
+    	    root = require_root();
 
     	/* Built-in method references that are verified to be native. */
     	var DataView = getNative(root, 'DataView');
@@ -8946,8 +9218,8 @@ var app = (function () {
     function require_Promise () {
     	if (hasRequired_Promise) return _Promise;
     	hasRequired_Promise = 1;
-    	var getNative = _getNative,
-    	    root = _root;
+    	var getNative = require_getNative(),
+    	    root = require_root();
 
     	/* Built-in method references that are verified to be native. */
     	var Promise = getNative(root, 'Promise');
@@ -8962,8 +9234,8 @@ var app = (function () {
     function require_Set () {
     	if (hasRequired_Set) return _Set;
     	hasRequired_Set = 1;
-    	var getNative = _getNative,
-    	    root = _root;
+    	var getNative = require_getNative(),
+    	    root = require_root();
 
     	/* Built-in method references that are verified to be native. */
     	var Set = getNative(root, 'Set');
@@ -8978,8 +9250,8 @@ var app = (function () {
     function require_WeakMap () {
     	if (hasRequired_WeakMap) return _WeakMap;
     	hasRequired_WeakMap = 1;
-    	var getNative = _getNative,
-    	    root = _root;
+    	var getNative = require_getNative(),
+    	    root = require_root();
 
     	/* Built-in method references that are verified to be native. */
     	var WeakMap = getNative(root, 'WeakMap');
@@ -8995,7 +9267,7 @@ var app = (function () {
     	if (hasRequired_getTag) return _getTag;
     	hasRequired_getTag = 1;
     	var DataView = require_DataView(),
-    	    Map = _Map,
+    	    Map = require_Map(),
     	    Promise = require_Promise(),
     	    Set = require_Set(),
     	    WeakMap = require_WeakMap(),
@@ -9097,7 +9369,7 @@ var app = (function () {
     function require_Uint8Array () {
     	if (hasRequired_Uint8Array) return _Uint8Array;
     	hasRequired_Uint8Array = 1;
-    	var root = _root;
+    	var root = require_root();
 
     	/** Built-in value references. */
     	var Uint8Array = root.Uint8Array;
@@ -9189,7 +9461,7 @@ var app = (function () {
     function require_cloneSymbol () {
     	if (hasRequired_cloneSymbol) return _cloneSymbol;
     	hasRequired_cloneSymbol = 1;
-    	var Symbol = _Symbol;
+    	var Symbol = require_Symbol();
 
     	/** Used to convert symbols to primitives and strings. */
     	var symbolProto = Symbol ? Symbol.prototype : undefined,
@@ -9327,7 +9599,7 @@ var app = (function () {
     function require_baseCreate () {
     	if (hasRequired_baseCreate) return _baseCreate;
     	hasRequired_baseCreate = 1;
-    	var isObject = isObject_1;
+    	var isObject = requireIsObject();
 
     	/** Built-in value references. */
     	var objectCreate = Object.create;
@@ -9394,7 +9666,7 @@ var app = (function () {
     	if (hasRequired_baseIsMap) return _baseIsMap;
     	hasRequired_baseIsMap = 1;
     	var getTag = require_getTag(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/** `Object#toString` result references. */
     	var mapTag = '[object Map]';
@@ -9457,7 +9729,7 @@ var app = (function () {
     	if (hasRequired_baseIsSet) return _baseIsSet;
     	hasRequired_baseIsSet = 1;
     	var getTag = require_getTag(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/** `Object#toString` result references. */
     	var setTag = '[object Set]';
@@ -9525,7 +9797,7 @@ var app = (function () {
     	    baseAssign = require_baseAssign(),
     	    baseAssignIn = require_baseAssignIn(),
     	    cloneBuffer = require_cloneBuffer(),
-    	    copyArray = _copyArray,
+    	    copyArray = require_copyArray(),
     	    copySymbols = require_copySymbols(),
     	    copySymbolsIn = require_copySymbolsIn(),
     	    getAllKeys = require_getAllKeys(),
@@ -9534,10 +9806,10 @@ var app = (function () {
     	    initCloneArray = require_initCloneArray(),
     	    initCloneByTag = require_initCloneByTag(),
     	    initCloneObject = require_initCloneObject(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    isBuffer = requireIsBuffer(),
     	    isMap = requireIsMap(),
-    	    isObject = isObject_1,
+    	    isObject = requireIsObject(),
     	    isSet = requireIsSet(),
     	    keys = requireKeys(),
     	    keysIn = requireKeysIn();
@@ -9981,7 +10253,7 @@ var app = (function () {
     	var arrayEach = require_arrayEach(),
     	    baseEach = require_baseEach(),
     	    castFunction = require_castFunction(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/**
     	 * Iterates over elements of `collection` and invokes `iteratee` for each element.
@@ -10362,9 +10634,9 @@ var app = (function () {
     function require_equalByTag () {
     	if (hasRequired_equalByTag) return _equalByTag;
     	hasRequired_equalByTag = 1;
-    	var Symbol = _Symbol,
+    	var Symbol = require_Symbol(),
     	    Uint8Array = require_Uint8Array(),
-    	    eq = eq_1,
+    	    eq = requireEq(),
     	    equalArrays = require_equalArrays(),
     	    mapToArray = require_mapToArray(),
     	    setToArray = require_setToArray();
@@ -10587,7 +10859,7 @@ var app = (function () {
     	    equalByTag = require_equalByTag(),
     	    equalObjects = require_equalObjects(),
     	    getTag = require_getTag(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    isBuffer = requireIsBuffer(),
     	    isTypedArray = requireIsTypedArray();
 
@@ -10675,7 +10947,7 @@ var app = (function () {
     	if (hasRequired_baseIsEqual) return _baseIsEqual;
     	hasRequired_baseIsEqual = 1;
     	var baseIsEqualDeep = require_baseIsEqualDeep(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/**
     	 * The base implementation of `_.isEqual` which supports partial comparisons
@@ -10782,7 +11054,7 @@ var app = (function () {
     function require_isStrictComparable () {
     	if (hasRequired_isStrictComparable) return _isStrictComparable;
     	hasRequired_isStrictComparable = 1;
-    	var isObject = isObject_1;
+    	var isObject = requireIsObject();
 
     	/**
     	 * Checks if `value` is suitable for strict equality comparisons, i.e. `===`.
@@ -10895,7 +11167,7 @@ var app = (function () {
     }
 
     var baseGetTag = _baseGetTag,
-        isObjectLike = isObjectLike_1;
+        isObjectLike = requireIsObjectLike();
 
     /** `Object#toString` result references. */
     var symbolTag = '[object Symbol]';
@@ -10917,42 +11189,50 @@ var app = (function () {
      * _.isSymbol('abc');
      * // => false
      */
-    function isSymbol$5(value) {
+    function isSymbol$4(value) {
       return typeof value == 'symbol' ||
         (isObjectLike(value) && baseGetTag(value) == symbolTag);
     }
 
-    var isSymbol_1 = isSymbol$5;
+    var isSymbol_1 = isSymbol$4;
 
-    var isArray$3 = isArray_1,
-        isSymbol$4 = isSymbol_1;
+    var _isKey;
+    var hasRequired_isKey;
 
-    /** Used to match property names within property paths. */
-    var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
-        reIsPlainProp = /^\w*$/;
+    function require_isKey () {
+    	if (hasRequired_isKey) return _isKey;
+    	hasRequired_isKey = 1;
+    	var isArray = requireIsArray(),
+    	    isSymbol = isSymbol_1;
 
-    /**
-     * Checks if `value` is a property name and not a property path.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @param {Object} [object] The object to query keys on.
-     * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
-     */
-    function isKey$1(value, object) {
-      if (isArray$3(value)) {
-        return false;
-      }
-      var type = typeof value;
-      if (type == 'number' || type == 'symbol' || type == 'boolean' ||
-          value == null || isSymbol$4(value)) {
-        return true;
-      }
-      return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
-        (object != null && value in Object(object));
+    	/** Used to match property names within property paths. */
+    	var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
+    	    reIsPlainProp = /^\w*$/;
+
+    	/**
+    	 * Checks if `value` is a property name and not a property path.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to check.
+    	 * @param {Object} [object] The object to query keys on.
+    	 * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
+    	 */
+    	function isKey(value, object) {
+    	  if (isArray(value)) {
+    	    return false;
+    	  }
+    	  var type = typeof value;
+    	  if (type == 'number' || type == 'symbol' || type == 'boolean' ||
+    	      value == null || isSymbol(value)) {
+    	    return true;
+    	  }
+    	  return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
+    	    (object != null && value in Object(object));
+    	}
+
+    	_isKey = isKey;
+    	return _isKey;
     }
-
-    var _isKey = isKey$1;
 
     var MapCache = _MapCache;
 
@@ -11093,22 +11373,30 @@ var app = (function () {
      * @returns {Array} Returns the new mapped array.
      */
 
-    function arrayMap$2(array, iteratee) {
-      var index = -1,
-          length = array == null ? 0 : array.length,
-          result = Array(length);
+    var _arrayMap;
+    var hasRequired_arrayMap;
 
-      while (++index < length) {
-        result[index] = iteratee(array[index], index, array);
-      }
-      return result;
+    function require_arrayMap () {
+    	if (hasRequired_arrayMap) return _arrayMap;
+    	hasRequired_arrayMap = 1;
+    	function arrayMap(array, iteratee) {
+    	  var index = -1,
+    	      length = array == null ? 0 : array.length,
+    	      result = Array(length);
+
+    	  while (++index < length) {
+    	    result[index] = iteratee(array[index], index, array);
+    	  }
+    	  return result;
+    	}
+
+    	_arrayMap = arrayMap;
+    	return _arrayMap;
     }
 
-    var _arrayMap = arrayMap$2;
-
-    var Symbol$1 = _Symbol,
-        arrayMap$1 = _arrayMap,
-        isArray$2 = isArray_1,
+    var Symbol$1 = require_Symbol(),
+        arrayMap$1 = require_arrayMap(),
+        isArray$2 = requireIsArray(),
         isSymbol$3 = isSymbol_1;
 
     /** Used as references for various `Number` constants. */
@@ -11173,8 +11461,8 @@ var app = (function () {
 
     var toString_1 = toString$3;
 
-    var isArray$1 = isArray_1,
-        isKey = _isKey,
+    var isArray$1 = requireIsArray(),
+        isKey = require_isKey(),
         stringToPath$1 = _stringToPath,
         toString$2 = toString_1;
 
@@ -11307,8 +11595,8 @@ var app = (function () {
     	hasRequired_hasPath = 1;
     	var castPath = _castPath,
     	    isArguments = requireIsArguments(),
-    	    isArray = isArray_1,
-    	    isIndex = _isIndex,
+    	    isArray = requireIsArray(),
+    	    isIndex = require_isIndex(),
     	    isLength = requireIsLength(),
     	    toKey = _toKey;
 
@@ -11399,7 +11687,7 @@ var app = (function () {
     	var baseIsEqual = require_baseIsEqual(),
     	    get = get_1,
     	    hasIn = requireHasIn(),
-    	    isKey = _isKey,
+    	    isKey = require_isKey(),
     	    isStrictComparable = require_isStrictComparable(),
     	    matchesStrictComparable = require_matchesStrictComparable(),
     	    toKey = _toKey;
@@ -11489,7 +11777,7 @@ var app = (function () {
     	hasRequiredProperty = 1;
     	var baseProperty = require_baseProperty(),
     	    basePropertyDeep = require_basePropertyDeep(),
-    	    isKey = _isKey,
+    	    isKey = require_isKey(),
     	    toKey = _toKey;
 
     	/**
@@ -11531,7 +11819,7 @@ var app = (function () {
     	var baseMatches = require_baseMatches(),
     	    baseMatchesProperty = require_baseMatchesProperty(),
     	    identity = requireIdentity(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    property = requireProperty();
 
     	/**
@@ -11571,7 +11859,7 @@ var app = (function () {
     	var arrayFilter = require_arrayFilter(),
     	    baseFilter = require_baseFilter(),
     	    baseIteratee = require_baseIteratee(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/**
     	 * Iterates over elements of `collection`, returning an array of all elements
@@ -11705,7 +11993,7 @@ var app = (function () {
     	var baseKeys = require_baseKeys(),
     	    getTag = require_getTag(),
     	    isArguments = requireIsArguments(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    isArrayLike = requireIsArrayLike(),
     	    isBuffer = requireIsBuffer(),
     	    isPrototype = require_isPrototype(),
@@ -11851,10 +12139,10 @@ var app = (function () {
     function requireMap () {
     	if (hasRequiredMap) return map_1;
     	hasRequiredMap = 1;
-    	var arrayMap = _arrayMap,
+    	var arrayMap = require_arrayMap(),
     	    baseIteratee = require_baseIteratee(),
     	    baseMap = require_baseMap(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/**
     	 * Creates an array of values by running each element in `collection` thru
@@ -11986,7 +12274,7 @@ var app = (function () {
     	    baseEach = require_baseEach(),
     	    baseIteratee = require_baseIteratee(),
     	    baseReduce = require_baseReduce(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/**
     	 * Reduces `collection` to a value which is the accumulated result of running
@@ -12043,8 +12331,8 @@ var app = (function () {
     	if (hasRequiredIsString) return isString_1;
     	hasRequiredIsString = 1;
     	var baseGetTag = _baseGetTag,
-    	    isArray = isArray_1,
-    	    isObjectLike = isObjectLike_1;
+    	    isArray = requireIsArray(),
+    	    isObjectLike = requireIsObjectLike();
 
     	/** `Object#toString` result references. */
     	var stringTag = '[object String]';
@@ -12279,10 +12567,10 @@ var app = (function () {
     	    baseForOwn = require_baseForOwn(),
     	    baseIteratee = require_baseIteratee(),
     	    getPrototype = require_getPrototype(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    isBuffer = requireIsBuffer(),
     	    isFunction = requireIsFunction(),
-    	    isObject = isObject_1,
+    	    isObject = requireIsObject(),
     	    isTypedArray = requireIsTypedArray();
 
     	/**
@@ -12348,9 +12636,9 @@ var app = (function () {
     function require_isFlattenable () {
     	if (hasRequired_isFlattenable) return _isFlattenable;
     	hasRequired_isFlattenable = 1;
-    	var Symbol = _Symbol,
+    	var Symbol = require_Symbol(),
     	    isArguments = requireIsArguments(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/** Built-in value references. */
     	var spreadableSymbol = Symbol ? Symbol.isConcatSpreadable : undefined;
@@ -12501,7 +12789,7 @@ var app = (function () {
     	if (hasRequired_baseSetToString) return _baseSetToString;
     	hasRequired_baseSetToString = 1;
     	var constant = requireConstant(),
-    	    defineProperty = _defineProperty$1,
+    	    defineProperty = require_defineProperty(),
     	    identity = requireIdentity();
 
     	/**
@@ -12940,7 +13228,7 @@ var app = (function () {
     	if (hasRequiredIsArrayLikeObject) return isArrayLikeObject_1;
     	hasRequiredIsArrayLikeObject = 1;
     	var isArrayLike = requireIsArrayLike(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/**
     	 * This method is like `_.isArrayLike` except that it also checks if `value`
@@ -13016,7 +13304,7 @@ var app = (function () {
     function require_baseValues () {
     	if (hasRequired_baseValues) return _baseValues;
     	hasRequired_baseValues = 1;
-    	var arrayMap = _arrayMap;
+    	var arrayMap = require_arrayMap();
 
     	/**
     	 * The base implementation of `_.values` and `_.valuesIn` which creates an
@@ -13093,7 +13381,7 @@ var app = (function () {
           each: requireEach(),
           filter: requireFilter(),
           has:  requireHas(),
-          isArray: isArray_1,
+          isArray: requireIsArray(),
           isEmpty: requireIsEmpty(),
           isFunction: requireIsFunction(),
           isUndefined: requireIsUndefined(),
@@ -13650,7 +13938,7 @@ var app = (function () {
     var version$2 = '2.1.8';
 
     // Includes only the "core" of graphlib
-    var lib = {
+    var lib$1 = {
       Graph: graph,
       version: version$2
     };
@@ -14287,25 +14575,16 @@ var app = (function () {
      * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      */
 
-    var graphlib$1;
-    var hasRequiredGraphlib$1;
+    var lib = lib$1;
 
-    function requireGraphlib$1 () {
-    	if (hasRequiredGraphlib$1) return graphlib$1;
-    	hasRequiredGraphlib$1 = 1;
-    	var lib$1 = lib;
+    var graphlib = {
+      Graph: lib.Graph,
+      json: json,
+      alg: alg,
+      version: lib.version
+    };
 
-    	graphlib$1 = {
-    	  Graph: lib$1.Graph,
-    	  json: json,
-    	  alg: alg,
-    	  version: lib$1.version
-    	};
-    	return graphlib$1;
-    }
-
-    var graphlibExports = requireGraphlib$1();
-    var graphlib = /*@__PURE__*/getDefaultExportFromCjs(graphlibExports);
+    var graphlib$1 = /*@__PURE__*/getDefaultExportFromCjs(graphlib);
 
     var __spreadArray$1 = (undefined && undefined.__spreadArray) || function (to, from, pack) {
         if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
@@ -14424,7 +14703,7 @@ var app = (function () {
         });
     }
     function topologicalSort(graph) {
-        const sorted = graphlibExports.alg.topsort(graph);
+        const sorted = graphlib.alg.topsort(graph);
         // The stack now contains a topological ordering of the nodes
         return sorted;
     }
@@ -14825,7 +15104,7 @@ var app = (function () {
     	let selectedNodes = [];
     	let name = "";
     	let description = "";
-    	let current_graph = new graphlibExports.Graph();
+    	let current_graph = new graphlib.Graph();
 
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
     		current_graph = $systemStateStore.graphState.graph;
@@ -14867,7 +15146,7 @@ var app = (function () {
     			return;
     		} else {
     			let topologicalOrder = topologicalSort(current_graph);
-    			let current_graph_string = JSON.stringify(graphlibExports.json.write(current_graph));
+    			let current_graph_string = JSON.stringify(graphlib.json.write(current_graph));
 
     			// console.log("current_graph_string: " + current_graph_string);
     			let process = {
@@ -14907,8 +15186,8 @@ var app = (function () {
     		removeSelectedEdge,
     		removeSelectedNode,
     		topologicalSort,
-    		Graph: graphlibExports.Graph,
-    		json: graphlibExports.json,
+    		Graph: graphlib.Graph,
+    		json: graphlib.json,
     		systemStateStore,
     		nodes,
     		selectedNodes,
@@ -16231,7 +16510,7 @@ var app = (function () {
     	}
     }
 
-    var root = _root;
+    var root = require_root();
 
     /**
      * Gets the timestamp of the number of milliseconds that have elapsed since
@@ -16297,7 +16576,7 @@ var app = (function () {
     var _baseTrim = baseTrim$1;
 
     var baseTrim = _baseTrim,
-        isObject$2 = isObject_1,
+        isObject$2 = requireIsObject(),
         isSymbol$1 = isSymbol_1;
 
     /** Used as references for various `Number` constants. */
@@ -16361,7 +16640,7 @@ var app = (function () {
 
     var toNumber_1 = toNumber$1;
 
-    var isObject$1 = isObject_1,
+    var isObject$1 = requireIsObject(),
         now = now_1,
         toNumber = toNumber_1;
 
@@ -16937,8 +17216,8 @@ var app = (function () {
 
     var assignValue = _assignValue,
         castPath = _castPath,
-        isIndex = _isIndex,
-        isObject = isObject_1,
+        isIndex = require_isIndex(),
+        isObject = requireIsObject(),
         toKey$1 = _toKey;
 
     /**
@@ -17023,9 +17302,9 @@ var app = (function () {
 
     var set_1 = set$1;
 
-    var arrayMap = _arrayMap,
-        copyArray$1 = _copyArray,
-        isArray = isArray_1,
+    var arrayMap = require_arrayMap(),
+        copyArray$1 = require_copyArray(),
+        isArray = requireIsArray(),
         isSymbol = isSymbol_1,
         stringToPath = _stringToPath,
         toKey = _toKey,
@@ -25166,7 +25445,7 @@ var app = (function () {
 
     /** A lookup of `match(check, ele)` functions by `Type` int */
 
-    var match = [];
+    var match$1 = [];
     /**
      * Returns whether the query matches for the element
      * @param query The `{ type, value, ... }` query object
@@ -25175,57 +25454,57 @@ var app = (function () {
 
     var matches$1 = function matches(query, ele) {
       return query.checks.every(function (chk) {
-        return match[chk.type](chk, ele);
+        return match$1[chk.type](chk, ele);
       });
     };
 
-    match[Type$1.GROUP] = function (check, ele) {
+    match$1[Type$1.GROUP] = function (check, ele) {
       var group = check.value;
       return group === '*' || group === ele.group();
     };
 
-    match[Type$1.STATE] = function (check, ele) {
+    match$1[Type$1.STATE] = function (check, ele) {
       var stateSelector = check.value;
       return stateSelectorMatches(stateSelector, ele);
     };
 
-    match[Type$1.ID] = function (check, ele) {
+    match$1[Type$1.ID] = function (check, ele) {
       var id = check.value;
       return ele.id() === id;
     };
 
-    match[Type$1.CLASS] = function (check, ele) {
+    match$1[Type$1.CLASS] = function (check, ele) {
       var cls = check.value;
       return ele.hasClass(cls);
     };
 
-    match[Type$1.META_COMPARE] = function (check, ele) {
+    match$1[Type$1.META_COMPARE] = function (check, ele) {
       var field = check.field,
           operator = check.operator,
           value = check.value;
       return valCmp(meta(ele, field), operator, value);
     };
 
-    match[Type$1.DATA_COMPARE] = function (check, ele) {
+    match$1[Type$1.DATA_COMPARE] = function (check, ele) {
       var field = check.field,
           operator = check.operator,
           value = check.value;
       return valCmp(data$1(ele, field), operator, value);
     };
 
-    match[Type$1.DATA_BOOL] = function (check, ele) {
+    match$1[Type$1.DATA_BOOL] = function (check, ele) {
       var field = check.field,
           operator = check.operator;
       return boolCmp(data$1(ele, field), operator);
     };
 
-    match[Type$1.DATA_EXIST] = function (check, ele) {
+    match$1[Type$1.DATA_EXIST] = function (check, ele) {
       var field = check.field;
           check.operator;
       return existCmp(data$1(ele, field));
     };
 
-    match[Type$1.UNDIRECTED_EDGE] = function (check, ele) {
+    match$1[Type$1.UNDIRECTED_EDGE] = function (check, ele) {
       var qA = check.nodes[0];
       var qB = check.nodes[1];
       var src = ele.source();
@@ -25233,64 +25512,64 @@ var app = (function () {
       return matches$1(qA, src) && matches$1(qB, tgt) || matches$1(qB, src) && matches$1(qA, tgt);
     };
 
-    match[Type$1.NODE_NEIGHBOR] = function (check, ele) {
+    match$1[Type$1.NODE_NEIGHBOR] = function (check, ele) {
       return matches$1(check.node, ele) && ele.neighborhood().some(function (n) {
         return n.isNode() && matches$1(check.neighbor, n);
       });
     };
 
-    match[Type$1.DIRECTED_EDGE] = function (check, ele) {
+    match$1[Type$1.DIRECTED_EDGE] = function (check, ele) {
       return matches$1(check.source, ele.source()) && matches$1(check.target, ele.target());
     };
 
-    match[Type$1.NODE_SOURCE] = function (check, ele) {
+    match$1[Type$1.NODE_SOURCE] = function (check, ele) {
       return matches$1(check.source, ele) && ele.outgoers().some(function (n) {
         return n.isNode() && matches$1(check.target, n);
       });
     };
 
-    match[Type$1.NODE_TARGET] = function (check, ele) {
+    match$1[Type$1.NODE_TARGET] = function (check, ele) {
       return matches$1(check.target, ele) && ele.incomers().some(function (n) {
         return n.isNode() && matches$1(check.source, n);
       });
     };
 
-    match[Type$1.CHILD] = function (check, ele) {
+    match$1[Type$1.CHILD] = function (check, ele) {
       return matches$1(check.child, ele) && matches$1(check.parent, ele.parent());
     };
 
-    match[Type$1.PARENT] = function (check, ele) {
+    match$1[Type$1.PARENT] = function (check, ele) {
       return matches$1(check.parent, ele) && ele.children().some(function (c) {
         return matches$1(check.child, c);
       });
     };
 
-    match[Type$1.DESCENDANT] = function (check, ele) {
+    match$1[Type$1.DESCENDANT] = function (check, ele) {
       return matches$1(check.descendant, ele) && ele.ancestors().some(function (a) {
         return matches$1(check.ancestor, a);
       });
     };
 
-    match[Type$1.ANCESTOR] = function (check, ele) {
+    match$1[Type$1.ANCESTOR] = function (check, ele) {
       return matches$1(check.ancestor, ele) && ele.descendants().some(function (d) {
         return matches$1(check.descendant, d);
       });
     };
 
-    match[Type$1.COMPOUND_SPLIT] = function (check, ele) {
+    match$1[Type$1.COMPOUND_SPLIT] = function (check, ele) {
       return matches$1(check.subject, ele) && matches$1(check.left, ele) && matches$1(check.right, ele);
     };
 
-    match[Type$1.TRUE] = function () {
+    match$1[Type$1.TRUE] = function () {
       return true;
     };
 
-    match[Type$1.COLLECTION] = function (check, ele) {
+    match$1[Type$1.COLLECTION] = function (check, ele) {
       var collection = check.value;
       return collection.has(ele);
     };
 
-    match[Type$1.FILTER] = function (check, ele) {
+    match$1[Type$1.FILTER] = function (check, ele) {
       var filter = check.value;
       return filter(ele);
     };
@@ -49029,19 +49308,19 @@ var app = (function () {
     function requireGraphlib () {
     	if (hasRequiredGraphlib) return graphlib_1;
     	hasRequiredGraphlib = 1;
-    	var graphlib;
+    	var graphlib$1;
 
     	if (typeof commonjsRequire === "function") {
     	  try {
-    	    graphlib = requireGraphlib$1();
+    	    graphlib$1 = graphlib;
     	  } catch (e) {}
     	}
 
-    	if (!graphlib) {
-    	  graphlib = window.graphlib;
+    	if (!graphlib$1) {
+    	  graphlib$1 = window.graphlib;
     	}
 
-    	graphlib_1 = graphlib;
+    	graphlib_1 = graphlib$1;
     	return graphlib_1;
     }
 
@@ -49089,10 +49368,10 @@ var app = (function () {
     function require_isIterateeCall () {
     	if (hasRequired_isIterateeCall) return _isIterateeCall;
     	hasRequired_isIterateeCall = 1;
-    	var eq = eq_1,
+    	var eq = requireEq(),
     	    isArrayLike = requireIsArrayLike(),
-    	    isIndex = _isIndex,
-    	    isObject = isObject_1;
+    	    isIndex = require_isIndex(),
+    	    isObject = requireIsObject();
 
     	/**
     	 * Checks if the given arguments are from an iteratee call.
@@ -49129,7 +49408,7 @@ var app = (function () {
     	if (hasRequiredDefaults) return defaults_1;
     	hasRequiredDefaults = 1;
     	var baseRest = require_baseRest(),
-    	    eq = eq_1,
+    	    eq = requireEq(),
     	    isIterateeCall = require_isIterateeCall(),
     	    keysIn = requireKeysIn();
 
@@ -49555,7 +49834,7 @@ var app = (function () {
     function requireMapValues () {
     	if (hasRequiredMapValues) return mapValues_1;
     	hasRequiredMapValues = 1;
-    	var baseAssignValue = _baseAssignValue,
+    	var baseAssignValue = require_baseAssignValue(),
     	    baseForOwn = require_baseForOwn(),
     	    baseIteratee = require_baseIteratee();
 
@@ -49710,8 +49989,8 @@ var app = (function () {
     function require_assignMergeValue () {
     	if (hasRequired_assignMergeValue) return _assignMergeValue;
     	hasRequired_assignMergeValue = 1;
-    	var baseAssignValue = _baseAssignValue,
-    	    eq = eq_1;
+    	var baseAssignValue = require_baseAssignValue(),
+    	    eq = requireEq();
 
     	/**
     	 * This function is like `assignValue` except that it doesn't assign
@@ -49741,7 +50020,7 @@ var app = (function () {
     	hasRequiredIsPlainObject = 1;
     	var baseGetTag = _baseGetTag,
     	    getPrototype = require_getPrototype(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/** `Object#toString` result references. */
     	var objectTag = '[object Object]';
@@ -49885,14 +50164,14 @@ var app = (function () {
     	var assignMergeValue = require_assignMergeValue(),
     	    cloneBuffer = require_cloneBuffer(),
     	    cloneTypedArray = require_cloneTypedArray(),
-    	    copyArray = _copyArray,
+    	    copyArray = require_copyArray(),
     	    initCloneObject = require_initCloneObject(),
     	    isArguments = requireIsArguments(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    isArrayLikeObject = requireIsArrayLikeObject(),
     	    isBuffer = requireIsBuffer(),
     	    isFunction = requireIsFunction(),
-    	    isObject = isObject_1,
+    	    isObject = requireIsObject(),
     	    isPlainObject = requireIsPlainObject(),
     	    isTypedArray = requireIsTypedArray(),
     	    safeGet = require_safeGet(),
@@ -49989,7 +50268,7 @@ var app = (function () {
     	    assignMergeValue = require_assignMergeValue(),
     	    baseFor = require_baseFor(),
     	    baseMergeDeep = require_baseMergeDeep(),
-    	    isObject = isObject_1,
+    	    isObject = requireIsObject(),
     	    keysIn = requireKeysIn(),
     	    safeGet = require_safeGet();
 
@@ -50627,7 +50906,7 @@ var app = (function () {
     function require_baseOrderBy () {
     	if (hasRequired_baseOrderBy) return _baseOrderBy;
     	hasRequired_baseOrderBy = 1;
-    	var arrayMap = _arrayMap,
+    	var arrayMap = require_arrayMap(),
     	    baseGet = _baseGet,
     	    baseIteratee = require_baseIteratee(),
     	    baseMap = require_baseMap(),
@@ -50635,7 +50914,7 @@ var app = (function () {
     	    baseUnary = require_baseUnary(),
     	    compareMultiple = require_compareMultiple(),
     	    identity = requireIdentity(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/**
     	 * The base implementation of `_.orderBy` without param guards.
@@ -54535,7 +54814,7 @@ var app = (function () {
     	setContext("graphSharedState", { getCyInstance: () => cyInstance });
     	let refElement = null;
     	let cyInstance = null;
-    	let g = new graphlib.Graph();
+    	let g = new graphlib$1.Graph();
     	let id_map = new Map();
 
     	systemStateStore.subscribe(new_value => {
@@ -54589,7 +54868,7 @@ var app = (function () {
     				cyInstance.remove(cyInstance.$id(value.actedOn[0]));
     			}
     		} else if (value.lastAction === "resetGraph") {
-    			g = new graphlib.Graph(); // reset graph
+    			g = new graphlib$1.Graph(); // reset graph
 
     			if (cyInstance) {
     				cyInstance.elements().remove();
@@ -54642,7 +54921,7 @@ var app = (function () {
     		systemStateStore,
     		selectNode,
     		selectEdge,
-    		graphlib,
+    		graphlib: graphlib$1,
     		refElement,
     		cyInstance,
     		g,
@@ -54773,6 +55052,61 @@ var app = (function () {
      * @since 2.0.0
      */
     var isLeft = isLeft$1;
+    /**
+     * Less strict version of [`match`](#match).
+     *
+     * The `W` suffix (short for **W**idening) means that the handler return types will be merged.
+     *
+     * @category pattern matching
+     * @since 2.10.0
+     */
+    var matchW = function (onLeft, onRight) {
+        return function (ma) {
+            return isLeft(ma) ? onLeft(ma.left) : onRight(ma.right);
+        };
+    };
+    /**
+     * Takes two functions and an `Either` value, if the value is a `Left` the inner value is applied to the first function,
+     * if the value is a `Right` the inner value is applied to the second function.
+     *
+     * @example
+     * import { match, left, right } from 'fp-ts/Either'
+     * import { pipe } from 'fp-ts/function'
+     *
+     * function onLeft(errors: Array<string>): string {
+     *   return `Errors: ${errors.join(', ')}`
+     * }
+     *
+     * function onRight(value: number): string {
+     *   return `Ok: ${value}`
+     * }
+     *
+     * assert.strictEqual(
+     *   pipe(
+     *     right(1),
+     *     match(onLeft, onRight)
+     *   ),
+     *   'Ok: 1'
+     * )
+     * assert.strictEqual(
+     *   pipe(
+     *     left(['error 1', 'error 2']),
+     *     match(onLeft, onRight)
+     *   ),
+     *   'Errors: error 1, error 2'
+     * )
+     *
+     * @category pattern matching
+     * @since 2.10.0
+     */
+    var match = matchW;
+    /**
+     * Alias of [`match`](#match).
+     *
+     * @category pattern matching
+     * @since 2.0.0
+     */
+    var fold = match;
     /** @internal */
     ({
         fromEither: FromEither.fromEither
@@ -54822,14 +55156,14 @@ var app = (function () {
      * @category Decode error
      * @since 1.0.0
      */
-    var failure = function (value, context, message) {
+    var failure$1 = function (value, context, message) {
         return failures([{ value: value, context: context, message: message }]);
     };
     /**
      * @category Decode error
      * @since 1.0.0
      */
-    var success = right;
+    var success$1 = right;
     /**
      * @category Codec
      * @since 1.0.0
@@ -54961,7 +55295,7 @@ var app = (function () {
                     a[k] = vok;
                 }
             }
-            return errors.length > 0 ? failures(errors) : success((changed || Object.keys(o).length !== len ? a : o));
+            return errors.length > 0 ? failures(errors) : success$1((changed || Object.keys(o).length !== len ? a : o));
         }, codomain.encode === identity
             ? identity
             : function (a) {
@@ -55029,12 +55363,12 @@ var app = (function () {
                         }
                     }
                 }
-                return errors.length > 0 ? failures(errors) : success((changed ? a : u));
+                return errors.length > 0 ? failures(errors) : success$1((changed ? a : u));
             }
             if (isAnyC(codomain) && Array.isArray(u)) {
-                return success(u);
+                return success$1(u);
             }
-            return failure(u, c);
+            return failure$1(u, c);
         }, domain.encode === identity && codomain.encode === identity
             ? identity
             : function (a) {
@@ -55273,7 +55607,7 @@ var app = (function () {
     var NullType = /** @class */ (function (_super) {
         __extends(NullType, _super);
         function NullType() {
-            var _this = _super.call(this, 'null', function (u) { return u === null; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            var _this = _super.call(this, 'null', function (u) { return u === null; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity) || this;
             /**
              * @since 1.0.0
              */
@@ -55286,14 +55620,14 @@ var app = (function () {
      * @category primitives
      * @since 1.0.0
      */
-    new NullType();
+    var nullType = new NullType();
     /**
      * @since 1.0.0
      */
     var UndefinedType = /** @class */ (function (_super) {
         __extends(UndefinedType, _super);
         function UndefinedType() {
-            var _this = _super.call(this, 'undefined', function (u) { return u === void 0; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            var _this = _super.call(this, 'undefined', function (u) { return u === void 0; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity) || this;
             /**
              * @since 1.0.0
              */
@@ -55329,7 +55663,7 @@ var app = (function () {
     var UnknownType = /** @class */ (function (_super) {
         __extends(UnknownType, _super);
         function UnknownType() {
-            var _this = _super.call(this, 'unknown', function (_) { return true; }, success, identity) || this;
+            var _this = _super.call(this, 'unknown', function (_) { return true; }, success$1, identity) || this;
             /**
              * @since 1.0.0
              */
@@ -55349,7 +55683,7 @@ var app = (function () {
     var StringType = /** @class */ (function (_super) {
         __extends(StringType, _super);
         function StringType() {
-            var _this = _super.call(this, 'string', function (u) { return typeof u === 'string'; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            var _this = _super.call(this, 'string', function (u) { return typeof u === 'string'; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity) || this;
             /**
              * @since 1.0.0
              */
@@ -55369,7 +55703,7 @@ var app = (function () {
     var NumberType = /** @class */ (function (_super) {
         __extends(NumberType, _super);
         function NumberType() {
-            var _this = _super.call(this, 'number', function (u) { return typeof u === 'number'; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            var _this = _super.call(this, 'number', function (u) { return typeof u === 'number'; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity) || this;
             /**
              * @since 1.0.0
              */
@@ -55391,7 +55725,7 @@ var app = (function () {
         function BigIntType() {
             var _this = _super.call(this, 'bigint', 
             // tslint:disable-next-line: valid-typeof
-            function (u) { return typeof u === 'bigint'; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            function (u) { return typeof u === 'bigint'; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity) || this;
             /**
              * @since 1.0.0
              */
@@ -55411,7 +55745,7 @@ var app = (function () {
     var BooleanType = /** @class */ (function (_super) {
         __extends(BooleanType, _super);
         function BooleanType() {
-            var _this = _super.call(this, 'boolean', function (u) { return typeof u === 'boolean'; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            var _this = _super.call(this, 'boolean', function (u) { return typeof u === 'boolean'; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity) || this;
             /**
              * @since 1.0.0
              */
@@ -55431,7 +55765,7 @@ var app = (function () {
     var AnyArrayType = /** @class */ (function (_super) {
         __extends(AnyArrayType, _super);
         function AnyArrayType() {
-            var _this = _super.call(this, 'UnknownArray', Array.isArray, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            var _this = _super.call(this, 'UnknownArray', Array.isArray, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity) || this;
             /**
              * @since 1.0.0
              */
@@ -55451,7 +55785,7 @@ var app = (function () {
     var AnyDictionaryType = /** @class */ (function (_super) {
         __extends(AnyDictionaryType, _super);
         function AnyDictionaryType() {
-            var _this = _super.call(this, 'UnknownRecord', function (u) { return u !== null && typeof u === 'object' && !Array.isArray(u); }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            var _this = _super.call(this, 'UnknownRecord', function (u) { return u !== null && typeof u === 'object' && !Array.isArray(u); }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity) || this;
             /**
              * @since 1.0.0
              */
@@ -55488,7 +55822,7 @@ var app = (function () {
     function literal(value, name) {
         if (name === void 0) { name = JSON.stringify(value); }
         var is = function (u) { return u === value; };
-        return new LiteralType(name, is, function (u, c) { return (is(u) ? success(value) : failure(u, c)); }, identity, value);
+        return new LiteralType(name, is, function (u, c) { return (is(u) ? success$1(value) : failure$1(u, c)); }, identity, value);
     }
     /**
      * @since 1.0.0
@@ -55515,7 +55849,7 @@ var app = (function () {
             .map(function (k) { return JSON.stringify(k); })
             .join(' | '); }
         var is = function (u) { return string.is(u) && hasOwnProperty.call(keys, u); };
-        return new KeyofType(name, is, function (u, c) { return (is(u) ? success(u) : failure(u, c)); }, identity, keys);
+        return new KeyofType(name, is, function (u, c) { return (is(u) ? success$1(u) : failure$1(u, c)); }, identity, keys);
     }
     // -------------------------------------------------------------------------------------
     // combinators
@@ -55621,7 +55955,7 @@ var app = (function () {
                     }
                 }
             }
-            return errors.length > 0 ? failures(errors) : success(as);
+            return errors.length > 0 ? failures(errors) : success$1(as);
         }, item.encode === identity ? identity : function (a) { return a.map(item.encode); }, item);
     }
     /**
@@ -55688,7 +56022,7 @@ var app = (function () {
                     }
                 }
             }
-            return errors.length > 0 ? failures(errors) : success(a);
+            return errors.length > 0 ? failures(errors) : success$1(a);
         }, useIdentity(types)
             ? identity
             : function (a) {
@@ -55795,7 +56129,7 @@ var app = (function () {
                 var r = e.right;
                 var i = find_1(r[tag_1]);
                 if (i === undefined) {
-                    return failure(u, c);
+                    return failure$1(u, c);
                 }
                 var codec = codecs[i];
                 return codec.validate(r, appendContext(c, String(i), codec, r));
@@ -55822,7 +56156,7 @@ var app = (function () {
                         pushAll(errors, result.left);
                     }
                     else {
-                        return success(result.right);
+                        return success$1(result.right);
                     }
                 }
                 return failures(errors);
@@ -55956,7 +56290,7 @@ var app = (function () {
         function FunctionType() {
             var _this = _super.call(this, 'Function', 
             // tslint:disable-next-line:strict-type-predicates
-            function (u) { return typeof u === 'function'; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            function (u) { return typeof u === 'function'; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity) || this;
             /**
              * @since 1.0.0
              */
@@ -55976,7 +56310,7 @@ var app = (function () {
     var NeverType = /** @class */ (function (_super) {
         __extends(NeverType, _super);
         function NeverType() {
-            var _this = _super.call(this, 'never', function (_) { return false; }, function (u, c) { return failure(u, c); }, 
+            var _this = _super.call(this, 'never', function (_) { return false; }, function (u, c) { return failure$1(u, c); }, 
             /* istanbul ignore next */
             function () {
                 throw new Error('cannot encode never');
@@ -56000,7 +56334,7 @@ var app = (function () {
     var AnyType = /** @class */ (function (_super) {
         __extends(AnyType, _super);
         function AnyType() {
-            var _this = _super.call(this, 'any', function (_) { return true; }, success, identity) || this;
+            var _this = _super.call(this, 'any', function (_) { return true; }, success$1, identity) || this;
             /**
              * @since 1.0.0
              */
@@ -56022,7 +56356,7 @@ var app = (function () {
                 return e;
             }
             var a = e.right;
-            return predicate(a) ? success(a) : failure(a, c);
+            return predicate(a) ? success$1(a) : failure$1(a, c);
         }, codec.encode, codec, predicate);
     }
     /**
@@ -56060,7 +56394,7 @@ var app = (function () {
     var ObjectType = /** @class */ (function (_super) {
         __extends(ObjectType, _super);
         function ObjectType() {
-            var _this = _super.call(this, 'object', function (u) { return u !== null && typeof u === 'object'; }, function (u, c) { return (_this.is(u) ? success(u) : failure(u, c)); }, identity) || this;
+            var _this = _super.call(this, 'object', function (u) { return u !== null && typeof u === 'object'; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity) || this;
             /**
              * @since 1.0.0
              */
@@ -56191,10 +56525,38 @@ var app = (function () {
             mongo_db_uri: string,
         }),
     });
-    const RuntimeCrudBundle = type({
+    type({
         verb: RuntimeVerbTypeNames,
         object: union([RuntimeNode, RuntimeInitialMessage, RuntimeUserSettings]),
     });
+    const RuntimeCommandResponse = type({
+        error: string,
+        output: string,
+    });
+    const RuntimePromptResponse = type({
+        response: string,
+    });
+    const RuntimeConditionalResponse = type({
+        chosen_option: string,
+    });
+    const RuntimeNodeExecutionResponse = union([
+        type({ Prompt: RuntimePromptResponse }),
+        type({ Command: RuntimeCommandResponse }),
+        type({ Conditional: RuntimeConditionalResponse }),
+    ]);
+    const RuntimeExecutionResponse = type({
+        execution_id: string,
+        container_execution_id: union([string, nullType]),
+        current_node_id: string,
+        current_node_type: RuntimeNodeTypeNames,
+        response: RuntimeNodeExecutionResponse,
+    });
+    const RuntimeResponseObject = union([
+        RuntimeNode,
+        literal("InitialMessage"),
+        literal("UserSettings"),
+        type({ ExecutionContext: RuntimeExecutionResponse }),
+    ]);
 
     var Either = {};
 
@@ -57753,6 +58115,48 @@ var app = (function () {
     	exports.getValidation = getValidation; 
     } (Either));
 
+    function stringify(v) {
+        if (typeof v === 'function') {
+            return getFunctionName(v);
+        }
+        if (typeof v === 'number' && !isFinite(v)) {
+            if (isNaN(v)) {
+                return 'NaN';
+            }
+            return v > 0 ? 'Infinity' : '-Infinity';
+        }
+        return JSON.stringify(v);
+    }
+    function getContextPath(context) {
+        return context.map(function (_a) {
+            var key = _a.key, type = _a.type;
+            return "".concat(key, ": ").concat(type.name);
+        }).join('/');
+    }
+    function getMessage(e) {
+        return e.message !== undefined
+            ? e.message
+            : "Invalid value ".concat(stringify(e.value), " supplied to ").concat(getContextPath(e.context));
+    }
+    /**
+     * @since 1.0.0
+     */
+    function failure(es) {
+        return es.map(getMessage);
+    }
+    /**
+     * @since 1.0.0
+     */
+    function success() {
+        return ['No errors!'];
+    }
+    /**
+     * @since 1.0.0
+     */
+    var PathReporter = {
+        report: fold(failure, success)
+    };
+
     /* src/App.svelte generated by Svelte v3.59.1 */
 
     const { console: console_1 } = globals;
@@ -57774,7 +58178,7 @@ var app = (function () {
     			t = space();
     			create_component(graphcomponentgraphlib.$$.fragment);
     			attr_dev(div, "class", "app-container");
-    			add_location(div, file, 79, 0, 3309);
+    			add_location(div, file, 74, 0, 3536);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -57892,20 +58296,31 @@ var app = (function () {
 
     			try {
     				data = JSON.parse(event.data);
-    				let validationResult = RuntimeCrudBundle.decode(data);
+    				let responseResult = RuntimeResponseObject.decode(data);
 
     				Either.fold(
     					errors => {
     						console.log("Error decoding websocket message: ", errors);
+    						console.error(PathReporter.report(responseResult));
     					},
-    					node => {
-    						$systemStateStore.nodes.push(node);
+    					response_object => {
+    						// if response_object is a node then add it to the system state store
+    						if (typeof response_object === "object" && response_object !== null && "Node" in response_object) {
+    							const { Node } = response_object;
+
+    							// Now you can access Node.type_name to further check its subtype
+    							console.log(Node.type_name); // Will log "Prompt", "Process", "Conditional", or "Command"
+
+    							$systemStateStore.nodes.push({ Node });
+    						} else {
+    							console.log("\n---------------\nresponse_object is not a node\n---------------\n");
+    						}
     					}
-    				)(validationResult);
+    				)(responseResult);
     			} catch(_a) {
     				console.log("Error parsing websocket message");
     			}
-    		}); // if the websocket message is a node then add it to the system state store
+    		});
     	}));
 
     	const writable_props = [];
@@ -57919,10 +58334,11 @@ var app = (function () {
     		Sidebar,
     		GraphComponentGraphlib: GraphComponent_graphlib,
     		sendWebsocketMessage,
-    		RuntimeCrudBundle,
+    		RuntimeResponseObject,
     		fold: Either.fold,
     		onMount,
     		systemStateStore,
+    		PathReporter,
     		$systemStateStore
     	});
 

@@ -99,7 +99,7 @@ const RuntimeNode = t.type({
     description: t.string,
     input_variables: t.array(t.string),
     output_variables: t.array(t.string),
-  });
+  })
 });
 
 const RuntimeExecutionContext = t.type({
@@ -128,6 +128,40 @@ const RuntimeCrudBundle = t.type({
   object: t.union([RuntimeNode, RuntimeInitialMessage, RuntimeUserSettings]),
 });
 
+const RuntimeCommandResponse = t.type({
+  error: t.string,
+  output: t.string,
+});
+
+const RuntimePromptResponse = t.type({
+  response: t.string,
+});
+
+const RuntimeConditionalResponse = t.type({
+  chosen_option: t.string,
+});
+
+const RuntimeNodeExecutionResponse = t.union([
+  t.type({ Prompt: RuntimePromptResponse }),
+  t.type({ Command: RuntimeCommandResponse }),
+  t.type({ Conditional: RuntimeConditionalResponse }),
+]);
+
+const RuntimeExecutionResponse = t.type({
+  execution_id: t.string,
+  container_execution_id: t.union([t.string, t.null]),
+  current_node_id: t.string,
+  current_node_type: RuntimeNodeTypeNames,
+  response: RuntimeNodeExecutionResponse,
+});
+
+const RuntimeResponseObject = t.union([
+  RuntimeNode,
+  t.literal("InitialMessage"),
+  t.literal("UserSettings"),
+  t.type({ ExecutionContext: RuntimeExecutionResponse }),
+]);
+
 type NodeTypeNames = TypeOf<typeof RuntimeNodeTypeNames>;
 type MongoId = TypeOf<typeof RuntimeMongoId>;
 type Prompt = TypeOf<typeof RuntimePrompt>;
@@ -141,8 +175,14 @@ type VerbTypeNames = TypeOf<typeof RuntimeVerbTypeNames>;
 type InitialMessage = TypeOf<typeof RuntimeInitialMessage>;
 type UserSettings = TypeOf<typeof RuntimeUserSettings>;
 type ExecutionContext = TypeOf<typeof RuntimeExecutionContext>;
+type CommandResponse = TypeOf<typeof RuntimeCommandResponse>;
+type PromptResponse = TypeOf<typeof RuntimePromptResponse>;
+type ConditionalResponse = TypeOf<typeof RuntimeConditionalResponse>;
+type NodeExecutionResponse = TypeOf<typeof RuntimeNodeExecutionResponse>;
+type ExecutionResponse = TypeOf<typeof RuntimeExecutionResponse>;
+type ResponseObject = TypeOf<typeof RuntimeResponseObject>;
 
 // Export static types
-export type { ExecutionContext, CrudBundle, VerbTypeNames, InitialMessage, NodeTypeNames, MongoId, Prompt, NodeType, Node, Process, Conditional, Command, UserSettings };
+export type { ExecutionContext, CrudBundle, VerbTypeNames, InitialMessage, NodeTypeNames, MongoId, Prompt, NodeType, Node, Process, Conditional, Command, UserSettings, CommandResponse, PromptResponse, ConditionalResponse, NodeExecutionResponse, ExecutionResponse, ResponseObject };
 
-export { RuntimeExecutionContext, RuntimeCrudBundle, RuntimeVerbTypeNames, RuntimeInitialMessage, RuntimeNodeTypeNames, RuntimeMongoId, RuntimePrompt, RuntimeNodeType, RuntimeNode, RuntimeProcess, RuntimeConditional, RuntimeCommand, RuntimeUserSettings };
+export { RuntimeExecutionContext, RuntimeCrudBundle, RuntimeVerbTypeNames, RuntimeInitialMessage, RuntimeNodeTypeNames, RuntimeMongoId, RuntimePrompt, RuntimeNodeType, RuntimeNode, RuntimeProcess, RuntimeConditional, RuntimeCommand, RuntimeUserSettings, RuntimeCommandResponse, RuntimePromptResponse, RuntimeConditionalResponse, RuntimeNodeExecutionResponse, RuntimeExecutionResponse, RuntimeResponseObject };

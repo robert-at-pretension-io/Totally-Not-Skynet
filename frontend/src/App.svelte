@@ -8,16 +8,17 @@
 
   import { sendWebsocketMessage } from "helper_functions/graph";
 
-  import type { CrudBundle, Node } from "./system_types";
-  import {RuntimeCrudBundle } from "./system_types";
+  import type { CrudBundle, ResponseObject } from "./system_types";
+  import {  RuntimeResponseObject } from "./system_types";
 
   import { fold } from "fp-ts/lib/Either";
 
   import { onMount } from "svelte";
   import systemStateStore from "stores/systemStateStore";
 
-  onMount(async () => {
+  import { PathReporter } from "io-ts/PathReporter";
 
+  onMount(async () => {
     console.log("on mount");
 
     // start the websocket connection
@@ -30,9 +31,7 @@
       let user_settings: CrudBundle = {
         verb: "GET",
         object: {
-          UserSettings:
-          {openai_api_key: "",
-            mongo_db_uri: "",}
+          UserSettings: { openai_api_key: "", mongo_db_uri: "" },
         },
       };
 
@@ -43,7 +42,7 @@
         object: {
           InitialMessage: {
             initial_message: "",
-          }
+          },
         },
       };
 
@@ -55,39 +54,35 @@
       try {
         data = JSON.parse(event.data);
 
-        let validationResult = RuntimeCrudBundle.decode(data);
-
+        let responseResult = RuntimeResponseObject.decode(data);
         fold(
           (errors) => {
             console.log("Error decoding websocket message: ", errors);
+            console.error(PathReporter.report(responseResult));
           },
-          (node: Node) => {
-            $systemStateStore.nodes.push(node);
+          (response_object: ResponseObject) => {
+            // if response_object is a node then add it to the system state store
+
+            if (typeof response_object === "object" && response_object !== null  && "Node" in response_object) {
+              const { Node } = response_object;
+
+              // Now you can access Node.type_name to further check its subtype
+              console.log(Node.type_name);  // Will log "Prompt", "Process", "Conditional", or "Command"
+
+              $systemStateStore.nodes.push({ Node });
+            }
+            else {
+              console.log("\n---------------\nresponse_object is not a node\n---------------\n");
+            }
           }
-        )(validationResult);
+        )(responseResult);
       } catch {
         console.log("Error parsing websocket message");
       }
 
-      // if the websocket message is a node then add it to the system state store
     });
   });
 
-  // async function handleProcessChange(process: Process) {
-  //   // console.log("selected process changed: ", process);
-  //   await processToGraph(process);
-  // }
-
-  // $: {
-  //   let process = $systemStateStore.selectedProcess;
-  //   if (
-  //     lastSelectedProcess == null ||
-  //     (process && process.name !== lastSelectedProcess.name)
-  //   ) {
-  //     handleProcessChange(process);
-  //     lastSelectedProcess = process;
-  //   }
-  // }
 </script>
 
 <div class="app-container">

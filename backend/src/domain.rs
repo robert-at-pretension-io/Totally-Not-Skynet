@@ -8,10 +8,6 @@ pub struct Prompt {
     pub system: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct PromptResponse {
-    pub response: String,
-}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Process {
@@ -28,10 +24,7 @@ pub struct Conditional {
     pub options: HashMap<String, ObjectId>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct ConditionalResponse {
-    pub chosen_option: String,
-}
+
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum NodeType {
@@ -69,6 +62,17 @@ pub struct Command {
 pub struct CommandResponse {
     pub error: String,
     pub output: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PromptResponse {
+    pub response: String,
+}
+
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ConditionalResponse {
+    pub chosen_option: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
