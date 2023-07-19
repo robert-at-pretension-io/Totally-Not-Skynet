@@ -3,7 +3,6 @@ use crate::domain::ExecutionResponse;
 use crate::domain::NodeExecutionResponse;
 use crate::domain::ResponseObject;
 use crate::domain::CrudBundle;
-use crate::domain::UserSettings;
 
 pub fn create_node_response_object(
     execution_clone: ExecutionContext,

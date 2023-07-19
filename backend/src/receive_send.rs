@@ -77,15 +77,18 @@ pub async fn start_message_sending_loop(
             CrudBundleObject::Node(node) => {
                 match verb {
                     VerbTypeNames::POST => {
+
+                        let mut mutable_node = node.clone();
+
                         let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
 
                         let db = return_db(db_uri).await;
 
                         let node_collection = db.collection::<crate::domain::Node>("nodes");
 
-                        node._id = Some(bson::oid::ObjectId::new());
+                        mutable_node._id = Some(bson::oid::ObjectId::new());
 
-                        let insert_result = node_collection.insert_one(node, None).await.unwrap();
+                        let insert_result = node_collection.insert_one(mutable_node, None).await.unwrap();
 
                         println!("Inserted node: {:?}", insert_result);
 
@@ -96,7 +99,7 @@ pub async fn start_message_sending_loop(
 
                         let response_object = ResponseObject::Node(inserted_node);
 
-                        send_message(&tx, msg.0.clone(), response_object);
+                        send_message(&tx, msg.0.clone(), response_object).await;
                     }
                     VerbTypeNames::PUT => {
                         let updated_node = node.clone();
@@ -174,7 +177,9 @@ pub async fn start_message_sending_loop(
                         } else {
                             println!("Updated {} nodes", update_result.modified_count);
 
-                            send_message(&tx, msg.0.clone(), updated_node);
+                            let response_object : ResponseObject = ResponseObject::Node(updated_node);
+
+                            send_message(&tx, msg.0.clone(), response_object).await;
                         }
                     }
                     _ => {
@@ -182,7 +187,7 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            CrudBundleObject::InitialMessage(initial_message) => {
+            CrudBundleObject::InitialMessage(_initial_message) => {
                 match verb {
                     VerbTypeNames::POST => {
                         println!("Initializing project for {}", msg.0.name);
@@ -243,19 +248,31 @@ pub async fn start_message_sending_loop(
                         // attempt to set them from environment variables
                         let system_settings = UserSettings::new();
 
-                        if user_settings.is_some() {
-                            let user_settings = system_settings.unwrap();
-                            runtime_settings.insert(msg.0.clone(), RuntimeSettings {
-                                openai_api_key: user_settings.openai_api_key,
-                                mongo_db_uri: user_settings.mongo_db_uri,
-                            });
-                        } else {
-                            let settings = system_settings.unwrap();
-                            runtime_settings.insert(msg.0.clone(), RuntimeSettings {
-                                openai_api_key: settings.openai_api_key,
-                                mongo_db_uri: settings.mongo_db_uri,
-                            });
+
+
+                        match system_settings {
+                            Some(settings) => {
+                                runtime_settings.insert(
+                                    msg.0.clone(),
+                                    UserSettings {
+                                        openai_api_key: settings.openai_api_key,
+                                        mongo_db_uri: settings.mongo_db_uri,
+                                    },
+                                );
+                            }
+                            None => {
+                                runtime_settings.insert(
+                                    msg.0.clone(),
+                                    UserSettings {
+                                        openai_api_key: user_settings.openai_api_key,
+                                        mongo_db_uri: user_settings.mongo_db_uri,
+                                    },
+                                );
+                            }
                         }
+
+
+                        
 
                         let users_runtime_settings = runtime_settings.get(&msg.0).unwrap();
 
@@ -264,7 +281,7 @@ pub async fn start_message_sending_loop(
                             &tx,
                             msg.0.clone(),
                             ResponseObject::UserSettings(users_runtime_settings.clone())
-                        );
+                        ).await;
                     }
                     _ => {
                         println!("Verb not supported for user settings: {:?}", verb);
@@ -405,7 +422,7 @@ pub async fn start_message_sending_loop(
     }
 }
 
-pub async fn send_message<T: Serialize + Sized>(
+pub async fn send_message(
     tx: &UnboundedSender<(Identity, Message)>,
     identity: Identity,
     message: ResponseObject

@@ -1,4 +1,3 @@
-use crate::settings::UserSettings;
 use bson::oid::ObjectId;
 use serde::{ Deserialize, Serialize };
 use std::collections::HashMap;
@@ -93,7 +92,7 @@ pub enum VerbTypeNames {
     GET,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserSettings {
     pub openai_api_key: String,
     pub mongo_db_uri: String,
