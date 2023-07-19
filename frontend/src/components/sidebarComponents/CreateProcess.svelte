@@ -76,44 +76,17 @@
 
       // console.log("current_graph_string: " + current_graph_string);
       let process: Process = {
-        _id: { $oid: "" },
-        name: name,
-        description: description,
-        graph: current_graph_string,
-        topological_order: topologicalOrder,
+        Process : {
+          graph: current_graph_string,
+          initial_variables: [],
+          topological_order: topologicalOrder,
+        }
       };
       // console.log("sending process: " + JSON.stringify(process));
-      $systemStateStore.websocket.send(JSON.stringify({ create_process: process }));
-      selectedActions = [];
+      console.log("sending process: ", process);
     }
   }
 
-  function toggleSelect(action: Prompt) {
-    // console.log("toggleSelect called on action: ", action);
-    const index = selectedActions.findIndex(
-      (a) => a._id.$oid === action._id.$oid
-    );
-    if (index !== -1) {
-      // action is currently selected, remove it
-      selectedActions = selectedActions.filter(
-        (a) => a._id.$oid !== action._id.$oid
-      );
-    } else {
-      // action is not currently selected, add it
-      selectedActions = [...selectedActions, action];
-    }
-    // console.log("selectedActions after toggleSelect:", selectedActions);
-  }
-
-  function isSelected(action: Prompt) {
-    // console.log("isSelected called on action: ", action);
-    let is_selected = selectedActions.some(
-      (a) => a._id.$oid === action._id.$oid
-    );
-    // console.log("selectedActions during isSelected:", selectedActions);
-    // console.log("isSelected returning: ", is_selected);
-    return is_selected;
-  }
 </script>
 
 <p>Please set a descriptive name for your process:</p>
@@ -130,7 +103,7 @@
 </p>
 
 <ul>
-  {#each actions as action (action._id)}
+  <!-- {#each actions as action (action._id)}
     <li>
       <button
         class:selected={isSelected(action)}
@@ -138,14 +111,14 @@
         on:click={() => toggleSelect(action)}>{action.name}</button
       >
     </li>
-  {/each}
+  {/each} -->
 </ul>
 
 <h3>Nodes to add:</h3>
 
-{#each selectedActions as action (action._id)}
+<!-- {#each selectedActions as action (action._id)}
   <p>{action.name}</p>
-{/each}
+{/each} -->
 <button class="add-button" on:click={localAddNodes}>Add Node(s)</button>
 <button class="remove-button" on:click={removeSelectedNode}
   >Remove Node(s)</button

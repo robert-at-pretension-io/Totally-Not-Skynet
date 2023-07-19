@@ -252,6 +252,9 @@ pub async fn start_message_sending_loop(
 
                         match system_settings {
                             Some(settings) => {
+
+                                println!("settings: {:?}", settings);
+
                                 runtime_settings.insert(
                                     msg.0.clone(),
                                     UserSettings {

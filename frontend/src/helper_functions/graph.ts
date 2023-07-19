@@ -2,7 +2,6 @@ import type {
   SystemState,
   Prompt,
   Node,
-  MongoId,
   CrudBundle
 } from "../system_types";
 import { Process } from "../system_types";
@@ -11,8 +10,8 @@ import { Graph } from "graphlib";
 import { Edge } from "@dagrejs/graphlib";
 import { alg } from "graphlib";
 import { some } from "fp-ts/lib/Option";
-import { Option, isSome } from "fp-ts/Option";
-import { unsafeCoerce } from 'fp-ts/lib/function';
+import {  isSome } from "fp-ts/Option";
+import { unsafeCoerce } from "fp-ts/lib/function";
 
 // Define the getter and setter
 
@@ -39,31 +38,30 @@ export async function validateGraph(): Promise<string[] | boolean> {
   const systemState = await getSystemState();
   const graph = systemState.graphState.graph;
 
-
   if (isSome(systemState.selectedNode)) {
-    let selected_node: Node = unsafeCoerce(systemState.selectedNode);
+    const selected_node: Node = unsafeCoerce(systemState.selectedNode);
     if (selected_node.type_name == "Process") {
-      let process: Process = selected_node.node_content as Process;
-      let initial_variables = process.Process.initial_variables;
+      const process: Process = selected_node.node_content as Process;
+      const initial_variables = process.Process.initial_variables;
 
-      let test_orders: string[][] = getAllTopologicalOrders(graph);
+      const test_orders: string[][] = getAllTopologicalOrders(graph);
 
       for (let i = 0; i++; i < test_orders.length) {
-        let current_order = test_orders[i];
+        const current_order = test_orders[i];
 
         // to test the order we need to keep track of which variables have already been defined by collecting the output variables in an array as we go, then we only need to determine if the input variables are in the array
 
-        let agregate_variables = initial_variables;
+        const agregate_variables = initial_variables;
 
         for (let j = 0; j++; j < current_order.length) {
-          let current_node = current_order[j];
-          let node = await getNodeById(current_node);
+          const current_node = current_order[j];
+          const node = await getNodeById(current_node);
           if (node) {
-            let input_variables = node.input_variables;
-            let output_variables = node.output_variables;
+            const input_variables = node.input_variables;
+            const output_variables = node.output_variables;
 
             // check if all of the input variables are in the agregate_variables array
-            let input_variables_in_agregate = input_variables.every((variable) => {
+            const input_variables_in_agregate = input_variables.every((variable) => {
               return agregate_variables.includes(variable);
             });
 
@@ -105,25 +103,24 @@ export function getAllTopologicalOrders(graph: Graph): string[][] {
   }
 
   // get the local graph
-  let local_graph = graphToLocalGraph(graph);
+  const local_graph = graphToLocalGraph(graph);
 
   return allTopologicalSorts(local_graph);
 
 }
-
 
 interface LocalGraph {
   [key: string]: string[];
 }
 
 export function graphToLocalGraph(graph: Graph): LocalGraph {
-  let local_graph: LocalGraph = {};
+  const local_graph: LocalGraph = {};
 
-  let my_nodes = graph.nodes();
+  const my_nodes = graph.nodes();
 
   for (let i = 0; i < my_nodes.length; i++) {
-    let node = my_nodes[i];
-    let neighbors = graph.successors(node);
+    const node = my_nodes[i];
+    const neighbors = graph.successors(node);
     if (neighbors) {
       local_graph[node] = neighbors;
     }
@@ -132,15 +129,13 @@ export function graphToLocalGraph(graph: Graph): LocalGraph {
   return local_graph;
 }
 
-
-
 function allTopologicalSorts(graph: LocalGraph): string[][] {
-  let allOrderings: string[][] = [];
-  let indegreeMap = calculateIndegreeForAllVertex(graph);
-  let startNodes = Array.from(Object.keys(indegreeMap)).filter((node) => indegreeMap[node] === 0);
-  let visited: { [node: string]: boolean } = {};
+  const allOrderings: string[][] = [];
+  const indegreeMap = calculateIndegreeForAllVertex(graph);
+  const startNodes = Array.from(Object.keys(indegreeMap)).filter((node) => indegreeMap[node] === 0);
+  const visited: { [node: string]: boolean } = {};
 
-  for (let node in graph) {
+  for (const node in graph) {
     visited[node] = false;
   }
 
@@ -151,7 +146,7 @@ function allTopologicalSorts(graph: LocalGraph): string[][] {
     if (stack.length === Object.keys(graph).length) {
       allOrderings.push([...stack]);
     } else {
-      for (let neighbor of graph[node]) {
+      for (const neighbor of graph[node]) {
         indegreeMap[neighbor]--;
         if (indegreeMap[neighbor] === 0 && !visited[neighbor]) {
           helper(neighbor, indegreeMap, visited, stack);
@@ -164,7 +159,7 @@ function allTopologicalSorts(graph: LocalGraph): string[][] {
     stack.pop();
   }
 
-  for (let node of startNodes) {
+  for (const node of startNodes) {
     helper(node, { ...indegreeMap }, { ...visited }, []);
   }
 
@@ -172,21 +167,20 @@ function allTopologicalSorts(graph: LocalGraph): string[][] {
 }
 
 function calculateIndegreeForAllVertex(graph: LocalGraph): { [node: string]: number } {
-  let indegreeMap: { [node: string]: number } = {};
+  const indegreeMap: { [node: string]: number } = {};
 
-  for (let node in graph) {
+  for (const node in graph) {
     indegreeMap[node] = 0;
   }
 
-  for (let node in graph) {
-    for (let neighbor of graph[node]) {
+  for (const node in graph) {
+    for (const neighbor of graph[node]) {
       indegreeMap[neighbor]++;
     }
   }
 
   return indegreeMap;
 }
-
 
 export async function getOutputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
   // Get the node by Id
@@ -246,7 +240,7 @@ export async function getNodeById(id: string): Promise<Node | undefined> {
 export async function getNodeInputVariables(node_id: string): Promise<string[] | null> {
   const node = await getNodeById(node_id);
   if (node) {
-    return node.input_variables
+    return node.input_variables;
   }
   else return null;
 }
@@ -384,19 +378,6 @@ export async function getParentOutputVariables(this_node_id: string): Promise<st
   return parent_output_variables;
 }
 
-export async function setLocalExecutionVariable(variable_name: string, variable_value: string): Promise<Map<string, string>> {
-  const systemState = await getSystemState();
-  systemState.executionContext.local_variables.set(variable_name, variable_value);
-  await setSystemState(systemState);
-  return systemState.executionContext.local_variables;
-}
-
-export async function setGlobalExecutionVariable(variable_name: string, variable_value: string) {
-  const systemState = await getSystemState();
-  systemState.executionContext.global_variables.set(variable_name, variable_value);
-  await setSystemState(systemState);
-}
-
 export function addVariablesToPrompt(prompt: string, variables: Map<string, string>): string {
   let new_prompt = prompt;
   for (const [key, value] of variables) {
@@ -405,35 +386,11 @@ export function addVariablesToPrompt(prompt: string, variables: Map<string, stri
   return new_prompt;
 }
 
-export async function incrementCurrentNode(): Promise<string> {
-  const systemState = await getSystemState();
-
-  // look at the topological order and the current_node and set the next node to be the current node
-  const topological_order = systemState.executionContext.topological_order;
-
-  // get the index of the current node
-  if (systemState.executionContext.current_node != null) {
-    const current_node_index = topological_order.indexOf(systemState.executionContext.current_node);
-    if (current_node_index + 1 < topological_order.length) {
-      systemState.executionContext.current_node = topological_order[current_node_index + 1];
-
-    }
-    else {
-      console.error("current node index is out of bounds");
-    }
-  }
-  else {
-    console.error("current node is null");
-    systemState.executionContext.current_node = topological_order[0];
-  }
-
-  await setSystemState(systemState);
-  return systemState.executionContext.current_node;
-}
-
 export async function sendWebsocketMessage(message: CrudBundle) {
+
+  console.log("sending websocket message: ", message);
   const systemState = await getSystemState();
-  let message_string = JSON.stringify(message);
+  const message_string = JSON.stringify(message);
   systemState.websocket.send(message_string);
 }
 

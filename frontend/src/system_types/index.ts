@@ -1,8 +1,8 @@
 import { Edge } from "@dagrejs/graphlib";
 import type { Graph } from "graphlib";
-import { Option, isSome } from "fp-ts/Option";
-import * as t from 'io-ts';
-import { record } from 'io-ts';
+import { Option } from "fp-ts/Option";
+import * as t from "io-ts";
+import { record } from "io-ts";
 import { option } from "io-ts-types";
 import { TypeOf } from "io-ts";
 
@@ -30,7 +30,6 @@ export type GraphState = {
   name: string | null;
   global_variables: Map<string, string>;
 };
-
 
 export type SystemState = {
   websocketReady: boolean;
@@ -110,12 +109,16 @@ const RuntimeExecutionContext = t.type({
 });
 
 const RuntimeInitialMessage = t.type({
-  initial_message: t.string,
+  InitialMessage: t.type({
+    initial_message: t.string,
+  }),
 });
 
 const RuntimeUserSettings = t.type({
-  openai_api_key: t.string,
-  mongo_db_uri: t.string,
+  UserSettings: t.type({
+    openai_api_key: t.string,
+    mongo_db_uri: t.string,
+  }),
 });
 
 const RuntimeCrudBundle = t.type({
@@ -141,4 +144,3 @@ type ExecutionContext = TypeOf<typeof RuntimeExecutionContext>;
 export type { ExecutionContext, CrudBundle, VerbTypeNames, InitialMessage, NodeTypeNames, MongoId, Prompt, NodeType, Node, Process, Conditional, Command, UserSettings };
 
 export { RuntimeExecutionContext, RuntimeCrudBundle, RuntimeVerbTypeNames, RuntimeInitialMessage, RuntimeNodeTypeNames, RuntimeMongoId, RuntimePrompt, RuntimeNodeType, RuntimeNode, RuntimeProcess, RuntimeConditional, RuntimeCommand, RuntimeUserSettings };
-

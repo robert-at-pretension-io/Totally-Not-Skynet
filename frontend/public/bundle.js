@@ -230,9 +230,6 @@ var app = (function () {
         const selected_option = select.querySelector(':checked');
         return selected_option && selected_option.__value;
     }
-    function toggle_class(element, name, toggle) {
-        element.classList[toggle ? 'add' : 'remove'](name);
-    }
     function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, bubbles, cancelable, detail);
@@ -619,11 +616,6 @@ var app = (function () {
                 }
             }
         };
-    }
-
-    function destroy_block(block, lookup) {
-        block.d(1);
-        lookup.delete(block.key);
     }
     function outro_and_destroy_block(block, lookup) {
         transition_out(block, 1, 1, () => {
@@ -1709,7 +1701,7 @@ var app = (function () {
     var version$3 = '2.1.13';
 
     // Includes only the "core" of graphlib
-    var lib$3 = {
+    var lib$2 = {
       Graph: graph$1,
       version: version$3
     };
@@ -2376,13 +2368,13 @@ var app = (function () {
      * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      */
 
-    var lib$2 = lib$3;
+    var lib$1 = lib$2;
 
     var graphlib$2 = {
-      Graph: lib$2.Graph,
+      Graph: lib$1.Graph,
       json: json$1,
       alg: alg$1,
-      version: lib$2.version
+      version: lib$1.version
     };
 
     function newGraphState() {
@@ -6149,26 +6141,26 @@ var app = (function () {
     			button = element$1("button");
     			button.textContent = "Submit";
     			attr_dev(label0, "for", "prompt");
-    			add_location(label0, file$7, 26, 2, 1132);
+    			add_location(label0, file$7, 23, 2, 1067);
     			attr_dev(input0, "id", "prompt");
     			attr_dev(input0, "type", "text");
     			input0.required = true;
-    			add_location(input0, file$7, 27, 2, 1169);
+    			add_location(input0, file$7, 24, 2, 1104);
     			attr_dev(label1, "for", "name");
-    			add_location(label1, file$7, 29, 2, 1240);
+    			add_location(label1, file$7, 26, 2, 1177);
     			attr_dev(input1, "id", "name");
     			attr_dev(input1, "type", "text");
     			input1.required = true;
-    			add_location(input1, file$7, 30, 2, 1273);
+    			add_location(input1, file$7, 27, 2, 1210);
     			attr_dev(label2, "for", "system");
-    			add_location(label2, file$7, 32, 2, 1340);
+    			add_location(label2, file$7, 29, 2, 1279);
     			attr_dev(input2, "id", "system");
     			attr_dev(input2, "type", "text");
     			input2.required = true;
-    			add_location(input2, file$7, 33, 2, 1377);
+    			add_location(input2, file$7, 30, 2, 1316);
     			attr_dev(button, "type", "submit");
-    			add_location(button, file$7, 35, 2, 1448);
-    			add_location(form, file$7, 25, 0, 1083);
+    			add_location(button, file$7, 32, 2, 1389);
+    			add_location(form, file$7, 22, 0, 1018);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -6282,10 +6274,7 @@ var app = (function () {
     	let action = {
     		_id: { $oid: "" },
     		prompt: "",
-    		name: "",
-    		system: "",
-    		input_variables: [],
-    		output_variables: []
+    		system: ""
     	};
 
     	function localAddNode() {
@@ -6440,11 +6429,19 @@ var app = (function () {
      * // => true
      */
 
-    function eq$1(value, other) {
-      return value === other || (value !== value && other !== other);
-    }
+    var eq_1;
+    var hasRequiredEq;
 
-    var eq_1 = eq$1;
+    function requireEq () {
+    	if (hasRequiredEq) return eq_1;
+    	hasRequiredEq = 1;
+    	function eq(value, other) {
+    	  return value === other || (value !== value && other !== other);
+    	}
+
+    	eq_1 = eq;
+    	return eq_1;
+    }
 
     var _assocIndexOf;
     var hasRequired_assocIndexOf;
@@ -6452,7 +6449,7 @@ var app = (function () {
     function require_assocIndexOf () {
     	if (hasRequired_assocIndexOf) return _assocIndexOf;
     	hasRequired_assocIndexOf = 1;
-    	var eq = eq_1;
+    	var eq = requireEq();
 
     	/**
     	 * Gets the index at which the `key` is found in `array` of key-value pairs.
@@ -6751,101 +6748,125 @@ var app = (function () {
 
     /** Detect free variable `global` from Node.js. */
 
-    var freeGlobal$1 = typeof commonjsGlobal == 'object' && commonjsGlobal && commonjsGlobal.Object === Object && commonjsGlobal;
+    var _freeGlobal;
+    var hasRequired_freeGlobal;
 
-    var _freeGlobal = freeGlobal$1;
+    function require_freeGlobal () {
+    	if (hasRequired_freeGlobal) return _freeGlobal;
+    	hasRequired_freeGlobal = 1;
+    	var freeGlobal = typeof commonjsGlobal == 'object' && commonjsGlobal && commonjsGlobal.Object === Object && commonjsGlobal;
 
-    var freeGlobal = _freeGlobal;
+    	_freeGlobal = freeGlobal;
+    	return _freeGlobal;
+    }
+
+    var freeGlobal = require_freeGlobal();
 
     /** Detect free variable `self`. */
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$3 = freeGlobal || freeSelf || Function('return this')();
+    var root$2 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$3;
+    var _root = root$2;
 
-    var root$2 = _root;
-
-    /** Built-in value references. */
-    var Symbol$4 = root$2.Symbol;
-
-    var _Symbol = Symbol$4;
-
-    var Symbol$3 = _Symbol;
-
-    /** Used for built-in method references. */
-    var objectProto$5 = Object.prototype;
-
-    /** Used to check objects for own properties. */
-    var hasOwnProperty$5 = objectProto$5.hasOwnProperty;
-
-    /**
-     * Used to resolve the
-     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
-     * of values.
-     */
-    var nativeObjectToString$1 = objectProto$5.toString;
+    var root$1 = _root;
 
     /** Built-in value references. */
-    var symToStringTag$1 = Symbol$3 ? Symbol$3.toStringTag : undefined;
+    var Symbol$3 = root$1.Symbol;
 
-    /**
-     * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
-     *
-     * @private
-     * @param {*} value The value to query.
-     * @returns {string} Returns the raw `toStringTag`.
-     */
-    function getRawTag$1(value) {
-      var isOwn = hasOwnProperty$5.call(value, symToStringTag$1),
-          tag = value[symToStringTag$1];
+    var _Symbol = Symbol$3;
 
-      try {
-        value[symToStringTag$1] = undefined;
-        var unmasked = true;
-      } catch (e) {}
+    var _getRawTag;
+    var hasRequired_getRawTag;
 
-      var result = nativeObjectToString$1.call(value);
-      if (unmasked) {
-        if (isOwn) {
-          value[symToStringTag$1] = tag;
-        } else {
-          delete value[symToStringTag$1];
-        }
-      }
-      return result;
+    function require_getRawTag () {
+    	if (hasRequired_getRawTag) return _getRawTag;
+    	hasRequired_getRawTag = 1;
+    	var Symbol = _Symbol;
+
+    	/** Used for built-in method references. */
+    	var objectProto = Object.prototype;
+
+    	/** Used to check objects for own properties. */
+    	var hasOwnProperty = objectProto.hasOwnProperty;
+
+    	/**
+    	 * Used to resolve the
+    	 * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+    	 * of values.
+    	 */
+    	var nativeObjectToString = objectProto.toString;
+
+    	/** Built-in value references. */
+    	var symToStringTag = Symbol ? Symbol.toStringTag : undefined;
+
+    	/**
+    	 * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to query.
+    	 * @returns {string} Returns the raw `toStringTag`.
+    	 */
+    	function getRawTag(value) {
+    	  var isOwn = hasOwnProperty.call(value, symToStringTag),
+    	      tag = value[symToStringTag];
+
+    	  try {
+    	    value[symToStringTag] = undefined;
+    	    var unmasked = true;
+    	  } catch (e) {}
+
+    	  var result = nativeObjectToString.call(value);
+    	  if (unmasked) {
+    	    if (isOwn) {
+    	      value[symToStringTag] = tag;
+    	    } else {
+    	      delete value[symToStringTag];
+    	    }
+    	  }
+    	  return result;
+    	}
+
+    	_getRawTag = getRawTag;
+    	return _getRawTag;
     }
-
-    var _getRawTag = getRawTag$1;
 
     /** Used for built-in method references. */
 
-    var objectProto$4 = Object.prototype;
+    var _objectToString;
+    var hasRequired_objectToString;
 
-    /**
-     * Used to resolve the
-     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
-     * of values.
-     */
-    var nativeObjectToString = objectProto$4.toString;
+    function require_objectToString () {
+    	if (hasRequired_objectToString) return _objectToString;
+    	hasRequired_objectToString = 1;
+    	var objectProto = Object.prototype;
 
-    /**
-     * Converts `value` to a string using `Object.prototype.toString`.
-     *
-     * @private
-     * @param {*} value The value to convert.
-     * @returns {string} Returns the converted string.
-     */
-    function objectToString$1(value) {
-      return nativeObjectToString.call(value);
+    	/**
+    	 * Used to resolve the
+    	 * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+    	 * of values.
+    	 */
+    	var nativeObjectToString = objectProto.toString;
+
+    	/**
+    	 * Converts `value` to a string using `Object.prototype.toString`.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to convert.
+    	 * @returns {string} Returns the converted string.
+    	 */
+    	function objectToString(value) {
+    	  return nativeObjectToString.call(value);
+    	}
+
+    	_objectToString = objectToString;
+    	return _objectToString;
     }
-
-    var _objectToString = objectToString$1;
 
     var Symbol$2 = _Symbol,
-        getRawTag = _getRawTag,
-        objectToString = _objectToString;
+        getRawTag = require_getRawTag(),
+        objectToString = require_objectToString();
 
     /** `Object#toString` result references. */
     var nullTag = '[object Null]',
@@ -6898,12 +6919,20 @@ var app = (function () {
      * // => false
      */
 
-    function isObject$4(value) {
-      var type = typeof value;
-      return value != null && (type == 'object' || type == 'function');
-    }
+    var isObject_1;
+    var hasRequiredIsObject;
 
-    var isObject_1 = isObject$4;
+    function requireIsObject () {
+    	if (hasRequiredIsObject) return isObject_1;
+    	hasRequiredIsObject = 1;
+    	function isObject(value) {
+    	  var type = typeof value;
+    	  return value != null && (type == 'object' || type == 'function');
+    	}
+
+    	isObject_1 = isObject;
+    	return isObject_1;
+    }
 
     var isFunction_1;
     var hasRequiredIsFunction;
@@ -6912,7 +6941,7 @@ var app = (function () {
     	if (hasRequiredIsFunction) return isFunction_1;
     	hasRequiredIsFunction = 1;
     	var baseGetTag = _baseGetTag,
-    	    isObject = isObject_1;
+    	    isObject = requireIsObject();
 
     	/** `Object#toString` result references. */
     	var asyncTag = '[object AsyncFunction]',
@@ -6951,33 +6980,49 @@ var app = (function () {
     	return isFunction_1;
     }
 
-    var root$1 = _root;
+    var _coreJsData;
+    var hasRequired_coreJsData;
 
-    /** Used to detect overreaching core-js shims. */
-    var coreJsData$1 = root$1['__core-js_shared__'];
+    function require_coreJsData () {
+    	if (hasRequired_coreJsData) return _coreJsData;
+    	hasRequired_coreJsData = 1;
+    	var root = _root;
 
-    var _coreJsData = coreJsData$1;
+    	/** Used to detect overreaching core-js shims. */
+    	var coreJsData = root['__core-js_shared__'];
 
-    var coreJsData = _coreJsData;
-
-    /** Used to detect methods masquerading as native. */
-    var maskSrcKey = (function() {
-      var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
-      return uid ? ('Symbol(src)_1.' + uid) : '';
-    }());
-
-    /**
-     * Checks if `func` has its source masked.
-     *
-     * @private
-     * @param {Function} func The function to check.
-     * @returns {boolean} Returns `true` if `func` is masked, else `false`.
-     */
-    function isMasked$1(func) {
-      return !!maskSrcKey && (maskSrcKey in func);
+    	_coreJsData = coreJsData;
+    	return _coreJsData;
     }
 
-    var _isMasked = isMasked$1;
+    var _isMasked;
+    var hasRequired_isMasked;
+
+    function require_isMasked () {
+    	if (hasRequired_isMasked) return _isMasked;
+    	hasRequired_isMasked = 1;
+    	var coreJsData = require_coreJsData();
+
+    	/** Used to detect methods masquerading as native. */
+    	var maskSrcKey = (function() {
+    	  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+    	  return uid ? ('Symbol(src)_1.' + uid) : '';
+    	}());
+
+    	/**
+    	 * Checks if `func` has its source masked.
+    	 *
+    	 * @private
+    	 * @param {Function} func The function to check.
+    	 * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+    	 */
+    	function isMasked(func) {
+    	  return !!maskSrcKey && (maskSrcKey in func);
+    	}
+
+    	_isMasked = isMasked;
+    	return _isMasked;
+    }
 
     /** Used for built-in method references. */
 
@@ -7015,53 +7060,61 @@ var app = (function () {
     	return _toSource;
     }
 
-    var isFunction = requireIsFunction(),
-        isMasked = _isMasked,
-        isObject$3 = isObject_1,
-        toSource = require_toSource();
+    var _baseIsNative;
+    var hasRequired_baseIsNative;
 
-    /**
-     * Used to match `RegExp`
-     * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
-     */
-    var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+    function require_baseIsNative () {
+    	if (hasRequired_baseIsNative) return _baseIsNative;
+    	hasRequired_baseIsNative = 1;
+    	var isFunction = requireIsFunction(),
+    	    isMasked = require_isMasked(),
+    	    isObject = requireIsObject(),
+    	    toSource = require_toSource();
 
-    /** Used to detect host constructors (Safari). */
-    var reIsHostCtor = /^\[object .+?Constructor\]$/;
+    	/**
+    	 * Used to match `RegExp`
+    	 * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+    	 */
+    	var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
 
-    /** Used for built-in method references. */
-    var funcProto = Function.prototype,
-        objectProto$3 = Object.prototype;
+    	/** Used to detect host constructors (Safari). */
+    	var reIsHostCtor = /^\[object .+?Constructor\]$/;
 
-    /** Used to resolve the decompiled source of functions. */
-    var funcToString = funcProto.toString;
+    	/** Used for built-in method references. */
+    	var funcProto = Function.prototype,
+    	    objectProto = Object.prototype;
 
-    /** Used to check objects for own properties. */
-    var hasOwnProperty$4 = objectProto$3.hasOwnProperty;
+    	/** Used to resolve the decompiled source of functions. */
+    	var funcToString = funcProto.toString;
 
-    /** Used to detect if a method is native. */
-    var reIsNative = RegExp('^' +
-      funcToString.call(hasOwnProperty$4).replace(reRegExpChar, '\\$&')
-      .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-    );
+    	/** Used to check objects for own properties. */
+    	var hasOwnProperty = objectProto.hasOwnProperty;
 
-    /**
-     * The base implementation of `_.isNative` without bad shim checks.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a native function,
-     *  else `false`.
-     */
-    function baseIsNative$1(value) {
-      if (!isObject$3(value) || isMasked(value)) {
-        return false;
-      }
-      var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
-      return pattern.test(toSource(value));
+    	/** Used to detect if a method is native. */
+    	var reIsNative = RegExp('^' +
+    	  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
+    	  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+    	);
+
+    	/**
+    	 * The base implementation of `_.isNative` without bad shim checks.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to check.
+    	 * @returns {boolean} Returns `true` if `value` is a native function,
+    	 *  else `false`.
+    	 */
+    	function baseIsNative(value) {
+    	  if (!isObject(value) || isMasked(value)) {
+    	    return false;
+    	  }
+    	  var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
+    	  return pattern.test(toSource(value));
+    	}
+
+    	_baseIsNative = baseIsNative;
+    	return _baseIsNative;
     }
-
-    var _baseIsNative = baseIsNative$1;
 
     /**
      * Gets the value at `key` of `object`.
@@ -7072,29 +7125,45 @@ var app = (function () {
      * @returns {*} Returns the property value.
      */
 
-    function getValue$2(object, key) {
-      return object == null ? undefined : object[key];
+    var _getValue;
+    var hasRequired_getValue;
+
+    function require_getValue () {
+    	if (hasRequired_getValue) return _getValue;
+    	hasRequired_getValue = 1;
+    	function getValue(object, key) {
+    	  return object == null ? undefined : object[key];
+    	}
+
+    	_getValue = getValue;
+    	return _getValue;
     }
 
-    var _getValue = getValue$2;
+    var _getNative;
+    var hasRequired_getNative;
 
-    var baseIsNative = _baseIsNative,
-        getValue$1 = _getValue;
+    function require_getNative () {
+    	if (hasRequired_getNative) return _getNative;
+    	hasRequired_getNative = 1;
+    	var baseIsNative = require_baseIsNative(),
+    	    getValue = require_getValue();
 
-    /**
-     * Gets the native function at `key` of `object`.
-     *
-     * @private
-     * @param {Object} object The object to query.
-     * @param {string} key The key of the method to get.
-     * @returns {*} Returns the function if it's native, else `undefined`.
-     */
-    function getNative$2(object, key) {
-      var value = getValue$1(object, key);
-      return baseIsNative(value) ? value : undefined;
+    	/**
+    	 * Gets the native function at `key` of `object`.
+    	 *
+    	 * @private
+    	 * @param {Object} object The object to query.
+    	 * @param {string} key The key of the method to get.
+    	 * @returns {*} Returns the function if it's native, else `undefined`.
+    	 */
+    	function getNative(object, key) {
+    	  var value = getValue(object, key);
+    	  return baseIsNative(value) ? value : undefined;
+    	}
+
+    	_getNative = getNative;
+    	return _getNative;
     }
-
-    var _getNative = getNative$2;
 
     var _Map;
     var hasRequired_Map;
@@ -7102,7 +7171,7 @@ var app = (function () {
     function require_Map () {
     	if (hasRequired_Map) return _Map;
     	hasRequired_Map = 1;
-    	var getNative = _getNative,
+    	var getNative = require_getNative(),
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -7112,28 +7181,44 @@ var app = (function () {
     	return _Map;
     }
 
-    var getNative$1 = _getNative;
+    var _nativeCreate;
+    var hasRequired_nativeCreate;
 
-    /* Built-in method references that are verified to be native. */
-    var nativeCreate$4 = getNative$1(Object, 'create');
+    function require_nativeCreate () {
+    	if (hasRequired_nativeCreate) return _nativeCreate;
+    	hasRequired_nativeCreate = 1;
+    	var getNative = require_getNative();
 
-    var _nativeCreate = nativeCreate$4;
+    	/* Built-in method references that are verified to be native. */
+    	var nativeCreate = getNative(Object, 'create');
 
-    var nativeCreate$3 = _nativeCreate;
-
-    /**
-     * Removes all key-value entries from the hash.
-     *
-     * @private
-     * @name clear
-     * @memberOf Hash
-     */
-    function hashClear$1() {
-      this.__data__ = nativeCreate$3 ? nativeCreate$3(null) : {};
-      this.size = 0;
+    	_nativeCreate = nativeCreate;
+    	return _nativeCreate;
     }
 
-    var _hashClear = hashClear$1;
+    var _hashClear;
+    var hasRequired_hashClear;
+
+    function require_hashClear () {
+    	if (hasRequired_hashClear) return _hashClear;
+    	hasRequired_hashClear = 1;
+    	var nativeCreate = require_nativeCreate();
+
+    	/**
+    	 * Removes all key-value entries from the hash.
+    	 *
+    	 * @private
+    	 * @name clear
+    	 * @memberOf Hash
+    	 */
+    	function hashClear() {
+    	  this.__data__ = nativeCreate ? nativeCreate(null) : {};
+    	  this.size = 0;
+    	}
+
+    	_hashClear = hashClear;
+    	return _hashClear;
+    }
 
     /**
      * Removes `key` and its value from the hash.
@@ -7146,147 +7231,195 @@ var app = (function () {
      * @returns {boolean} Returns `true` if the entry was removed, else `false`.
      */
 
-    function hashDelete$1(key) {
-      var result = this.has(key) && delete this.__data__[key];
-      this.size -= result ? 1 : 0;
-      return result;
+    var _hashDelete;
+    var hasRequired_hashDelete;
+
+    function require_hashDelete () {
+    	if (hasRequired_hashDelete) return _hashDelete;
+    	hasRequired_hashDelete = 1;
+    	function hashDelete(key) {
+    	  var result = this.has(key) && delete this.__data__[key];
+    	  this.size -= result ? 1 : 0;
+    	  return result;
+    	}
+
+    	_hashDelete = hashDelete;
+    	return _hashDelete;
     }
 
-    var _hashDelete = hashDelete$1;
+    var _hashGet;
+    var hasRequired_hashGet;
 
-    var nativeCreate$2 = _nativeCreate;
+    function require_hashGet () {
+    	if (hasRequired_hashGet) return _hashGet;
+    	hasRequired_hashGet = 1;
+    	var nativeCreate = require_nativeCreate();
 
-    /** Used to stand-in for `undefined` hash values. */
-    var HASH_UNDEFINED$1 = '__lodash_hash_undefined__';
+    	/** Used to stand-in for `undefined` hash values. */
+    	var HASH_UNDEFINED = '__lodash_hash_undefined__';
 
-    /** Used for built-in method references. */
-    var objectProto$2 = Object.prototype;
+    	/** Used for built-in method references. */
+    	var objectProto = Object.prototype;
 
-    /** Used to check objects for own properties. */
-    var hasOwnProperty$3 = objectProto$2.hasOwnProperty;
+    	/** Used to check objects for own properties. */
+    	var hasOwnProperty = objectProto.hasOwnProperty;
 
-    /**
-     * Gets the hash value for `key`.
-     *
-     * @private
-     * @name get
-     * @memberOf Hash
-     * @param {string} key The key of the value to get.
-     * @returns {*} Returns the entry value.
-     */
-    function hashGet$1(key) {
-      var data = this.__data__;
-      if (nativeCreate$2) {
-        var result = data[key];
-        return result === HASH_UNDEFINED$1 ? undefined : result;
-      }
-      return hasOwnProperty$3.call(data, key) ? data[key] : undefined;
+    	/**
+    	 * Gets the hash value for `key`.
+    	 *
+    	 * @private
+    	 * @name get
+    	 * @memberOf Hash
+    	 * @param {string} key The key of the value to get.
+    	 * @returns {*} Returns the entry value.
+    	 */
+    	function hashGet(key) {
+    	  var data = this.__data__;
+    	  if (nativeCreate) {
+    	    var result = data[key];
+    	    return result === HASH_UNDEFINED ? undefined : result;
+    	  }
+    	  return hasOwnProperty.call(data, key) ? data[key] : undefined;
+    	}
+
+    	_hashGet = hashGet;
+    	return _hashGet;
     }
 
-    var _hashGet = hashGet$1;
+    var _hashHas;
+    var hasRequired_hashHas;
 
-    var nativeCreate$1 = _nativeCreate;
+    function require_hashHas () {
+    	if (hasRequired_hashHas) return _hashHas;
+    	hasRequired_hashHas = 1;
+    	var nativeCreate = require_nativeCreate();
 
-    /** Used for built-in method references. */
-    var objectProto$1 = Object.prototype;
+    	/** Used for built-in method references. */
+    	var objectProto = Object.prototype;
 
-    /** Used to check objects for own properties. */
-    var hasOwnProperty$2 = objectProto$1.hasOwnProperty;
+    	/** Used to check objects for own properties. */
+    	var hasOwnProperty = objectProto.hasOwnProperty;
 
-    /**
-     * Checks if a hash value for `key` exists.
-     *
-     * @private
-     * @name has
-     * @memberOf Hash
-     * @param {string} key The key of the entry to check.
-     * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
-     */
-    function hashHas$1(key) {
-      var data = this.__data__;
-      return nativeCreate$1 ? (data[key] !== undefined) : hasOwnProperty$2.call(data, key);
+    	/**
+    	 * Checks if a hash value for `key` exists.
+    	 *
+    	 * @private
+    	 * @name has
+    	 * @memberOf Hash
+    	 * @param {string} key The key of the entry to check.
+    	 * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+    	 */
+    	function hashHas(key) {
+    	  var data = this.__data__;
+    	  return nativeCreate ? (data[key] !== undefined) : hasOwnProperty.call(data, key);
+    	}
+
+    	_hashHas = hashHas;
+    	return _hashHas;
     }
 
-    var _hashHas = hashHas$1;
+    var _hashSet;
+    var hasRequired_hashSet;
 
-    var nativeCreate = _nativeCreate;
+    function require_hashSet () {
+    	if (hasRequired_hashSet) return _hashSet;
+    	hasRequired_hashSet = 1;
+    	var nativeCreate = require_nativeCreate();
 
-    /** Used to stand-in for `undefined` hash values. */
-    var HASH_UNDEFINED = '__lodash_hash_undefined__';
+    	/** Used to stand-in for `undefined` hash values. */
+    	var HASH_UNDEFINED = '__lodash_hash_undefined__';
 
-    /**
-     * Sets the hash `key` to `value`.
-     *
-     * @private
-     * @name set
-     * @memberOf Hash
-     * @param {string} key The key of the value to set.
-     * @param {*} value The value to set.
-     * @returns {Object} Returns the hash instance.
-     */
-    function hashSet$1(key, value) {
-      var data = this.__data__;
-      this.size += this.has(key) ? 0 : 1;
-      data[key] = (nativeCreate && value === undefined) ? HASH_UNDEFINED : value;
-      return this;
+    	/**
+    	 * Sets the hash `key` to `value`.
+    	 *
+    	 * @private
+    	 * @name set
+    	 * @memberOf Hash
+    	 * @param {string} key The key of the value to set.
+    	 * @param {*} value The value to set.
+    	 * @returns {Object} Returns the hash instance.
+    	 */
+    	function hashSet(key, value) {
+    	  var data = this.__data__;
+    	  this.size += this.has(key) ? 0 : 1;
+    	  data[key] = (nativeCreate && value === undefined) ? HASH_UNDEFINED : value;
+    	  return this;
+    	}
+
+    	_hashSet = hashSet;
+    	return _hashSet;
     }
 
-    var _hashSet = hashSet$1;
+    var _Hash;
+    var hasRequired_Hash;
 
-    var hashClear = _hashClear,
-        hashDelete = _hashDelete,
-        hashGet = _hashGet,
-        hashHas = _hashHas,
-        hashSet = _hashSet;
+    function require_Hash () {
+    	if (hasRequired_Hash) return _Hash;
+    	hasRequired_Hash = 1;
+    	var hashClear = require_hashClear(),
+    	    hashDelete = require_hashDelete(),
+    	    hashGet = require_hashGet(),
+    	    hashHas = require_hashHas(),
+    	    hashSet = require_hashSet();
 
-    /**
-     * Creates a hash object.
-     *
-     * @private
-     * @constructor
-     * @param {Array} [entries] The key-value pairs to cache.
-     */
-    function Hash$1(entries) {
-      var index = -1,
-          length = entries == null ? 0 : entries.length;
+    	/**
+    	 * Creates a hash object.
+    	 *
+    	 * @private
+    	 * @constructor
+    	 * @param {Array} [entries] The key-value pairs to cache.
+    	 */
+    	function Hash(entries) {
+    	  var index = -1,
+    	      length = entries == null ? 0 : entries.length;
 
-      this.clear();
-      while (++index < length) {
-        var entry = entries[index];
-        this.set(entry[0], entry[1]);
-      }
+    	  this.clear();
+    	  while (++index < length) {
+    	    var entry = entries[index];
+    	    this.set(entry[0], entry[1]);
+    	  }
+    	}
+
+    	// Add methods to `Hash`.
+    	Hash.prototype.clear = hashClear;
+    	Hash.prototype['delete'] = hashDelete;
+    	Hash.prototype.get = hashGet;
+    	Hash.prototype.has = hashHas;
+    	Hash.prototype.set = hashSet;
+
+    	_Hash = Hash;
+    	return _Hash;
     }
 
-    // Add methods to `Hash`.
-    Hash$1.prototype.clear = hashClear;
-    Hash$1.prototype['delete'] = hashDelete;
-    Hash$1.prototype.get = hashGet;
-    Hash$1.prototype.has = hashHas;
-    Hash$1.prototype.set = hashSet;
+    var _mapCacheClear;
+    var hasRequired_mapCacheClear;
 
-    var _Hash = Hash$1;
+    function require_mapCacheClear () {
+    	if (hasRequired_mapCacheClear) return _mapCacheClear;
+    	hasRequired_mapCacheClear = 1;
+    	var Hash = require_Hash(),
+    	    ListCache = require_ListCache(),
+    	    Map = require_Map();
 
-    var Hash = _Hash,
-        ListCache = require_ListCache(),
-        Map$2 = require_Map();
+    	/**
+    	 * Removes all key-value entries from the map.
+    	 *
+    	 * @private
+    	 * @name clear
+    	 * @memberOf MapCache
+    	 */
+    	function mapCacheClear() {
+    	  this.size = 0;
+    	  this.__data__ = {
+    	    'hash': new Hash,
+    	    'map': new (Map || ListCache),
+    	    'string': new Hash
+    	  };
+    	}
 
-    /**
-     * Removes all key-value entries from the map.
-     *
-     * @private
-     * @name clear
-     * @memberOf MapCache
-     */
-    function mapCacheClear$1() {
-      this.size = 0;
-      this.__data__ = {
-        'hash': new Hash,
-        'map': new (Map$2 || ListCache),
-        'string': new Hash
-      };
+    	_mapCacheClear = mapCacheClear;
+    	return _mapCacheClear;
     }
-
-    var _mapCacheClear = mapCacheClear$1;
 
     /**
      * Checks if `value` is suitable for use as unique object key.
@@ -7296,115 +7429,163 @@ var app = (function () {
      * @returns {boolean} Returns `true` if `value` is suitable, else `false`.
      */
 
-    function isKeyable$1(value) {
-      var type = typeof value;
-      return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
-        ? (value !== '__proto__')
-        : (value === null);
+    var _isKeyable;
+    var hasRequired_isKeyable;
+
+    function require_isKeyable () {
+    	if (hasRequired_isKeyable) return _isKeyable;
+    	hasRequired_isKeyable = 1;
+    	function isKeyable(value) {
+    	  var type = typeof value;
+    	  return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
+    	    ? (value !== '__proto__')
+    	    : (value === null);
+    	}
+
+    	_isKeyable = isKeyable;
+    	return _isKeyable;
     }
 
-    var _isKeyable = isKeyable$1;
+    var _getMapData;
+    var hasRequired_getMapData;
 
-    var isKeyable = _isKeyable;
+    function require_getMapData () {
+    	if (hasRequired_getMapData) return _getMapData;
+    	hasRequired_getMapData = 1;
+    	var isKeyable = require_isKeyable();
 
-    /**
-     * Gets the data for `map`.
-     *
-     * @private
-     * @param {Object} map The map to query.
-     * @param {string} key The reference key.
-     * @returns {*} Returns the map data.
-     */
-    function getMapData$4(map, key) {
-      var data = map.__data__;
-      return isKeyable(key)
-        ? data[typeof key == 'string' ? 'string' : 'hash']
-        : data.map;
+    	/**
+    	 * Gets the data for `map`.
+    	 *
+    	 * @private
+    	 * @param {Object} map The map to query.
+    	 * @param {string} key The reference key.
+    	 * @returns {*} Returns the map data.
+    	 */
+    	function getMapData(map, key) {
+    	  var data = map.__data__;
+    	  return isKeyable(key)
+    	    ? data[typeof key == 'string' ? 'string' : 'hash']
+    	    : data.map;
+    	}
+
+    	_getMapData = getMapData;
+    	return _getMapData;
     }
 
-    var _getMapData = getMapData$4;
+    var _mapCacheDelete;
+    var hasRequired_mapCacheDelete;
 
-    var getMapData$3 = _getMapData;
+    function require_mapCacheDelete () {
+    	if (hasRequired_mapCacheDelete) return _mapCacheDelete;
+    	hasRequired_mapCacheDelete = 1;
+    	var getMapData = require_getMapData();
 
-    /**
-     * Removes `key` and its value from the map.
-     *
-     * @private
-     * @name delete
-     * @memberOf MapCache
-     * @param {string} key The key of the value to remove.
-     * @returns {boolean} Returns `true` if the entry was removed, else `false`.
-     */
-    function mapCacheDelete$1(key) {
-      var result = getMapData$3(this, key)['delete'](key);
-      this.size -= result ? 1 : 0;
-      return result;
+    	/**
+    	 * Removes `key` and its value from the map.
+    	 *
+    	 * @private
+    	 * @name delete
+    	 * @memberOf MapCache
+    	 * @param {string} key The key of the value to remove.
+    	 * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+    	 */
+    	function mapCacheDelete(key) {
+    	  var result = getMapData(this, key)['delete'](key);
+    	  this.size -= result ? 1 : 0;
+    	  return result;
+    	}
+
+    	_mapCacheDelete = mapCacheDelete;
+    	return _mapCacheDelete;
     }
 
-    var _mapCacheDelete = mapCacheDelete$1;
+    var _mapCacheGet;
+    var hasRequired_mapCacheGet;
 
-    var getMapData$2 = _getMapData;
+    function require_mapCacheGet () {
+    	if (hasRequired_mapCacheGet) return _mapCacheGet;
+    	hasRequired_mapCacheGet = 1;
+    	var getMapData = require_getMapData();
 
-    /**
-     * Gets the map value for `key`.
-     *
-     * @private
-     * @name get
-     * @memberOf MapCache
-     * @param {string} key The key of the value to get.
-     * @returns {*} Returns the entry value.
-     */
-    function mapCacheGet$1(key) {
-      return getMapData$2(this, key).get(key);
+    	/**
+    	 * Gets the map value for `key`.
+    	 *
+    	 * @private
+    	 * @name get
+    	 * @memberOf MapCache
+    	 * @param {string} key The key of the value to get.
+    	 * @returns {*} Returns the entry value.
+    	 */
+    	function mapCacheGet(key) {
+    	  return getMapData(this, key).get(key);
+    	}
+
+    	_mapCacheGet = mapCacheGet;
+    	return _mapCacheGet;
     }
 
-    var _mapCacheGet = mapCacheGet$1;
+    var _mapCacheHas;
+    var hasRequired_mapCacheHas;
 
-    var getMapData$1 = _getMapData;
+    function require_mapCacheHas () {
+    	if (hasRequired_mapCacheHas) return _mapCacheHas;
+    	hasRequired_mapCacheHas = 1;
+    	var getMapData = require_getMapData();
 
-    /**
-     * Checks if a map value for `key` exists.
-     *
-     * @private
-     * @name has
-     * @memberOf MapCache
-     * @param {string} key The key of the entry to check.
-     * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
-     */
-    function mapCacheHas$1(key) {
-      return getMapData$1(this, key).has(key);
+    	/**
+    	 * Checks if a map value for `key` exists.
+    	 *
+    	 * @private
+    	 * @name has
+    	 * @memberOf MapCache
+    	 * @param {string} key The key of the entry to check.
+    	 * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+    	 */
+    	function mapCacheHas(key) {
+    	  return getMapData(this, key).has(key);
+    	}
+
+    	_mapCacheHas = mapCacheHas;
+    	return _mapCacheHas;
     }
 
-    var _mapCacheHas = mapCacheHas$1;
+    var _mapCacheSet;
+    var hasRequired_mapCacheSet;
 
-    var getMapData = _getMapData;
+    function require_mapCacheSet () {
+    	if (hasRequired_mapCacheSet) return _mapCacheSet;
+    	hasRequired_mapCacheSet = 1;
+    	var getMapData = require_getMapData();
 
-    /**
-     * Sets the map `key` to `value`.
-     *
-     * @private
-     * @name set
-     * @memberOf MapCache
-     * @param {string} key The key of the value to set.
-     * @param {*} value The value to set.
-     * @returns {Object} Returns the map cache instance.
-     */
-    function mapCacheSet$1(key, value) {
-      var data = getMapData(this, key),
-          size = data.size;
+    	/**
+    	 * Sets the map `key` to `value`.
+    	 *
+    	 * @private
+    	 * @name set
+    	 * @memberOf MapCache
+    	 * @param {string} key The key of the value to set.
+    	 * @param {*} value The value to set.
+    	 * @returns {Object} Returns the map cache instance.
+    	 */
+    	function mapCacheSet(key, value) {
+    	  var data = getMapData(this, key),
+    	      size = data.size;
 
-      data.set(key, value);
-      this.size += data.size == size ? 0 : 1;
-      return this;
+    	  data.set(key, value);
+    	  this.size += data.size == size ? 0 : 1;
+    	  return this;
+    	}
+
+    	_mapCacheSet = mapCacheSet;
+    	return _mapCacheSet;
     }
 
-    var _mapCacheSet = mapCacheSet$1;
-
-    var mapCacheClear = _mapCacheClear,
-        mapCacheDelete = _mapCacheDelete,
-        mapCacheGet = _mapCacheGet,
-        mapCacheHas = _mapCacheHas,
-        mapCacheSet = _mapCacheSet;
+    var mapCacheClear = require_mapCacheClear(),
+        mapCacheDelete = require_mapCacheDelete(),
+        mapCacheGet = require_mapCacheGet(),
+        mapCacheHas = require_mapCacheHas(),
+        mapCacheSet = require_mapCacheSet();
 
     /**
      * Creates a map cache object to store key-value pairs.
@@ -7544,46 +7725,62 @@ var app = (function () {
     	return _arrayEach;
     }
 
-    var getNative = _getNative;
+    var _defineProperty$1;
+    var hasRequired_defineProperty;
 
-    var defineProperty$1 = (function() {
-      try {
-        var func = getNative(Object, 'defineProperty');
-        func({}, '', {});
-        return func;
-      } catch (e) {}
-    }());
+    function require_defineProperty () {
+    	if (hasRequired_defineProperty) return _defineProperty$1;
+    	hasRequired_defineProperty = 1;
+    	var getNative = require_getNative();
 
-    var _defineProperty$1 = defineProperty$1;
+    	var defineProperty = (function() {
+    	  try {
+    	    var func = getNative(Object, 'defineProperty');
+    	    func({}, '', {});
+    	    return func;
+    	  } catch (e) {}
+    	}());
 
-    var defineProperty = _defineProperty$1;
-
-    /**
-     * The base implementation of `assignValue` and `assignMergeValue` without
-     * value checks.
-     *
-     * @private
-     * @param {Object} object The object to modify.
-     * @param {string} key The key of the property to assign.
-     * @param {*} value The value to assign.
-     */
-    function baseAssignValue$1(object, key, value) {
-      if (key == '__proto__' && defineProperty) {
-        defineProperty(object, key, {
-          'configurable': true,
-          'enumerable': true,
-          'value': value,
-          'writable': true
-        });
-      } else {
-        object[key] = value;
-      }
+    	_defineProperty$1 = defineProperty;
+    	return _defineProperty$1;
     }
 
-    var _baseAssignValue = baseAssignValue$1;
+    var _baseAssignValue;
+    var hasRequired_baseAssignValue;
 
-    var baseAssignValue = _baseAssignValue,
-        eq = eq_1;
+    function require_baseAssignValue () {
+    	if (hasRequired_baseAssignValue) return _baseAssignValue;
+    	hasRequired_baseAssignValue = 1;
+    	var defineProperty = require_defineProperty();
+
+    	/**
+    	 * The base implementation of `assignValue` and `assignMergeValue` without
+    	 * value checks.
+    	 *
+    	 * @private
+    	 * @param {Object} object The object to modify.
+    	 * @param {string} key The key of the property to assign.
+    	 * @param {*} value The value to assign.
+    	 */
+    	function baseAssignValue(object, key, value) {
+    	  if (key == '__proto__' && defineProperty) {
+    	    defineProperty(object, key, {
+    	      'configurable': true,
+    	      'enumerable': true,
+    	      'value': value,
+    	      'writable': true
+    	    });
+    	  } else {
+    	    object[key] = value;
+    	  }
+    	}
+
+    	_baseAssignValue = baseAssignValue;
+    	return _baseAssignValue;
+    }
+
+    var baseAssignValue = require_baseAssignValue(),
+        eq = requireEq();
 
     /** Used for built-in method references. */
     var objectProto = Object.prototype;
@@ -7618,7 +7815,7 @@ var app = (function () {
     	if (hasRequired_copyObject) return _copyObject;
     	hasRequired_copyObject = 1;
     	var assignValue = _assignValue,
-    	    baseAssignValue = _baseAssignValue;
+    	    baseAssignValue = require_baseAssignValue();
 
     	/**
     	 * Copies properties of `source` to `object`.
@@ -7715,11 +7912,19 @@ var app = (function () {
      * // => false
      */
 
-    function isObjectLike$1(value) {
-      return value != null && typeof value == 'object';
-    }
+    var isObjectLike_1;
+    var hasRequiredIsObjectLike;
 
-    var isObjectLike_1 = isObjectLike$1;
+    function requireIsObjectLike () {
+    	if (hasRequiredIsObjectLike) return isObjectLike_1;
+    	hasRequiredIsObjectLike = 1;
+    	function isObjectLike(value) {
+    	  return value != null && typeof value == 'object';
+    	}
+
+    	isObjectLike_1 = isObjectLike;
+    	return isObjectLike_1;
+    }
 
     var _baseIsArguments;
     var hasRequired_baseIsArguments;
@@ -7728,7 +7933,7 @@ var app = (function () {
     	if (hasRequired_baseIsArguments) return _baseIsArguments;
     	hasRequired_baseIsArguments = 1;
     	var baseGetTag = _baseGetTag,
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/** `Object#toString` result references. */
     	var argsTag = '[object Arguments]';
@@ -7755,7 +7960,7 @@ var app = (function () {
     	if (hasRequiredIsArguments) return isArguments_1;
     	hasRequiredIsArguments = 1;
     	var baseIsArguments = require_baseIsArguments(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/** Used for built-in method references. */
     	var objectProto = Object.prototype;
@@ -7817,9 +8022,17 @@ var app = (function () {
      * // => false
      */
 
-    var isArray$4 = Array.isArray;
+    var isArray_1;
+    var hasRequiredIsArray;
 
-    var isArray_1 = isArray$4;
+    function requireIsArray () {
+    	if (hasRequiredIsArray) return isArray_1;
+    	hasRequiredIsArray = 1;
+    	var isArray = Array.isArray;
+
+    	isArray_1 = isArray;
+    	return isArray_1;
+    }
 
     var isBuffer = {exports: {}};
 
@@ -7903,30 +8116,38 @@ var app = (function () {
 
     /** Used as references for various `Number` constants. */
 
-    var MAX_SAFE_INTEGER = 9007199254740991;
+    var _isIndex;
+    var hasRequired_isIndex;
 
-    /** Used to detect unsigned integer values. */
-    var reIsUint = /^(?:0|[1-9]\d*)$/;
+    function require_isIndex () {
+    	if (hasRequired_isIndex) return _isIndex;
+    	hasRequired_isIndex = 1;
+    	var MAX_SAFE_INTEGER = 9007199254740991;
 
-    /**
-     * Checks if `value` is a valid array-like index.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
-     * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
-     */
-    function isIndex$1(value, length) {
-      var type = typeof value;
-      length = length == null ? MAX_SAFE_INTEGER : length;
+    	/** Used to detect unsigned integer values. */
+    	var reIsUint = /^(?:0|[1-9]\d*)$/;
 
-      return !!length &&
-        (type == 'number' ||
-          (type != 'symbol' && reIsUint.test(value))) &&
-            (value > -1 && value % 1 == 0 && value < length);
+    	/**
+    	 * Checks if `value` is a valid array-like index.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to check.
+    	 * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+    	 * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+    	 */
+    	function isIndex(value, length) {
+    	  var type = typeof value;
+    	  length = length == null ? MAX_SAFE_INTEGER : length;
+
+    	  return !!length &&
+    	    (type == 'number' ||
+    	      (type != 'symbol' && reIsUint.test(value))) &&
+    	        (value > -1 && value % 1 == 0 && value < length);
+    	}
+
+    	_isIndex = isIndex;
+    	return _isIndex;
     }
-
-    var _isIndex = isIndex$1;
 
     /** Used as references for various `Number` constants. */
 
@@ -7981,7 +8202,7 @@ var app = (function () {
     	hasRequired_baseIsTypedArray = 1;
     	var baseGetTag = _baseGetTag,
     	    isLength = requireIsLength(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/** `Object#toString` result references. */
     	var argsTag = '[object Arguments]',
@@ -8076,7 +8297,7 @@ var app = (function () {
     	if (hasRequired_nodeUtil) return _nodeUtil.exports;
     	hasRequired_nodeUtil = 1;
     	(function (module, exports) {
-    		var freeGlobal = _freeGlobal;
+    		var freeGlobal = require_freeGlobal();
 
     		/** Detect free variable `exports`. */
     		var freeExports = exports && !exports.nodeType && exports;
@@ -8154,9 +8375,9 @@ var app = (function () {
     	hasRequired_arrayLikeKeys = 1;
     	var baseTimes = require_baseTimes(),
     	    isArguments = requireIsArguments(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    isBuffer = requireIsBuffer(),
-    	    isIndex = _isIndex,
+    	    isIndex = require_isIndex(),
     	    isTypedArray = requireIsTypedArray();
 
     	/** Used for built-in method references. */
@@ -8461,7 +8682,7 @@ var app = (function () {
     function require_baseKeysIn () {
     	if (hasRequired_baseKeysIn) return _baseKeysIn;
     	hasRequired_baseKeysIn = 1;
-    	var isObject = isObject_1,
+    	var isObject = requireIsObject(),
     	    isPrototype = require_isPrototype(),
     	    nativeKeysIn = require_nativeKeysIn();
 
@@ -8878,7 +9099,7 @@ var app = (function () {
     	if (hasRequired_baseGetAllKeys) return _baseGetAllKeys;
     	hasRequired_baseGetAllKeys = 1;
     	var arrayPush = require_arrayPush(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/**
     	 * The base implementation of `getAllKeys` and `getAllKeysIn` which uses
@@ -8957,7 +9178,7 @@ var app = (function () {
     function require_DataView () {
     	if (hasRequired_DataView) return _DataView;
     	hasRequired_DataView = 1;
-    	var getNative = _getNative,
+    	var getNative = require_getNative(),
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -8973,7 +9194,7 @@ var app = (function () {
     function require_Promise () {
     	if (hasRequired_Promise) return _Promise;
     	hasRequired_Promise = 1;
-    	var getNative = _getNative,
+    	var getNative = require_getNative(),
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -8989,7 +9210,7 @@ var app = (function () {
     function require_Set () {
     	if (hasRequired_Set) return _Set;
     	hasRequired_Set = 1;
-    	var getNative = _getNative,
+    	var getNative = require_getNative(),
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -9005,7 +9226,7 @@ var app = (function () {
     function require_WeakMap () {
     	if (hasRequired_WeakMap) return _WeakMap;
     	hasRequired_WeakMap = 1;
-    	var getNative = _getNative,
+    	var getNative = require_getNative(),
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -9354,7 +9575,7 @@ var app = (function () {
     function require_baseCreate () {
     	if (hasRequired_baseCreate) return _baseCreate;
     	hasRequired_baseCreate = 1;
-    	var isObject = isObject_1;
+    	var isObject = requireIsObject();
 
     	/** Built-in value references. */
     	var objectCreate = Object.create;
@@ -9421,7 +9642,7 @@ var app = (function () {
     	if (hasRequired_baseIsMap) return _baseIsMap;
     	hasRequired_baseIsMap = 1;
     	var getTag = require_getTag(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/** `Object#toString` result references. */
     	var mapTag = '[object Map]';
@@ -9484,7 +9705,7 @@ var app = (function () {
     	if (hasRequired_baseIsSet) return _baseIsSet;
     	hasRequired_baseIsSet = 1;
     	var getTag = require_getTag(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/** `Object#toString` result references. */
     	var setTag = '[object Set]';
@@ -9561,10 +9782,10 @@ var app = (function () {
     	    initCloneArray = require_initCloneArray(),
     	    initCloneByTag = require_initCloneByTag(),
     	    initCloneObject = require_initCloneObject(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    isBuffer = requireIsBuffer(),
     	    isMap = requireIsMap(),
-    	    isObject = isObject_1,
+    	    isObject = requireIsObject(),
     	    isSet = requireIsSet(),
     	    keys = requireKeys(),
     	    keysIn = requireKeysIn();
@@ -10008,7 +10229,7 @@ var app = (function () {
     	var arrayEach = require_arrayEach(),
     	    baseEach = require_baseEach(),
     	    castFunction = require_castFunction(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/**
     	 * Iterates over elements of `collection` and invokes `iteratee` for each element.
@@ -10391,7 +10612,7 @@ var app = (function () {
     	hasRequired_equalByTag = 1;
     	var Symbol = _Symbol,
     	    Uint8Array = require_Uint8Array(),
-    	    eq = eq_1,
+    	    eq = requireEq(),
     	    equalArrays = require_equalArrays(),
     	    mapToArray = require_mapToArray(),
     	    setToArray = require_setToArray();
@@ -10614,7 +10835,7 @@ var app = (function () {
     	    equalByTag = require_equalByTag(),
     	    equalObjects = require_equalObjects(),
     	    getTag = require_getTag(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    isBuffer = requireIsBuffer(),
     	    isTypedArray = requireIsTypedArray();
 
@@ -10702,7 +10923,7 @@ var app = (function () {
     	if (hasRequired_baseIsEqual) return _baseIsEqual;
     	hasRequired_baseIsEqual = 1;
     	var baseIsEqualDeep = require_baseIsEqualDeep(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/**
     	 * The base implementation of `_.isEqual` which supports partial comparisons
@@ -10809,7 +11030,7 @@ var app = (function () {
     function require_isStrictComparable () {
     	if (hasRequired_isStrictComparable) return _isStrictComparable;
     	hasRequired_isStrictComparable = 1;
-    	var isObject = isObject_1;
+    	var isObject = requireIsObject();
 
     	/**
     	 * Checks if `value` is suitable for strict equality comparisons, i.e. `===`.
@@ -10922,7 +11143,7 @@ var app = (function () {
     }
 
     var baseGetTag = _baseGetTag,
-        isObjectLike = isObjectLike_1;
+        isObjectLike = requireIsObjectLike();
 
     /** `Object#toString` result references. */
     var symbolTag = '[object Symbol]';
@@ -10944,42 +11165,50 @@ var app = (function () {
      * _.isSymbol('abc');
      * // => false
      */
-    function isSymbol$5(value) {
+    function isSymbol$4(value) {
       return typeof value == 'symbol' ||
         (isObjectLike(value) && baseGetTag(value) == symbolTag);
     }
 
-    var isSymbol_1 = isSymbol$5;
+    var isSymbol_1 = isSymbol$4;
 
-    var isArray$3 = isArray_1,
-        isSymbol$4 = isSymbol_1;
+    var _isKey;
+    var hasRequired_isKey;
 
-    /** Used to match property names within property paths. */
-    var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
-        reIsPlainProp = /^\w*$/;
+    function require_isKey () {
+    	if (hasRequired_isKey) return _isKey;
+    	hasRequired_isKey = 1;
+    	var isArray = requireIsArray(),
+    	    isSymbol = isSymbol_1;
 
-    /**
-     * Checks if `value` is a property name and not a property path.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @param {Object} [object] The object to query keys on.
-     * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
-     */
-    function isKey$1(value, object) {
-      if (isArray$3(value)) {
-        return false;
-      }
-      var type = typeof value;
-      if (type == 'number' || type == 'symbol' || type == 'boolean' ||
-          value == null || isSymbol$4(value)) {
-        return true;
-      }
-      return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
-        (object != null && value in Object(object));
+    	/** Used to match property names within property paths. */
+    	var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
+    	    reIsPlainProp = /^\w*$/;
+
+    	/**
+    	 * Checks if `value` is a property name and not a property path.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to check.
+    	 * @param {Object} [object] The object to query keys on.
+    	 * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
+    	 */
+    	function isKey(value, object) {
+    	  if (isArray(value)) {
+    	    return false;
+    	  }
+    	  var type = typeof value;
+    	  if (type == 'number' || type == 'symbol' || type == 'boolean' ||
+    	      value == null || isSymbol(value)) {
+    	    return true;
+    	  }
+    	  return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
+    	    (object != null && value in Object(object));
+    	}
+
+    	_isKey = isKey;
+    	return _isKey;
     }
-
-    var _isKey = isKey$1;
 
     var MapCache = _MapCache;
 
@@ -11120,22 +11349,30 @@ var app = (function () {
      * @returns {Array} Returns the new mapped array.
      */
 
-    function arrayMap$2(array, iteratee) {
-      var index = -1,
-          length = array == null ? 0 : array.length,
-          result = Array(length);
+    var _arrayMap;
+    var hasRequired_arrayMap;
 
-      while (++index < length) {
-        result[index] = iteratee(array[index], index, array);
-      }
-      return result;
+    function require_arrayMap () {
+    	if (hasRequired_arrayMap) return _arrayMap;
+    	hasRequired_arrayMap = 1;
+    	function arrayMap(array, iteratee) {
+    	  var index = -1,
+    	      length = array == null ? 0 : array.length,
+    	      result = Array(length);
+
+    	  while (++index < length) {
+    	    result[index] = iteratee(array[index], index, array);
+    	  }
+    	  return result;
+    	}
+
+    	_arrayMap = arrayMap;
+    	return _arrayMap;
     }
 
-    var _arrayMap = arrayMap$2;
-
     var Symbol$1 = _Symbol,
-        arrayMap$1 = _arrayMap,
-        isArray$2 = isArray_1,
+        arrayMap$1 = require_arrayMap(),
+        isArray$2 = requireIsArray(),
         isSymbol$3 = isSymbol_1;
 
     /** Used as references for various `Number` constants. */
@@ -11200,8 +11437,8 @@ var app = (function () {
 
     var toString_1 = toString$3;
 
-    var isArray$1 = isArray_1,
-        isKey = _isKey,
+    var isArray$1 = requireIsArray(),
+        isKey = require_isKey(),
         stringToPath$1 = _stringToPath,
         toString$2 = toString_1;
 
@@ -11334,8 +11571,8 @@ var app = (function () {
     	hasRequired_hasPath = 1;
     	var castPath = _castPath,
     	    isArguments = requireIsArguments(),
-    	    isArray = isArray_1,
-    	    isIndex = _isIndex,
+    	    isArray = requireIsArray(),
+    	    isIndex = require_isIndex(),
     	    isLength = requireIsLength(),
     	    toKey = _toKey;
 
@@ -11426,7 +11663,7 @@ var app = (function () {
     	var baseIsEqual = require_baseIsEqual(),
     	    get = get_1,
     	    hasIn = requireHasIn(),
-    	    isKey = _isKey,
+    	    isKey = require_isKey(),
     	    isStrictComparable = require_isStrictComparable(),
     	    matchesStrictComparable = require_matchesStrictComparable(),
     	    toKey = _toKey;
@@ -11516,7 +11753,7 @@ var app = (function () {
     	hasRequiredProperty = 1;
     	var baseProperty = require_baseProperty(),
     	    basePropertyDeep = require_basePropertyDeep(),
-    	    isKey = _isKey,
+    	    isKey = require_isKey(),
     	    toKey = _toKey;
 
     	/**
@@ -11558,7 +11795,7 @@ var app = (function () {
     	var baseMatches = require_baseMatches(),
     	    baseMatchesProperty = require_baseMatchesProperty(),
     	    identity = requireIdentity(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    property = requireProperty();
 
     	/**
@@ -11598,7 +11835,7 @@ var app = (function () {
     	var arrayFilter = require_arrayFilter(),
     	    baseFilter = require_baseFilter(),
     	    baseIteratee = require_baseIteratee(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/**
     	 * Iterates over elements of `collection`, returning an array of all elements
@@ -11732,7 +11969,7 @@ var app = (function () {
     	var baseKeys = require_baseKeys(),
     	    getTag = require_getTag(),
     	    isArguments = requireIsArguments(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    isArrayLike = requireIsArrayLike(),
     	    isBuffer = requireIsBuffer(),
     	    isPrototype = require_isPrototype(),
@@ -11878,10 +12115,10 @@ var app = (function () {
     function requireMap () {
     	if (hasRequiredMap) return map_1;
     	hasRequiredMap = 1;
-    	var arrayMap = _arrayMap,
+    	var arrayMap = require_arrayMap(),
     	    baseIteratee = require_baseIteratee(),
     	    baseMap = require_baseMap(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/**
     	 * Creates an array of values by running each element in `collection` thru
@@ -12013,7 +12250,7 @@ var app = (function () {
     	    baseEach = require_baseEach(),
     	    baseIteratee = require_baseIteratee(),
     	    baseReduce = require_baseReduce(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/**
     	 * Reduces `collection` to a value which is the accumulated result of running
@@ -12070,8 +12307,8 @@ var app = (function () {
     	if (hasRequiredIsString) return isString_1;
     	hasRequiredIsString = 1;
     	var baseGetTag = _baseGetTag,
-    	    isArray = isArray_1,
-    	    isObjectLike = isObjectLike_1;
+    	    isArray = requireIsArray(),
+    	    isObjectLike = requireIsObjectLike();
 
     	/** `Object#toString` result references. */
     	var stringTag = '[object String]';
@@ -12306,10 +12543,10 @@ var app = (function () {
     	    baseForOwn = require_baseForOwn(),
     	    baseIteratee = require_baseIteratee(),
     	    getPrototype = require_getPrototype(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    isBuffer = requireIsBuffer(),
     	    isFunction = requireIsFunction(),
-    	    isObject = isObject_1,
+    	    isObject = requireIsObject(),
     	    isTypedArray = requireIsTypedArray();
 
     	/**
@@ -12377,7 +12614,7 @@ var app = (function () {
     	hasRequired_isFlattenable = 1;
     	var Symbol = _Symbol,
     	    isArguments = requireIsArguments(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/** Built-in value references. */
     	var spreadableSymbol = Symbol ? Symbol.isConcatSpreadable : undefined;
@@ -12528,7 +12765,7 @@ var app = (function () {
     	if (hasRequired_baseSetToString) return _baseSetToString;
     	hasRequired_baseSetToString = 1;
     	var constant = requireConstant(),
-    	    defineProperty = _defineProperty$1,
+    	    defineProperty = require_defineProperty(),
     	    identity = requireIdentity();
 
     	/**
@@ -12967,7 +13204,7 @@ var app = (function () {
     	if (hasRequiredIsArrayLikeObject) return isArrayLikeObject_1;
     	hasRequiredIsArrayLikeObject = 1;
     	var isArrayLike = requireIsArrayLike(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/**
     	 * This method is like `_.isArrayLike` except that it also checks if `value`
@@ -13043,7 +13280,7 @@ var app = (function () {
     function require_baseValues () {
     	if (hasRequired_baseValues) return _baseValues;
     	hasRequired_baseValues = 1;
-    	var arrayMap = _arrayMap;
+    	var arrayMap = require_arrayMap();
 
     	/**
     	 * The base implementation of `_.values` and `_.valuesIn` which creates an
@@ -13120,7 +13357,7 @@ var app = (function () {
           each: requireEach(),
           filter: requireFilter(),
           has:  requireHas(),
-          isArray: isArray_1,
+          isArray: requireIsArray(),
           isEmpty: requireIsEmpty(),
           isFunction: requireIsFunction(),
           isUndefined: requireIsUndefined(),
@@ -13677,7 +13914,7 @@ var app = (function () {
     var version$2 = '2.1.8';
 
     // Includes only the "core" of graphlib
-    var lib$1 = {
+    var lib = {
       Graph: graph,
       version: version$2
     };
@@ -14314,16 +14551,131 @@ var app = (function () {
      * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      */
 
-    var lib = lib$1;
+    var graphlib$1;
+    var hasRequiredGraphlib$1;
 
-    var graphlib = {
-      Graph: lib.Graph,
-      json: json,
-      alg: alg,
-      version: lib.version
+    function requireGraphlib$1 () {
+    	if (hasRequiredGraphlib$1) return graphlib$1;
+    	hasRequiredGraphlib$1 = 1;
+    	var lib$1 = lib;
+
+    	graphlib$1 = {
+    	  Graph: lib$1.Graph,
+    	  json: json,
+    	  alg: alg,
+    	  version: lib$1.version
+    	};
+    	return graphlib$1;
+    }
+
+    var graphlibExports = requireGraphlib$1();
+    var graphlib = /*@__PURE__*/getDefaultExportFromCjs(graphlibExports);
+
+    var __spreadArray$1 = (undefined && undefined.__spreadArray) || function (to, from, pack) {
+        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+            if (ar || !(i in from)) {
+                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+                ar[i] = from[i];
+            }
+        }
+        return to.concat(ar || Array.prototype.slice.call(from));
+    };
+    /**
+     * @since 2.0.0
+     */
+    function identity$2(a) {
+        return a;
+    }
+    function pipe(a, ab, bc, cd, de, ef, fg, gh, hi) {
+        switch (arguments.length) {
+            case 1:
+                return a;
+            case 2:
+                return ab(a);
+            case 3:
+                return bc(ab(a));
+            case 4:
+                return cd(bc(ab(a)));
+            case 5:
+                return de(cd(bc(ab(a))));
+            case 6:
+                return ef(de(cd(bc(ab(a)))));
+            case 7:
+                return fg(ef(de(cd(bc(ab(a))))));
+            case 8:
+                return gh(fg(ef(de(cd(bc(ab(a)))))));
+            case 9:
+                return hi(gh(fg(ef(de(cd(bc(ab(a))))))));
+            default: {
+                var ret = arguments[0];
+                for (var i = 1; i < arguments.length; i++) {
+                    ret = arguments[i](ret);
+                }
+                return ret;
+            }
+        }
+    }
+    /** @internal */
+    var dual = function (arity, body) {
+        var isDataFirst = typeof arity === 'number' ? function (args) { return args.length >= arity; } : arity;
+        return function () {
+            var args = Array.from(arguments);
+            if (isDataFirst(arguments)) {
+                return body.apply(this, args);
+            }
+            return function (self) { return body.apply(void 0, __spreadArray$1([self], args, false)); };
+        };
     };
 
-    var graphlib$1 = /*@__PURE__*/getDefaultExportFromCjs(graphlib);
+    (undefined && undefined.__spreadArray) || function (to, from, pack) {
+        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+            if (ar || !(i in from)) {
+                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+                ar[i] = from[i];
+            }
+        }
+        return to.concat(ar || Array.prototype.slice.call(from));
+    };
+    /** @internal */
+    var none$1 = { _tag: 'None' };
+    // -------------------------------------------------------------------------------------
+    // Either
+    // -------------------------------------------------------------------------------------
+    /** @internal */
+    var isLeft$1 = function (ma) { return ma._tag === 'Left'; };
+    /** @internal */
+    var left$1 = function (e) { return ({ _tag: 'Left', left: e }); };
+    /** @internal */
+    var right$1 = function (a) { return ({ _tag: 'Right', right: a }); };
+
+    /**
+     * A `Functor` is a type constructor which supports a mapping operation `map`.
+     *
+     * `map` can be used to turn functions `a -> b` into functions `f a -> f b` whose argument and return types use the type
+     * constructor `f` to represent some computational context.
+     *
+     * Instances must satisfy the following laws:
+     *
+     * 1. Identity: `F.map(fa, a => a) <-> fa`
+     * 2. Composition: `F.map(fa, a => bc(ab(a))) <-> F.map(F.map(fa, ab), bc)`
+     *
+     * @since 2.0.0
+     */
+    /** @internal */
+    function as(F) {
+        return function (self, b) { return F.map(self, function () { return b; }); };
+    }
+
+    // -------------------------------------------------------------------------------------
+    // constructors
+    // -------------------------------------------------------------------------------------
+    /**
+     * `None` doesn't have a constructor, instead you can use it directly as a value. Represents a missing value.
+     *
+     * @category constructors
+     * @since 2.0.0
+     */
+    var none = none$1;
 
     // Define the getter and setter
     function getSystemState() {
@@ -14336,7 +14688,7 @@ var app = (function () {
         });
     }
     function topologicalSort(graph) {
-        const sorted = graphlib.alg.topsort(graph);
+        const sorted = graphlibExports.alg.topsort(graph);
         // The stack now contains a topological ordering of the nodes
         return sorted;
     }
@@ -14392,6 +14744,14 @@ var app = (function () {
                 systemState.graphState.actedOn = [node_id, ""];
             }
             setSystemState(systemState);
+        });
+    }
+    function sendWebsocketMessage(message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("sending websocket message: ", message);
+            const systemState = yield getSystemState();
+            const message_string = JSON.stringify(message);
+            systemState.websocket.send(message_string);
         });
     }
     function addEdge(edge) {
@@ -14502,121 +14862,9 @@ var app = (function () {
     }
 
     /* src/components/sidebarComponents/CreateProcess.svelte generated by Svelte v3.59.1 */
+
+    const { console: console_1$2 } = globals;
     const file$6 = "src/components/sidebarComponents/CreateProcess.svelte";
-
-    function get_each_context$3(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[13] = list[i];
-    	return child_ctx;
-    }
-
-    function get_each_context_1(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[13] = list[i];
-    	return child_ctx;
-    }
-
-    // (114:2) {#each actions as action (action._id)}
-    function create_each_block_1(key_1, ctx) {
-    	let li;
-    	let button;
-    	let t0_value = /*action*/ ctx[13].name + "";
-    	let t0;
-    	let t1;
-    	let mounted;
-    	let dispose;
-
-    	function click_handler() {
-    		return /*click_handler*/ ctx[8](/*action*/ ctx[13]);
-    	}
-
-    	const block = {
-    		key: key_1,
-    		first: null,
-    		c: function create() {
-    			li = element$1("li");
-    			button = element$1("button");
-    			t0 = text(t0_value);
-    			t1 = space();
-    			attr_dev(button, "type", "button");
-    			toggle_class(button, "selected", isSelected(/*action*/ ctx[13]));
-    			add_location(button, file$6, 115, 6, 4509);
-    			add_location(li, file$6, 114, 4, 4498);
-    			this.first = li;
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, li, anchor);
-    			append_dev(li, button);
-    			append_dev(button, t0);
-    			append_dev(li, t1);
-
-    			if (!mounted) {
-    				dispose = listen_dev(button, "click", click_handler, false, false, false, false);
-    				mounted = true;
-    			}
-    		},
-    		p: function update(new_ctx, dirty) {
-    			ctx = new_ctx;
-
-    			if (dirty & /*isSelected, actions*/ 0) {
-    				toggle_class(button, "selected", isSelected(/*action*/ ctx[13]));
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(li);
-    			mounted = false;
-    			dispose();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_each_block_1.name,
-    		type: "each",
-    		source: "(114:2) {#each actions as action (action._id)}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (127:0) {#each selectedActions as action (action._id)}
-    function create_each_block$3(key_1, ctx) {
-    	let p;
-    	let t_value = /*action*/ ctx[13].name + "";
-    	let t;
-
-    	const block = {
-    		key: key_1,
-    		first: null,
-    		c: function create() {
-    			p = element$1("p");
-    			t = text(t_value);
-    			add_location(p, file$6, 127, 2, 4759);
-    			this.first = p;
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, p, anchor);
-    			append_dev(p, t);
-    		},
-    		p: function update(new_ctx, dirty) {
-    			ctx = new_ctx;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(p);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_each_block$3.name,
-    		type: "each",
-    		source: "(127:0) {#each selectedActions as action (action._id)}",
-    		ctx
-    	});
-
-    	return block;
-    }
 
     function create_fragment$6(ctx) {
     	let p0;
@@ -14630,46 +14878,20 @@ var app = (function () {
     	let p2;
     	let t7;
     	let ul;
-    	let each_blocks_1 = [];
-    	let each0_lookup = new Map();
     	let t8;
     	let h3;
     	let t10;
-    	let each_blocks = [];
-    	let each1_lookup = new Map();
-    	let t11;
     	let button0;
-    	let t13;
+    	let t12;
     	let button1;
-    	let t15;
+    	let t14;
     	let button2;
-    	let t17;
+    	let t16;
     	let button3;
-    	let t19;
+    	let t18;
     	let button4;
     	let mounted;
     	let dispose;
-    	let each_value_1 = actions;
-    	validate_each_argument(each_value_1);
-    	const get_key = ctx => /*action*/ ctx[13]._id;
-    	validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
-
-    	for (let i = 0; i < each_value_1.length; i += 1) {
-    		let child_ctx = get_each_context_1(ctx, each_value_1, i);
-    		let key = get_key(child_ctx);
-    		each0_lookup.set(key, each_blocks_1[i] = create_each_block_1(key, child_ctx));
-    	}
-
-    	let each_value = selectedActions;
-    	validate_each_argument(each_value);
-    	const get_key_1 = ctx => /*action*/ ctx[13]._id;
-    	validate_each_keys(ctx, each_value, get_each_context$3, get_key_1);
-
-    	for (let i = 0; i < each_value.length; i += 1) {
-    		let child_ctx = get_each_context$3(ctx, each_value, i);
-    		let key = get_key_1(child_ctx);
-    		each1_lookup.set(key, each_blocks[i] = create_each_block$3(key, child_ctx));
-    	}
 
     	const block = {
     		c: function create() {
@@ -14687,54 +14909,43 @@ var app = (function () {
     			p2.textContent = "Click the node buttons below to add them to the graph. Then click \"Add Node(s)\n  to see them populate on the graph.\"";
     			t7 = space();
     			ul = element$1("ul");
-
-    			for (let i = 0; i < each_blocks_1.length; i += 1) {
-    				each_blocks_1[i].c();
-    			}
-
     			t8 = space();
     			h3 = element$1("h3");
     			h3.textContent = "Nodes to add:";
     			t10 = space();
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			t11 = space();
     			button0 = element$1("button");
     			button0.textContent = "Add Node(s)";
-    			t13 = space();
+    			t12 = space();
     			button1 = element$1("button");
     			button1.textContent = "Remove Node(s)";
-    			t15 = space();
+    			t14 = space();
     			button2 = element$1("button");
     			button2.textContent = "Add Edge";
-    			t17 = space();
+    			t16 = space();
     			button3 = element$1("button");
     			button3.textContent = "Remove Edge";
-    			t19 = space();
+    			t18 = space();
     			button4 = element$1("button");
     			button4.textContent = "Save Process";
-    			add_location(p0, file$6, 99, 0, 4078);
+    			add_location(p0, file$6, 78, 0, 3117);
     			attr_dev(input0, "type", "text");
-    			add_location(input0, file$6, 100, 0, 4133);
-    			add_location(p1, file$6, 101, 0, 4173);
+    			add_location(input0, file$6, 79, 0, 3172);
+    			add_location(p1, file$6, 80, 0, 3212);
     			attr_dev(input1, "type", "text");
-    			add_location(input1, file$6, 105, 0, 4271);
-    			add_location(p2, file$6, 107, 0, 4319);
-    			add_location(ul, file$6, 112, 0, 4448);
-    			add_location(h3, file$6, 124, 0, 4686);
+    			add_location(input1, file$6, 84, 0, 3310);
+    			add_location(p2, file$6, 86, 0, 3358);
+    			add_location(ul, file$6, 91, 0, 3487);
+    			add_location(h3, file$6, 103, 0, 3734);
     			attr_dev(button0, "class", "add-button");
-    			add_location(button0, file$6, 129, 0, 4788);
+    			add_location(button0, file$6, 108, 0, 3845);
     			attr_dev(button1, "class", "remove-button");
-    			add_location(button1, file$6, 130, 0, 4861);
+    			add_location(button1, file$6, 109, 0, 3918);
     			attr_dev(button2, "class", "add-button");
-    			add_location(button2, file$6, 133, 0, 4949);
+    			add_location(button2, file$6, 112, 0, 4006);
     			attr_dev(button3, "class", "remove-button");
-    			add_location(button3, file$6, 134, 0, 5018);
+    			add_location(button3, file$6, 113, 0, 4075);
     			attr_dev(button4, "class", "add-button");
-    			add_location(button4, file$6, 135, 0, 5099);
+    			add_location(button4, file$6, 114, 0, 4156);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -14753,32 +14964,17 @@ var app = (function () {
     			insert_dev(target, p2, anchor);
     			insert_dev(target, t7, anchor);
     			insert_dev(target, ul, anchor);
-
-    			for (let i = 0; i < each_blocks_1.length; i += 1) {
-    				if (each_blocks_1[i]) {
-    					each_blocks_1[i].m(ul, null);
-    				}
-    			}
-
     			insert_dev(target, t8, anchor);
     			insert_dev(target, h3, anchor);
     			insert_dev(target, t10, anchor);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				if (each_blocks[i]) {
-    					each_blocks[i].m(target, anchor);
-    				}
-    			}
-
-    			insert_dev(target, t11, anchor);
     			insert_dev(target, button0, anchor);
-    			insert_dev(target, t13, anchor);
+    			insert_dev(target, t12, anchor);
     			insert_dev(target, button1, anchor);
-    			insert_dev(target, t15, anchor);
+    			insert_dev(target, t14, anchor);
     			insert_dev(target, button2, anchor);
-    			insert_dev(target, t17, anchor);
+    			insert_dev(target, t16, anchor);
     			insert_dev(target, button3, anchor);
-    			insert_dev(target, t19, anchor);
+    			insert_dev(target, t18, anchor);
     			insert_dev(target, button4, anchor);
 
     			if (!mounted) {
@@ -14803,20 +14999,6 @@ var app = (function () {
     			if (dirty & /*description*/ 2 && input1.value !== /*description*/ ctx[1]) {
     				set_input_value(input1, /*description*/ ctx[1]);
     			}
-
-    			if (dirty & /*isSelected, actions, toggleSelect*/ 0) {
-    				each_value_1 = actions;
-    				validate_each_argument(each_value_1);
-    				validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
-    				each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx, each_value_1, each0_lookup, ul, destroy_block, create_each_block_1, null, get_each_context_1);
-    			}
-
-    			if (dirty & /*selectedActions*/ 0) {
-    				each_value = selectedActions;
-    				validate_each_argument(each_value);
-    				validate_each_keys(ctx, each_value, get_each_context$3, get_key_1);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key_1, 1, ctx, each_value, each1_lookup, t11.parentNode, destroy_block, create_each_block$3, t11, get_each_context$3);
-    			}
     		},
     		i: noop$2,
     		o: noop$2,
@@ -14832,28 +15014,17 @@ var app = (function () {
     			if (detaching) detach_dev(p2);
     			if (detaching) detach_dev(t7);
     			if (detaching) detach_dev(ul);
-
-    			for (let i = 0; i < each_blocks_1.length; i += 1) {
-    				each_blocks_1[i].d();
-    			}
-
     			if (detaching) detach_dev(t8);
     			if (detaching) detach_dev(h3);
     			if (detaching) detach_dev(t10);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].d(detaching);
-    			}
-
-    			if (detaching) detach_dev(t11);
     			if (detaching) detach_dev(button0);
-    			if (detaching) detach_dev(t13);
+    			if (detaching) detach_dev(t12);
     			if (detaching) detach_dev(button1);
-    			if (detaching) detach_dev(t15);
+    			if (detaching) detach_dev(t14);
     			if (detaching) detach_dev(button2);
-    			if (detaching) detach_dev(t17);
+    			if (detaching) detach_dev(t16);
     			if (detaching) detach_dev(button3);
-    			if (detaching) detach_dev(t19);
+    			if (detaching) detach_dev(t18);
     			if (detaching) detach_dev(button4);
     			mounted = false;
     			run_all(dispose);
@@ -14869,28 +15040,6 @@ var app = (function () {
     	});
 
     	return block;
-    }
-
-    function toggleSelect(action) {
-    	// console.log("toggleSelect called on action: ", action);
-    	const index = selectedActions.findIndex(a => a._id.$oid === action._id.$oid);
-
-    	if (index !== -1) {
-    		// action is currently selected, remove it
-    		selectedActions = selectedActions.filter(a => a._id.$oid !== action._id.$oid);
-    	} else {
-    		// action is not currently selected, add it
-    		selectedActions = [...selectedActions, action];
-    	}
-    } // console.log("selectedActions after toggleSelect:", selectedActions);
-
-    function isSelected(action) {
-    	// console.log("isSelected called on action: ", action);
-    	let is_selected = selectedActions.some(a => a._id.$oid === action._id.$oid);
-
-    	// console.log("selectedActions during isSelected:", selectedActions);
-    	// console.log("isSelected returning: ", is_selected);
-    	return is_selected;
     }
 
     function instance$6($$self, $$props, $$invalidate) {
@@ -14940,7 +15089,7 @@ var app = (function () {
     	let selectedNodes = [];
     	let name = "";
     	let description = "";
-    	let current_graph = new graphlib.Graph();
+    	let current_graph = new graphlibExports.Graph();
 
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
     		current_graph = $systemStateStore.graphState.graph;
@@ -14982,28 +15131,26 @@ var app = (function () {
     			return;
     		} else {
     			let topologicalOrder = topologicalSort(current_graph);
-    			let current_graph_string = JSON.stringify(graphlib.json.write(current_graph));
+    			let current_graph_string = JSON.stringify(graphlibExports.json.write(current_graph));
 
     			// console.log("current_graph_string: " + current_graph_string);
     			let process = {
-    				_id: { $oid: "" },
-    				name,
-    				description,
-    				graph: current_graph_string,
-    				topological_order: topologicalOrder
+    				Process: {
+    					graph: current_graph_string,
+    					initial_variables: [],
+    					topological_order: topologicalOrder
+    				}
     			};
 
     			// console.log("sending process: " + JSON.stringify(process));
-    			$systemStateStore.websocket.send(JSON.stringify({ create_process: process }));
-
-    			selectedActions = [];
+    			console.log("sending process: ", process);
     		}
     	}
 
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<CreateProcess> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<CreateProcess> was created with unknown prop '${key}'`);
     	});
 
     	function input0_input_handler() {
@@ -15016,8 +15163,6 @@ var app = (function () {
     		$$invalidate(1, description);
     	}
 
-    	const click_handler = action => toggleSelect(action);
-
     	$$self.$capture_state = () => ({
     		__awaiter,
     		onMount,
@@ -15026,8 +15171,8 @@ var app = (function () {
     		removeSelectedEdge,
     		removeSelectedNode,
     		topologicalSort,
-    		Graph: graphlib.Graph,
-    		json: graphlib.json,
+    		Graph: graphlibExports.Graph,
+    		json: graphlibExports.json,
     		systemStateStore,
     		nodes,
     		selectedNodes,
@@ -15037,8 +15182,6 @@ var app = (function () {
     		localAddNodes,
     		localAddEdge,
     		saveProcess,
-    		toggleSelect,
-    		isSelected,
     		$systemStateStore
     	});
 
@@ -15072,8 +15215,7 @@ var app = (function () {
     		saveProcess,
     		$systemStateStore,
     		input0_input_handler,
-    		input1_input_handler,
-    		click_handler
+    		input1_input_handler
     	];
     }
 
@@ -15303,112 +15445,6 @@ var app = (function () {
     	}
     }
 
-    var __spreadArray$1 = (undefined && undefined.__spreadArray) || function (to, from, pack) {
-        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-            if (ar || !(i in from)) {
-                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-                ar[i] = from[i];
-            }
-        }
-        return to.concat(ar || Array.prototype.slice.call(from));
-    };
-    /**
-     * @since 2.0.0
-     */
-    function identity$2(a) {
-        return a;
-    }
-    function pipe(a, ab, bc, cd, de, ef, fg, gh, hi) {
-        switch (arguments.length) {
-            case 1:
-                return a;
-            case 2:
-                return ab(a);
-            case 3:
-                return bc(ab(a));
-            case 4:
-                return cd(bc(ab(a)));
-            case 5:
-                return de(cd(bc(ab(a))));
-            case 6:
-                return ef(de(cd(bc(ab(a)))));
-            case 7:
-                return fg(ef(de(cd(bc(ab(a))))));
-            case 8:
-                return gh(fg(ef(de(cd(bc(ab(a)))))));
-            case 9:
-                return hi(gh(fg(ef(de(cd(bc(ab(a))))))));
-            default: {
-                var ret = arguments[0];
-                for (var i = 1; i < arguments.length; i++) {
-                    ret = arguments[i](ret);
-                }
-                return ret;
-            }
-        }
-    }
-    /** @internal */
-    var dual = function (arity, body) {
-        var isDataFirst = typeof arity === 'number' ? function (args) { return args.length >= arity; } : arity;
-        return function () {
-            var args = Array.from(arguments);
-            if (isDataFirst(arguments)) {
-                return body.apply(this, args);
-            }
-            return function (self) { return body.apply(void 0, __spreadArray$1([self], args, false)); };
-        };
-    };
-
-    (undefined && undefined.__spreadArray) || function (to, from, pack) {
-        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-            if (ar || !(i in from)) {
-                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-                ar[i] = from[i];
-            }
-        }
-        return to.concat(ar || Array.prototype.slice.call(from));
-    };
-    /** @internal */
-    var none$1 = { _tag: 'None' };
-    // -------------------------------------------------------------------------------------
-    // Either
-    // -------------------------------------------------------------------------------------
-    /** @internal */
-    var isLeft$1 = function (ma) { return ma._tag === 'Left'; };
-    /** @internal */
-    var left$1 = function (e) { return ({ _tag: 'Left', left: e }); };
-    /** @internal */
-    var right$1 = function (a) { return ({ _tag: 'Right', right: a }); };
-
-    /**
-     * A `Functor` is a type constructor which supports a mapping operation `map`.
-     *
-     * `map` can be used to turn functions `a -> b` into functions `f a -> f b` whose argument and return types use the type
-     * constructor `f` to represent some computational context.
-     *
-     * Instances must satisfy the following laws:
-     *
-     * 1. Identity: `F.map(fa, a => a) <-> fa`
-     * 2. Composition: `F.map(fa, a => bc(ab(a))) <-> F.map(F.map(fa, ab), bc)`
-     *
-     * @since 2.0.0
-     */
-    /** @internal */
-    function as(F) {
-        return function (self, b) { return F.map(self, function () { return b; }); };
-    }
-
-    // -------------------------------------------------------------------------------------
-    // constructors
-    // -------------------------------------------------------------------------------------
-    /**
-     * `None` doesn't have a constructor, instead you can use it directly as a value. Represents a missing value.
-     *
-     * @category constructors
-     * @since 2.0.0
-     */
-    var none = none$1;
-
     /* src/components/sidebarComponents/InteractWithActionsAndProcesses.svelte generated by Svelte v3.59.1 */
 
     const { console: console_1$1 } = globals;
@@ -15420,7 +15456,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (23:2) {#each nodes as node}
+    // (20:2) {#each nodes as node}
     function create_each_block$2(ctx) {
     	let option;
     	let t_value = /*node*/ ctx[6].name + "";
@@ -15433,7 +15469,7 @@ var app = (function () {
     			t = text(t_value);
     			option.__value = option_value_value = /*node*/ ctx[6];
     			option.value = option.__value;
-    			add_location(option, file$4, 23, 4, 676);
+    			add_location(option, file$4, 20, 4, 668);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -15456,7 +15492,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(23:2) {#each nodes as node}",
+    		source: "(20:2) {#each nodes as node}",
     		ctx
     	});
 
@@ -15480,7 +15516,7 @@ var app = (function () {
     		c: function create() {
     			select = element$1("select");
     			option = element$1("option");
-    			option.textContent = "Select an action";
+    			option.textContent = "Select a node";
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
@@ -15488,7 +15524,7 @@ var app = (function () {
 
     			option.__value = "";
     			option.value = option.__value;
-    			add_location(option, file$4, 21, 2, 605);
+    			add_location(option, file$4, 18, 2, 600);
     			if (/*selectedNode*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[4].call(select));
     			add_location(select, file$4, 17, 0, 526);
     		},
@@ -16525,7 +16561,7 @@ var app = (function () {
     var _baseTrim = baseTrim$1;
 
     var baseTrim = _baseTrim,
-        isObject$2 = isObject_1,
+        isObject$2 = requireIsObject(),
         isSymbol$1 = isSymbol_1;
 
     /** Used as references for various `Number` constants. */
@@ -16589,7 +16625,7 @@ var app = (function () {
 
     var toNumber_1 = toNumber$1;
 
-    var isObject$1 = isObject_1,
+    var isObject$1 = requireIsObject(),
         now = now_1,
         toNumber = toNumber_1;
 
@@ -17165,8 +17201,8 @@ var app = (function () {
 
     var assignValue = _assignValue,
         castPath = _castPath,
-        isIndex = _isIndex,
-        isObject = isObject_1,
+        isIndex = require_isIndex(),
+        isObject = requireIsObject(),
         toKey$1 = _toKey;
 
     /**
@@ -17251,9 +17287,9 @@ var app = (function () {
 
     var set_1 = set$1;
 
-    var arrayMap = _arrayMap,
+    var arrayMap = require_arrayMap(),
         copyArray$1 = _copyArray,
-        isArray = isArray_1,
+        isArray = requireIsArray(),
         isSymbol = isSymbol_1,
         stringToPath = _stringToPath,
         toKey = _toKey,
@@ -49257,19 +49293,19 @@ var app = (function () {
     function requireGraphlib () {
     	if (hasRequiredGraphlib) return graphlib_1;
     	hasRequiredGraphlib = 1;
-    	var graphlib$1;
+    	var graphlib;
 
     	if (typeof commonjsRequire === "function") {
     	  try {
-    	    graphlib$1 = graphlib;
+    	    graphlib = requireGraphlib$1();
     	  } catch (e) {}
     	}
 
-    	if (!graphlib$1) {
-    	  graphlib$1 = window.graphlib;
+    	if (!graphlib) {
+    	  graphlib = window.graphlib;
     	}
 
-    	graphlib_1 = graphlib$1;
+    	graphlib_1 = graphlib;
     	return graphlib_1;
     }
 
@@ -49317,10 +49353,10 @@ var app = (function () {
     function require_isIterateeCall () {
     	if (hasRequired_isIterateeCall) return _isIterateeCall;
     	hasRequired_isIterateeCall = 1;
-    	var eq = eq_1,
+    	var eq = requireEq(),
     	    isArrayLike = requireIsArrayLike(),
-    	    isIndex = _isIndex,
-    	    isObject = isObject_1;
+    	    isIndex = require_isIndex(),
+    	    isObject = requireIsObject();
 
     	/**
     	 * Checks if the given arguments are from an iteratee call.
@@ -49357,7 +49393,7 @@ var app = (function () {
     	if (hasRequiredDefaults) return defaults_1;
     	hasRequiredDefaults = 1;
     	var baseRest = require_baseRest(),
-    	    eq = eq_1,
+    	    eq = requireEq(),
     	    isIterateeCall = require_isIterateeCall(),
     	    keysIn = requireKeysIn();
 
@@ -49783,7 +49819,7 @@ var app = (function () {
     function requireMapValues () {
     	if (hasRequiredMapValues) return mapValues_1;
     	hasRequiredMapValues = 1;
-    	var baseAssignValue = _baseAssignValue,
+    	var baseAssignValue = require_baseAssignValue(),
     	    baseForOwn = require_baseForOwn(),
     	    baseIteratee = require_baseIteratee();
 
@@ -49938,8 +49974,8 @@ var app = (function () {
     function require_assignMergeValue () {
     	if (hasRequired_assignMergeValue) return _assignMergeValue;
     	hasRequired_assignMergeValue = 1;
-    	var baseAssignValue = _baseAssignValue,
-    	    eq = eq_1;
+    	var baseAssignValue = require_baseAssignValue(),
+    	    eq = requireEq();
 
     	/**
     	 * This function is like `assignValue` except that it doesn't assign
@@ -49969,7 +50005,7 @@ var app = (function () {
     	hasRequiredIsPlainObject = 1;
     	var baseGetTag = _baseGetTag,
     	    getPrototype = require_getPrototype(),
-    	    isObjectLike = isObjectLike_1;
+    	    isObjectLike = requireIsObjectLike();
 
     	/** `Object#toString` result references. */
     	var objectTag = '[object Object]';
@@ -50116,11 +50152,11 @@ var app = (function () {
     	    copyArray = _copyArray,
     	    initCloneObject = require_initCloneObject(),
     	    isArguments = requireIsArguments(),
-    	    isArray = isArray_1,
+    	    isArray = requireIsArray(),
     	    isArrayLikeObject = requireIsArrayLikeObject(),
     	    isBuffer = requireIsBuffer(),
     	    isFunction = requireIsFunction(),
-    	    isObject = isObject_1,
+    	    isObject = requireIsObject(),
     	    isPlainObject = requireIsPlainObject(),
     	    isTypedArray = requireIsTypedArray(),
     	    safeGet = require_safeGet(),
@@ -50217,7 +50253,7 @@ var app = (function () {
     	    assignMergeValue = require_assignMergeValue(),
     	    baseFor = require_baseFor(),
     	    baseMergeDeep = require_baseMergeDeep(),
-    	    isObject = isObject_1,
+    	    isObject = requireIsObject(),
     	    keysIn = requireKeysIn(),
     	    safeGet = require_safeGet();
 
@@ -50855,7 +50891,7 @@ var app = (function () {
     function require_baseOrderBy () {
     	if (hasRequired_baseOrderBy) return _baseOrderBy;
     	hasRequired_baseOrderBy = 1;
-    	var arrayMap = _arrayMap,
+    	var arrayMap = require_arrayMap(),
     	    baseGet = _baseGet,
     	    baseIteratee = require_baseIteratee(),
     	    baseMap = require_baseMap(),
@@ -50863,7 +50899,7 @@ var app = (function () {
     	    baseUnary = require_baseUnary(),
     	    compareMultiple = require_compareMultiple(),
     	    identity = requireIdentity(),
-    	    isArray = isArray_1;
+    	    isArray = requireIsArray();
 
     	/**
     	 * The base implementation of `_.orderBy` without param guards.
@@ -54763,7 +54799,7 @@ var app = (function () {
     	setContext("graphSharedState", { getCyInstance: () => cyInstance });
     	let refElement = null;
     	let cyInstance = null;
-    	let g = new graphlib$1.Graph();
+    	let g = new graphlib.Graph();
     	let id_map = new Map();
 
     	systemStateStore.subscribe(new_value => {
@@ -54817,7 +54853,7 @@ var app = (function () {
     				cyInstance.remove(cyInstance.$id(value.actedOn[0]));
     			}
     		} else if (value.lastAction === "resetGraph") {
-    			g = new graphlib$1.Graph(); // reset graph
+    			g = new graphlib.Graph(); // reset graph
 
     			if (cyInstance) {
     				cyInstance.elements().remove();
@@ -54870,7 +54906,7 @@ var app = (function () {
     		systemStateStore,
     		selectNode,
     		selectEdge,
-    		graphlib: graphlib$1,
+    		graphlib,
     		refElement,
     		cyInstance,
     		g,
@@ -55161,6 +55197,9 @@ var app = (function () {
     function getInterfaceTypeName(props) {
         return "{ ".concat(getNameFromProps(props), " }");
     }
+    function getPartialTypeName(inner) {
+        return "Partial<".concat(inner, ">");
+    }
     function enumerableRecord(keys, domain, codomain, name) {
         if (name === void 0) { name = "{ [K in ".concat(domain.name, "]: ").concat(codomain.name, " }"); }
         var len = keys.length;
@@ -55276,6 +55315,43 @@ var app = (function () {
     function getUnionName(codecs) {
         return '(' + codecs.map(function (type) { return type.name; }).join(' | ') + ')';
     }
+    function getProps(codec) {
+        switch (codec._tag) {
+            case 'RefinementType':
+            case 'ReadonlyType':
+                return getProps(codec.type);
+            case 'InterfaceType':
+            case 'StrictType':
+            case 'PartialType':
+                return codec.props;
+            case 'IntersectionType':
+                return codec.types.reduce(function (props, type) { return Object.assign(props, getProps(type)); }, {});
+        }
+    }
+    function stripKeys(o, props) {
+        var keys = Object.getOwnPropertyNames(o);
+        var shouldStrip = false;
+        var r = {};
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            if (!hasOwnProperty.call(props, key)) {
+                shouldStrip = true;
+            }
+            else {
+                r[key] = o[key];
+            }
+        }
+        return shouldStrip ? r : o;
+    }
+    function getExactTypeName(codec) {
+        if (isTypeC(codec)) {
+            return "{| ".concat(getNameFromProps(codec.props), " |}");
+        }
+        else if (isPartialC(codec)) {
+            return getPartialTypeName("{| ".concat(getNameFromProps(codec.props), " |}"));
+        }
+        return "Exact<".concat(codec.name, ">");
+    }
     function isNonEmpty(as) {
         return as.length > 0;
     }
@@ -55348,6 +55424,9 @@ var app = (function () {
     }
     function isTypeC(codec) {
         return codec._tag === 'InterfaceType';
+    }
+    function isPartialC(codec) {
+        return codec._tag === 'PartialType';
     }
     // tslint:disable-next-line: deprecation
     function isStrictC(codec) {
@@ -55653,7 +55732,7 @@ var app = (function () {
     /**
      * @since 1.0.0
      */
-    /** @class */ ((function (_super) {
+    var LiteralType = /** @class */ (function (_super) {
         __extends(LiteralType, _super);
         function LiteralType(name, is, validate, encode, value) {
             var _this = _super.call(this, name, is, validate, encode) || this;
@@ -55665,7 +55744,16 @@ var app = (function () {
             return _this;
         }
         return LiteralType;
-    })(Type));
+    }(Type));
+    /**
+     * @category constructors
+     * @since 1.0.0
+     */
+    function literal(value, name) {
+        if (name === void 0) { name = JSON.stringify(value); }
+        var is = function (u) { return u === value; };
+        return new LiteralType(name, is, function (u, c) { return (is(u) ? success(value) : failure(u, c)); }, identity, value);
+    }
     /**
      * @since 1.0.0
      */
@@ -56081,9 +56169,16 @@ var app = (function () {
         return ReadonlyArrayType;
     })(Type));
     /**
+     * Strips additional properties, equivalent to `exact(type(props))`.
+     *
+     * @category combinators
+     * @since 1.0.0
+     */
+    var strict = function (props, name) { return exact(type(props), name); };
+    /**
      * @since 1.1.0
      */
-    /** @class */ ((function (_super) {
+    var ExactType = /** @class */ (function (_super) {
         __extends(ExactType, _super);
         function ExactType(name, is, validate, encode, type) {
             var _this = _super.call(this, name, is, validate, encode) || this;
@@ -56095,7 +56190,28 @@ var app = (function () {
             return _this;
         }
         return ExactType;
-    })(Type));
+    }(Type));
+    /**
+     * Strips additional properties.
+     *
+     * @category combinators
+     * @since 1.1.0
+     */
+    function exact(codec, name) {
+        if (name === void 0) { name = getExactTypeName(codec); }
+        var props = getProps(codec);
+        return new ExactType(name, codec.is, function (u, c) {
+            var e = UnknownRecord.validate(u, c);
+            if (isLeft(e)) {
+                return e;
+            }
+            var ce = codec.validate(u, c);
+            if (isLeft(ce)) {
+                return ce;
+            }
+            return right(stripKeys(ce.right, props));
+        }, function (a) { return codec.encode(stripKeys(a, props)); }, codec);
+    }
     /**
      * @since 1.0.0
      */
@@ -56250,11 +56366,36 @@ var app = (function () {
         return StrictType;
     })(Type));
 
+    var None = strict({
+        _tag: literal('None')
+    }, 'None');
+    var someLiteral = literal('Some');
+    /**
+     * @since 0.5.0
+     */
+    function option(codec, name) {
+        if (name === void 0) { name = "Option<" + codec.name + ">"; }
+        return union([
+            None,
+            strict({
+                _tag: someLiteral,
+                value: codec
+            }, "Some<" + codec.name + ">")
+        ], name);
+    }
+
     const RuntimeNodeTypeNames = keyof({
         "Prompt": null,
         "Process": null,
         "Conditional": null,
         "Command": null
+    });
+    const RuntimeVerbTypeNames = keyof({
+        "POST": null,
+        "PUT": null,
+        "PATCH": null,
+        "DELETE": null,
+        "GET": null,
     });
     const RuntimeMongoId = type({
         $oid: string,
@@ -56262,15 +56403,13 @@ var app = (function () {
     const RuntimePrompt = type({
         Prompt: type({
             prompt: string,
-            input_variables: array(string),
-            output_variables: array(string),
             system: string,
         }),
     });
     const RuntimeProcess = type({
         Process: type({
             graph: string,
-            description: string,
+            initial_variables: array(string),
             topological_order: array(string),
         }),
     });
@@ -56292,6 +56431,31 @@ var app = (function () {
         name: string,
         type_name: RuntimeNodeTypeNames,
         node_content: RuntimeNodeType,
+        description: string,
+        input_variables: array(string),
+        output_variables: array(string),
+    });
+    type({
+        topological_order: array(string),
+        current_node: RuntimeNode,
+        variables: record(string, string),
+        execution_id: string,
+        return_execution_id: option(string),
+    });
+    const RuntimeInitialMessage = type({
+        InitialMessage: type({
+            initial_message: string,
+        }),
+    });
+    const RuntimeUserSettings = type({
+        UserSettings: type({
+            openai_api_key: string,
+            mongo_db_uri: string,
+        }),
+    });
+    const RuntimeCrudBundle = type({
+        verb: RuntimeVerbTypeNames,
+        object: union([RuntimeNode, RuntimeInitialMessage, RuntimeUserSettings]),
     });
 
     var Either = {};
@@ -57872,7 +58036,7 @@ var app = (function () {
     			t = space();
     			create_component(graphcomponentgraphlib.$$.fragment);
     			attr_dev(div, "class", "app-container");
-    			add_location(div, file, 62, 0, 2926);
+    			add_location(div, file, 79, 0, 3310);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -57958,6 +58122,8 @@ var app = (function () {
     	};
 
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
+    		console.log("on mount");
+
     		// start the websocket connection
     		$systemStateStore.websocket.addEventListener("open", () => {
     			let apiKey = localStorage.getItem("apiKey") || "Api Key";
@@ -57965,12 +58131,21 @@ var app = (function () {
     			localStorage.setItem("apiKey", apiKey);
     			localStorage.setItem("mongo_uri", mongo_uri);
 
-    			$systemStateStore.websocket.send(JSON.stringify({
-    				openai_api_key: apiKey,
-    				mongo_db_uri: mongo_uri
-    			}));
+    			let user_settings = {
+    				verb: "POST",
+    				object: {
+    					UserSettings: { openai_api_key: "", mongo_db_uri: "" }
+    				}
+    			};
 
-    			$systemStateStore.websocket.send(JSON.stringify({ initial_message: "initial message" }));
+    			sendWebsocketMessage(user_settings);
+
+    			const initial_message = {
+    				verb: "POST",
+    				object: { InitialMessage: { initial_message: "" } }
+    			};
+
+    			sendWebsocketMessage(initial_message);
     		});
 
     		$systemStateStore.websocket.addEventListener("message", event => {
@@ -57979,7 +58154,7 @@ var app = (function () {
 
     			try {
     				data = JSON.parse(event.data);
-    				let validationResult = RuntimeNode.decode(data);
+    				let validationResult = RuntimeCrudBundle.decode(data);
 
     				Either.fold(
     					errors => {
@@ -58005,7 +58180,8 @@ var app = (function () {
     		__awaiter,
     		Sidebar,
     		GraphComponentGraphlib: GraphComponent_graphlib,
-    		RuntimeNode,
+    		sendWebsocketMessage,
+    		RuntimeCrudBundle,
     		fold: Either.fold,
     		onMount,
     		systemStateStore,

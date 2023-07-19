@@ -9,7 +9,7 @@
   import { sendWebsocketMessage } from "helper_functions/graph";
 
   import type { CrudBundle, Node } from "./system_types";
-  import { RuntimeNode, RuntimeCrudBundle } from "./system_types";
+  import {RuntimeCrudBundle } from "./system_types";
 
   import { fold } from "fp-ts/lib/Either";
 
@@ -17,6 +17,9 @@
   import systemStateStore from "stores/systemStateStore";
 
   onMount(async () => {
+
+    console.log("on mount");
+
     // start the websocket connection
     $systemStateStore.websocket.addEventListener("open", () => {
       let apiKey = localStorage.getItem("apiKey") || "Api Key";
@@ -27,8 +30,9 @@
       let user_settings: CrudBundle = {
         verb: "POST",
         object: {
-          openai_api_key: "",
-          mongo_db_uri: "",
+          UserSettings:
+          {openai_api_key: "",
+            mongo_db_uri: "",}
         },
       };
 
@@ -37,7 +41,9 @@
       const initial_message: CrudBundle = {
         verb: "POST",
         object: {
-          initial_message: "",
+          InitialMessage: {
+            initial_message: "",
+          }
         },
       };
 
