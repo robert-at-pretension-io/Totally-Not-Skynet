@@ -10,7 +10,7 @@ import { Graph } from "graphlib";
 import { Edge } from "@dagrejs/graphlib";
 import { alg } from "graphlib";
 import { some } from "fp-ts/lib/Option";
-import {  isSome } from "fp-ts/Option";
+import { isSome } from "fp-ts/Option";
 import { unsafeCoerce } from "fp-ts/lib/function";
 
 // Define the getter and setter
@@ -27,9 +27,8 @@ export async function getInputVariablesByNodeId(nodeId: string): Promise<string[
   // Get the action by ID
   const node = await getNodeById(nodeId);
 
-  if (node && node.type_name === "Prompt") {
-    const node_content = node.node_content as Prompt;
-    return node_content.prompt.input_variables;
+  if (node && node.Node.type_name === "Prompt") {
+    return node.Node.input_variables;
   }
   return null;
 }
@@ -38,10 +37,10 @@ export async function validateGraph(): Promise<string[] | boolean> {
   const systemState = await getSystemState();
   const graph = systemState.graphState.graph;
 
-  if (isSome(systemState.selectedNode)) {
-    const selected_node: Node = unsafeCoerce(systemState.selectedNode);
-    if (selected_node.type_name == "Process") {
-      const process: Process = selected_node.node_content as Process;
+  if (systemState.selectedNode) {
+    const selected_node: Node = systemState.selectedNode;
+    if (selected_node.Node.type_name == "Process") {
+      const process: Process = selected_node.Node.node_content as Process;
       const initial_variables = process.Process.initial_variables;
 
       const test_orders: string[][] = getAllTopologicalOrders(graph);
@@ -57,8 +56,8 @@ export async function validateGraph(): Promise<string[] | boolean> {
           const current_node = current_order[j];
           const node = await getNodeById(current_node);
           if (node) {
-            const input_variables = node.input_variables;
-            const output_variables = node.output_variables;
+            const input_variables = node.Node.input_variables;
+            const output_variables = node.Node.output_variables;
 
             // check if all of the input variables are in the agregate_variables array
             const input_variables_in_agregate = input_variables.every((variable) => {
@@ -185,9 +184,8 @@ function calculateIndegreeForAllVertex(graph: LocalGraph): { [node: string]: num
 export async function getOutputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
   // Get the node by Id
   const node = await getNodeById(nodeId);
-  if (node && node.type_name === "Prompt") {
-    const node_content = node.node_content as Prompt;
-    return node_content.prompt.output_variables;
+  if (node) {
+    return node.Node.output_variables;
   }
   return null;
 }
@@ -230,7 +228,7 @@ export async function getAncestorNodes(node: string, graph: Graph): Promise<Node
 export async function getNodeById(id: string): Promise<Node | undefined> {
   const systemState = await getSystemState();
   const prompt = systemState.nodes.find((node: Node) => {
-    if (node._id) {
+    if (node.Node._id) {
       return getId(node) == id;
     }
   });
@@ -240,16 +238,9 @@ export async function getNodeById(id: string): Promise<Node | undefined> {
 export async function getNodeInputVariables(node_id: string): Promise<string[] | null> {
   const node = await getNodeById(node_id);
   if (node) {
-    return node.input_variables;
+    return node.Node.input_variables;
   }
   else return null;
-}
-
-export function topologicalSort(graph: Graph) {
-  const sorted = alg.topsort(graph);
-
-  // The stack now contains a topological ordering of the nodes
-  return sorted;
 }
 
 // get the name of the action by using the id
@@ -258,12 +249,12 @@ export async function getNodeName(id: string): Promise<string | undefined> {
 
   const node = system_state.nodes.find((node: Node) => {
     // get the node with the id:
-    if (node._id) {
+    if (node.Node._id) {
       return getId(node) == id;
     }
   });
   if (node) {
-    return node.name;
+    return node.Node.name;
   }
 }
 
@@ -275,7 +266,7 @@ export async function printEdge(edge: Edge) {
 
 export function getId(node: Node): string | undefined {
   if (node) {
-    return node._id?.$oid;
+    return node.Node._id?.$oid;
   }
   return undefined;
 
@@ -283,12 +274,6 @@ export function getId(node: Node): string | undefined {
 
 export async function setSystemState(systemState: SystemState) {
   systemStateStore.set(systemState);
-}
-
-export async function addGlobalVariable(variable_name: string, variable_value: string) {
-  const current_state = await getSystemState();
-  current_state.graphState.global_variables.set(variable_name, variable_value);
-  await setSystemState(current_state);
 }
 
 export async function addNode(node_id: string): Promise<void> {
@@ -315,7 +300,7 @@ export async function processToGraph(process: Process): Promise<void> {
   await resetGraph();
 
   // verify that all of the steps have corresponding actions
-  let graph: string | Graph = process.process.graph;
+  let graph: string | Graph = process.Process.graph;
 
   const nodes: string[] = [];
 
@@ -346,7 +331,7 @@ export async function processToGraph(process: Process): Promise<void> {
   let topOrder: string[] = [];
 
   if (graph instanceof Graph) {
-    topOrder = topologicalSort(graph);
+    topOrder = getAllTopologicalOrders(graph);
   }
 
   for (const node of topOrder) {
@@ -469,7 +454,7 @@ export async function returnProcesses(): Promise<Node[]> {
 
   // filter out the prompts
   nodes = nodes.filter((node: Node) => {
-    return node.type_name == "Process";
+    return node.Node.type_name == "Process";
   }
   );
 
@@ -493,11 +478,11 @@ export async function selectNode(id: string): Promise<void> {
 
   if (res) {
     const systemState = await getSystemState();
-    systemState.selectedNode = some(res);
+    systemState.selectedNode = res;
     systemState.graphState.lastAction = "selectNode";
     systemState.graphState.lastActedOn = systemState.graphState.actedOn;
-    systemState.graphState.actedOn = [id, res.name];
-    systemState.graphState.name = res.name;
+    systemState.graphState.actedOn = [id, res.Node.name];
+    systemState.graphState.name = res.Node.name;
     setSystemState(systemState);
   }
 }

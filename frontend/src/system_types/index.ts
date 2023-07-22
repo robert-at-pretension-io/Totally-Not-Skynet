@@ -33,7 +33,7 @@ export type GraphState = {
 
 export type SystemState = {
   websocketReady: boolean;
-  selectedNode: Option<Node>;
+  selectedNode: Node | null;
   graphState: GraphState;
   websocket: WebSocket;
   executionContext: ExecutionContext;
