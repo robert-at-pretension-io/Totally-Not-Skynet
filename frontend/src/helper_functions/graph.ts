@@ -33,8 +33,7 @@ export async function getInputVariablesByNodeId(nodeId: string): Promise<string[
   return null;
 }
 
-export async function validateGraph(): Promise<string[] | boolean> {
-  const systemState = await getSystemState();
+export async function validateGraph(systemState: SystemState): Promise<string[] | boolean> {
   const graph = systemState.graphState.graph;
 
   if (systemState.selectedNode) {

@@ -1,12 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { Prompt, Process, Node } from "system_types";
+  import type { Process, Node } from "system_types";
   import {
     addEdge,
     addNode,
+    getSystemState,
     removeSelectedEdge,
     removeSelectedNode,
-    topologicalSort,
+    validateGraph,
   } from "../../helper_functions/graph";
   import { Graph } from "graphlib";
   import { json } from "graphlib";
@@ -34,7 +35,7 @@
     // for each of the selected actions, add a node to the graph
     selectedNodes.forEach((node) => {
       // console.log("local");
-      addNode(node._id.$oid);
+      addNode(node.Node._id.$oid);
     });
 
     // clear out the selected actions
@@ -65,28 +66,67 @@
     }
   }
 
-  function saveProcess() {
+  async function saveProcess() {
     // create an alert message if either name or description are null
     if (name === null || description === null) {
       alert("Please enter a name and description for the process");
       return;
     } else {
-      let topologicalOrder: string[] = topologicalSort(current_graph);
-      let current_graph_string = JSON.stringify(json.write(current_graph));
+      const systemState = await getSystemState();
+      let maybe_topological_order = await validateGraph(systemState);
 
-      // console.log("current_graph_string: " + current_graph_string);
-      let process: Process = {
-        Process : {
-          graph: current_graph_string,
-          initial_variables: [],
-          topological_order: topologicalOrder,
-        }
-      };
-      // console.log("sending process: " + JSON.stringify(process));
-      console.log("sending process: ", process);
+      if (maybe_topological_order) {
+        let topological_order = maybe_topological_order as string[];
+        let current_graph_string = JSON.stringify(json.write(current_graph));
+
+        // console.log("current_graph_string: " + current_graph_string);
+        let process: Process = {
+          Process: {
+            graph: current_graph_string,
+            initial_variables: [],
+            topological_order: topological_order,
+          },
+        };
+        // console.log("sending process: " + JSON.stringify(process));
+        console.log("sending process: ", process);
+      } else {
+        alert("The process does not have a valid topological order :(");
+      }
     }
   }
 
+  function isSelected(node: Node): boolean {
+    // check to see if selectedNodes : Node[] contains node : Node
+    return (
+      selectedNodes.filter((val) => {
+        val.Node._id.$oid === node.Node._id.$oid;
+      }).length > 0
+    );
+  }
+
+  function toggleSelect(node: Node) {
+    // if the node is already in the selectedNodes then remove it, otherwise add it
+
+    console.log("The nodes that are currently selected are:");
+    selectedNodes.forEach((node: Node) => {
+      console.log(node.Node.name);
+    });
+
+    let should_remove = isSelected(node);
+
+    if (should_remove) {
+      selectedNodes = selectedNodes.filter((val) => {
+        val.Node._id.$oid != node.Node._id.$oid;
+      });
+    } else {
+      selectedNodes.push(node);
+    }
+
+    console.log("After running toggleSelect, the nodes are:");
+    selectedNodes.forEach((node: Node) => {
+      console.log(node.Node.name);
+    });
+  }
 </script>
 
 <p>Please set a descriptive name for your process:</p>
@@ -103,22 +143,22 @@
 </p>
 
 <ul>
-  <!-- {#each actions as action (action._id)}
+  {#each nodes as node (node.Node._id)}
     <li>
       <button
-        class:selected={isSelected(action)}
+        class:selected={isSelected(node)}
         type="button"
-        on:click={() => toggleSelect(action)}>{action.name}</button
+        on:click={() => toggleSelect(node)}>{node.Node.name}</button
       >
     </li>
-  {/each} -->
+  {/each}
 </ul>
 
 <h3>Nodes to add:</h3>
 
-<!-- {#each selectedActions as action (action._id)}
-  <p>{action.name}</p>
-{/each} -->
+{#each selectedNodes as node (node.Node._id)}
+  <p>{node.Node.name}</p>
+{/each}
 <button class="add-button" on:click={localAddNodes}>Add Node(s)</button>
 <button class="remove-button" on:click={removeSelectedNode}
   >Remove Node(s)</button

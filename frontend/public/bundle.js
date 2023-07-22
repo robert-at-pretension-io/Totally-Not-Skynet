@@ -230,6 +230,9 @@ var app = (function () {
         const selected_option = select.querySelector(':checked');
         return selected_option && selected_option.__value;
     }
+    function toggle_class(element, name, toggle) {
+        element.classList[toggle ? 'add' : 'remove'](name);
+    }
     function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, bubbles, cancelable, detail);
@@ -616,6 +619,11 @@ var app = (function () {
                 }
             }
         };
+    }
+
+    function destroy_block(block, lookup) {
+        block.d(1);
+        lookup.delete(block.key);
     }
     function outro_and_destroy_block(block, lookup) {
         transition_out(block, 1, 1, () => {
@@ -3060,31 +3068,31 @@ var app = (function () {
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$4 = freeGlobal || freeSelf || Function('return this')();
+    var root$3 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$4;
+    var _root = root$3;
 
-    var root$3 = _root;
+    var root$2 = _root;
 
     /** Built-in value references. */
-    var Symbol$4 = root$3.Symbol;
+    var Symbol$4 = root$2.Symbol;
 
     var _Symbol = Symbol$4;
 
     var Symbol$3 = _Symbol;
 
     /** Used for built-in method references. */
-    var objectProto$5 = Object.prototype;
+    var objectProto$4 = Object.prototype;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty$5 = objectProto$5.hasOwnProperty;
+    var hasOwnProperty$4 = objectProto$4.hasOwnProperty;
 
     /**
      * Used to resolve the
      * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
      * of values.
      */
-    var nativeObjectToString$1 = objectProto$5.toString;
+    var nativeObjectToString$1 = objectProto$4.toString;
 
     /** Built-in value references. */
     var symToStringTag$1 = Symbol$3 ? Symbol$3.toStringTag : undefined;
@@ -3097,7 +3105,7 @@ var app = (function () {
      * @returns {string} Returns the raw `toStringTag`.
      */
     function getRawTag$1(value) {
-      var isOwn = hasOwnProperty$5.call(value, symToStringTag$1),
+      var isOwn = hasOwnProperty$4.call(value, symToStringTag$1),
           tag = value[symToStringTag$1];
 
       try {
@@ -3120,14 +3128,14 @@ var app = (function () {
 
     /** Used for built-in method references. */
 
-    var objectProto$4 = Object.prototype;
+    var objectProto$3 = Object.prototype;
 
     /**
      * Used to resolve the
      * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
      * of values.
      */
-    var nativeObjectToString = objectProto$4.toString;
+    var nativeObjectToString = objectProto$3.toString;
 
     /**
      * Converts `value` to a string using `Object.prototype.toString`.
@@ -3197,12 +3205,12 @@ var app = (function () {
      * // => false
      */
 
-    function isObject$4(value) {
+    function isObject$3(value) {
       var type = typeof value;
       return value != null && (type == 'object' || type == 'function');
     }
 
-    var isObject_1 = isObject$4;
+    var isObject_1 = isObject$3;
 
     var isFunction_1;
     var hasRequiredIsFunction;
@@ -3250,33 +3258,49 @@ var app = (function () {
     	return isFunction_1;
     }
 
-    var root$2 = _root;
+    var _coreJsData;
+    var hasRequired_coreJsData;
 
-    /** Used to detect overreaching core-js shims. */
-    var coreJsData$1 = root$2['__core-js_shared__'];
+    function require_coreJsData () {
+    	if (hasRequired_coreJsData) return _coreJsData;
+    	hasRequired_coreJsData = 1;
+    	var root = _root;
 
-    var _coreJsData = coreJsData$1;
+    	/** Used to detect overreaching core-js shims. */
+    	var coreJsData = root['__core-js_shared__'];
 
-    var coreJsData = _coreJsData;
-
-    /** Used to detect methods masquerading as native. */
-    var maskSrcKey = (function() {
-      var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
-      return uid ? ('Symbol(src)_1.' + uid) : '';
-    }());
-
-    /**
-     * Checks if `func` has its source masked.
-     *
-     * @private
-     * @param {Function} func The function to check.
-     * @returns {boolean} Returns `true` if `func` is masked, else `false`.
-     */
-    function isMasked$1(func) {
-      return !!maskSrcKey && (maskSrcKey in func);
+    	_coreJsData = coreJsData;
+    	return _coreJsData;
     }
 
-    var _isMasked = isMasked$1;
+    var _isMasked;
+    var hasRequired_isMasked;
+
+    function require_isMasked () {
+    	if (hasRequired_isMasked) return _isMasked;
+    	hasRequired_isMasked = 1;
+    	var coreJsData = require_coreJsData();
+
+    	/** Used to detect methods masquerading as native. */
+    	var maskSrcKey = (function() {
+    	  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+    	  return uid ? ('Symbol(src)_1.' + uid) : '';
+    	}());
+
+    	/**
+    	 * Checks if `func` has its source masked.
+    	 *
+    	 * @private
+    	 * @param {Function} func The function to check.
+    	 * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+    	 */
+    	function isMasked(func) {
+    	  return !!maskSrcKey && (maskSrcKey in func);
+    	}
+
+    	_isMasked = isMasked;
+    	return _isMasked;
+    }
 
     /** Used for built-in method references. */
 
@@ -3314,53 +3338,61 @@ var app = (function () {
     	return _toSource;
     }
 
-    var isFunction = requireIsFunction(),
-        isMasked = _isMasked,
-        isObject$3 = isObject_1,
-        toSource = require_toSource();
+    var _baseIsNative;
+    var hasRequired_baseIsNative;
 
-    /**
-     * Used to match `RegExp`
-     * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
-     */
-    var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+    function require_baseIsNative () {
+    	if (hasRequired_baseIsNative) return _baseIsNative;
+    	hasRequired_baseIsNative = 1;
+    	var isFunction = requireIsFunction(),
+    	    isMasked = require_isMasked(),
+    	    isObject = isObject_1,
+    	    toSource = require_toSource();
 
-    /** Used to detect host constructors (Safari). */
-    var reIsHostCtor = /^\[object .+?Constructor\]$/;
+    	/**
+    	 * Used to match `RegExp`
+    	 * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+    	 */
+    	var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
 
-    /** Used for built-in method references. */
-    var funcProto = Function.prototype,
-        objectProto$3 = Object.prototype;
+    	/** Used to detect host constructors (Safari). */
+    	var reIsHostCtor = /^\[object .+?Constructor\]$/;
 
-    /** Used to resolve the decompiled source of functions. */
-    var funcToString = funcProto.toString;
+    	/** Used for built-in method references. */
+    	var funcProto = Function.prototype,
+    	    objectProto = Object.prototype;
 
-    /** Used to check objects for own properties. */
-    var hasOwnProperty$4 = objectProto$3.hasOwnProperty;
+    	/** Used to resolve the decompiled source of functions. */
+    	var funcToString = funcProto.toString;
 
-    /** Used to detect if a method is native. */
-    var reIsNative = RegExp('^' +
-      funcToString.call(hasOwnProperty$4).replace(reRegExpChar, '\\$&')
-      .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-    );
+    	/** Used to check objects for own properties. */
+    	var hasOwnProperty = objectProto.hasOwnProperty;
 
-    /**
-     * The base implementation of `_.isNative` without bad shim checks.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a native function,
-     *  else `false`.
-     */
-    function baseIsNative$1(value) {
-      if (!isObject$3(value) || isMasked(value)) {
-        return false;
-      }
-      var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
-      return pattern.test(toSource(value));
+    	/** Used to detect if a method is native. */
+    	var reIsNative = RegExp('^' +
+    	  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
+    	  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+    	);
+
+    	/**
+    	 * The base implementation of `_.isNative` without bad shim checks.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to check.
+    	 * @returns {boolean} Returns `true` if `value` is a native function,
+    	 *  else `false`.
+    	 */
+    	function baseIsNative(value) {
+    	  if (!isObject(value) || isMasked(value)) {
+    	    return false;
+    	  }
+    	  var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
+    	  return pattern.test(toSource(value));
+    	}
+
+    	_baseIsNative = baseIsNative;
+    	return _baseIsNative;
     }
-
-    var _baseIsNative = baseIsNative$1;
 
     /**
      * Gets the value at `key` of `object`.
@@ -3371,14 +3403,22 @@ var app = (function () {
      * @returns {*} Returns the property value.
      */
 
-    function getValue$2(object, key) {
-      return object == null ? undefined : object[key];
+    var _getValue;
+    var hasRequired_getValue;
+
+    function require_getValue () {
+    	if (hasRequired_getValue) return _getValue;
+    	hasRequired_getValue = 1;
+    	function getValue(object, key) {
+    	  return object == null ? undefined : object[key];
+    	}
+
+    	_getValue = getValue;
+    	return _getValue;
     }
 
-    var _getValue = getValue$2;
-
-    var baseIsNative = _baseIsNative,
-        getValue$1 = _getValue;
+    var baseIsNative = require_baseIsNative(),
+        getValue$1 = require_getValue();
 
     /**
      * Gets the native function at `key` of `object`.
@@ -10616,472 +10656,6 @@ var app = (function () {
 
     var graphlib$1 = /*@__PURE__*/getDefaultExportFromCjs(graphlib);
 
-    var __spreadArray$1 = (undefined && undefined.__spreadArray) || function (to, from, pack) {
-        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-            if (ar || !(i in from)) {
-                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-                ar[i] = from[i];
-            }
-        }
-        return to.concat(ar || Array.prototype.slice.call(from));
-    };
-    /**
-     * @since 2.0.0
-     */
-    function identity$2(a) {
-        return a;
-    }
-    function pipe(a, ab, bc, cd, de, ef, fg, gh, hi) {
-        switch (arguments.length) {
-            case 1:
-                return a;
-            case 2:
-                return ab(a);
-            case 3:
-                return bc(ab(a));
-            case 4:
-                return cd(bc(ab(a)));
-            case 5:
-                return de(cd(bc(ab(a))));
-            case 6:
-                return ef(de(cd(bc(ab(a)))));
-            case 7:
-                return fg(ef(de(cd(bc(ab(a))))));
-            case 8:
-                return gh(fg(ef(de(cd(bc(ab(a)))))));
-            case 9:
-                return hi(gh(fg(ef(de(cd(bc(ab(a))))))));
-            default: {
-                var ret = arguments[0];
-                for (var i = 1; i < arguments.length; i++) {
-                    ret = arguments[i](ret);
-                }
-                return ret;
-            }
-        }
-    }
-    /** @internal */
-    var dual = function (arity, body) {
-        var isDataFirst = typeof arity === 'number' ? function (args) { return args.length >= arity; } : arity;
-        return function () {
-            var args = Array.from(arguments);
-            if (isDataFirst(arguments)) {
-                return body.apply(this, args);
-            }
-            return function (self) { return body.apply(void 0, __spreadArray$1([self], args, false)); };
-        };
-    };
-
-    (undefined && undefined.__spreadArray) || function (to, from, pack) {
-        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-            if (ar || !(i in from)) {
-                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-                ar[i] = from[i];
-            }
-        }
-        return to.concat(ar || Array.prototype.slice.call(from));
-    };
-    // -------------------------------------------------------------------------------------
-    // Either
-    // -------------------------------------------------------------------------------------
-    /** @internal */
-    var isLeft$1 = function (ma) { return ma._tag === 'Left'; };
-    /** @internal */
-    var left$1 = function (e) { return ({ _tag: 'Left', left: e }); };
-    /** @internal */
-    var right$1 = function (a) { return ({ _tag: 'Right', right: a }); };
-
-    /**
-     * A `Functor` is a type constructor which supports a mapping operation `map`.
-     *
-     * `map` can be used to turn functions `a -> b` into functions `f a -> f b` whose argument and return types use the type
-     * constructor `f` to represent some computational context.
-     *
-     * Instances must satisfy the following laws:
-     *
-     * 1. Identity: `F.map(fa, a => a) <-> fa`
-     * 2. Composition: `F.map(fa, a => bc(ab(a))) <-> F.map(F.map(fa, ab), bc)`
-     *
-     * @since 2.0.0
-     */
-    /** @internal */
-    function as$1(F) {
-        return function (self, b) { return F.map(self, function () { return b; }); };
-    }
-
-    var _function = {};
-
-    (function (exports) {
-    	var __spreadArray = (commonjsGlobal && commonjsGlobal.__spreadArray) || function (to, from, pack) {
-    	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-    	        if (ar || !(i in from)) {
-    	            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-    	            ar[i] = from[i];
-    	        }
-    	    }
-    	    return to.concat(ar || Array.prototype.slice.call(from));
-    	};
-    	Object.defineProperty(exports, "__esModule", { value: true });
-    	exports.dual = exports.getEndomorphismMonoid = exports.not = exports.SK = exports.hole = exports.pipe = exports.untupled = exports.tupled = exports.absurd = exports.decrement = exports.increment = exports.tuple = exports.flow = exports.flip = exports.constVoid = exports.constUndefined = exports.constNull = exports.constFalse = exports.constTrue = exports.constant = exports.unsafeCoerce = exports.identity = exports.apply = exports.getRing = exports.getSemiring = exports.getMonoid = exports.getSemigroup = exports.getBooleanAlgebra = void 0;
-    	// -------------------------------------------------------------------------------------
-    	// instances
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	var getBooleanAlgebra = function (B) {
-    	    return function () { return ({
-    	        meet: function (x, y) { return function (a) { return B.meet(x(a), y(a)); }; },
-    	        join: function (x, y) { return function (a) { return B.join(x(a), y(a)); }; },
-    	        zero: function () { return B.zero; },
-    	        one: function () { return B.one; },
-    	        implies: function (x, y) { return function (a) { return B.implies(x(a), y(a)); }; },
-    	        not: function (x) { return function (a) { return B.not(x(a)); }; }
-    	    }); };
-    	};
-    	exports.getBooleanAlgebra = getBooleanAlgebra;
-    	/**
-    	 * Unary functions form a semigroup as long as you can provide a semigroup for the codomain.
-    	 *
-    	 * @example
-    	 * import { Predicate, getSemigroup } from 'fp-ts/function'
-    	 * import * as B from 'fp-ts/boolean'
-    	 *
-    	 * const f: Predicate<number> = (n) => n <= 2
-    	 * const g: Predicate<number> = (n) => n >= 0
-    	 *
-    	 * const S1 = getSemigroup(B.SemigroupAll)<number>()
-    	 *
-    	 * assert.deepStrictEqual(S1.concat(f, g)(1), true)
-    	 * assert.deepStrictEqual(S1.concat(f, g)(3), false)
-    	 *
-    	 * const S2 = getSemigroup(B.SemigroupAny)<number>()
-    	 *
-    	 * assert.deepStrictEqual(S2.concat(f, g)(1), true)
-    	 * assert.deepStrictEqual(S2.concat(f, g)(3), true)
-    	 *
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	var getSemigroup = function (S) {
-    	    return function () { return ({
-    	        concat: function (f, g) { return function (a) { return S.concat(f(a), g(a)); }; }
-    	    }); };
-    	};
-    	exports.getSemigroup = getSemigroup;
-    	/**
-    	 * Unary functions form a monoid as long as you can provide a monoid for the codomain.
-    	 *
-    	 * @example
-    	 * import { Predicate } from 'fp-ts/Predicate'
-    	 * import { getMonoid } from 'fp-ts/function'
-    	 * import * as B from 'fp-ts/boolean'
-    	 *
-    	 * const f: Predicate<number> = (n) => n <= 2
-    	 * const g: Predicate<number> = (n) => n >= 0
-    	 *
-    	 * const M1 = getMonoid(B.MonoidAll)<number>()
-    	 *
-    	 * assert.deepStrictEqual(M1.concat(f, g)(1), true)
-    	 * assert.deepStrictEqual(M1.concat(f, g)(3), false)
-    	 *
-    	 * const M2 = getMonoid(B.MonoidAny)<number>()
-    	 *
-    	 * assert.deepStrictEqual(M2.concat(f, g)(1), true)
-    	 * assert.deepStrictEqual(M2.concat(f, g)(3), true)
-    	 *
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	var getMonoid = function (M) {
-    	    var getSemigroupM = (0, exports.getSemigroup)(M);
-    	    return function () { return ({
-    	        concat: getSemigroupM().concat,
-    	        empty: function () { return M.empty; }
-    	    }); };
-    	};
-    	exports.getMonoid = getMonoid;
-    	/**
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	var getSemiring = function (S) { return ({
-    	    add: function (f, g) { return function (x) { return S.add(f(x), g(x)); }; },
-    	    zero: function () { return S.zero; },
-    	    mul: function (f, g) { return function (x) { return S.mul(f(x), g(x)); }; },
-    	    one: function () { return S.one; }
-    	}); };
-    	exports.getSemiring = getSemiring;
-    	/**
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	var getRing = function (R) {
-    	    var S = (0, exports.getSemiring)(R);
-    	    return {
-    	        add: S.add,
-    	        mul: S.mul,
-    	        one: S.one,
-    	        zero: S.zero,
-    	        sub: function (f, g) { return function (x) { return R.sub(f(x), g(x)); }; }
-    	    };
-    	};
-    	exports.getRing = getRing;
-    	// -------------------------------------------------------------------------------------
-    	// utils
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @since 2.11.0
-    	 */
-    	var apply = function (a) {
-    	    return function (f) {
-    	        return f(a);
-    	    };
-    	};
-    	exports.apply = apply;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	function identity(a) {
-    	    return a;
-    	}
-    	exports.identity = identity;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	exports.unsafeCoerce = identity;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	function constant(a) {
-    	    return function () { return a; };
-    	}
-    	exports.constant = constant;
-    	/**
-    	 * A thunk that returns always `true`.
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	exports.constTrue = constant(true);
-    	/**
-    	 * A thunk that returns always `false`.
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	exports.constFalse = constant(false);
-    	/**
-    	 * A thunk that returns always `null`.
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	exports.constNull = constant(null);
-    	/**
-    	 * A thunk that returns always `undefined`.
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	exports.constUndefined = constant(undefined);
-    	/**
-    	 * A thunk that returns always `void`.
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	exports.constVoid = exports.constUndefined;
-    	function flip(f) {
-    	    return function () {
-    	        var args = [];
-    	        for (var _i = 0; _i < arguments.length; _i++) {
-    	            args[_i] = arguments[_i];
-    	        }
-    	        if (args.length > 1) {
-    	            return f(args[1], args[0]);
-    	        }
-    	        return function (a) { return f(a)(args[0]); };
-    	    };
-    	}
-    	exports.flip = flip;
-    	function flow(ab, bc, cd, de, ef, fg, gh, hi, ij) {
-    	    switch (arguments.length) {
-    	        case 1:
-    	            return ab;
-    	        case 2:
-    	            return function () {
-    	                return bc(ab.apply(this, arguments));
-    	            };
-    	        case 3:
-    	            return function () {
-    	                return cd(bc(ab.apply(this, arguments)));
-    	            };
-    	        case 4:
-    	            return function () {
-    	                return de(cd(bc(ab.apply(this, arguments))));
-    	            };
-    	        case 5:
-    	            return function () {
-    	                return ef(de(cd(bc(ab.apply(this, arguments)))));
-    	            };
-    	        case 6:
-    	            return function () {
-    	                return fg(ef(de(cd(bc(ab.apply(this, arguments))))));
-    	            };
-    	        case 7:
-    	            return function () {
-    	                return gh(fg(ef(de(cd(bc(ab.apply(this, arguments)))))));
-    	            };
-    	        case 8:
-    	            return function () {
-    	                return hi(gh(fg(ef(de(cd(bc(ab.apply(this, arguments))))))));
-    	            };
-    	        case 9:
-    	            return function () {
-    	                return ij(hi(gh(fg(ef(de(cd(bc(ab.apply(this, arguments)))))))));
-    	            };
-    	    }
-    	    return;
-    	}
-    	exports.flow = flow;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	function tuple() {
-    	    var t = [];
-    	    for (var _i = 0; _i < arguments.length; _i++) {
-    	        t[_i] = arguments[_i];
-    	    }
-    	    return t;
-    	}
-    	exports.tuple = tuple;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	function increment(n) {
-    	    return n + 1;
-    	}
-    	exports.increment = increment;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	function decrement(n) {
-    	    return n - 1;
-    	}
-    	exports.decrement = decrement;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	function absurd(_) {
-    	    throw new Error('Called `absurd` function which should be uncallable');
-    	}
-    	exports.absurd = absurd;
-    	/**
-    	 * Creates a tupled version of this function: instead of `n` arguments, it accepts a single tuple argument.
-    	 *
-    	 * @example
-    	 * import { tupled } from 'fp-ts/function'
-    	 *
-    	 * const add = tupled((x: number, y: number): number => x + y)
-    	 *
-    	 * assert.strictEqual(add([1, 2]), 3)
-    	 *
-    	 * @since 2.4.0
-    	 */
-    	function tupled(f) {
-    	    return function (a) { return f.apply(void 0, a); };
-    	}
-    	exports.tupled = tupled;
-    	/**
-    	 * Inverse function of `tupled`
-    	 *
-    	 * @since 2.4.0
-    	 */
-    	function untupled(f) {
-    	    return function () {
-    	        var a = [];
-    	        for (var _i = 0; _i < arguments.length; _i++) {
-    	            a[_i] = arguments[_i];
-    	        }
-    	        return f(a);
-    	    };
-    	}
-    	exports.untupled = untupled;
-    	function pipe(a, ab, bc, cd, de, ef, fg, gh, hi) {
-    	    switch (arguments.length) {
-    	        case 1:
-    	            return a;
-    	        case 2:
-    	            return ab(a);
-    	        case 3:
-    	            return bc(ab(a));
-    	        case 4:
-    	            return cd(bc(ab(a)));
-    	        case 5:
-    	            return de(cd(bc(ab(a))));
-    	        case 6:
-    	            return ef(de(cd(bc(ab(a)))));
-    	        case 7:
-    	            return fg(ef(de(cd(bc(ab(a))))));
-    	        case 8:
-    	            return gh(fg(ef(de(cd(bc(ab(a)))))));
-    	        case 9:
-    	            return hi(gh(fg(ef(de(cd(bc(ab(a))))))));
-    	        default: {
-    	            var ret = arguments[0];
-    	            for (var i = 1; i < arguments.length; i++) {
-    	                ret = arguments[i](ret);
-    	            }
-    	            return ret;
-    	        }
-    	    }
-    	}
-    	exports.pipe = pipe;
-    	/**
-    	 * Type hole simulation
-    	 *
-    	 * @since 2.7.0
-    	 */
-    	exports.hole = absurd;
-    	/**
-    	 * @since 2.11.0
-    	 */
-    	var SK = function (_, b) { return b; };
-    	exports.SK = SK;
-    	/**
-    	 * Use `Predicate` module instead.
-    	 *
-    	 * @category zone of death
-    	 * @since 2.0.0
-    	 * @deprecated
-    	 */
-    	function not(predicate) {
-    	    return function (a) { return !predicate(a); };
-    	}
-    	exports.not = not;
-    	/**
-    	 * Use `Endomorphism` module instead.
-    	 *
-    	 * @category zone of death
-    	 * @since 2.10.0
-    	 * @deprecated
-    	 */
-    	var getEndomorphismMonoid = function () { return ({
-    	    concat: function (first, second) { return flow(first, second); },
-    	    empty: identity
-    	}); };
-    	exports.getEndomorphismMonoid = getEndomorphismMonoid;
-    	/** @internal */
-    	var dual = function (arity, body) {
-    	    var isDataFirst = typeof arity === 'number' ? function (args) { return args.length >= arity; } : arity;
-    	    return function () {
-    	        var args = Array.from(arguments);
-    	        if (isDataFirst(arguments)) {
-    	            return body.apply(this, args);
-    	        }
-    	        return function (self) { return body.apply(void 0, __spreadArray([self], args, false)); };
-    	    };
-    	};
-    	exports.dual = dual; 
-    } (_function));
-
     // Define the getter and setter
     function getSystemState() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -11092,10 +10666,130 @@ var app = (function () {
             });
         });
     }
-    function topologicalSort(graph) {
-        const sorted = graphlib.alg.topsort(graph);
-        // The stack now contains a topological ordering of the nodes
-        return sorted;
+    function validateGraph(systemState) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const graph = systemState.graphState.graph;
+            if (systemState.selectedNode) {
+                const selected_node = systemState.selectedNode;
+                if (selected_node.Node.type_name == "Process") {
+                    const process = selected_node.Node.node_content;
+                    const initial_variables = process.Process.initial_variables;
+                    const test_orders = getAllTopologicalOrders(graph);
+                    for (let i = 0; i++; i < test_orders.length) {
+                        const current_order = test_orders[i];
+                        // to test the order we need to keep track of which variables have already been defined by collecting the output variables in an array as we go, then we only need to determine if the input variables are in the array
+                        const agregate_variables = initial_variables;
+                        for (let j = 0; j++; j < current_order.length) {
+                            const current_node = current_order[j];
+                            const node = yield getNodeById(current_node);
+                            if (node) {
+                                const input_variables = node.Node.input_variables;
+                                const output_variables = node.Node.output_variables;
+                                // check if all of the input variables are in the agregate_variables array
+                                const input_variables_in_agregate = input_variables.every((variable) => {
+                                    return agregate_variables.includes(variable);
+                                });
+                                // if the input variables are in the agregate_variables array, then add the output variables to the agregate_variables array
+                                if (input_variables_in_agregate) {
+                                    agregate_variables.push(...output_variables);
+                                    // if we are on the last node, then we have a valid order
+                                    if (j == current_order.length - 1) {
+                                        return current_order;
+                                    }
+                                }
+                                else {
+                                    return false;
+                                }
+                            }
+                            else {
+                                return false;
+                            }
+                        }
+                    }
+                    return false;
+                }
+                else {
+                    return false;
+                }
+            }
+            return false;
+        });
+    }
+    function getAllTopologicalOrders(graph) {
+        // check that there is a single component (that the graph is connected) AND
+        // that there are no cycles in the graph
+        if (!graphlib.alg.isAcyclic(graph) || graphlib.alg.components(graph).length !== 1) {
+            return [];
+        }
+        // get the local graph
+        const local_graph = graphToLocalGraph(graph);
+        return allTopologicalSorts(local_graph);
+    }
+    function graphToLocalGraph(graph) {
+        const local_graph = {};
+        const my_nodes = graph.nodes();
+        for (let i = 0; i < my_nodes.length; i++) {
+            const node = my_nodes[i];
+            const neighbors = graph.successors(node);
+            if (neighbors) {
+                local_graph[node] = neighbors;
+            }
+        }
+        return local_graph;
+    }
+    function allTopologicalSorts(graph) {
+        const allOrderings = [];
+        const indegreeMap = calculateIndegreeForAllVertex(graph);
+        const startNodes = Array.from(Object.keys(indegreeMap)).filter((node) => indegreeMap[node] === 0);
+        const visited = {};
+        for (const node in graph) {
+            visited[node] = false;
+        }
+        function helper(node, indegreeMap, visited, stack) {
+            visited[node] = true;
+            stack.push(node);
+            if (stack.length === Object.keys(graph).length) {
+                allOrderings.push([...stack]);
+            }
+            else {
+                for (const neighbor of graph[node]) {
+                    indegreeMap[neighbor]--;
+                    if (indegreeMap[neighbor] === 0 && !visited[neighbor]) {
+                        helper(neighbor, indegreeMap, visited, stack);
+                    }
+                    indegreeMap[neighbor]++;
+                }
+            }
+            visited[node] = false;
+            stack.pop();
+        }
+        for (const node of startNodes) {
+            helper(node, Object.assign({}, indegreeMap), Object.assign({}, visited), []);
+        }
+        return allOrderings;
+    }
+    function calculateIndegreeForAllVertex(graph) {
+        const indegreeMap = {};
+        for (const node in graph) {
+            indegreeMap[node] = 0;
+        }
+        for (const node in graph) {
+            for (const neighbor of graph[node]) {
+                indegreeMap[neighbor]++;
+            }
+        }
+        return indegreeMap;
+    }
+    function getNodeById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const systemState = yield getSystemState();
+            const prompt = systemState.nodes.find((node) => {
+                if (node.Node._id) {
+                    return getId(node) == id;
+                }
+            });
+            return prompt;
+        });
     }
     // get the name of the action by using the id
     function getNodeName(id) {
@@ -11103,12 +10797,12 @@ var app = (function () {
             const system_state = yield getSystemState();
             const node = system_state.nodes.find((node) => {
                 // get the node with the id:
-                if (node._id) {
+                if (node.Node._id) {
                     return getId(node) == id;
                 }
             });
             if (node) {
-                return node.name;
+                return node.Node.name;
             }
         });
     }
@@ -11122,7 +10816,7 @@ var app = (function () {
     function getId(node) {
         var _a;
         if (node) {
-            return (_a = node._id) === null || _a === void 0 ? void 0 : _a.$oid;
+            return (_a = node.Node._id) === null || _a === void 0 ? void 0 : _a.$oid;
         }
         return undefined;
     }
@@ -11235,8 +10929,8 @@ var app = (function () {
                 systemState.selectedNode = res;
                 systemState.graphState.lastAction = "selectNode";
                 systemState.graphState.lastActedOn = systemState.graphState.actedOn;
-                systemState.graphState.actedOn = [id, res.name];
-                systemState.graphState.name = res.name;
+                systemState.graphState.actedOn = [id, res.Node.name];
+                systemState.graphState.name = res.Node.name;
                 setSystemState(systemState);
             }
         });
@@ -11256,6 +10950,122 @@ var app = (function () {
     const { console: console_1$2 } = globals;
     const file$6 = "src/components/sidebarComponents/CreateProcess.svelte";
 
+    function get_each_context$2(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[15] = list[i];
+    	return child_ctx;
+    }
+
+    function get_each_context_1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[15] = list[i];
+    	return child_ctx;
+    }
+
+    // (128:2) {#each nodes as node (node.Node._id)}
+    function create_each_block_1(key_1, ctx) {
+    	let li;
+    	let button;
+    	let t0_value = /*node*/ ctx[15].Node.name + "";
+    	let t0;
+    	let t1;
+    	let mounted;
+    	let dispose;
+
+    	function click_handler() {
+    		return /*click_handler*/ ctx[12](/*node*/ ctx[15]);
+    	}
+
+    	const block = {
+    		key: key_1,
+    		first: null,
+    		c: function create() {
+    			li = element$1("li");
+    			button = element$1("button");
+    			t0 = text(t0_value);
+    			t1 = space();
+    			attr_dev(button, "type", "button");
+    			toggle_class(button, "selected", /*isSelected*/ ctx[7](/*node*/ ctx[15]));
+    			add_location(button, file$6, 129, 6, 4919);
+    			add_location(li, file$6, 128, 4, 4908);
+    			this.first = li;
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, li, anchor);
+    			append_dev(li, button);
+    			append_dev(button, t0);
+    			append_dev(li, t1);
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", click_handler, false, false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			if (dirty & /*nodes*/ 1 && t0_value !== (t0_value = /*node*/ ctx[15].Node.name + "")) set_data_dev(t0, t0_value);
+
+    			if (dirty & /*isSelected, nodes*/ 129) {
+    				toggle_class(button, "selected", /*isSelected*/ ctx[7](/*node*/ ctx[15]));
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(li);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1.name,
+    		type: "each",
+    		source: "(128:2) {#each nodes as node (node.Node._id)}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (141:0) {#each selectedNodes as node (node.Node._id)}
+    function create_each_block$2(key_1, ctx) {
+    	let p;
+    	let t_value = /*node*/ ctx[15].Node.name + "";
+    	let t;
+
+    	const block = {
+    		key: key_1,
+    		first: null,
+    		c: function create() {
+    			p = element$1("p");
+    			t = text(t_value);
+    			add_location(p, file$6, 141, 2, 5167);
+    			this.first = p;
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, p, anchor);
+    			append_dev(p, t);
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			if (dirty & /*selectedNodes*/ 2 && t_value !== (t_value = /*node*/ ctx[15].Node.name + "")) set_data_dev(t, t_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(p);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block$2.name,
+    		type: "each",
+    		source: "(141:0) {#each selectedNodes as node (node.Node._id)}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
     function create_fragment$6(ctx) {
     	let p0;
     	let t1;
@@ -11268,20 +11078,46 @@ var app = (function () {
     	let p2;
     	let t7;
     	let ul;
+    	let each_blocks_1 = [];
+    	let each0_lookup = new Map();
     	let t8;
     	let h3;
     	let t10;
+    	let each_blocks = [];
+    	let each1_lookup = new Map();
+    	let t11;
     	let button0;
-    	let t12;
+    	let t13;
     	let button1;
-    	let t14;
+    	let t15;
     	let button2;
-    	let t16;
+    	let t17;
     	let button3;
-    	let t18;
+    	let t19;
     	let button4;
     	let mounted;
     	let dispose;
+    	let each_value_1 = /*nodes*/ ctx[0];
+    	validate_each_argument(each_value_1);
+    	const get_key = ctx => /*node*/ ctx[15].Node._id;
+    	validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		let child_ctx = get_each_context_1(ctx, each_value_1, i);
+    		let key = get_key(child_ctx);
+    		each0_lookup.set(key, each_blocks_1[i] = create_each_block_1(key, child_ctx));
+    	}
+
+    	let each_value = /*selectedNodes*/ ctx[1];
+    	validate_each_argument(each_value);
+    	const get_key_1 = ctx => /*node*/ ctx[15].Node._id;
+    	validate_each_keys(ctx, each_value, get_each_context$2, get_key_1);
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		let child_ctx = get_each_context$2(ctx, each_value, i);
+    		let key = get_key_1(child_ctx);
+    		each1_lookup.set(key, each_blocks[i] = create_each_block$2(key, child_ctx));
+    	}
 
     	const block = {
     		c: function create() {
@@ -11299,43 +11135,54 @@ var app = (function () {
     			p2.textContent = "Click the node buttons below to add them to the graph. Then click \"Add Node(s)\n  to see them populate on the graph.\"";
     			t7 = space();
     			ul = element$1("ul");
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].c();
+    			}
+
     			t8 = space();
     			h3 = element$1("h3");
     			h3.textContent = "Nodes to add:";
     			t10 = space();
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t11 = space();
     			button0 = element$1("button");
     			button0.textContent = "Add Node(s)";
-    			t12 = space();
+    			t13 = space();
     			button1 = element$1("button");
     			button1.textContent = "Remove Node(s)";
-    			t14 = space();
+    			t15 = space();
     			button2 = element$1("button");
     			button2.textContent = "Add Edge";
-    			t16 = space();
+    			t17 = space();
     			button3 = element$1("button");
     			button3.textContent = "Remove Edge";
-    			t18 = space();
+    			t19 = space();
     			button4 = element$1("button");
     			button4.textContent = "Save Process";
-    			add_location(p0, file$6, 78, 0, 3117);
+    			add_location(p0, file$6, 113, 0, 4489);
     			attr_dev(input0, "type", "text");
-    			add_location(input0, file$6, 79, 0, 3172);
-    			add_location(p1, file$6, 80, 0, 3212);
+    			add_location(input0, file$6, 114, 0, 4544);
+    			add_location(p1, file$6, 115, 0, 4584);
     			attr_dev(input1, "type", "text");
-    			add_location(input1, file$6, 84, 0, 3310);
-    			add_location(p2, file$6, 86, 0, 3358);
-    			add_location(ul, file$6, 91, 0, 3487);
-    			add_location(h3, file$6, 103, 0, 3734);
+    			add_location(input1, file$6, 119, 0, 4682);
+    			add_location(p2, file$6, 121, 0, 4730);
+    			add_location(ul, file$6, 126, 0, 4859);
+    			add_location(h3, file$6, 138, 0, 5095);
     			attr_dev(button0, "class", "add-button");
-    			add_location(button0, file$6, 108, 0, 3845);
+    			add_location(button0, file$6, 143, 0, 5199);
     			attr_dev(button1, "class", "remove-button");
-    			add_location(button1, file$6, 109, 0, 3918);
+    			add_location(button1, file$6, 144, 0, 5272);
     			attr_dev(button2, "class", "add-button");
-    			add_location(button2, file$6, 112, 0, 4006);
+    			add_location(button2, file$6, 147, 0, 5360);
     			attr_dev(button3, "class", "remove-button");
-    			add_location(button3, file$6, 113, 0, 4075);
+    			add_location(button3, file$6, 148, 0, 5429);
     			attr_dev(button4, "class", "add-button");
-    			add_location(button4, file$6, 114, 0, 4156);
+    			add_location(button4, file$6, 149, 0, 5510);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -11344,50 +11191,79 @@ var app = (function () {
     			insert_dev(target, p0, anchor);
     			insert_dev(target, t1, anchor);
     			insert_dev(target, input0, anchor);
-    			set_input_value(input0, /*name*/ ctx[0]);
+    			set_input_value(input0, /*name*/ ctx[2]);
     			insert_dev(target, t2, anchor);
     			insert_dev(target, p1, anchor);
     			insert_dev(target, t4, anchor);
     			insert_dev(target, input1, anchor);
-    			set_input_value(input1, /*description*/ ctx[1]);
+    			set_input_value(input1, /*description*/ ctx[3]);
     			insert_dev(target, t5, anchor);
     			insert_dev(target, p2, anchor);
     			insert_dev(target, t7, anchor);
     			insert_dev(target, ul, anchor);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				if (each_blocks_1[i]) {
+    					each_blocks_1[i].m(ul, null);
+    				}
+    			}
+
     			insert_dev(target, t8, anchor);
     			insert_dev(target, h3, anchor);
     			insert_dev(target, t10, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				if (each_blocks[i]) {
+    					each_blocks[i].m(target, anchor);
+    				}
+    			}
+
+    			insert_dev(target, t11, anchor);
     			insert_dev(target, button0, anchor);
-    			insert_dev(target, t12, anchor);
+    			insert_dev(target, t13, anchor);
     			insert_dev(target, button1, anchor);
-    			insert_dev(target, t14, anchor);
+    			insert_dev(target, t15, anchor);
     			insert_dev(target, button2, anchor);
-    			insert_dev(target, t16, anchor);
+    			insert_dev(target, t17, anchor);
     			insert_dev(target, button3, anchor);
-    			insert_dev(target, t18, anchor);
+    			insert_dev(target, t19, anchor);
     			insert_dev(target, button4, anchor);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[6]),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[7]),
-    					listen_dev(button0, "click", /*localAddNodes*/ ctx[2], false, false, false, false),
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[10]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[11]),
+    					listen_dev(button0, "click", /*localAddNodes*/ ctx[4], false, false, false, false),
     					listen_dev(button1, "click", removeSelectedNode, false, false, false, false),
-    					listen_dev(button2, "click", /*localAddEdge*/ ctx[3], false, false, false, false),
+    					listen_dev(button2, "click", /*localAddEdge*/ ctx[5], false, false, false, false),
     					listen_dev(button3, "click", removeSelectedEdge, false, false, false, false),
-    					listen_dev(button4, "click", /*saveProcess*/ ctx[4], false, false, false, false)
+    					listen_dev(button4, "click", /*saveProcess*/ ctx[6], false, false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*name*/ 1 && input0.value !== /*name*/ ctx[0]) {
-    				set_input_value(input0, /*name*/ ctx[0]);
+    			if (dirty & /*name*/ 4 && input0.value !== /*name*/ ctx[2]) {
+    				set_input_value(input0, /*name*/ ctx[2]);
     			}
 
-    			if (dirty & /*description*/ 2 && input1.value !== /*description*/ ctx[1]) {
-    				set_input_value(input1, /*description*/ ctx[1]);
+    			if (dirty & /*description*/ 8 && input1.value !== /*description*/ ctx[3]) {
+    				set_input_value(input1, /*description*/ ctx[3]);
+    			}
+
+    			if (dirty & /*isSelected, nodes, toggleSelect*/ 385) {
+    				each_value_1 = /*nodes*/ ctx[0];
+    				validate_each_argument(each_value_1);
+    				validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
+    				each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx, each_value_1, each0_lookup, ul, destroy_block, create_each_block_1, null, get_each_context_1);
+    			}
+
+    			if (dirty & /*selectedNodes*/ 2) {
+    				each_value = /*selectedNodes*/ ctx[1];
+    				validate_each_argument(each_value);
+    				validate_each_keys(ctx, each_value, get_each_context$2, get_key_1);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key_1, 1, ctx, each_value, each1_lookup, t11.parentNode, destroy_block, create_each_block$2, t11, get_each_context$2);
     			}
     		},
     		i: noop$2,
@@ -11404,17 +11280,28 @@ var app = (function () {
     			if (detaching) detach_dev(p2);
     			if (detaching) detach_dev(t7);
     			if (detaching) detach_dev(ul);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].d();
+    			}
+
     			if (detaching) detach_dev(t8);
     			if (detaching) detach_dev(h3);
     			if (detaching) detach_dev(t10);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].d(detaching);
+    			}
+
+    			if (detaching) detach_dev(t11);
     			if (detaching) detach_dev(button0);
-    			if (detaching) detach_dev(t12);
+    			if (detaching) detach_dev(t13);
     			if (detaching) detach_dev(button1);
-    			if (detaching) detach_dev(t14);
+    			if (detaching) detach_dev(t15);
     			if (detaching) detach_dev(button2);
-    			if (detaching) detach_dev(t16);
+    			if (detaching) detach_dev(t17);
     			if (detaching) detach_dev(button3);
-    			if (detaching) detach_dev(t18);
+    			if (detaching) detach_dev(t19);
     			if (detaching) detach_dev(button4);
     			mounted = false;
     			run_all(dispose);
@@ -11435,7 +11322,7 @@ var app = (function () {
     function instance$6($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(5, $systemStateStore = $$value));
+    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(9, $systemStateStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('CreateProcess', slots, []);
 
@@ -11483,18 +11370,18 @@ var app = (function () {
 
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
     		current_graph = $systemStateStore.graphState.graph;
-    		nodes = $systemStateStore.nodes;
+    		$$invalidate(0, nodes = $systemStateStore.nodes);
     	}));
 
     	function localAddNodes() {
     		// for each of the selected actions, add a node to the graph
     		selectedNodes.forEach(node => {
     			// console.log("local");
-    			addNode(node._id.$oid);
+    			addNode(node.Node._id.$oid);
     		});
 
     		// clear out the selected actions
-    		selectedNodes = [];
+    		$$invalidate(1, selectedNodes = []);
     	}
 
     	function localAddEdge() {
@@ -11515,26 +11402,67 @@ var app = (function () {
     	}
 
     	function saveProcess() {
-    		// create an alert message if either name or description are null
-    		if (name === null || description === null) {
-    			alert("Please enter a name and description for the process");
-    			return;
-    		} else {
-    			let topologicalOrder = topologicalSort(current_graph);
-    			let current_graph_string = JSON.stringify(graphlib.json.write(current_graph));
+    		return __awaiter(this, void 0, void 0, function* () {
+    			// create an alert message if either name or description are null
+    			if (name === null || description === null) {
+    				alert("Please enter a name and description for the process");
+    				return;
+    			} else {
+    				const systemState = yield getSystemState();
+    				let maybe_topological_order = yield validateGraph(systemState);
 
-    			// console.log("current_graph_string: " + current_graph_string);
-    			let process = {
-    				Process: {
-    					graph: current_graph_string,
-    					initial_variables: [],
-    					topological_order: topologicalOrder
+    				if (maybe_topological_order) {
+    					let topological_order = maybe_topological_order;
+    					let current_graph_string = JSON.stringify(graphlib.json.write(current_graph));
+
+    					// console.log("current_graph_string: " + current_graph_string);
+    					let process = {
+    						Process: {
+    							graph: current_graph_string,
+    							initial_variables: [],
+    							topological_order
+    						}
+    					};
+
+    					// console.log("sending process: " + JSON.stringify(process));
+    					console.log("sending process: ", process);
+    				} else {
+    					alert("The process does not have a valid topological order :(");
     				}
-    			};
+    			}
+    		});
+    	}
 
-    			// console.log("sending process: " + JSON.stringify(process));
-    			console.log("sending process: ", process);
+    	function isSelected(node) {
+    		// check to see if selectedNodes : Node[] contains node : Node
+    		return selectedNodes.filter(val => {
+    			val.Node._id.$oid === node.Node._id.$oid;
+    		}).length > 0;
+    	}
+
+    	function toggleSelect(node) {
+    		// if the node is already in the selectedNodes then remove it, otherwise add it
+    		console.log("The nodes that are currently selected are:");
+
+    		selectedNodes.forEach(node => {
+    			console.log(node.Node.name);
+    		});
+
+    		let should_remove = isSelected(node);
+
+    		if (should_remove) {
+    			$$invalidate(1, selectedNodes = selectedNodes.filter(val => {
+    				val.Node._id.$oid != node.Node._id.$oid;
+    			}));
+    		} else {
+    			selectedNodes.push(node);
     		}
+
+    		console.log("After running toggleSelect, the nodes are:");
+
+    		selectedNodes.forEach(node => {
+    			console.log(node.Node.name);
+    		});
     	}
 
     	const writable_props = [];
@@ -11545,22 +11473,25 @@ var app = (function () {
 
     	function input0_input_handler() {
     		name = this.value;
-    		$$invalidate(0, name);
+    		$$invalidate(2, name);
     	}
 
     	function input1_input_handler() {
     		description = this.value;
-    		$$invalidate(1, description);
+    		$$invalidate(3, description);
     	}
+
+    	const click_handler = node => toggleSelect(node);
 
     	$$self.$capture_state = () => ({
     		__awaiter,
     		onMount,
     		addEdge,
     		addNode,
+    		getSystemState,
     		removeSelectedEdge,
     		removeSelectedNode,
-    		topologicalSort,
+    		validateGraph,
     		Graph: graphlib.Graph,
     		json: graphlib.json,
     		systemStateStore,
@@ -11572,15 +11503,17 @@ var app = (function () {
     		localAddNodes,
     		localAddEdge,
     		saveProcess,
+    		isSelected,
+    		toggleSelect,
     		$systemStateStore
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
-    		if ('nodes' in $$props) nodes = $$props.nodes;
-    		if ('selectedNodes' in $$props) selectedNodes = $$props.selectedNodes;
-    		if ('name' in $$props) $$invalidate(0, name = $$props.name);
-    		if ('description' in $$props) $$invalidate(1, description = $$props.description);
+    		if ('nodes' in $$props) $$invalidate(0, nodes = $$props.nodes);
+    		if ('selectedNodes' in $$props) $$invalidate(1, selectedNodes = $$props.selectedNodes);
+    		if ('name' in $$props) $$invalidate(2, name = $$props.name);
+    		if ('description' in $$props) $$invalidate(3, description = $$props.description);
     		if ('current_graph' in $$props) current_graph = $$props.current_graph;
     	};
 
@@ -11589,23 +11522,28 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$systemStateStore*/ 32) {
+    		if ($$self.$$.dirty & /*$systemStateStore*/ 512) {
     			{
     				current_graph = $systemStateStore.graphState.graph;
-    				nodes = $systemStateStore.nodes;
+    				$$invalidate(0, nodes = $systemStateStore.nodes);
     			}
     		}
     	};
 
     	return [
+    		nodes,
+    		selectedNodes,
     		name,
     		description,
     		localAddNodes,
     		localAddEdge,
     		saveProcess,
+    		isSelected,
+    		toggleSelect,
     		$systemStateStore,
     		input0_input_handler,
-    		input1_input_handler
+    		input1_input_handler,
+    		click_handler
     	];
     }
 
@@ -12103,6 +12041,99 @@ var app = (function () {
             easing,
             css: t => `opacity: ${t * o}`
         };
+    }
+
+    var __spreadArray$1 = (undefined && undefined.__spreadArray) || function (to, from, pack) {
+        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+            if (ar || !(i in from)) {
+                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+                ar[i] = from[i];
+            }
+        }
+        return to.concat(ar || Array.prototype.slice.call(from));
+    };
+    /**
+     * @since 2.0.0
+     */
+    function identity$2(a) {
+        return a;
+    }
+    function pipe(a, ab, bc, cd, de, ef, fg, gh, hi) {
+        switch (arguments.length) {
+            case 1:
+                return a;
+            case 2:
+                return ab(a);
+            case 3:
+                return bc(ab(a));
+            case 4:
+                return cd(bc(ab(a)));
+            case 5:
+                return de(cd(bc(ab(a))));
+            case 6:
+                return ef(de(cd(bc(ab(a)))));
+            case 7:
+                return fg(ef(de(cd(bc(ab(a))))));
+            case 8:
+                return gh(fg(ef(de(cd(bc(ab(a)))))));
+            case 9:
+                return hi(gh(fg(ef(de(cd(bc(ab(a))))))));
+            default: {
+                var ret = arguments[0];
+                for (var i = 1; i < arguments.length; i++) {
+                    ret = arguments[i](ret);
+                }
+                return ret;
+            }
+        }
+    }
+    /** @internal */
+    var dual = function (arity, body) {
+        var isDataFirst = typeof arity === 'number' ? function (args) { return args.length >= arity; } : arity;
+        return function () {
+            var args = Array.from(arguments);
+            if (isDataFirst(arguments)) {
+                return body.apply(this, args);
+            }
+            return function (self) { return body.apply(void 0, __spreadArray$1([self], args, false)); };
+        };
+    };
+
+    (undefined && undefined.__spreadArray) || function (to, from, pack) {
+        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+            if (ar || !(i in from)) {
+                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+                ar[i] = from[i];
+            }
+        }
+        return to.concat(ar || Array.prototype.slice.call(from));
+    };
+    // -------------------------------------------------------------------------------------
+    // Either
+    // -------------------------------------------------------------------------------------
+    /** @internal */
+    var isLeft$1 = function (ma) { return ma._tag === 'Left'; };
+    /** @internal */
+    var left$1 = function (e) { return ({ _tag: 'Left', left: e }); };
+    /** @internal */
+    var right$1 = function (a) { return ({ _tag: 'Right', right: a }); };
+
+    /**
+     * A `Functor` is a type constructor which supports a mapping operation `map`.
+     *
+     * `map` can be used to turn functions `a -> b` into functions `f a -> f b` whose argument and return types use the type
+     * constructor `f` to represent some computational context.
+     *
+     * Instances must satisfy the following laws:
+     *
+     * 1. Identity: `F.map(fa, a => a) <-> fa`
+     * 2. Composition: `F.map(fa, a => bc(ab(a))) <-> F.map(F.map(fa, ab), bc)`
+     *
+     * @since 2.0.0
+     */
+    /** @internal */
+    function as$1(F) {
+        return function (self, b) { return F.map(self, function () { return b; }); };
     }
 
     // -------------------------------------------------------------------------------------
@@ -52800,6 +52831,379 @@ var app = (function () {
     var Applicative = {};
 
     var Apply = {};
+
+    var _function = {};
+
+    (function (exports) {
+    	var __spreadArray = (commonjsGlobal && commonjsGlobal.__spreadArray) || function (to, from, pack) {
+    	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+    	        if (ar || !(i in from)) {
+    	            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+    	            ar[i] = from[i];
+    	        }
+    	    }
+    	    return to.concat(ar || Array.prototype.slice.call(from));
+    	};
+    	Object.defineProperty(exports, "__esModule", { value: true });
+    	exports.dual = exports.getEndomorphismMonoid = exports.not = exports.SK = exports.hole = exports.pipe = exports.untupled = exports.tupled = exports.absurd = exports.decrement = exports.increment = exports.tuple = exports.flow = exports.flip = exports.constVoid = exports.constUndefined = exports.constNull = exports.constFalse = exports.constTrue = exports.constant = exports.unsafeCoerce = exports.identity = exports.apply = exports.getRing = exports.getSemiring = exports.getMonoid = exports.getSemigroup = exports.getBooleanAlgebra = void 0;
+    	// -------------------------------------------------------------------------------------
+    	// instances
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var getBooleanAlgebra = function (B) {
+    	    return function () { return ({
+    	        meet: function (x, y) { return function (a) { return B.meet(x(a), y(a)); }; },
+    	        join: function (x, y) { return function (a) { return B.join(x(a), y(a)); }; },
+    	        zero: function () { return B.zero; },
+    	        one: function () { return B.one; },
+    	        implies: function (x, y) { return function (a) { return B.implies(x(a), y(a)); }; },
+    	        not: function (x) { return function (a) { return B.not(x(a)); }; }
+    	    }); };
+    	};
+    	exports.getBooleanAlgebra = getBooleanAlgebra;
+    	/**
+    	 * Unary functions form a semigroup as long as you can provide a semigroup for the codomain.
+    	 *
+    	 * @example
+    	 * import { Predicate, getSemigroup } from 'fp-ts/function'
+    	 * import * as B from 'fp-ts/boolean'
+    	 *
+    	 * const f: Predicate<number> = (n) => n <= 2
+    	 * const g: Predicate<number> = (n) => n >= 0
+    	 *
+    	 * const S1 = getSemigroup(B.SemigroupAll)<number>()
+    	 *
+    	 * assert.deepStrictEqual(S1.concat(f, g)(1), true)
+    	 * assert.deepStrictEqual(S1.concat(f, g)(3), false)
+    	 *
+    	 * const S2 = getSemigroup(B.SemigroupAny)<number>()
+    	 *
+    	 * assert.deepStrictEqual(S2.concat(f, g)(1), true)
+    	 * assert.deepStrictEqual(S2.concat(f, g)(3), true)
+    	 *
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var getSemigroup = function (S) {
+    	    return function () { return ({
+    	        concat: function (f, g) { return function (a) { return S.concat(f(a), g(a)); }; }
+    	    }); };
+    	};
+    	exports.getSemigroup = getSemigroup;
+    	/**
+    	 * Unary functions form a monoid as long as you can provide a monoid for the codomain.
+    	 *
+    	 * @example
+    	 * import { Predicate } from 'fp-ts/Predicate'
+    	 * import { getMonoid } from 'fp-ts/function'
+    	 * import * as B from 'fp-ts/boolean'
+    	 *
+    	 * const f: Predicate<number> = (n) => n <= 2
+    	 * const g: Predicate<number> = (n) => n >= 0
+    	 *
+    	 * const M1 = getMonoid(B.MonoidAll)<number>()
+    	 *
+    	 * assert.deepStrictEqual(M1.concat(f, g)(1), true)
+    	 * assert.deepStrictEqual(M1.concat(f, g)(3), false)
+    	 *
+    	 * const M2 = getMonoid(B.MonoidAny)<number>()
+    	 *
+    	 * assert.deepStrictEqual(M2.concat(f, g)(1), true)
+    	 * assert.deepStrictEqual(M2.concat(f, g)(3), true)
+    	 *
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var getMonoid = function (M) {
+    	    var getSemigroupM = (0, exports.getSemigroup)(M);
+    	    return function () { return ({
+    	        concat: getSemigroupM().concat,
+    	        empty: function () { return M.empty; }
+    	    }); };
+    	};
+    	exports.getMonoid = getMonoid;
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var getSemiring = function (S) { return ({
+    	    add: function (f, g) { return function (x) { return S.add(f(x), g(x)); }; },
+    	    zero: function () { return S.zero; },
+    	    mul: function (f, g) { return function (x) { return S.mul(f(x), g(x)); }; },
+    	    one: function () { return S.one; }
+    	}); };
+    	exports.getSemiring = getSemiring;
+    	/**
+    	 * @category instances
+    	 * @since 2.10.0
+    	 */
+    	var getRing = function (R) {
+    	    var S = (0, exports.getSemiring)(R);
+    	    return {
+    	        add: S.add,
+    	        mul: S.mul,
+    	        one: S.one,
+    	        zero: S.zero,
+    	        sub: function (f, g) { return function (x) { return R.sub(f(x), g(x)); }; }
+    	    };
+    	};
+    	exports.getRing = getRing;
+    	// -------------------------------------------------------------------------------------
+    	// utils
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @since 2.11.0
+    	 */
+    	var apply = function (a) {
+    	    return function (f) {
+    	        return f(a);
+    	    };
+    	};
+    	exports.apply = apply;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	function identity(a) {
+    	    return a;
+    	}
+    	exports.identity = identity;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	exports.unsafeCoerce = identity;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	function constant(a) {
+    	    return function () { return a; };
+    	}
+    	exports.constant = constant;
+    	/**
+    	 * A thunk that returns always `true`.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.constTrue = constant(true);
+    	/**
+    	 * A thunk that returns always `false`.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.constFalse = constant(false);
+    	/**
+    	 * A thunk that returns always `null`.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.constNull = constant(null);
+    	/**
+    	 * A thunk that returns always `undefined`.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.constUndefined = constant(undefined);
+    	/**
+    	 * A thunk that returns always `void`.
+    	 *
+    	 * @since 2.0.0
+    	 */
+    	exports.constVoid = exports.constUndefined;
+    	function flip(f) {
+    	    return function () {
+    	        var args = [];
+    	        for (var _i = 0; _i < arguments.length; _i++) {
+    	            args[_i] = arguments[_i];
+    	        }
+    	        if (args.length > 1) {
+    	            return f(args[1], args[0]);
+    	        }
+    	        return function (a) { return f(a)(args[0]); };
+    	    };
+    	}
+    	exports.flip = flip;
+    	function flow(ab, bc, cd, de, ef, fg, gh, hi, ij) {
+    	    switch (arguments.length) {
+    	        case 1:
+    	            return ab;
+    	        case 2:
+    	            return function () {
+    	                return bc(ab.apply(this, arguments));
+    	            };
+    	        case 3:
+    	            return function () {
+    	                return cd(bc(ab.apply(this, arguments)));
+    	            };
+    	        case 4:
+    	            return function () {
+    	                return de(cd(bc(ab.apply(this, arguments))));
+    	            };
+    	        case 5:
+    	            return function () {
+    	                return ef(de(cd(bc(ab.apply(this, arguments)))));
+    	            };
+    	        case 6:
+    	            return function () {
+    	                return fg(ef(de(cd(bc(ab.apply(this, arguments))))));
+    	            };
+    	        case 7:
+    	            return function () {
+    	                return gh(fg(ef(de(cd(bc(ab.apply(this, arguments)))))));
+    	            };
+    	        case 8:
+    	            return function () {
+    	                return hi(gh(fg(ef(de(cd(bc(ab.apply(this, arguments))))))));
+    	            };
+    	        case 9:
+    	            return function () {
+    	                return ij(hi(gh(fg(ef(de(cd(bc(ab.apply(this, arguments)))))))));
+    	            };
+    	    }
+    	    return;
+    	}
+    	exports.flow = flow;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	function tuple() {
+    	    var t = [];
+    	    for (var _i = 0; _i < arguments.length; _i++) {
+    	        t[_i] = arguments[_i];
+    	    }
+    	    return t;
+    	}
+    	exports.tuple = tuple;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	function increment(n) {
+    	    return n + 1;
+    	}
+    	exports.increment = increment;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	function decrement(n) {
+    	    return n - 1;
+    	}
+    	exports.decrement = decrement;
+    	/**
+    	 * @since 2.0.0
+    	 */
+    	function absurd(_) {
+    	    throw new Error('Called `absurd` function which should be uncallable');
+    	}
+    	exports.absurd = absurd;
+    	/**
+    	 * Creates a tupled version of this function: instead of `n` arguments, it accepts a single tuple argument.
+    	 *
+    	 * @example
+    	 * import { tupled } from 'fp-ts/function'
+    	 *
+    	 * const add = tupled((x: number, y: number): number => x + y)
+    	 *
+    	 * assert.strictEqual(add([1, 2]), 3)
+    	 *
+    	 * @since 2.4.0
+    	 */
+    	function tupled(f) {
+    	    return function (a) { return f.apply(void 0, a); };
+    	}
+    	exports.tupled = tupled;
+    	/**
+    	 * Inverse function of `tupled`
+    	 *
+    	 * @since 2.4.0
+    	 */
+    	function untupled(f) {
+    	    return function () {
+    	        var a = [];
+    	        for (var _i = 0; _i < arguments.length; _i++) {
+    	            a[_i] = arguments[_i];
+    	        }
+    	        return f(a);
+    	    };
+    	}
+    	exports.untupled = untupled;
+    	function pipe(a, ab, bc, cd, de, ef, fg, gh, hi) {
+    	    switch (arguments.length) {
+    	        case 1:
+    	            return a;
+    	        case 2:
+    	            return ab(a);
+    	        case 3:
+    	            return bc(ab(a));
+    	        case 4:
+    	            return cd(bc(ab(a)));
+    	        case 5:
+    	            return de(cd(bc(ab(a))));
+    	        case 6:
+    	            return ef(de(cd(bc(ab(a)))));
+    	        case 7:
+    	            return fg(ef(de(cd(bc(ab(a))))));
+    	        case 8:
+    	            return gh(fg(ef(de(cd(bc(ab(a)))))));
+    	        case 9:
+    	            return hi(gh(fg(ef(de(cd(bc(ab(a))))))));
+    	        default: {
+    	            var ret = arguments[0];
+    	            for (var i = 1; i < arguments.length; i++) {
+    	                ret = arguments[i](ret);
+    	            }
+    	            return ret;
+    	        }
+    	    }
+    	}
+    	exports.pipe = pipe;
+    	/**
+    	 * Type hole simulation
+    	 *
+    	 * @since 2.7.0
+    	 */
+    	exports.hole = absurd;
+    	/**
+    	 * @since 2.11.0
+    	 */
+    	var SK = function (_, b) { return b; };
+    	exports.SK = SK;
+    	/**
+    	 * Use `Predicate` module instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.0.0
+    	 * @deprecated
+    	 */
+    	function not(predicate) {
+    	    return function (a) { return !predicate(a); };
+    	}
+    	exports.not = not;
+    	/**
+    	 * Use `Endomorphism` module instead.
+    	 *
+    	 * @category zone of death
+    	 * @since 2.10.0
+    	 * @deprecated
+    	 */
+    	var getEndomorphismMonoid = function () { return ({
+    	    concat: function (first, second) { return flow(first, second); },
+    	    empty: identity
+    	}); };
+    	exports.getEndomorphismMonoid = getEndomorphismMonoid;
+    	/** @internal */
+    	var dual = function (arity, body) {
+    	    var isDataFirst = typeof arity === 'number' ? function (args) { return args.length >= arity; } : arity;
+    	    return function () {
+    	        var args = Array.from(arguments);
+    	        if (isDataFirst(arguments)) {
+    	            return body.apply(this, args);
+    	        }
+    	        return function (self) { return body.apply(void 0, __spreadArray([self], args, false)); };
+    	    };
+    	};
+    	exports.dual = dual; 
+    } (_function));
 
     var internal = {};
 
