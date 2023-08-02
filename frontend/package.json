@@ -38,6 +38,7 @@
     "start:dev": "sirv public --dev --host 0.0.0.0 --port 80"
   },
   "dependencies": {
+    "@auth0/auth0-spa-js": "^2.1.1",
     "@dagrejs/graphlib": "^2.1.12",
     "@rollup/plugin-typescript": "^11.0.0",
     "@types/cytoscape": "^3.19.9",
@@ -47,6 +48,7 @@
     "cytoscape-dagre": "^2.2.2",
     "eslint-plugin-svelte": "^2.14.1",
     "fp-ts": "^2.16.0",
+    "http-server": "^14.1.1",
     "io-ts": "^2.2.20",
     "io-ts-types": "^0.5.19",
     "postcss": "^8.4.21",

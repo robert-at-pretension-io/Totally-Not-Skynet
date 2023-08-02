@@ -6,7 +6,7 @@ const system_state: SystemState = {
   websocketReady: false,
   selectedNode: null,
   graphState: newGraphState(),
-  websocket: new WebSocket("ws://157.245.243.205:8080"),
+  websocket: new WebSocket("ws://134.122.112.104:8080"),
   executionContext: NewExecutionContext(),
   nodes: [],
 };
