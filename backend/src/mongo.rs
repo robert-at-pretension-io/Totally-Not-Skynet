@@ -30,8 +30,8 @@ pub async fn return_db(db_uri: String) -> mongodb::Database {
     match client_options {
         Ok(mut client_options) => {
             // Set the server_api field of the client_options object to Stable API version 1
-            let server_api = ServerApi::builder().version(ServerApiVersion::V1).build();
-            client_options.server_api = Some(server_api);
+            // let server_api = ServerApi::builder().version(ServerApiVersion::V1).build();
+            // client_options.server_api = Some(server_api);
             // Get a handle to the cluster
             let client = Client::with_options(client_options).unwrap();
 
