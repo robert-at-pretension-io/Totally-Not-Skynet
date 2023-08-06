@@ -1,6 +1,5 @@
 use std::sync::Arc;
-use tokio::sync::{mpsc, Mutex};
-
+use tokio::sync::{ mpsc, Mutex };
 
 mod domain;
 mod mongo;
@@ -9,6 +8,7 @@ mod receive_send;
 mod settings;
 mod utils;
 mod websocket;
+mod env_vars_checker;
 
 use crate::receive_send::start_message_sending_loop;
 use crate::websocket::start_websocket_server;
@@ -18,6 +18,16 @@ use crate::websocket::start_websocket_server;
 #[tokio::main]
 async fn main() {
     // setup docker client
+
+    // Check that the environmental variables are set:
+    let file_location = "./req_env_vars.txt";
+    match env_vars_checker::check_env_vars(file_location) {
+        Ok(_) => println!("Checked all environment variables."),
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            panic!("env variables not set");
+        }
+    }
 
     let (tx, rx) = mpsc::unbounded_channel();
     let rx = Arc::new(Mutex::new(rx));
