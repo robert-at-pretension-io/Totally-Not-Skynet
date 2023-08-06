@@ -1,10 +1,5 @@
-
 use futures_util::StreamExt;
-use mongodb::{
-    options::{ClientOptions, ServerApi, ServerApiVersion},
-    Client,
-};
-
+use mongodb::{ options::{ ClientOptions, ServerApi, ServerApiVersion }, Client };
 
 pub async fn get_nodes(db: &mongodb::Database) -> Vec<crate::domain::Node> {
     let node_collection = db.collection::<crate::domain::Node>("nodes");
@@ -40,7 +35,7 @@ pub async fn return_db(db_uri: String) -> mongodb::Database {
             // Get a handle to the cluster
             let client = Client::with_options(client_options).unwrap();
 
-            client.database("skynet")
+            client.database("admin")
         }
         Err(e) => panic!("Error connecting to MongoDB: {:?}", e),
     }

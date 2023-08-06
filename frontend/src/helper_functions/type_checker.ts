@@ -1,5 +1,5 @@
 import { Graph } from "@dagrejs/graphlib";
-import { GraphState,  ExecutionContext } from "system_types";
+import { GraphState, ExecutionContext } from "system_types";
 
 export function newGraphState(): GraphState {
   return {
@@ -12,14 +12,14 @@ export function newGraphState(): GraphState {
   };
 }
 
-export function NewExecutionContext(): ExecutionContext {
-  return {
-    local_variables: new Map<string, string>(),
-    global_variables: new Map<string, string>(),
-    topological_order: [],
-    topological_order_names: [],
-    current_node: null,
-    prompts: new Map<string, string>(),
-    responses: new Map<string, string>(),
-  };
-}
+// export function NewExecutionContext(): ExecutionContext {
+//   return {
+//     local_variables: new Map<string, string>(),
+//     global_variables: new Map<string, string>(),
+//     topological_order: [],
+//     topological_order_names: [],
+//     current_node: null,
+//     prompts: new Map<string, string>(),
+//     responses: new Map<string, string>(),
+//   };
+// }
