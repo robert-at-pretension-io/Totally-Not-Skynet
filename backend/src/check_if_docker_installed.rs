@@ -18,32 +18,67 @@ pub fn docker_check() {
 }
 
 fn install_docker() {
-    // The following commands are specific to Ubuntu.
-    // Modify for your specific OS or distribution.
-    let apt_update = Command::new("sudo")
-        .arg("apt-get")
-        .arg("update")
+    // Step 1: Update existing list of packages
+    run_command("sudo", &["apt-get", "update"]);
+
+    // Step 2: Install prerequisites
+    run_command(
+        "sudo",
+        &[
+            "apt-get",
+            "install",
+            "-y",
+            "apt-transport-https",
+            "ca-certificates",
+            "curl",
+            "software-properties-common",
+        ]
+    );
+
+    // Step 3: Add Docker's official GPG key
+    run_command(
+        "curl",
+        &[
+            "-fsSL",
+            "https://download.docker.com/linux/ubuntu/gpg",
+            "|",
+            "sudo",
+            "apt-key",
+            "add",
+            "-",
+        ]
+    );
+
+    // Step 4: Set up the Docker stable repository
+    run_command(
+        "sudo",
+        &[
+            "add-apt-repository",
+            "deb",
+            "[arch=amd64]",
+            "https://download.docker.com/linux/ubuntu",
+            "$(lsb_release -cs)",
+            "stable",
+        ]
+    );
+
+    // Step 5: Update the apt package index (again)
+    run_command("sudo", &["apt-get", "update"]);
+
+    // Step 6: Install Docker
+    run_command("sudo", &["apt-get", "install", "-y", "docker-ce"]);
+
+    println!("Docker installed successfully");
+}
+
+fn run_command(command: &str, args: &[&str]) {
+    let status = Command::new(command)
+        .args(args)
         .status()
-        .expect("Failed to update apt repository");
+        .expect(&format!("Failed to run command: {}", command));
 
-    if !apt_update.success() {
-        panic!("Failed to update apt repository");
-    }
-
-    let install_docker = Command::new("sudo")
-        .arg("apt-get")
-        .arg("-y")
-        .arg("install")
-        .arg("docker-ce")
-        .arg("docker-ce-cli")
-        .arg("containerd.io")
-        .status()
-        .expect("Failed to install Docker");
-
-    if install_docker.success() {
-        println!("Docker installed successfully");
-    } else {
-        panic!("Failed to install Docker");
+    if !status.success() {
+        panic!("Command failed: {}", command);
     }
 }
 
