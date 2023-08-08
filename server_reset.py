@@ -12,10 +12,11 @@ def is_installed(command):
 def ensure_dependencies():
     if not is_installed('cargo'):
         raise Exception("Cargo (Rust) is not installed. Please install it and try again.")
-    
+
     if not is_installed('npm'):
         raise Exception("NPM is not installed. Please install it and try again.")
 
+    print("All dependencies are installed")
 
 def kill_process(name):
     print(f"Attempting to kill all {name} processes...")
