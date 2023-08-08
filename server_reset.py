@@ -1,7 +1,20 @@
 import os
 import socket
 import subprocess
+import shutil
 from signal import SIGTERM
+
+
+def is_installed(command):
+    return shutil.which(command) is not None
+
+
+def ensure_dependencies():
+    if not is_installed('cargo'):
+        raise Exception("Cargo (Rust) is not installed. Please install it and try again.")
+    
+    if not is_installed('npm'):
+        raise Exception("NPM is not installed. Please install it and try again.")
 
 
 def kill_process(name):
@@ -22,6 +35,12 @@ def git_pull(path):
 
 def run_npm(path):
     path = os.path.expanduser(path)
+
+    # Running npm install first
+    print(f"Starting npm install in {path}...")
+    subprocess.run(['npm', 'install'], cwd=path)
+    print(f"Npm install in {path} completed.")
+    
     print(f"Starting npm run build in {path}...")
     subprocess.run(['npm', 'run', 'build'], cwd=path)
     print(f"Npm run build in {path} completed.")
@@ -62,6 +81,9 @@ def listen_on_port(port, message):
                     return True
     return False
 
+
+# Ensure dependencies are installed
+ensure_dependencies()
 
 while True:
     if listen_on_port(420, "reset"):

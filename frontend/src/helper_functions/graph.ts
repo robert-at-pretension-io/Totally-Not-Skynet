@@ -275,23 +275,23 @@ export async function setSystemState(systemState: SystemState) {
   systemStateStore.set(systemState);
 }
 
-export async function addNode(node_id: string): Promise<void> {
+export async addNode(node_id: string): Promise < void> {
   const systemState = await getSystemState();
   // add the input and output variables to the graph state
 
   //check if the node already exists in the graph
-  if (!systemState.graphState.graph.hasNode(node_id)) {
-    systemState.graphState.graph.setNode(node_id);
-  }
-  systemState.graphState.lastAction = "addNode";
-  const node_name = await getNodeName(node_id);
-  if (node_name) {
-    systemState.graphState.name = node_name;
-    systemState.graphState.actedOn = [node_id, node_name];
-  } else {
-    systemState.graphState.actedOn = [node_id, ""];
-  }
-  setSystemState(systemState);
+  if(!systemState.graphState.graph.hasNode(node_id)) {
+  systemState.graphState.graph.setNode(node_id);
+}
+systemState.graphState.lastAction = "addNode";
+const node_name = await getNodeName(node_id);
+if (node_name) {
+  systemState.graphState.name = node_name;
+  systemState.graphState.actedOn = [node_id, node_name];
+} else {
+  systemState.graphState.actedOn = [node_id, ""];
+}
+setSystemState(systemState);
 }
 
 // function for converting a process to a graph
