@@ -1,5 +1,5 @@
 use std::process::Command;
-use std::fs::read_to_string;
+use std::fs;
 
 pub fn docker_check() {
     // Check if Docker is installed
