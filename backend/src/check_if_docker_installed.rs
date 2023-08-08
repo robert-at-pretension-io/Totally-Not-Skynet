@@ -36,18 +36,8 @@ fn install_docker() {
     );
 
     // Step 3: Add Docker's official GPG key
-    run_command(
-        "curl",
-        &[
-            "-fsSL",
-            "https://download.docker.com/linux/ubuntu/gpg",
-            "|",
-            "sudo",
-            "apt-key",
-            "add",
-            "-",
-        ]
-    );
+    let cmd_str = "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -";
+    run_shell_command(cmd_str);
 
     // Step 4: Set up the Docker stable repository
     run_command(
@@ -69,6 +59,18 @@ fn install_docker() {
     run_command("sudo", &["apt-get", "install", "-y", "docker-ce"]);
 
     println!("Docker installed successfully");
+}
+
+fn run_shell_command(command_str: &str) {
+    let status = Command::new("sh")
+        .arg("-c")
+        .arg(command_str)
+        .status()
+        .expect(&format!("Failed to run shell command: {}", command_str));
+
+    if !status.success() {
+        panic!("Shell command failed: {}", command_str);
+    }
 }
 
 fn run_command(command: &str, args: &[&str]) {
