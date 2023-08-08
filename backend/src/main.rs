@@ -30,7 +30,14 @@ async fn main() {
         }
     }
 
-    check_if_docker_installed::docker_check();
+    match check_if_docker_installed::docker_check() {
+        Ok(_) => {
+            println!("Docker check was successful!");
+        }
+        Err(e) => {
+            println!("Error occurred during Docker check: {}", e);
+        }
+    }
 
     let (tx, rx) = mpsc::unbounded_channel();
     let rx = Arc::new(Mutex::new(rx));
