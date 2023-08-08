@@ -39,18 +39,16 @@ fn install_docker() {
     let cmd_str = "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -";
     run_shell_command(cmd_str);
 
+    let output = Command::new("lsb_release")
+        .arg("-cs")
+        .output()
+        .expect("Failed to execute lsb_release");
+    let codename = String::from_utf8_lossy(&output.stdout).trim().to_string();
+
     // Step 4: Set up the Docker stable repository
-    run_command(
-        "sudo",
-        &[
-            "add-apt-repository",
-            "deb",
-            "[arch=amd64]",
-            "https://download.docker.com/linux/ubuntu",
-            "$(lsb_release -cs)",
-            "stable",
-        ]
-    );
+    let repo_url =
+        format!("deb [arch=amd64] https://download.docker.com/linux/ubuntu {} stable", codename);
+    run_command("sudo", &["add-apt-repository", &repo_url]);
 
     // Step 5: Update the apt package index (again)
     run_command("sudo", &["apt-get", "update"]);
