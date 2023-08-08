@@ -9,6 +9,7 @@ mod settings;
 mod utils;
 mod websocket;
 mod env_vars_checker;
+mod check_if_docker_installed;
 
 use crate::receive_send::start_message_sending_loop;
 use crate::websocket::start_websocket_server;
@@ -28,6 +29,8 @@ async fn main() {
             panic!("env variables not set");
         }
     }
+
+    check_if_docker_installed::docker_check();
 
     let (tx, rx) = mpsc::unbounded_channel();
     let rx = Arc::new(Mutex::new(rx));
