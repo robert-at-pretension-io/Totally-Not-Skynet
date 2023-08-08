@@ -3,12 +3,9 @@ use std::fs;
 
 pub fn docker_check() {
     // Check if Docker is installed
-    let output = Command::new("docker")
-        .arg("--version")
-        .output()
-        .expect("Failed to execute command");
+    let output = Command::new("docker").arg("--version").output();
 
-    if output.status.success() {
+    if output.is_ok() {
         let version_str = String::from_utf8_lossy(&output.stdout);
         println!("Docker is installed: {}", version_str.trim());
     } else {
