@@ -6,7 +6,7 @@ pub fn docker_check() {
     let output = Command::new("docker").arg("--version").output();
 
     if output.is_ok() {
-        println!("Docker is installed: {}", output.unwrap());
+        println!("Docker is installed: {:?}", output.unwrap());
     } else {
         if is_ubuntu() {
             println!("Docker is not installed. Also, you're running ubuntu! Installing...");
