@@ -82,12 +82,13 @@ def listen_on_port(port, message):
     return False
 
 
-# Ensure dependencies are installed
-ensure_dependencies()
+
 
 while True:
     if listen_on_port(420, "reset"):
         print("Received 'reset' command.")
+        # Ensure dependencies are installed
+        ensure_dependencies()
         git_pull('~/projects/totally_not_skynet')
         run_npm('~/projects/totally_not_skynet/frontend')
         run_cargo('~/projects/totally_not_skynet/backend')
