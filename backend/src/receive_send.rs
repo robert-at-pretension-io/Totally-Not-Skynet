@@ -77,7 +77,6 @@ pub async fn start_message_sending_loop(
             CrudBundleObject::Node(node) => {
                 match verb {
                     VerbTypeNames::POST => {
-
                         let mut mutable_node = node.clone();
 
                         let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
@@ -88,7 +87,9 @@ pub async fn start_message_sending_loop(
 
                         mutable_node._id = Some(bson::oid::ObjectId::new());
 
-                        let insert_result = node_collection.insert_one(mutable_node, None).await.unwrap();
+                        let insert_result = node_collection
+                            .insert_one(mutable_node, None).await
+                            .unwrap();
 
                         println!("Inserted node: {:?}", insert_result);
 
@@ -177,7 +178,8 @@ pub async fn start_message_sending_loop(
                         } else {
                             println!("Updated {} nodes", update_result.modified_count);
 
-                            let response_object : ResponseObject = ResponseObject::Node(updated_node);
+                            let response_object: ResponseObject =
+                                ResponseObject::Node(updated_node);
 
                             send_message(&tx, msg.0.clone(), response_object).await;
                         }
@@ -248,43 +250,38 @@ pub async fn start_message_sending_loop(
                         // attempt to set them from environment variables
                         let system_settings = UserSettings::new();
 
-
-
                         match system_settings {
                             Some(settings) => {
-
                                 println!("settings: {:?}", settings);
 
-                                runtime_settings.insert(
-                                    msg.0.clone(),
-                                    UserSettings {
+                                // Check if runtime_settings already have settings for the user
+                                if runtime_settings.contains_key(&msg.0) {
+                                    println!("Settings for user {} already exist", msg.0.name);
+                                } else {
+                                    runtime_settings.insert(msg.0.clone(), UserSettings {
                                         openai_api_key: settings.openai_api_key,
                                         mongo_db_uri: settings.mongo_db_uri,
-                                    },
-                                );
+                                    });
+                                    println!("Settings for user {} have been set", msg.0.name);
+                                }
                             }
                             None => {
-                                runtime_settings.insert(
-                                    msg.0.clone(),
-                                    UserSettings {
-                                        openai_api_key: user_settings.openai_api_key,
-                                        mongo_db_uri: user_settings.mongo_db_uri,
-                                    },
-                                );
+                                // runtime_settings.insert(msg.0.clone(), UserSettings {
+                                //     openai_api_key: user_settings.openai_api_key,
+                                //     mongo_db_uri: user_settings.mongo_db_uri,
+                                // });
+                                panic!("fug... the settings are not set.");
                             }
                         }
 
-
-                    
                         // respond to the client
-                        send_message(
-                            &tx,
-                            msg.0.clone(),
-                            ResponseObject::UserSettings
-                        ).await;
+                        send_message(&tx, msg.0.clone(), ResponseObject::UserSettings).await;
                     }
                     _ => {
-                        println!("\n-------------------\nVerb not supported for user settings: {:?}\n-------------------\n", verb);
+                        println!(
+                            "\n-------------------\nVerb not supported for user settings: {:?}\n-------------------\n",
+                            verb
+                        );
                     }
                 }
             }
