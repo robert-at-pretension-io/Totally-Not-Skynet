@@ -2,7 +2,8 @@ import type {
   SystemState,
   Prompt,
   Node,
-  CrudBundle
+  CrudBundle,
+  GraphNodeId
 } from "../system_types";
 import { Process } from "../system_types";
 import systemStateStore from "stores/systemStateStore";
@@ -275,23 +276,32 @@ export async function setSystemState(systemState: SystemState) {
   systemStateStore.set(systemState);
 }
 
-export async addNode(node_id: string): Promise < void> {
+export async function addNode(node_id: string): Promise<void> {
   const systemState = await getSystemState();
   // add the input and output variables to the graph state
 
   //check if the node already exists in the graph
-  if(!systemState.graphState.graph.hasNode(node_id)) {
-  systemState.graphState.graph.setNode(node_id);
-}
-systemState.graphState.lastAction = "addNode";
-const node_name = await getNodeName(node_id);
-if (node_name) {
-  systemState.graphState.name = node_name;
-  systemState.graphState.actedOn = [node_id, node_name];
-} else {
-  systemState.graphState.actedOn = [node_id, ""];
-}
-setSystemState(systemState);
+  if (!systemState.graphState.graph.hasNode(node_id)) {
+    console.log("Adding node to graph")
+    systemState.graphState.graph.setNode(node_id);
+  }
+  else {
+    console.log("Node ", node_id, " is already in the graph, not adding it.")
+    return;
+  }
+  systemState.graphState.lastAction = "addNode";
+
+  const node_name = await getNodeName(node_id);
+
+
+  let nodeInfo: GraphNodeId = {
+    id: node_id,
+    name: node_name ? node_name : ""
+  }
+
+  systemState.graphState.actedOn = nodeInfo;
+
+  setSystemState(systemState);
 }
 
 // function for converting a process to a graph
@@ -327,23 +337,15 @@ export async function processToGraph(process: Process): Promise<void> {
     edges = graph.edges();
   }
 
-  let topOrder: string[] = [];
+  // note that this contains a list of lists of ALL possible orders. We must still go through the list and ensure that the input/output variables within each ordering is "valid"
+  let topOrder: string[][] = [];
 
   if (graph instanceof Graph) {
     topOrder = getAllTopologicalOrders(graph);
   }
 
-  for (const node of topOrder) {
-    // filter edges where the source node is the current node
-    const nodeEdges = edges.filter(this_edge => this_edge.v === node);
-
-    // iterate over the node's edges and add them
-    for (const edge of nodeEdges) {
-      // if edge does not exist, add it
-      await addEdge(edge); // assuming 'addEdge' is your helper function
-
-    }
-  }
+  // This function doesn't exist yet.
+  findValidTopOrder(topOrder)
 }
 
 export async function getParentOutputVariables(this_node_id: string): Promise<string[] | null> {
@@ -398,11 +400,17 @@ export async function removeNode(id: string): Promise<void> {
   const systemState = await getSystemState();
   systemState.graphState.graph.removeNode(id);
   systemState.graphState.lastAction = "removeNode";
-  if (name) {
-    systemState.graphState.actedOn = [id, name];
-  } else {
-    systemState.graphState.actedOn = [id, "unknown"];
+
+  const node_name = await getNodeName(id);
+
+
+  let nodeInfo: GraphNodeId = {
+    id: id,
+    name: node_name ? node_name : ""
   }
+
+  systemState.graphState.actedOn = nodeInfo;
+
   setSystemState(systemState);
 }
 
@@ -422,7 +430,8 @@ export async function removeSelectedEdge(): Promise<void> {
   ) {
     const selected = systemState.graphState.actedOn;
     if (selected != null) {
-      await removeEdge(selected.v, selected.w);
+      let edge = selected as Edge;
+      await removeEdge(edge.v, edge.w);
     }
   } else {
     // console.log("not removing edge, doesn't meet criteria");
@@ -480,7 +489,7 @@ export async function selectNode(id: string): Promise<void> {
     systemState.selectedNode = res;
     systemState.graphState.lastAction = "selectNode";
     systemState.graphState.lastActedOn = systemState.graphState.actedOn;
-    systemState.graphState.actedOn = [id, res.Node.name];
+    systemState.graphState.actedOn = { id, name: res.Node.name };
     systemState.graphState.name = res.Node.name;
     setSystemState(systemState);
   }

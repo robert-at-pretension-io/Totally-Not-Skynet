@@ -9,7 +9,7 @@
     removeSelectedNode,
     validateGraph,
   } from "../../helper_functions/graph";
-  import { Graph } from "graphlib";
+  import { Edge, Graph } from "graphlib";
   import { json } from "graphlib";
 
   import systemStateStore from "stores/systemStateStore";
@@ -33,13 +33,18 @@
 
   function localAddNodes() {
     // for each of the selected actions, add a node to the graph
-    selectedNodes.forEach((node) => {
-      // console.log("local");
-      addNode(node.Node._id.$oid);
-    });
+
+    // For each of the selected nodes, check if they are already in the $systemStore.nodes
+
+    // If they are already in the nodes... don't do anything
 
     // clear out the selected actions
-    selectedNodes = [];
+
+    selectedNodes.forEach((node) => {
+      if (!nodeContainedGlobally(node)) {
+        $systemStateStore.nodes.push(node);
+      }
+    });
   }
 
   function localAddEdge() {
@@ -51,14 +56,9 @@
     actedOn = $systemStateStore.graphState.actedOn;
 
     // check that lastActedOn and actedOn are not null and are arrays
-    if (
-      lastActedOn !== null &&
-      actedOn !== null &&
-      Array.isArray(lastActedOn) &&
-      Array.isArray(actedOn)
-    ) {
+    if (lastActedOn !== null && actedOn !== null && lastActedOn.id) {
       // add an edge between the lastActedOn and actedOn
-      let edge = { v: lastActedOn[0], w: actedOn[0] };
+      let edge: Edge = { v: lastActedOn[0], w: actedOn[0] };
 
       addEdge(edge);
     } else {

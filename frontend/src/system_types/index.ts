@@ -10,6 +10,11 @@ export type selectedGraphComponent = {
   type: "Node" | "Edge" | null;
 };
 
+export type GraphNodeId = {
+  id: string,
+  name: string
+}
+
 export type GraphState = {
   graph: Graph;
   lastAction:
@@ -25,8 +30,9 @@ export type GraphState = {
   | "updateNode"
   | "updateEdge"
   | "resetGraph";
-  actedOn: Edge | [string, string] | null;
-  lastActedOn: Edge | [string, string] | null;
+  actedOn: Edge | GraphNodeId | null;
+  containedNodes: Node[];
+  lastActedOn: Edge | GraphNodeId | null;
   name: string | null;
   global_variables: Map<string, string>;
 };
