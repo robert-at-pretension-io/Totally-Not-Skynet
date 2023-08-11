@@ -38,11 +38,12 @@ export type GraphState = {
 };
 
 export type SystemState = {
+  authenticated: boolean;
   websocketReady: boolean;
   selectedNode: Node | null;
-  graphState: GraphState;
-  websocket: WebSocket;
-  executionContext: ExecutionContext;
+  graphState: GraphState | null;
+  websocket: WebSocket | null;
+  executionContext: ExecutionContext | null;
   nodes: Node[];
 };
 
@@ -119,8 +120,15 @@ const RuntimeExecutionContext = t.type({
 const RuntimeInitialMessage = t.type({
   InitialMessage: t.type({
     initial_message: t.string,
+    client_email: t.string,
+    client_password: t.string
   }),
 });
+
+/*
+    pub client_email: String,
+    pub client_password: String,
+*/
 
 const RuntimeUserSettings = t.type({
   UserSettings: t.type({

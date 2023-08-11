@@ -1,13 +1,13 @@
 import { writable } from "svelte/store";
 import { SystemState } from "../system_types";
-import { newGraphState, NewExecutionContext } from "helper_functions/type_checker";
 
 const system_state: SystemState = {
+  authenticated: false,
   websocketReady: false,
   selectedNode: null,
-  graphState: newGraphState(),
-  websocket: new WebSocket("ws://138.197.70.163:8080"),
-  executionContext: NewExecutionContext(),
+  graphState: null,
+  websocket: null,
+  executionContext: null,
   nodes: [],
 };
 

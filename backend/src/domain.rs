@@ -8,7 +8,6 @@ pub struct Prompt {
     pub system: Option<String>,
 }
 
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Process {
     pub graph: String,
@@ -23,8 +22,6 @@ pub struct Conditional {
     pub statement: String,
     pub options: HashMap<String, ObjectId>,
 }
-
-
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum NodeType {
@@ -69,7 +66,6 @@ pub struct PromptResponse {
     pub response: String,
 }
 
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConditionalResponse {
     pub chosen_option: String,
@@ -85,6 +81,8 @@ pub enum NodeExecutionResponse {
 #[derive(Serialize, Debug, Deserialize)]
 pub struct InitialMessage {
     pub initial_message: String,
+    pub client_email: String,
+    pub client_password: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
