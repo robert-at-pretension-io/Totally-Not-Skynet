@@ -79,10 +79,14 @@ pub enum NodeExecutionResponse {
 }
 
 #[derive(Serialize, Debug, Deserialize)]
-pub struct InitialMessage {
-    pub initial_message: String,
+pub struct AuthenticationMessage {
     pub client_email: String,
     pub client_password: String,
+}
+
+#[derive(Serialize, Debug, Deserialize)]
+pub struct AuthorizationToken {
+    pub token: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -121,7 +125,7 @@ pub struct ExecutionResponse {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum CrudBundleObject {
     Node(Node),
-    InitialMessage(InitialMessage),
+    AuthenticationMessage(AuthenticationMessage),
     UserSettings(UserSettings),
     ExecutionContext(ExecutionContext),
 }
@@ -129,7 +133,7 @@ pub enum CrudBundleObject {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ResponseObject {
     Node(Node),
-    InitialMessage,
+    AuthorizationToken,
     UserSettings,
     ExecutionContext(ExecutionResponse),
 }

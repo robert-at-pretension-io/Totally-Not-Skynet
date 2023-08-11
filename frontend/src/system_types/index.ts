@@ -117,18 +117,13 @@ const RuntimeExecutionContext = t.type({
   return_execution_id: option(t.string),
 });
 
-const RuntimeInitialMessage = t.type({
-  InitialMessage: t.type({
-    initial_message: t.string,
+const RuntimeAuthenticationMessage = t.type({
+  AuthenticationMessage: t.type({
     client_email: t.string,
     client_password: t.string
   }),
 });
 
-/*
-    pub client_email: String,
-    pub client_password: String,
-*/
 
 const RuntimeUserSettings = t.type({
   UserSettings: t.type({
@@ -139,7 +134,7 @@ const RuntimeUserSettings = t.type({
 
 const RuntimeCrudBundle = t.type({
   verb: RuntimeVerbTypeNames,
-  object: t.union([RuntimeNode, RuntimeInitialMessage, RuntimeUserSettings]),
+  object: t.union([RuntimeNode, RuntimeAuthenticationMessage, RuntimeUserSettings]),
 });
 
 const RuntimeCommandResponse = t.type({
@@ -186,7 +181,7 @@ type NodeType = TypeOf<typeof RuntimeNodeType>;
 type Node = TypeOf<typeof RuntimeNode>;
 type CrudBundle = TypeOf<typeof RuntimeCrudBundle>;
 type VerbTypeNames = TypeOf<typeof RuntimeVerbTypeNames>;
-type InitialMessage = TypeOf<typeof RuntimeInitialMessage>;
+type AuthenticationMessage = TypeOf<typeof RuntimeAuthenticationMessage>;
 type UserSettings = TypeOf<typeof RuntimeUserSettings>;
 type ExecutionContext = TypeOf<typeof RuntimeExecutionContext>;
 type CommandResponse = TypeOf<typeof RuntimeCommandResponse>;
@@ -199,4 +194,4 @@ type ResponseObject = TypeOf<typeof RuntimeResponseObject>;
 // Export static types
 export type { ExecutionContext, CrudBundle, VerbTypeNames, InitialMessage, NodeTypeNames, MongoId, Prompt, NodeType, Node, Process, Conditional, Command, UserSettings, CommandResponse, PromptResponse, ConditionalResponse, NodeExecutionResponse, ExecutionResponse, ResponseObject };
 
-export { RuntimeExecutionContext, RuntimeCrudBundle, RuntimeVerbTypeNames, RuntimeInitialMessage, RuntimeNodeTypeNames, RuntimeMongoId, RuntimePrompt, RuntimeNodeType, RuntimeNode, RuntimeProcess, RuntimeConditional, RuntimeCommand, RuntimeUserSettings, RuntimeCommandResponse, RuntimePromptResponse, RuntimeConditionalResponse, RuntimeNodeExecutionResponse, RuntimeExecutionResponse, RuntimeResponseObject };
+export { RuntimeExecutionContext, RuntimeCrudBundle, RuntimeVerbTypeNames, RuntimeAuthenticationMessage, RuntimeNodeTypeNames, RuntimeMongoId, RuntimePrompt, RuntimeNodeType, RuntimeNode, RuntimeProcess, RuntimeConditional, RuntimeCommand, RuntimeUserSettings, RuntimeCommandResponse, RuntimePromptResponse, RuntimeConditionalResponse, RuntimeNodeExecutionResponse, RuntimeExecutionResponse, RuntimeResponseObject };
