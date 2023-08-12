@@ -2,12 +2,12 @@ import type {
   SystemState,
   Node,
   CrudBundle,
-  GraphNodeId
+  GraphNodeInfo,
+  Edge
 } from "../system_types";
 import { Process } from "../system_types";
 import systemStateStore from "stores/systemStateStore";
 import { Graph } from "graphlib";
-import { Edge } from "@dagrejs/graphlib";
 import { alg } from "graphlib";
 
 // Define the getter and setter
@@ -20,6 +20,8 @@ export async function getSystemState(): Promise<SystemState> {
   });
 }
 
+
+
 export async function getInputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
   // Get the action by ID
   const node = await getNodeById(nodeId);
@@ -31,9 +33,10 @@ export async function getInputVariablesByNodeId(nodeId: string): Promise<string[
 }
 
 export async function validateGraph(systemState: SystemState): Promise<string[] | boolean> {
-  const graph = systemState.graphState.graph;
+  const graph = systemState.graphState?.graph;
 
-  if (systemState.selectedNode) {
+
+  if (systemState.selectedNode && graph) {
     const selected_node: Node = systemState.selectedNode;
     if (selected_node.Node.type_name == "Process") {
       const process: Process = selected_node.Node.node_content as Process;
@@ -186,12 +189,12 @@ export async function getOutputVariablesByNodeId(nodeId: string): Promise<string
   return null;
 }
 
-export function getGlobalVariableNames() {
-  let globalVariableNames: string[] = [];
-  systemStateStore.subscribe(store => {
-    globalVariableNames = Array.from(store.graphState.global_variables.keys());
-  })();
-  return globalVariableNames;
+export async function getGlobalVariableNames(): Promise<Map<string, string> | null> {
+  let system_state = await getSystemState();
+  let global_vars = system_state.graphState?.global_variables;
+
+  return global_vars ? global_vars : null;
+
 }
 
 export async function getAncestorNodes(node: string, graph: Graph): Promise<Node[]> {
@@ -272,6 +275,14 @@ export async function setSystemState(systemState: SystemState) {
   systemStateStore.set(systemState);
 }
 
+export async function graphHasNode(node_id: string): Promise<boolean> {
+  const systemState = await getSystemState();
+
+  let potentially_has_node = systemState.graphState?.graph.hasNode(node_id)
+
+
+}
+
 export async function addNode(node_id: string): Promise<void> {
   const systemState = await getSystemState();
   // add the input and output variables to the graph state
@@ -289,7 +300,7 @@ export async function addNode(node_id: string): Promise<void> {
 
   const node_name = await getNodeName(node_id);
 
-  const nodeInfo: GraphNodeId = {
+  const nodeInfo: GraphNodeInfo = {
     id: node_id,
     name: node_name ? node_name : ""
   };
@@ -399,7 +410,7 @@ export async function removeNode(id: string): Promise<void> {
 
   const node_name = await getNodeName(id);
 
-  const nodeInfo: GraphNodeId = {
+  const nodeInfo: GraphNodeInfo = {
     id: id,
     name: node_name ? node_name : ""
   };
@@ -509,9 +520,14 @@ export async function resetLastAction(): Promise<void> {
   setSystemState(systemState);
 }
 
-export async function nodes(): Promise<string[]> {
+export async function nodes(): Promise<string[] | null> {
   const systemState = await getSystemState();
-  return systemState.graphState.graph.nodes();
+  if (systemState.graphState?.graph != null) {
+    return systemState.graphState.graph.nodes();
+  }
+  else {
+    return null;
+  }
 }
 
 export async function edges(): Promise<Edge[]> {

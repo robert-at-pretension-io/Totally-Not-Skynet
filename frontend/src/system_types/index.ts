@@ -1,4 +1,3 @@
-import { Edge } from "@dagrejs/graphlib";
 import type { Graph } from "graphlib";
 import * as t from "io-ts";
 import { record } from "io-ts";
@@ -9,9 +8,15 @@ export type selectedGraphComponent = {
   type: "Node" | "Edge" | null;
 };
 
-export type GraphNodeId = {
+export type GraphNodeInfo = {
   id: string,
   name: string
+}
+
+export type Edge = {
+  source: string,
+  target: string,
+  name?: string
 }
 
 export type GraphState = {
@@ -29,9 +34,9 @@ export type GraphState = {
   | "updateNode"
   | "updateEdge"
   | "resetGraph";
-  actedOn: Edge | GraphNodeId | null;
+  actedOn: Edge | GraphNodeInfo | null;
   containedNodes: Node[];
-  lastActedOn: Edge | GraphNodeId | null;
+  lastActedOn: Edge | GraphNodeInfo | null;
   name: string | null;
   global_variables: Map<string, string>;
 };
@@ -45,6 +50,17 @@ export type SystemState = {
   executionContext: ExecutionContext | null;
   nodes: Node[];
 };
+
+const RuntimeErrorNames = t.keyof({
+  "GraphDoesntExist": null
+});
+
+
+export const RuntimeSystemError = t.type({
+  name: t.type({ RuntimeErrorNames })
+});
+
+
 
 const RuntimeNodeTypeNames = t.keyof({
   "Prompt": null,

@@ -21,12 +21,21 @@
   let current_graph: Graph = new Graph();
 
   $: {
-    current_graph = $systemStateStore.graphState.graph;
+    if ($systemStateStore.graphState?.graph != null) {
+      current_graph = $systemStateStore.graphState.graph;
+    } else {
+      console.log("The graph is null.");
+    }
+
     nodes = $systemStateStore.nodes;
   }
 
   onMount(async () => {
-    current_graph = $systemStateStore.graphState.graph;
+    if ($systemStateStore.graphState?.graph != null) {
+      current_graph = $systemStateStore.graphState.graph;
+    } else {
+      console.log("The graph is null.");
+    }
     nodes = $systemStateStore.nodes;
   });
 
@@ -51,17 +60,21 @@
     let lastActedOn = null;
     let actedOn = null;
 
-    lastActedOn = $systemStateStore.graphState.lastActedOn;
-    actedOn = $systemStateStore.graphState.actedOn;
+    if ($systemStateStore.graphState?.graph != null) {
+      lastActedOn = $systemStateStore.graphState.lastActedOn;
+      actedOn = $systemStateStore.graphState.actedOn;
 
-    // check that lastActedOn and actedOn are not null and are arrays
-    if (lastActedOn !== null && actedOn !== null && lastActedOn.id) {
-      // add an edge between the lastActedOn and actedOn
-      let edge: Edge = { v: lastActedOn[0], w: actedOn[0] };
+      // check that lastActedOn and actedOn are not null and are arrays
+      if (lastActedOn !== null && actedOn !== null && lastActedOn.id) {
+        // add an edge between the lastActedOn and actedOn
+        let edge: Edge = { v: lastActedOn[0], w: actedOn[0] };
 
-      addEdge(edge);
+        addEdge(edge);
+      } else {
+      }
+      current_graph = $systemStateStore.graphState.graph;
     } else {
-      // console.log("lastActedOn or actedOn is null or not an array");
+      console.log("The graph is null.");
     }
   }
 
@@ -93,7 +106,6 @@
       }
     }
   }
-
   function isSelected(node: Node): boolean {
     // check to see if selectedNodes : Node[] contains node : Node
     return (
@@ -102,7 +114,6 @@
       }).length > 0
     );
   }
-
   function toggleSelect(node: Node) {
     // if the node is already in the selectedNodes then remove it, otherwise add it
 

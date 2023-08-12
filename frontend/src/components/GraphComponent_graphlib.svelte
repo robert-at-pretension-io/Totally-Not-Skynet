@@ -6,7 +6,7 @@
   import systemStateStore from "stores/systemStateStore.js";
   import { selectNode, selectEdge } from "../helper_functions/graph";
   import graphlib from "graphlib";
-  import type { SystemState } from "system_types/index.js";
+  import type { SystemState, Edge, GraphNodeInfo } from "system_types/index.js";
 
   setContext("graphSharedState", {
     getCyInstance: () => cyInstance,
@@ -15,7 +15,6 @@
   let refElement: HTMLElement | null = null;
   let cyInstance: Core | null = null;
   let g = new graphlib.Graph();
-  let id_map = new Map();
 
   systemStateStore.subscribe((new_value: SystemState) => {
     let value = new_value.graphState;
@@ -23,18 +22,17 @@
     if (
       value !== null &&
       value.lastAction === "addNode" &&
-      value.actedOn != null &&
-      Array.isArray(value.actedOn)
+      value.actedOn != null
     ) {
       // check if the node is already in the graph
-      if (g.hasNode(value.actedOn[0])) {
+      let node = value.actedOn as GraphNodeInfo;
+      if (g.hasNode(node.name)) {
         return;
       }
-      id_map = id_map.set(value.actedOn[0], value.actedOn[1]);
-      g.setNode(value.actedOn[0], value.actedOn[1]);
+      g.setNode(node.id, node.name);
       if (cyInstance) {
         cyInstance.add({
-          data: { id: value.actedOn[0], label: value.actedOn[1] },
+          data: { id: node.id, label: node.name },
         });
 
         cyInstance
@@ -46,42 +44,44 @@
     } else if (
       value !== null &&
       value.lastAction === "addEdge" &&
-      value.actedOn != null &&
-      !Array.isArray(value.actedOn)
+      value.actedOn != null
     ) {
+      let edge = value.actedOn as Edge;
       // check if the edge is already in the graph
-      if (g.hasEdge(value.actedOn.v, value.actedOn.w)) {
+      if (g.hasEdge(edge.v, edge.w)) {
         return;
       }
-      g.setEdge(value.actedOn.v, value.actedOn.w, value.actedOn);
+
+      g.setEdge(edge.v, edge.w, value.actedOn);
       if (cyInstance) {
         cyInstance.add({
-          data: { source: value.actedOn.v, target: value.actedOn.w },
+          data: { source: edge.v, target: edge.w },
         });
       }
     } else if (
+      value !== null &&
       value.lastAction === "removeEdge" &&
-      value.actedOn != null &&
-      !Array.isArray(value.actedOn)
+      value.actedOn != null
     ) {
-      g.removeEdge(value.actedOn.v, value.actedOn.w);
+      let edge = value.actedOn as Edge;
+
+      g.removeEdge(edge.v, edge.w);
       if (cyInstance) {
         cyInstance.remove(
-          cyInstance
-            .$id(value.actedOn.v)
-            .edgesTo(cyInstance.$id(value.actedOn.w))
+          cyInstance.$id(edge.v).edgesTo(cyInstance.$id(edge.w))
         );
       }
     } else if (
+      value != null &&
       value.lastAction === "removeNode" &&
-      value.actedOn != null &&
-      Array.isArray(value.actedOn)
+      value.actedOn != null
     ) {
-      g.removeNode(value.actedOn[0]);
+      let node = value.actedOn as GraphNodeInfo;
+      g.removeNode(node.name);
       if (cyInstance) {
-        cyInstance.remove(cyInstance.$id(value.actedOn[0]));
+        cyInstance.remove(cyInstance.$id(node.id));
       }
-    } else if (value.lastAction === "resetGraph") {
+    } else if (value != null && value.lastAction === "resetGraph") {
       g = new graphlib.Graph(); // reset graph
       if (cyInstance) {
         cyInstance.elements().remove();
