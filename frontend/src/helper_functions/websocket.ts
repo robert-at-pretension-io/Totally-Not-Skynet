@@ -13,7 +13,7 @@ export async function setupWebsocketConnection() {
     // setup message processor
     websocket = await setupWebsocketMessageHandler(websocket, system_state);
 
-    system_state.websocketReady = true;
+    system_state.websocket_read = true;
     system_state.websocket = websocket;
     await setSystemState(system_state);
 
@@ -40,8 +40,8 @@ export async function setupWebsocketMessageHandler(websocket: WebSocket, system_
             // if response_object is a node then add it to the system state store
             if (
               typeof response_object === "object" &&
-                            response_object !== null &&
-                            "Node" in response_object
+              response_object !== null &&
+              "Node" in response_object
             ) {
               const { Node } = response_object;
               console.log(Node.type_name); // Will log "Prompt", "Process", "Conditional", or "Command"

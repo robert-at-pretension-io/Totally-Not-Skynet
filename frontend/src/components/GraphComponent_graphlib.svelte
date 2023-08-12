@@ -17,15 +17,15 @@
   let g = new graphlib.Graph();
 
   systemStateStore.subscribe((new_value: SystemState) => {
-    let value = new_value.graphState;
+    let value = new_value.graph_state;
 
     if (
       value !== null &&
-      value.lastAction === "addNode" &&
-      value.actedOn != null
+      value.last_action === "addNode" &&
+      value.acted_on != null
     ) {
       // check if the node is already in the graph
-      let node = value.actedOn as GraphNodeInfo;
+      let node = value.acted_on as GraphNodeInfo;
       if (g.hasNode(node.name)) {
         return;
       }
@@ -43,10 +43,10 @@
       }
     } else if (
       value !== null &&
-      value.lastAction === "addEdge" &&
-      value.actedOn != null
+      value.last_action === "addEdge" &&
+      value.acted_on != null
     ) {
-      let edge = value.actedOn as Edge;
+      let edge = value.acted_on as Edge;
       // check if the edge is already in the graph
       if (g.hasEdge(edge.source, edge.target)) {
         return;
@@ -60,10 +60,10 @@
       }
     } else if (
       value !== null &&
-      value.lastAction === "removeEdge" &&
-      value.actedOn != null
+      value.last_action === "removeEdge" &&
+      value.acted_on != null
     ) {
-      let edge = value.actedOn as Edge;
+      let edge = value.acted_on as Edge;
 
       g.removeEdge(edge.source, edge.target);
       if (cyInstance) {
@@ -73,15 +73,15 @@
       }
     } else if (
       value != null &&
-      value.lastAction === "removeNode" &&
-      value.actedOn != null
+      value.last_action === "removeNode" &&
+      value.acted_on != null
     ) {
-      let node = value.actedOn as GraphNodeInfo;
+      let node = value.acted_on as GraphNodeInfo;
       g.removeNode(node.name);
       if (cyInstance) {
         cyInstance.remove(cyInstance.$id(node.id));
       }
-    } else if (value != null && value.lastAction === "resetGraph") {
+    } else if (value != null && value.last_action === "resetGraph") {
       g = new graphlib.Graph(); // reset graph
       if (cyInstance) {
         cyInstance.elements().remove();

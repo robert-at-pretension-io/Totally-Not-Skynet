@@ -9,12 +9,12 @@
 
   $: {
     nodes = $systemStateStore.nodes;
-    selectedNode = $systemStateStore.selectedNode;
+    selectedNode = $systemStateStore.selected_node;
   }
 
   // Function to handle dropdown change events
   function onDropdownChange() {
-    $systemStateStore.selectedNode = selectedNode;
+    $systemStateStore.selected_node = selectedNode;
   }
 </script>
 

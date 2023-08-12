@@ -7,7 +7,7 @@ export async function authenticate(email: string, password: string) {
 
     let system_state = await getSystemState();
 
-    if (system_state.websocketReady) {
+    if (system_state.websocket_read) {
         const authMessage: CrudBundle = {
             verb: "POST",
             object: {

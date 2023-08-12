@@ -1,6 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { type Process, type Node, RuntimeSystemErrors } from "system_types";
+  import {
+    type Process,
+    type Node,
+    RuntimeSystemErrors,
+    GraphState,
+    RuntimeNode,
+    RuntimeGraphNodeInfo,
+  } from "system_types";
   import {
     addEdge,
     addNode,
@@ -11,71 +18,60 @@
     removeSelectedNode,
     validateGraph,
   } from "../../helper_functions/graph";
-  import { Edge, Graph } from "graphlib";
   import { json } from "graphlib";
+  import { Edge } from "system_types";
 
   import systemStateStore from "stores/systemStateStore";
 
   let nodes: Node[] = [];
-  let selectedNodes: Node[] = [];
+  let selected_nodes: Node[] = [];
+  let graph_state: GraphState;
 
   let name = "";
   let description = "";
-  let current_graph: Graph = new Graph();
 
   $: {
-    if ($systemStateStore.graphState?.graph != null) {
-      current_graph = $systemStateStore.graphState.graph;
+    if ($systemStateStore.graph_state) {
+      graph_state = $systemStateStore.graph_state;
     } else {
-      console.log("The graph is null.");
+      handleGraphError();
     }
-
     nodes = $systemStateStore.nodes;
   }
 
   onMount(async () => {
-    if ($systemStateStore.graphState?.graph != null) {
-      current_graph = $systemStateStore.graphState.graph;
+    if ($systemStateStore.graph_state) {
+      graph_state = $systemStateStore.graph_state;
     } else {
-      console.log("The graph is null.");
+      handleGraphError();
     }
     nodes = $systemStateStore.nodes;
   });
 
+  async function handleGraphError() {
+    await handleError({ name: "GraphDoesntExist" });
+  }
+
   async function localAddNodes() {
-    selectedNodes.forEach(async (node) => {
-      let res = await graphHasNode(node);
-
-      if (RuntimeSystemErrors.is(res)) {
-        handleError(res);
-      }
-
-      if (!(await graphHasNode(node))) {
-        await addNode(node);
+    selected_nodes.forEach(async (node) => {
+      if (!(await graphHasNode(node, graph_state))) {
+        await addNode(node, graph_state);
       }
     });
   }
 
   function localAddEdge() {
-    // get the lastActedOn and actedOn from the graphStore
-    let lastActedOn = null;
-    let actedOn = null;
+    let lastActedOn = $systemStateStore.graph_state.last_acted_on;
+    let actedOn = $systemStateStore.graph_state.acted_on;
 
-    if ($systemStateStore.graphState?.graph != null) {
-      lastActedOn = $systemStateStore.graphState.lastActedOn;
-      actedOn = $systemStateStore.graphState.actedOn;
+    if (
+      RuntimeGraphNodeInfo.is(lastActedOn) &&
+      RuntimeGraphNodeInfo.is(actedOn)
+    ) {
+      // add an edge between the lastActedOn and actedOn
+      let edge: Edge = { source: lastActedOn, target: actedOn };
 
-      // check that lastActedOn and actedOn are not null and are arrays
-      if (lastActedOn !== null && actedOn !== null && lastActedOn.id) {
-        // add an edge between the lastActedOn and actedOn
-        let edge: Edge = { v: lastActedOn[0], w: actedOn[0] };
-
-        addEdge(edge);
-      } else {
-      }
-      current_graph = $systemStateStore.graphState.graph;
-    } else {
-      console.log("The graph is null.");
+      addEdge(edge, graph_state);
     }
   }
 

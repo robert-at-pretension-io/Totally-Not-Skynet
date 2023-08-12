@@ -3,11 +3,11 @@ import { SystemState } from "../system_types";
 
 const system_state: SystemState = {
   authenticated: false,
-  websocketReady: false,
-  selectedNode: null,
-  graphState: null,
+  websocket_read: false,
+  selected_node: null,
+  graph_state: null,
   websocket: null,
-  executionContext: null,
+  execution_context: null,
   nodes: []
 };
 

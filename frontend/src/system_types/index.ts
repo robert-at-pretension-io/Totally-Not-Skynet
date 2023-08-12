@@ -16,50 +16,41 @@ export const RuntimeGraphNodeInfo = t.type({
 
 export type GraphNodeInfo = TypeOf<typeof RuntimeGraphNodeInfo>;
 
+export const RuntimeEdge = t.type({
+  source: RuntimeGraphNodeInfo,
+  target: RuntimeGraphNodeInfo
+});
 
+export type Edge = TypeOf<typeof RuntimeEdge>;
 
+export const GraphAction = t.partial({
+  last_action: t.union([t.literal("addNode"), t.literal("addEdge"), t.literal("removeNode"),
+  t.literal("removeEdge"),
+  t.literal("selectNode"),
+  t.literal("deselectNode"),
+  t.literal("selectEdge"),
+  t.literal("deselectEdge"),
+  t.literal("updateNode"),
+  t.literal("updateEdge"),
+  t.literal("resetGraph"),
+  t.literal("none")
+  ]),
+  acted_on: t.union([RuntimeEdge, RuntimeGraphNodeInfo]),
+  last_acted_on: t.union([RuntimeEdge, RuntimeGraphNodeInfo])
+});
 
-export type Edge = {
-  source: GraphNodeInfo,
-  target: GraphNodeInfo,
-  name?: string
-}
+const Graph = t.type({
+  graph: t.string
+});
 
-export type GraphState = {
-  graph: Graph;
-  lastAction:
-  | "addNode"
-  | "addEdge"
-  | "removeNode"
-  | "removeEdge"
-  | "selectNode"
-  | "deselectNode"
-  | "none"
-  | "selectEdge"
-  | "deselectEdge"
-  | "updateNode"
-  | "updateEdge"
-  | "resetGraph";
-  actedOn: Edge | GraphNodeInfo | null;
-  containedNodes: Node[];
-  lastActedOn: Edge | GraphNodeInfo | null;
-  name: string | null;
-  global_variables: Map<string, string>;
-};
+export const RuntimeGraphState = t.intersection([Graph, GraphAction]);
 
-export type SystemState = {
-  authenticated: boolean;
-  websocketReady: boolean;
-  selectedNode: Node | null;
-  graphState: GraphState | null;
-  websocket: WebSocket | null;
-  executionContext: ExecutionContext | null;
-  nodes: Node[];
-};
+export type GraphState = TypeOf<typeof RuntimeGraphState>;
+
 
 
 export const RuntimeSystemErrors = t.type({
-  name: t.union([t.literal("GraphDoesntExist"), t.literal("OtherError")])
+  name: t.union([t.literal("GraphDoesntExist"), t.literal("GraphStateDoesntExist"), t.literal("OtherError")])
 });
 
 
@@ -132,6 +123,18 @@ export const RuntimeExecutionContext = t.type({
   execution_id: t.string,
   return_execution_id: option(t.string),
 });
+
+export const RuntimeSystemState = t.type({
+  authenticated: t.boolean,
+  websocket_read: t.boolean,
+  selected_node: RuntimeNode,
+  graph_state: RuntimeGraphState,
+  execution_context: RuntimeExecutionContext,
+  nodes: t.array(RuntimeNode)
+})
+
+export type SystemState = TypeOf<typeof RuntimeSystemState>;
+
 
 export const RuntimeAuthenticationMessage = t.type({
   AuthenticationMessage: t.type({

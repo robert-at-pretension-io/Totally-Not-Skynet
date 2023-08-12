@@ -8,17 +8,17 @@
 
   onMount(() => {
     console.log("on mount: Node Info");
-    has_selected_node = $systemStateStore.selectedNode != null;
+    has_selected_node = $systemStateStore.selected_node != null;
 
     console.log("has_selected_node: ", has_selected_node);
   });
 
   $: {
-    console.log("Node Info: selectedNode: ", $systemStateStore.selectedNode);
-    has_selected_node = $systemStateStore.selectedNode != null;
+    console.log("Node Info: selectedNode: ", $systemStateStore.selected_node);
+    has_selected_node = $systemStateStore.selected_node != null;
 
     if (has_selected_node) {
-      selected_node = $systemStateStore.selectedNode;
+      selected_node = $systemStateStore.selected_node;
     }
   }
 </script>
