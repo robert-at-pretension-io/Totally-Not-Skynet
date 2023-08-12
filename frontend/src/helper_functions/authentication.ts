@@ -1,29 +1,25 @@
 import { sendWebsocketMessage } from "./graph";
 import { CrudBundle } from "system_types";
+import { getSystemState, setSystemState } from "./graph";
 
 
 export async function authenticate(email: string, password: string) {
 
+    let system_state = await getSystemState();
 
-    const initial_message: CrudBundle = {
-        verb: "POST",
-        object: {
-            InitialMessage: {
-                initial_message: "",
-                client_email: email,
-                client_password: password
+    if (system_state.websocketReady) {
+        const authMessage: CrudBundle = {
+            verb: "POST",
+            object: {
+                AuthenticationMessage: {
+                    client_email: email,
+                    client_password: password
+                },
             },
-        },
-    };
-    sendWebsocketMessage(initial_message);
+        };
+        await sendWebsocketMessage(authMessage);
+    }
+
 }
 
-const initial_message: CrudBundle = {
-    verb: "POST",
-    object: {
-        InitialMessage: {
-            initial_message: "",
-        },
-    },
-};
-sendWebsocketMessage(initial_message);
+

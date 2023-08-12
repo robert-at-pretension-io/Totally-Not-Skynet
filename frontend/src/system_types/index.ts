@@ -192,6 +192,6 @@ type ExecutionResponse = TypeOf<typeof RuntimeExecutionResponse>;
 type ResponseObject = TypeOf<typeof RuntimeResponseObject>;
 
 // Export static types
-export type { ExecutionContext, CrudBundle, VerbTypeNames, InitialMessage, NodeTypeNames, MongoId, Prompt, NodeType, Node, Process, Conditional, Command, UserSettings, CommandResponse, PromptResponse, ConditionalResponse, NodeExecutionResponse, ExecutionResponse, ResponseObject };
+export type { ExecutionContext, CrudBundle, VerbTypeNames, AuthenticationMessage, NodeTypeNames, MongoId, Prompt, NodeType, Node, Process, Conditional, Command, UserSettings, CommandResponse, PromptResponse, ConditionalResponse, NodeExecutionResponse, ExecutionResponse, ResponseObject };
 
 export { RuntimeExecutionContext, RuntimeCrudBundle, RuntimeVerbTypeNames, RuntimeAuthenticationMessage, RuntimeNodeTypeNames, RuntimeMongoId, RuntimePrompt, RuntimeNodeType, RuntimeNode, RuntimeProcess, RuntimeConditional, RuntimeCommand, RuntimeUserSettings, RuntimeCommandResponse, RuntimePromptResponse, RuntimeConditionalResponse, RuntimeNodeExecutionResponse, RuntimeExecutionResponse, RuntimeResponseObject };

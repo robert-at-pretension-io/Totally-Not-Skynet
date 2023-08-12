@@ -21,6 +21,7 @@
     let value = new_value.graphState;
 
     if (
+      value !== null &&
       value.lastAction === "addNode" &&
       value.actedOn != null &&
       Array.isArray(value.actedOn)
@@ -43,6 +44,7 @@
           .run();
       }
     } else if (
+      value !== null &&
       value.lastAction === "addEdge" &&
       value.actedOn != null &&
       !Array.isArray(value.actedOn)
