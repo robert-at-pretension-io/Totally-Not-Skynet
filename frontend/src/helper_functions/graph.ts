@@ -3,7 +3,8 @@ import type {
   Node,
   CrudBundle,
   GraphNodeInfo,
-  Edge
+  Edge,
+  SystemError
 } from "../system_types";
 import { Process } from "../system_types";
 import systemStateStore from "stores/systemStateStore";
@@ -18,6 +19,20 @@ export async function getSystemState(): Promise<SystemState> {
       resolve(systemStateStore);
     });
   });
+}
+
+export async function handleError(error: SystemError) {
+  switch (error.name) {
+    case "GraphDoesntExist": {
+
+    }
+    case "OtherError": {
+
+    }
+    default: {
+
+    }
+  }
 }
 
 

@@ -51,25 +51,21 @@ export type SystemState = {
   nodes: Node[];
 };
 
-const RuntimeErrorNames = t.keyof({
-  "GraphDoesntExist": null
-});
-
 
 export const RuntimeSystemError = t.type({
-  name: t.type({ RuntimeErrorNames })
+  name: t.union([t.literal("GraphDoesntExist"), t.literal("OtherError")]),
+  error_handler: t.Function
 });
 
 
-
-const RuntimeNodeTypeNames = t.keyof({
+export const RuntimeNodeTypeNames = t.keyof({
   "Prompt": null,
   "Process": null,
   "Conditional": null,
   "Command": null
 });
 
-const RuntimeVerbTypeNames = t.keyof({
+export const RuntimeVerbTypeNames = t.keyof({
   "POST": null,
   "PUT": null,
   "PATCH": null,
@@ -77,18 +73,18 @@ const RuntimeVerbTypeNames = t.keyof({
   "GET": null,
 });
 
-const RuntimeMongoId = t.type({
+export const RuntimeMongoId = t.type({
   $oid: t.string,
 });
 
-const RuntimePrompt = t.type({
+export const RuntimePrompt = t.type({
   Prompt: t.type({
     prompt: t.string,
     system: t.string,
   }),
 });
 
-const RuntimeProcess = t.type({
+export const RuntimeProcess = t.type({
   Process: t.type({
     graph: t.string,
     initial_variables: t.array(t.string),
@@ -96,7 +92,7 @@ const RuntimeProcess = t.type({
   }),
 });
 
-const RuntimeConditional = t.type({
+export const RuntimeConditional = t.type({
   Conditional: t.type({
     system_variables: t.record(t.string, t.string),
     statement: t.string,
@@ -104,15 +100,15 @@ const RuntimeConditional = t.type({
   }),
 });
 
-const RuntimeCommand = t.type({
+export const RuntimeCommand = t.type({
   Command: t.type({
     command: t.string,
   }),
 });
 
-const RuntimeNodeType = t.union([RuntimePrompt, RuntimeProcess, RuntimeConditional, RuntimeCommand]);
+export const RuntimeNodeType = t.union([RuntimePrompt, RuntimeProcess, RuntimeConditional, RuntimeCommand]);
 
-const RuntimeNode = t.type({
+export const RuntimeNode = t.type({
   Node: t.type({
     _id: RuntimeMongoId,
     name: t.string,
@@ -124,7 +120,7 @@ const RuntimeNode = t.type({
   })
 });
 
-const RuntimeExecutionContext = t.type({
+export const RuntimeExecutionContext = t.type({
   topological_order: t.array(t.string),
   current_node: RuntimeNode, // Use your actual Node type here
   variables: record(t.string, t.string),
@@ -132,45 +128,45 @@ const RuntimeExecutionContext = t.type({
   return_execution_id: option(t.string),
 });
 
-const RuntimeAuthenticationMessage = t.type({
+export const RuntimeAuthenticationMessage = t.type({
   AuthenticationMessage: t.type({
     client_email: t.string,
     client_password: t.string
   }),
 });
 
-const RuntimeUserSettings = t.type({
+export const RuntimeUserSettings = t.type({
   UserSettings: t.type({
     openai_api_key: t.string,
     mongo_db_uri: t.string,
   }),
 });
 
-const RuntimeCrudBundle = t.type({
+export const RuntimeCrudBundle = t.type({
   verb: RuntimeVerbTypeNames,
   object: t.union([RuntimeNode, RuntimeAuthenticationMessage, RuntimeUserSettings]),
 });
 
-const RuntimeCommandResponse = t.type({
+export const RuntimeCommandResponse = t.type({
   error: t.string,
   output: t.string,
 });
 
-const RuntimePromptResponse = t.type({
+export const RuntimePromptResponse = t.type({
   response: t.string,
 });
 
-const RuntimeConditionalResponse = t.type({
+export const RuntimeConditionalResponse = t.type({
   chosen_option: t.string,
 });
 
-const RuntimeNodeExecutionResponse = t.union([
+export const RuntimeNodeExecutionResponse = t.union([
   t.type({ Prompt: RuntimePromptResponse }),
   t.type({ Command: RuntimeCommandResponse }),
   t.type({ Conditional: RuntimeConditionalResponse }),
 ]);
 
-const RuntimeExecutionResponse = t.type({
+export const RuntimeExecutionResponse = t.type({
   execution_id: t.string,
   container_execution_id: t.union([t.string, t.null]),
   current_node_id: t.string,
@@ -178,34 +174,30 @@ const RuntimeExecutionResponse = t.type({
   response: RuntimeNodeExecutionResponse,
 });
 
-const RuntimeResponseObject = t.union([
+export const RuntimeResponseObject = t.union([
   RuntimeNode,
   t.literal("InitialMessage"),
   t.literal("UserSettings"),
   t.type({ ExecutionContext: RuntimeExecutionResponse }),
 ]);
 
-type NodeTypeNames = TypeOf<typeof RuntimeNodeTypeNames>;
-type MongoId = TypeOf<typeof RuntimeMongoId>;
-type Prompt = TypeOf<typeof RuntimePrompt>;
-type Process = TypeOf<typeof RuntimeProcess>;
-type Conditional = TypeOf<typeof RuntimeConditional>;
-type Command = TypeOf<typeof RuntimeCommand>;
-type NodeType = TypeOf<typeof RuntimeNodeType>;
-type Node = TypeOf<typeof RuntimeNode>;
-type CrudBundle = TypeOf<typeof RuntimeCrudBundle>;
-type VerbTypeNames = TypeOf<typeof RuntimeVerbTypeNames>;
-type AuthenticationMessage = TypeOf<typeof RuntimeAuthenticationMessage>;
-type UserSettings = TypeOf<typeof RuntimeUserSettings>;
-type ExecutionContext = TypeOf<typeof RuntimeExecutionContext>;
-type CommandResponse = TypeOf<typeof RuntimeCommandResponse>;
-type PromptResponse = TypeOf<typeof RuntimePromptResponse>;
-type ConditionalResponse = TypeOf<typeof RuntimeConditionalResponse>;
-type NodeExecutionResponse = TypeOf<typeof RuntimeNodeExecutionResponse>;
-type ExecutionResponse = TypeOf<typeof RuntimeExecutionResponse>;
-type ResponseObject = TypeOf<typeof RuntimeResponseObject>;
-
-// Export static types
-export type { ExecutionContext, CrudBundle, VerbTypeNames, AuthenticationMessage, NodeTypeNames, MongoId, Prompt, NodeType, Node, Process, Conditional, Command, UserSettings, CommandResponse, PromptResponse, ConditionalResponse, NodeExecutionResponse, ExecutionResponse, ResponseObject };
-
-export { RuntimeExecutionContext, RuntimeCrudBundle, RuntimeVerbTypeNames, RuntimeAuthenticationMessage, RuntimeNodeTypeNames, RuntimeMongoId, RuntimePrompt, RuntimeNodeType, RuntimeNode, RuntimeProcess, RuntimeConditional, RuntimeCommand, RuntimeUserSettings, RuntimeCommandResponse, RuntimePromptResponse, RuntimeConditionalResponse, RuntimeNodeExecutionResponse, RuntimeExecutionResponse, RuntimeResponseObject };
+export type NodeTypeNames = TypeOf<typeof RuntimeNodeTypeNames>;
+export type SystemError = TypeOf<typeof RuntimeSystemError>;
+export type MongoId = TypeOf<typeof RuntimeMongoId>;
+export type Prompt = TypeOf<typeof RuntimePrompt>;
+export type Process = TypeOf<typeof RuntimeProcess>;
+export type Conditional = TypeOf<typeof RuntimeConditional>;
+export type Command = TypeOf<typeof RuntimeCommand>;
+export type NodeType = TypeOf<typeof RuntimeNodeType>;
+export type Node = TypeOf<typeof RuntimeNode>;
+export type CrudBundle = TypeOf<typeof RuntimeCrudBundle>;
+export type VerbTypeNames = TypeOf<typeof RuntimeVerbTypeNames>;
+export type AuthenticationMessage = TypeOf<typeof RuntimeAuthenticationMessage>;
+export type UserSettings = TypeOf<typeof RuntimeUserSettings>;
+export type ExecutionContext = TypeOf<typeof RuntimeExecutionContext>;
+export type CommandResponse = TypeOf<typeof RuntimeCommandResponse>;
+export type PromptResponse = TypeOf<typeof RuntimePromptResponse>;
+export type ConditionalResponse = TypeOf<typeof RuntimeConditionalResponse>;
+export type NodeExecutionResponse = TypeOf<typeof RuntimeNodeExecutionResponse>;
+export type ResponseObject = TypeOf<typeof RuntimeResponseObject>;
+export type ExecutionResponse = TypeOf<typeof RuntimeExecutionResponse>;
