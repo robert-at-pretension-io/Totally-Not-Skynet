@@ -1,6 +1,5 @@
 import { Edge } from "@dagrejs/graphlib";
 import type { Graph } from "graphlib";
-import { Option } from "fp-ts/Option";
 import * as t from "io-ts";
 import { record } from "io-ts";
 import { option } from "io-ts-types";
@@ -123,7 +122,6 @@ const RuntimeAuthenticationMessage = t.type({
     client_password: t.string
   }),
 });
-
 
 const RuntimeUserSettings = t.type({
   UserSettings: t.type({

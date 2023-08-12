@@ -1,8 +1,12 @@
 {
   "version": 3,
   "file": "bundle.css",
-  "sources": [],
-  "sourcesContent": [],
+  "sources": [
+    "AuthPage.svelte"
+  ],
+  "sourcesContent": [
+    "<script>\n    import systemStateStore from \"stores/systemStateStore\";\n\n    let username = \"\";\n    let password = \"\";\n\n    function handleSubmit() {\n      console.log(\"Username:\", username);\n      console.log(\"Password:\", password);\n      $systemStateStore.authenticated = true;\n    }\n</script>\n\n<div class=\"container\">\n    <div class=\"fields\">\n        <input type=\"text\" bind:value={username} placeholder=\"Username\" />\n        <input type=\"password\" bind:value={password} placeholder=\"Password\" />\n        <button class=\"submit-button\" on:click={handleSubmit}>Submit</button>\n    </div>\n</div>\n\n<style>\n    .container {\n        display: flex;\n        flex-direction: column;\n        align-items: center;\n        justify-content: center;\n        height: 100vh;\n    }\n    .fields {\n        display: flex;\n        flex-direction: column;\n        gap: 10px;\n    }\n    .submit-button {\n        background-color: green;\n        color: white;\n        padding: 10px 20px;\n        border: none;\n        cursor: pointer;\n        font-size: 16px;\n        transition: 0.3s;\n    }\n    .submit-button:hover {\n        background-color: darkgreen;\n    }\n</style>\n"
+  ],
   "names": [],
-  "mappings": ""
+  "mappings": "AAsBI,yBAAW,CACP,OAAO,CAAE,IAAI,CACb,cAAc,CAAE,MAAM,CACtB,WAAW,CAAE,MAAM,CACnB,eAAe,CAAE,MAAM,CACvB,MAAM,CAAE,KACZ,CACA,sBAAQ,CACJ,OAAO,CAAE,IAAI,CACb,cAAc,CAAE,MAAM,CACtB,GAAG,CAAE,IACT,CACA,6BAAe,CACX,gBAAgB,CAAE,KAAK,CACvB,KAAK,CAAE,KAAK,CACZ,OAAO,CAAE,IAAI,CAAC,IAAI,CAClB,MAAM,CAAE,IAAI,CACZ,MAAM,CAAE,OAAO,CACf,SAAS,CAAE,IAAI,CACf,UAAU,CAAE,IAChB,CACA,6BAAc,MAAO,CACjB,gBAAgB,CAAE,SACtB"
 }

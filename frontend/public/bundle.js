@@ -1005,1422 +1005,21 @@ var app = (function () {
         return { set, update, subscribe };
     }
 
-    var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-    function getDefaultExportFromCjs (x) {
-    	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-    }
-
-    var DEFAULT_EDGE_NAME$1 = "\x00";
-    var GRAPH_NODE$1 = "\x00";
-    var EDGE_KEY_DELIM$1 = "\x01";
-
-    // Implementation notes:
-    //
-    //  * Node id query functions should return string ids for the nodes
-    //  * Edge id query functions should return an "edgeObj", edge object, that is
-    //    composed of enough information to uniquely identify an edge: {v, w, name}.
-    //  * Internally we use an "edgeId", a stringified form of the edgeObj, to
-    //    reference edges. This is because we need a performant way to look these
-    //    edges up and, object properties, which have string keys, are the closest
-    //    we're going to get to a performant hashtable in JavaScript.
-
-    class Graph$5 {
-      #isDirected = true;
-      #isMultigraph = false;
-      #isCompound = false;
-
-      // Label for the graph itself
-      #label;
-
-      // Defaults to be set when creating a new node
-      #defaultNodeLabelFn = () => undefined;
-
-      // Defaults to be set when creating a new edge
-      #defaultEdgeLabelFn = () => undefined;
-
-      // v -> label
-      #nodes = {};
-
-      // v -> edgeObj
-      #in = {};
-
-      // u -> v -> Number
-      #preds = {};
-
-      // v -> edgeObj
-      #out = {};
-
-      // v -> w -> Number
-      #sucs = {};
-
-      // e -> edgeObj
-      #edgeObjs = {};
-
-      // e -> label
-      #edgeLabels = {};
-
-      /* Number of nodes in the graph. Should only be changed by the implementation. */
-      #nodeCount = 0;
-
-      /* Number of edges in the graph. Should only be changed by the implementation. */
-      #edgeCount = 0;
-
-      #parent;
-
-      #children;
-
-      constructor(opts) {
-        if (opts) {
-          this.#isDirected = opts.hasOwnProperty("directed") ? opts.directed : true;
-          this.#isMultigraph = opts.hasOwnProperty("multigraph") ? opts.multigraph : false;
-          this.#isCompound = opts.hasOwnProperty("compound") ? opts.compound : false;
-        }
-
-        if (this.#isCompound) {
-          // v -> parent
-          this.#parent = {};
-
-          // v -> children
-          this.#children = {};
-          this.#children[GRAPH_NODE$1] = {};
-        }
-      }
-
-      /* === Graph functions ========= */
-
-      /**
-       * Whether graph was created with 'directed' flag set to true or not.
-       */
-      isDirected() {
-        return this.#isDirected;
-      }
-
-      /**
-       * Whether graph was created with 'multigraph' flag set to true or not.
-       */
-      isMultigraph() {
-        return this.#isMultigraph;
-      }
-
-      /**
-       * Whether graph was created with 'compound' flag set to true or not.
-       */
-      isCompound() {
-        return this.#isCompound;
-      }
-
-      /**
-       * Sets the label of the graph.
-       */
-      setGraph(label) {
-        this.#label = label;
-        return this;
-      }
-
-      /**
-       * Gets the graph label.
-       */
-      graph() {
-        return this.#label;
-      }
-
-
-      /* === Node functions ========== */
-
-      /**
-       * Sets the default node label. If newDefault is a function, it will be
-       * invoked ach time when setting a label for a node. Otherwise, this label
-       * will be assigned as default label in case if no label was specified while
-       * setting a node.
-       * Complexity: O(1).
-       */
-      setDefaultNodeLabel(newDefault) {
-        this.#defaultNodeLabelFn = newDefault;
-        if (typeof newDefault !== 'function') {
-          this.#defaultNodeLabelFn = () => newDefault;
-        }
-
-        return this;
-      }
-
-      /**
-       * Gets the number of nodes in the graph.
-       * Complexity: O(1).
-       */
-      nodeCount() {
-        return this.#nodeCount;
-      }
-
-      /**
-       * Gets all nodes of the graph. Note, the in case of compound graph subnodes are
-       * not included in list.
-       * Complexity: O(1).
-       */
-      nodes() {
-        return Object.keys(this.#nodes);
-      }
-
-      /**
-       * Gets list of nodes without in-edges.
-       * Complexity: O(|V|).
-       */
-      sources() {
-        var self = this;
-        return this.nodes().filter(v => Object.keys(self.#in[v]).length === 0);
-      }
-
-      /**
-       * Gets list of nodes without out-edges.
-       * Complexity: O(|V|).
-       */
-      sinks() {
-        var self = this;
-        return this.nodes().filter(v => Object.keys(self.#out[v]).length === 0);
-      }
-
-      /**
-       * Invokes setNode method for each node in names list.
-       * Complexity: O(|names|).
-       */
-      setNodes(vs, value) {
-        var args = arguments;
-        var self = this;
-        vs.forEach(function(v) {
-          if (args.length > 1) {
-            self.setNode(v, value);
-          } else {
-            self.setNode(v);
-          }
-        });
-        return this;
-      }
-
-      /**
-       * Creates or updates the value for the node v in the graph. If label is supplied
-       * it is set as the value for the node. If label is not supplied and the node was
-       * created by this call then the default node label will be assigned.
-       * Complexity: O(1).
-       */
-      setNode(v, value) {
-        if (this.#nodes.hasOwnProperty(v)) {
-          if (arguments.length > 1) {
-            this.#nodes[v] = value;
-          }
-          return this;
-        }
-
-        this.#nodes[v] = arguments.length > 1 ? value : this.#defaultNodeLabelFn(v);
-        if (this.#isCompound) {
-          this.#parent[v] = GRAPH_NODE$1;
-          this.#children[v] = {};
-          this.#children[GRAPH_NODE$1][v] = true;
-        }
-        this.#in[v] = {};
-        this.#preds[v] = {};
-        this.#out[v] = {};
-        this.#sucs[v] = {};
-        ++this.#nodeCount;
-        return this;
-      }
-
-      /**
-       * Gets the label of node with specified name.
-       * Complexity: O(|V|).
-       */
-      node(v) {
-        return this.#nodes[v];
-      }
-
-      /**
-       * Detects whether graph has a node with specified name or not.
-       */
-      hasNode(v) {
-        return this.#nodes.hasOwnProperty(v);
-      }
-
-      /**
-       * Remove the node with the name from the graph or do nothing if the node is not in
-       * the graph. If the node was removed this function also removes any incident
-       * edges.
-       * Complexity: O(1).
-       */
-      removeNode(v) {
-        var self = this;
-        if (this.#nodes.hasOwnProperty(v)) {
-          var removeEdge = e => self.removeEdge(self.#edgeObjs[e]);
-          delete this.#nodes[v];
-          if (this.#isCompound) {
-            this.#removeFromParentsChildList(v);
-            delete this.#parent[v];
-            this.children(v).forEach(function(child) {
-              self.setParent(child);
-            });
-            delete this.#children[v];
-          }
-          Object.keys(this.#in[v]).forEach(removeEdge);
-          delete this.#in[v];
-          delete this.#preds[v];
-          Object.keys(this.#out[v]).forEach(removeEdge);
-          delete this.#out[v];
-          delete this.#sucs[v];
-          --this.#nodeCount;
-        }
-        return this;
-      }
-
-      /**
-       * Sets node p as a parent for node v if it is defined, or removes the
-       * parent for v if p is undefined. Method throws an exception in case of
-       * invoking it in context of noncompound graph.
-       * Average-case complexity: O(1).
-       */
-      setParent(v, parent) {
-        if (!this.#isCompound) {
-          throw new Error("Cannot set parent in a non-compound graph");
-        }
-
-        if (parent === undefined) {
-          parent = GRAPH_NODE$1;
-        } else {
-          // Coerce parent to string
-          parent += "";
-          for (var ancestor = parent; ancestor !== undefined; ancestor = this.parent(ancestor)) {
-            if (ancestor === v) {
-              throw new Error("Setting " + parent+ " as parent of " + v +
-                  " would create a cycle");
-            }
-          }
-
-          this.setNode(parent);
-        }
-
-        this.setNode(v);
-        this.#removeFromParentsChildList(v);
-        this.#parent[v] = parent;
-        this.#children[parent][v] = true;
-        return this;
-      }
-
-      #removeFromParentsChildList(v) {
-        delete this.#children[this.#parent[v]][v];
-      }
-
-      /**
-       * Gets parent node for node v.
-       * Complexity: O(1).
-       */
-      parent(v) {
-        if (this.#isCompound) {
-          var parent = this.#parent[v];
-          if (parent !== GRAPH_NODE$1) {
-            return parent;
-          }
-        }
-      }
-
-      /**
-       * Gets list of direct children of node v.
-       * Complexity: O(1).
-       */
-      children(v = GRAPH_NODE$1) {
-        if (this.#isCompound) {
-          var children = this.#children[v];
-          if (children) {
-            return Object.keys(children);
-          }
-        } else if (v === GRAPH_NODE$1) {
-          return this.nodes();
-        } else if (this.hasNode(v)) {
-          return [];
-        }
-      }
-
-      /**
-       * Return all nodes that are predecessors of the specified node or undefined if node v is not in
-       * the graph. Behavior is undefined for undirected graphs - use neighbors instead.
-       * Complexity: O(|V|).
-       */
-      predecessors(v) {
-        var predsV = this.#preds[v];
-        if (predsV) {
-          return Object.keys(predsV);
-        }
-      }
-
-      /**
-       * Return all nodes that are successors of the specified node or undefined if node v is not in
-       * the graph. Behavior is undefined for undirected graphs - use neighbors instead.
-       * Complexity: O(|V|).
-       */
-      successors(v) {
-        var sucsV = this.#sucs[v];
-        if (sucsV) {
-          return Object.keys(sucsV);
-        }
-      }
-
-      /**
-       * Return all nodes that are predecessors or successors of the specified node or undefined if
-       * node v is not in the graph.
-       * Complexity: O(|V|).
-       */
-      neighbors(v) {
-        var preds = this.predecessors(v);
-        if (preds) {
-          const union = new Set(preds);
-          for (var succ of this.successors(v)) {
-            union.add(succ);
-          }
-
-          return Array.from(union.values());
-        }
-      }
-
-      isLeaf(v) {
-        var neighbors;
-        if (this.isDirected()) {
-          neighbors = this.successors(v);
-        } else {
-          neighbors = this.neighbors(v);
-        }
-        return neighbors.length === 0;
-      }
-
-      /**
-       * Creates new graph with nodes filtered via filter. Edges incident to rejected node
-       * are also removed. In case of compound graph, if parent is rejected by filter,
-       * than all its children are rejected too.
-       * Average-case complexity: O(|E|+|V|).
-       */
-      filterNodes(filter) {
-        var copy = new this.constructor({
-          directed: this.#isDirected,
-          multigraph: this.#isMultigraph,
-          compound: this.#isCompound
-        });
-
-        copy.setGraph(this.graph());
-
-        var self = this;
-        Object.entries(this.#nodes).forEach(function([v, value]) {
-          if (filter(v)) {
-            copy.setNode(v, value);
-          }
-        });
-
-        Object.values(this.#edgeObjs).forEach(function(e) {
-          if (copy.hasNode(e.v) && copy.hasNode(e.w)) {
-            copy.setEdge(e, self.edge(e));
-          }
-        });
-
-        var parents = {};
-        function findParent(v) {
-          var parent = self.parent(v);
-          if (parent === undefined || copy.hasNode(parent)) {
-            parents[v] = parent;
-            return parent;
-          } else if (parent in parents) {
-            return parents[parent];
-          } else {
-            return findParent(parent);
-          }
-        }
-
-        if (this.#isCompound) {
-          copy.nodes().forEach(v => copy.setParent(v, findParent(v)));
-        }
-
-        return copy;
-      }
-
-      /* === Edge functions ========== */
-
-      /**
-       * Sets the default edge label or factory function. This label will be
-       * assigned as default label in case if no label was specified while setting
-       * an edge or this function will be invoked each time when setting an edge
-       * with no label specified and returned value * will be used as a label for edge.
-       * Complexity: O(1).
-       */
-      setDefaultEdgeLabel(newDefault) {
-        this.#defaultEdgeLabelFn = newDefault;
-        if (typeof newDefault !== 'function') {
-          this.#defaultEdgeLabelFn = () => newDefault;
-        }
-
-        return this;
-      }
-
-      /**
-       * Gets the number of edges in the graph.
-       * Complexity: O(1).
-       */
-      edgeCount() {
-        return this.#edgeCount;
-      }
-
-      /**
-       * Gets edges of the graph. In case of compound graph subgraphs are not considered.
-       * Complexity: O(|E|).
-       */
-      edges() {
-        return Object.values(this.#edgeObjs);
-      }
-
-      /**
-       * Establish an edges path over the nodes in nodes list. If some edge is already
-       * exists, it will update its label, otherwise it will create an edge between pair
-       * of nodes with label provided or default label if no label provided.
-       * Complexity: O(|nodes|).
-       */
-      setPath(vs, value) {
-        var self = this;
-        var args = arguments;
-        vs.reduce(function(v, w) {
-          if (args.length > 1) {
-            self.setEdge(v, w, value);
-          } else {
-            self.setEdge(v, w);
-          }
-          return w;
-        });
-        return this;
-      }
-
-      /**
-       * Creates or updates the label for the edge (v, w) with the optionally supplied
-       * name. If label is supplied it is set as the value for the edge. If label is not
-       * supplied and the edge was created by this call then the default edge label will
-       * be assigned. The name parameter is only useful with multigraphs.
-       */
-      setEdge() {
-        var v, w, name, value;
-        var valueSpecified = false;
-        var arg0 = arguments[0];
-
-        if (typeof arg0 === "object" && arg0 !== null && "v" in arg0) {
-          v = arg0.v;
-          w = arg0.w;
-          name = arg0.name;
-          if (arguments.length === 2) {
-            value = arguments[1];
-            valueSpecified = true;
-          }
-        } else {
-          v = arg0;
-          w = arguments[1];
-          name = arguments[3];
-          if (arguments.length > 2) {
-            value = arguments[2];
-            valueSpecified = true;
-          }
-        }
-
-        v = "" + v;
-        w = "" + w;
-        if (name !== undefined) {
-          name = "" + name;
-        }
-
-        var e = edgeArgsToId$1(this.#isDirected, v, w, name);
-        if (this.#edgeLabels.hasOwnProperty(e)) {
-          if (valueSpecified) {
-            this.#edgeLabels[e] = value;
-          }
-          return this;
-        }
-
-        if (name !== undefined && !this.#isMultigraph) {
-          throw new Error("Cannot set a named edge when isMultigraph = false");
-        }
-
-        // It didn't exist, so we need to create it.
-        // First ensure the nodes exist.
-        this.setNode(v);
-        this.setNode(w);
-
-        this.#edgeLabels[e] = valueSpecified ? value : this.#defaultEdgeLabelFn(v, w, name);
-
-        var edgeObj = edgeArgsToObj$1(this.#isDirected, v, w, name);
-        // Ensure we add undirected edges in a consistent way.
-        v = edgeObj.v;
-        w = edgeObj.w;
-
-        Object.freeze(edgeObj);
-        this.#edgeObjs[e] = edgeObj;
-        incrementOrInitEntry$1(this.#preds[w], v);
-        incrementOrInitEntry$1(this.#sucs[v], w);
-        this.#in[w][e] = edgeObj;
-        this.#out[v][e] = edgeObj;
-        this.#edgeCount++;
-        return this;
-      }
-
-      /**
-       * Gets the label for the specified edge.
-       * Complexity: O(1).
-       */
-      edge(v, w, name) {
-        var e = (arguments.length === 1
-          ? edgeObjToId$1(this.#isDirected, arguments[0])
-          : edgeArgsToId$1(this.#isDirected, v, w, name));
-        return this.#edgeLabels[e];
-      }
-
-      /**
-       * Gets the label for the specified edge and converts it to an object.
-       * Complexity: O(1)
-       */
-      edgeAsObj() {
-        const edge = this.edge(...arguments);
-        if (typeof edge !== "object") {
-          return {label: edge};
-        }
-
-        return edge;
-      }
-
-      /**
-       * Detects whether the graph contains specified edge or not. No subgraphs are considered.
-       * Complexity: O(1).
-       */
-      hasEdge(v, w, name) {
-        var e = (arguments.length === 1
-          ? edgeObjToId$1(this.#isDirected, arguments[0])
-          : edgeArgsToId$1(this.#isDirected, v, w, name));
-        return this.#edgeLabels.hasOwnProperty(e);
-      }
-
-      /**
-       * Removes the specified edge from the graph. No subgraphs are considered.
-       * Complexity: O(1).
-       */
-      removeEdge(v, w, name) {
-        var e = (arguments.length === 1
-          ? edgeObjToId$1(this.#isDirected, arguments[0])
-          : edgeArgsToId$1(this.#isDirected, v, w, name));
-        var edge = this.#edgeObjs[e];
-        if (edge) {
-          v = edge.v;
-          w = edge.w;
-          delete this.#edgeLabels[e];
-          delete this.#edgeObjs[e];
-          decrementOrRemoveEntry$1(this.#preds[w], v);
-          decrementOrRemoveEntry$1(this.#sucs[v], w);
-          delete this.#in[w][e];
-          delete this.#out[v][e];
-          this.#edgeCount--;
-        }
-        return this;
-      }
-
-      /**
-       * Return all edges that point to the node v. Optionally filters those edges down to just those
-       * coming from node u. Behavior is undefined for undirected graphs - use nodeEdges instead.
-       * Complexity: O(|E|).
-       */
-      inEdges(v, u) {
-        var inV = this.#in[v];
-        if (inV) {
-          var edges = Object.values(inV);
-          if (!u) {
-            return edges;
-          }
-          return edges.filter(edge => edge.v === u);
-        }
-      }
-
-      /**
-       * Return all edges that are pointed at by node v. Optionally filters those edges down to just
-       * those point to w. Behavior is undefined for undirected graphs - use nodeEdges instead.
-       * Complexity: O(|E|).
-       */
-      outEdges(v, w) {
-        var outV = this.#out[v];
-        if (outV) {
-          var edges = Object.values(outV);
-          if (!w) {
-            return edges;
-          }
-          return edges.filter(edge => edge.w === w);
-        }
-      }
-
-      /**
-       * Returns all edges to or from node v regardless of direction. Optionally filters those edges
-       * down to just those between nodes v and w regardless of direction.
-       * Complexity: O(|E|).
-       */
-      nodeEdges(v, w) {
-        var inEdges = this.inEdges(v, w);
-        if (inEdges) {
-          return inEdges.concat(this.outEdges(v, w));
-        }
-      }
-    }
-
-    function incrementOrInitEntry$1(map, k) {
-      if (map[k]) {
-        map[k]++;
-      } else {
-        map[k] = 1;
-      }
-    }
-
-    function decrementOrRemoveEntry$1(map, k) {
-      if (!--map[k]) { delete map[k]; }
-    }
-
-    function edgeArgsToId$1(isDirected, v_, w_, name) {
-      var v = "" + v_;
-      var w = "" + w_;
-      if (!isDirected && v > w) {
-        var tmp = v;
-        v = w;
-        w = tmp;
-      }
-      return v + EDGE_KEY_DELIM$1 + w + EDGE_KEY_DELIM$1 +
-                 (name === undefined ? DEFAULT_EDGE_NAME$1 : name);
-    }
-
-    function edgeArgsToObj$1(isDirected, v_, w_, name) {
-      var v = "" + v_;
-      var w = "" + w_;
-      if (!isDirected && v > w) {
-        var tmp = v;
-        v = w;
-        w = tmp;
-      }
-      var edgeObj =  { v: v, w: w };
-      if (name) {
-        edgeObj.name = name;
-      }
-      return edgeObj;
-    }
-
-    function edgeObjToId$1(isDirected, edgeObj) {
-      return edgeArgsToId$1(isDirected, edgeObj.v, edgeObj.w, edgeObj.name);
-    }
-
-    var graph$1 = Graph$5;
-
-    var version$3 = '2.1.13';
-
-    // Includes only the "core" of graphlib
-    var lib$3 = {
-      Graph: graph$1,
-      version: version$3
-    };
-
-    var Graph$4 = graph$1;
-
-    var json$1 = {
-      write: write$1,
-      read: read$1
-    };
-
-    /**
-     * Creates a JSON representation of the graph that can be serialized to a string with
-     * JSON.stringify. The graph can later be restored using json.read.
-     */
-    function write$1(g) {
-      var json = {
-        options: {
-          directed: g.isDirected(),
-          multigraph: g.isMultigraph(),
-          compound: g.isCompound()
-        },
-        nodes: writeNodes$1(g),
-        edges: writeEdges$1(g)
-      };
-
-      if (g.graph() !== undefined) {
-        json.value = structuredClone(g.graph());
-      }
-      return json;
-    }
-
-    function writeNodes$1(g) {
-      return g.nodes().map(function(v) {
-        var nodeValue = g.node(v);
-        var parent = g.parent(v);
-        var node = { v: v };
-        if (nodeValue !== undefined) {
-          node.value = nodeValue;
-        }
-        if (parent !== undefined) {
-          node.parent = parent;
-        }
-        return node;
-      });
-    }
-
-    function writeEdges$1(g) {
-      return g.edges().map(function(e) {
-        var edgeValue = g.edge(e);
-        var edge = { v: e.v, w: e.w };
-        if (e.name !== undefined) {
-          edge.name = e.name;
-        }
-        if (edgeValue !== undefined) {
-          edge.value = edgeValue;
-        }
-        return edge;
-      });
-    }
-
-    /**
-     * Takes JSON as input and returns the graph representation.
-     *
-     * @example
-     * var g2 = graphlib.json.read(JSON.parse(str));
-     * g2.nodes();
-     * // ['a', 'b']
-     * g2.edges()
-     * // [ { v: 'a', w: 'b' } ]
-     */
-    function read$1(json) {
-      var g = new Graph$4(json.options).setGraph(json.value);
-      json.nodes.forEach(function(entry) {
-        g.setNode(entry.v, entry.value);
-        if (entry.parent) {
-          g.setParent(entry.v, entry.parent);
-        }
-      });
-      json.edges.forEach(function(entry) {
-        g.setEdge({ v: entry.v, w: entry.w, name: entry.name }, entry.value);
-      });
-      return g;
-    }
-
-    var components_1$1 = components$1;
-
-    function components$1(g) {
-      var visited = {};
-      var cmpts = [];
-      var cmpt;
-
-      function dfs(v) {
-        if (visited.hasOwnProperty(v)) return;
-        visited[v] = true;
-        cmpt.push(v);
-        g.successors(v).forEach(dfs);
-        g.predecessors(v).forEach(dfs);
-      }
-
-      g.nodes().forEach(function(v) {
-        cmpt = [];
-        dfs(v);
-        if (cmpt.length) {
-          cmpts.push(cmpt);
-        }
-      });
-
-      return cmpts;
-    }
-
-    /**
-     * A min-priority queue data structure. This algorithm is derived from Cormen,
-     * et al., "Introduction to Algorithms". The basic idea of a min-priority
-     * queue is that you can efficiently (in O(1) time) get the smallest key in
-     * the queue. Adding and removing elements takes O(log n) time. A key can
-     * have its priority decreased in O(log n) time.
-     */
-
-    class PriorityQueue$5 {
-      #arr = [];
-      #keyIndices = {};
-
-      /**
-       * Returns the number of elements in the queue. Takes `O(1)` time.
-       */
-      size() {
-        return this.#arr.length;
-      }
-
-      /**
-       * Returns the keys that are in the queue. Takes `O(n)` time.
-       */
-      keys() {
-        return this.#arr.map(function(x) { return x.key; });
-      }
-
-      /**
-       * Returns `true` if **key** is in the queue and `false` if not.
-       */
-      has(key) {
-        return this.#keyIndices.hasOwnProperty(key);
-      }
-
-      /**
-       * Returns the priority for **key**. If **key** is not present in the queue
-       * then this function returns `undefined`. Takes `O(1)` time.
-       *
-       * @param {Object} key
-       */
-      priority(key) {
-        var index = this.#keyIndices[key];
-        if (index !== undefined) {
-          return this.#arr[index].priority;
-        }
-      }
-
-      /**
-       * Returns the key for the minimum element in this queue. If the queue is
-       * empty this function throws an Error. Takes `O(1)` time.
-       */
-      min() {
-        if (this.size() === 0) {
-          throw new Error("Queue underflow");
-        }
-        return this.#arr[0].key;
-      }
-
-      /**
-       * Inserts a new key into the priority queue. If the key already exists in
-       * the queue this function returns `false`; otherwise it will return `true`.
-       * Takes `O(n)` time.
-       *
-       * @param {Object} key the key to add
-       * @param {Number} priority the initial priority for the key
-       */
-      add(key, priority) {
-        var keyIndices = this.#keyIndices;
-        key = String(key);
-        if (!keyIndices.hasOwnProperty(key)) {
-          var arr = this.#arr;
-          var index = arr.length;
-          keyIndices[key] = index;
-          arr.push({key: key, priority: priority});
-          this.#decrease(index);
-          return true;
-        }
-        return false;
-      }
-
-      /**
-       * Removes and returns the smallest key in the queue. Takes `O(log n)` time.
-       */
-      removeMin() {
-        this.#swap(0, this.#arr.length - 1);
-        var min = this.#arr.pop();
-        delete this.#keyIndices[min.key];
-        this.#heapify(0);
-        return min.key;
-      }
-
-      /**
-       * Decreases the priority for **key** to **priority**. If the new priority is
-       * greater than the previous priority, this function will throw an Error.
-       *
-       * @param {Object} key the key for which to raise priority
-       * @param {Number} priority the new priority for the key
-       */
-      decrease(key, priority) {
-        var index = this.#keyIndices[key];
-        if (priority > this.#arr[index].priority) {
-          throw new Error("New priority is greater than current priority. " +
-              "Key: " + key + " Old: " + this.#arr[index].priority + " New: " + priority);
-        }
-        this.#arr[index].priority = priority;
-        this.#decrease(index);
-      }
-
-      #heapify(i) {
-        var arr = this.#arr;
-        var l = 2 * i;
-        var r = l + 1;
-        var largest = i;
-        if (l < arr.length) {
-          largest = arr[l].priority < arr[largest].priority ? l : largest;
-          if (r < arr.length) {
-            largest = arr[r].priority < arr[largest].priority ? r : largest;
-          }
-          if (largest !== i) {
-            this.#swap(i, largest);
-            this.#heapify(largest);
-          }
-        }
-      }
-
-      #decrease(index) {
-        var arr = this.#arr;
-        var priority = arr[index].priority;
-        var parent;
-        while (index !== 0) {
-          parent = index >> 1;
-          if (arr[parent].priority < priority) {
-            break;
-          }
-          this.#swap(index, parent);
-          index = parent;
-        }
-      }
-
-      #swap(i, j) {
-        var arr = this.#arr;
-        var keyIndices = this.#keyIndices;
-        var origArrI = arr[i];
-        var origArrJ = arr[j];
-        arr[i] = origArrJ;
-        arr[j] = origArrI;
-        keyIndices[origArrJ.key] = i;
-        keyIndices[origArrI.key] = j;
-      }
-    }
-
-    var priorityQueue$1 = PriorityQueue$5;
-
-    var PriorityQueue$4 = priorityQueue$1;
-
-    var dijkstra_1$1 = dijkstra$3;
-
-    var DEFAULT_WEIGHT_FUNC$3 = () => 1;
-
-    function dijkstra$3(g, source, weightFn, edgeFn) {
-      return runDijkstra$1(g, String(source),
-        weightFn || DEFAULT_WEIGHT_FUNC$3,
-        edgeFn || function(v) { return g.outEdges(v); });
-    }
-
-    function runDijkstra$1(g, source, weightFn, edgeFn) {
-      var results = {};
-      var pq = new PriorityQueue$4();
-      var v, vEntry;
-
-      var updateNeighbors = function(edge) {
-        var w = edge.v !== v ? edge.v : edge.w;
-        var wEntry = results[w];
-        var weight = weightFn(edge);
-        var distance = vEntry.distance + weight;
-
-        if (weight < 0) {
-          throw new Error("dijkstra does not allow negative edge weights. " +
-                          "Bad edge: " + edge + " Weight: " + weight);
-        }
-
-        if (distance < wEntry.distance) {
-          wEntry.distance = distance;
-          wEntry.predecessor = v;
-          pq.decrease(w, distance);
-        }
-      };
-
-      g.nodes().forEach(function(v) {
-        var distance = v === source ? 0 : Number.POSITIVE_INFINITY;
-        results[v] = { distance: distance };
-        pq.add(v, distance);
-      });
-
-      while (pq.size() > 0) {
-        v = pq.removeMin();
-        vEntry = results[v];
-        if (vEntry.distance === Number.POSITIVE_INFINITY) {
-          break;
-        }
-
-        edgeFn(v).forEach(updateNeighbors);
-      }
-
-      return results;
-    }
-
-    var dijkstra$2 = dijkstra_1$1;
-
-    var dijkstraAll_1$1 = dijkstraAll$1;
-
-    function dijkstraAll$1(g, weightFunc, edgeFunc) {
-      return g.nodes().reduce(function(acc, v) {
-        acc[v] = dijkstra$2(g, v, weightFunc, edgeFunc);
-        return acc;
-      }, {});
-    }
-
-    var tarjan_1$1 = tarjan$3;
-
-    function tarjan$3(g) {
-      var index = 0;
-      var stack = [];
-      var visited = {}; // node id -> { onStack, lowlink, index }
-      var results = [];
-
-      function dfs(v) {
-        var entry = visited[v] = {
-          onStack: true,
-          lowlink: index,
-          index: index++
-        };
-        stack.push(v);
-
-        g.successors(v).forEach(function(w) {
-          if (!visited.hasOwnProperty(w)) {
-            dfs(w);
-            entry.lowlink = Math.min(entry.lowlink, visited[w].lowlink);
-          } else if (visited[w].onStack) {
-            entry.lowlink = Math.min(entry.lowlink, visited[w].index);
-          }
-        });
-
-        if (entry.lowlink === entry.index) {
-          var cmpt = [];
-          var w;
-          do {
-            w = stack.pop();
-            visited[w].onStack = false;
-            cmpt.push(w);
-          } while (v !== w);
-          results.push(cmpt);
-        }
-      }
-
-      g.nodes().forEach(function(v) {
-        if (!visited.hasOwnProperty(v)) {
-          dfs(v);
-        }
-      });
-
-      return results;
-    }
-
-    var tarjan$2 = tarjan_1$1;
-
-    var findCycles_1$1 = findCycles$1;
-
-    function findCycles$1(g) {
-      return tarjan$2(g).filter(function(cmpt) {
-        return cmpt.length > 1 || (cmpt.length === 1 && g.hasEdge(cmpt[0], cmpt[0]));
-      });
-    }
-
-    var floydWarshall_1$1 = floydWarshall$1;
-
-    var DEFAULT_WEIGHT_FUNC$2 = () => 1;
-
-    function floydWarshall$1(g, weightFn, edgeFn) {
-      return runFloydWarshall$1(g,
-        weightFn || DEFAULT_WEIGHT_FUNC$2,
-        edgeFn || function(v) { return g.outEdges(v); });
-    }
-
-    function runFloydWarshall$1(g, weightFn, edgeFn) {
-      var results = {};
-      var nodes = g.nodes();
-
-      nodes.forEach(function(v) {
-        results[v] = {};
-        results[v][v] = { distance: 0 };
-        nodes.forEach(function(w) {
-          if (v !== w) {
-            results[v][w] = { distance: Number.POSITIVE_INFINITY };
-          }
-        });
-        edgeFn(v).forEach(function(edge) {
-          var w = edge.v === v ? edge.w : edge.v;
-          var d = weightFn(edge);
-          results[v][w] = { distance: d, predecessor: v };
-        });
-      });
-
-      nodes.forEach(function(k) {
-        var rowK = results[k];
-        nodes.forEach(function(i) {
-          var rowI = results[i];
-          nodes.forEach(function(j) {
-            var ik = rowI[k];
-            var kj = rowK[j];
-            var ij = rowI[j];
-            var altDistance = ik.distance + kj.distance;
-            if (altDistance < ij.distance) {
-              ij.distance = altDistance;
-              ij.predecessor = kj.predecessor;
-            }
-          });
-        });
-      });
-
-      return results;
-    }
-
-    function topsort$3(g) {
-      var visited = {};
-      var stack = {};
-      var results = [];
-
-      function visit(node) {
-        if (stack.hasOwnProperty(node)) {
-          throw new CycleException$1();
-        }
-
-        if (!visited.hasOwnProperty(node)) {
-          stack[node] = true;
-          visited[node] = true;
-          g.predecessors(node).forEach(visit);
-          delete stack[node];
-          results.push(node);
-        }
-      }
-
-      g.sinks().forEach(visit);
-
-      if (Object.keys(visited).length !== g.nodeCount()) {
-        throw new CycleException$1();
-      }
-
-      return results;
-    }
-
-    class CycleException$1 extends Error {
-      constructor() {
-        super(...arguments);
-      }
-    }
-
-    var topsort_1$1 = topsort$3;
-    topsort$3.CycleException = CycleException$1;
-
-    var topsort$2 = topsort_1$1;
-
-    var isAcyclic_1$1 = isAcyclic$1;
-
-    function isAcyclic$1(g) {
-      try {
-        topsort$2(g);
-      } catch (e) {
-        if (e instanceof topsort$2.CycleException) {
-          return false;
-        }
-        throw e;
-      }
-      return true;
-    }
-
-    var dfs_1$1 = dfs$5;
-
-    /*
-     * A helper that preforms a pre- or post-order traversal on the input graph
-     * and returns the nodes in the order they were visited. If the graph is
-     * undirected then this algorithm will navigate using neighbors. If the graph
-     * is directed then this algorithm will navigate using successors.
-     *
-     * If the order is not "post", it will be treated as "pre".
-     */
-    function dfs$5(g, vs, order) {
-      if (!Array.isArray(vs)) {
-        vs = [vs];
-      }
-
-      var navigation = g.isDirected() ? v => g.successors(v) : v => g.neighbors(v);
-      var orderFunc = order === "post" ? postOrderDfs : preOrderDfs;
-
-      var acc = [];
-      var visited = {};
-      vs.forEach(v => {
-        if (!g.hasNode(v)) {
-          throw new Error("Graph does not have node: " + v);
-        }
-
-        orderFunc(v, navigation, visited, acc);
-      });
-
-      return acc;
-    }
-
-    function postOrderDfs(v, navigation, visited, acc) {
-      var stack = [[v, false]];
-      while (stack.length > 0) {
-        var curr = stack.pop();
-        if (curr[1]) {
-          acc.push(curr[0]);
-        } else {
-          if (!visited.hasOwnProperty(curr[0])) {
-            visited[curr[0]] = true;
-            stack.push([curr[0], true]);
-            forEachRight(navigation(curr[0]), w => stack.push([w, false]));
-          }
-        }
-      }
-    }
-
-    function preOrderDfs(v, navigation, visited, acc) {
-      var stack = [v];
-      while (stack.length > 0) {
-        var curr = stack.pop();
-        if (!visited.hasOwnProperty(curr)) {
-          visited[curr] = true;
-          acc.push(curr);
-          forEachRight(navigation(curr), w => stack.push(w));
-        }
-      }
-    }
-
-    function forEachRight(array, iteratee) {
-      var length = array.length;
-      while (length--) {
-        iteratee(array[length], length, array);
-      }
-
-      return array;
-    }
-
-    var dfs$4 = dfs_1$1;
-
-    var postorder_1$1 = postorder$1;
-
-    function postorder$1(g, vs) {
-      return dfs$4(g, vs, "post");
-    }
-
-    var dfs$3 = dfs_1$1;
-
-    var preorder_1$1 = preorder$1;
-
-    function preorder$1(g, vs) {
-      return dfs$3(g, vs, "pre");
-    }
-
-    var Graph$3 = graph$1;
-    var PriorityQueue$3 = priorityQueue$1;
-
-    var prim_1$1 = prim$1;
-
-    function prim$1(g, weightFunc) {
-      var result = new Graph$3();
-      var parents = {};
-      var pq = new PriorityQueue$3();
-      var v;
-
-      function updateNeighbors(edge) {
-        var w = edge.v === v ? edge.w : edge.v;
-        var pri = pq.priority(w);
-        if (pri !== undefined) {
-          var edgeWeight = weightFunc(edge);
-          if (edgeWeight < pri) {
-            parents[w] = v;
-            pq.decrease(w, edgeWeight);
-          }
-        }
-      }
-
-      if (g.nodeCount() === 0) {
-        return result;
-      }
-
-      g.nodes().forEach(function(v) {
-        pq.add(v, Number.POSITIVE_INFINITY);
-        result.setNode(v);
-      });
-
-      // Start from an arbitrary node
-      pq.decrease(g.nodes()[0], 0);
-
-      var init = false;
-      while (pq.size() > 0) {
-        v = pq.removeMin();
-        if (parents.hasOwnProperty(v)) {
-          result.setEdge(v, parents[v]);
-        } else if (init) {
-          throw new Error("Input graph is not connected: " + g);
-        } else {
-          init = true;
-        }
-
-        g.nodeEdges(v).forEach(updateNeighbors);
-      }
-
-      return result;
-    }
-
-    var alg$1 = {
-      components: components_1$1,
-      dijkstra: dijkstra_1$1,
-      dijkstraAll: dijkstraAll_1$1,
-      findCycles: findCycles_1$1,
-      floydWarshall: floydWarshall_1$1,
-      isAcyclic: isAcyclic_1$1,
-      postorder: postorder_1$1,
-      preorder: preorder_1$1,
-      prim: prim_1$1,
-      tarjan: tarjan_1$1,
-      topsort: topsort_1$1
-    };
-
-    /**
-     * Copyright (c) 2014, Chris Pettitt
-     * All rights reserved.
-     *
-     * Redistribution and use in source and binary forms, with or without
-     * modification, are permitted provided that the following conditions are met:
-     *
-     * 1. Redistributions of source code must retain the above copyright notice, this
-     * list of conditions and the following disclaimer.
-     *
-     * 2. Redistributions in binary form must reproduce the above copyright notice,
-     * this list of conditions and the following disclaimer in the documentation
-     * and/or other materials provided with the distribution.
-     *
-     * 3. Neither the name of the copyright holder nor the names of its contributors
-     * may be used to endorse or promote products derived from this software without
-     * specific prior written permission.
-     *
-     * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-     * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-     * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-     * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-     * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-     * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-     * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-     * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-     * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-     * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-     */
-
-    var lib$2 = lib$3;
-
-    var graphlib$2 = {
-      Graph: lib$2.Graph,
-      json: json$1,
-      alg: alg$1,
-      version: lib$2.version
-    };
-
-    function newGraphState() {
-        return {
-            graph: new graphlib$2.Graph(),
-            lastAction: "none",
-            actedOn: null,
-            lastActedOn: null,
-            name: null,
-            global_variables: new Map(),
-        };
-    }
-    function NewExecutionContext() {
-        return {
-            local_variables: new Map(),
-            global_variables: new Map(),
-            topological_order: [],
-            topological_order_names: [],
-            current_node: null,
-            prompts: new Map(),
-            responses: new Map(),
-        };
-    }
-
     const system_state = {
+        authenticated: false,
         websocketReady: false,
         selectedNode: null,
-        graphState: newGraphState(),
-        websocket: new WebSocket("ws://138.197.70.163:8080"),
-        executionContext: NewExecutionContext(),
+        graphState: null,
+        websocket: null,
+        executionContext: null,
         nodes: [],
     };
     const systemStateStore = writable(system_state);
 
     /* src/components/sidebarComponents/AddNodeButton.svelte generated by Svelte v3.59.1 */
-    const file$7 = "src/components/sidebarComponents/AddNodeButton.svelte";
+    const file$8 = "src/components/sidebarComponents/AddNodeButton.svelte";
 
-    function create_fragment$7(ctx) {
+    function create_fragment$8(ctx) {
     	let form;
     	let label0;
     	let t1;
@@ -2459,26 +1058,26 @@ var app = (function () {
     			button = element$1("button");
     			button.textContent = "Submit";
     			attr_dev(label0, "for", "prompt");
-    			add_location(label0, file$7, 23, 2, 1067);
+    			add_location(label0, file$8, 23, 2, 1067);
     			attr_dev(input0, "id", "prompt");
     			attr_dev(input0, "type", "text");
     			input0.required = true;
-    			add_location(input0, file$7, 24, 2, 1104);
+    			add_location(input0, file$8, 24, 2, 1104);
     			attr_dev(label1, "for", "name");
-    			add_location(label1, file$7, 26, 2, 1177);
+    			add_location(label1, file$8, 26, 2, 1177);
     			attr_dev(input1, "id", "name");
     			attr_dev(input1, "type", "text");
     			input1.required = true;
-    			add_location(input1, file$7, 27, 2, 1210);
+    			add_location(input1, file$8, 27, 2, 1210);
     			attr_dev(label2, "for", "system");
-    			add_location(label2, file$7, 29, 2, 1279);
+    			add_location(label2, file$8, 29, 2, 1279);
     			attr_dev(input2, "id", "system");
     			attr_dev(input2, "type", "text");
     			input2.required = true;
-    			add_location(input2, file$7, 30, 2, 1316);
+    			add_location(input2, file$8, 30, 2, 1316);
     			attr_dev(button, "type", "submit");
-    			add_location(button, file$7, 32, 2, 1389);
-    			add_location(form, file$7, 22, 0, 1018);
+    			add_location(button, file$8, 32, 2, 1389);
+    			add_location(form, file$8, 22, 0, 1018);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2537,7 +1136,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$7.name,
+    		id: create_fragment$8.name,
     		type: "component",
     		source: "",
     		ctx
@@ -2546,7 +1145,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$7($$self, $$props, $$invalidate) {
+    function instance$8($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
     	component_subscribe($$self, systemStateStore, $$value => $$invalidate(5, $systemStateStore = $$value));
@@ -2651,13 +1250,13 @@ var app = (function () {
     class AddNodeButton extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$7, create_fragment$7, safe_not_equal, {});
+    		init(this, options, instance$8, create_fragment$8, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "AddNodeButton",
     			options,
-    			id: create_fragment$7.name
+    			id: create_fragment$8.name
     		});
     	}
     }
@@ -2685,6 +1284,12 @@ var app = (function () {
             function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
             step((generator = generator.apply(thisArg, _arguments || [])).next());
         });
+    }
+
+    var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+    function getDefaultExportFromCjs (x) {
+    	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
     }
 
     function commonjsRequire(path) {
@@ -3068,31 +1673,31 @@ var app = (function () {
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$2 = freeGlobal || freeSelf || Function('return this')();
+    var root$4 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$2;
+    var _root = root$4;
 
-    var root$1 = _root;
+    var root$3 = _root;
 
     /** Built-in value references. */
-    var Symbol$4 = root$1.Symbol;
+    var Symbol$4 = root$3.Symbol;
 
     var _Symbol = Symbol$4;
 
     var Symbol$3 = _Symbol;
 
     /** Used for built-in method references. */
-    var objectProto$4 = Object.prototype;
+    var objectProto$5 = Object.prototype;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty$4 = objectProto$4.hasOwnProperty;
+    var hasOwnProperty$5 = objectProto$5.hasOwnProperty;
 
     /**
      * Used to resolve the
      * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
      * of values.
      */
-    var nativeObjectToString$1 = objectProto$4.toString;
+    var nativeObjectToString$1 = objectProto$5.toString;
 
     /** Built-in value references. */
     var symToStringTag$1 = Symbol$3 ? Symbol$3.toStringTag : undefined;
@@ -3105,7 +1710,7 @@ var app = (function () {
      * @returns {string} Returns the raw `toStringTag`.
      */
     function getRawTag$1(value) {
-      var isOwn = hasOwnProperty$4.call(value, symToStringTag$1),
+      var isOwn = hasOwnProperty$5.call(value, symToStringTag$1),
           tag = value[symToStringTag$1];
 
       try {
@@ -3128,14 +1733,14 @@ var app = (function () {
 
     /** Used for built-in method references. */
 
-    var objectProto$3 = Object.prototype;
+    var objectProto$4 = Object.prototype;
 
     /**
      * Used to resolve the
      * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
      * of values.
      */
-    var nativeObjectToString = objectProto$3.toString;
+    var nativeObjectToString = objectProto$4.toString;
 
     /**
      * Converts `value` to a string using `Object.prototype.toString`.
@@ -3168,7 +1773,7 @@ var app = (function () {
      * @param {*} value The value to query.
      * @returns {string} Returns the `toStringTag`.
      */
-    function baseGetTag$1(value) {
+    function baseGetTag$2(value) {
       if (value == null) {
         return value === undefined ? undefinedTag : nullTag;
       }
@@ -3177,7 +1782,7 @@ var app = (function () {
         : objectToString(value);
     }
 
-    var _baseGetTag = baseGetTag$1;
+    var _baseGetTag = baseGetTag$2;
 
     /**
      * Checks if `value` is the
@@ -3205,102 +1810,78 @@ var app = (function () {
      * // => false
      */
 
-    function isObject$3(value) {
+    function isObject$5(value) {
       var type = typeof value;
       return value != null && (type == 'object' || type == 'function');
     }
 
-    var isObject_1 = isObject$3;
+    var isObject_1 = isObject$5;
 
-    var isFunction_1;
-    var hasRequiredIsFunction;
+    var baseGetTag$1 = _baseGetTag,
+        isObject$4 = isObject_1;
 
-    function requireIsFunction () {
-    	if (hasRequiredIsFunction) return isFunction_1;
-    	hasRequiredIsFunction = 1;
-    	var baseGetTag = _baseGetTag,
-    	    isObject = isObject_1;
+    /** `Object#toString` result references. */
+    var asyncTag = '[object AsyncFunction]',
+        funcTag = '[object Function]',
+        genTag = '[object GeneratorFunction]',
+        proxyTag = '[object Proxy]';
 
-    	/** `Object#toString` result references. */
-    	var asyncTag = '[object AsyncFunction]',
-    	    funcTag = '[object Function]',
-    	    genTag = '[object GeneratorFunction]',
-    	    proxyTag = '[object Proxy]';
-
-    	/**
-    	 * Checks if `value` is classified as a `Function` object.
-    	 *
-    	 * @static
-    	 * @memberOf _
-    	 * @since 0.1.0
-    	 * @category Lang
-    	 * @param {*} value The value to check.
-    	 * @returns {boolean} Returns `true` if `value` is a function, else `false`.
-    	 * @example
-    	 *
-    	 * _.isFunction(_);
-    	 * // => true
-    	 *
-    	 * _.isFunction(/abc/);
-    	 * // => false
-    	 */
-    	function isFunction(value) {
-    	  if (!isObject(value)) {
-    	    return false;
-    	  }
-    	  // The use of `Object#toString` avoids issues with the `typeof` operator
-    	  // in Safari 9 which returns 'object' for typed arrays and other constructors.
-    	  var tag = baseGetTag(value);
-    	  return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
-    	}
-
-    	isFunction_1 = isFunction;
-    	return isFunction_1;
+    /**
+     * Checks if `value` is classified as a `Function` object.
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a function, else `false`.
+     * @example
+     *
+     * _.isFunction(_);
+     * // => true
+     *
+     * _.isFunction(/abc/);
+     * // => false
+     */
+    function isFunction$1(value) {
+      if (!isObject$4(value)) {
+        return false;
+      }
+      // The use of `Object#toString` avoids issues with the `typeof` operator
+      // in Safari 9 which returns 'object' for typed arrays and other constructors.
+      var tag = baseGetTag$1(value);
+      return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
     }
 
-    var _coreJsData;
-    var hasRequired_coreJsData;
+    var isFunction_1 = isFunction$1;
 
-    function require_coreJsData () {
-    	if (hasRequired_coreJsData) return _coreJsData;
-    	hasRequired_coreJsData = 1;
-    	var root = _root;
+    var root$2 = _root;
 
-    	/** Used to detect overreaching core-js shims. */
-    	var coreJsData = root['__core-js_shared__'];
+    /** Used to detect overreaching core-js shims. */
+    var coreJsData$1 = root$2['__core-js_shared__'];
 
-    	_coreJsData = coreJsData;
-    	return _coreJsData;
+    var _coreJsData = coreJsData$1;
+
+    var coreJsData = _coreJsData;
+
+    /** Used to detect methods masquerading as native. */
+    var maskSrcKey = (function() {
+      var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+      return uid ? ('Symbol(src)_1.' + uid) : '';
+    }());
+
+    /**
+     * Checks if `func` has its source masked.
+     *
+     * @private
+     * @param {Function} func The function to check.
+     * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+     */
+    function isMasked$1(func) {
+      return !!maskSrcKey && (maskSrcKey in func);
     }
 
-    var _isMasked;
-    var hasRequired_isMasked;
-
-    function require_isMasked () {
-    	if (hasRequired_isMasked) return _isMasked;
-    	hasRequired_isMasked = 1;
-    	var coreJsData = require_coreJsData();
-
-    	/** Used to detect methods masquerading as native. */
-    	var maskSrcKey = (function() {
-    	  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
-    	  return uid ? ('Symbol(src)_1.' + uid) : '';
-    	}());
-
-    	/**
-    	 * Checks if `func` has its source masked.
-    	 *
-    	 * @private
-    	 * @param {Function} func The function to check.
-    	 * @returns {boolean} Returns `true` if `func` is masked, else `false`.
-    	 */
-    	function isMasked(func) {
-    	  return !!maskSrcKey && (maskSrcKey in func);
-    	}
-
-    	_isMasked = isMasked;
-    	return _isMasked;
-    }
+    var _isMasked = isMasked$1;
 
     /** Used for built-in method references. */
 
@@ -3338,61 +1919,53 @@ var app = (function () {
     	return _toSource;
     }
 
-    var _baseIsNative;
-    var hasRequired_baseIsNative;
+    var isFunction = isFunction_1,
+        isMasked = _isMasked,
+        isObject$3 = isObject_1,
+        toSource = require_toSource();
 
-    function require_baseIsNative () {
-    	if (hasRequired_baseIsNative) return _baseIsNative;
-    	hasRequired_baseIsNative = 1;
-    	var isFunction = requireIsFunction(),
-    	    isMasked = require_isMasked(),
-    	    isObject = isObject_1,
-    	    toSource = require_toSource();
+    /**
+     * Used to match `RegExp`
+     * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+     */
+    var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
 
-    	/**
-    	 * Used to match `RegExp`
-    	 * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
-    	 */
-    	var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+    /** Used to detect host constructors (Safari). */
+    var reIsHostCtor = /^\[object .+?Constructor\]$/;
 
-    	/** Used to detect host constructors (Safari). */
-    	var reIsHostCtor = /^\[object .+?Constructor\]$/;
+    /** Used for built-in method references. */
+    var funcProto = Function.prototype,
+        objectProto$3 = Object.prototype;
 
-    	/** Used for built-in method references. */
-    	var funcProto = Function.prototype,
-    	    objectProto = Object.prototype;
+    /** Used to resolve the decompiled source of functions. */
+    var funcToString = funcProto.toString;
 
-    	/** Used to resolve the decompiled source of functions. */
-    	var funcToString = funcProto.toString;
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$4 = objectProto$3.hasOwnProperty;
 
-    	/** Used to check objects for own properties. */
-    	var hasOwnProperty = objectProto.hasOwnProperty;
+    /** Used to detect if a method is native. */
+    var reIsNative = RegExp('^' +
+      funcToString.call(hasOwnProperty$4).replace(reRegExpChar, '\\$&')
+      .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+    );
 
-    	/** Used to detect if a method is native. */
-    	var reIsNative = RegExp('^' +
-    	  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
-    	  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-    	);
-
-    	/**
-    	 * The base implementation of `_.isNative` without bad shim checks.
-    	 *
-    	 * @private
-    	 * @param {*} value The value to check.
-    	 * @returns {boolean} Returns `true` if `value` is a native function,
-    	 *  else `false`.
-    	 */
-    	function baseIsNative(value) {
-    	  if (!isObject(value) || isMasked(value)) {
-    	    return false;
-    	  }
-    	  var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
-    	  return pattern.test(toSource(value));
-    	}
-
-    	_baseIsNative = baseIsNative;
-    	return _baseIsNative;
+    /**
+     * The base implementation of `_.isNative` without bad shim checks.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a native function,
+     *  else `false`.
+     */
+    function baseIsNative$1(value) {
+      if (!isObject$3(value) || isMasked(value)) {
+        return false;
+      }
+      var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
+      return pattern.test(toSource(value));
     }
+
+    var _baseIsNative = baseIsNative$1;
 
     /**
      * Gets the value at `key` of `object`.
@@ -3403,63 +1976,39 @@ var app = (function () {
      * @returns {*} Returns the property value.
      */
 
-    var _getValue;
-    var hasRequired_getValue;
-
-    function require_getValue () {
-    	if (hasRequired_getValue) return _getValue;
-    	hasRequired_getValue = 1;
-    	function getValue(object, key) {
-    	  return object == null ? undefined : object[key];
-    	}
-
-    	_getValue = getValue;
-    	return _getValue;
+    function getValue$2(object, key) {
+      return object == null ? undefined : object[key];
     }
 
-    var _getNative;
-    var hasRequired_getNative;
+    var _getValue = getValue$2;
 
-    function require_getNative () {
-    	if (hasRequired_getNative) return _getNative;
-    	hasRequired_getNative = 1;
-    	var baseIsNative = require_baseIsNative(),
-    	    getValue = require_getValue();
+    var baseIsNative = _baseIsNative,
+        getValue$1 = _getValue;
 
-    	/**
-    	 * Gets the native function at `key` of `object`.
-    	 *
-    	 * @private
-    	 * @param {Object} object The object to query.
-    	 * @param {string} key The key of the method to get.
-    	 * @returns {*} Returns the function if it's native, else `undefined`.
-    	 */
-    	function getNative(object, key) {
-    	  var value = getValue(object, key);
-    	  return baseIsNative(value) ? value : undefined;
-    	}
-
-    	_getNative = getNative;
-    	return _getNative;
+    /**
+     * Gets the native function at `key` of `object`.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @param {string} key The key of the method to get.
+     * @returns {*} Returns the function if it's native, else `undefined`.
+     */
+    function getNative$3(object, key) {
+      var value = getValue$1(object, key);
+      return baseIsNative(value) ? value : undefined;
     }
 
-    var _Map;
-    var hasRequired_Map;
+    var _getNative = getNative$3;
 
-    function require_Map () {
-    	if (hasRequired_Map) return _Map;
-    	hasRequired_Map = 1;
-    	var getNative = require_getNative(),
-    	    root = _root;
+    var getNative$2 = _getNative,
+        root$1 = _root;
 
-    	/* Built-in method references that are verified to be native. */
-    	var Map = getNative(root, 'Map');
+    /* Built-in method references that are verified to be native. */
+    var Map$3 = getNative$2(root$1, 'Map');
 
-    	_Map = Map;
-    	return _Map;
-    }
+    var _Map = Map$3;
 
-    var getNative$1 = require_getNative();
+    var getNative$1 = _getNative;
 
     /* Built-in method references that are verified to be native. */
     var nativeCreate$4 = getNative$1(Object, 'create');
@@ -3615,7 +2164,7 @@ var app = (function () {
 
     var Hash = _Hash,
         ListCache = require_ListCache(),
-        Map$2 = require_Map();
+        Map$2 = _Map;
 
     /**
      * Removes all key-value entries from the map.
@@ -3787,7 +2336,7 @@ var app = (function () {
     	if (hasRequired_stackSet) return _stackSet;
     	hasRequired_stackSet = 1;
     	var ListCache = require_ListCache(),
-    	    Map = require_Map(),
+    	    Map = _Map,
     	    MapCache = _MapCache;
 
     	/** Used as the size to enable large array optimizations. */
@@ -3891,7 +2440,7 @@ var app = (function () {
     	return _arrayEach;
     }
 
-    var getNative = require_getNative();
+    var getNative = _getNative;
 
     var defineProperty$1 = (function() {
       try {
@@ -4664,7 +3213,7 @@ var app = (function () {
     function requireIsArrayLike () {
     	if (hasRequiredIsArrayLike) return isArrayLike_1;
     	hasRequiredIsArrayLike = 1;
-    	var isFunction = requireIsFunction(),
+    	var isFunction = isFunction_1,
     	    isLength = requireIsLength();
 
     	/**
@@ -5304,7 +3853,7 @@ var app = (function () {
     function require_DataView () {
     	if (hasRequired_DataView) return _DataView;
     	hasRequired_DataView = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -5320,7 +3869,7 @@ var app = (function () {
     function require_Promise () {
     	if (hasRequired_Promise) return _Promise;
     	hasRequired_Promise = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -5336,7 +3885,7 @@ var app = (function () {
     function require_Set () {
     	if (hasRequired_Set) return _Set;
     	hasRequired_Set = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -5352,7 +3901,7 @@ var app = (function () {
     function require_WeakMap () {
     	if (hasRequired_WeakMap) return _WeakMap;
     	hasRequired_WeakMap = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -5369,7 +3918,7 @@ var app = (function () {
     	if (hasRequired_getTag) return _getTag;
     	hasRequired_getTag = 1;
     	var DataView = require_DataView(),
-    	    Map = require_Map(),
+    	    Map = _Map,
     	    Promise = require_Promise(),
     	    Set = require_Set(),
     	    WeakMap = require_WeakMap(),
@@ -8655,7 +7204,7 @@ var app = (function () {
     	    getPrototype = require_getPrototype(),
     	    isArray = isArray_1,
     	    isBuffer = requireIsBuffer(),
-    	    isFunction = requireIsFunction(),
+    	    isFunction = isFunction_1,
     	    isObject = isObject_1,
     	    isTypedArray = requireIsTypedArray();
 
@@ -9469,7 +8018,7 @@ var app = (function () {
           has:  requireHas(),
           isArray: isArray_1,
           isEmpty: requireIsEmpty(),
-          isFunction: requireIsFunction(),
+          isFunction: isFunction_1,
           isUndefined: requireIsUndefined(),
           keys: requireKeys(),
           map: requireMap(),
@@ -10024,7 +8573,7 @@ var app = (function () {
     var version$2 = '2.1.8';
 
     // Includes only the "core" of graphlib
-    var lib$1 = {
+    var lib$2 = {
       Graph: graph,
       version: version$2
     };
@@ -10661,13 +9210,13 @@ var app = (function () {
      * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      */
 
-    var lib = lib$1;
+    var lib$1 = lib$2;
 
     var graphlib = {
-      Graph: lib.Graph,
+      Graph: lib$1.Graph,
       json: json,
       alg: alg,
-      version: lib.version
+      version: lib$1.version
     };
 
     var graphlib$1 = /*@__PURE__*/getDefaultExportFromCjs(graphlib);
@@ -10841,34 +9390,6 @@ var app = (function () {
             systemStateStore.set(systemState);
         });
     }
-    function addNode(node_id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const systemState = yield getSystemState();
-            // add the input and output variables to the graph state
-            //check if the node already exists in the graph
-            if (!systemState.graphState.graph.hasNode(node_id)) {
-                systemState.graphState.graph.setNode(node_id);
-            }
-            systemState.graphState.lastAction = "addNode";
-            const node_name = yield getNodeName(node_id);
-            if (node_name) {
-                systemState.graphState.name = node_name;
-                systemState.graphState.actedOn = [node_id, node_name];
-            }
-            else {
-                systemState.graphState.actedOn = [node_id, ""];
-            }
-            setSystemState(systemState);
-        });
-    }
-    function sendWebsocketMessage(message) {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log("sending websocket message: ", message);
-            const systemState = yield getSystemState();
-            const message_string = JSON.stringify(message);
-            systemState.websocket.send(message_string);
-        });
-    }
     function addEdge(edge) {
         return __awaiter(this, void 0, void 0, function* () {
             yield printEdge(edge);
@@ -10885,16 +9406,16 @@ var app = (function () {
     }
     function removeNode(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const name = yield getNodeName(id);
+            yield getNodeName(id);
             const systemState = yield getSystemState();
             systemState.graphState.graph.removeNode(id);
             systemState.graphState.lastAction = "removeNode";
-            if (name) {
-                systemState.graphState.actedOn = [id, name];
-            }
-            else {
-                systemState.graphState.actedOn = [id, "unknown"];
-            }
+            const node_name = yield getNodeName(id);
+            const nodeInfo = {
+                id: id,
+                name: node_name ? node_name : ""
+            };
+            systemState.graphState.actedOn = nodeInfo;
             setSystemState(systemState);
         });
     }
@@ -10914,7 +9435,8 @@ var app = (function () {
                 systemState.graphState.lastAction == "selectEdge") {
                 const selected = systemState.graphState.actedOn;
                 if (selected != null) {
-                    yield removeEdge(selected.v, selected.w);
+                    const edge = selected;
+                    yield removeEdge(edge.v, edge.w);
                 }
             }
         });
@@ -10945,7 +9467,7 @@ var app = (function () {
                 systemState.selectedNode = res;
                 systemState.graphState.lastAction = "selectNode";
                 systemState.graphState.lastActedOn = systemState.graphState.actedOn;
-                systemState.graphState.actedOn = [id, res.Node.name];
+                systemState.graphState.actedOn = { id, name: res.Node.name };
                 systemState.graphState.name = res.Node.name;
                 setSystemState(systemState);
             }
@@ -10964,7 +9486,7 @@ var app = (function () {
     /* src/components/sidebarComponents/CreateProcess.svelte generated by Svelte v3.59.1 */
 
     const { console: console_1$2 } = globals;
-    const file$6 = "src/components/sidebarComponents/CreateProcess.svelte";
+    const file$7 = "src/components/sidebarComponents/CreateProcess.svelte";
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
@@ -10978,7 +9500,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (128:2) {#each nodes as node (node.Node._id)}
+    // (127:2) {#each nodes as node (node.Node._id)}
     function create_each_block_1(key_1, ctx) {
     	let li;
     	let button;
@@ -11002,8 +9524,8 @@ var app = (function () {
     			t1 = space();
     			attr_dev(button, "type", "button");
     			toggle_class(button, "selected", /*isSelected*/ ctx[7](/*node*/ ctx[15]));
-    			add_location(button, file$6, 129, 6, 4919);
-    			add_location(li, file$6, 128, 4, 4908);
+    			add_location(button, file$7, 128, 6, 5008);
+    			add_location(li, file$7, 127, 4, 4997);
     			this.first = li;
     		},
     		m: function mount(target, anchor) {
@@ -11036,14 +9558,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(128:2) {#each nodes as node (node.Node._id)}",
+    		source: "(127:2) {#each nodes as node (node.Node._id)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (141:0) {#each selectedNodes as node (node.Node._id)}
+    // (140:0) {#each selectedNodes as node (node.Node._id)}
     function create_each_block$2(key_1, ctx) {
     	let p;
     	let t_value = /*node*/ ctx[15].Node.name + "";
@@ -11055,7 +9577,7 @@ var app = (function () {
     		c: function create() {
     			p = element$1("p");
     			t = text(t_value);
-    			add_location(p, file$6, 141, 2, 5167);
+    			add_location(p, file$7, 140, 2, 5256);
     			this.first = p;
     		},
     		m: function mount(target, anchor) {
@@ -11075,14 +9597,14 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(141:0) {#each selectedNodes as node (node.Node._id)}",
+    		source: "(140:0) {#each selectedNodes as node (node.Node._id)}",
     		ctx
     	});
 
     	return block;
     }
 
-    function create_fragment$6(ctx) {
+    function create_fragment$7(ctx) {
     	let p0;
     	let t1;
     	let input0;
@@ -11180,25 +9702,25 @@ var app = (function () {
     			t19 = space();
     			button4 = element$1("button");
     			button4.textContent = "Save Process";
-    			add_location(p0, file$6, 113, 0, 4489);
+    			add_location(p0, file$7, 112, 0, 4578);
     			attr_dev(input0, "type", "text");
-    			add_location(input0, file$6, 114, 0, 4544);
-    			add_location(p1, file$6, 115, 0, 4584);
+    			add_location(input0, file$7, 113, 0, 4633);
+    			add_location(p1, file$7, 114, 0, 4673);
     			attr_dev(input1, "type", "text");
-    			add_location(input1, file$6, 119, 0, 4682);
-    			add_location(p2, file$6, 121, 0, 4730);
-    			add_location(ul, file$6, 126, 0, 4859);
-    			add_location(h3, file$6, 138, 0, 5095);
+    			add_location(input1, file$7, 118, 0, 4771);
+    			add_location(p2, file$7, 120, 0, 4819);
+    			add_location(ul, file$7, 125, 0, 4948);
+    			add_location(h3, file$7, 137, 0, 5184);
     			attr_dev(button0, "class", "add-button");
-    			add_location(button0, file$6, 143, 0, 5199);
+    			add_location(button0, file$7, 142, 0, 5288);
     			attr_dev(button1, "class", "remove-button");
-    			add_location(button1, file$6, 144, 0, 5272);
+    			add_location(button1, file$7, 143, 0, 5361);
     			attr_dev(button2, "class", "add-button");
-    			add_location(button2, file$6, 147, 0, 5360);
+    			add_location(button2, file$7, 146, 0, 5449);
     			attr_dev(button3, "class", "remove-button");
-    			add_location(button3, file$6, 148, 0, 5429);
+    			add_location(button3, file$7, 147, 0, 5518);
     			attr_dev(button4, "class", "add-button");
-    			add_location(button4, file$6, 149, 0, 5510);
+    			add_location(button4, file$7, 148, 0, 5599);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -11326,7 +9848,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$6.name,
+    		id: create_fragment$7.name,
     		type: "component",
     		source: "",
     		ctx
@@ -11335,7 +9857,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$6($$self, $$props, $$invalidate) {
+    function instance$7($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
     	component_subscribe($$self, systemStateStore, $$value => $$invalidate(9, $systemStateStore = $$value));
@@ -11391,13 +9913,14 @@ var app = (function () {
 
     	function localAddNodes() {
     		// for each of the selected actions, add a node to the graph
-    		selectedNodes.forEach(node => {
-    			// console.log("local");
-    			addNode(node.Node._id.$oid);
-    		});
-
+    		// For each of the selected nodes, check if they are already in the $systemStore.nodes
+    		// If they are already in the nodes... don't do anything
     		// clear out the selected actions
-    		$$invalidate(1, selectedNodes = []);
+    		selectedNodes.forEach(node => {
+    			if (!nodeContainedGlobally(node)) {
+    				$systemStateStore.nodes.push(node);
+    			}
+    		});
     	}
 
     	function localAddEdge() {
@@ -11409,7 +9932,7 @@ var app = (function () {
     		actedOn = $systemStateStore.graphState.actedOn;
 
     		// check that lastActedOn and actedOn are not null and are arrays
-    		if (lastActedOn !== null && actedOn !== null && Array.isArray(lastActedOn) && Array.isArray(actedOn)) {
+    		if (lastActedOn !== null && actedOn !== null && lastActedOn.id) {
     			// add an edge between the lastActedOn and actedOn
     			let edge = { v: lastActedOn[0], w: actedOn[0] };
 
@@ -11503,7 +10026,6 @@ var app = (function () {
     		__awaiter,
     		onMount,
     		addEdge,
-    		addNode,
     		getSystemState,
     		removeSelectedEdge,
     		removeSelectedNode,
@@ -11566,22 +10088,22 @@ var app = (function () {
     class CreateProcess extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$6, create_fragment$6, safe_not_equal, {});
+    		init(this, options, instance$7, create_fragment$7, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "CreateProcess",
     			options,
-    			id: create_fragment$6.name
+    			id: create_fragment$7.name
     		});
     	}
     }
 
     /* src/components/sidebarComponents/BackgroundInfo.svelte generated by Svelte v3.59.1 */
 
-    const file$5 = "src/components/sidebarComponents/BackgroundInfo.svelte";
+    const file$6 = "src/components/sidebarComponents/BackgroundInfo.svelte";
 
-    function create_fragment$5(ctx) {
+    function create_fragment$6(ctx) {
     	let h10;
     	let t1;
     	let p0;
@@ -11665,23 +10187,23 @@ var app = (function () {
     			t29 = space();
     			p6 = element$1("p");
     			p6.textContent = "In short, the Node Graph System allows for the handling of complex workflows in a way that is scalable, manageable, and easy to understand.";
-    			add_location(h10, file$5, 0, 0, 0);
-    			add_location(p0, file$5, 2, 0, 54);
-    			add_location(p1, file$5, 6, 0, 313);
-    			add_location(h20, file$5, 10, 0, 377);
-    			add_location(p2, file$5, 11, 0, 396);
-    			add_location(h21, file$5, 15, 0, 645);
-    			add_location(p3, file$5, 16, 0, 664);
-    			add_location(h22, file$5, 20, 0, 955);
-    			add_location(p4, file$5, 21, 0, 974);
-    			add_location(h11, file$5, 25, 0, 1171);
-    			add_location(p5, file$5, 27, 0, 1219);
-    			add_location(li0, file$5, 32, 4, 1376);
-    			add_location(li1, file$5, 33, 4, 1442);
-    			add_location(li2, file$5, 34, 4, 1512);
-    			add_location(li3, file$5, 35, 4, 1593);
-    			add_location(ul, file$5, 31, 0, 1367);
-    			add_location(p6, file$5, 38, 0, 1693);
+    			add_location(h10, file$6, 0, 0, 0);
+    			add_location(p0, file$6, 2, 0, 54);
+    			add_location(p1, file$6, 6, 0, 313);
+    			add_location(h20, file$6, 10, 0, 377);
+    			add_location(p2, file$6, 11, 0, 396);
+    			add_location(h21, file$6, 15, 0, 645);
+    			add_location(p3, file$6, 16, 0, 664);
+    			add_location(h22, file$6, 20, 0, 955);
+    			add_location(p4, file$6, 21, 0, 974);
+    			add_location(h11, file$6, 25, 0, 1171);
+    			add_location(p5, file$6, 27, 0, 1219);
+    			add_location(li0, file$6, 32, 4, 1376);
+    			add_location(li1, file$6, 33, 4, 1442);
+    			add_location(li2, file$6, 34, 4, 1512);
+    			add_location(li3, file$6, 35, 4, 1593);
+    			add_location(ul, file$6, 31, 0, 1367);
+    			add_location(p6, file$6, 38, 0, 1693);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -11754,7 +10276,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$5.name,
+    		id: create_fragment$6.name,
     		type: "component",
     		source: "",
     		ctx
@@ -11763,7 +10285,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$5($$self, $$props) {
+    function instance$6($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('BackgroundInfo', slots, []);
     	const writable_props = [];
@@ -11778,19 +10300,19 @@ var app = (function () {
     class BackgroundInfo extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$5, create_fragment$5, safe_not_equal, {});
+    		init(this, options, instance$6, create_fragment$6, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "BackgroundInfo",
     			options,
-    			id: create_fragment$5.name
+    			id: create_fragment$6.name
     		});
     	}
     }
 
     /* src/components/sidebarComponents/InteractWithActionsAndProcesses.svelte generated by Svelte v3.59.1 */
-    const file$4 = "src/components/sidebarComponents/InteractWithActionsAndProcesses.svelte";
+    const file$5 = "src/components/sidebarComponents/InteractWithActionsAndProcesses.svelte";
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
@@ -11816,7 +10338,7 @@ var app = (function () {
     			t2 = text(t2_value);
     			option.__value = option_value_value = /*node*/ ctx[6];
     			option.value = option.__value;
-    			add_location(option, file$4, 18, 4, 575);
+    			add_location(option, file$5, 18, 4, 575);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -11849,7 +10371,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$4(ctx) {
+    function create_fragment$5(ctx) {
     	let select;
     	let option;
     	let mounted;
@@ -11874,9 +10396,9 @@ var app = (function () {
 
     			option.__value = "";
     			option.value = option.__value;
-    			add_location(option, file$4, 16, 2, 507);
+    			add_location(option, file$5, 16, 2, 507);
     			if (/*selectedNode*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[4].call(select));
-    			add_location(select, file$4, 15, 0, 433);
+    			add_location(select, file$5, 15, 0, 433);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -11943,7 +10465,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$4.name,
+    		id: create_fragment$5.name,
     		type: "component",
     		source: "",
     		ctx
@@ -11952,7 +10474,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$4($$self, $$props, $$invalidate) {
+    function instance$5($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
     	component_subscribe($$self, systemStateStore, $$value => $$invalidate(3, $systemStateStore = $$value));
@@ -12021,13 +10543,13 @@ var app = (function () {
     class InteractWithActionsAndProcesses extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {});
+    		init(this, options, instance$5, create_fragment$5, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "InteractWithActionsAndProcesses",
     			options,
-    			id: create_fragment$4.name
+    			id: create_fragment$5.name
     		});
     	}
     }
@@ -13679,9 +12201,10 @@ var app = (function () {
         execution_id: string$1,
         return_execution_id: option(string$1),
     });
-    const RuntimeInitialMessage = type({
-        InitialMessage: type({
-            initial_message: string$1,
+    const RuntimeAuthenticationMessage = type({
+        AuthenticationMessage: type({
+            client_email: string$1,
+            client_password: string$1
         }),
     });
     const RuntimeUserSettings = type({
@@ -13692,7 +12215,7 @@ var app = (function () {
     });
     type({
         verb: RuntimeVerbTypeNames,
-        object: union([RuntimeNode, RuntimeInitialMessage, RuntimeUserSettings]),
+        object: union([RuntimeNode, RuntimeAuthenticationMessage, RuntimeUserSettings]),
     });
     const RuntimeCommandResponse = type({
         error: string$1,
@@ -13726,7 +12249,7 @@ var app = (function () {
     /* src/components/NodeInfo.svelte generated by Svelte v3.59.1 */
 
     const { console: console_1$1 } = globals;
-    const file$3 = "src/components/NodeInfo.svelte";
+    const file$4 = "src/components/NodeInfo.svelte";
 
     // (34:0) {:else}
     function create_else_block(ctx) {
@@ -13736,7 +12259,7 @@ var app = (function () {
     		c: function create() {
     			p = element$1("p");
     			p.textContent = "No node selected";
-    			add_location(p, file$3, 34, 2, 1150);
+    			add_location(p, file$4, 34, 2, 1150);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -13759,7 +12282,7 @@ var app = (function () {
     }
 
     // (22:0) {#if has_selected_node && selected_node != null}
-    function create_if_block$2(ctx) {
+    function create_if_block$3(ctx) {
     	let t0;
     	let t1_value = /*selected_node*/ ctx[1].Node.name + "";
     	let t1;
@@ -13777,7 +12300,7 @@ var app = (function () {
     			br = element$1("br");
     			t3 = text("\n  Description: ");
     			t4 = text(t4_value);
-    			add_location(br, file$3, 22, 34, 765);
+    			add_location(br, file$4, 22, 34, 765);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, t0, anchor);
@@ -13803,7 +12326,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$2.name,
+    		id: create_if_block$3.name,
     		type: "if",
     		source: "(22:0) {#if has_selected_node && selected_node != null}",
     		ctx
@@ -13812,11 +12335,11 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$3(ctx) {
+    function create_fragment$4(ctx) {
     	let if_block_anchor;
 
     	function select_block_type(ctx, dirty) {
-    		if (/*has_selected_node*/ ctx[0] && /*selected_node*/ ctx[1] != null) return create_if_block$2;
+    		if (/*has_selected_node*/ ctx[0] && /*selected_node*/ ctx[1] != null) return create_if_block$3;
     		return create_else_block;
     	}
 
@@ -13858,7 +12381,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$3.name,
+    		id: create_fragment$4.name,
     		type: "component",
     		source: "",
     		ctx
@@ -13867,7 +12390,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$3($$self, $$props, $$invalidate) {
+    function instance$4($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
     	component_subscribe($$self, systemStateStore, $$value => $$invalidate(2, $systemStateStore = $$value));
@@ -13924,19 +12447,19 @@ var app = (function () {
     class NodeInfo extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {});
+    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "NodeInfo",
     			options,
-    			id: create_fragment$3.name
+    			id: create_fragment$4.name
     		});
     	}
     }
 
     /* src/components/Sidebar.svelte generated by Svelte v3.59.1 */
-    const file$2 = "src/components/Sidebar.svelte";
+    const file$3 = "src/components/Sidebar.svelte";
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
@@ -13947,7 +12470,7 @@ var app = (function () {
     }
 
     // (66:6) {#if section.open}
-    function create_if_block$1(ctx) {
+    function create_if_block$2(ctx) {
     	let div;
     	let switch_instance;
     	let div_intro;
@@ -13968,7 +12491,7 @@ var app = (function () {
     			div = element$1("div");
     			if (switch_instance) create_component(switch_instance.$$.fragment);
     			attr_dev(div, "class", "section-content");
-    			add_location(div, file$2, 66, 8, 1845);
+    			add_location(div, file$3, 66, 8, 1845);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -14026,7 +12549,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$1.name,
+    		id: create_if_block$2.name,
     		type: "if",
     		source: "(66:6) {#if section.open}",
     		ctx
@@ -14056,7 +12579,7 @@ var app = (function () {
     		return /*click_handler*/ ctx[3](/*section*/ ctx[5]);
     	}
 
-    	let if_block = /*section*/ ctx[5].open && create_if_block$1(ctx);
+    	let if_block = /*section*/ ctx[5].open && create_if_block$2(ctx);
     	const assign_div1 = () => /*div1_binding*/ ctx[4](div1, each_value, section_index);
     	const unassign_div1 = () => /*div1_binding*/ ctx[4](null, each_value, section_index);
 
@@ -14070,9 +12593,9 @@ var app = (function () {
     			t1 = space();
     			if (if_block) if_block.c();
     			attr_dev(div0, "class", "section-header");
-    			add_location(div0, file$2, 54, 6, 1551);
+    			add_location(div0, file$3, 54, 6, 1551);
     			attr_dev(div1, "class", "section");
-    			add_location(div1, file$2, 53, 4, 1499);
+    			add_location(div1, file$3, 53, 4, 1499);
     			this.first = div1;
     		},
     		m: function mount(target, anchor) {
@@ -14105,7 +12628,7 @@ var app = (function () {
     						transition_in(if_block, 1);
     					}
     				} else {
-    					if_block = create_if_block$1(ctx);
+    					if_block = create_if_block$2(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
     					if_block.m(div1, null);
@@ -14156,7 +12679,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$2(ctx) {
+    function create_fragment$3(ctx) {
     	let div1;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -14189,9 +12712,9 @@ var app = (function () {
     			div0 = element$1("div");
     			create_component(nodeinfo.$$.fragment);
     			attr_dev(div0, "class", "section");
-    			add_location(div0, file$2, 76, 2, 2088);
+    			add_location(div0, file$3, 76, 2, 2088);
     			attr_dev(div1, "class", "sidebar");
-    			add_location(div1, file$2, 51, 0, 1426);
+    			add_location(div1, file$3, 51, 0, 1426);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -14251,7 +12774,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$2.name,
+    		id: create_fragment$3.name,
     		type: "component",
     		source: "",
     		ctx
@@ -14260,7 +12783,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$2($$self, $$props, $$invalidate) {
+    function instance$3($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Sidebar', slots, []);
 
@@ -14354,13 +12877,13 @@ var app = (function () {
     class Sidebar extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Sidebar",
     			options,
-    			id: create_fragment$2.name
+    			id: create_fragment$3.name
     		});
     	}
     }
@@ -48025,7 +46548,7 @@ var app = (function () {
     	    isArray = isArray_1,
     	    isArrayLikeObject = requireIsArrayLikeObject(),
     	    isBuffer = requireIsBuffer(),
-    	    isFunction = requireIsFunction(),
+    	    isFunction = isFunction_1,
     	    isObject = isObject_1,
     	    isPlainObject = requireIsPlainObject(),
     	    isTypedArray = requireIsTypedArray(),
@@ -52494,10 +51017,10 @@ var app = (function () {
     ];
 
     /* src/components/GraphComponent_graphlib.svelte generated by Svelte v3.59.1 */
-    const file$1 = "src/components/GraphComponent_graphlib.svelte";
+    const file$2 = "src/components/GraphComponent_graphlib.svelte";
 
-    // (102:2) {#if cyInstance}
-    function create_if_block(ctx) {
+    // (104:2) {#if cyInstance}
+    function create_if_block$1(ctx) {
     	let current;
     	const default_slot_template = /*#slots*/ ctx[3].default;
     	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[2], null);
@@ -52545,26 +51068,26 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block.name,
+    		id: create_if_block$1.name,
     		type: "if",
-    		source: "(102:2) {#if cyInstance}",
+    		source: "(104:2) {#if cyInstance}",
     		ctx
     	});
 
     	return block;
     }
 
-    function create_fragment$1(ctx) {
+    function create_fragment$2(ctx) {
     	let div;
     	let current;
-    	let if_block = /*cyInstance*/ ctx[1] && create_if_block(ctx);
+    	let if_block = /*cyInstance*/ ctx[1] && create_if_block$1(ctx);
 
     	const block = {
     		c: function create() {
     			div = element$1("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "graph");
-    			add_location(div, file$1, 100, 0, 3705);
+    			add_location(div, file$2, 102, 0, 3757);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -52584,7 +51107,7 @@ var app = (function () {
     						transition_in(if_block, 1);
     					}
     				} else {
-    					if_block = create_if_block(ctx);
+    					if_block = create_if_block$1(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
     					if_block.m(div, null);
@@ -52617,7 +51140,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$1.name,
+    		id: create_fragment$2.name,
     		type: "component",
     		source: "",
     		ctx
@@ -52626,7 +51149,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1($$self, $$props, $$invalidate) {
+    function instance$2($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('GraphComponent_graphlib', slots, ['default']);
 
@@ -52675,7 +51198,7 @@ var app = (function () {
     	systemStateStore.subscribe(new_value => {
     		let value = new_value.graphState;
 
-    		if (value.lastAction === "addNode" && value.actedOn != null && Array.isArray(value.actedOn)) {
+    		if (value !== null && value.lastAction === "addNode" && value.actedOn != null && Array.isArray(value.actedOn)) {
     			// check if the node is already in the graph
     			if (g.hasNode(value.actedOn[0])) {
     				return;
@@ -52694,7 +51217,7 @@ var app = (function () {
 
     				cyInstance.layout({ name: "dagre" }).run();
     			}
-    		} else if (value.lastAction === "addEdge" && value.actedOn != null && !Array.isArray(value.actedOn)) {
+    		} else if (value !== null && value.lastAction === "addEdge" && value.actedOn != null && !Array.isArray(value.actedOn)) {
     			// check if the edge is already in the graph
     			if (g.hasEdge(value.actedOn.v, value.actedOn.w)) {
     				return;
@@ -52801,13 +51324,13 @@ var app = (function () {
     class GraphComponent_graphlib extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "GraphComponent_graphlib",
     			options,
-    			id: create_fragment$1.name
+    			id: create_fragment$2.name
     		});
     	}
     }
@@ -52841,6 +51364,10 @@ var app = (function () {
 
     var css_248z = "* {\n  box-sizing: border-box;\n  font-family: 'Roboto', sans-serif;\n  color: #2c3e50;\n  /* Dark Blue */\n}\n\n.section-header {\n  cursor: pointer;\n  transition: background-color 0.2s ease;\n  padding: 10px;\n  border-radius: 4px;\n}\n\n.section-header:hover {\n  background-color: #f0f0f0;\n}\n\n.section-header::after {\n  content: \"▼\";\n  /* You can replace with any symbol or icon font you like */\n  margin-left: 5px;\n}\n\ntextarea,\ninput {\n  resize: vertical;\n  width: 100%;\n  height: 100%;\n  white-space: pre-wrap;\n  border-radius: 4px;\n  border: 2px solid #27ae60;\n  /* Green */\n  background-color: #ecf0f1;\n  /* Light Gray */\n}\n\nbutton.selected {\n  background-color: #2ecc71;\n  /* Green */\n  color: #ecf0f1;\n  /* Light Gray */\n}\n\n.add-button {\n  background-color: #16a085;\n  /* Green */\n  margin-top: 20px;\n  margin-bottom: 10px;\n}\n\n.remove-button {\n  background-color: #c0392b;\n  /* Dark Red */\n}\n\n.section-content {\n  background-color: #ecf0f1;\n  /* Light Gray */\n}\n\n\nform {\n  display: flex;\n  flex-direction: column;\n  gap: 1em;\n}\n\n/* Mobile Styles */\n@media (max-width: 800px) {\n  .app-container {\n    display: flex;\n    flex-direction: column;\n    height: 100vh;\n  }\n\n  .graph {\n    width: 100%;\n    /* height should take up rest of screen */\n    height: 60vh;\n    order: 2;\n  }\n\n  .sidebar {\n    width: 100%;\n    height: 40vh;\n    min-height: 200px;\n    order: 1;\n    padding: 2vw;\n    overflow-y: auto;\n    outline: 2px solid #333;\n    /* Outline added */\n  }\n\n  .section {\n    margin-bottom: 2vh;\n    border-radius: 1vh;\n    background-color: #9b59b6;\n    /* Purple */\n  }\n\n  .section-header {\n    padding: 1vh;\n    background-color: #f1c40f;\n    /* Yellow */\n    border-radius: 1vh;\n  }\n}\n\n\n\n/* Larger screen styles */\n@media (min-width: 801px) {\n\n  /* Styles specific to components */\n  .app-container {\n    display: grid;\n    grid-template-columns: 25vw 1fr;\n  }\n\n\n  /* ./components/GraphComponent_graphlib.svelte */\n  .graph {\n    grid-column: 2;\n    height: 100%;\n  }\n\n  /* ./components/Sidebar.svelte */\n  .sidebar {\n    grid-column: 1;\n    position: sticky;\n    top: 0;\n    height: 100vh;\n    background-color: #2ecc71;\n    /* Green */\n    overflow-y: auto;\n    box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.541);\n    border-radius: 12px;\n  }\n\n}";
     styleInject(css_248z);
+
+    var PathReporter = {};
+
+    var lib = {};
 
     var Either = {};
 
@@ -55513,9 +54040,1673 @@ var app = (function () {
     	exports.getValidation = getValidation; 
     } (Either));
 
+    (function (exports) {
+    	var __extends = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
+    	    var extendStatics = function (d, b) {
+    	        extendStatics = Object.setPrototypeOf ||
+    	            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+    	            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+    	        return extendStatics(d, b);
+    	    };
+    	    return function (d, b) {
+    	        if (typeof b !== "function" && b !== null)
+    	            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+    	        extendStatics(d, b);
+    	        function __() { this.constructor = d; }
+    	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    	    };
+    	})();
+    	var __assign = (commonjsGlobal && commonjsGlobal.__assign) || function () {
+    	    __assign = Object.assign || function(t) {
+    	        for (var s, i = 1, n = arguments.length; i < n; i++) {
+    	            s = arguments[i];
+    	            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+    	                t[p] = s[p];
+    	        }
+    	        return t;
+    	    };
+    	    return __assign.apply(this, arguments);
+    	};
+    	var __spreadArray = (commonjsGlobal && commonjsGlobal.__spreadArray) || function (to, from, pack) {
+    	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+    	        if (ar || !(i in from)) {
+    	            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+    	            ar[i] = from[i];
+    	        }
+    	    }
+    	    return to.concat(ar || Array.prototype.slice.call(from));
+    	};
+    	Object.defineProperty(exports, "__esModule", { value: true });
+    	exports.partial = exports.PartialType = exports.type = exports.InterfaceType = exports.array = exports.ArrayType = exports.recursion = exports.RecursiveType = exports.Int = exports.brand = exports.RefinementType = exports.keyof = exports.KeyofType = exports.literal = exports.LiteralType = exports.void = exports.undefined = exports.null = exports.UnknownRecord = exports.AnyDictionaryType = exports.UnknownArray = exports.AnyArrayType = exports.boolean = exports.BooleanType = exports.bigint = exports.BigIntType = exports.number = exports.NumberType = exports.string = exports.StringType = exports.unknown = exports.UnknownType = exports.voidType = exports.VoidType = exports.UndefinedType = exports.nullType = exports.NullType = exports.getIndex = exports.getTags = exports.emptyTags = exports.mergeAll = exports.getDomainKeys = exports.appendContext = exports.getContextEntry = exports.getFunctionName = exports.identity = exports.Type = exports.success = exports.failure = exports.failures = void 0;
+    	exports.alias = exports.clean = exports.StrictType = exports.dictionary = exports.object = exports.ObjectType = exports.Dictionary = exports.getDefaultContext = exports.getValidationError = exports.interface = exports.Array = exports.taggedUnion = exports.TaggedUnionType = exports.Integer = exports.refinement = exports.any = exports.AnyType = exports.never = exports.NeverType = exports.Function = exports.FunctionType = exports.exact = exports.ExactType = exports.strict = exports.readonlyArray = exports.ReadonlyArrayType = exports.readonly = exports.ReadonlyType = exports.tuple = exports.TupleType = exports.intersection = exports.IntersectionType = exports.union = exports.UnionType = exports.record = exports.DictionaryType = void 0;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var Either_1 = Either;
+    	/**
+    	 * @category Decode error
+    	 * @since 1.0.0
+    	 */
+    	exports.failures = Either_1.left;
+    	/**
+    	 * @category Decode error
+    	 * @since 1.0.0
+    	 */
+    	var failure = function (value, context, message) {
+    	    return (0, exports.failures)([{ value: value, context: context, message: message }]);
+    	};
+    	exports.failure = failure;
+    	/**
+    	 * @category Decode error
+    	 * @since 1.0.0
+    	 */
+    	exports.success = Either_1.right;
+    	/**
+    	 * @category Codec
+    	 * @since 1.0.0
+    	 */
+    	var Type = /** @class */ (function () {
+    	    function Type(
+    	    /** a unique name for this codec */
+    	    name, 
+    	    /** a custom type guard */
+    	    is, 
+    	    /** succeeds if a value of type I can be decoded to a value of type A */
+    	    validate, 
+    	    /** converts a value of type A to a value of type O */
+    	    encode) {
+    	        this.name = name;
+    	        this.is = is;
+    	        this.validate = validate;
+    	        this.encode = encode;
+    	        this.decode = this.decode.bind(this);
+    	    }
+    	    /**
+    	     * @since 1.0.0
+    	     */
+    	    Type.prototype.pipe = function (ab, name) {
+    	        var _this = this;
+    	        if (name === void 0) { name = "pipe(".concat(this.name, ", ").concat(ab.name, ")"); }
+    	        return new Type(name, ab.is, function (i, c) {
+    	            var e = _this.validate(i, c);
+    	            if ((0, Either_1.isLeft)(e)) {
+    	                return e;
+    	            }
+    	            return ab.validate(e.right, c);
+    	        }, this.encode === exports.identity && ab.encode === exports.identity ? exports.identity : function (b) { return _this.encode(ab.encode(b)); });
+    	    };
+    	    /**
+    	     * @since 1.0.0
+    	     */
+    	    Type.prototype.asDecoder = function () {
+    	        return this;
+    	    };
+    	    /**
+    	     * @since 1.0.0
+    	     */
+    	    Type.prototype.asEncoder = function () {
+    	        return this;
+    	    };
+    	    /**
+    	     * a version of `validate` with a default context
+    	     * @since 1.0.0
+    	     */
+    	    Type.prototype.decode = function (i) {
+    	        return this.validate(i, [{ key: '', type: this, actual: i }]);
+    	    };
+    	    return Type;
+    	}());
+    	exports.Type = Type;
+    	// -------------------------------------------------------------------------------------
+    	// utils
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var identity = function (a) { return a; };
+    	exports.identity = identity;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	function getFunctionName(f) {
+    	    return f.displayName || f.name || "<function".concat(f.length, ">");
+    	}
+    	exports.getFunctionName = getFunctionName;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	function getContextEntry(key, decoder) {
+    	    return { key: key, type: decoder };
+    	}
+    	exports.getContextEntry = getContextEntry;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	function appendContext(c, key, decoder, actual) {
+    	    var len = c.length;
+    	    var r = Array(len + 1);
+    	    for (var i = 0; i < len; i++) {
+    	        r[i] = c[i];
+    	    }
+    	    r[len] = { key: key, type: decoder, actual: actual };
+    	    return r;
+    	}
+    	exports.appendContext = appendContext;
+    	function pushAll(xs, ys) {
+    	    var l = ys.length;
+    	    for (var i = 0; i < l; i++) {
+    	        xs.push(ys[i]);
+    	    }
+    	}
+    	var hasOwnProperty = Object.prototype.hasOwnProperty;
+    	function getNameFromProps(props) {
+    	    return Object.keys(props)
+    	        .map(function (k) { return "".concat(k, ": ").concat(props[k].name); })
+    	        .join(', ');
+    	}
+    	function useIdentity(codecs) {
+    	    for (var i = 0; i < codecs.length; i++) {
+    	        if (codecs[i].encode !== exports.identity) {
+    	            return false;
+    	        }
+    	    }
+    	    return true;
+    	}
+    	function getInterfaceTypeName(props) {
+    	    return "{ ".concat(getNameFromProps(props), " }");
+    	}
+    	function getPartialTypeName(inner) {
+    	    return "Partial<".concat(inner, ">");
+    	}
+    	function enumerableRecord(keys, domain, codomain, name) {
+    	    if (name === void 0) { name = "{ [K in ".concat(domain.name, "]: ").concat(codomain.name, " }"); }
+    	    var len = keys.length;
+    	    return new DictionaryType(name, function (u) { return exports.UnknownRecord.is(u) && keys.every(function (k) { return codomain.is(u[k]); }); }, function (u, c) {
+    	        var e = exports.UnknownRecord.validate(u, c);
+    	        if ((0, Either_1.isLeft)(e)) {
+    	            return e;
+    	        }
+    	        var o = e.right;
+    	        var a = {};
+    	        var errors = [];
+    	        var changed = false;
+    	        for (var i = 0; i < len; i++) {
+    	            var k = keys[i];
+    	            var ok = o[k];
+    	            var codomainResult = codomain.validate(ok, appendContext(c, k, codomain, ok));
+    	            if ((0, Either_1.isLeft)(codomainResult)) {
+    	                pushAll(errors, codomainResult.left);
+    	            }
+    	            else {
+    	                var vok = codomainResult.right;
+    	                changed = changed || vok !== ok;
+    	                a[k] = vok;
+    	            }
+    	        }
+    	        return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)((changed || Object.keys(o).length !== len ? a : o));
+    	    }, codomain.encode === exports.identity
+    	        ? exports.identity
+    	        : function (a) {
+    	            var s = {};
+    	            for (var i = 0; i < len; i++) {
+    	                var k = keys[i];
+    	                s[k] = codomain.encode(a[k]);
+    	            }
+    	            return s;
+    	        }, domain, codomain);
+    	}
+    	/**
+    	 * @internal
+    	 */
+    	function getDomainKeys(domain) {
+    	    var _a;
+    	    if (isLiteralC(domain)) {
+    	        var literal_1 = domain.value;
+    	        if (exports.string.is(literal_1)) {
+    	            return _a = {}, _a[literal_1] = null, _a;
+    	        }
+    	    }
+    	    else if (isKeyofC(domain)) {
+    	        return domain.keys;
+    	    }
+    	    else if (isUnionC(domain)) {
+    	        var keys = domain.types.map(function (type) { return getDomainKeys(type); });
+    	        return keys.some(undefinedType.is) ? undefined : Object.assign.apply(Object, __spreadArray([{}], keys, false));
+    	    }
+    	    return undefined;
+    	}
+    	exports.getDomainKeys = getDomainKeys;
+    	function nonEnumerableRecord(domain, codomain, name) {
+    	    if (name === void 0) { name = "{ [K in ".concat(domain.name, "]: ").concat(codomain.name, " }"); }
+    	    return new DictionaryType(name, function (u) {
+    	        if (exports.UnknownRecord.is(u)) {
+    	            return Object.keys(u).every(function (k) { return domain.is(k) && codomain.is(u[k]); });
+    	        }
+    	        return isAnyC(codomain) && Array.isArray(u);
+    	    }, function (u, c) {
+    	        if (exports.UnknownRecord.is(u)) {
+    	            var a = {};
+    	            var errors = [];
+    	            var keys = Object.keys(u);
+    	            var len = keys.length;
+    	            var changed = false;
+    	            for (var i = 0; i < len; i++) {
+    	                var k = keys[i];
+    	                var ok = u[k];
+    	                var domainResult = domain.validate(k, appendContext(c, k, domain, k));
+    	                if ((0, Either_1.isLeft)(domainResult)) {
+    	                    pushAll(errors, domainResult.left);
+    	                }
+    	                else {
+    	                    var vk = domainResult.right;
+    	                    changed = changed || vk !== k;
+    	                    k = vk;
+    	                    var codomainResult = codomain.validate(ok, appendContext(c, k, codomain, ok));
+    	                    if ((0, Either_1.isLeft)(codomainResult)) {
+    	                        pushAll(errors, codomainResult.left);
+    	                    }
+    	                    else {
+    	                        var vok = codomainResult.right;
+    	                        changed = changed || vok !== ok;
+    	                        a[k] = vok;
+    	                    }
+    	                }
+    	            }
+    	            return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)((changed ? a : u));
+    	        }
+    	        if (isAnyC(codomain) && Array.isArray(u)) {
+    	            return (0, exports.success)(u);
+    	        }
+    	        return (0, exports.failure)(u, c);
+    	    }, domain.encode === exports.identity && codomain.encode === exports.identity
+    	        ? exports.identity
+    	        : function (a) {
+    	            var s = {};
+    	            var keys = Object.keys(a);
+    	            var len = keys.length;
+    	            for (var i = 0; i < len; i++) {
+    	                var k = keys[i];
+    	                s[String(domain.encode(k))] = codomain.encode(a[k]);
+    	            }
+    	            return s;
+    	        }, domain, codomain);
+    	}
+    	function getUnionName(codecs) {
+    	    return '(' + codecs.map(function (type) { return type.name; }).join(' | ') + ')';
+    	}
+    	/**
+    	 * @internal
+    	 */
+    	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    	function mergeAll(base, us) {
+    	    var equal = true;
+    	    var primitive = true;
+    	    var baseIsNotADictionary = !exports.UnknownRecord.is(base);
+    	    for (var _i = 0, us_1 = us; _i < us_1.length; _i++) {
+    	        var u = us_1[_i];
+    	        if (u !== base) {
+    	            equal = false;
+    	        }
+    	        if (exports.UnknownRecord.is(u)) {
+    	            primitive = false;
+    	        }
+    	    }
+    	    if (equal) {
+    	        return base;
+    	    }
+    	    else if (primitive) {
+    	        return us[us.length - 1];
+    	    }
+    	    var r = {};
+    	    for (var _a = 0, us_2 = us; _a < us_2.length; _a++) {
+    	        var u = us_2[_a];
+    	        for (var k in u) {
+    	            if (!hasOwnProperty.call(r, k) || baseIsNotADictionary || u[k] !== base[k]) {
+    	                r[k] = u[k];
+    	            }
+    	        }
+    	    }
+    	    return r;
+    	}
+    	exports.mergeAll = mergeAll;
+    	function getProps(codec) {
+    	    switch (codec._tag) {
+    	        case 'RefinementType':
+    	        case 'ReadonlyType':
+    	            return getProps(codec.type);
+    	        case 'InterfaceType':
+    	        case 'StrictType':
+    	        case 'PartialType':
+    	            return codec.props;
+    	        case 'IntersectionType':
+    	            return codec.types.reduce(function (props, type) { return Object.assign(props, getProps(type)); }, {});
+    	    }
+    	}
+    	function stripKeys(o, props) {
+    	    var keys = Object.getOwnPropertyNames(o);
+    	    var shouldStrip = false;
+    	    var r = {};
+    	    for (var i = 0; i < keys.length; i++) {
+    	        var key = keys[i];
+    	        if (!hasOwnProperty.call(props, key)) {
+    	            shouldStrip = true;
+    	        }
+    	        else {
+    	            r[key] = o[key];
+    	        }
+    	    }
+    	    return shouldStrip ? r : o;
+    	}
+    	function getExactTypeName(codec) {
+    	    if (isTypeC(codec)) {
+    	        return "{| ".concat(getNameFromProps(codec.props), " |}");
+    	    }
+    	    else if (isPartialC(codec)) {
+    	        return getPartialTypeName("{| ".concat(getNameFromProps(codec.props), " |}"));
+    	    }
+    	    return "Exact<".concat(codec.name, ">");
+    	}
+    	function isNonEmpty(as) {
+    	    return as.length > 0;
+    	}
+    	/**
+    	 * @internal
+    	 */
+    	exports.emptyTags = {};
+    	function intersect(a, b) {
+    	    var r = [];
+    	    for (var _i = 0, a_1 = a; _i < a_1.length; _i++) {
+    	        var v = a_1[_i];
+    	        if (b.indexOf(v) !== -1) {
+    	            r.push(v);
+    	        }
+    	    }
+    	    return r;
+    	}
+    	function mergeTags(a, b) {
+    	    if (a === exports.emptyTags) {
+    	        return b;
+    	    }
+    	    if (b === exports.emptyTags) {
+    	        return a;
+    	    }
+    	    var r = Object.assign({}, a);
+    	    for (var k in b) {
+    	        if (hasOwnProperty.call(a, k)) {
+    	            var intersection_1 = intersect(a[k], b[k]);
+    	            if (isNonEmpty(intersection_1)) {
+    	                r[k] = intersection_1;
+    	            }
+    	            else {
+    	                r = exports.emptyTags;
+    	                break;
+    	            }
+    	        }
+    	        else {
+    	            r[k] = b[k];
+    	        }
+    	    }
+    	    return r;
+    	}
+    	function intersectTags(a, b) {
+    	    if (a === exports.emptyTags || b === exports.emptyTags) {
+    	        return exports.emptyTags;
+    	    }
+    	    var r = exports.emptyTags;
+    	    for (var k in a) {
+    	        if (hasOwnProperty.call(b, k)) {
+    	            var intersection_2 = intersect(a[k], b[k]);
+    	            if (intersection_2.length === 0) {
+    	                if (r === exports.emptyTags) {
+    	                    r = {};
+    	                }
+    	                r[k] = a[k].concat(b[k]);
+    	            }
+    	        }
+    	    }
+    	    return r;
+    	}
+    	// tslint:disable-next-line: deprecation
+    	function isAnyC(codec) {
+    	    return codec._tag === 'AnyType';
+    	}
+    	function isLiteralC(codec) {
+    	    return codec._tag === 'LiteralType';
+    	}
+    	function isKeyofC(codec) {
+    	    return codec._tag === 'KeyofType';
+    	}
+    	function isTypeC(codec) {
+    	    return codec._tag === 'InterfaceType';
+    	}
+    	function isPartialC(codec) {
+    	    return codec._tag === 'PartialType';
+    	}
+    	// tslint:disable-next-line: deprecation
+    	function isStrictC(codec) {
+    	    return codec._tag === 'StrictType';
+    	}
+    	function isExactC(codec) {
+    	    return codec._tag === 'ExactType';
+    	}
+    	// tslint:disable-next-line: deprecation
+    	function isRefinementC(codec) {
+    	    return codec._tag === 'RefinementType';
+    	}
+    	function isIntersectionC(codec) {
+    	    return codec._tag === 'IntersectionType';
+    	}
+    	function isUnionC(codec) {
+    	    return codec._tag === 'UnionType';
+    	}
+    	function isRecursiveC(codec) {
+    	    return codec._tag === 'RecursiveType';
+    	}
+    	var lazyCodecs = [];
+    	/**
+    	 * @internal
+    	 */
+    	function getTags(codec) {
+    	    if (lazyCodecs.indexOf(codec) !== -1) {
+    	        return exports.emptyTags;
+    	    }
+    	    if (isTypeC(codec) || isStrictC(codec)) {
+    	        var index = exports.emptyTags;
+    	        // tslint:disable-next-line: forin
+    	        for (var k in codec.props) {
+    	            var prop = codec.props[k];
+    	            if (isLiteralC(prop)) {
+    	                if (index === exports.emptyTags) {
+    	                    index = {};
+    	                }
+    	                index[k] = [prop.value];
+    	            }
+    	        }
+    	        return index;
+    	    }
+    	    else if (isExactC(codec) || isRefinementC(codec)) {
+    	        return getTags(codec.type);
+    	    }
+    	    else if (isIntersectionC(codec)) {
+    	        return codec.types.reduce(function (tags, codec) { return mergeTags(tags, getTags(codec)); }, exports.emptyTags);
+    	    }
+    	    else if (isUnionC(codec)) {
+    	        return codec.types.slice(1).reduce(function (tags, codec) { return intersectTags(tags, getTags(codec)); }, getTags(codec.types[0]));
+    	    }
+    	    else if (isRecursiveC(codec)) {
+    	        lazyCodecs.push(codec);
+    	        var tags = getTags(codec.type);
+    	        lazyCodecs.pop();
+    	        return tags;
+    	    }
+    	    return exports.emptyTags;
+    	}
+    	exports.getTags = getTags;
+    	/**
+    	 * @internal
+    	 */
+    	function getIndex(codecs) {
+    	    var tags = getTags(codecs[0]);
+    	    var keys = Object.keys(tags);
+    	    var len = codecs.length;
+    	    var _loop_1 = function (k) {
+    	        var all = tags[k].slice();
+    	        var index = [tags[k]];
+    	        for (var i = 1; i < len; i++) {
+    	            var codec = codecs[i];
+    	            var ctags = getTags(codec);
+    	            var values = ctags[k];
+    	            // tslint:disable-next-line: strict-type-predicates
+    	            if (values === undefined) {
+    	                return "continue-keys";
+    	            }
+    	            else {
+    	                if (values.some(function (v) { return all.indexOf(v) !== -1; })) {
+    	                    return "continue-keys";
+    	                }
+    	                else {
+    	                    all.push.apply(all, values);
+    	                    index.push(values);
+    	                }
+    	            }
+    	        }
+    	        return { value: [k, index] };
+    	    };
+    	    keys: for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
+    	        var k = keys_1[_i];
+    	        var state_1 = _loop_1(k);
+    	        if (typeof state_1 === "object")
+    	            return state_1.value;
+    	        switch (state_1) {
+    	            case "continue-keys": continue keys;
+    	        }
+    	    }
+    	    return undefined;
+    	}
+    	exports.getIndex = getIndex;
+    	// -------------------------------------------------------------------------------------
+    	// primitives
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var NullType = /** @class */ (function (_super) {
+    	    __extends(NullType, _super);
+    	    function NullType() {
+    	        var _this = _super.call(this, 'null', function (u) { return u === null; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'NullType';
+    	        return _this;
+    	    }
+    	    return NullType;
+    	}(Type));
+    	exports.NullType = NullType;
+    	/**
+    	 * @category primitives
+    	 * @since 1.0.0
+    	 */
+    	exports.nullType = new NullType();
+    	exports.null = exports.nullType;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var UndefinedType = /** @class */ (function (_super) {
+    	    __extends(UndefinedType, _super);
+    	    function UndefinedType() {
+    	        var _this = _super.call(this, 'undefined', function (u) { return u === void 0; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'UndefinedType';
+    	        return _this;
+    	    }
+    	    return UndefinedType;
+    	}(Type));
+    	exports.UndefinedType = UndefinedType;
+    	var undefinedType = new UndefinedType();
+    	exports.undefined = undefinedType;
+    	/**
+    	 * @since 1.2.0
+    	 */
+    	var VoidType = /** @class */ (function (_super) {
+    	    __extends(VoidType, _super);
+    	    function VoidType() {
+    	        var _this = _super.call(this, 'void', undefinedType.is, undefinedType.validate, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'VoidType';
+    	        return _this;
+    	    }
+    	    return VoidType;
+    	}(Type));
+    	exports.VoidType = VoidType;
+    	/**
+    	 * @category primitives
+    	 * @since 1.2.0
+    	 */
+    	exports.voidType = new VoidType();
+    	exports.void = exports.voidType;
+    	/**
+    	 * @since 1.5.0
+    	 */
+    	var UnknownType = /** @class */ (function (_super) {
+    	    __extends(UnknownType, _super);
+    	    function UnknownType() {
+    	        var _this = _super.call(this, 'unknown', function (_) { return true; }, exports.success, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'UnknownType';
+    	        return _this;
+    	    }
+    	    return UnknownType;
+    	}(Type));
+    	exports.UnknownType = UnknownType;
+    	/**
+    	 * @category primitives
+    	 * @since 1.5.0
+    	 */
+    	exports.unknown = new UnknownType();
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var StringType = /** @class */ (function (_super) {
+    	    __extends(StringType, _super);
+    	    function StringType() {
+    	        var _this = _super.call(this, 'string', function (u) { return typeof u === 'string'; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'StringType';
+    	        return _this;
+    	    }
+    	    return StringType;
+    	}(Type));
+    	exports.StringType = StringType;
+    	/**
+    	 * @category primitives
+    	 * @since 1.0.0
+    	 */
+    	exports.string = new StringType();
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var NumberType = /** @class */ (function (_super) {
+    	    __extends(NumberType, _super);
+    	    function NumberType() {
+    	        var _this = _super.call(this, 'number', function (u) { return typeof u === 'number'; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'NumberType';
+    	        return _this;
+    	    }
+    	    return NumberType;
+    	}(Type));
+    	exports.NumberType = NumberType;
+    	/**
+    	 * @category primitives
+    	 * @since 1.0.0
+    	 */
+    	exports.number = new NumberType();
+    	/**
+    	 * @since 2.1.0
+    	 */
+    	var BigIntType = /** @class */ (function (_super) {
+    	    __extends(BigIntType, _super);
+    	    function BigIntType() {
+    	        var _this = _super.call(this, 'bigint', 
+    	        // tslint:disable-next-line: valid-typeof
+    	        function (u) { return typeof u === 'bigint'; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'BigIntType';
+    	        return _this;
+    	    }
+    	    return BigIntType;
+    	}(Type));
+    	exports.BigIntType = BigIntType;
+    	/**
+    	 * @category primitives
+    	 * @since 2.1.0
+    	 */
+    	exports.bigint = new BigIntType();
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var BooleanType = /** @class */ (function (_super) {
+    	    __extends(BooleanType, _super);
+    	    function BooleanType() {
+    	        var _this = _super.call(this, 'boolean', function (u) { return typeof u === 'boolean'; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'BooleanType';
+    	        return _this;
+    	    }
+    	    return BooleanType;
+    	}(Type));
+    	exports.BooleanType = BooleanType;
+    	/**
+    	 * @category primitives
+    	 * @since 1.0.0
+    	 */
+    	exports.boolean = new BooleanType();
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var AnyArrayType = /** @class */ (function (_super) {
+    	    __extends(AnyArrayType, _super);
+    	    function AnyArrayType() {
+    	        var _this = _super.call(this, 'UnknownArray', Array.isArray, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'AnyArrayType';
+    	        return _this;
+    	    }
+    	    return AnyArrayType;
+    	}(Type));
+    	exports.AnyArrayType = AnyArrayType;
+    	/**
+    	 * @category primitives
+    	 * @since 1.7.1
+    	 */
+    	exports.UnknownArray = new AnyArrayType();
+    	exports.Array = exports.UnknownArray;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var AnyDictionaryType = /** @class */ (function (_super) {
+    	    __extends(AnyDictionaryType, _super);
+    	    function AnyDictionaryType() {
+    	        var _this = _super.call(this, 'UnknownRecord', function (u) { return u !== null && typeof u === 'object' && !Array.isArray(u); }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'AnyDictionaryType';
+    	        return _this;
+    	    }
+    	    return AnyDictionaryType;
+    	}(Type));
+    	exports.AnyDictionaryType = AnyDictionaryType;
+    	/**
+    	 * @category primitives
+    	 * @since 1.7.1
+    	 */
+    	exports.UnknownRecord = new AnyDictionaryType();
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var LiteralType = /** @class */ (function (_super) {
+    	    __extends(LiteralType, _super);
+    	    function LiteralType(name, is, validate, encode, value) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.value = value;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'LiteralType';
+    	        return _this;
+    	    }
+    	    return LiteralType;
+    	}(Type));
+    	exports.LiteralType = LiteralType;
+    	/**
+    	 * @category constructors
+    	 * @since 1.0.0
+    	 */
+    	function literal(value, name) {
+    	    if (name === void 0) { name = JSON.stringify(value); }
+    	    var is = function (u) { return u === value; };
+    	    return new LiteralType(name, is, function (u, c) { return (is(u) ? (0, exports.success)(value) : (0, exports.failure)(u, c)); }, exports.identity, value);
+    	}
+    	exports.literal = literal;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var KeyofType = /** @class */ (function (_super) {
+    	    __extends(KeyofType, _super);
+    	    function KeyofType(name, is, validate, encode, keys) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.keys = keys;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'KeyofType';
+    	        return _this;
+    	    }
+    	    return KeyofType;
+    	}(Type));
+    	exports.KeyofType = KeyofType;
+    	/**
+    	 * @category constructors
+    	 * @since 1.0.0
+    	 */
+    	function keyof(keys, name) {
+    	    if (name === void 0) { name = Object.keys(keys)
+    	        .map(function (k) { return JSON.stringify(k); })
+    	        .join(' | '); }
+    	    var is = function (u) { return exports.string.is(u) && hasOwnProperty.call(keys, u); };
+    	    return new KeyofType(name, is, function (u, c) { return (is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity, keys);
+    	}
+    	exports.keyof = keyof;
+    	// -------------------------------------------------------------------------------------
+    	// combinators
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var RefinementType = /** @class */ (function (_super) {
+    	    __extends(RefinementType, _super);
+    	    function RefinementType(name, is, validate, encode, type, predicate) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.type = type;
+    	        _this.predicate = predicate;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'RefinementType';
+    	        return _this;
+    	    }
+    	    return RefinementType;
+    	}(Type));
+    	exports.RefinementType = RefinementType;
+    	/**
+    	 * @category combinators
+    	 * @since 1.8.1
+    	 */
+    	function brand(codec, predicate, name) {
+    	    return refinement(codec, predicate, name);
+    	}
+    	exports.brand = brand;
+    	/**
+    	 * A branded codec representing an integer
+    	 *
+    	 * @category primitives
+    	 * @since 1.8.1
+    	 */
+    	exports.Int = brand(exports.number, function (n) { return Number.isInteger(n); }, 'Int');
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var RecursiveType = /** @class */ (function (_super) {
+    	    __extends(RecursiveType, _super);
+    	    function RecursiveType(name, is, validate, encode, runDefinition) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.runDefinition = runDefinition;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'RecursiveType';
+    	        return _this;
+    	    }
+    	    return RecursiveType;
+    	}(Type));
+    	exports.RecursiveType = RecursiveType;
+    	Object.defineProperty(RecursiveType.prototype, 'type', {
+    	    get: function () {
+    	        return this.runDefinition();
+    	    },
+    	    enumerable: true,
+    	    configurable: true
+    	});
+    	/**
+    	 * @category combinators
+    	 * @since 1.0.0
+    	 */
+    	function recursion(name, definition) {
+    	    var cache;
+    	    var runDefinition = function () {
+    	        if (!cache) {
+    	            cache = definition(Self);
+    	            cache.name = name;
+    	        }
+    	        return cache;
+    	    };
+    	    var Self = new RecursiveType(name, function (u) { return runDefinition().is(u); }, function (u, c) { return runDefinition().validate(u, c); }, function (a) { return runDefinition().encode(a); }, runDefinition);
+    	    return Self;
+    	}
+    	exports.recursion = recursion;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var ArrayType = /** @class */ (function (_super) {
+    	    __extends(ArrayType, _super);
+    	    function ArrayType(name, is, validate, encode, type) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.type = type;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'ArrayType';
+    	        return _this;
+    	    }
+    	    return ArrayType;
+    	}(Type));
+    	exports.ArrayType = ArrayType;
+    	/**
+    	 * @category combinators
+    	 * @since 1.0.0
+    	 */
+    	function array(item, name) {
+    	    if (name === void 0) { name = "Array<".concat(item.name, ">"); }
+    	    return new ArrayType(name, function (u) { return exports.UnknownArray.is(u) && u.every(item.is); }, function (u, c) {
+    	        var e = exports.UnknownArray.validate(u, c);
+    	        if ((0, Either_1.isLeft)(e)) {
+    	            return e;
+    	        }
+    	        var us = e.right;
+    	        var len = us.length;
+    	        var as = us;
+    	        var errors = [];
+    	        for (var i = 0; i < len; i++) {
+    	            var ui = us[i];
+    	            var result = item.validate(ui, appendContext(c, String(i), item, ui));
+    	            if ((0, Either_1.isLeft)(result)) {
+    	                pushAll(errors, result.left);
+    	            }
+    	            else {
+    	                var ai = result.right;
+    	                if (ai !== ui) {
+    	                    if (as === us) {
+    	                        as = us.slice();
+    	                    }
+    	                    as[i] = ai;
+    	                }
+    	            }
+    	        }
+    	        return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)(as);
+    	    }, item.encode === exports.identity ? exports.identity : function (a) { return a.map(item.encode); }, item);
+    	}
+    	exports.array = array;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var InterfaceType = /** @class */ (function (_super) {
+    	    __extends(InterfaceType, _super);
+    	    function InterfaceType(name, is, validate, encode, props) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.props = props;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'InterfaceType';
+    	        return _this;
+    	    }
+    	    return InterfaceType;
+    	}(Type));
+    	exports.InterfaceType = InterfaceType;
+    	/**
+    	 * @category combinators
+    	 * @since 1.0.0
+    	 */
+    	function type(props, name) {
+    	    if (name === void 0) { name = getInterfaceTypeName(props); }
+    	    var keys = Object.keys(props);
+    	    var types = keys.map(function (key) { return props[key]; });
+    	    var len = keys.length;
+    	    return new InterfaceType(name, function (u) {
+    	        if (exports.UnknownRecord.is(u)) {
+    	            for (var i = 0; i < len; i++) {
+    	                var k = keys[i];
+    	                var uk = u[k];
+    	                if ((uk === undefined && !hasOwnProperty.call(u, k)) || !types[i].is(uk)) {
+    	                    return false;
+    	                }
+    	            }
+    	            return true;
+    	        }
+    	        return false;
+    	    }, function (u, c) {
+    	        var e = exports.UnknownRecord.validate(u, c);
+    	        if ((0, Either_1.isLeft)(e)) {
+    	            return e;
+    	        }
+    	        var o = e.right;
+    	        var a = o;
+    	        var errors = [];
+    	        for (var i = 0; i < len; i++) {
+    	            var k = keys[i];
+    	            var ak = a[k];
+    	            var type_1 = types[i];
+    	            var result = type_1.validate(ak, appendContext(c, k, type_1, ak));
+    	            if ((0, Either_1.isLeft)(result)) {
+    	                pushAll(errors, result.left);
+    	            }
+    	            else {
+    	                var vak = result.right;
+    	                if (vak !== ak || (vak === undefined && !hasOwnProperty.call(a, k))) {
+    	                    /* istanbul ignore next */
+    	                    if (a === o) {
+    	                        a = __assign({}, o);
+    	                    }
+    	                    a[k] = vak;
+    	                }
+    	            }
+    	        }
+    	        return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)(a);
+    	    }, useIdentity(types)
+    	        ? exports.identity
+    	        : function (a) {
+    	            var s = __assign({}, a);
+    	            for (var i = 0; i < len; i++) {
+    	                var k = keys[i];
+    	                var encode = types[i].encode;
+    	                if (encode !== exports.identity) {
+    	                    s[k] = encode(a[k]);
+    	                }
+    	            }
+    	            return s;
+    	        }, props);
+    	}
+    	exports.type = type;
+    	exports.interface = type;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var PartialType = /** @class */ (function (_super) {
+    	    __extends(PartialType, _super);
+    	    function PartialType(name, is, validate, encode, props) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.props = props;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'PartialType';
+    	        return _this;
+    	    }
+    	    return PartialType;
+    	}(Type));
+    	exports.PartialType = PartialType;
+    	/**
+    	 * @category combinators
+    	 * @since 1.0.0
+    	 */
+    	function partial(props, name) {
+    	    if (name === void 0) { name = getPartialTypeName(getInterfaceTypeName(props)); }
+    	    var keys = Object.keys(props);
+    	    var types = keys.map(function (key) { return props[key]; });
+    	    var len = keys.length;
+    	    return new PartialType(name, function (u) {
+    	        if (exports.UnknownRecord.is(u)) {
+    	            for (var i = 0; i < len; i++) {
+    	                var k = keys[i];
+    	                var uk = u[k];
+    	                if (uk !== undefined && !props[k].is(uk)) {
+    	                    return false;
+    	                }
+    	            }
+    	            return true;
+    	        }
+    	        return false;
+    	    }, function (u, c) {
+    	        var e = exports.UnknownRecord.validate(u, c);
+    	        if ((0, Either_1.isLeft)(e)) {
+    	            return e;
+    	        }
+    	        var o = e.right;
+    	        var a = o;
+    	        var errors = [];
+    	        for (var i = 0; i < len; i++) {
+    	            var k = keys[i];
+    	            var ak = a[k];
+    	            var type_2 = props[k];
+    	            var result = type_2.validate(ak, appendContext(c, k, type_2, ak));
+    	            if ((0, Either_1.isLeft)(result)) {
+    	                if (ak !== undefined) {
+    	                    pushAll(errors, result.left);
+    	                }
+    	            }
+    	            else {
+    	                var vak = result.right;
+    	                if (vak !== ak) {
+    	                    /* istanbul ignore next */
+    	                    if (a === o) {
+    	                        a = __assign({}, o);
+    	                    }
+    	                    a[k] = vak;
+    	                }
+    	            }
+    	        }
+    	        return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)(a);
+    	    }, useIdentity(types)
+    	        ? exports.identity
+    	        : function (a) {
+    	            var s = __assign({}, a);
+    	            for (var i = 0; i < len; i++) {
+    	                var k = keys[i];
+    	                var ak = a[k];
+    	                if (ak !== undefined) {
+    	                    s[k] = types[i].encode(ak);
+    	                }
+    	            }
+    	            return s;
+    	        }, props);
+    	}
+    	exports.partial = partial;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var DictionaryType = /** @class */ (function (_super) {
+    	    __extends(DictionaryType, _super);
+    	    function DictionaryType(name, is, validate, encode, domain, codomain) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.domain = domain;
+    	        _this.codomain = codomain;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'DictionaryType';
+    	        return _this;
+    	    }
+    	    return DictionaryType;
+    	}(Type));
+    	exports.DictionaryType = DictionaryType;
+    	/**
+    	 * @category combinators
+    	 * @since 1.7.1
+    	 */
+    	function record(domain, codomain, name) {
+    	    var keys = getDomainKeys(domain);
+    	    return keys
+    	        ? enumerableRecord(Object.keys(keys), domain, codomain, name)
+    	        : nonEnumerableRecord(domain, codomain, name);
+    	}
+    	exports.record = record;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var UnionType = /** @class */ (function (_super) {
+    	    __extends(UnionType, _super);
+    	    function UnionType(name, is, validate, encode, types) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.types = types;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'UnionType';
+    	        return _this;
+    	    }
+    	    return UnionType;
+    	}(Type));
+    	exports.UnionType = UnionType;
+    	/**
+    	 * @category combinators
+    	 * @since 1.0.0
+    	 */
+    	function union(codecs, name) {
+    	    if (name === void 0) { name = getUnionName(codecs); }
+    	    var index = getIndex(codecs);
+    	    if (index !== undefined && codecs.length > 0) {
+    	        var tag_1 = index[0], groups_1 = index[1];
+    	        var len_1 = groups_1.length;
+    	        var find_1 = function (value) {
+    	            for (var i = 0; i < len_1; i++) {
+    	                if (groups_1[i].indexOf(value) !== -1) {
+    	                    return i;
+    	                }
+    	            }
+    	            return undefined;
+    	        };
+    	        // tslint:disable-next-line: deprecation
+    	        return new TaggedUnionType(name, function (u) {
+    	            if (exports.UnknownRecord.is(u)) {
+    	                var i = find_1(u[tag_1]);
+    	                return i !== undefined ? codecs[i].is(u) : false;
+    	            }
+    	            return false;
+    	        }, function (u, c) {
+    	            var e = exports.UnknownRecord.validate(u, c);
+    	            if ((0, Either_1.isLeft)(e)) {
+    	                return e;
+    	            }
+    	            var r = e.right;
+    	            var i = find_1(r[tag_1]);
+    	            if (i === undefined) {
+    	                return (0, exports.failure)(u, c);
+    	            }
+    	            var codec = codecs[i];
+    	            return codec.validate(r, appendContext(c, String(i), codec, r));
+    	        }, useIdentity(codecs)
+    	            ? exports.identity
+    	            : function (a) {
+    	                var i = find_1(a[tag_1]);
+    	                if (i === undefined) {
+    	                    // https://github.com/gcanti/io-ts/pull/305
+    	                    throw new Error("no codec found to encode value in union codec ".concat(name));
+    	                }
+    	                else {
+    	                    return codecs[i].encode(a);
+    	                }
+    	            }, codecs, tag_1);
+    	    }
+    	    else {
+    	        return new UnionType(name, function (u) { return codecs.some(function (type) { return type.is(u); }); }, function (u, c) {
+    	            var errors = [];
+    	            for (var i = 0; i < codecs.length; i++) {
+    	                var codec = codecs[i];
+    	                var result = codec.validate(u, appendContext(c, String(i), codec, u));
+    	                if ((0, Either_1.isLeft)(result)) {
+    	                    pushAll(errors, result.left);
+    	                }
+    	                else {
+    	                    return (0, exports.success)(result.right);
+    	                }
+    	            }
+    	            return (0, exports.failures)(errors);
+    	        }, useIdentity(codecs)
+    	            ? exports.identity
+    	            : function (a) {
+    	                for (var _i = 0, codecs_1 = codecs; _i < codecs_1.length; _i++) {
+    	                    var codec = codecs_1[_i];
+    	                    if (codec.is(a)) {
+    	                        return codec.encode(a);
+    	                    }
+    	                }
+    	                // https://github.com/gcanti/io-ts/pull/305
+    	                throw new Error("no codec found to encode value in union type ".concat(name));
+    	            }, codecs);
+    	    }
+    	}
+    	exports.union = union;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var IntersectionType = /** @class */ (function (_super) {
+    	    __extends(IntersectionType, _super);
+    	    function IntersectionType(name, is, validate, encode, types) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.types = types;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'IntersectionType';
+    	        return _this;
+    	    }
+    	    return IntersectionType;
+    	}(Type));
+    	exports.IntersectionType = IntersectionType;
+    	function intersection(codecs, name) {
+    	    if (name === void 0) { name = "(".concat(codecs.map(function (type) { return type.name; }).join(' & '), ")"); }
+    	    var len = codecs.length;
+    	    return new IntersectionType(name, function (u) { return codecs.every(function (type) { return type.is(u); }); }, codecs.length === 0
+    	        ? exports.success
+    	        : function (u, c) {
+    	            var us = [];
+    	            var errors = [];
+    	            for (var i = 0; i < len; i++) {
+    	                var codec = codecs[i];
+    	                var result = codec.validate(u, appendContext(c, String(i), codec, u));
+    	                if ((0, Either_1.isLeft)(result)) {
+    	                    pushAll(errors, result.left);
+    	                }
+    	                else {
+    	                    us.push(result.right);
+    	                }
+    	            }
+    	            return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)(mergeAll(u, us));
+    	        }, codecs.length === 0
+    	        ? exports.identity
+    	        : function (a) {
+    	            return mergeAll(a, codecs.map(function (codec) { return codec.encode(a); }));
+    	        }, codecs);
+    	}
+    	exports.intersection = intersection;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var TupleType = /** @class */ (function (_super) {
+    	    __extends(TupleType, _super);
+    	    function TupleType(name, is, validate, encode, types) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.types = types;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'TupleType';
+    	        return _this;
+    	    }
+    	    return TupleType;
+    	}(Type));
+    	exports.TupleType = TupleType;
+    	function tuple(codecs, name) {
+    	    if (name === void 0) { name = "[".concat(codecs.map(function (type) { return type.name; }).join(', '), "]"); }
+    	    var len = codecs.length;
+    	    return new TupleType(name, function (u) { return exports.UnknownArray.is(u) && u.length === len && codecs.every(function (type, i) { return type.is(u[i]); }); }, function (u, c) {
+    	        var e = exports.UnknownArray.validate(u, c);
+    	        if ((0, Either_1.isLeft)(e)) {
+    	            return e;
+    	        }
+    	        var us = e.right;
+    	        var as = us.length > len ? us.slice(0, len) : us; // strip additional components
+    	        var errors = [];
+    	        for (var i = 0; i < len; i++) {
+    	            var a = us[i];
+    	            var type_3 = codecs[i];
+    	            var result = type_3.validate(a, appendContext(c, String(i), type_3, a));
+    	            if ((0, Either_1.isLeft)(result)) {
+    	                pushAll(errors, result.left);
+    	            }
+    	            else {
+    	                var va = result.right;
+    	                if (va !== a) {
+    	                    /* istanbul ignore next */
+    	                    if (as === us) {
+    	                        as = us.slice();
+    	                    }
+    	                    as[i] = va;
+    	                }
+    	            }
+    	        }
+    	        return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)(as);
+    	    }, useIdentity(codecs) ? exports.identity : function (a) { return codecs.map(function (type, i) { return type.encode(a[i]); }); }, codecs);
+    	}
+    	exports.tuple = tuple;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var ReadonlyType = /** @class */ (function (_super) {
+    	    __extends(ReadonlyType, _super);
+    	    function ReadonlyType(name, is, validate, encode, type) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.type = type;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'ReadonlyType';
+    	        return _this;
+    	    }
+    	    return ReadonlyType;
+    	}(Type));
+    	exports.ReadonlyType = ReadonlyType;
+    	/**
+    	 * @category combinators
+    	 * @since 1.0.0
+    	 */
+    	function readonly(codec, name) {
+    	    if (name === void 0) { name = "Readonly<".concat(codec.name, ">"); }
+    	    return new ReadonlyType(name, codec.is, codec.validate, codec.encode, codec);
+    	}
+    	exports.readonly = readonly;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var ReadonlyArrayType = /** @class */ (function (_super) {
+    	    __extends(ReadonlyArrayType, _super);
+    	    function ReadonlyArrayType(name, is, validate, encode, type) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.type = type;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'ReadonlyArrayType';
+    	        return _this;
+    	    }
+    	    return ReadonlyArrayType;
+    	}(Type));
+    	exports.ReadonlyArrayType = ReadonlyArrayType;
+    	/**
+    	 * @category combinators
+    	 * @since 1.0.0
+    	 */
+    	function readonlyArray(item, name) {
+    	    if (name === void 0) { name = "ReadonlyArray<".concat(item.name, ">"); }
+    	    var codec = array(item);
+    	    return new ReadonlyArrayType(name, codec.is, codec.validate, codec.encode, item);
+    	}
+    	exports.readonlyArray = readonlyArray;
+    	/**
+    	 * Strips additional properties, equivalent to `exact(type(props))`.
+    	 *
+    	 * @category combinators
+    	 * @since 1.0.0
+    	 */
+    	var strict = function (props, name) { return exact(type(props), name); };
+    	exports.strict = strict;
+    	/**
+    	 * @since 1.1.0
+    	 */
+    	var ExactType = /** @class */ (function (_super) {
+    	    __extends(ExactType, _super);
+    	    function ExactType(name, is, validate, encode, type) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.type = type;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'ExactType';
+    	        return _this;
+    	    }
+    	    return ExactType;
+    	}(Type));
+    	exports.ExactType = ExactType;
+    	/**
+    	 * Strips additional properties.
+    	 *
+    	 * @category combinators
+    	 * @since 1.1.0
+    	 */
+    	function exact(codec, name) {
+    	    if (name === void 0) { name = getExactTypeName(codec); }
+    	    var props = getProps(codec);
+    	    return new ExactType(name, codec.is, function (u, c) {
+    	        var e = exports.UnknownRecord.validate(u, c);
+    	        if ((0, Either_1.isLeft)(e)) {
+    	            return e;
+    	        }
+    	        var ce = codec.validate(u, c);
+    	        if ((0, Either_1.isLeft)(ce)) {
+    	            return ce;
+    	        }
+    	        return (0, Either_1.right)(stripKeys(ce.right, props));
+    	    }, function (a) { return codec.encode(stripKeys(a, props)); }, codec);
+    	}
+    	exports.exact = exact;
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var FunctionType = /** @class */ (function (_super) {
+    	    __extends(FunctionType, _super);
+    	    function FunctionType() {
+    	        var _this = _super.call(this, 'Function', 
+    	        // tslint:disable-next-line:strict-type-predicates
+    	        function (u) { return typeof u === 'function'; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'FunctionType';
+    	        return _this;
+    	    }
+    	    return FunctionType;
+    	}(Type));
+    	exports.FunctionType = FunctionType;
+    	/**
+    	 * @category primitives
+    	 * @since 1.0.0
+    	 */
+    	exports.Function = new FunctionType();
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var NeverType = /** @class */ (function (_super) {
+    	    __extends(NeverType, _super);
+    	    function NeverType() {
+    	        var _this = _super.call(this, 'never', function (_) { return false; }, function (u, c) { return (0, exports.failure)(u, c); }, 
+    	        /* istanbul ignore next */
+    	        function () {
+    	            throw new Error('cannot encode never');
+    	        }) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'NeverType';
+    	        return _this;
+    	    }
+    	    return NeverType;
+    	}(Type));
+    	exports.NeverType = NeverType;
+    	/**
+    	 * @category primitives
+    	 * @since 1.0.0
+    	 */
+    	exports.never = new NeverType();
+    	/**
+    	 * @since 1.0.0
+    	 */
+    	var AnyType = /** @class */ (function (_super) {
+    	    __extends(AnyType, _super);
+    	    function AnyType() {
+    	        var _this = _super.call(this, 'any', function (_) { return true; }, exports.success, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'AnyType';
+    	        return _this;
+    	    }
+    	    return AnyType;
+    	}(Type));
+    	exports.AnyType = AnyType;
+    	/**
+    	 * @category primitives
+    	 * @since 1.0.0
+    	 */
+    	exports.any = new AnyType();
+    	function refinement(codec, predicate, name) {
+    	    if (name === void 0) { name = "(".concat(codec.name, " | ").concat(getFunctionName(predicate), ")"); }
+    	    return new RefinementType(name, function (u) { return codec.is(u) && predicate(u); }, function (i, c) {
+    	        var e = codec.validate(i, c);
+    	        if ((0, Either_1.isLeft)(e)) {
+    	            return e;
+    	        }
+    	        var a = e.right;
+    	        return predicate(a) ? (0, exports.success)(a) : (0, exports.failure)(a, c);
+    	    }, codec.encode, codec, predicate);
+    	}
+    	exports.refinement = refinement;
+    	/**
+    	 * @category primitives
+    	 * @since 1.0.0
+    	 */
+    	exports.Integer = refinement(exports.number, Number.isInteger, 'Integer');
+    	// -------------------------------------------------------------------------------------
+    	// deprecated
+    	// -------------------------------------------------------------------------------------
+    	/**
+    	 * @since 1.3.0
+    	 * @deprecated
+    	 */
+    	var TaggedUnionType = /** @class */ (function (_super) {
+    	    __extends(TaggedUnionType, _super);
+    	    function TaggedUnionType(name, 
+    	    // tslint:disable-next-line: deprecation
+    	    is, 
+    	    // tslint:disable-next-line: deprecation
+    	    validate, 
+    	    // tslint:disable-next-line: deprecation
+    	    encode, codecs, tag) {
+    	        var _this = _super.call(this, name, is, validate, encode, codecs) /* istanbul ignore next */ // <= workaround for https://github.com/Microsoft/TypeScript/issues/13455
+    	         || this;
+    	        _this.tag = tag;
+    	        return _this;
+    	    }
+    	    return TaggedUnionType;
+    	}(UnionType));
+    	exports.TaggedUnionType = TaggedUnionType;
+    	/**
+    	 * Use `union` instead.
+    	 *
+    	 * @category combinators
+    	 * @since 1.3.0
+    	 * @deprecated
+    	 */
+    	var taggedUnion = function (tag, codecs, name
+    	// tslint:disable-next-line: deprecation
+    	) {
+    	    if (name === void 0) { name = getUnionName(codecs); }
+    	    var U = union(codecs, name);
+    	    // tslint:disable-next-line: deprecation
+    	    if (U instanceof TaggedUnionType) {
+    	        return U;
+    	    }
+    	    else {
+    	        console.warn("[io-ts] Cannot build a tagged union for ".concat(name, ", returning a de-optimized union"));
+    	        // tslint:disable-next-line: deprecation
+    	        return new TaggedUnionType(name, U.is, U.validate, U.encode, codecs, tag);
+    	    }
+    	};
+    	exports.taggedUnion = taggedUnion;
+    	/**
+    	 * @since 1.0.0
+    	 * @deprecated
+    	 */
+    	var getValidationError /* istanbul ignore next */ = function (value, context) { return ({
+    	    value: value,
+    	    context: context
+    	}); };
+    	exports.getValidationError /* istanbul ignore next */ = getValidationError;
+    	/**
+    	 * @since 1.0.0
+    	 * @deprecated
+    	 */
+    	var getDefaultContext /* istanbul ignore next */ = function (decoder) { return [
+    	    { key: '', type: decoder }
+    	]; };
+    	exports.getDefaultContext /* istanbul ignore next */ = getDefaultContext;
+    	/**
+    	 * Use `UnknownRecord` instead.
+    	 *
+    	 * @category primitives
+    	 * @since 1.0.0
+    	 * @deprecated
+    	 */
+    	exports.Dictionary = exports.UnknownRecord;
+    	/**
+    	 * @since 1.0.0
+    	 * @deprecated
+    	 */
+    	var ObjectType = /** @class */ (function (_super) {
+    	    __extends(ObjectType, _super);
+    	    function ObjectType() {
+    	        var _this = _super.call(this, 'object', function (u) { return u !== null && typeof u === 'object'; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'ObjectType';
+    	        return _this;
+    	    }
+    	    return ObjectType;
+    	}(Type));
+    	exports.ObjectType = ObjectType;
+    	/**
+    	 * Use `UnknownRecord` instead.
+    	 *
+    	 * @category primitives
+    	 * @since 1.0.0
+    	 * @deprecated
+    	 */
+    	// tslint:disable-next-line: deprecation
+    	exports.object = new ObjectType();
+    	/**
+    	 * Use `record` instead.
+    	 *
+    	 * @category combinators
+    	 * @since 1.0.0
+    	 * @deprecated
+    	 */
+    	exports.dictionary = record;
+    	/**
+    	 * @since 1.0.0
+    	 * @deprecated
+    	 */
+    	var StrictType = /** @class */ (function (_super) {
+    	    __extends(StrictType, _super);
+    	    function StrictType(name, 
+    	    // tslint:disable-next-line: deprecation
+    	    is, 
+    	    // tslint:disable-next-line: deprecation
+    	    validate, 
+    	    // tslint:disable-next-line: deprecation
+    	    encode, props) {
+    	        var _this = _super.call(this, name, is, validate, encode) || this;
+    	        _this.props = props;
+    	        /**
+    	         * @since 1.0.0
+    	         */
+    	        _this._tag = 'StrictType';
+    	        return _this;
+    	    }
+    	    return StrictType;
+    	}(Type));
+    	exports.StrictType = StrictType;
+    	/**
+    	 * Drops the codec "kind".
+    	 *
+    	 * @category combinators
+    	 * @since 1.1.0
+    	 * @deprecated
+    	 */
+    	function clean(codec) {
+    	    return codec;
+    	}
+    	exports.clean = clean;
+    	function alias(codec) {
+    	    return function () { return codec; };
+    	}
+    	exports.alias = alias; 
+    } (lib));
+
+    Object.defineProperty(PathReporter, "__esModule", { value: true });
+    var PathReporter_1 = PathReporter.PathReporter = PathReporter.success = PathReporter.failure = void 0;
+    var _1 = lib;
+    var Either_1 = Either;
     function stringify(v) {
         if (typeof v === 'function') {
-            return getFunctionName(v);
+            return (0, _1.getFunctionName)(v);
         }
         if (typeof v === 'number' && !isFinite(v)) {
             if (isNaN(v)) {
@@ -55542,25 +55733,270 @@ var app = (function () {
     function failure(es) {
         return es.map(getMessage);
     }
+    PathReporter.failure = failure;
     /**
      * @since 1.0.0
      */
     function success() {
         return ['No errors!'];
     }
+    PathReporter.success = success;
     /**
      * @since 1.0.0
      */
-    var PathReporter = {
-        report: fold(failure, success)
+    PathReporter_1 = PathReporter.PathReporter = {
+        report: (0, Either_1.fold)(failure, success)
     };
 
-    /* src/App.svelte generated by Svelte v3.59.1 */
+    function setupWebsocketConnection() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let websocket = new WebSocket("ws://138.197.70.163:8080");
+            const system_state = yield getSystemState();
+            // start the websocket connection
+            websocket.addEventListener("open", () => __awaiter(this, void 0, void 0, function* () {
+                // setup message processor
+                websocket = yield setupWebsocketMessageHandler(websocket, system_state);
+                system_state.websocketReady = true;
+                system_state.websocket = websocket;
+                yield setSystemState(system_state);
+            }));
+        });
+    }
+    function setupWebsocketMessageHandler(websocket, system_state) {
+        return __awaiter(this, void 0, void 0, function* () {
+            websocket.addEventListener("message", (event) => {
+                console.log("websocket message received: ", event.data);
+                let data;
+                try {
+                    data = JSON.parse(event.data);
+                    const responseResult = RuntimeResponseObject.decode(data);
+                    pipe(responseResult, fold((errors) => {
+                        console.log("Error decoding websocket message: ", errors);
+                        console.error(PathReporter_1.report(responseResult));
+                    }, (response_object) => __awaiter(this, void 0, void 0, function* () {
+                        // if response_object is a node then add it to the system state store
+                        if (typeof response_object === "object" &&
+                            response_object !== null &&
+                            "Node" in response_object) {
+                            const { Node } = response_object;
+                            console.log(Node.type_name); // Will log "Prompt", "Process", "Conditional", or "Command"
+                            system_state.nodes.push({ Node });
+                        }
+                        else {
+                            console.log("\n---------------\nresponse_object is not a node\n---------------\n");
+                        }
+                        yield setSystemState(system_state);
+                    })));
+                }
+                catch (_a) {
+                    console.log("Error parsing websocket message");
+                }
+            });
+            return websocket;
+        });
+    }
+
+    /* src/components/AuthPage.svelte generated by Svelte v3.59.1 */
 
     const { console: console_1 } = globals;
+    const file$1 = "src/components/AuthPage.svelte";
+
+    function create_fragment$1(ctx) {
+    	let div1;
+    	let div0;
+    	let input0;
+    	let t0;
+    	let input1;
+    	let t1;
+    	let button;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			div1 = element$1("div");
+    			div0 = element$1("div");
+    			input0 = element$1("input");
+    			t0 = space();
+    			input1 = element$1("input");
+    			t1 = space();
+    			button = element$1("button");
+    			button.textContent = "Submit";
+    			attr_dev(input0, "type", "text");
+    			attr_dev(input0, "placeholder", "Username");
+    			add_location(input0, file$1, 15, 8, 351);
+    			attr_dev(input1, "type", "password");
+    			attr_dev(input1, "placeholder", "Password");
+    			add_location(input1, file$1, 16, 8, 426);
+    			attr_dev(button, "class", "submit-button svelte-1vzwa14");
+    			add_location(button, file$1, 17, 8, 505);
+    			attr_dev(div0, "class", "fields svelte-1vzwa14");
+    			add_location(div0, file$1, 14, 4, 322);
+    			attr_dev(div1, "class", "container svelte-1vzwa14");
+    			add_location(div1, file$1, 13, 0, 294);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div1, anchor);
+    			append_dev(div1, div0);
+    			append_dev(div0, input0);
+    			set_input_value(input0, /*username*/ ctx[0]);
+    			append_dev(div0, t0);
+    			append_dev(div0, input1);
+    			set_input_value(input1, /*password*/ ctx[1]);
+    			append_dev(div0, t1);
+    			append_dev(div0, button);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[3]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[4]),
+    					listen_dev(button, "click", /*handleSubmit*/ ctx[2], false, false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*username*/ 1 && input0.value !== /*username*/ ctx[0]) {
+    				set_input_value(input0, /*username*/ ctx[0]);
+    			}
+
+    			if (dirty & /*password*/ 2 && input1.value !== /*password*/ ctx[1]) {
+    				set_input_value(input1, /*password*/ ctx[1]);
+    			}
+    		},
+    		i: noop$2,
+    		o: noop$2,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div1);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$1.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$1($$self, $$props, $$invalidate) {
+    	let $systemStateStore;
+    	validate_store(systemStateStore, 'systemStateStore');
+    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(5, $systemStateStore = $$value));
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('AuthPage', slots, []);
+    	let username = "";
+    	let password = "";
+
+    	function handleSubmit() {
+    		console.log("Username:", username);
+    		console.log("Password:", password);
+    		set_store_value(systemStateStore, $systemStateStore.authenticated = true, $systemStateStore);
+    	}
+
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<AuthPage> was created with unknown prop '${key}'`);
+    	});
+
+    	function input0_input_handler() {
+    		username = this.value;
+    		$$invalidate(0, username);
+    	}
+
+    	function input1_input_handler() {
+    		password = this.value;
+    		$$invalidate(1, password);
+    	}
+
+    	$$self.$capture_state = () => ({
+    		systemStateStore,
+    		username,
+    		password,
+    		handleSubmit,
+    		$systemStateStore
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('username' in $$props) $$invalidate(0, username = $$props.username);
+    		if ('password' in $$props) $$invalidate(1, password = $$props.password);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [username, password, handleSubmit, input0_input_handler, input1_input_handler];
+    }
+
+    class AuthPage extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "AuthPage",
+    			options,
+    			id: create_fragment$1.name
+    		});
+    	}
+    }
+
+    /* src/App.svelte generated by Svelte v3.59.1 */
     const file = "src/App.svelte";
 
-    function create_fragment(ctx) {
+    // (30:0) {#if !authenticated}
+    function create_if_block_1(ctx) {
+    	let authpage;
+    	let current;
+    	authpage = new AuthPage({ $$inline: true });
+
+    	const block = {
+    		c: function create() {
+    			create_component(authpage.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(authpage, target, anchor);
+    			current = true;
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(authpage.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(authpage.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(authpage, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1.name,
+    		type: "if",
+    		source: "(30:0) {#if !authenticated}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (34:0) {#if authenticated}
+    function create_if_block(ctx) {
     	let div;
     	let sidebar;
     	let t;
@@ -55576,10 +56012,7 @@ var app = (function () {
     			t = space();
     			create_component(graphcomponentgraphlib.$$.fragment);
     			attr_dev(div, "class", "app-container");
-    			add_location(div, file, 74, 0, 3536);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    			add_location(div, file, 34, 2, 1513);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -55588,7 +56021,6 @@ var app = (function () {
     			mount_component(graphcomponentgraphlib, div, null);
     			current = true;
     		},
-    		p: noop$2,
     		i: function intro(local) {
     			if (current) return;
     			transition_in(sidebar.$$.fragment, local);
@@ -55609,6 +56041,103 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
+    		id: create_if_block.name,
+    		type: "if",
+    		source: "(34:0) {#if authenticated}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment(ctx) {
+    	let t;
+    	let if_block1_anchor;
+    	let current;
+    	let if_block0 = !/*authenticated*/ ctx[0] && create_if_block_1(ctx);
+    	let if_block1 = /*authenticated*/ ctx[0] && create_if_block(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if (if_block0) if_block0.c();
+    			t = space();
+    			if (if_block1) if_block1.c();
+    			if_block1_anchor = empty();
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			if (if_block0) if_block0.m(target, anchor);
+    			insert_dev(target, t, anchor);
+    			if (if_block1) if_block1.m(target, anchor);
+    			insert_dev(target, if_block1_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (!/*authenticated*/ ctx[0]) {
+    				if (if_block0) {
+    					if (dirty & /*authenticated*/ 1) {
+    						transition_in(if_block0, 1);
+    					}
+    				} else {
+    					if_block0 = create_if_block_1(ctx);
+    					if_block0.c();
+    					transition_in(if_block0, 1);
+    					if_block0.m(t.parentNode, t);
+    				}
+    			} else if (if_block0) {
+    				group_outros();
+
+    				transition_out(if_block0, 1, 1, () => {
+    					if_block0 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (/*authenticated*/ ctx[0]) {
+    				if (if_block1) {
+    					if (dirty & /*authenticated*/ 1) {
+    						transition_in(if_block1, 1);
+    					}
+    				} else {
+    					if_block1 = create_if_block(ctx);
+    					if_block1.c();
+    					transition_in(if_block1, 1);
+    					if_block1.m(if_block1_anchor.parentNode, if_block1_anchor);
+    				}
+    			} else if (if_block1) {
+    				group_outros();
+
+    				transition_out(if_block1, 1, 1, () => {
+    					if_block1 = null;
+    				});
+
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block0);
+    			transition_in(if_block1);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block0);
+    			transition_out(if_block1);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (if_block0) if_block0.d(detaching);
+    			if (detaching) detach_dev(t);
+    			if (if_block1) if_block1.d(detaching);
+    			if (detaching) detach_dev(if_block1_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
     		id: create_fragment.name,
     		type: "component",
     		source: "",
@@ -55621,7 +56150,7 @@ var app = (function () {
     function instance($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(0, $systemStateStore = $$value));
+    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(1, $systemStateStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
 
@@ -55661,94 +56190,51 @@ var app = (function () {
     			});
     	};
 
+    	let authenticated = false;
+
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
-    		console.log("on mount");
-
-    		// start the websocket connection
-    		$systemStateStore.websocket.addEventListener("open", () => {
-    			let apiKey = localStorage.getItem("apiKey") || "Api Key";
-    			let mongo_uri = localStorage.getItem("mongo_uri") || "Mongo Uri";
-    			localStorage.setItem("apiKey", apiKey);
-    			localStorage.setItem("mongo_uri", mongo_uri);
-
-    			let user_settings = {
-    				verb: "GET",
-    				object: {
-    					UserSettings: { openai_api_key: "", mongo_db_uri: "" }
-    				}
-    			};
-
-    			sendWebsocketMessage(user_settings);
-
-    			const initial_message = {
-    				verb: "POST",
-    				object: { InitialMessage: { initial_message: "" } }
-    			};
-
-    			sendWebsocketMessage(initial_message);
-    		});
-
-    		$systemStateStore.websocket.addEventListener("message", event => {
-    			console.log("websocket message received: ", event.data);
-    			let data;
-
-    			try {
-    				data = JSON.parse(event.data);
-    				let responseResult = RuntimeResponseObject.decode(data);
-
-    				Either.fold(
-    					errors => {
-    						console.log("Error decoding websocket message: ", errors);
-    						console.error(PathReporter.report(responseResult));
-    					},
-    					response_object => {
-    						// if response_object is a node then add it to the system state store
-    						if (typeof response_object === "object" && response_object !== null && "Node" in response_object) {
-    							const { Node } = response_object;
-
-    							// Now you can access Node.type_name to further check its subtype
-    							console.log(Node.type_name); // Will log "Prompt", "Process", "Conditional", or "Command"
-
-    							$systemStateStore.nodes.push({ Node });
-    						} else {
-    							console.log("\n---------------\nresponse_object is not a node\n---------------\n");
-    						}
-    					}
-    				)(responseResult);
-    			} catch(_a) {
-    				console.log("Error parsing websocket message");
-    			}
-    		});
+    		if (!$systemStateStore.websocketReady) {
+    			// startup websocket connection
+    			yield setupWebsocketConnection();
+    		}
     	}));
 
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<App> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
     		__awaiter,
     		Sidebar,
     		GraphComponentGraphlib: GraphComponent_graphlib,
-    		sendWebsocketMessage,
-    		RuntimeResponseObject,
-    		fold: Either.fold,
+    		setupWebsocketConnection,
     		onMount,
     		systemStateStore,
-    		PathReporter,
+    		AuthPage,
+    		authenticated,
     		$systemStateStore
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
+    		if ('authenticated' in $$props) $$invalidate(0, authenticated = $$props.authenticated);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [];
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$systemStateStore*/ 2) {
+    			{
+    				$$invalidate(0, authenticated = $systemStateStore.authenticated);
+    			}
+    		}
+    	};
+
+    	return [authenticated, $systemStateStore];
     }
 
     class App extends SvelteComponentDev {

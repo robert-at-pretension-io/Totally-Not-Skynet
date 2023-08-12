@@ -1,6 +1,5 @@
 import type {
   SystemState,
-  Prompt,
   Node,
   CrudBundle,
   GraphNodeId
@@ -10,9 +9,6 @@ import systemStateStore from "stores/systemStateStore";
 import { Graph } from "graphlib";
 import { Edge } from "@dagrejs/graphlib";
 import { alg } from "graphlib";
-import { some } from "fp-ts/lib/Option";
-import { isSome } from "fp-ts/Option";
-import { unsafeCoerce } from "fp-ts/lib/function";
 
 // Define the getter and setter
 
@@ -282,22 +278,21 @@ export async function addNode(node_id: string): Promise<void> {
 
   //check if the node already exists in the graph
   if (!systemState.graphState.graph.hasNode(node_id)) {
-    console.log("Adding node to graph")
+    console.log("Adding node to graph");
     systemState.graphState.graph.setNode(node_id);
   }
   else {
-    console.log("Node ", node_id, " is already in the graph, not adding it.")
+    console.log("Node ", node_id, " is already in the graph, not adding it.");
     return;
   }
   systemState.graphState.lastAction = "addNode";
 
   const node_name = await getNodeName(node_id);
 
-
-  let nodeInfo: GraphNodeId = {
+  const nodeInfo: GraphNodeId = {
     id: node_id,
     name: node_name ? node_name : ""
-  }
+  };
 
   systemState.graphState.actedOn = nodeInfo;
 
@@ -318,10 +313,6 @@ export async function processToGraph(process: Process): Promise<void> {
     const parsed_graph = JSON.parse(graph);
     graph = new Graph(parsed_graph);
   }
-
-  // console.log("nodes: ", nodes);
-
-  // for each of the node ids stored in nodes, get the name of the action
 
   //loop through the nodes
   for (let i = 0; i < nodes.length; i++) {
@@ -345,7 +336,12 @@ export async function processToGraph(process: Process): Promise<void> {
   }
 
   // This function doesn't exist yet.
-  findValidTopOrder(topOrder)
+  findValidTopOrder(topOrder);
+}
+
+export function findValidTopOrder(topOrder: string[][]): string[] {
+  console.log("REPLACE ME WITH REAL VALID TOPOLOGICAL ORDER");
+  return [];
 }
 
 export async function getParentOutputVariables(this_node_id: string): Promise<string[] | null> {
@@ -403,11 +399,10 @@ export async function removeNode(id: string): Promise<void> {
 
   const node_name = await getNodeName(id);
 
-
-  let nodeInfo: GraphNodeId = {
+  const nodeInfo: GraphNodeId = {
     id: id,
     name: node_name ? node_name : ""
-  }
+  };
 
   systemState.graphState.actedOn = nodeInfo;
 
@@ -430,7 +425,7 @@ export async function removeSelectedEdge(): Promise<void> {
   ) {
     const selected = systemState.graphState.actedOn;
     if (selected != null) {
-      let edge = selected as Edge;
+      const edge = selected as Edge;
       await removeEdge(edge.v, edge.w);
     }
   } else {

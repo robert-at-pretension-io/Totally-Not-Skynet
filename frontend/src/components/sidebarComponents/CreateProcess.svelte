@@ -3,7 +3,6 @@
   import type { Process, Node } from "system_types";
   import {
     addEdge,
-    addNode,
     getSystemState,
     removeSelectedEdge,
     removeSelectedNode,
