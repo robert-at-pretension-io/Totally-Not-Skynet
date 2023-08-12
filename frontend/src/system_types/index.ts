@@ -1,9 +1,8 @@
-import type { Graph } from "graphlib";
+// import type { Graph } from "graphlib";
 import * as t from "io-ts";
 import { record } from "io-ts";
 import { option } from "io-ts-types";
 import { TypeOf } from "io-ts";
-import NodeInfo from "components/NodeInfo.svelte";
 
 export type selectedGraphComponent = {
   type: "Node" | "Edge" | null;
@@ -24,50 +23,15 @@ export const RuntimeEdge = t.type({
 export type Edge = TypeOf<typeof RuntimeEdge>;
 
 export const GraphAction = t.partial({
-  last_action: t.union([t.literal("addNode"), t.literal("addEdge"), t.literal("removeNode"),
-  t.literal("removeEdge"),
-  t.literal("selectNode"),
-  t.literal("deselectNode"),
-  t.literal("selectEdge"),
-  t.literal("deselectEdge"),
-  t.literal("updateNode"),
-  t.literal("updateEdge"),
-  t.literal("resetGraph"),
+  last_action: t.union([t.literal("add"), t.literal("remove"), t.literal("select"),
+  t.literal("deselect"),
+  t.literal("reset"),
   t.literal("none")
   ]),
   acted_on: t.union([RuntimeEdge, RuntimeGraphNodeInfo]),
   last_acted_on: t.union([RuntimeEdge, RuntimeGraphNodeInfo])
 });
 
-const Graph = t.type({
-  graph: t.string
-});
-
-export const RuntimeGraphState = t.intersection([Graph, GraphAction]);
-
-export type GraphState = TypeOf<typeof RuntimeGraphState>;
-
-
-
-export const RuntimeSystemErrors = t.type({
-  name: t.union([t.literal("GraphDoesntExist"), t.literal("GraphStateDoesntExist"), t.literal("OtherError")])
-});
-
-
-export const RuntimeNodeTypeNames = t.keyof({
-  "Prompt": null,
-  "Process": null,
-  "Conditional": null,
-  "Command": null
-});
-
-export const RuntimeVerbTypeNames = t.keyof({
-  "POST": null,
-  "PUT": null,
-  "PATCH": null,
-  "DELETE": null,
-  "GET": null,
-});
 
 export const RuntimeMongoId = t.type({
   $oid: t.string,
@@ -104,6 +68,13 @@ export const RuntimeCommand = t.type({
 
 export const RuntimeNodeType = t.union([RuntimePrompt, RuntimeProcess, RuntimeConditional, RuntimeCommand]);
 
+export const RuntimeNodeTypeNames = t.keyof({
+  "Prompt": null,
+  "Process": null,
+  "Conditional": null,
+  "Command": null
+});
+
 export const RuntimeNode = t.type({
   Node: t.type({
     _id: RuntimeMongoId,
@@ -115,6 +86,42 @@ export const RuntimeNode = t.type({
     output_variables: t.array(t.string),
   })
 });
+
+
+export const RuntimeGraph = t.type({
+  nodes: t.array(RuntimeGraphNodeInfo),
+  edges: t.array(RuntimeEdge)
+})
+
+export type Graph = TypeOf<typeof RuntimeGraph>;
+
+const Graph = t.type({
+  graph: RuntimeGraph
+});
+
+export const RuntimeGraphState = t.intersection([Graph, GraphAction]);
+
+export type GraphState = TypeOf<typeof RuntimeGraphState>;
+
+
+
+export const RuntimeSystemErrors = t.type({
+  name: t.union([t.literal("GraphDoesntExist"), t.literal("GraphStateDoesntExist"), t.literal("OtherError"), t.literal("NodeDoesntExist")])
+});
+
+
+
+
+export const RuntimeVerbTypeNames = t.keyof({
+  "POST": null,
+  "PUT": null,
+  "PATCH": null,
+  "DELETE": null,
+  "GET": null,
+});
+
+
+
 
 export const RuntimeExecutionContext = t.type({
   topological_order: t.array(t.string),

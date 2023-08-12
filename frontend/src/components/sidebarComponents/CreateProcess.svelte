@@ -18,7 +18,7 @@
     removeSelectedNode,
     validateGraph,
   } from "../../helper_functions/graph";
-  import { json } from "graphlib";
+  import * as graphlib from "graphlib";
   import { Edge } from "system_types";
 
   import systemStateStore from "stores/systemStateStore";

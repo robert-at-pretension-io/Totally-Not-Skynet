@@ -5,13 +5,12 @@ import type {
   GraphNodeInfo,
   Edge,
   SystemErrors,
-  GraphState
+  GraphState,
+  Graph
 } from "../system_types";
 import { Process, RuntimeGraphNodeInfo, RuntimeNode } from "../system_types";
 import systemStateStore from "stores/systemStateStore";
-import { Graph, json } from "graphlib";
-import { alg } from "graphlib";
-import NodeInfo from "components/NodeInfo.svelte";
+import * as graphlib from "graphlib";
 
 // Define the getter and setter
 
@@ -21,6 +20,21 @@ export async function getSystemState(): Promise<SystemState> {
       resolve(systemStateStore);
     });
   });
+}
+
+export function systemGraphToGraphLib(graph: Graph) {
+  let g = new graphlib.Graph()
+
+
+  graph.nodes.forEach((node: GraphNodeInfo) => {
+    g.setNode(node.id, node.name);
+  })
+
+  graph.edges.forEach((edge: Edge) => {
+    g.setEdge({ v: edge.source.id, w: edge.target.id })
+  })
+
+  return g;
 }
 
 export async function handleError(error: SystemErrors) {
@@ -111,7 +125,9 @@ export function getAllTopologicalOrders(graph: Graph): string[][] {
   // check that there is a single component (that the graph is connected) AND
   // that there are no cycles in the graph
 
-  if (!alg.isAcyclic(graph) || alg.components(graph).length !== 1) {
+  let graphlib_graph = systemGraphToGraphLib(graph);
+
+  if (!graphlib.alg.isAcyclic(graphlib_graph) || graphlib.alg.components(graphlib_graph).length !== 1) {
     return [];
   }
 
@@ -122,20 +138,20 @@ export function getAllTopologicalOrders(graph: Graph): string[][] {
 
 }
 
-interface LocalGraph {
-  [key: string]: string[];
-}
 
-export function graphToLocalGraph(graph: Graph): LocalGraph {
-  const local_graph: LocalGraph = {};
 
-  const my_nodes = graph.nodes();
+export function graphToLocalGraph(graph: Graph): Map<GraphNodeInfo, string[]> {
+  const node_neightbors: Map<GraphNodeInfo, string[]>;
+
+  let graphlib_graph = systemGraphToGraphLib(graph);
+
+  const my_nodes = graphlib_graph.nodes();
 
   for (let i = 0; i < my_nodes.length; i++) {
     const node = my_nodes[i];
-    const neighbors = graph.successors(node);
+    const neighbors = graphlib_graph.successors(node);
     if (neighbors) {
-      local_graph[node] = neighbors;
+      node_neightbors[node] = neighbors;
     }
   }
 
@@ -364,9 +380,18 @@ export async function addEdge(edge: Edge, graph_state: GraphState): Promise<void
   setSystemState(system_state);
 }
 
-export function getNodeInfo(node: GraphNodeInfo | Node): GraphNodeInfo {
+export async function getNodeInfo(node: GraphNodeInfo | Node | string): Promise<GraphNodeInfo | void> {
   if (RuntimeGraphNodeInfo.is(node)) {
     return node;
+  }
+  else if (typeof node === "string") {
+    let node_id = await getNode(node as string);
+    if (node_id) {
+      return await getNodeInfo(node_id);
+    }
+    else {
+      await handleError({ name: "NodeDoesntExist" })
+    }
   }
   else {
     return {
