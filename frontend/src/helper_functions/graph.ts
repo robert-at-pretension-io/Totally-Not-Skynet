@@ -4,12 +4,13 @@ import type {
   CrudBundle,
   GraphNodeInfo,
   Edge,
-  SystemError
+  SystemErrors
 } from "../system_types";
-import { Process } from "../system_types";
+import { Process, RuntimeGraphNodeInfo, RuntimeNode } from "../system_types";
 import systemStateStore from "stores/systemStateStore";
 import { Graph } from "graphlib";
 import { alg } from "graphlib";
+import NodeInfo from "components/NodeInfo.svelte";
 
 // Define the getter and setter
 
@@ -21,7 +22,7 @@ export async function getSystemState(): Promise<SystemState> {
   });
 }
 
-export async function handleError(error: SystemError) {
+export async function handleError(error: SystemErrors) {
   switch (error.name) {
     case "GraphDoesntExist": {
 
@@ -34,8 +35,6 @@ export async function handleError(error: SystemError) {
     }
   }
 }
-
-
 
 export async function getInputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
   // Get the action by ID
@@ -273,8 +272,8 @@ export async function getNodeName(id: string): Promise<string | undefined> {
 }
 
 export async function printEdge(edge: Edge) {
-  const sourceName = await getNodeName(edge.v);
-  const targetName = await getNodeName(edge.w);
+  const sourceName = edge.source.name;
+  const targetName = edge.target.name
   console.log("edge: " + sourceName + " -> " + targetName);
 }
 
@@ -290,12 +289,26 @@ export async function setSystemState(systemState: SystemState) {
   systemStateStore.set(systemState);
 }
 
-export async function graphHasNode(node_id: string): Promise<boolean> {
+export async function graphHasNode(node: GraphNodeInfo | Node): Promise<boolean | SystemErrors> {
+
+  let node_id: string = "";
+
+  if (RuntimeNode.is(node)) {
+    node_id = node.Node._id.$oid
+  }
+  else if (RuntimeGraphNodeInfo.is(node)) {
+    node_id = node.id;
+  }
+
   const systemState = await getSystemState();
 
-  let potentially_has_node = systemState.graphState?.graph.hasNode(node_id)
+  let potentially_has_node = systemState.graphState?.graph.hasNode(node_id);
 
+  let error: SystemErrors = {
+    name: "GraphDoesntExist"
+  };
 
+  return potentially_has_node ? potentially_has_node : error
 }
 
 export async function addNode(node_id: string): Promise<void> {

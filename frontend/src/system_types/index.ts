@@ -3,19 +3,25 @@ import * as t from "io-ts";
 import { record } from "io-ts";
 import { option } from "io-ts-types";
 import { TypeOf } from "io-ts";
+import NodeInfo from "components/NodeInfo.svelte";
 
 export type selectedGraphComponent = {
   type: "Node" | "Edge" | null;
 };
 
-export type GraphNodeInfo = {
-  id: string,
-  name: string
-}
+export const RuntimeGraphNodeInfo = t.type({
+  id: t.string,
+  name: t.string
+});
+
+export type GraphNodeInfo = TypeOf<typeof RuntimeGraphNodeInfo>;
+
+
+
 
 export type Edge = {
-  source: string,
-  target: string,
+  source: GraphNodeInfo,
+  target: GraphNodeInfo,
   name?: string
 }
 
@@ -52,9 +58,8 @@ export type SystemState = {
 };
 
 
-export const RuntimeSystemError = t.type({
-  name: t.union([t.literal("GraphDoesntExist"), t.literal("OtherError")]),
-  error_handler: t.Function
+export const RuntimeSystemErrors = t.type({
+  name: t.union([t.literal("GraphDoesntExist"), t.literal("OtherError")])
 });
 
 
@@ -182,7 +187,7 @@ export const RuntimeResponseObject = t.union([
 ]);
 
 export type NodeTypeNames = TypeOf<typeof RuntimeNodeTypeNames>;
-export type SystemError = TypeOf<typeof RuntimeSystemError>;
+export type SystemErrors = TypeOf<typeof RuntimeSystemErrors>;
 export type MongoId = TypeOf<typeof RuntimeMongoId>;
 export type Prompt = TypeOf<typeof RuntimePrompt>;
 export type Process = TypeOf<typeof RuntimeProcess>;

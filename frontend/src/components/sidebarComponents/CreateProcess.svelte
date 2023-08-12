@@ -1,9 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { Process, Node } from "system_types";
+  import { type Process, type Node, RuntimeSystemErrors } from "system_types";
   import {
     addEdge,
+    addNode,
     getSystemState,
+    graphHasNode,
+    handleError,
     removeSelectedEdge,
     removeSelectedNode,
     validateGraph,
@@ -39,18 +42,16 @@
     nodes = $systemStateStore.nodes;
   });
 
-  function localAddNodes() {
-    // for each of the selected actions, add a node to the graph
+  async function localAddNodes() {
+    selectedNodes.forEach(async (node) => {
+      let res = await graphHasNode(node);
 
-    // For each of the selected nodes, check if they are already in the $systemStore.nodes
+      if (RuntimeSystemErrors.is(res)) {
+        handleError(res);
+      }
 
-    // If they are already in the nodes... don't do anything
-
-    // clear out the selected actions
-
-    selectedNodes.forEach((node) => {
-      if (!nodeContainedGlobally(node)) {
-        $systemStateStore.nodes.push(node);
+      if (!(await graphHasNode(node))) {
+        await addNode(node);
       }
     });
   }

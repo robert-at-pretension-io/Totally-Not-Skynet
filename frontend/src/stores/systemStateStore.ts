@@ -8,7 +8,7 @@ const system_state: SystemState = {
   graphState: null,
   websocket: null,
   executionContext: null,
-  nodes: [],
+  nodes: []
 };
 
 const systemStateStore = writable(system_state);

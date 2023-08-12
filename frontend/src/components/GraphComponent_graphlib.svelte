@@ -48,14 +48,14 @@
     ) {
       let edge = value.actedOn as Edge;
       // check if the edge is already in the graph
-      if (g.hasEdge(edge.v, edge.w)) {
+      if (g.hasEdge(edge.source, edge.target)) {
         return;
       }
 
-      g.setEdge(edge.v, edge.w, value.actedOn);
+      g.setEdge(edge.source, edge.target);
       if (cyInstance) {
         cyInstance.add({
-          data: { source: edge.v, target: edge.w },
+          data: { source: edge.source, target: edge.target },
         });
       }
     } else if (
@@ -65,10 +65,10 @@
     ) {
       let edge = value.actedOn as Edge;
 
-      g.removeEdge(edge.v, edge.w);
+      g.removeEdge(edge.source, edge.target);
       if (cyInstance) {
         cyInstance.remove(
-          cyInstance.$id(edge.v).edgesTo(cyInstance.$id(edge.w))
+          cyInstance.$id(edge.source).edgesTo(cyInstance.$id(edge.target))
         );
       }
     } else if (
