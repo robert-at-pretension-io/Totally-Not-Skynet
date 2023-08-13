@@ -157,23 +157,29 @@ export async function returnSuccessorMap(graph: Graph): Promise<Map<GraphNodeInf
 }
 
 function allTopologicalSorts(graph: Graph): string[][] {
-  const all_orderings: string[][] = [];
+  const all_orderings: GraphNodeInfo[][] = [];
   const successor_map = await returnSuccessorMap(graph);
-  const start_nodes = calculateIndegreeForAllVertex(successor_map);
+  const start_nodes = returnStartNodes(graph);
+  const in_degree_map = returnAllIndegree(graph);
+  let visited: Map<GraphNodeInfo, boolean> = new Map();
 
-  const visited: { [node: string]: boolean } = {};
+  graph.nodes.forEach((node) => {
+    visited.set(node, false);
+  })
 
-  for (const node in graph) {
-    visited[node] = false;
-  }
 
-  function helper(node: string, indegreeMap: { [node: string]: number }, visited: { [node: string]: boolean }, stack: string[]): void {
-    visited[node] = true;
+  function helper(node: GraphNodeInfo, in_degree_map: Map<GraphNodeInfo, number>, visited: Map<GraphNodeInfo, boolean>, stack: GraphNodeInfo[]): void {
+
+    visited.set(node, true);
+
     stack.push(node);
 
-    if (stack.length === Object.keys(graph).length) {
-      allOrderings.push([...stack]);
+    if (stack.length === graph.nodes.length) {
+      all_orderings.push([...stack]);
     } else {
+
+
+
       for (const neighbor of graph[node]) {
         indegreeMap[neighbor]--;
         if (indegreeMap[neighbor] === 0 && !visited[neighbor]) {
@@ -209,6 +215,30 @@ async function returnStartNodes(graph: Graph): Promise<GraphNodeInfo[]> {
     }
   })
   return start_nodes
+}
+
+async function returnAllIndegree(graph: Graph): Promise<Map<GraphNodeInfo, number>> {
+
+  let in_degree_map: Map<GraphNodeInfo, number> = new Map();
+
+  let graphlib_graph = systemGraphToGraphLib(graph);
+
+
+  graphlib_graph.nodes().forEach(async (source_id: string) => {
+    let val = await getNodeInfo(source_id);
+
+    let count = 0;
+    let maybe_count = graphlib_graph.predecessors(source_id);
+
+    if (maybe_count) {
+      count = maybe_count.length;
+    }
+
+    if (val) {
+      in_degree_map.set(val, count);
+    }
+  });
+  return in_degree_map;
 }
 
 export async function getOutputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
