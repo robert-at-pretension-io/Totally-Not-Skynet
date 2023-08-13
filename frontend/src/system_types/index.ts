@@ -126,7 +126,7 @@ export const RuntimeVerbTypeNames = t.keyof({
 export const RuntimeExecutionContext = t.type({
   topological_order: t.array(t.string),
   current_node: RuntimeNode, // Use your actual Node type here
-  variables: record(t.string, t.string),
+  global_variables: record(t.string, t.string),
   execution_id: t.string,
   return_execution_id: option(t.string),
 });
