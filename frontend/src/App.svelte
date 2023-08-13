@@ -10,7 +10,7 @@
   let authenticated = false;
 
   onMount(async () => {
-    if (!$systemStateStore.websocket_read) {
+    if (!$systemStateStore.websocket_ready) {
       // startup websocket connection
       await setupWebsocketConnection();
     }

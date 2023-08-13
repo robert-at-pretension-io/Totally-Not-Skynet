@@ -8,9 +8,10 @@ import type {
   GraphState,
   Graph
 } from "../system_types";
-import { Process, RuntimeGraphNodeInfo, RuntimeNode } from "../system_types";
+import { Process, RuntimeGraphNodeInfo, RuntimeNode, RuntimeProcess } from "../system_types";
 import systemStateStore from "stores/systemStateStore";
 import * as graphlib from "graphlib";
+import { System } from "typescript";
 
 // Define the getter and setter
 
@@ -67,7 +68,7 @@ export async function validateGraph(systemState: SystemState): Promise<GraphNode
 
   if (systemState.selected_node && graph) {
     const selected_node: Node = systemState.selected_node;
-    if (selected_node.Node.type_name == "Process") {
+    if (RuntimeProcess.is(selected_node)) {
       const process: Process = selected_node.Node.node_content as Process;
       const initial_variables = process.Process.initial_variables;
 
@@ -441,19 +442,20 @@ export async function addNode(node: GraphNodeInfo | Node, graph_state: GraphStat
   const systemState = await getSystemState();
   // add the input and output variables to the graph state
 
-  node = getNodeInfo(node) as GraphNodeInfo;
+  node = await getNodeInfo(node) as GraphNodeInfo;
 
   //check if the node already exists in the graph
   if (await !graphHasNode(node, graph_state)) {
     // Based on the definition of graphHasNode, we can assume that the graph is defined.
     console.log("Adding node to graph");
-    graph_state.graph?.setNode(node.id, node.name);
+    let graph = systemGraphToGraphLib(graph_state.graph)
+    graph.setNode(node.id, node.name);
   }
   else {
     console.log("Node ", node, " is already in the graph, not adding it.");
     return;
   }
-  graph_state.last_action = "addNode";
+  graph_state.last_action = "add";
   graph_state.acted_on = node;
 
   setSystemState(systemState);
@@ -463,18 +465,8 @@ export async function addNode(node: GraphNodeInfo | Node, graph_state: GraphStat
 export async function processToGraphVisualization(process: Process, graph_state: GraphState): Promise<void> {
   await resetGraph();
 
-  // verify that all of the steps have corresponding actions
-  let graph: string | Graph = process.Process.graph;
-
-  let nodes: string[] = [];
-
-  // check if the graph is a string and if so, parse it into a graphlib Graph object
-  if (typeof graph === "string") {
-    const parsed_graph = JSON.parse(graph);
-    graph = new Graph(parsed_graph);
-  }
-
-  nodes = graph.nodes()
+  let graph = graph_state.graph;
+  let nodes = graph.nodes
 
   //loop through the nodes
   for (let i = 0; i < nodes.length; i++) {
@@ -484,43 +476,33 @@ export async function processToGraphVisualization(process: Process, graph_state:
     }
   }
 
-  let edges: Edge[] = [];
+  let topOrder: GraphNodeInfo[][] = await getAllTopologicalOrders(graph);
 
-  if (graph instanceof Graph) {
-    edges = graph.edges();
-  }
-
-  // note that this contains a list of lists of ALL possible orders. We must still go through the list and ensure that the input/output variables within each ordering is "valid"
-  let topOrder: string[][] = [];
-
-  if (graph instanceof Graph) {
-    topOrder = getAllTopologicalOrders(graph);
-  }
 
   // This function doesn't exist yet.
   findValidTopOrder(topOrder);
 }
 
-export function findValidTopOrder(topOrder: string[][]): string[] {
+export function findValidTopOrder(topOrder: GraphNodeInfo[][]): GraphNodeInfo[] {
   console.log("REPLACE ME WITH REAL VALID TOPOLOGICAL ORDER");
   return [];
 }
 
-export async function getParentOutputVariables(this_node_id: string): Promise<string[] | null> {
-  const systemState = await getSystemState();
+// export async function getParentOutputVariables(this_node_id: string): Promise<string[] | null> {
+//   const systemState = await getSystemState();
 
-  // get topological order
+//   // get topological order
 
-  const topological_order = systemState.execution_context.topological_order;
+//   const topological_order = systemState.execution_context.topological_order;
 
-  // get parent node id
-  const parent_node_id = topological_order[topological_order.indexOf(this_node_id) - 1];
+//   // get parent node id
+//   const parent_node_id = topological_order[topological_order.indexOf(this_node_id) - 1];
 
-  // get the output variables of the parent node
-  const parent_output_variables = getOutputVariablesByNodeId(parent_node_id);
+//   // get the output variables of the parent node
+//   const parent_output_variables = getOutputVariablesByNodeId(parent_node_id);
 
-  return parent_output_variables;
-}
+//   return parent_output_variables;
+// }
 
 export function addVariablesToPrompt(prompt: string, variables: Map<string, string>): string {
   let new_prompt = prompt;
@@ -530,56 +512,27 @@ export function addVariablesToPrompt(prompt: string, variables: Map<string, stri
   return new_prompt;
 }
 
-export async function sendWebsocketMessage(message: CrudBundle) {
+export async function sendWebsocketMessage(message: CrudBundle, websocket: WebSocket) {
 
   console.log("sending websocket message: ", message);
   const systemState = await getSystemState();
   const message_string = JSON.stringify(message);
-  systemState.websocket.send(message_string);
+  websocket.send(message_string);
 }
 
 
 export async function removeNode(id: string): Promise<void> {
-  const name = await getNodeName(id);
   const systemState = await getSystemState();
-  systemState.graph_state.graph.removeNode(id);
-  systemState.graph_state.last_action = "removeNode";
-
-  const node_name = await getNodeName(id);
-
-  const nodeInfo: GraphNodeInfo = {
-    id: id,
-    name: node_name ? node_name : ""
-  };
-
-  systemState.graph_state.acted_on = nodeInfo;
-
-  setSystemState(systemState);
-}
-
-export async function removeSelectedNode(): Promise<void> {
-  const systemState = await getSystemState();
-  if (Array.isArray(systemState.graph_state.acted_on)) {
-    const selected = systemState.graph_state.acted_on[0];
-    await removeNode(selected);
+  let node_info = await getNodeInfo(id);
+  if (node_info) {
+    let remove_index = systemState.graph_state.graph.nodes.indexOf(node_info);
+    systemState.graph_state.graph.nodes.splice(remove_index);
+    systemState.graph_state.last_action = "remove";
+    systemState.graph_state.acted_on = node_info;
+    setSystemState(systemState);
   }
 }
 
-export async function removeSelectedEdge(): Promise<void> {
-  const systemState = await getSystemState();
-  if (
-    !Array.isArray(systemState.graph_state.acted_on) &&
-    systemState.graph_state.last_action == "selectEdge"
-  ) {
-    const selected = systemState.graph_state.acted_on;
-    if (selected != null) {
-      const edge = selected as Edge;
-      await removeEdge(edge.v, edge.w);
-    }
-  } else {
-    // console.log("not removing edge, doesn't meet criteria");
-  }
-}
 
 export async function removeEdge(
   _sourceId: string,
@@ -593,9 +546,9 @@ export async function removeEdge(
   const edge = systemState.graph_state.acted_on;
   // graphState.graph.removeEdge(edge);
 
-  systemState.graph_state.last_action = "removeEdge";
+  systemState.graph_state.last_action = "remove";
   systemState.graph_state.acted_on = edge;
-  systemState.graph_state.name = null;
+
   setSystemState(systemState);
 }
 
@@ -621,32 +574,24 @@ export async function selectNode(id: string): Promise<void> {
   const system_state = await getSystemState();
   const nodes = system_state.nodes;
 
-  // const res = actions.find((action: Prompt) => {
-  //   return getId(action) == id;
-  // });
-
   const res = nodes.find((node: Node) => getId(node) == id);
 
   if (res) {
     const systemState = await getSystemState();
     systemState.selected_node = res;
-    systemState.graph_state.last_action = "selectNode";
+    systemState.graph_state.last_action = "select";
     systemState.graph_state.last_acted_on = systemState.graph_state.acted_on;
     systemState.graph_state.acted_on = { id, name: res.Node.name };
-    systemState.graph_state.name = res.Node.name;
     setSystemState(systemState);
   }
 }
 
-export async function selectEdge(
-  source: string,
-  target: string
+export async function selectEdge(edge: Edge
 ): Promise<void> {
   const systemState = await getSystemState();
 
-  systemState.graph_state.last_action = "selectEdge";
-  systemState.graph_state.acted_on = { v: source, w: target };
-  systemState.graph_state.name = null;
+  systemState.graph_state.last_action = "select";
+  systemState.graph_state.acted_on = edge;
   setSystemState(systemState);
 }
 
@@ -657,28 +602,19 @@ export async function resetLastAction(): Promise<void> {
   setSystemState(systemState);
 }
 
-export async function nodes(): Promise<string[] | null> {
-  const systemState = await getSystemState();
-  if (systemState.graph_state?.graph != null) {
-    return systemState.graph_state.graph.nodes();
-  }
-  else {
-    return null;
-  }
+export function nodes(graph_state: GraphState): GraphNodeInfo[] {
+  return graph_state.graph.nodes
 }
 
-export async function edges(): Promise<Edge[]> {
-  const systemState = await getSystemState();
-  return systemState.graph_state.graph.edges();
+export function edges(graph_state: GraphState): Edge[] {
+  return graph_state.graph.edges;
 }
 
 // reset the graphState to a new empty graph
 export async function resetGraph(): Promise<void> {
-  // console.log("resetting graph");
   const systemState = await getSystemState();
-  systemState.graph_state.graph = new Graph();
-  systemState.graph_state.last_action = "resetGraph";
-  systemState.graph_state.acted_on = null;
-  systemState.graph_state.name = null;
+  systemState.graph_state.graph = { edges: [], nodes: [] }
+  systemState.graph_state.last_action = "reset";
+  systemState.graph_state.acted_on = undefined;
   setSystemState(systemState);
 }

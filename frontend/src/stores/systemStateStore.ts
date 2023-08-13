@@ -1,13 +1,13 @@
 import { writable } from "svelte/store";
-import { SystemState } from "../system_types";
+import { RuntimeGraphState, SystemState } from "../system_types";
 
 const system_state: SystemState = {
   authenticated: false,
-  websocket_read: false,
-  selected_node: null,
-  graph_state: null,
-  websocket: null,
-  execution_context: null,
+  websocket_ready: false,
+  selected_node: undefined,
+  graph_state: {
+    graph: { nodes: [], edges: [] }
+  },
   nodes: []
 };
 

@@ -131,14 +131,26 @@ export const RuntimeExecutionContext = t.type({
   return_execution_id: option(t.string),
 });
 
-export const RuntimeSystemState = t.type({
-  authenticated: t.boolean,
-  websocket_read: t.boolean,
+
+export const RuntimeOptionalSystemState = t.partial({
   selected_node: RuntimeNode,
-  graph_state: RuntimeGraphState,
   execution_context: RuntimeExecutionContext,
+})
+
+export type OptionalSystemState = TypeOf<typeof RuntimeOptionalSystemState>;
+
+export const RuntimeRequiredSystemState = t.type({
+  authenticated: t.boolean,
+  websocket_ready: t.boolean,
+  graph_state: RuntimeGraphState,
   nodes: t.array(RuntimeNode)
 })
+
+export type RequiredSystemState = TypeOf<typeof RuntimeRequiredSystemState>;
+
+
+export const RuntimeSystemState = t.intersection([RuntimeOptionalSystemState, RuntimeRequiredSystemState])
+
 
 export type SystemState = TypeOf<typeof RuntimeSystemState>;
 

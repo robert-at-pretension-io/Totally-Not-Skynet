@@ -4,7 +4,7 @@ import { PathReporter } from "io-ts/lib/PathReporter";
 import { getSystemState, setSystemState } from "./graph";
 import { ResponseObject, RuntimeResponseObject, SystemState } from "system_types";
 
-export async function setupWebsocketConnection() {
+export async function setupWebsocketConnection(): Promise<WebSocket> {
   let websocket = new WebSocket("ws://138.197.70.163:8080");
   const system_state = await getSystemState();
 
@@ -13,11 +13,13 @@ export async function setupWebsocketConnection() {
     // setup message processor
     websocket = await setupWebsocketMessageHandler(websocket, system_state);
 
-    system_state.websocket_read = true;
-    system_state.websocket = websocket;
+    system_state.websocket_ready = true;
     await setSystemState(system_state);
 
   });
+
+  return websocket;
+
 }
 
 export async function setupWebsocketMessageHandler(websocket: WebSocket, system_state: SystemState): Promise<WebSocket> {
