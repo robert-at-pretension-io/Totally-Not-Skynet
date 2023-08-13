@@ -132,7 +132,7 @@ export function getAllTopologicalOrders(graph: Graph): string[][] {
   }
 
   // get the local graph
-  const local_graph = graphToLocalGraph(graph);
+  const local_graph = returnNeighborMap(graph);
 
   return allTopologicalSorts(local_graph);
 
@@ -140,8 +140,8 @@ export function getAllTopologicalOrders(graph: Graph): string[][] {
 
 
 
-export function graphToLocalGraph(graph: Graph): Map<GraphNodeInfo, string[]> {
-  const node_neightbors: Map<GraphNodeInfo, string[]>;
+export async function returnSuccessorMap(graph: Graph): Promise<Map<GraphNodeInfo, string[]>> {
+  const node_neightbors: Map<GraphNodeInfo, string[]> = new Map();
 
   let graphlib_graph = systemGraphToGraphLib(graph);
 
@@ -151,16 +151,19 @@ export function graphToLocalGraph(graph: Graph): Map<GraphNodeInfo, string[]> {
     const node = my_nodes[i];
     const neighbors = graphlib_graph.successors(node);
     if (neighbors) {
-      node_neightbors[node] = neighbors;
+      let node_info = await getNodeInfo(node);
+      if (node_info) {
+        node_neightbors.set(node_info, neighbors);
+      }
     }
   }
-
-  return local_graph;
+  return node_neightbors;
 }
 
-function allTopologicalSorts(graph: LocalGraph): string[][] {
-  const allOrderings: string[][] = [];
-  const indegreeMap = calculateIndegreeForAllVertex(graph);
+function allTopologicalSorts(graph: Graph): string[][] {
+  const all_orderings: string[][] = [];
+  const neighbor_map = await returnNeighborMap(graph);
+  const indegreeMap = calculateIndegreeForAllVertex(neighbor_map);
   const startNodes = Array.from(Object.keys(indegreeMap)).filter((node) => indegreeMap[node] === 0);
   const visited: { [node: string]: boolean } = {};
 
@@ -195,8 +198,10 @@ function allTopologicalSorts(graph: LocalGraph): string[][] {
   return allOrderings;
 }
 
-function calculateIndegreeForAllVertex(graph: LocalGraph): { [node: string]: number } {
-  const indegreeMap: { [node: string]: number } = {};
+async function calculateIndegreeForAllVertex(graph: Graph): Promise<Map<GraphNodeInfo, number>> {
+  const indegreeMap: Map<GraphNodeInfo, number> = new Map();
+
+
 
   for (const node in graph) {
     indegreeMap[node] = 0;
