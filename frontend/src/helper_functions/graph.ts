@@ -131,10 +131,7 @@ export function getAllTopologicalOrders(graph: Graph): string[][] {
     return [];
   }
 
-  // get the local graph
-  const local_graph = returnNeighborMap(graph);
-
-  return allTopologicalSorts(local_graph);
+  return allTopologicalSorts(graph);
 
 }
 
@@ -144,7 +141,6 @@ export async function returnSuccessorMap(graph: Graph): Promise<Map<GraphNodeInf
   const node_neightbors: Map<GraphNodeInfo, string[]> = new Map();
 
   let graphlib_graph = systemGraphToGraphLib(graph);
-
   const my_nodes = graphlib_graph.nodes();
 
   for (let i = 0; i < my_nodes.length; i++) {
@@ -162,9 +158,9 @@ export async function returnSuccessorMap(graph: Graph): Promise<Map<GraphNodeInf
 
 function allTopologicalSorts(graph: Graph): string[][] {
   const all_orderings: string[][] = [];
-  const neighbor_map = await returnNeighborMap(graph);
-  const indegreeMap = calculateIndegreeForAllVertex(neighbor_map);
-  const startNodes = Array.from(Object.keys(indegreeMap)).filter((node) => indegreeMap[node] === 0);
+  const successor_map = await returnSuccessorMap(graph);
+  const start_nodes = calculateIndegreeForAllVertex(successor_map);
+
   const visited: { [node: string]: boolean } = {};
 
   for (const node in graph) {
@@ -198,22 +194,21 @@ function allTopologicalSorts(graph: Graph): string[][] {
   return allOrderings;
 }
 
-async function calculateIndegreeForAllVertex(graph: Graph): Promise<Map<GraphNodeInfo, number>> {
-  const indegreeMap: Map<GraphNodeInfo, number> = new Map();
+async function returnStartNodes(graph: Graph): Promise<GraphNodeInfo[]> {
 
+  let start_nodes: GraphNodeInfo[] = [];
 
+  let graphlib_graph = systemGraphToGraphLib(graph);
 
-  for (const node in graph) {
-    indegreeMap[node] = 0;
-  }
+  let sources = graphlib_graph.sources();
 
-  for (const node in graph) {
-    for (const neighbor of graph[node]) {
-      indegreeMap[neighbor]++;
+  sources.forEach(async (source_id: string) => {
+    let val = await getNodeInfo(source_id);
+    if (val) {
+      start_nodes.push(val)
     }
-  }
-
-  return indegreeMap;
+  })
+  return start_nodes
 }
 
 export async function getOutputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
