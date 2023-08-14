@@ -31,7 +31,7 @@
     "typescript": "^4.9.4"
   },
   "scripts": {
-    "build-protos": "pwd && ./build-protos.sh",
+    "build-protos": "pwd && ./proto_build.sh",
     "build": "rollup -c ",
     "autobuild": "npm run build-protos && rollup -c -w",
     "dev": "npm run build-protos && run-p start:dev autobuild",
