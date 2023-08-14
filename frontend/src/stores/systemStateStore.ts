@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import { RuntimeGraphState, SystemState } from "../system_types";
+import { SystemState } from "../system_types";
 
 const system_state: SystemState = {
   authenticated: false,

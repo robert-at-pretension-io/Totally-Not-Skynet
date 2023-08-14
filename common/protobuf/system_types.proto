@@ -1,0 +1,202 @@
+syntax = "proto3";
+
+// GraphNodeInfo
+message GraphNodeInfo {
+  string id = 1;
+  string name = 2;
+}
+
+// Edge
+message Edge {
+  GraphNodeInfo source = 1;
+  GraphNodeInfo target = 2;
+}
+
+// GraphAction
+message GraphAction {
+  enum LastAction {
+    ADD = 0;
+    REMOVE = 1;
+    SELECT = 2;
+    DESELECT = 3;
+    RESET = 4;
+    NONE = 5;
+  }
+  LastAction last_action = 1;
+  oneof acted_on {
+    Edge edge = 2;
+    GraphNodeInfo node = 3;
+  }
+  oneof last_acted_on {
+    Edge edge_last = 4;
+    GraphNodeInfo node_last = 5;
+  }
+}
+
+// MongoId
+message MongoId {
+  string oid = 1;
+}
+
+// Prompt
+message Prompt {
+  string prompt = 1;
+  string system = 2;
+}
+
+// Command
+message Command {
+  string command = 1;
+}
+
+// NodeTypeNames
+enum NodeTypeNames {
+  PROMPT = 0;
+  PROCESS = 1;
+  CONDITIONAL = 2;
+  COMMAND = 3;
+}
+
+// Conditional
+message Conditional {
+  map<string, string> system_variables = 1;
+  string statement = 2;
+  map<string, string> options = 3; // assuming ObjectId is replaced with string
+}
+
+// Graph
+message Graph {
+  repeated GraphNodeInfo nodes = 1;
+  repeated Edge edges = 2;
+}
+
+// Process
+message Process {
+  Graph graph = 1;
+  repeated string initial_variables = 2;
+  repeated string topological_order = 3;
+}
+
+// Node
+message Node {
+  MongoId _id = 1;
+  string name = 2;
+  NodeTypeNames type_name = 3;
+  oneof node_content {
+    Prompt prompt = 4;
+    Process process = 5;
+    Conditional conditional = 6;
+    Command command = 7;
+  }
+  string description = 8;
+  repeated string input_variables = 9;
+  repeated string output_variables = 10;
+}
+
+// GraphState
+message GraphState {
+  Graph graph = 1;
+  GraphAction action = 2;
+}
+
+// SystemErrors
+enum SystemErrors {
+  GRAPH_DOESNT_EXIST = 0;
+  GRAPH_STATE_DOESNT_EXIST = 1;
+  OTHER_ERROR = 2;
+  NODE_DOESNT_EXIST = 3;
+}
+
+// VerbTypeNames
+enum VerbTypeNames {
+  POST = 0;
+  PUT = 1;
+  PATCH = 2;
+  DELETE = 3;
+  GET = 4;
+}
+
+// ExecutionContext
+message ExecutionContext {
+  repeated string topological_order = 1;
+  Node current_node = 2; // Use your actual Node type here
+  map<string, string> global_variables = 3;
+  string execution_id = 4;
+  string return_execution_id = 5; // Adapted to string, consider using wrapper or default value
+}
+
+// SystemState
+message SystemState {
+  bool authenticated = 1;
+  bool websocket_ready = 2;
+  GraphState graph_state = 3;
+  repeated Node nodes = 4;
+  Node selected_node = 5; // Adapted to non-optional
+  ExecutionContext execution_context = 6; // Adapted to non-optional
+}
+
+// AuthenticationMessage
+message AuthenticationMessage {
+  string client_email = 1;
+  string client_password = 2;
+}
+
+// UserSettings
+message UserSettings {
+  string openai_api_key = 1;
+  string mongo_db_uri = 2;
+}
+
+// CrudBundle
+message CrudBundle {
+  VerbTypeNames verb = 1;
+  oneof object {
+    Node node = 2;
+    AuthenticationMessage authentication_message = 3;
+    UserSettings user_settings = 4;
+  }
+}
+
+// CommandResponse
+message CommandResponse {
+  string error = 1;
+  string output = 2;
+}
+
+// PromptResponse
+message PromptResponse {
+  string response = 1;
+}
+
+// ConditionalResponse
+message ConditionalResponse {
+  string chosen_option = 1;
+}
+
+// NodeExecutionResponse
+message NodeExecutionResponse {
+  oneof response {
+    PromptResponse prompt_response = 1;
+    CommandResponse command_response = 2;
+    ConditionalResponse conditional_response = 3;
+  }
+}
+
+// ExecutionResponse
+message ExecutionResponse {
+  string execution_id = 1;
+  string container_execution_id = 2; // Adapted to string, consider using wrapper or default value
+  string current_node_id = 3;
+  NodeTypeNames current_node_type = 4;
+  NodeExecutionResponse response = 5;
+}
+
+// ResponseObject
+message ResponseObject {
+  oneof object {
+    Node node = 1;
+    string initial_message = 2; // Adapted to string
+    string user_settings = 3; // Adapted to string
+    ExecutionResponse execution_response = 4;
+  }
+}

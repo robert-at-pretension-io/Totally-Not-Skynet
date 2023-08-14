@@ -2,7 +2,7 @@ import { pipe } from "fp-ts/function";
 import { fold } from "fp-ts/Either";
 import { PathReporter } from "io-ts/lib/PathReporter";
 import { getSystemState, setSystemState } from "./graph";
-import { ResponseObject, RuntimeResponseObject, SystemState } from "system_types";
+import { CrudBundle, ResponseObject, RuntimeResponseObject, SystemState } from "system_types";
 
 export async function setupWebsocketConnection(): Promise<WebSocket> {
   let websocket = new WebSocket("ws://138.197.70.163:8080");
@@ -63,4 +63,9 @@ export async function setupWebsocketMessageHandler(websocket: WebSocket, system_
   });
   return websocket;
 
+}
+export async function sendWebsocketMessage(message: CrudBundle, websocket: WebSocket) {
+  console.log("sending websocket message: ", message);
+  const message_string = JSON.stringify(message);
+  websocket.send(message_string);
 }

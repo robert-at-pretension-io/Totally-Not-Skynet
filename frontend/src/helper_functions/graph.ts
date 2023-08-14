@@ -1,7 +1,6 @@
 import type {
   SystemState,
   Node,
-  CrudBundle,
   GraphNodeInfo,
   Edge,
   SystemErrors,
@@ -11,7 +10,6 @@ import type {
 import { Process, RuntimeGraphNodeInfo, RuntimeNode, RuntimeProcess } from "../system_types";
 import systemStateStore from "stores/systemStateStore";
 import * as graphlib from "graphlib";
-import { System } from "typescript";
 
 // Define the getter and setter
 
@@ -24,31 +22,40 @@ export async function getSystemState(): Promise<SystemState> {
 }
 
 export function systemGraphToGraphLib(graph: Graph) {
-  let g = new graphlib.Graph()
-
+  const g = new graphlib.Graph();
 
   graph.nodes.forEach((node: GraphNodeInfo) => {
     g.setNode(node.id, node.name);
-  })
+  });
 
   graph.edges.forEach((edge: Edge) => {
-    g.setEdge({ v: edge.source.id, w: edge.target.id })
-  })
+    g.setEdge({ v: edge.source.id, w: edge.target.id });
+  });
 
   return g;
 }
 
 export async function handleError(error: SystemErrors) {
   switch (error.name) {
-    case "GraphDoesntExist": {
-
-    }
-    case "OtherError": {
-
-    }
-    default: {
-
-    }
+  case "GraphDoesntExist": {
+    console.log(error);
+    break;
+  }
+  case "OtherError": {
+    console.log(error);
+    break;
+  }
+  case "GraphStateDoesntExist": {
+    console.log(error);
+    break;
+  }
+  case "NodeDoesntExist": {
+    console.log(error);
+    break;
+  }
+  default: {
+    console.log("Uncovered Error");
+  }
   }
 }
 
@@ -64,7 +71,6 @@ export async function getInputVariablesByNodeId(nodeId: string): Promise<string[
 
 export async function validateGraph(systemState: SystemState): Promise<GraphNodeInfo[] | boolean> {
   const graph = systemState.graph_state?.graph;
-
 
   if (systemState.selected_node && graph) {
     const selected_node: Node = systemState.selected_node;
@@ -126,7 +132,7 @@ export async function getAllTopologicalOrders(graph: Graph): Promise<GraphNodeIn
   // check that there is a single component (that the graph is connected) AND
   // that there are no cycles in the graph
 
-  let graphlib_graph = systemGraphToGraphLib(graph);
+  const graphlib_graph = systemGraphToGraphLib(graph);
 
   if (!graphlib.alg.isAcyclic(graphlib_graph) || graphlib.alg.components(graphlib_graph).length !== 1) {
     return [];
@@ -136,27 +142,25 @@ export async function getAllTopologicalOrders(graph: Graph): Promise<GraphNodeIn
 
 }
 
-
-
 export async function returnSuccessorMap(graph: Graph): Promise<Map<GraphNodeInfo, GraphNodeInfo[]>> {
   const node_neightbors: Map<GraphNodeInfo, GraphNodeInfo[]> = new Map();
 
-  let graphlib_graph = systemGraphToGraphLib(graph);
+  const graphlib_graph = systemGraphToGraphLib(graph);
   const my_nodes = graphlib_graph.nodes();
 
   for (let i = 0; i < my_nodes.length; i++) {
     const node = my_nodes[i];
     const neighbors = graphlib_graph.successors(node);
     if (neighbors) {
-      let node_info = await getNodeInfo(node);
+      const node_info = await getNodeInfo(node);
       if (node_info) {
-        let neighbors_node_info: GraphNodeInfo[] = [];
+        const neighbors_node_info: GraphNodeInfo[] = [];
         neighbors.forEach(async (neighbor) => {
-          let neighbor_node_info = await getNodeInfo(neighbor);
+          const neighbor_node_info = await getNodeInfo(neighbor);
           if (neighbor_node_info) {
             neighbors_node_info.push(neighbor_node_info);
           }
-        })
+        });
         node_neightbors.set(node_info, neighbors_node_info);
       }
     }
@@ -169,12 +173,11 @@ async function allTopologicalSorts(graph: Graph): Promise<GraphNodeInfo[][]> {
   const successor_map = await returnSuccessorMap(graph);
   const start_nodes = await returnStartNodes(graph);
   const in_degree_map = await returnAllIndegree(graph);
-  let visited: Map<GraphNodeInfo, boolean> = new Map();
+  const visited: Map<GraphNodeInfo, boolean> = new Map();
 
   graph.nodes.forEach((node) => {
     visited.set(node, false);
-  })
-
+  });
 
   function helper(node: GraphNodeInfo, in_degree_map: Map<GraphNodeInfo, number>, visited: Map<GraphNodeInfo, boolean>, stack: GraphNodeInfo[]): void {
 
@@ -186,28 +189,26 @@ async function allTopologicalSorts(graph: Graph): Promise<GraphNodeInfo[][]> {
       all_orderings.push([...stack]);
     } else {
 
-      let successors = successor_map.get(node);
+      const successors = successor_map.get(node);
 
       if (successors) {
         successors.forEach((successor) => {
-          let count = in_degree_map.get(successor);
-          let is_visited = visited.get(successor)
+          const count = in_degree_map.get(successor);
+          const is_visited = visited.get(successor);
 
           if (count && is_visited != undefined) {
-            let new_count = count - 1;
-            in_degree_map.set(successor, new_count)
+            const new_count = count - 1;
+            in_degree_map.set(successor, new_count);
 
             if (new_count == 0 && !is_visited) {
               helper(successor, in_degree_map, visited, stack);
             }
 
-            in_degree_map.set(successor, count)
-
+            in_degree_map.set(successor, count);
 
           }
 
-
-        })
+        });
       }
 
     }
@@ -220,39 +221,37 @@ async function allTopologicalSorts(graph: Graph): Promise<GraphNodeInfo[][]> {
     helper(node, in_degree_map, visited, []);
   });
 
-
   return all_orderings;
 }
 
 async function returnStartNodes(graph: Graph): Promise<GraphNodeInfo[]> {
 
-  let start_nodes: GraphNodeInfo[] = [];
+  const start_nodes: GraphNodeInfo[] = [];
 
-  let graphlib_graph = systemGraphToGraphLib(graph);
+  const graphlib_graph = systemGraphToGraphLib(graph);
 
-  let sources = graphlib_graph.sources();
+  const sources = graphlib_graph.sources();
 
   sources.forEach(async (source_id: string) => {
-    let val = await getNodeInfo(source_id);
+    const val = await getNodeInfo(source_id);
     if (val) {
-      start_nodes.push(val)
+      start_nodes.push(val);
     }
-  })
-  return start_nodes
+  });
+  return start_nodes;
 }
 
 async function returnAllIndegree(graph: Graph): Promise<Map<GraphNodeInfo, number>> {
 
-  let in_degree_map: Map<GraphNodeInfo, number> = new Map();
+  const in_degree_map: Map<GraphNodeInfo, number> = new Map();
 
-  let graphlib_graph = systemGraphToGraphLib(graph);
-
+  const graphlib_graph = systemGraphToGraphLib(graph);
 
   graphlib_graph.nodes().forEach(async (source_id: string) => {
-    let val = await getNodeInfo(source_id);
+    const val = await getNodeInfo(source_id);
 
     let count = 0;
-    let maybe_count = graphlib_graph.predecessors(source_id);
+    const maybe_count = graphlib_graph.predecessors(source_id);
 
     if (maybe_count) {
       count = maybe_count.length;
@@ -274,10 +273,9 @@ export async function getOutputVariablesByNodeId(nodeId: string): Promise<string
   return null;
 }
 
-
 export async function getAncestorNodes(node: string, graph: Graph): Promise<Node[]> {
 
-  let graphlib_graph = systemGraphToGraphLib(graph);
+  const graphlib_graph = systemGraphToGraphLib(graph);
 
   const ancestors: Node[] = [];
   const visitedNodes = new Set<string>();
@@ -345,7 +343,7 @@ export async function getNodeName(id: string): Promise<string | undefined> {
 
 export async function printEdge(edge: Edge) {
   const sourceName = edge.source.name;
-  const targetName = edge.target.name
+  const targetName = edge.target.name;
   console.log("edge: " + sourceName + " -> " + targetName);
 }
 
@@ -361,53 +359,51 @@ export async function setSystemState(systemState: SystemState) {
   systemStateStore.set(systemState);
 }
 
-export async function graphHasNode(node: GraphNodeInfo | Node, graph_state: GraphState): Promise<Boolean | void> {
+export async function graphHasNode(node: GraphNodeInfo | Node, graph_state: GraphState): Promise<boolean | void> {
   let node_name = "";
 
   if (RuntimeNode.is(node)) {
-    node_name = node.Node.name
+    node_name = node.Node.name;
   }
   else if (RuntimeGraphNodeInfo.is(node)) {
     node_name = node.name;
   }
 
   if (!graph_state.graph) {
-    await handleError({ name: "GraphDoesntExist" })
+    await handleError({ name: "GraphDoesntExist" });
   }
   else {
-    let graph = systemGraphToGraphLib(graph_state.graph);
-    return graph.hasNode(node_name)
+    const graph = systemGraphToGraphLib(graph_state.graph);
+    return graph.hasNode(node_name);
   }
 
 }
 
-export async function graphHasEdge(edge: Edge, graph_state: GraphState): Promise<Boolean | void> {
+export async function graphHasEdge(edge: Edge, graph_state: GraphState): Promise<boolean | void> {
   if (await graphExists(graph_state)) {
-    let graph = systemGraphToGraphLib(graph_state.graph);
-    return graph.hasEdge(edge.source.id, edge.target.id)
+    const graph = systemGraphToGraphLib(graph_state.graph);
+    return graph.hasEdge(edge.source.id, edge.target.id);
   }
 }
-
 
 export async function graphExists(graph_state: GraphState): Promise<boolean | void> {
   if (!(graph_state.graph)) {
-    await handleError({ name: "GraphDoesntExist" })
+    await handleError({ name: "GraphDoesntExist" });
   }
   else {
     return true;
   }
 }
 
-
 export async function addEdge(edge: Edge, graph_state: GraphState): Promise<void> {
 
-  let system_state = await getSystemState();
+  const system_state = await getSystemState();
 
-  console.log("Adding Edge:")
+  console.log("Adding Edge:");
   await printEdge(edge);
 
   if (!graph_state.graph.edges.includes(edge)) {
-    addEdge(edge, graph_state)
+    addEdge(edge, graph_state);
   }
   graph_state.last_action = "add";
   graph_state.acted_on = edge;
@@ -422,19 +418,19 @@ export async function getNodeInfo(node: GraphNodeInfo | Node | string): Promise<
     return node;
   }
   else if (typeof node === "string") {
-    let node_id = await getNode(node as string);
+    const node_id = await getNode(node as string);
     if (node_id) {
       return await getNodeInfo(node_id);
     }
     else {
-      await handleError({ name: "NodeDoesntExist" })
+      await handleError({ name: "NodeDoesntExist" });
     }
   }
   else {
     return {
       id: node.Node._id.$oid,
       name: node.Node.name
-    }
+    };
   }
 }
 
@@ -448,7 +444,7 @@ export async function addNode(node: GraphNodeInfo | Node, graph_state: GraphStat
   if (await !graphHasNode(node, graph_state)) {
     // Based on the definition of graphHasNode, we can assume that the graph is defined.
     console.log("Adding node to graph");
-    let graph = systemGraphToGraphLib(graph_state.graph)
+    const graph = systemGraphToGraphLib(graph_state.graph);
     graph.setNode(node.id, node.name);
   }
   else {
@@ -465,19 +461,18 @@ export async function addNode(node: GraphNodeInfo | Node, graph_state: GraphStat
 export async function processToGraphVisualization(process: Process, graph_state: GraphState): Promise<void> {
   await resetGraph();
 
-  let graph = graph_state.graph;
-  let nodes = graph.nodes
+  const graph = graph_state.graph;
+  const nodes = graph.nodes;
 
   //loop through the nodes
   for (let i = 0; i < nodes.length; i++) {
-    let node = await getNode(nodes[i]);
+    const node = await getNode(nodes[i]);
     if (node) {
       await addNode(node, graph_state);
     }
   }
 
-  let topOrder: GraphNodeInfo[][] = await getAllTopologicalOrders(graph);
-
+  const topOrder: GraphNodeInfo[][] = await getAllTopologicalOrders(graph);
 
   // This function doesn't exist yet.
   findValidTopOrder(topOrder);
@@ -512,27 +507,17 @@ export function addVariablesToPrompt(prompt: string, variables: Map<string, stri
   return new_prompt;
 }
 
-export async function sendWebsocketMessage(message: CrudBundle, websocket: WebSocket) {
-
-  console.log("sending websocket message: ", message);
-  const systemState = await getSystemState();
-  const message_string = JSON.stringify(message);
-  websocket.send(message_string);
-}
-
-
 export async function removeNode(id: string): Promise<void> {
   const systemState = await getSystemState();
-  let node_info = await getNodeInfo(id);
+  const node_info = await getNodeInfo(id);
   if (node_info) {
-    let remove_index = systemState.graph_state.graph.nodes.indexOf(node_info);
+    const remove_index = systemState.graph_state.graph.nodes.indexOf(node_info);
     systemState.graph_state.graph.nodes.splice(remove_index);
     systemState.graph_state.last_action = "remove";
     systemState.graph_state.acted_on = node_info;
     setSystemState(systemState);
   }
 }
-
 
 export async function removeEdge(
   _sourceId: string,
@@ -603,7 +588,7 @@ export async function resetLastAction(): Promise<void> {
 }
 
 export function nodes(graph_state: GraphState): GraphNodeInfo[] {
-  return graph_state.graph.nodes
+  return graph_state.graph.nodes;
 }
 
 export function edges(graph_state: GraphState): Edge[] {
@@ -613,7 +598,7 @@ export function edges(graph_state: GraphState): Edge[] {
 // reset the graphState to a new empty graph
 export async function resetGraph(): Promise<void> {
   const systemState = await getSystemState();
-  systemState.graph_state.graph = { edges: [], nodes: [] }
+  systemState.graph_state.graph = { edges: [], nodes: [] };
   systemState.graph_state.last_action = "reset";
   systemState.graph_state.acted_on = undefined;
   setSystemState(systemState);

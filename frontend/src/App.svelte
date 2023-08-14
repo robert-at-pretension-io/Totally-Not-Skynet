@@ -8,16 +8,20 @@
   import AuthPage from "./components/AuthPage.svelte";
 
   let authenticated = false;
+  let websocket: WebSocket;
 
   onMount(async () => {
     if (!$systemStateStore.websocket_ready) {
       // startup websocket connection
-      await setupWebsocketConnection();
+      websocket = await setupWebsocketConnection();
     }
   });
 
   $: {
     authenticated = $systemStateStore.authenticated;
+    if ($systemStateStore.websocket_ready) {
+      console.log("Websocket Ready to send Messages!");
+    }
   }
 </script>
 

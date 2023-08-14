@@ -32,7 +32,6 @@ export const GraphAction = t.partial({
   last_acted_on: t.union([RuntimeEdge, RuntimeGraphNodeInfo])
 });
 
-
 export const RuntimeMongoId = t.type({
   $oid: t.string,
 });
@@ -44,13 +43,25 @@ export const RuntimePrompt = t.type({
   }),
 });
 
-export const RuntimeProcess = t.type({
-  Process: t.type({
-    graph: t.string,
-    initial_variables: t.array(t.string),
-    topological_order: t.array(t.string),
+export const RuntimeCommand = t.type({
+  Command: t.type({
+    command: t.string,
   }),
 });
+
+
+
+export const RuntimeNodeTypeNames = t.keyof({
+  "Prompt": null,
+  "Process": null,
+  "Conditional": null,
+  "Command": null
+});
+
+
+
+
+
 
 export const RuntimeConditional = t.type({
   Conditional: t.type({
@@ -60,20 +71,25 @@ export const RuntimeConditional = t.type({
   }),
 });
 
-export const RuntimeCommand = t.type({
-  Command: t.type({
-    command: t.string,
+
+
+
+export const RuntimeGraph = t.type({
+  nodes: t.array(RuntimeGraphNodeInfo),
+  edges: t.array(RuntimeEdge)
+});
+
+export type Graph = TypeOf<typeof RuntimeGraph>;
+
+export const RuntimeProcess = t.type({
+  Process: t.type({
+    graph: RuntimeGraph,
+    initial_variables: t.array(t.string),
+    topological_order: t.array(t.string),
   }),
 });
 
 export const RuntimeNodeType = t.union([RuntimePrompt, RuntimeProcess, RuntimeConditional, RuntimeCommand]);
-
-export const RuntimeNodeTypeNames = t.keyof({
-  "Prompt": null,
-  "Process": null,
-  "Conditional": null,
-  "Command": null
-});
 
 export const RuntimeNode = t.type({
   Node: t.type({
@@ -88,29 +104,19 @@ export const RuntimeNode = t.type({
 });
 
 
-export const RuntimeGraph = t.type({
-  nodes: t.array(RuntimeGraphNodeInfo),
-  edges: t.array(RuntimeEdge)
-})
-
-export type Graph = TypeOf<typeof RuntimeGraph>;
-
-const Graph = t.type({
+const RequiredGraph = t.type({
   graph: RuntimeGraph
 });
 
-export const RuntimeGraphState = t.intersection([Graph, GraphAction]);
+
+
+export const RuntimeGraphState = t.intersection([RuntimeGraph, GraphAction]);
 
 export type GraphState = TypeOf<typeof RuntimeGraphState>;
-
-
 
 export const RuntimeSystemErrors = t.type({
   name: t.union([t.literal("GraphDoesntExist"), t.literal("GraphStateDoesntExist"), t.literal("OtherError"), t.literal("NodeDoesntExist")])
 });
-
-
-
 
 export const RuntimeVerbTypeNames = t.keyof({
   "POST": null,
@@ -120,9 +126,6 @@ export const RuntimeVerbTypeNames = t.keyof({
   "GET": null,
 });
 
-
-
-
 export const RuntimeExecutionContext = t.type({
   topological_order: t.array(t.string),
   current_node: RuntimeNode, // Use your actual Node type here
@@ -131,11 +134,10 @@ export const RuntimeExecutionContext = t.type({
   return_execution_id: option(t.string),
 });
 
-
 export const RuntimeOptionalSystemState = t.partial({
   selected_node: RuntimeNode,
   execution_context: RuntimeExecutionContext,
-})
+});
 
 export type OptionalSystemState = TypeOf<typeof RuntimeOptionalSystemState>;
 
@@ -144,16 +146,13 @@ export const RuntimeRequiredSystemState = t.type({
   websocket_ready: t.boolean,
   graph_state: RuntimeGraphState,
   nodes: t.array(RuntimeNode)
-})
+});
 
 export type RequiredSystemState = TypeOf<typeof RuntimeRequiredSystemState>;
 
-
-export const RuntimeSystemState = t.intersection([RuntimeOptionalSystemState, RuntimeRequiredSystemState])
-
+export const RuntimeSystemState = t.intersection([RuntimeOptionalSystemState, RuntimeRequiredSystemState]);
 
 export type SystemState = TypeOf<typeof RuntimeSystemState>;
-
 
 export const RuntimeAuthenticationMessage = t.type({
   AuthenticationMessage: t.type({
