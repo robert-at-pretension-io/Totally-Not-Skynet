@@ -22,3 +22,8 @@ walkdir = "2.3.3"
 dotenv = "0.15.0"
 anyhow = "1.0"
 thiserror = "1.0"
+prost = "0.8.0"
+prost-types = "0.8.0"
+
+[build-dependencies]
+prost-build = "0.8.0"

@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package skynet;
+
 // GraphNodeInfo
 message GraphNodeInfo {
   string id = 1;
@@ -195,7 +197,7 @@ message ExecutionResponse {
 message ResponseObject {
   oneof object {
     Node node = 1;
-    string initial_message = 2; // Adapted to string
+    string authentication_method = 2; // Adapted to string
     string user_settings = 3; // Adapted to string
     ExecutionResponse execution_response = 4;
   }

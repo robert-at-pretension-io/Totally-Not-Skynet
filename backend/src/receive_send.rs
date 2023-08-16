@@ -189,7 +189,7 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            CrudBundleObject::InitialMessage(_initial_message) => {
+            CrudBundleObject::AuthenticationMessage(_authentication_message) => {
                 match verb {
                     VerbTypeNames::POST => {
                         println!("Initializing project for {}", msg.0.name);
@@ -235,7 +235,7 @@ pub async fn start_message_sending_loop(
 
                         // need to send an additional message to the client to let them know that the project has been initialized
 
-                        send_message(&tx, msg.0.clone(), ResponseObject::InitialMessage).await;
+                        send_message(&tx, msg.0.clone(), ResponseObject::AuthorizationToken).await;
                     }
                     _ => {
                         println!("Verb not supported for initial message: {:?}", verb);

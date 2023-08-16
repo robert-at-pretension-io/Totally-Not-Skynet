@@ -202,7 +202,7 @@ export const RuntimeExecutionResponse = t.type({
 
 export const RuntimeResponseObject = t.union([
   RuntimeNode,
-  t.literal("InitialMessage"),
+  t.literal("AuthenticationMessage"),
   t.literal("UserSettings"),
   t.type({ ExecutionContext: RuntimeExecutionResponse }),
 ]);
