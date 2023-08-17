@@ -1,6 +1,7 @@
 use crate::openai::{ ChatMessage, Role, get_openai_completion };
 use crate::mongo::{ get_actions_and_processes, return_db };
-use crate::domain::{ Action, Process, MessageTypes };
+use crate::generated_types::{ Action, Process, MessageTypes };
+
 use crate::utils::{ parse_message };
 use crate::settings::UserSettings;
 

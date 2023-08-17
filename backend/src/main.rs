@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use tokio::sync::{ mpsc, Mutex };
 
-mod domain;
+// mod domain;
 mod mongo;
 mod openai;
 mod receive_send;
@@ -10,6 +10,10 @@ mod utils;
 mod websocket;
 mod env_vars_checker;
 mod check_if_docker_installed;
+
+pub mod generated_types {
+    include!(concat!(env!("OUT_DIR"), "/skynet.types.rs"));
+}
 
 use crate::receive_send::start_message_sending_loop;
 use crate::websocket::start_websocket_server;

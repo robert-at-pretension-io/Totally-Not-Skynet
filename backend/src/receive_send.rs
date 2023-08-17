@@ -1,4 +1,4 @@
-use crate::domain::{
+use crate::generated_types::{
     CrudBundle,
     Node,
     NodeType,
@@ -11,6 +11,7 @@ use crate::domain::{
     PromptResponse,
     UserSettings,
 };
+
 use crate::mongo::{ get_nodes, return_db };
 use crate::openai::{ get_openai_completion, ChatMessage, Role };
 use crate::utils::{ parse_message, create_node_response_object };
@@ -50,7 +51,7 @@ pub async fn start_message_sending_loop(
     mut client_rx: mpsc::Receiver<(Identity, String)>
 ) {
     let mut runtime_settings: HashMap<Identity, UserSettings> = HashMap::new();
-    let mut messages_thus_far: HashMap<Identity, Vec<String>> = HashMap::new();
+    // let mut messages_thus_far: HashMap<Identity, Vec<String>> = HashMap::new();
     let mut docker_containers: HashMap<Identity, String> = HashMap::new();
 
     // startup the docker container here
@@ -83,7 +84,7 @@ pub async fn start_message_sending_loop(
 
                         let db = return_db(db_uri).await;
 
-                        let node_collection = db.collection::<crate::domain::Node>("nodes");
+                        let node_collection = db.collection::<Node>("nodes");
 
                         mutable_node._id = Some(bson::oid::ObjectId::new());
 
@@ -242,7 +243,7 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            CrudBundleObject::UserSettings(user_settings) => {
+            CrudBundleObject::UserSettings(_user_settings) => {
                 match verb {
                     VerbTypeNames::GET => {
                         println!("Setting user settings for {}", msg.0.name);

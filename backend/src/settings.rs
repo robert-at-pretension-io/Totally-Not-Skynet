@@ -1,5 +1,5 @@
 use std::env;
-use crate::domain::UserSettings;
+use crate::generated_types::UserSettings;
 
 impl UserSettings {
     pub fn new() -> Option<UserSettings> {

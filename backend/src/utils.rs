@@ -1,8 +1,11 @@
-use crate::domain::ExecutionContext;
-use crate::domain::ExecutionResponse;
-use crate::domain::NodeExecutionResponse;
-use crate::domain::ResponseObject;
-use crate::domain::CrudBundle;
+use crate::generated_types::{
+    ExecutionContext,
+    ExecutionResponse,
+    NodeExecutionResponse,
+    ResponseObject,
+    CrudBundle,
+    NodeTypeName,
+};
 
 pub fn create_node_response_object(
     execution_clone: ExecutionContext,
@@ -12,7 +15,7 @@ pub fn create_node_response_object(
         execution_id: execution_clone.execution_id,
         container_execution_id: execution_clone.container_execution_id,
         current_node_id: execution_clone.current_node._id.clone().unwrap().to_string(),
-        current_node_type: crate::domain::NodeTypeName::Command,
+        current_node_type: NodeTypeName::Command,
         response: node_execution_response,
     };
 
