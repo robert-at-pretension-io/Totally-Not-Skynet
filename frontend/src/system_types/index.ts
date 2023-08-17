@@ -24,9 +24,9 @@ export type Edge = TypeOf<typeof RuntimeEdge>;
 
 export const GraphAction = t.partial({
   last_action: t.union([t.literal("add"), t.literal("remove"), t.literal("select"),
-  t.literal("deselect"),
-  t.literal("reset"),
-  t.literal("none")
+    t.literal("deselect"),
+    t.literal("reset"),
+    t.literal("none")
   ]),
   acted_on: t.union([RuntimeEdge, RuntimeGraphNodeInfo]),
   last_acted_on: t.union([RuntimeEdge, RuntimeGraphNodeInfo])
@@ -49,19 +49,12 @@ export const RuntimeCommand = t.type({
   }),
 });
 
-
-
 export const RuntimeNodeTypeNames = t.keyof({
   "Prompt": null,
   "Process": null,
   "Conditional": null,
   "Command": null
 });
-
-
-
-
-
 
 export const RuntimeConditional = t.type({
   Conditional: t.type({
@@ -70,9 +63,6 @@ export const RuntimeConditional = t.type({
     options: t.record(t.string, t.string), // assuming ObjectId is replaced with string
   }),
 });
-
-
-
 
 export const RuntimeGraph = t.type({
   nodes: t.array(RuntimeGraphNodeInfo),
@@ -103,12 +93,9 @@ export const RuntimeNode = t.type({
   })
 });
 
-
 const RequiredGraph = t.type({
   graph: RuntimeGraph
 });
-
-
 
 export const RuntimeGraphState = t.intersection([RuntimeGraph, GraphAction]);
 

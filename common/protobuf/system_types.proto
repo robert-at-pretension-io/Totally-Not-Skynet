@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package skynet;
+package skynet.types;
 
 // GraphNodeInfo
 message GraphNodeInfo {
@@ -111,11 +111,11 @@ enum SystemErrors {
 
 // VerbTypeNames
 enum VerbTypeNames {
-  POST = 0;
-  PUT = 1;
-  PATCH = 2;
-  DELETE = 3;
-  GET = 4;
+  Post = 0;
+  Put = 1;
+  Patch = 2;
+  Delete = 3;
+  Get = 4;
 }
 
 // ExecutionContext
@@ -197,7 +197,7 @@ message ExecutionResponse {
 message ResponseObject {
   oneof object {
     Node node = 1;
-    string authentication_method = 2; // Adapted to string
+    string authentication_message = 2; // Adapted to string
     string user_settings = 3; // Adapted to string
     ExecutionResponse execution_response = 4;
   }
