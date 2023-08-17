@@ -1,5 +1,5 @@
-use mongodb::{ options::{ ClientOptions }, Client };
-use crate::generated_types::{ Node };
+use mongodb::{ options::ClientOptions, Client };
+use crate::generated_types::Node;
 
 pub async fn get_nodes(db: &mongodb::Database) -> Vec<Node> {
     let node_collection = db.collection::<Node>("nodes");

@@ -13,20 +13,21 @@ pub fn create_node_response_object(
     let execution_response: ExecutionResponse = ExecutionResponse {
         execution_id: execution_clone.execution_id,
         container_execution_id: execution_clone.return_execution_id,
-        current_node_id: execution_clone.current_node.id.clone().unwrap().to_string(),
+        current_node_id: execution_clone.current_node.unwrap().id.clone(),
         current_node_type: NodeTypeName::Command,
         response: Some(node_execution_response),
     };
 
-    let response_object: ResponseObject =
-        ResponseObject::object::ExecutionResponse(execution_response);
+    let response_object: ResponseObject = ResponseObject {
+        object: ExecutionResponse(execution_response),
+    };
 
     response_object
 }
 
 use prost::Message;
 // use base64::{ encode };
-use Engine::encode;
+use base64::Engine::encode;
 
 pub fn to_base64_string<M: Message>(message: &M) -> Result<String, prost::EncodeError> {
     // Create a buffer to hold the serialized bytes
@@ -63,7 +64,7 @@ pub fn parse_message(message_str: &str) -> Option<CrudBundle> {
     // };
 }
 
-use Engine::decode;
+use base64::Engine::decode;
 
 fn typed_object_from_base64_string<M: Message + Default>(
     base64_string: &str

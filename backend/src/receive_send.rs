@@ -69,10 +69,10 @@ pub async fn start_message_sending_loop(
             println!("Received a parsed message from the client: {:?}", message_contents);
         }
 
-        let verb: VerbTypeNames = message_contents.verb.clone();
+        let verb: VerbTypeNames = message_contents.verb.clone().as_str_name();
 
-        match message_contents.object {
-            CrudBundleObject::Node(node) => {
+        match CrudBundle::from_i32(message_contents.object) {
+            Some(Node(node)) => {
                 match verb {
                     VerbTypeNames::Post => {
                         let mut mutable_node = node.clone();
@@ -96,7 +96,7 @@ pub async fn start_message_sending_loop(
                             .unwrap()
                             .unwrap();
 
-                        let response_object = ResponseObject::response::Node(inserted_node);
+                        let response_object = ResponseObject { response: Node(inserted_node) };
 
                         send_message(&tx, msg.0.clone(), response_object).await;
                     }
@@ -176,8 +176,9 @@ pub async fn start_message_sending_loop(
                         } else {
                             println!("Updated {} nodes", update_result.modified_count);
 
-                            let response_object: ResponseObject =
-                                ResponseObject::Object::Node(updated_node);
+                            let response_object: ResponseObject = ResponseObject {
+                                object: Node(updated_node),
+                            };
 
                             send_message(&tx, msg.0.clone(), response_object).await;
                         }
@@ -187,7 +188,7 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            CrudBundleObject::AuthenticationMessage(_authentication_message) => {
+            Some(AuthenticationMessage(_authentication_message)) => {
                 match verb {
                     VerbTypeNames::Post => {
                         println!("Initializing project for {}", msg.0.name);
@@ -205,11 +206,9 @@ pub async fn start_message_sending_loop(
                         println!("Found the following nodes: {:?}", nodes);
 
                         for node in &nodes {
-                            send_message(
-                                &tx,
-                                msg.0.clone(),
-                                ResponseObject::Object::Node(node.clone())
-                            ).await;
+                            send_message(&tx, msg.0.clone(), ResponseObject {
+                                object: Node(node.clone()),
+                            }).await;
                         }
 
                         const IMAGE: &str = "alpine:3";
@@ -243,7 +242,7 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            CrudBundleObject::UserSettings(_user_settings) => {
+            Some(UserSettings(_user_settings)) => {
                 match verb {
                     VerbTypeNames::Get => {
                         println!("Setting user settings for {}", msg.0.name);
@@ -288,7 +287,7 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            CrudBundleObject::ExecutionContext(execution_context) => {
+            Some(ExecutionContext(execution_context)) => {
                 let node = execution_context.current_node.clone();
                 let execution_clone: ExecutionContext = execution_context.clone();
 
@@ -328,11 +327,11 @@ pub async fn start_message_sending_loop(
                                         Ok(res) => {
                                             let response_object = create_node_response_object(
                                                 execution_clone,
-                                                NodeExecutionResponse::response::PromptResponse(
-                                                    PromptResponse {
+                                                NodeExecutionResponse {
+                                                    response: PromptResponse(PromptResponse {
                                                         response: res,
-                                                    }
-                                                )
+                                                    }),
+                                                }
                                             );
 
                                             send_message(&tx, msg.0.clone(), response_object).await;
@@ -389,13 +388,14 @@ pub async fn start_message_sending_loop(
 
                                             // Once we've read all the output, send it to the client
 
-                                            let node_execution_response =
-                                                NodeExecutionResponse::response::CommandResponse(
-                                                    CommandResponse {
-                                                        error: "".to_string(),
-                                                        output: full_output,
-                                                    }
-                                                );
+                                            use crate::generated_types::node_execution_response::Response::CommandResponse;
+
+                                            let node_execution_response = NodeExecutionResponse {
+                                                response: Some(CommandResponse {
+                                                    error: "".to_string(),
+                                                    output: full_output,
+                                                }),
+                                            };
 
                                             let response_object: ResponseObject =
                                                 create_node_response_object(
@@ -421,6 +421,9 @@ pub async fn start_message_sending_loop(
                         }
                     }
                 }
+            }
+            None => {
+                println!("odd...");
             }
         }
     }
