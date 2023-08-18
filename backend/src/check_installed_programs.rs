@@ -129,3 +129,9 @@ fn run_command(command: &str, args: &[&str]) -> Result<()> {
         Err(SQLiteCheckError::CommandFailed(command.to_string()).into())
     }
 }
+
+pub fn check_all_programs() -> Result<()> {
+    docker_check()?;
+    sqlite_check()?;
+    Ok(())
+}

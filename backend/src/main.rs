@@ -1,5 +1,8 @@
 use std::sync::Arc;
 use tokio::sync::{ mpsc, Mutex };
+use r2d2::Pool;
+use r2d2_sqlite::SqliteConnectionManager;
+use std::env;
 
 // mod domain;
 mod mongo;
@@ -33,31 +36,29 @@ async fn main() {
         }
     }
 
-    // setup docker client
-    match check_installed_programs::docker_check() {
-        Ok(_) => {
-            println!("Docker check was successful!");
-        }
-        Err(e) => {
-            panic!("Error occurred during Docker check: {}", e);
-        }
-    }
-
-    match check_installed_programs::install_sqlite3() {
-        _ => {
-            println!("uhhh maybe that worked to install sqlite3");
-        }
-    }
+    // assert check required installed programs
+    assert!(check_installed_programs::check_all_programs().is_ok());
 
     // Setup the db:
-    match sqlite_helper_functions::get_sqlite_db() {
+    match sqlite_helper_functions::setup_sqlite_db() {
         Ok(_) => {
-            println!("sqlite working..");
+            println!("sqlite working.. Tables are setup!");
         }
         Err(err) => {
             panic!("Oh goodness... {:?}", err);
         }
     }
+
+    let key = "SQLITE_FILE_LOCATION";
+    let sqlite_location = env::var(key).unwrap();
+
+    let manager = SqliteConnectionManager::file(sqlite_location);
+    let pool = match Pool::new(manager) {
+        Ok(p) => p,
+        Err(err) => {
+            panic!("Failed to create SQLite connection pool: {:?}", err);
+        }
+    };
 
     let (tx, rx) = mpsc::unbounded_channel();
     let rx = Arc::new(Mutex::new(rx));
@@ -69,9 +70,11 @@ async fn main() {
         start_websocket_server(rx.clone(), client_tx).await;
     });
 
+    let arc_pool = Arc::new(pool.clone());
+
     // Spawn the message sender task
     let sender_task = tokio::spawn(async move {
-        start_message_sending_loop(tx, client_rx).await;
+        start_message_sending_loop(tx, client_rx, arc_pool).await;
     });
 
     // Wait for both tasks to complete

@@ -25,7 +25,10 @@ thiserror = "1.0"
 prost = "0.11"
 prost-types = "0.11"
 base64 = "0.21.2"
-rusqlite = "0.29.0"
+rusqlite = "*"
+r2d2 = "*"
+r2d2_sqlite = "*"
+
 
 [build-dependencies]
 prost-build = "0.11"

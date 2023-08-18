@@ -12,8 +12,19 @@ use crate::generated_types::{
     node_execution_response,
 };
 
+use std::sync::Arc;
+
+use crate::generated_types::response_object::Object::Node;
+
 use crate::openai::{ get_openai_completion, ChatMessage, Role };
 use crate::utils::{ parse_message, create_node_response_object };
+
+use crate::sqlite_helper_functions::{ update_node, insert_node, setup_sqlite_db };
+
+use r2d2::Pool;
+use r2d2_sqlite::SqliteConnectionManager;
+use rusqlite::Connection;
+use tokio::sync::mpsc::UnboundedSender;
 
 // use bollard::container::Config;
 // use bollard::exec::{ CreateExecOptions, StartExecResults };
@@ -22,7 +33,6 @@ use bson::doc;
 use serde::{ Deserialize, Serialize };
 use std::collections::HashMap;
 use tokio::sync::mpsc;
-use tokio::sync::mpsc::UnboundedSender;
 use tokio_tungstenite::tungstenite::Message;
 use crate::generated_types::node_execution_response::Response;
 
@@ -46,7 +56,8 @@ impl Identity {
 pub async fn start_message_sending_loop(
     // docker: Docker,
     tx: UnboundedSender<(Identity, Message)>,
-    mut client_rx: mpsc::Receiver<(Identity, String)>
+    mut client_rx: mpsc::Receiver<(Identity, String)>,
+    pool: Arc<Pool<SqliteConnectionManager>>
 ) {
     let mut runtime_settings: HashMap<Identity, UserSettings> = HashMap::new();
     // let mut messages_thus_far: HashMap<Identity, Vec<String>> = HashMap::new();
@@ -74,8 +85,6 @@ pub async fn start_message_sending_loop(
 
         match message_contents.object {
             Some(crud_bundle::Object::Node(node)) => {
-                todo!("Add create node function for sqlite here");
-
                 match verb {
                     VerbTypeNames::Post => {
                         let mut mutable_node = node.clone();
@@ -85,14 +94,13 @@ pub async fn start_message_sending_loop(
 
                         // get_sqlite_db is a function that returns a connection to the sqlite db
 
-                        let connection = sqlite_helper_function::get_sqlite_db().unwrap();
-
                         //insert the node into the db
-                        match 
-                        sqlite_helper_function::insert_node(&connection, &mutable_node){
+                        match insert_node(pool.clone(), &mutable_node) {
                             Ok(_) => {
                                 println!("Node inserted successfully");
-                                let response_object = ResponseObject { object: Node(mutable_node) };
+                                let response_object = ResponseObject {
+                                    object: Some(Node(mutable_node.to_owned())),
+                                };
 
                                 send_message(&tx, msg.0.clone(), response_object).await;
                             }
@@ -100,24 +108,22 @@ pub async fn start_message_sending_loop(
                                 println!("Error inserting node: {:?}", err);
                             }
                         }
-
-
-                    },
+                    }
                     VerbTypeNames::Put => {
                         let updated_node = node.clone();
 
-                        let connection = sqlite_helper_function::get_sqlite_db().unwrap();
+                        update_node(pool.clone(), &updated_node).unwrap();
 
-                        update_node(&connection, &updated_node).unwrap();
-
-                    
                         let response_object: ResponseObject = ResponseObject {
-                        object: Node(updated_node),
+                            object: Some(Node(updated_node)),
                         };
 
                         send_message(&tx, msg.0.clone(), response_object).await;
                     }
-
+                    _ => {
+                        println!("Verb not supported for node: {:?}", verb);
+                    }
+                }
             }
             Some(crud_bundle::Object::AuthenticationMessage(_authentication_message)) => {
                 match verb {
@@ -224,7 +230,7 @@ pub async fn start_message_sending_loop(
             Some(crud_bundle::Object::ExecutionContext(execution_context)) => {
                 match verb {
                     _ => {
-                        todo!("Handle execution context")
+                        todo!("Handle execution context");
                     }
                 }
             }
