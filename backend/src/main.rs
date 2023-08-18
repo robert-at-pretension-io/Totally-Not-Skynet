@@ -33,9 +33,6 @@ async fn main() {
         }
     }
 
-    // Setup the db:
-    sqlite_helper_functions::setup_sqlite();
-
     // setup docker client
     match check_installed_programs::docker_check() {
         Ok(_) => {
@@ -49,6 +46,16 @@ async fn main() {
     match check_installed_programs::install_sqlite3() {
         _ => {
             println!("uhhh maybe that worked to install sqlite3");
+        }
+    }
+
+    // Setup the db:
+    match sqlite_helper_functions::get_sqlite_db() {
+        Ok(_) => {
+            println!("sqlite working..");
+        }
+        Err(err) => {
+            panic!("Oh goodness... {:?}", err);
         }
     }
 

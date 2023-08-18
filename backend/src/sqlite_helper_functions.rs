@@ -2,7 +2,7 @@ use rusqlite::{ Connection, Result, params };
 use std::env;
 use crate::generated_types::Node;
 
-pub fn setup_sqlite() -> Result<Connection> {
+pub fn get_sqlite_db() -> Result<Connection> {
     // Get the environmental variables required:
     let key = "SQLITE_FILE_LOCATION";
 
@@ -20,7 +20,7 @@ pub fn create_nodes_table(conn: &Connection) -> Result<()> {
         "CREATE TABLE IF NOT EXISTS nodes (
             id TEXT PRIMARY KEY,
             name TEXT,
-            type_name INTEGER,
+            type_name TEXT,
             serialized_node BLOB
         )",
         []
@@ -35,7 +35,7 @@ pub fn insert_node(conn: &Connection, node: &Node) -> Result<()> {
             match
                 conn.execute(
                     "INSERT OR REPLACE INTO nodes (id, name, type_name, serialized_node) VALUES (?1, ?2, ?3, ?4)",
-                    params![node.id, node.name, node.type_name as i32, serialized_node]
+                    params![node.id, node.name, node.type_name, serialized_node]
                 )
             {
                 Ok(_) => {
@@ -49,6 +49,38 @@ pub fn insert_node(conn: &Connection, node: &Node) -> Result<()> {
         }
         Err(err) => {
             println!("Unable to serialize node{:?}", err);
+            return Ok(());
+        }
+    }
+}
+
+pub fn update_node(conn: &Connection, node: &Node) -> Result<()> {
+    let mut serialized_node = vec![];
+    match node.encode(&mut serialized_node) {
+        Ok(_) => {
+            match
+                conn.execute(
+                    "UPDATE nodes SET name = ?1, type_name = ?2, serialized_node = ?3 WHERE id = ?4",
+                    params![node.name, node.type_name, serialized_node, node.id]
+                )
+            {
+                Ok(count) => {
+                    if count > 0 {
+                        println!("Node updated successfully");
+                        return Ok(());
+                    } else {
+                        println!("No node found with the given ID");
+                        return Ok(());
+                    }
+                }
+                Err(err) => {
+                    println!("Unable to update node in db: {:?}", err);
+                    return Ok(());
+                }
+            }
+        }
+        Err(err) => {
+            println!("Unable to serialize node: {:?}", err);
             return Ok(());
         }
     }

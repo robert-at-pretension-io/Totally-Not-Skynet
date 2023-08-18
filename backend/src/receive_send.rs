@@ -76,121 +76,48 @@ pub async fn start_message_sending_loop(
             Some(crud_bundle::Object::Node(node)) => {
                 todo!("Add create node function for sqlite here");
 
-                // match verb {
-                //     VerbTypeNames::Post => {
+                match verb {
+                    VerbTypeNames::Post => {
+                        let mut mutable_node = node.clone();
 
-                //         // let mut mutable_node = node.clone();
+                        // create a uuid for the node:
+                        mutable_node.id = uuid::Uuid::new_v4().to_string();
 
-                //         // let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
+                        // get_sqlite_db is a function that returns a connection to the sqlite db
 
-                //         // let db = return_db(db_uri).await;
+                        let connection = sqlite_helper_function::get_sqlite_db().unwrap();
 
-                //         // let node_collection = db.collection::<Node>("nodes");
+                        //insert the node into the db
+                        match 
+                        sqlite_helper_function::insert_node(&connection, &mutable_node){
+                            Ok(_) => {
+                                println!("Node inserted successfully");
+                                let response_object = ResponseObject { object: Node(mutable_node) };
 
-                //         // mutable_node._id = Some(bson::oid::ObjectId::new());
+                                send_message(&tx, msg.0.clone(), response_object).await;
+                            }
+                            Err(err) => {
+                                println!("Error inserting node: {:?}", err);
+                            }
+                        }
 
-                //         // let insert_result = node_collection
-                //         //     .insert_one(mutable_node, None).await
-                //         //     .unwrap();
 
-                //         // println!("Inserted node: {:?}", insert_result);
+                    },
+                    VerbTypeNames::Put => {
+                        let updated_node = node.clone();
 
-                //         // let inserted_node = node_collection
-                //         //     .find_one(doc! { "id": insert_result.inserted_id.clone() }, None).await
-                //         //     .unwrap()
-                //         //     .unwrap();
+                        let connection = sqlite_helper_function::get_sqlite_db().unwrap();
 
-                //         // let response_object = ResponseObject { object: Node(inserted_node) };
+                        update_node(&connection, &updated_node).unwrap();
 
-                //         // send_message(&tx, msg.0.clone(), response_object).await;
-                //     }
-                //     // VerbTypeNames::Put => {
-                //     //     let updated_node = node.clone();
+                    
+                        let response_object: ResponseObject = ResponseObject {
+                        object: Node(updated_node),
+                        };
 
-                //     //     let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
+                        send_message(&tx, msg.0.clone(), response_object).await;
+                    }
 
-                //     //     let db = return_db(db_uri).await;
-
-                //     //     let node_collection = db.collection::<Node>("nodes");
-
-                //     //     let filter = doc! { "_id": updated_node._id.clone().unwrap() };
-
-                //     //     let update = match updated_node.node_content.clone() {
-                //     //         NodeType::Prompt(prompt) => {
-                //     //             doc! {
-                //     //         "$set": {
-                //     //             "Prompt": {
-                //     //             "prompt": prompt.prompt.clone(),
-                //     //             "system": prompt.system.clone(),
-                //     //             }
-                //     //         }
-                //     //     }
-                //     //         }
-                //     //         NodeType::Process(process) => {
-                //     //             doc! {
-                //     //         "$set": {
-                //     //             "Process": {
-                //     //             "graph": process.graph.clone(),
-                //     //             "initial_variables": process.initial_variables.clone(),
-                //     //             "topological_order": process.topological_order.clone(),
-                //     //             "is_loop": process.is_loop,
-                //     //             }
-                //     //         }
-                //     //     }
-                //     //         }
-                //     //         NodeType::Conditional(conditional) => {
-                //     //             let mut system_variables = doc! {};
-
-                //     //             for (key, value) in conditional.system_variables {
-                //     //                 system_variables.insert(key, value);
-                //     //             }
-
-                //     //             let mut new_options = Document::new();
-                //     //             for (key, value) in &conditional.options {
-                //     //                 new_options.insert(key.clone(), Bson::from(value.clone()));
-                //     //             }
-
-                //     //             doc! {
-                //     //         "$set": {
-                //     //             "Conditional": {
-                //     //             "system_variables": system_variables,
-                //     //             "statement": conditional.statement.clone(),
-                //     //             "options": new_options
-                //     //             }
-                //     //         }
-                //     //     }
-                //     //         }
-                //     //         NodeType::Command(command) => {
-                //     //             doc! {
-                //     //         "$set": {
-                //     //             "Command": {
-                //     //             "command": command.command.clone()
-                //     //             }
-                //     //         }
-                //     //     }
-                //     //         }
-                //     //     };
-
-                //     //     let update_result = node_collection
-                //     //         .update_one(filter, update, None).await
-                //     //         .unwrap();
-
-                //     //     if update_result.modified_count == 0 {
-                //     //         println!("No nodes updated");
-                //     //     } else {
-                //     //         println!("Updated {} nodes", update_result.modified_count);
-
-                //     //         let response_object: ResponseObject = ResponseObject {
-                //     //             object: Node(updated_node),
-                //     //         };
-
-                //     //         send_message(&tx, msg.0.clone(), response_object).await;
-                //     //     }
-                //     }
-                //     _ => {
-                //         println!("Verb not supported for node: {:?}", verb);
-                //     }
-                // }
             }
             Some(crud_bundle::Object::AuthenticationMessage(_authentication_message)) => {
                 match verb {
@@ -291,6 +218,13 @@ pub async fn start_message_sending_loop(
                             "\n-------------------\nVerb not supported for user settings: {:?}\n-------------------\n",
                             verb
                         );
+                    }
+                }
+            }
+            Some(crud_bundle::Object::ExecutionContext(execution_context)) => {
+                match verb {
+                    _ => {
+                        todo!("Handle execution context")
                     }
                 }
             }
