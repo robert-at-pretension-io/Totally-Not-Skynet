@@ -2,7 +2,7 @@ import { pipe } from "fp-ts/function";
 import { fold } from "fp-ts/Either";
 import { PathReporter } from "io-ts/lib/PathReporter";
 import { getSystemState, setSystemState } from "./graph";
-import { CrudBundle, ResponseObject, RuntimeResponseObject, SystemState } from "system_types";
+import { CrudBundle, ResponseObject, SystemState } from "generated/system_types_pb.js";
 
 export async function setupWebsocketConnection(): Promise<WebSocket> {
   let websocket = new WebSocket("ws://138.197.70.163:8080");

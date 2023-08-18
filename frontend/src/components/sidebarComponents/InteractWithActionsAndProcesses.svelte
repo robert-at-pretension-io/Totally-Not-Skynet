@@ -1,6 +1,8 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
-  import type { Node } from "system_types";
+  import {
+    Node
+  } from "generated/system_types_pb.js";
 
   let selectedNode: Node | null;
 

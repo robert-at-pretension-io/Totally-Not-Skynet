@@ -1,7 +1,7 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
   import { onMount } from "svelte";
-  import { Node } from "system_types";
+  import { Node } from "generated/system_types_pb.js";
 
   let selected_node: Node | null;
   let has_selected_node = false;

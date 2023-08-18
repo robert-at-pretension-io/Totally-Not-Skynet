@@ -1,7 +1,8 @@
-// package: 
+// package: skynet.types
 // file: system_types.proto
 
 import * as jspb from "google-protobuf";
+import * as google_protobuf_wrappers_pb from "google-protobuf/google/protobuf/wrappers_pb";
 
 export class GraphNodeInfo extends jspb.Message {
   getId(): string;
@@ -121,26 +122,6 @@ export namespace GraphAction {
     LAST_ACTED_ON_NOT_SET = 0,
     EDGE_LAST = 4,
     NODE_LAST = 5,
-  }
-}
-
-export class MongoId extends jspb.Message {
-  getOid(): string;
-  setOid(value: string): void;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): MongoId.AsObject;
-  static toObject(includeInstance: boolean, msg: MongoId): MongoId.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: MongoId, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): MongoId;
-  static deserializeBinaryFromReader(message: MongoId, reader: jspb.BinaryReader): MongoId;
-}
-
-export namespace MongoId {
-  export type AsObject = {
-    oid: string,
   }
 }
 
@@ -277,10 +258,8 @@ export namespace Process {
 }
 
 export class Node extends jspb.Message {
-  hasId(): boolean;
-  clearId(): void;
-  getId(): MongoId | undefined;
-  setId(value?: MongoId): void;
+  getId(): string;
+  setId(value: string): void;
 
   getName(): string;
   setName(value: string): void;
@@ -334,7 +313,7 @@ export class Node extends jspb.Message {
 
 export namespace Node {
   export type AsObject = {
-    id?: MongoId.AsObject,
+    id: string,
     name: string,
     typeName: NodeTypeNamesMap[keyof NodeTypeNamesMap],
     prompt?: Prompt.AsObject,
@@ -537,6 +516,11 @@ export class CrudBundle extends jspb.Message {
   getUserSettings(): UserSettings | undefined;
   setUserSettings(value?: UserSettings): void;
 
+  hasExecutionContext(): boolean;
+  clearExecutionContext(): void;
+  getExecutionContext(): ExecutionContext | undefined;
+  setExecutionContext(value?: ExecutionContext): void;
+
   getObjectCase(): CrudBundle.ObjectCase;
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): CrudBundle.AsObject;
@@ -554,6 +538,7 @@ export namespace CrudBundle {
     node?: Node.AsObject,
     authenticationMessage?: AuthenticationMessage.AsObject,
     userSettings?: UserSettings.AsObject,
+    executionContext?: ExecutionContext.AsObject,
   }
 
   export enum ObjectCase {
@@ -561,15 +546,20 @@ export namespace CrudBundle {
     NODE = 2,
     AUTHENTICATION_MESSAGE = 3,
     USER_SETTINGS = 4,
+    EXECUTION_CONTEXT = 5,
   }
 }
 
 export class CommandResponse extends jspb.Message {
-  getError(): string;
-  setError(value: string): void;
+  hasError(): boolean;
+  clearError(): void;
+  getError(): google_protobuf_wrappers_pb.StringValue | undefined;
+  setError(value?: google_protobuf_wrappers_pb.StringValue): void;
 
-  getOutput(): string;
-  setOutput(value: string): void;
+  hasOutput(): boolean;
+  clearOutput(): void;
+  getOutput(): google_protobuf_wrappers_pb.StringValue | undefined;
+  setOutput(value?: google_protobuf_wrappers_pb.StringValue): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): CommandResponse.AsObject;
@@ -583,14 +573,14 @@ export class CommandResponse extends jspb.Message {
 
 export namespace CommandResponse {
   export type AsObject = {
-    error: string,
-    output: string,
+    error?: google_protobuf_wrappers_pb.StringValue.AsObject,
+    output?: google_protobuf_wrappers_pb.StringValue.AsObject,
   }
 }
 
 export class PromptResponse extends jspb.Message {
-  getResponse(): string;
-  setResponse(value: string): void;
+  getAiTextResponse(): string;
+  setAiTextResponse(value: string): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): PromptResponse.AsObject;
@@ -604,7 +594,7 @@ export class PromptResponse extends jspb.Message {
 
 export namespace PromptResponse {
   export type AsObject = {
-    response: string,
+    aiTextResponse: string,
   }
 }
 
@@ -714,10 +704,10 @@ export class ResponseObject extends jspb.Message {
   getNode(): Node | undefined;
   setNode(value?: Node): void;
 
-  hasInitialMessage(): boolean;
-  clearInitialMessage(): void;
-  getInitialMessage(): string;
-  setInitialMessage(value: string): void;
+  hasAuthenticationMessage(): boolean;
+  clearAuthenticationMessage(): void;
+  getAuthenticationMessage(): string;
+  setAuthenticationMessage(value: string): void;
 
   hasUserSettings(): boolean;
   clearUserSettings(): void;
@@ -743,7 +733,7 @@ export class ResponseObject extends jspb.Message {
 export namespace ResponseObject {
   export type AsObject = {
     node?: Node.AsObject,
-    initialMessage: string,
+    authenticationMessage: string,
     userSettings: string,
     executionResponse?: ExecutionResponse.AsObject,
   }
@@ -751,7 +741,7 @@ export namespace ResponseObject {
   export enum ObjectCase {
     OBJECT_NOT_SET = 0,
     NODE = 1,
-    INITIAL_MESSAGE = 2,
+    AUTHENTICATION_MESSAGE = 2,
     USER_SETTINGS = 3,
     EXECUTION_RESPONSE = 4,
   }
@@ -781,6 +771,7 @@ export interface VerbTypeNamesMap {
   PATCH: 2;
   DELETE: 3;
   GET: 4;
+  EXECUTE: 5;
 }
 
 export const VerbTypeNames: VerbTypeNamesMap;

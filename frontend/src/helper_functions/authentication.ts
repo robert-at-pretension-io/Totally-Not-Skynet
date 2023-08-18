@@ -1,5 +1,9 @@
-import { sendWebsocketMessage } from "./graph";
-import { CrudBundle } from "system_types";
+import { sendWebsocketMessage } from "./websocket";
+
+import {
+    CrudBundle
+} from "generated/system_types_pb.js";
+
 import { getSystemState, setSystemState } from "./graph";
 
 

@@ -1,7 +1,7 @@
 {
   "name": "svelte-app",
   "version": "1.0.0",
-  "types": "src/system_types/graph.d.ts",
+  "types": "src/generated/system_types_pb.d.ts",
   "license": "Apache License 2.0",
   "devDependencies": {
     "@jridgewell/sourcemap-codec": "^1.4.15",

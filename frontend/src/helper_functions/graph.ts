@@ -5,9 +5,11 @@ import type {
   Edge,
   SystemErrors,
   GraphState,
-  Graph
-} from "../system_types";
-import { Process, RuntimeGraphNodeInfo, RuntimeNode, RuntimeProcess } from "../system_types";
+  Graph,
+  Process,
+
+} from "generated/system_types_pb.js";
+
 import systemStateStore from "stores/systemStateStore";
 import * as graphlib from "graphlib";
 

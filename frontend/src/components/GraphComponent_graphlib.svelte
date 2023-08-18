@@ -5,7 +5,12 @@
   import GraphStyles from "./GraphStyles.js";
   import systemStateStore from "stores/systemStateStore.js";
   import { selectNode, selectEdge } from "../helper_functions/graph";
-  import type { SystemState, Edge, GraphNodeInfo } from "system_types/index.js";
+
+  import {
+    SystemState,
+    Edge,
+    GraphNodeInfo,
+  } from "generated/system_types_pb.js";
   import * as graphlib from "graphlib";
 
   setContext("graphSharedState", {

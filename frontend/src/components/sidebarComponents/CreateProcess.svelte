@@ -1,25 +1,22 @@
 <script lang="ts">
   import { onMount } from "svelte";
+
   import {
-    type Process,
-    type Node,
-    RuntimeSystemErrors,
+    GraphNodeInfo,
     GraphState,
-    RuntimeNode,
-    RuntimeGraphNodeInfo,
-  } from "system_types";
+    Node,
+    Edge,
+  } from "generated/system_types_pb.js";
+
   import {
     addEdge,
     addNode,
     getSystemState,
     graphHasNode,
     handleError,
-    removeSelectedEdge,
-    removeSelectedNode,
     validateGraph,
   } from "../../helper_functions/graph";
   import * as graphlib from "graphlib";
-  import { Edge } from "system_types";
 
   import systemStateStore from "stores/systemStateStore";
 
