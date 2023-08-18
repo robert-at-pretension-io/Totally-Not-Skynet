@@ -9,7 +9,7 @@ mod settings;
 mod utils;
 mod websocket;
 mod env_vars_checker;
-mod check_if_docker_installed;
+mod check_installed_programs;
 mod sqlite_helper_functions;
 
 pub mod generated_types {
@@ -37,12 +37,18 @@ async fn main() {
     sqlite_helper_functions::setup_sqlite();
 
     // setup docker client
-    match check_if_docker_installed::docker_check() {
+    match check_installed_programs::docker_check() {
         Ok(_) => {
             println!("Docker check was successful!");
         }
         Err(e) => {
             panic!("Error occurred during Docker check: {}", e);
+        }
+    }
+
+    match check_installed_programs::install_sqlite3() {
+        _ => {
+            println!("uhhh maybe that worked to install sqlite3");
         }
     }
 

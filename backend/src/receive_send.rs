@@ -6,18 +6,19 @@ use crate::generated_types::{
     NodeExecutionResponse,
     PromptResponse,
     UserSettings,
+    CommandResponse,
     node,
     crud_bundle,
+    node_execution_response,
 };
 
 use crate::openai::{ get_openai_completion, ChatMessage, Role };
 use crate::utils::{ parse_message, create_node_response_object };
 
 // use bollard::container::Config;
-use bollard::exec::{ CreateExecOptions, StartExecResults };
+// use bollard::exec::{ CreateExecOptions, StartExecResults };
 use bollard::Docker;
 use bson::doc;
-use futures_util::StreamExt;
 use serde::{ Deserialize, Serialize };
 use std::collections::HashMap;
 use tokio::sync::mpsc;
@@ -49,7 +50,7 @@ pub async fn start_message_sending_loop(
 ) {
     let mut runtime_settings: HashMap<Identity, UserSettings> = HashMap::new();
     // let mut messages_thus_far: HashMap<Identity, Vec<String>> = HashMap::new();
-    let mut docker_containers: HashMap<Identity, String> = HashMap::new();
+    // let mut docker_containers: HashMap<Identity, String> = HashMap::new();
 
     // startup the docker container here
     let docker = Docker::connect_with_local_defaults().unwrap();
@@ -293,161 +294,164 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            Some(crud_bundle::Object::ExecutionContext(execution_context)) => {
-                let node = execution_context.current_node.clone();
-                let execution_clone: ExecutionContext = execution_context.clone();
+            // Some(crud_bundle::Object::ExecutionContext(execution_context)) => {
+            //     let node = execution_context.current_node.clone();
+            //     let execution_clone: ExecutionContext = execution_context.clone();
 
-                match node.node_content {
-                    Some(node::NodeContent::Prompt(prompt)) => {
-                        match verb {
-                            VerbTypeNames::Post => {
-                                let openai_api_key = match runtime_settings.get(&msg.0) {
-                                    Some(settings) => Some(settings.openai_api_key.clone()),
-                                    None => {
-                                        println!("No openai key set for {}", msg.0.name);
-                                        None
-                                    }
-                                };
+            //     match node.node_content {
+            //         Some(node::NodeContent::Prompt(prompt)) => {
+            //             match verb {
+            //                 VerbTypeNames::Post => {
+            //                     let openai_api_key = match runtime_settings.get(&msg.0) {
+            //                         Some(settings) => Some(settings.openai_api_key.clone()),
+            //                         None => {
+            //                             println!("No openai key set for {}", msg.0.name);
+            //                             None
+            //                         }
+            //                     };
 
-                                if openai_api_key.is_some() {
-                                    let messages = vec![
-                                        ChatMessage {
-                                            role: Role::System,
-                                            content: prompt.system.clone(),
-                                        },
-                                        ChatMessage {
-                                            role: Role::User,
-                                            content: prompt.prompt.clone(),
-                                        }
-                                    ];
+            //                     if openai_api_key.is_some() {
+            //                         let messages = vec![
+            //                             ChatMessage {
+            //                                 role: Role::System,
+            //                                 content: prompt.system.clone(),
+            //                             },
+            //                             ChatMessage {
+            //                                 role: Role::User,
+            //                                 content: prompt.prompt.clone(),
+            //                             }
+            //                         ];
 
-                                    let response = get_openai_completion(
-                                        messages,
-                                        openai_api_key.unwrap(),
-                                        DEFAULT_MODEL.to_string()
-                                    ).await;
+            //                         let response = get_openai_completion(
+            //                             messages,
+            //                             openai_api_key.unwrap(),
+            //                             DEFAULT_MODEL.to_string()
+            //                         ).await;
 
-                                    match response {
-                                        Ok(res) => {
-                                            let response_object = create_node_response_object(
-                                                execution_clone,
-                                                NodeExecutionResponse {
-                                                    response: Some(
-                                                        Response::PromptResponse(PromptResponse {
-                                                            ai_text_response: res,
-                                                        })
-                                                    ),
-                                                }
-                                            );
+            //                         match response {
+            //                             Ok(res) => {
+            //                                 let response_object = create_node_response_object(
+            //                                     execution_clone,
+            //                                     NodeExecutionResponse {
+            //                                         response: Some(
+            //                                             Response::PromptResponse(PromptResponse {
+            //                                                 ai_text_response: res,
+            //                                             })
+            //                                         ),
+            //                                     }
+            //                                 );
 
-                                            send_message(&tx, msg.0.clone(), response_object).await;
-                                        }
-                                        Err(_) => todo!(),
-                                    }
-                                }
-                            }
-                            _ => {
-                                println!("Verb not supported for prompt: {:?}", verb);
-                            }
-                        }
-                    }
-                    Some(node::NodeContent::Process(_process)) => {
-                        println!(
-                            "Processes cannot be executed directly. Instead, the frontend should break the process into nodes and send a execution context to the backend."
-                        );
-                    }
-                    Some(node::NodeContent::Conditional(_conditional)) => {
-                        todo!("Conditional not implemented yet");
-                    }
+            //                                 send_message(&tx, msg.0.clone(), response_object).await;
+            //                             }
+            //                             Err(_) => todo!(),
+            //                         }
+            //                     }
+            //                 }
+            //                 _ => {
+            //                     println!("Verb not supported for prompt: {:?}", verb);
+            //                 }
+            //             }
+            //         }
+            //         Some(node::NodeContent::Process(_process)) => {
+            //             println!(
+            //                 "Processes cannot be executed directly. Instead, the frontend should break the process into nodes and send a execution context to the backend."
+            //             );
+            //         }
+            //         Some(node::NodeContent::Conditional(_conditional)) => {
+            //             todo!("Conditional not implemented yet");
+            //         }
 
-                    Some(node::NodeContent::Command(command)) => {
-                        match verb {
-                            VerbTypeNames::Post => {
-                                if let Some(container_id) = docker_containers.get(&msg.0) {
-                                    let exec_options = CreateExecOptions {
-                                        attach_stdout: Some(true),
-                                        cmd: Some(vec!["sh", "-c", &command.command]),
-                                        ..Default::default()
-                                    };
+            //         Some(node::NodeContent::Command(command)) => {
+            //             match verb {
+            //                 VerbTypeNames::Post => {
+            //                     if let Some(container_id) = docker_containers.get(&msg.0) {
+            //                         let exec_options = CreateExecOptions {
+            //                             attach_stdout: Some(true),
+            //                             cmd: Some(vec!["sh", "-c", &command.command]),
+            //                             ..Default::default()
+            //                         };
 
-                                    let exec_created = docker
-                                        .create_exec(container_id, exec_options).await
-                                        .unwrap();
+            //                         let exec_created = docker
+            //                             .create_exec(container_id, exec_options).await
+            //                             .unwrap();
 
-                                    // Start the exec instance
-                                    let exec_started = docker
-                                        .start_exec(&exec_created.id, None).await
-                                        .unwrap();
+            //                         // Start the exec instance
+            //                         let exec_started = docker
+            //                             .start_exec(&exec_created.id, None).await
+            //                             .unwrap();
 
-                                    match exec_started {
-                                        StartExecResults::Attached { mut output, .. } => {
-                                            let mut full_output = String::new(); // used to accumulate the output
+            //                         match exec_started {
+            //                             StartExecResults::Attached { mut output, .. } => {
+            //                                 let mut full_output = String::new(); // used to accumulate the output
 
-                                            while let Some(item) = output.next().await {
-                                                match item {
-                                                    Ok(log) => {
-                                                        println!("{:?}", log);
-                                                        let log_str = log.to_string();
-                                                        full_output.push_str(&log_str);
-                                                        full_output.push('\n'); // add a newline between each piece of output
-                                                    }
-                                                    Err(e) => eprintln!("Error: {:?}", e),
-                                                }
-                                            }
+            //                                 while let Some(item) = output.next().await {
+            //                                     match item {
+            //                                         Ok(log) => {
+            //                                             println!("{:?}", log);
+            //                                             let log_str = log.to_string();
+            //                                             full_output.push_str(&log_str);
+            //                                             full_output.push('\n'); // add a newline between each piece of output
+            //                                         }
+            //                                         Err(e) => eprintln!("Error: {:?}", e),
+            //                                     }
+            //                                 }
 
-                                            // Once we've read all the output, send it to the client
+            //                                 // Once we've read all the output, send it to the client
 
-                                            use crate::generated_types::node_execution_response::Response::CommandResponse;
+            //                                 let node_execution_response = NodeExecutionResponse {
+            //                                     response: Some(
+            //                                         node_execution_response::Response::CommandResponse(
+            //                                             generated_types::CommandResponse {
+            //                                                 error: None,
+            //                                                 output: Some(full_output),
+            //                                             }
+            //                                         )
+            //                                     ),
+            //                                 };
 
-                                            let node_execution_response = NodeExecutionResponse {
-                                                response: Some(
-                                                    CommandResponse(CommandResponse {
-                                                        error: "".to_string(),
-                                                        output: full_output,
-                                                    })
-                                                ),
-                                            };
+            //                                 let response_object: ResponseObject =
+            //                                     create_node_response_object(
+            //                                         execution_clone,
+            //                                         node_execution_response
+            //                                     );
 
-                                            let response_object: ResponseObject =
-                                                create_node_response_object(
-                                                    execution_clone,
-                                                    node_execution_response
-                                                );
-
-                                            send_message(&tx, msg.0.clone(), response_object).await;
-                                        }
-                                        StartExecResults::Detached => {
-                                            println!(
-                                                "The exec instance completed execution and detached"
-                                            );
-                                        }
-                                    }
-                                } else {
-                                    println!("No container found for this client.");
-                                }
-                            }
-                            _ => {
-                                println!("Verb not supported for command: {:?}", verb);
-                            }
-                        }
-                    }
-                }
-            }
+            //                                 send_message(&tx, msg.0.clone(), response_object).await;
+            //                             }
+            //                             StartExecResults::Detached => {
+            //                                 println!(
+            //                                     "The exec instance completed execution and detached"
+            //                                 );
+            //                             }
+            //                         }
+            //                     } else {
+            //                         println!("No container found for this client.");
+            //                     }
+            //                 }
+            //                 _ => {
+            //                     println!("Verb not supported for command: {:?}", verb);
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
             None => {
                 println!("odd...");
             }
         }
     }
 }
-use crate::utils::to_base64_string;
+use crate::utils::to_u8_vec;
 
 pub async fn send_message(
     tx: &UnboundedSender<(Identity, Message)>,
     identity: Identity,
     message: ResponseObject
 ) {
-    match to_base64_string(&message) {
-        Ok(send_string) => {
+    match to_u8_vec(&message) {
+        Ok(u8_vec) => {
+            //convert u8_vec to string
+            let send_string = String::from_utf8(u8_vec).unwrap();
+
             match tx.send((identity, Message::Text(send_string))) {
                 Ok(_) => {}
                 Err(e) => {

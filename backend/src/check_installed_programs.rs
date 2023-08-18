@@ -78,20 +78,54 @@ fn run_shell_command(command_str: &str) -> Result<()> {
     }
 }
 
+fn is_ubuntu() -> bool {
+    // Read the contents of the /etc/os-release file
+    match fs::read_to_string("/etc/os-release") {
+        Ok(contents) => contents.contains("NAME=\"Ubuntu\""),
+        Err(_) => false,
+    }
+}
+
+#[derive(Error, Debug)]
+pub enum SQLiteCheckError {
+    #[error("Not running Ubuntu, can't install SQLite3 automatically.")]
+    NotUbuntu,
+    #[error("Command execution failed: {0}")] CommandFailed(String),
+}
+
+pub fn sqlite_check() -> Result<()> {
+    // Check if SQLite3 is installed
+    let output = Command::new("sqlite3").arg("--version").output()?;
+
+    if output.status.success() {
+        println!("SQLite3 is installed: {:?}", output);
+        return Ok(());
+    } else if is_ubuntu() {
+        println!("SQLite3 is not installed. Also, you're running Ubuntu! Installing...");
+        install_sqlite3()?;
+        return Ok(());
+    } else {
+        return Err(SQLiteCheckError::NotUbuntu.into());
+    }
+}
+
+pub fn install_sqlite3() -> Result<()> {
+    // Step 1: Update existing list of packages
+    run_command("sudo", &["apt-get", "update"])?;
+
+    // Step 2: Install SQLite3
+    run_command("sudo", &["apt-get", "install", "-y", "libsqlite3-dev"])?;
+
+    println!("SQLite3 installed successfully");
+    Ok(())
+}
+
 fn run_command(command: &str, args: &[&str]) -> Result<()> {
     let status = Command::new(command).args(args).status()?;
 
     if status.success() {
         Ok(())
     } else {
-        Err(DockerCheckError::CommandFailed(command.to_string()).into())
-    }
-}
-
-fn is_ubuntu() -> bool {
-    // Read the contents of the /etc/os-release file
-    match fs::read_to_string("/etc/os-release") {
-        Ok(contents) => contents.contains("NAME=\"Ubuntu\""),
-        Err(_) => false,
+        Err(SQLiteCheckError::CommandFailed(command.to_string()).into())
     }
 }

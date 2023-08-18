@@ -8,7 +8,6 @@ use crate::generated_types::{
     NodeTypeNames,
 };
 use prost::Message;
-use base64::Engine;
 
 pub fn create_node_response_object(
     execution_clone: ExecutionContext,
@@ -18,7 +17,7 @@ pub fn create_node_response_object(
         execution_id: execution_clone.execution_id,
         container_execution_id: execution_clone.return_execution_id,
         current_node_id: execution_clone.current_node.unwrap().id.clone(),
-        current_node_type: NodeTypeNames::Command,
+        current_node_type: NodeTypeNames::Command as i32,
         response: Some(node_execution_response),
     };
 
@@ -29,17 +28,14 @@ pub fn create_node_response_object(
     response_object
 }
 
-pub fn to_base64_string<M: Message>(message: &M) -> Result<String, prost::EncodeError> {
+pub fn to_u8_vec<M: Message>(message: &M) -> Result<Vec<u8>, prost::EncodeError> {
     // Create a buffer to hold the serialized bytes
     let mut bytes = Vec::new();
 
     // Serialize the message to the buffer
     message.encode(&mut bytes)?;
 
-    // Encode the bytes as a base64 string
-    let base64_string = Engine::encode(&bytes);
-
-    Ok(base64_string)
+    Ok(bytes)
 }
 
 pub fn parse_message(message_str: &str) -> Option<CrudBundle> {
@@ -64,14 +60,17 @@ pub fn parse_message(message_str: &str) -> Option<CrudBundle> {
     // };
 }
 
+use prost::bytes::Bytes;
 fn typed_object_from_base64_string<M: Message + Default>(
     base64_string: &str
 ) -> Result<M, Box<dyn std::error::Error>> {
     // Decode the base64 string into bytes
-    let bytes = Engine::decode(base64_string)?;
+    // let bytes = Engine::decode(base64_string)?;
+
+    let my_bytes = Bytes::from(base64_string.to_owned());
 
     // Parse the bytes into the specific Prost-generated type
-    let message = M::decode(&*bytes)?;
+    let message = M::decode(my_bytes)?;
 
     Ok(message)
 }

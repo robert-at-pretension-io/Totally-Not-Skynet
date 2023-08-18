@@ -27,15 +27,29 @@ pub fn create_nodes_table(conn: &Connection) -> Result<()> {
     )?;
     Ok(())
 }
-
+use prost::Message;
 pub fn insert_node(conn: &Connection, node: &Node) -> Result<()> {
     let mut serialized_node = vec![];
-    node.encode(&mut serialized_node)?;
-
-    conn.execute(
-        "INSERT OR REPLACE INTO nodes (id, name, type_name, serialized_node) VALUES (?1, ?2, ?3, ?4)",
-        params![node.id, node.name, node.type_name as i32, serialized_node]
-    )?;
-
-    Ok(())
+    match node.encode(&mut serialized_node) {
+        Ok(_) => {
+            match
+                conn.execute(
+                    "INSERT OR REPLACE INTO nodes (id, name, type_name, serialized_node) VALUES (?1, ?2, ?3, ?4)",
+                    params![node.id, node.name, node.type_name as i32, serialized_node]
+                )
+            {
+                Ok(_) => {
+                    return Ok(());
+                }
+                Err(err) => {
+                    println!("Unable to insert node into db: {:?}", err);
+                    return Ok(());
+                }
+            }
+        }
+        Err(err) => {
+            println!("Unable to serialize node{:?}", err);
+            return Ok(());
+        }
+    }
 }
