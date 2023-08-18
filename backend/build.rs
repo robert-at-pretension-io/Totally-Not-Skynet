@@ -1,5 +1,5 @@
 fn main() {
-    println!("Change in build !!!!!!");
+    println!("Change in build !!!!!!!");
 
     prost_build
         ::compile_protos(&["../common/protobuf/system_types.proto"], &["../common/protobuf"])

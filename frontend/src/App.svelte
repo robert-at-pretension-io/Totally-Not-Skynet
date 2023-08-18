@@ -13,7 +13,7 @@
   onMount(async () => {
     if (!$systemStateStore.websocket_ready) {
       // startup websocket connection
-      websocket = await setupWebsocketConnection();
+      websocket = await setupWebsocwketConnection();
     }
   });
 

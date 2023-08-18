@@ -1,25 +1,20 @@
 use crate::generated_types::{
     CrudBundle,
-    Node,
     VerbTypeNames,
     ResponseObject,
-    CommandResponse,
     ExecutionContext,
     NodeExecutionResponse,
     PromptResponse,
     UserSettings,
 };
 
-use crate::mongo::{ get_nodes, return_db };
 use crate::openai::{ get_openai_completion, ChatMessage, Role };
 use crate::utils::{ parse_message, create_node_response_object };
 
-use bollard::container::Config;
+// use bollard::container::Config;
 use bollard::exec::{ CreateExecOptions, StartExecResults };
 use bollard::Docker;
 use bson::doc;
-use bson::Bson;
-use bson::Document;
 use futures_util::StreamExt;
 use serde::{ Deserialize, Serialize };
 use std::collections::HashMap;
@@ -41,6 +36,8 @@ impl Identity {
         Identity { name }
     }
 }
+
+// use std::env;
 
 pub async fn start_message_sending_loop(
     // docker: Docker,
@@ -69,126 +66,132 @@ pub async fn start_message_sending_loop(
             println!("Received a parsed message from the client: {:?}", message_contents);
         }
 
-        let verb: VerbTypeNames = message_contents.verb.clone().as_str_name();
+        let verb: VerbTypeNames = VerbTypeNames::from_i32(message_contents.verb).unwrap() ;
 
-        match CrudBundle::from_i32(message_contents.object) {
-            Some(Node(node)) => {
-                match verb {
-                    VerbTypeNames::Post => {
-                        let mut mutable_node = node.clone();
+        match message_contents.object {
+            Some(crud_bund::Object::Node(node)) => {
+                todo!("Add create node function for sqlite here")
 
-                        let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
+                // match verb {
+                //     VerbTypeNames::Post => {
 
-                        let db = return_db(db_uri).await;
+                        
+                        
+                //         // let mut mutable_node = node.clone();
 
-                        let node_collection = db.collection::<Node>("nodes");
+                //         // let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
 
-                        mutable_node._id = Some(bson::oid::ObjectId::new());
+                //         // let db = return_db(db_uri).await;
 
-                        let insert_result = node_collection
-                            .insert_one(mutable_node, None).await
-                            .unwrap();
+                //         // let node_collection = db.collection::<Node>("nodes");
 
-                        println!("Inserted node: {:?}", insert_result);
+                //         // mutable_node._id = Some(bson::oid::ObjectId::new());
 
-                        let inserted_node = node_collection
-                            .find_one(doc! { "id": insert_result.inserted_id.clone() }, None).await
-                            .unwrap()
-                            .unwrap();
+                //         // let insert_result = node_collection
+                //         //     .insert_one(mutable_node, None).await
+                //         //     .unwrap();
 
-                        let response_object = ResponseObject { response: Node(inserted_node) };
+                //         // println!("Inserted node: {:?}", insert_result);
 
-                        send_message(&tx, msg.0.clone(), response_object).await;
-                    }
-                    VerbTypeNames::Put => {
-                        let updated_node = node.clone();
+                //         // let inserted_node = node_collection
+                //         //     .find_one(doc! { "id": insert_result.inserted_id.clone() }, None).await
+                //         //     .unwrap()
+                //         //     .unwrap();
 
-                        let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
+                //         // let response_object = ResponseObject { object: Node(inserted_node) };
 
-                        let db = return_db(db_uri).await;
+                //         // send_message(&tx, msg.0.clone(), response_object).await;
+                //     }
+                //     // VerbTypeNames::Put => {
+                //     //     let updated_node = node.clone();
 
-                        let node_collection = db.collection::<Node>("nodes");
+                //     //     let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
 
-                        let filter = doc! { "_id": updated_node._id.clone().unwrap() };
+                //     //     let db = return_db(db_uri).await;
 
-                        let update = match updated_node.node_content.clone() {
-                            NodeType::Prompt(prompt) => {
-                                doc! {
-                            "$set": {
-                                "Prompt": {
-                                "prompt": prompt.prompt.clone(),
-                                "system": prompt.system.clone(),
-                                }
-                            }
-                        }
-                            }
-                            NodeType::Process(process) => {
-                                doc! {
-                            "$set": {
-                                "Process": {
-                                "graph": process.graph.clone(),
-                                "initial_variables": process.initial_variables.clone(),
-                                "topological_order": process.topological_order.clone(),
-                                "is_loop": process.is_loop,
-                                }
-                            }
-                        }
-                            }
-                            NodeType::Conditional(conditional) => {
-                                let mut system_variables = doc! {};
+                //     //     let node_collection = db.collection::<Node>("nodes");
 
-                                for (key, value) in conditional.system_variables {
-                                    system_variables.insert(key, value);
-                                }
+                //     //     let filter = doc! { "_id": updated_node._id.clone().unwrap() };
 
-                                let mut new_options = Document::new();
-                                for (key, value) in &conditional.options {
-                                    new_options.insert(key.clone(), Bson::from(value.clone()));
-                                }
+                //     //     let update = match updated_node.node_content.clone() {
+                //     //         NodeType::Prompt(prompt) => {
+                //     //             doc! {
+                //     //         "$set": {
+                //     //             "Prompt": {
+                //     //             "prompt": prompt.prompt.clone(),
+                //     //             "system": prompt.system.clone(),
+                //     //             }
+                //     //         }
+                //     //     }
+                //     //         }
+                //     //         NodeType::Process(process) => {
+                //     //             doc! {
+                //     //         "$set": {
+                //     //             "Process": {
+                //     //             "graph": process.graph.clone(),
+                //     //             "initial_variables": process.initial_variables.clone(),
+                //     //             "topological_order": process.topological_order.clone(),
+                //     //             "is_loop": process.is_loop,
+                //     //             }
+                //     //         }
+                //     //     }
+                //     //         }
+                //     //         NodeType::Conditional(conditional) => {
+                //     //             let mut system_variables = doc! {};
 
-                                doc! {
-                            "$set": {
-                                "Conditional": {
-                                "system_variables": system_variables,
-                                "statement": conditional.statement.clone(),
-                                "options": new_options
-                                }
-                            }
-                        }
-                            }
-                            NodeType::Command(command) => {
-                                doc! {
-                            "$set": {
-                                "Command": {
-                                "command": command.command.clone()
-                                }
-                            }
-                        }
-                            }
-                        };
+                //     //             for (key, value) in conditional.system_variables {
+                //     //                 system_variables.insert(key, value);
+                //     //             }
 
-                        let update_result = node_collection
-                            .update_one(filter, update, None).await
-                            .unwrap();
+                //     //             let mut new_options = Document::new();
+                //     //             for (key, value) in &conditional.options {
+                //     //                 new_options.insert(key.clone(), Bson::from(value.clone()));
+                //     //             }
 
-                        if update_result.modified_count == 0 {
-                            println!("No nodes updated");
-                        } else {
-                            println!("Updated {} nodes", update_result.modified_count);
+                //     //             doc! {
+                //     //         "$set": {
+                //     //             "Conditional": {
+                //     //             "system_variables": system_variables,
+                //     //             "statement": conditional.statement.clone(),
+                //     //             "options": new_options
+                //     //             }
+                //     //         }
+                //     //     }
+                //     //         }
+                //     //         NodeType::Command(command) => {
+                //     //             doc! {
+                //     //         "$set": {
+                //     //             "Command": {
+                //     //             "command": command.command.clone()
+                //     //             }
+                //     //         }
+                //     //     }
+                //     //         }
+                //     //     };
 
-                            let response_object: ResponseObject = ResponseObject {
-                                object: Node(updated_node),
-                            };
+                //     //     let update_result = node_collection
+                //     //         .update_one(filter, update, None).await
+                //     //         .unwrap();
 
-                            send_message(&tx, msg.0.clone(), response_object).await;
-                        }
-                    }
-                    _ => {
-                        println!("Verb not supported for node: {:?}", verb);
-                    }
-                }
+                //     //     if update_result.modified_count == 0 {
+                //     //         println!("No nodes updated");
+                //     //     } else {
+                //     //         println!("Updated {} nodes", update_result.modified_count);
+
+                //     //         let response_object: ResponseObject = ResponseObject {
+                //     //             object: Node(updated_node),
+                //     //         };
+
+                //     //         send_message(&tx, msg.0.clone(), response_object).await;
+                //     //     }
+                //     }
+                //     _ => {
+                //         println!("Verb not supported for node: {:?}", verb);
+                //     }
+                // }
             }
-            Some(AuthenticationMessage(_authentication_message)) => {
+            Some(crud_bund::Object::AuthenticationMessage(_authentication_message)) => {
+
                 match verb {
                     VerbTypeNames::Post => {
                         println!("Initializing project for {}", msg.0.name);
@@ -197,52 +200,55 @@ pub async fn start_message_sending_loop(
                             runtime_settings.get(&msg.0)
                         );
 
-                        let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
+                        todo!("Get nodes, settings, etc from db!");
 
-                        let db = return_db(db_uri).await;
+                        // let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
 
-                        let nodes = get_nodes(&db).await;
+                        // let db = return_db(db_uri).await;
 
-                        println!("Found the following nodes: {:?}", nodes);
+                        // let nodes = get_nodes(&db).await;
 
-                        for node in &nodes {
-                            send_message(&tx, msg.0.clone(), ResponseObject {
-                                object: Node(node.clone()),
-                            }).await;
-                        }
+                        // println!("Found the following nodes: {:?}", nodes);
 
-                        const IMAGE: &str = "alpine:3";
+                        // for node in &nodes {
+                        //     send_message(&tx, msg.0.clone(), ResponseObject {
+                        //         object: Node(node.clone()),
+                        //     }).await;
+                        // }
 
-                        let alpine_config = Config {
-                            image: Some(IMAGE),
-                            tty: Some(true),
-                            attach_stdin: Some(true),
-                            attach_stdout: Some(true),
-                            attach_stderr: Some(true),
-                            open_stdin: Some(true),
-                            ..Default::default()
-                        };
+                        // Get the docker image from env variables:
+                        // const IMAGE: &str = env::var("DOCKER_OPERATING_SYSTEM").unwrap();
 
-                        let id = docker
-                            .create_container::<&str, &str>(None, alpine_config.clone()).await
-                            .unwrap().id;
+                        // let alpine_config = Config {
+                        //     image: Some(IMAGE),
+                        //     tty: Some(true),
+                        //     attach_stdin: Some(true),
+                        //     attach_stdout: Some(true),
+                        //     attach_stderr: Some(true),
+                        //     open_stdin: Some(true),
+                        //     ..Default::default()
+                        // };
 
-                        println!("Created container with id: {}", id);
-                        docker_containers.insert(msg.0.clone(), id);
+                        // let id = docker
+                        //     .create_container::<&str, &str>(None, alpine_config.clone()).await
+                        //     .unwrap().id;
 
-                        // need to send an additional message to the client to let them know that the project has been initialized
+                        // println!("Created container with id: {}", id);
+                        // docker_containers.insert(msg.0.clone(), id);
 
-                        // send_message(&tx, msg.0.clone(), ResponseObject::AuthorizationToken).await;
-                        todo!(
-                            "send auth token to user that will be required to execute other commands"
-                        );
+                        // // need to send an additional message to the client to let them know that the project has been initialized
+
+                        // // send_message(&tx, msg.0.clone(), ResponseObject::AuthorizationToken).await;
+                        // todo!(
+                        //     "send auth token to user that will be required to execute other commands"
+                        // );
                     }
                     _ => {
                         println!("Verb not supported for initial message: {:?}", verb);
                     }
                 }
             }
-            Some(UserSettings(_user_settings)) => {
+            Some(crud_bund::Object::UserSettings(_user_settings)) => {
                 match verb {
                     VerbTypeNames::Get => {
                         println!("Setting user settings for {}", msg.0.name);
@@ -287,7 +293,7 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            Some(ExecutionContext(execution_context)) => {
+            Some(crud_bund::Object::ExecutionContext(execution_context)) => {
                 let node = execution_context.current_node.clone();
                 let execution_clone: ExecutionContext = execution_context.clone();
 
@@ -391,10 +397,10 @@ pub async fn start_message_sending_loop(
                                             use crate::generated_types::node_execution_response::Response::CommandResponse;
 
                                             let node_execution_response = NodeExecutionResponse {
-                                                response: Some(CommandResponse {
+                                                response: Some(CommandResponse({
                                                     error: "".to_string(),
                                                     output: full_output,
-                                                }),
+                                                })),
                                             };
 
                                             let response_object: ResponseObject =

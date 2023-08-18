@@ -19,7 +19,7 @@ pub fn create_node_response_object(
     };
 
     let response_object: ResponseObject = ResponseObject {
-        object: ExecutionResponse(execution_response),
+        object: Some(execution_response),
     };
 
     response_object

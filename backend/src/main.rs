@@ -10,6 +10,7 @@ mod utils;
 mod websocket;
 mod env_vars_checker;
 mod check_if_docker_installed;
+mod sqlite_helper_functions;
 
 pub mod generated_types {
     include!(concat!(env!("OUT_DIR"), "/skynet.types.rs"));
@@ -22,8 +23,6 @@ use crate::websocket::start_websocket_server;
 
 #[tokio::main]
 async fn main() {
-    // setup docker client
-
     // Check that the environmental variables are set:
     let file_location = "./req_env_vars.txt";
     match env_vars_checker::check_env_vars(file_location) {
@@ -34,12 +33,16 @@ async fn main() {
         }
     }
 
+    // Setup the db:
+    sqlite_helper_functions::setup_sqlite();
+
+    // setup docker client
     match check_if_docker_installed::docker_check() {
         Ok(_) => {
             println!("Docker check was successful!");
         }
         Err(e) => {
-            println!("Error occurred during Docker check: {}", e);
+            panic!("Error occurred during Docker check: {}", e);
         }
     }
 

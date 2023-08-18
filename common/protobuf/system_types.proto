@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package skynet.types;
+import "google/protobuf/wrappers.proto";
 
 // GraphNodeInfo
 message GraphNodeInfo {
@@ -35,10 +36,7 @@ message GraphAction {
   }
 }
 
-// MongoId
-message MongoId {
-  string oid = 1;
-}
+
 
 // Prompt
 message Prompt {
@@ -81,7 +79,7 @@ message Process {
 
 // Node
 message Node {
-  MongoId _id = 1;
+  string id = 1;
   string name = 2;
   NodeTypeNames type_name = 3;
   oneof node_content {
@@ -161,13 +159,13 @@ message CrudBundle {
 
 // CommandResponse
 message CommandResponse {
-  string error = 1;
-  string output = 2;
+  google.protobuf.StringValue error = 1; 
+  google.protobuf.StringValue output = 2;
 }
 
 // PromptResponse
 message PromptResponse {
-  string response = 1;
+  string ai_text_response = 1;
 }
 
 // ConditionalResponse
