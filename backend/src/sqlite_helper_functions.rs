@@ -1,5 +1,6 @@
-use rusqlite::{ Connection, Result };
+use rusqlite::{ Connection, Result, params };
 use std::env;
+use crate::generated_types::Node;
 
 pub fn setup_sqlite() -> Result<Connection> {
     // Get the environmental variables required:
@@ -11,7 +12,7 @@ pub fn setup_sqlite() -> Result<Connection> {
 
     create_nodes_table(&conn)?;
 
-    return conn;
+    return Ok(conn);
 }
 
 pub fn create_nodes_table(conn: &Connection) -> Result<()> {
@@ -26,10 +27,6 @@ pub fn create_nodes_table(conn: &Connection) -> Result<()> {
     )?;
     Ok(())
 }
-
-// use prost::Message;
-use generated_types::Node;
-use rusqlite::{ params, Connection, Result };
 
 pub fn insert_node(conn: &Connection, node: &Node) -> Result<()> {
     let mut serialized_node = vec![];

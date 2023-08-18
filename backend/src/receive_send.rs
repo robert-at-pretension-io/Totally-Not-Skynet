@@ -6,6 +6,8 @@ use crate::generated_types::{
     NodeExecutionResponse,
     PromptResponse,
     UserSettings,
+    node,
+    crud_bundle,
 };
 
 use crate::openai::{ get_openai_completion, ChatMessage, Role };
@@ -21,6 +23,7 @@ use std::collections::HashMap;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_tungstenite::tungstenite::Message;
+use crate::generated_types::node_execution_response::Response;
 
 // create a "models" type that can be used to select the model to use
 // it should be one of a couple of strings: "gpt-4", "gpt3.5-turbo", etc
@@ -66,17 +69,15 @@ pub async fn start_message_sending_loop(
             println!("Received a parsed message from the client: {:?}", message_contents);
         }
 
-        let verb: VerbTypeNames = VerbTypeNames::from_i32(message_contents.verb).unwrap() ;
+        let verb: VerbTypeNames = VerbTypeNames::from_i32(message_contents.verb).unwrap();
 
         match message_contents.object {
-            Some(crud_bund::Object::Node(node)) => {
-                todo!("Add create node function for sqlite here")
+            Some(crud_bundle::Object::Node(node)) => {
+                todo!("Add create node function for sqlite here");
 
                 // match verb {
                 //     VerbTypeNames::Post => {
 
-                        
-                        
                 //         // let mut mutable_node = node.clone();
 
                 //         // let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
@@ -190,8 +191,7 @@ pub async fn start_message_sending_loop(
                 //     }
                 // }
             }
-            Some(crud_bund::Object::AuthenticationMessage(_authentication_message)) => {
-
+            Some(crud_bundle::Object::AuthenticationMessage(_authentication_message)) => {
                 match verb {
                     VerbTypeNames::Post => {
                         println!("Initializing project for {}", msg.0.name);
@@ -248,7 +248,7 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            Some(crud_bund::Object::UserSettings(_user_settings)) => {
+            Some(crud_bundle::Object::UserSettings(_user_settings)) => {
                 match verb {
                     VerbTypeNames::Get => {
                         println!("Setting user settings for {}", msg.0.name);
@@ -293,12 +293,12 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            Some(crud_bund::Object::ExecutionContext(execution_context)) => {
+            Some(crud_bundle::Object::ExecutionContext(execution_context)) => {
                 let node = execution_context.current_node.clone();
                 let execution_clone: ExecutionContext = execution_context.clone();
 
                 match node.node_content {
-                    NodeType::Prompt(prompt) => {
+                    Some(node::NodeContent::Prompt(prompt)) => {
                         match verb {
                             VerbTypeNames::Post => {
                                 let openai_api_key = match runtime_settings.get(&msg.0) {
@@ -313,9 +313,7 @@ pub async fn start_message_sending_loop(
                                     let messages = vec![
                                         ChatMessage {
                                             role: Role::System,
-                                            content: prompt.system
-                                                .unwrap_or("".to_string())
-                                                .clone(),
+                                            content: prompt.system.clone(),
                                         },
                                         ChatMessage {
                                             role: Role::User,
@@ -334,9 +332,11 @@ pub async fn start_message_sending_loop(
                                             let response_object = create_node_response_object(
                                                 execution_clone,
                                                 NodeExecutionResponse {
-                                                    response: PromptResponse(PromptResponse {
-                                                        response: res,
-                                                    }),
+                                                    response: Some(
+                                                        Response::PromptResponse(PromptResponse {
+                                                            ai_text_response: res,
+                                                        })
+                                                    ),
                                                 }
                                             );
 
@@ -351,13 +351,16 @@ pub async fn start_message_sending_loop(
                             }
                         }
                     }
-                    NodeType::Process(_) => {
+                    Some(node::NodeContent::Process(_process)) => {
                         println!(
                             "Processes cannot be executed directly. Instead, the frontend should break the process into nodes and send a execution context to the backend."
                         );
                     }
-                    NodeType::Conditional(_) => todo!("Conditional not implemented yet"),
-                    NodeType::Command(command) => {
+                    Some(node::NodeContent::Conditional(_conditional)) => {
+                        todo!("Conditional not implemented yet");
+                    }
+
+                    Some(node::NodeContent::Command(command)) => {
                         match verb {
                             VerbTypeNames::Post => {
                                 if let Some(container_id) = docker_containers.get(&msg.0) {
@@ -397,10 +400,12 @@ pub async fn start_message_sending_loop(
                                             use crate::generated_types::node_execution_response::Response::CommandResponse;
 
                                             let node_execution_response = NodeExecutionResponse {
-                                                response: Some(CommandResponse({
-                                                    error: "".to_string(),
-                                                    output: full_output,
-                                                })),
+                                                response: Some(
+                                                    CommandResponse(CommandResponse {
+                                                        error: "".to_string(),
+                                                        output: full_output,
+                                                    })
+                                                ),
                                             };
 
                                             let response_object: ResponseObject =
