@@ -17,7 +17,7 @@ message Edge {
 
 // GraphAction
 message GraphAction {
-  enum LastAction {
+  enum Action {
     ADD = 0;
     REMOVE = 1;
     SELECT = 2;
@@ -25,14 +25,11 @@ message GraphAction {
     RESET = 4;
     NONE = 5;
   }
-  LastAction last_action = 1;
-  oneof acted_on {
-    Edge edge = 2;
-    GraphNodeInfo node = 3;
-  }
-  oneof last_acted_on {
-    Edge edge_last = 4;
-    GraphNodeInfo node_last = 5;
+  Action action = 1;
+
+    oneof object {
+    Node node = 2;
+    Edge edge = 3;
   }
 }
 
@@ -72,9 +69,9 @@ message Graph {
 
 // Process
 message Process {
-  Graph graph = 1;
+  GraphState graph_state = 1;
   repeated string initial_variables = 2;
-  repeated string topological_order = 3;
+  repeated GraphNodeInfo topological_order = 3;
 }
 
 // Node
@@ -96,7 +93,7 @@ message Node {
 // GraphState
 message GraphState {
   Graph graph = 1;
-  GraphAction action = 2;
+  repeated GraphAction action_history = 2;
 }
 
 // SystemErrors
@@ -132,7 +129,7 @@ message SystemState {
   bool websocket_ready = 2;
   GraphState graph_state = 3;
   repeated Node nodes = 4;
-  Node selected_node = 5; // Adapted to non-optional
+  repeated Node selected_node = 5; // Adapted to non-optional
   ExecutionContext execution_context = 6; // Adapted to non-optional
 }
 

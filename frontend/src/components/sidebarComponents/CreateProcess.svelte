@@ -1,76 +1,24 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-
   import {
     GraphNodeInfo,
-    GraphState,
+    Graph,
     Node,
     Edge,
+    Process,
   } from "generated/system_types_pb.js";
 
-  import {
-    addEdge,
-    addNode,
-    getSystemState,
-    graphHasNode,
-    handleError,
-    validateGraph,
-  } from "../../helper_functions/graph";
-  import * as graphlib from "graphlib";
+  import * as helper_functions from "../../helper_functions/graph";
 
-  import systemStateStore from "stores/systemStateStore";
+  let selected_nodes: GraphNodeInfo[] = [];
+  let selected_edge: Edge | null = null;
 
-  let nodes: Node[] = [];
-  let selected_nodes: Node[] = [];
-  let graph_state: GraphState;
-
+  let graph = new Graph();
   let name = "";
   let description = "";
 
-  $: {
-    if ($systemStateStore.graph_state) {
-      graph_state = $systemStateStore.graph_state;
-    } else {
-      handleGraphError();
-    }
-    nodes = $systemStateStore.nodes;
-  }
-
-  onMount(async () => {
-    if ($systemStateStore.graph_state) {
-      graph_state = $systemStateStore.graph_state;
-    } else {
-      handleGraphError();
-    }
-    nodes = $systemStateStore.nodes;
-  });
-
-  async function handleGraphError() {
-    await handleError({ name: "GraphDoesntExist" });
-  }
-
-  async function localAddNodes() {
-    selected_nodes.forEach(async (node) => {
-      if (!(await graphHasNode(node, graph_state))) {
-        await addNode(node, graph_state);
-      }
-    });
-  }
-
-  function localAddEdge() {
-    let lastActedOn = $systemStateStore.graph_state.last_acted_on;
-    let actedOn = $systemStateStore.graph_state.acted_on;
-
-    if (
-      RuntimeGraphNodeInfo.is(lastActedOn) &&
-      RuntimeGraphNodeInfo.is(actedOn)
-    ) {
-      // add an edge between the lastActedOn and actedOn
-      let edge: Edge = { source: lastActedOn, target: actedOn };
-
-      addEdge(edge, graph_state);
-    }
-  }
+  // async function handleGraphError() {
+  //   await handleError({ name: "GraphDoesntExist" });
+  // }
 
   async function saveProcess() {
     // create an alert message if either name or description are null
@@ -78,58 +26,91 @@
       alert("Please enter a name and description for the process");
       return;
     } else {
-      const systemState = await getSystemState();
-      let maybe_topological_order = await validateGraph(systemState);
+      const systemState = await helper_functions.getSystemState();
+      let graph_state = systemState.getGraphState();
+      let maybe_topological_order = await helper_functions.validateGraph(
+        systemState
+      );
 
-      if (maybe_topological_order) {
-        let topological_order = maybe_topological_order as string[];
-        let current_graph_string = JSON.stringify(json.write(current_graph));
+      if (maybe_topological_order && graph_state != undefined) {
+        let topological_order = maybe_topological_order as GraphNodeInfo[];
 
         // console.log("current_graph_string: " + current_graph_string);
-        let process: Process = {
-          Process: {
-            graph: current_graph_string,
-            initial_variables: [],
-            topological_order: topological_order,
-          },
-        };
-        // console.log("sending process: " + JSON.stringify(process));
-        console.log("sending process: ", process);
+        let process = new Process();
+
+        process.setGraphState(graph_state);
+        process.setInitialVariablesList([]);
+        process.setTopologicalOrderList(topological_order);
+
+        let new_node = new Node();
+
+        new_node.setName(name);
+        new_node.setDescription(description);
+        new_node.setProcess(process);
+
+        alert("todo: save process by sending websocket message");
       } else {
         alert("The process does not have a valid topological order :(");
       }
     }
   }
-  function isSelected(node: Node): boolean {
-    // check to see if selectedNodes : Node[] contains node : Node
+  function isSelected(node: GraphNodeInfo): boolean {
+    // check to see if selected_nodes : Node[] contains node : Node
     return (
-      selectedNodes.filter((val) => {
-        val.Node._id.$oid === node.Node._id.$oid;
+      selected_nodes.filter((val) => {
+        val.getId() === node.getId();
       }).length > 0
     );
   }
-  function toggleSelect(node: Node) {
-    // if the node is already in the selectedNodes then remove it, otherwise add it
+  function removeNodes() {
+    let current = graph.getNodesList();
 
-    console.log("The nodes that are currently selected are:");
-    selectedNodes.forEach((node: Node) => {
-      console.log(node.Node.name);
+    let new_nodes = current.filter((node: GraphNodeInfo) => {
+      return !selected_nodes.includes(node);
     });
 
-    let should_remove = isSelected(node);
+    graph.setNodesList(new_nodes);
 
-    if (should_remove) {
-      selectedNodes = selectedNodes.filter((val) => {
-        val.Node._id.$oid != node.Node._id.$oid;
+    selected_nodes = [];
+  }
+  function addNodes() {
+    let current_nodes = graph.getNodesList();
+    selected_nodes.forEach((node: GraphNodeInfo) => {
+      // check if current_nodes already contains node
+      if (!current_nodes.includes(node)) {
+        current_nodes.push(node);
+      }
+    });
+    graph.setNodesList(current_nodes);
+    selected_nodes = [];
+  }
+  function addEdge() {
+    let current_edges = graph.getEdgesList();
+    // add selected_edge : Edge to current_edges : Edge[]
+    if (selected_edge != null) {
+      current_edges.push(selected_edge);
+    }
+    graph.setEdgesList(current_edges);
+  }
+  function removeEdge() {
+    let current_edges = graph.getEdgesList();
+    // remove selected_edge : Edge from current_edges : Edge[]
+    if (selected_edge != null) {
+      current_edges = current_edges.filter((edge: Edge) => {
+        return edge != selected_edge;
+      });
+    }
+    graph.setEdgesList(current_edges);
+  }
+
+  function toggleNodeSelect(node: GraphNodeInfo) {
+    if (isSelected(node)) {
+      selected_nodes = selected_nodes.filter((val) => {
+        val != node;
       });
     } else {
-      selectedNodes.push(node);
+      selected_nodes.push(node);
     }
-
-    console.log("After running toggleSelect, the nodes are:");
-    selectedNodes.forEach((node: Node) => {
-      console.log(node.Node.name);
-    });
   }
 </script>
 
@@ -147,12 +128,12 @@
 </p>
 
 <ul>
-  {#each nodes as node (node.Node._id)}
+  {#each graph.getNodesList() as node (node.getId())}
     <li>
       <button
         class:selected={isSelected(node)}
         type="button"
-        on:click={() => toggleSelect(node)}>{node.Node.name}</button
+        on:click={() => toggleNodeSelect(node)}>{node.getName()}</button
       >
     </li>
   {/each}
@@ -160,15 +141,13 @@
 
 <h3>Nodes to add:</h3>
 
-{#each selectedNodes as node (node.Node._id)}
-  <p>{node.Node.name}</p>
+{#each selected_nodes as node (node.getId())}
+  <p>{node.getName()}</p>
 {/each}
-<button class="add-button" on:click={localAddNodes}>Add Node(s)</button>
-<button class="remove-button" on:click={removeSelectedNode}
-  >Remove Node(s)</button
->
-<button class="add-button" on:click={localAddEdge}>Add Edge</button>
-<button class="remove-button" on:click={removeSelectedEdge}>Remove Edge</button>
+<button class="add-button" on:click={addNodes}>Add Node(s)</button>
+<button class="remove-button" on:click={removeNodes}>Remove Node(s)</button>
+<button class="add-button" on:click={addEdge}>Add Edge</button>
+<button class="remove-button" on:click={removeEdge}>Remove Edge</button>
 <button class="add-button" on:click={saveProcess}>Save Process</button>
 
 <!-- <InteractWithActionsAndProcesses /> -->

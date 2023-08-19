@@ -57,31 +57,20 @@ export namespace Edge {
 }
 
 export class GraphAction extends jspb.Message {
-  getLastAction(): GraphAction.LastActionMap[keyof GraphAction.LastActionMap];
-  setLastAction(value: GraphAction.LastActionMap[keyof GraphAction.LastActionMap]): void;
+  getAction(): GraphAction.ActionMap[keyof GraphAction.ActionMap];
+  setAction(value: GraphAction.ActionMap[keyof GraphAction.ActionMap]): void;
+
+  hasNode(): boolean;
+  clearNode(): void;
+  getNode(): Node | undefined;
+  setNode(value?: Node): void;
 
   hasEdge(): boolean;
   clearEdge(): void;
   getEdge(): Edge | undefined;
   setEdge(value?: Edge): void;
 
-  hasNode(): boolean;
-  clearNode(): void;
-  getNode(): GraphNodeInfo | undefined;
-  setNode(value?: GraphNodeInfo): void;
-
-  hasEdgeLast(): boolean;
-  clearEdgeLast(): void;
-  getEdgeLast(): Edge | undefined;
-  setEdgeLast(value?: Edge): void;
-
-  hasNodeLast(): boolean;
-  clearNodeLast(): void;
-  getNodeLast(): GraphNodeInfo | undefined;
-  setNodeLast(value?: GraphNodeInfo): void;
-
-  getActedOnCase(): GraphAction.ActedOnCase;
-  getLastActedOnCase(): GraphAction.LastActedOnCase;
+  getObjectCase(): GraphAction.ObjectCase;
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GraphAction.AsObject;
   static toObject(includeInstance: boolean, msg: GraphAction): GraphAction.AsObject;
@@ -94,14 +83,12 @@ export class GraphAction extends jspb.Message {
 
 export namespace GraphAction {
   export type AsObject = {
-    lastAction: GraphAction.LastActionMap[keyof GraphAction.LastActionMap],
+    action: GraphAction.ActionMap[keyof GraphAction.ActionMap],
+    node?: Node.AsObject,
     edge?: Edge.AsObject,
-    node?: GraphNodeInfo.AsObject,
-    edgeLast?: Edge.AsObject,
-    nodeLast?: GraphNodeInfo.AsObject,
   }
 
-  export interface LastActionMap {
+  export interface ActionMap {
     ADD: 0;
     REMOVE: 1;
     SELECT: 2;
@@ -110,18 +97,12 @@ export namespace GraphAction {
     NONE: 5;
   }
 
-  export const LastAction: LastActionMap;
+  export const Action: ActionMap;
 
-  export enum ActedOnCase {
-    ACTED_ON_NOT_SET = 0,
-    EDGE = 2,
-    NODE = 3,
-  }
-
-  export enum LastActedOnCase {
-    LAST_ACTED_ON_NOT_SET = 0,
-    EDGE_LAST = 4,
-    NODE_LAST = 5,
+  export enum ObjectCase {
+    OBJECT_NOT_SET = 0,
+    NODE = 2,
+    EDGE = 3,
   }
 }
 
@@ -224,10 +205,10 @@ export namespace Graph {
 }
 
 export class Process extends jspb.Message {
-  hasGraph(): boolean;
-  clearGraph(): void;
-  getGraph(): Graph | undefined;
-  setGraph(value?: Graph): void;
+  hasGraphState(): boolean;
+  clearGraphState(): void;
+  getGraphState(): GraphState | undefined;
+  setGraphState(value?: GraphState): void;
 
   clearInitialVariablesList(): void;
   getInitialVariablesList(): Array<string>;
@@ -235,9 +216,9 @@ export class Process extends jspb.Message {
   addInitialVariables(value: string, index?: number): string;
 
   clearTopologicalOrderList(): void;
-  getTopologicalOrderList(): Array<string>;
-  setTopologicalOrderList(value: Array<string>): void;
-  addTopologicalOrder(value: string, index?: number): string;
+  getTopologicalOrderList(): Array<GraphNodeInfo>;
+  setTopologicalOrderList(value: Array<GraphNodeInfo>): void;
+  addTopologicalOrder(value?: GraphNodeInfo, index?: number): GraphNodeInfo;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Process.AsObject;
@@ -251,9 +232,9 @@ export class Process extends jspb.Message {
 
 export namespace Process {
   export type AsObject = {
-    graph?: Graph.AsObject,
+    graphState?: GraphState.AsObject,
     initialVariablesList: Array<string>,
-    topologicalOrderList: Array<string>,
+    topologicalOrderList: Array<GraphNodeInfo.AsObject>,
   }
 }
 
@@ -340,10 +321,10 @@ export class GraphState extends jspb.Message {
   getGraph(): Graph | undefined;
   setGraph(value?: Graph): void;
 
-  hasAction(): boolean;
-  clearAction(): void;
-  getAction(): GraphAction | undefined;
-  setAction(value?: GraphAction): void;
+  clearActionHistoryList(): void;
+  getActionHistoryList(): Array<GraphAction>;
+  setActionHistoryList(value: Array<GraphAction>): void;
+  addActionHistory(value?: GraphAction, index?: number): GraphAction;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GraphState.AsObject;
@@ -358,7 +339,7 @@ export class GraphState extends jspb.Message {
 export namespace GraphState {
   export type AsObject = {
     graph?: Graph.AsObject,
-    action?: GraphAction.AsObject,
+    actionHistoryList: Array<GraphAction.AsObject>,
   }
 }
 
@@ -418,10 +399,10 @@ export class SystemState extends jspb.Message {
   setNodesList(value: Array<Node>): void;
   addNodes(value?: Node, index?: number): Node;
 
-  hasSelectedNode(): boolean;
-  clearSelectedNode(): void;
-  getSelectedNode(): Node | undefined;
-  setSelectedNode(value?: Node): void;
+  clearSelectedNodeList(): void;
+  getSelectedNodeList(): Array<Node>;
+  setSelectedNodeList(value: Array<Node>): void;
+  addSelectedNode(value?: Node, index?: number): Node;
 
   hasExecutionContext(): boolean;
   clearExecutionContext(): void;
@@ -444,7 +425,7 @@ export namespace SystemState {
     websocketReady: boolean,
     graphState?: GraphState.AsObject,
     nodesList: Array<Node.AsObject>,
-    selectedNode?: Node.AsObject,
+    selectedNodeList: Array<Node.AsObject>,
     executionContext?: ExecutionContext.AsObject,
   }
 }

@@ -1,17 +1,17 @@
-import type {
-  SystemState,
-  Node,
-  GraphNodeInfo,
-  Edge,
-  SystemErrors,
-  GraphState,
-  Graph,
+import {
+  type SystemState,
+  Node, GraphNodeInfo,
+  type Edge,
+  type GraphState,
+  type Graph,
   Process,
+  NodeTypeNames,
 
 } from "generated/system_types_pb.js";
 
 import systemStateStore from "stores/systemStateStore";
 import * as graphlib from "graphlib";
+import { isInstanceOf } from "./misc";
 
 // Define the getter and setter
 
@@ -23,111 +23,67 @@ export async function getSystemState(): Promise<SystemState> {
   });
 }
 
-export function systemGraphToGraphLib(graph: Graph) {
+export function systemGraphToGraphLib(graph: Graph): graphlib.Graph {
   const g = new graphlib.Graph();
 
-  graph.nodes.forEach((node: GraphNodeInfo) => {
-    g.setNode(node.id, node.name);
+  graph.getNodesList().forEach((node: GraphNodeInfo) => {
+    g.setNode(node.getId(), node.getName());
   });
 
-  graph.edges.forEach((edge: Edge) => {
-    g.setEdge({ v: edge.source.id, w: edge.target.id });
+  graph.getEdgesList().forEach((edge: Edge) => {
+    const source = edge.getSource()?.getId();
+    const target = edge.getTarget()?.getId();
+    if (source != undefined && target != undefined) {
+      g.setEdge({ v: source, w: target });
+    }
   });
 
   return g;
 }
 
-export async function handleError(error: SystemErrors) {
-  switch (error.name) {
-  case "GraphDoesntExist": {
-    console.log(error);
-    break;
-  }
-  case "OtherError": {
-    console.log(error);
-    break;
-  }
-  case "GraphStateDoesntExist": {
-    console.log(error);
-    break;
-  }
-  case "NodeDoesntExist": {
-    console.log(error);
-    break;
-  }
-  default: {
-    console.log("Uncovered Error");
-  }
-  }
+export async function handleError(_error: any) {
+  // switch (error.name) {
+  // case "GraphDoesntExist": {
+  //   console.log(error);
+  //   break;
+  // }
+  // case "OtherError": {
+  //   console.log(error);
+  //   break;
+  // }
+  // case "GraphStateDoesntExist": {
+  //   console.log(error);
+  //   break;
+  // }
+  // case "NodeDoesntExist": {
+  //   console.log(error);
+  //   break;
+  // }
+  // default: {
+  //   console.log("Uncovered Error");
+  // }
+  // }
+
+  alert("REIMPLEMENT THIS USING PROTO BUF");
 }
 
 export async function getInputVariablesByNodeId(nodeId: string): Promise<string[] | null> {
   // Get the action by ID
   const node = await getNode(nodeId);
 
-  if (node && node.Node.type_name === "Prompt") {
-    return node.Node.input_variables;
+  if (node && node.getTypeName() === NodeTypeNames.PROCESS) {
+    return node.getInputVariablesList();
   }
   return null;
 }
 
 export async function validateGraph(systemState: SystemState): Promise<GraphNodeInfo[] | boolean> {
-  const graph = systemState.graph_state?.graph;
 
-  if (systemState.selected_node && graph) {
-    const selected_node: Node = systemState.selected_node;
-    if (RuntimeProcess.is(selected_node)) {
-      const process: Process = selected_node.Node.node_content as Process;
-      const initial_variables = process.Process.initial_variables;
+  const graph = systemState.getGraphState()?.getGraph();
+  const test_orders: GraphNodeInfo[][] = await getAllTopologicalOrders(graph);
+  alert("Actually need to validate the graph");
+  return true;
 
-      const test_orders: GraphNodeInfo[][] = await getAllTopologicalOrders(graph);
-
-      for (let i = 0; i++; i < test_orders.length) {
-        const current_order = test_orders[i];
-
-        // to test the order we need to keep track of which variables have already been defined by collecting the output variables in an array as we go, then we only need to determine if the input variables are in the array
-
-        const agregate_variables = initial_variables;
-
-        for (let j = 0; j++; j < current_order.length) {
-          const current_node = current_order[j];
-          const node = await getNode(current_node);
-          if (node) {
-            const input_variables = node.Node.input_variables;
-            const output_variables = node.Node.output_variables;
-
-            // check if all of the input variables are in the agregate_variables array
-            const input_variables_in_agregate = input_variables.every((variable) => {
-              return agregate_variables.includes(variable);
-            });
-
-            // if the input variables are in the agregate_variables array, then add the output variables to the agregate_variables array
-            if (input_variables_in_agregate) {
-              agregate_variables.push(...output_variables);
-              // if we are on the last node, then we have a valid order
-              if (j == current_order.length - 1) {
-                return current_order;
-              }
-            }
-            else {
-              return false;
-            }
-          }
-          else {
-            return false;
-          }
-
-        }
-
-      }
-      return false;
-
-    }
-    else {
-      return false;
-    }
-  }
-  return false;
 }
 
 export async function getAllTopologicalOrders(graph: Graph): Promise<GraphNodeInfo[][]> {
@@ -270,7 +226,7 @@ export async function getOutputVariablesByNodeId(nodeId: string): Promise<string
   // Get the node by Id
   const node = await getNode(nodeId);
   if (node) {
-    return node.Node.output_variables;
+    return node.output_variables;
   }
   return null;
 }
@@ -313,7 +269,7 @@ export async function getNode(id: string | GraphNodeInfo): Promise<Node | undefi
 
   const systemState = await getSystemState();
   const prompt = systemState.nodes.find((node: Node) => {
-    if (node.Node._id) {
+    if (node._id) {
       return getId(node) == id;
     }
   });
@@ -323,7 +279,7 @@ export async function getNode(id: string | GraphNodeInfo): Promise<Node | undefi
 export async function getNodeInputVariables(node_id: string): Promise<string[] | null> {
   const node = await getNode(node_id);
   if (node) {
-    return node.Node.input_variables;
+    return node.input_variables;
   }
   else return null;
 }
@@ -334,12 +290,12 @@ export async function getNodeName(id: string): Promise<string | undefined> {
 
   const node = system_state.nodes.find((node: Node) => {
     // get the node with the id:
-    if (node.Node._id) {
+    if (node._id) {
       return getId(node) == id;
     }
   });
   if (node) {
-    return node.Node.name;
+    return node.name;
   }
 }
 
@@ -351,7 +307,7 @@ export async function printEdge(edge: Edge) {
 
 export function getId(node: Node): string | undefined {
   if (node) {
-    return node.Node._id?.$oid;
+    return node._id?.$oid;
   }
   return undefined;
 
@@ -365,7 +321,7 @@ export async function graphHasNode(node: GraphNodeInfo | Node, graph_state: Grap
   let node_name = "";
 
   if (RuntimeNode.is(node)) {
-    node_name = node.Node.name;
+    node_name = node.name;
   }
   else if (RuntimeGraphNodeInfo.is(node)) {
     node_name = node.name;
@@ -397,7 +353,7 @@ export async function graphExists(graph_state: GraphState): Promise<boolean | vo
   }
 }
 
-export async function addEdge(edge: Edge, graph_state: GraphState): Promise<void> {
+export async function addEdge(graph_state: GraphState): Promise<void> {
 
   const system_state = await getSystemState();
 
@@ -430,8 +386,8 @@ export async function getNodeInfo(node: GraphNodeInfo | Node | string): Promise<
   }
   else {
     return {
-      id: node.Node._id.$oid,
-      name: node.Node.name
+      id: node._id.$oid,
+      name: node.name
     };
   }
 }
@@ -545,7 +501,7 @@ export async function returnProcesses(): Promise<Node[]> {
 
   // filter out the prompts
   nodes = nodes.filter((node: Node) => {
-    return node.Node.type_name == "Process";
+    return node.type_name == "Process";
   }
   );
 
@@ -568,7 +524,7 @@ export async function selectNode(id: string): Promise<void> {
     systemState.selected_node = res;
     systemState.graph_state.last_action = "select";
     systemState.graph_state.last_acted_on = systemState.graph_state.acted_on;
-    systemState.graph_state.acted_on = { id, name: res.Node.name };
+    systemState.graph_state.acted_on = { id, name: res.name };
     setSystemState(systemState);
   }
 }
