@@ -1,10 +1,25 @@
 
 (function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
-var app = (function () {
+var app = (function (system_types_pb_js) {
     'use strict';
 
+    function _mergeNamespaces(n, m) {
+        m.forEach(function (e) {
+            e && typeof e !== 'string' && !Array.isArray(e) && Object.keys(e).forEach(function (k) {
+                if (k !== 'default' && !(k in n)) {
+                    var d = Object.getOwnPropertyDescriptor(e, k);
+                    Object.defineProperty(n, k, d.get ? d : {
+                        enumerable: true,
+                        get: function () { return e[k]; }
+                    });
+                }
+            });
+        });
+        return Object.freeze(n);
+    }
+
     function noop$2() { }
-    const identity$3 = x => x;
+    const identity$1 = x => x;
     function assign$3(tar, src) {
         // @ts-ignore
         for (const k in src)
@@ -354,6 +369,9 @@ var app = (function () {
     function add_render_callback(fn) {
         render_callbacks.push(fn);
     }
+    function add_flush_callback(fn) {
+        flush_callbacks.push(fn);
+    }
     // flush() calls callbacks in this order:
     // 1. All beforeUpdate callbacks, in order: parents before children
     // 2. All bind:this callbacks, in reverse order: children before parents.
@@ -511,7 +529,7 @@ var app = (function () {
                 delete_rule(node, animation_name);
         }
         function go() {
-            const { delay = 0, duration = 300, easing = identity$3, tick = noop$2, css } = config || null_transition;
+            const { delay = 0, duration = 300, easing = identity$1, tick = noop$2, css } = config || null_transition;
             if (css)
                 animation_name = create_rule(node, 0, 1, duration, delay, easing, css, uid++);
             tick(0, 1);
@@ -571,7 +589,7 @@ var app = (function () {
         const group = outros;
         group.r += 1;
         function go() {
-            const { delay = 0, duration = 300, easing = identity$3, tick = noop$2, css } = config || null_transition;
+            const { delay = 0, duration = 300, easing = identity$1, tick = noop$2, css } = config || null_transition;
             if (css)
                 animation_name = create_rule(node, 1, 0, duration, delay, easing, css);
             const start_time = now$2() + delay;
@@ -716,6 +734,14 @@ var app = (function () {
                 throw new Error('Cannot have duplicate keys in a keyed each');
             }
             keys.add(key);
+        }
+    }
+
+    function bind(component, name, callback) {
+        const index = component.$$.props[name];
+        if (index !== undefined) {
+            component.$$.bound[index] = callback;
+            callback(component.$$.ctx[index]);
         }
     }
     function create_component(block) {
@@ -957,6 +983,31 @@ var app = (function () {
         $inject_state() { }
     }
 
+    /******************************************************************************
+    Copyright (c) Microsoft Corporation.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+
+    function __awaiter(thisArg, _arguments, P, generator) {
+        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+        return new (P || (P = Promise))(function (resolve, reject) {
+            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+            step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+    }
+
     const subscriber_queue = [];
     /**
      * Create a `Writable` store that allows both updating and reading by subscription.
@@ -1005,286 +1056,8 @@ var app = (function () {
         return { set, update, subscribe };
     }
 
-    const system_state = {
-        authenticated: false,
-        websocketReady: false,
-        selectedNode: null,
-        graphState: null,
-        websocket: null,
-        executionContext: null,
-        nodes: [],
-    };
+    const system_state = new system_types_pb_js.SystemState();
     const systemStateStore = writable(system_state);
-
-    /* src/components/sidebarComponents/AddNodeButton.svelte generated by Svelte v3.59.1 */
-    const file$8 = "src/components/sidebarComponents/AddNodeButton.svelte";
-
-    function create_fragment$8(ctx) {
-    	let form;
-    	let label0;
-    	let t1;
-    	let input0;
-    	let t2;
-    	let label1;
-    	let t4;
-    	let input1;
-    	let t5;
-    	let label2;
-    	let t7;
-    	let input2;
-    	let t8;
-    	let button;
-    	let mounted;
-    	let dispose;
-
-    	const block = {
-    		c: function create() {
-    			form = element$1("form");
-    			label0 = element$1("label");
-    			label0.textContent = "Prompt";
-    			t1 = space();
-    			input0 = element$1("input");
-    			t2 = space();
-    			label1 = element$1("label");
-    			label1.textContent = "Name";
-    			t4 = space();
-    			input1 = element$1("input");
-    			t5 = space();
-    			label2 = element$1("label");
-    			label2.textContent = "System";
-    			t7 = space();
-    			input2 = element$1("input");
-    			t8 = space();
-    			button = element$1("button");
-    			button.textContent = "Submit";
-    			attr_dev(label0, "for", "prompt");
-    			add_location(label0, file$8, 23, 2, 1067);
-    			attr_dev(input0, "id", "prompt");
-    			attr_dev(input0, "type", "text");
-    			input0.required = true;
-    			add_location(input0, file$8, 24, 2, 1104);
-    			attr_dev(label1, "for", "name");
-    			add_location(label1, file$8, 26, 2, 1177);
-    			attr_dev(input1, "id", "name");
-    			attr_dev(input1, "type", "text");
-    			input1.required = true;
-    			add_location(input1, file$8, 27, 2, 1210);
-    			attr_dev(label2, "for", "system");
-    			add_location(label2, file$8, 29, 2, 1279);
-    			attr_dev(input2, "id", "system");
-    			attr_dev(input2, "type", "text");
-    			input2.required = true;
-    			add_location(input2, file$8, 30, 2, 1316);
-    			attr_dev(button, "type", "submit");
-    			add_location(button, file$8, 32, 2, 1389);
-    			add_location(form, file$8, 22, 0, 1018);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, form, anchor);
-    			append_dev(form, label0);
-    			append_dev(form, t1);
-    			append_dev(form, input0);
-    			set_input_value(input0, /*action*/ ctx[0].prompt);
-    			append_dev(form, t2);
-    			append_dev(form, label1);
-    			append_dev(form, t4);
-    			append_dev(form, input1);
-    			set_input_value(input1, /*action*/ ctx[0].name);
-    			append_dev(form, t5);
-    			append_dev(form, label2);
-    			append_dev(form, t7);
-    			append_dev(form, input2);
-    			set_input_value(input2, /*action*/ ctx[0].system);
-    			append_dev(form, t8);
-    			append_dev(form, button);
-
-    			if (!mounted) {
-    				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[2]),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[3]),
-    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[4]),
-    					listen_dev(form, "submit", prevent_default(/*localAddNode*/ ctx[1]), false, true, false, false)
-    				];
-
-    				mounted = true;
-    			}
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*action*/ 1 && input0.value !== /*action*/ ctx[0].prompt) {
-    				set_input_value(input0, /*action*/ ctx[0].prompt);
-    			}
-
-    			if (dirty & /*action*/ 1 && input1.value !== /*action*/ ctx[0].name) {
-    				set_input_value(input1, /*action*/ ctx[0].name);
-    			}
-
-    			if (dirty & /*action*/ 1 && input2.value !== /*action*/ ctx[0].system) {
-    				set_input_value(input2, /*action*/ ctx[0].system);
-    			}
-    		},
-    		i: noop$2,
-    		o: noop$2,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(form);
-    			mounted = false;
-    			run_all(dispose);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$8.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$8($$self, $$props, $$invalidate) {
-    	let $systemStateStore;
-    	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(5, $systemStateStore = $$value));
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('AddNodeButton', slots, []);
-
-    	var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
-    		function adopt(value) {
-    			return value instanceof P
-    			? value
-    			: new P(function (resolve) {
-    						resolve(value);
-    					});
-    		}
-
-    		return new (P || (P = Promise))(function (resolve, reject) {
-    				function fulfilled(value) {
-    					try {
-    						step(generator.next(value));
-    					} catch(e) {
-    						reject(e);
-    					}
-    				}
-
-    				function rejected(value) {
-    					try {
-    						step(generator["throw"](value));
-    					} catch(e) {
-    						reject(e);
-    					}
-    				}
-
-    				function step(result) {
-    					result.done
-    					? resolve(result.value)
-    					: adopt(result.value).then(fulfilled, rejected);
-    				}
-
-    				step((generator = generator.apply(thisArg, _arguments || [])).next());
-    			});
-    	};
-
-    	let action = {
-    		_id: { $oid: "" },
-    		prompt: "",
-    		system: ""
-    	};
-
-    	function localAddNode() {
-    		return __awaiter(this, void 0, void 0, function* () {
-    			$systemStateStore.websocket.send(JSON.stringify({ create_action: action }));
-    		});
-    	}
-
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<AddNodeButton> was created with unknown prop '${key}'`);
-    	});
-
-    	function input0_input_handler() {
-    		action.prompt = this.value;
-    		$$invalidate(0, action);
-    	}
-
-    	function input1_input_handler() {
-    		action.name = this.value;
-    		$$invalidate(0, action);
-    	}
-
-    	function input2_input_handler() {
-    		action.system = this.value;
-    		$$invalidate(0, action);
-    	}
-
-    	$$self.$capture_state = () => ({
-    		__awaiter,
-    		systemStateStore,
-    		action,
-    		localAddNode,
-    		$systemStateStore
-    	});
-
-    	$$self.$inject_state = $$props => {
-    		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
-    		if ('action' in $$props) $$invalidate(0, action = $$props.action);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [
-    		action,
-    		localAddNode,
-    		input0_input_handler,
-    		input1_input_handler,
-    		input2_input_handler
-    	];
-    }
-
-    class AddNodeButton extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$8, create_fragment$8, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "AddNodeButton",
-    			options,
-    			id: create_fragment$8.name
-    		});
-    	}
-    }
-
-    /******************************************************************************
-    Copyright (c) Microsoft Corporation.
-
-    Permission to use, copy, modify, and/or distribute this software for any
-    purpose with or without fee is hereby granted.
-
-    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-    PERFORMANCE OF THIS SOFTWARE.
-    ***************************************************************************** */
-
-    function __awaiter(thisArg, _arguments, P, generator) {
-        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-        return new (P || (P = Promise))(function (resolve, reject) {
-            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-            step((generator = generator.apply(thisArg, _arguments || [])).next());
-        });
-    }
 
     var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -1690,7 +1463,7 @@ var app = (function () {
     var objectProto$5 = Object.prototype;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty$5 = objectProto$5.hasOwnProperty;
+    var hasOwnProperty$4 = objectProto$5.hasOwnProperty;
 
     /**
      * Used to resolve the
@@ -1710,7 +1483,7 @@ var app = (function () {
      * @returns {string} Returns the raw `toStringTag`.
      */
     function getRawTag$1(value) {
-      var isOwn = hasOwnProperty$5.call(value, symToStringTag$1),
+      var isOwn = hasOwnProperty$4.call(value, symToStringTag$1),
           tag = value[symToStringTag$1];
 
       try {
@@ -1773,7 +1546,7 @@ var app = (function () {
      * @param {*} value The value to query.
      * @returns {string} Returns the `toStringTag`.
      */
-    function baseGetTag$2(value) {
+    function baseGetTag$1(value) {
       if (value == null) {
         return value === undefined ? undefinedTag : nullTag;
       }
@@ -1782,7 +1555,7 @@ var app = (function () {
         : objectToString(value);
     }
 
-    var _baseGetTag = baseGetTag$2;
+    var _baseGetTag = baseGetTag$1;
 
     /**
      * Checks if `value` is the
@@ -1810,50 +1583,58 @@ var app = (function () {
      * // => false
      */
 
-    function isObject$5(value) {
+    function isObject$4(value) {
       var type = typeof value;
       return value != null && (type == 'object' || type == 'function');
     }
 
-    var isObject_1 = isObject$5;
+    var isObject_1 = isObject$4;
 
-    var baseGetTag$1 = _baseGetTag,
-        isObject$4 = isObject_1;
+    var isFunction_1;
+    var hasRequiredIsFunction;
 
-    /** `Object#toString` result references. */
-    var asyncTag = '[object AsyncFunction]',
-        funcTag = '[object Function]',
-        genTag = '[object GeneratorFunction]',
-        proxyTag = '[object Proxy]';
+    function requireIsFunction () {
+    	if (hasRequiredIsFunction) return isFunction_1;
+    	hasRequiredIsFunction = 1;
+    	var baseGetTag = _baseGetTag,
+    	    isObject = isObject_1;
 
-    /**
-     * Checks if `value` is classified as a `Function` object.
-     *
-     * @static
-     * @memberOf _
-     * @since 0.1.0
-     * @category Lang
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a function, else `false`.
-     * @example
-     *
-     * _.isFunction(_);
-     * // => true
-     *
-     * _.isFunction(/abc/);
-     * // => false
-     */
-    function isFunction$1(value) {
-      if (!isObject$4(value)) {
-        return false;
-      }
-      // The use of `Object#toString` avoids issues with the `typeof` operator
-      // in Safari 9 which returns 'object' for typed arrays and other constructors.
-      var tag = baseGetTag$1(value);
-      return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
+    	/** `Object#toString` result references. */
+    	var asyncTag = '[object AsyncFunction]',
+    	    funcTag = '[object Function]',
+    	    genTag = '[object GeneratorFunction]',
+    	    proxyTag = '[object Proxy]';
+
+    	/**
+    	 * Checks if `value` is classified as a `Function` object.
+    	 *
+    	 * @static
+    	 * @memberOf _
+    	 * @since 0.1.0
+    	 * @category Lang
+    	 * @param {*} value The value to check.
+    	 * @returns {boolean} Returns `true` if `value` is a function, else `false`.
+    	 * @example
+    	 *
+    	 * _.isFunction(_);
+    	 * // => true
+    	 *
+    	 * _.isFunction(/abc/);
+    	 * // => false
+    	 */
+    	function isFunction(value) {
+    	  if (!isObject(value)) {
+    	    return false;
+    	  }
+    	  // The use of `Object#toString` avoids issues with the `typeof` operator
+    	  // in Safari 9 which returns 'object' for typed arrays and other constructors.
+    	  var tag = baseGetTag(value);
+    	  return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
+    	}
+
+    	isFunction_1 = isFunction;
+    	return isFunction_1;
     }
-
-    var isFunction_1 = isFunction$1;
 
     var root$2 = _root;
 
@@ -1919,7 +1700,7 @@ var app = (function () {
     	return _toSource;
     }
 
-    var isFunction = isFunction_1,
+    var isFunction = requireIsFunction(),
         isMasked = _isMasked,
         isObject$3 = isObject_1,
         toSource = require_toSource();
@@ -1941,11 +1722,11 @@ var app = (function () {
     var funcToString = funcProto.toString;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty$4 = objectProto$3.hasOwnProperty;
+    var hasOwnProperty$3 = objectProto$3.hasOwnProperty;
 
     /** Used to detect if a method is native. */
     var reIsNative = RegExp('^' +
-      funcToString.call(hasOwnProperty$4).replace(reRegExpChar, '\\$&')
+      funcToString.call(hasOwnProperty$3).replace(reRegExpChar, '\\$&')
       .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
     );
 
@@ -2059,7 +1840,7 @@ var app = (function () {
     var objectProto$2 = Object.prototype;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty$3 = objectProto$2.hasOwnProperty;
+    var hasOwnProperty$2 = objectProto$2.hasOwnProperty;
 
     /**
      * Gets the hash value for `key`.
@@ -2076,7 +1857,7 @@ var app = (function () {
         var result = data[key];
         return result === HASH_UNDEFINED$1 ? undefined : result;
       }
-      return hasOwnProperty$3.call(data, key) ? data[key] : undefined;
+      return hasOwnProperty$2.call(data, key) ? data[key] : undefined;
     }
 
     var _hashGet = hashGet$1;
@@ -2087,7 +1868,7 @@ var app = (function () {
     var objectProto$1 = Object.prototype;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty$2 = objectProto$1.hasOwnProperty;
+    var hasOwnProperty$1 = objectProto$1.hasOwnProperty;
 
     /**
      * Checks if a hash value for `key` exists.
@@ -2100,7 +1881,7 @@ var app = (function () {
      */
     function hashHas$1(key) {
       var data = this.__data__;
-      return nativeCreate$1 ? (data[key] !== undefined) : hasOwnProperty$2.call(data, key);
+      return nativeCreate$1 ? (data[key] !== undefined) : hasOwnProperty$1.call(data, key);
     }
 
     var _hashHas = hashHas$1;
@@ -2485,7 +2266,7 @@ var app = (function () {
     var objectProto = Object.prototype;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty$1 = objectProto.hasOwnProperty;
+    var hasOwnProperty = objectProto.hasOwnProperty;
 
     /**
      * Assigns `value` to `key` of `object` if the existing value is not equivalent
@@ -2499,7 +2280,7 @@ var app = (function () {
      */
     function assignValue$1(object, key, value) {
       var objValue = object[key];
-      if (!(hasOwnProperty$1.call(object, key) && eq(objValue, value)) ||
+      if (!(hasOwnProperty.call(object, key) && eq(objValue, value)) ||
           (value === undefined && !(key in object))) {
         baseAssignValue(object, key, value);
       }
@@ -3213,7 +2994,7 @@ var app = (function () {
     function requireIsArrayLike () {
     	if (hasRequiredIsArrayLike) return isArrayLike_1;
     	hasRequiredIsArrayLike = 1;
-    	var isFunction = isFunction_1,
+    	var isFunction = requireIsFunction(),
     	    isLength = requireIsLength();
 
     	/**
@@ -7204,7 +6985,7 @@ var app = (function () {
     	    getPrototype = require_getPrototype(),
     	    isArray = isArray_1,
     	    isBuffer = requireIsBuffer(),
-    	    isFunction = isFunction_1,
+    	    isFunction = requireIsFunction(),
     	    isObject = isObject_1,
     	    isTypedArray = requireIsTypedArray();
 
@@ -8018,7 +7799,7 @@ var app = (function () {
           has:  requireHas(),
           isArray: isArray_1,
           isEmpty: requireIsEmpty(),
-          isFunction: isFunction_1,
+          isFunction: requireIsFunction(),
           isUndefined: requireIsUndefined(),
           keys: requireKeys(),
           map: requireMap(),
@@ -8039,7 +7820,7 @@ var app = (function () {
 
     var lodash_1$1 = lodash;
 
-    var _$e = lodash_1$1;
+    var _$b = lodash_1$1;
 
     var graph = Graph$2;
 
@@ -8058,18 +7839,18 @@ var app = (function () {
     //    we're going to get to a performant hashtable in JavaScript.
 
     function Graph$2(opts) {
-      this._isDirected = _$e.has(opts, "directed") ? opts.directed : true;
-      this._isMultigraph = _$e.has(opts, "multigraph") ? opts.multigraph : false;
-      this._isCompound = _$e.has(opts, "compound") ? opts.compound : false;
+      this._isDirected = _$b.has(opts, "directed") ? opts.directed : true;
+      this._isMultigraph = _$b.has(opts, "multigraph") ? opts.multigraph : false;
+      this._isCompound = _$b.has(opts, "compound") ? opts.compound : false;
 
       // Label for the graph itself
       this._label = undefined;
 
       // Defaults to be set when creating a new node
-      this._defaultNodeLabelFn = _$e.constant(undefined);
+      this._defaultNodeLabelFn = _$b.constant(undefined);
 
       // Defaults to be set when creating a new edge
-      this._defaultEdgeLabelFn = _$e.constant(undefined);
+      this._defaultEdgeLabelFn = _$b.constant(undefined);
 
       // v -> label
       this._nodes = {};
@@ -8136,8 +7917,8 @@ var app = (function () {
     /* === Node functions ========== */
 
     Graph$2.prototype.setDefaultNodeLabel = function(newDefault) {
-      if (!_$e.isFunction(newDefault)) {
-        newDefault = _$e.constant(newDefault);
+      if (!_$b.isFunction(newDefault)) {
+        newDefault = _$b.constant(newDefault);
       }
       this._defaultNodeLabelFn = newDefault;
       return this;
@@ -8148,27 +7929,27 @@ var app = (function () {
     };
 
     Graph$2.prototype.nodes = function() {
-      return _$e.keys(this._nodes);
+      return _$b.keys(this._nodes);
     };
 
     Graph$2.prototype.sources = function() {
       var self = this;
-      return _$e.filter(this.nodes(), function(v) {
-        return _$e.isEmpty(self._in[v]);
+      return _$b.filter(this.nodes(), function(v) {
+        return _$b.isEmpty(self._in[v]);
       });
     };
 
     Graph$2.prototype.sinks = function() {
       var self = this;
-      return _$e.filter(this.nodes(), function(v) {
-        return _$e.isEmpty(self._out[v]);
+      return _$b.filter(this.nodes(), function(v) {
+        return _$b.isEmpty(self._out[v]);
       });
     };
 
     Graph$2.prototype.setNodes = function(vs, value) {
       var args = arguments;
       var self = this;
-      _$e.each(vs, function(v) {
+      _$b.each(vs, function(v) {
         if (args.length > 1) {
           self.setNode(v, value);
         } else {
@@ -8179,7 +7960,7 @@ var app = (function () {
     };
 
     Graph$2.prototype.setNode = function(v, value) {
-      if (_$e.has(this._nodes, v)) {
+      if (_$b.has(this._nodes, v)) {
         if (arguments.length > 1) {
           this._nodes[v] = value;
         }
@@ -8205,26 +7986,26 @@ var app = (function () {
     };
 
     Graph$2.prototype.hasNode = function(v) {
-      return _$e.has(this._nodes, v);
+      return _$b.has(this._nodes, v);
     };
 
     Graph$2.prototype.removeNode =  function(v) {
       var self = this;
-      if (_$e.has(this._nodes, v)) {
+      if (_$b.has(this._nodes, v)) {
         var removeEdge = function(e) { self.removeEdge(self._edgeObjs[e]); };
         delete this._nodes[v];
         if (this._isCompound) {
           this._removeFromParentsChildList(v);
           delete this._parent[v];
-          _$e.each(this.children(v), function(child) {
+          _$b.each(this.children(v), function(child) {
             self.setParent(child);
           });
           delete this._children[v];
         }
-        _$e.each(_$e.keys(this._in[v]), removeEdge);
+        _$b.each(_$b.keys(this._in[v]), removeEdge);
         delete this._in[v];
         delete this._preds[v];
-        _$e.each(_$e.keys(this._out[v]), removeEdge);
+        _$b.each(_$b.keys(this._out[v]), removeEdge);
         delete this._out[v];
         delete this._sucs[v];
         --this._nodeCount;
@@ -8237,13 +8018,13 @@ var app = (function () {
         throw new Error("Cannot set parent in a non-compound graph");
       }
 
-      if (_$e.isUndefined(parent)) {
+      if (_$b.isUndefined(parent)) {
         parent = GRAPH_NODE;
       } else {
         // Coerce parent to string
         parent += "";
         for (var ancestor = parent;
-          !_$e.isUndefined(ancestor);
+          !_$b.isUndefined(ancestor);
           ancestor = this.parent(ancestor)) {
           if (ancestor === v) {
             throw new Error("Setting " + parent+ " as parent of " + v +
@@ -8275,14 +8056,14 @@ var app = (function () {
     };
 
     Graph$2.prototype.children = function(v) {
-      if (_$e.isUndefined(v)) {
+      if (_$b.isUndefined(v)) {
         v = GRAPH_NODE;
       }
 
       if (this._isCompound) {
         var children = this._children[v];
         if (children) {
-          return _$e.keys(children);
+          return _$b.keys(children);
         }
       } else if (v === GRAPH_NODE) {
         return this.nodes();
@@ -8294,21 +8075,21 @@ var app = (function () {
     Graph$2.prototype.predecessors = function(v) {
       var predsV = this._preds[v];
       if (predsV) {
-        return _$e.keys(predsV);
+        return _$b.keys(predsV);
       }
     };
 
     Graph$2.prototype.successors = function(v) {
       var sucsV = this._sucs[v];
       if (sucsV) {
-        return _$e.keys(sucsV);
+        return _$b.keys(sucsV);
       }
     };
 
     Graph$2.prototype.neighbors = function(v) {
       var preds = this.predecessors(v);
       if (preds) {
-        return _$e.union(preds, this.successors(v));
+        return _$b.union(preds, this.successors(v));
       }
     };
 
@@ -8332,13 +8113,13 @@ var app = (function () {
       copy.setGraph(this.graph());
 
       var self = this;
-      _$e.each(this._nodes, function(value, v) {
+      _$b.each(this._nodes, function(value, v) {
         if (filter(v)) {
           copy.setNode(v, value);
         }
       });
 
-      _$e.each(this._edgeObjs, function(e) {
+      _$b.each(this._edgeObjs, function(e) {
         if (copy.hasNode(e.v) && copy.hasNode(e.w)) {
           copy.setEdge(e, self.edge(e));
         }
@@ -8358,7 +8139,7 @@ var app = (function () {
       }
 
       if (this._isCompound) {
-        _$e.each(copy.nodes(), function(v) {
+        _$b.each(copy.nodes(), function(v) {
           copy.setParent(v, findParent(v));
         });
       }
@@ -8369,8 +8150,8 @@ var app = (function () {
     /* === Edge functions ========== */
 
     Graph$2.prototype.setDefaultEdgeLabel = function(newDefault) {
-      if (!_$e.isFunction(newDefault)) {
-        newDefault = _$e.constant(newDefault);
+      if (!_$b.isFunction(newDefault)) {
+        newDefault = _$b.constant(newDefault);
       }
       this._defaultEdgeLabelFn = newDefault;
       return this;
@@ -8381,13 +8162,13 @@ var app = (function () {
     };
 
     Graph$2.prototype.edges = function() {
-      return _$e.values(this._edgeObjs);
+      return _$b.values(this._edgeObjs);
     };
 
     Graph$2.prototype.setPath = function(vs, value) {
       var self = this;
       var args = arguments;
-      _$e.reduce(vs, function(v, w) {
+      _$b.reduce(vs, function(v, w) {
         if (args.length > 1) {
           self.setEdge(v, w, value);
         } else {
@@ -8427,19 +8208,19 @@ var app = (function () {
 
       v = "" + v;
       w = "" + w;
-      if (!_$e.isUndefined(name)) {
+      if (!_$b.isUndefined(name)) {
         name = "" + name;
       }
 
       var e = edgeArgsToId(this._isDirected, v, w, name);
-      if (_$e.has(this._edgeLabels, e)) {
+      if (_$b.has(this._edgeLabels, e)) {
         if (valueSpecified) {
           this._edgeLabels[e] = value;
         }
         return this;
       }
 
-      if (!_$e.isUndefined(name) && !this._isMultigraph) {
+      if (!_$b.isUndefined(name) && !this._isMultigraph) {
         throw new Error("Cannot set a named edge when isMultigraph = false");
       }
 
@@ -8476,7 +8257,7 @@ var app = (function () {
       var e = (arguments.length === 1
         ? edgeObjToId(this._isDirected, arguments[0])
         : edgeArgsToId(this._isDirected, v, w, name));
-      return _$e.has(this._edgeLabels, e);
+      return _$b.has(this._edgeLabels, e);
     };
 
     Graph$2.prototype.removeEdge = function(v, w, name) {
@@ -8501,22 +8282,22 @@ var app = (function () {
     Graph$2.prototype.inEdges = function(v, u) {
       var inV = this._in[v];
       if (inV) {
-        var edges = _$e.values(inV);
+        var edges = _$b.values(inV);
         if (!u) {
           return edges;
         }
-        return _$e.filter(edges, function(edge) { return edge.v === u; });
+        return _$b.filter(edges, function(edge) { return edge.v === u; });
       }
     };
 
     Graph$2.prototype.outEdges = function(v, w) {
       var outV = this._out[v];
       if (outV) {
-        var edges = _$e.values(outV);
+        var edges = _$b.values(outV);
         if (!w) {
           return edges;
         }
-        return _$e.filter(edges, function(edge) { return edge.w === w; });
+        return _$b.filter(edges, function(edge) { return edge.w === w; });
       }
     };
 
@@ -8548,7 +8329,7 @@ var app = (function () {
         w = tmp;
       }
       return v + EDGE_KEY_DELIM + w + EDGE_KEY_DELIM +
-                 (_$e.isUndefined(name) ? DEFAULT_EDGE_NAME : name);
+                 (_$b.isUndefined(name) ? DEFAULT_EDGE_NAME : name);
     }
 
     function edgeArgsToObj(isDirected, v_, w_, name) {
@@ -8573,12 +8354,12 @@ var app = (function () {
     var version$2 = '2.1.8';
 
     // Includes only the "core" of graphlib
-    var lib$2 = {
+    var lib$1 = {
       Graph: graph,
       version: version$2
     };
 
-    var _$d = lodash_1$1;
+    var _$a = lodash_1$1;
     var Graph$1 = graph;
 
     var json = {
@@ -8596,21 +8377,21 @@ var app = (function () {
         nodes: writeNodes(g),
         edges: writeEdges(g)
       };
-      if (!_$d.isUndefined(g.graph())) {
-        json.value = _$d.clone(g.graph());
+      if (!_$a.isUndefined(g.graph())) {
+        json.value = _$a.clone(g.graph());
       }
       return json;
     }
 
     function writeNodes(g) {
-      return _$d.map(g.nodes(), function(v) {
+      return _$a.map(g.nodes(), function(v) {
         var nodeValue = g.node(v);
         var parent = g.parent(v);
         var node = { v: v };
-        if (!_$d.isUndefined(nodeValue)) {
+        if (!_$a.isUndefined(nodeValue)) {
           node.value = nodeValue;
         }
-        if (!_$d.isUndefined(parent)) {
+        if (!_$a.isUndefined(parent)) {
           node.parent = parent;
         }
         return node;
@@ -8618,13 +8399,13 @@ var app = (function () {
     }
 
     function writeEdges(g) {
-      return _$d.map(g.edges(), function(e) {
+      return _$a.map(g.edges(), function(e) {
         var edgeValue = g.edge(e);
         var edge = { v: e.v, w: e.w };
-        if (!_$d.isUndefined(e.name)) {
+        if (!_$a.isUndefined(e.name)) {
           edge.name = e.name;
         }
-        if (!_$d.isUndefined(edgeValue)) {
+        if (!_$a.isUndefined(edgeValue)) {
           edge.value = edgeValue;
         }
         return edge;
@@ -8633,19 +8414,19 @@ var app = (function () {
 
     function read(json) {
       var g = new Graph$1(json.options).setGraph(json.value);
-      _$d.each(json.nodes, function(entry) {
+      _$a.each(json.nodes, function(entry) {
         g.setNode(entry.v, entry.value);
         if (entry.parent) {
           g.setParent(entry.v, entry.parent);
         }
       });
-      _$d.each(json.edges, function(entry) {
+      _$a.each(json.edges, function(entry) {
         g.setEdge({ v: entry.v, w: entry.w, name: entry.name }, entry.value);
       });
       return g;
     }
 
-    var _$c = lodash_1$1;
+    var _$9 = lodash_1$1;
 
     var components_1 = components;
 
@@ -8655,14 +8436,14 @@ var app = (function () {
       var cmpt;
 
       function dfs(v) {
-        if (_$c.has(visited, v)) return;
+        if (_$9.has(visited, v)) return;
         visited[v] = true;
         cmpt.push(v);
-        _$c.each(g.successors(v), dfs);
-        _$c.each(g.predecessors(v), dfs);
+        _$9.each(g.successors(v), dfs);
+        _$9.each(g.predecessors(v), dfs);
       }
 
-      _$c.each(g.nodes(), function(v) {
+      _$9.each(g.nodes(), function(v) {
         cmpt = [];
         dfs(v);
         if (cmpt.length) {
@@ -8673,7 +8454,7 @@ var app = (function () {
       return cmpts;
     }
 
-    var _$b = lodash_1$1;
+    var _$8 = lodash_1$1;
 
     var priorityQueue = PriorityQueue$2;
 
@@ -8707,7 +8488,7 @@ var app = (function () {
      * Returns `true` if **key** is in the queue and `false` if not.
      */
     PriorityQueue$2.prototype.has = function(key) {
-      return _$b.has(this._keyIndices, key);
+      return _$8.has(this._keyIndices, key);
     };
 
     /**
@@ -8745,7 +8526,7 @@ var app = (function () {
     PriorityQueue$2.prototype.add = function(key, priority) {
       var keyIndices = this._keyIndices;
       key = String(key);
-      if (!_$b.has(keyIndices, key)) {
+      if (!_$8.has(keyIndices, key)) {
         var arr = this._arr;
         var index = arr.length;
         keyIndices[key] = index;
@@ -8826,12 +8607,12 @@ var app = (function () {
       keyIndices[origArrI.key] = j;
     };
 
-    var _$a = lodash_1$1;
+    var _$7 = lodash_1$1;
     var PriorityQueue$1 = priorityQueue;
 
     var dijkstra_1 = dijkstra$1;
 
-    var DEFAULT_WEIGHT_FUNC$1 = _$a.constant(1);
+    var DEFAULT_WEIGHT_FUNC$1 = _$7.constant(1);
 
     function dijkstra$1(g, source, weightFn, edgeFn) {
       return runDijkstra(g, String(source),
@@ -8882,17 +8663,17 @@ var app = (function () {
     }
 
     var dijkstra = dijkstra_1;
-    var _$9 = lodash_1$1;
+    var _$6 = lodash_1$1;
 
     var dijkstraAll_1 = dijkstraAll;
 
     function dijkstraAll(g, weightFunc, edgeFunc) {
-      return _$9.transform(g.nodes(), function(acc, v) {
+      return _$6.transform(g.nodes(), function(acc, v) {
         acc[v] = dijkstra(g, v, weightFunc, edgeFunc);
       }, {});
     }
 
-    var _$8 = lodash_1$1;
+    var _$5 = lodash_1$1;
 
     var tarjan_1 = tarjan$1;
 
@@ -8911,7 +8692,7 @@ var app = (function () {
         stack.push(v);
 
         g.successors(v).forEach(function(w) {
-          if (!_$8.has(visited, w)) {
+          if (!_$5.has(visited, w)) {
             dfs(w);
             entry.lowlink = Math.min(entry.lowlink, visited[w].lowlink);
           } else if (visited[w].onStack) {
@@ -8932,7 +8713,7 @@ var app = (function () {
       }
 
       g.nodes().forEach(function(v) {
-        if (!_$8.has(visited, v)) {
+        if (!_$5.has(visited, v)) {
           dfs(v);
         }
       });
@@ -8940,22 +8721,22 @@ var app = (function () {
       return results;
     }
 
-    var _$7 = lodash_1$1;
+    var _$4 = lodash_1$1;
     var tarjan = tarjan_1;
 
     var findCycles_1 = findCycles;
 
     function findCycles(g) {
-      return _$7.filter(tarjan(g), function(cmpt) {
+      return _$4.filter(tarjan(g), function(cmpt) {
         return cmpt.length > 1 || (cmpt.length === 1 && g.hasEdge(cmpt[0], cmpt[0]));
       });
     }
 
-    var _$6 = lodash_1$1;
+    var _$3 = lodash_1$1;
 
     var floydWarshall_1 = floydWarshall;
 
-    var DEFAULT_WEIGHT_FUNC = _$6.constant(1);
+    var DEFAULT_WEIGHT_FUNC = _$3.constant(1);
 
     function floydWarshall(g, weightFn, edgeFn) {
       return runFloydWarshall(g,
@@ -9002,7 +8783,7 @@ var app = (function () {
       return results;
     }
 
-    var _$5 = lodash_1$1;
+    var _$2 = lodash_1$1;
 
     var topsort_1 = topsort$1;
     topsort$1.CycleException = CycleException;
@@ -9013,22 +8794,22 @@ var app = (function () {
       var results = [];
 
       function visit(node) {
-        if (_$5.has(stack, node)) {
+        if (_$2.has(stack, node)) {
           throw new CycleException();
         }
 
-        if (!_$5.has(visited, node)) {
+        if (!_$2.has(visited, node)) {
           stack[node] = true;
           visited[node] = true;
-          _$5.each(g.predecessors(node), visit);
+          _$2.each(g.predecessors(node), visit);
           delete stack[node];
           results.push(node);
         }
       }
 
-      _$5.each(g.sinks(), visit);
+      _$2.each(g.sinks(), visit);
 
-      if (_$5.size(visited) !== g.nodeCount()) {
+      if (_$2.size(visited) !== g.nodeCount()) {
         throw new CycleException();
       }
 
@@ -9054,7 +8835,7 @@ var app = (function () {
       return true;
     }
 
-    var _$4 = lodash_1$1;
+    var _$1 = lodash_1$1;
 
     var dfs_1 = dfs$2;
 
@@ -9067,7 +8848,7 @@ var app = (function () {
      * Order must be one of "pre" or "post".
      */
     function dfs$2(g, vs, order) {
-      if (!_$4.isArray(vs)) {
+      if (!_$1.isArray(vs)) {
         vs = [vs];
       }
 
@@ -9075,7 +8856,7 @@ var app = (function () {
 
       var acc = [];
       var visited = {};
-      _$4.each(vs, function(v) {
+      _$1.each(vs, function(v) {
         if (!g.hasNode(v)) {
           throw new Error("Graph does not have node: " + v);
         }
@@ -9086,11 +8867,11 @@ var app = (function () {
     }
 
     function doDfs(g, v, postorder, visited, navigation, acc) {
-      if (!_$4.has(visited, v)) {
+      if (!_$1.has(visited, v)) {
         visited[v] = true;
 
         if (!postorder) { acc.push(v); }
-        _$4.each(navigation(v), function(w) {
+        _$1.each(navigation(v), function(w) {
           doDfs(g, w, postorder, visited, navigation, acc);
         });
         if (postorder) { acc.push(v); }
@@ -9113,7 +8894,7 @@ var app = (function () {
       return dfs(g, vs, "pre");
     }
 
-    var _$3 = lodash_1$1;
+    var _ = lodash_1$1;
     var Graph = graph;
     var PriorityQueue = priorityQueue;
 
@@ -9141,7 +8922,7 @@ var app = (function () {
         return result;
       }
 
-      _$3.each(g.nodes(), function(v) {
+      _.each(g.nodes(), function(v) {
         pq.add(v, Number.POSITIVE_INFINITY);
         result.setNode(v);
       });
@@ -9152,7 +8933,7 @@ var app = (function () {
       var init = false;
       while (pq.size() > 0) {
         v = pq.removeMin();
-        if (_$3.has(parents, v)) {
+        if (_.has(parents, v)) {
           result.setEdge(v, parents[v]);
         } else if (init) {
           throw new Error("Input graph is not connected: " + g);
@@ -9210,16 +8991,21 @@ var app = (function () {
      * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      */
 
-    var lib$1 = lib$2;
+    var lib = lib$1;
 
     var graphlib = {
-      Graph: lib$1.Graph,
+      Graph: lib.Graph,
       json: json,
       alg: alg,
-      version: lib$1.version
+      version: lib.version
     };
 
-    var graphlib$1 = /*@__PURE__*/getDefaultExportFromCjs(graphlib);
+    var index = /*@__PURE__*/getDefaultExportFromCjs(graphlib);
+
+    var graphlib$1 = /*#__PURE__*/_mergeNamespaces({
+        __proto__: null,
+        'default': index
+    }, [graphlib]);
 
     // Define the getter and setter
     function getSystemState() {
@@ -9231,213 +9017,337 @@ var app = (function () {
             });
         });
     }
-    function validateGraph(systemState) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const graph = systemState.graphState.graph;
-            if (systemState.selectedNode) {
-                const selected_node = systemState.selectedNode;
-                if (selected_node.Node.type_name == "Process") {
-                    const process = selected_node.Node.node_content;
-                    const initial_variables = process.Process.initial_variables;
-                    const test_orders = getAllTopologicalOrders(graph);
-                    for (let i = 0; i++; i < test_orders.length) {
-                        const current_order = test_orders[i];
-                        // to test the order we need to keep track of which variables have already been defined by collecting the output variables in an array as we go, then we only need to determine if the input variables are in the array
-                        const agregate_variables = initial_variables;
-                        for (let j = 0; j++; j < current_order.length) {
-                            const current_node = current_order[j];
-                            const node = yield getNodeById(current_node);
-                            if (node) {
-                                const input_variables = node.Node.input_variables;
-                                const output_variables = node.Node.output_variables;
-                                // check if all of the input variables are in the agregate_variables array
-                                const input_variables_in_agregate = input_variables.every((variable) => {
-                                    return agregate_variables.includes(variable);
-                                });
-                                // if the input variables are in the agregate_variables array, then add the output variables to the agregate_variables array
-                                if (input_variables_in_agregate) {
-                                    agregate_variables.push(...output_variables);
-                                    // if we are on the last node, then we have a valid order
-                                    if (j == current_order.length - 1) {
-                                        return current_order;
-                                    }
-                                }
-                                else {
-                                    return false;
-                                }
-                            }
-                            else {
-                                return false;
-                            }
-                        }
-                    }
-                    return false;
-                }
-                else {
-                    return false;
-                }
+    function systemGraphToGraphLib(graph_state) {
+        const graph = graph_state.getGraph();
+        const g = new graphlib.Graph();
+        graph.getNodesList().forEach((node) => {
+            g.setNode(node.getId(), node.getName());
+        });
+        graph.getEdgesList().forEach((edge) => {
+            var _a, _b;
+            const source = (_a = edge.getSource()) === null || _a === void 0 ? void 0 : _a.getId();
+            const target = (_b = edge.getTarget()) === null || _b === void 0 ? void 0 : _b.getId();
+            if (source != undefined && target != undefined) {
+                g.setEdge({ v: source, w: target });
             }
-            return false;
+        });
+        return g;
+    }
+    function handleError(_error) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // switch (error.name) {
+            // case "GraphDoesntExist": {
+            //   console.log(error);
+            //   break;
+            // }
+            // case "OtherError": {
+            //   console.log(error);
+            //   break;
+            // }
+            // case "GraphStateDoesntExist": {
+            //   console.log(error);
+            //   break;
+            // }
+            // case "NodeDoesntExist": {
+            //   console.log(error);
+            //   break;
+            // }
+            // default: {
+            //   console.log("Uncovered Error");
+            // }
+            // }
+            alert("REIMPLEMENT THIS USING PROTO BUF");
         });
     }
-    function getAllTopologicalOrders(graph) {
-        // check that there is a single component (that the graph is connected) AND
-        // that there are no cycles in the graph
-        if (!graphlib.alg.isAcyclic(graph) || graphlib.alg.components(graph).length !== 1) {
-            return [];
-        }
-        // get the local graph
-        const local_graph = graphToLocalGraph(graph);
-        return allTopologicalSorts(local_graph);
-    }
-    function graphToLocalGraph(graph) {
-        const local_graph = {};
-        const my_nodes = graph.nodes();
-        for (let i = 0; i < my_nodes.length; i++) {
-            const node = my_nodes[i];
-            const neighbors = graph.successors(node);
-            if (neighbors) {
-                local_graph[node] = neighbors;
-            }
-        }
-        return local_graph;
-    }
-    function allTopologicalSorts(graph) {
-        const allOrderings = [];
-        const indegreeMap = calculateIndegreeForAllVertex(graph);
-        const startNodes = Array.from(Object.keys(indegreeMap)).filter((node) => indegreeMap[node] === 0);
-        const visited = {};
-        for (const node in graph) {
-            visited[node] = false;
-        }
-        function helper(node, indegreeMap, visited, stack) {
-            visited[node] = true;
-            stack.push(node);
-            if (stack.length === Object.keys(graph).length) {
-                allOrderings.push([...stack]);
+    function validateGraph(system_state) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const graph_state = system_state.getGraphState();
+            if (!graph_state) {
+                yield handleError();
             }
             else {
-                for (const neighbor of graph[node]) {
-                    indegreeMap[neighbor]--;
-                    if (indegreeMap[neighbor] === 0 && !visited[neighbor]) {
-                        helper(neighbor, indegreeMap, visited, stack);
-                    }
-                    indegreeMap[neighbor]++;
-                }
+                const test_orders = yield getAllTopologicalOrders(graph_state);
+                console.log("test_orders: ", test_orders);
             }
-            visited[node] = false;
-            stack.pop();
-        }
-        for (const node of startNodes) {
-            helper(node, Object.assign({}, indegreeMap), Object.assign({}, visited), []);
-        }
-        return allOrderings;
-    }
-    function calculateIndegreeForAllVertex(graph) {
-        const indegreeMap = {};
-        for (const node in graph) {
-            indegreeMap[node] = 0;
-        }
-        for (const node in graph) {
-            for (const neighbor of graph[node]) {
-                indegreeMap[neighbor]++;
-            }
-        }
-        return indegreeMap;
-    }
-    function getNodeById(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const systemState = yield getSystemState();
-            const prompt = systemState.nodes.find((node) => {
-                if (node.Node._id) {
-                    return getId(node) == id;
-                }
-            });
-            return prompt;
+            alert("Actually need to validate the graph");
+            return true;
         });
     }
-    // get the name of the action by using the id
-    function getNodeName(id) {
+    function getAllTopologicalOrders(graph_state) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // check that there is a single component (that the graph is connected) AND
+            // that there are no cycles in the graph
+            const graphlib_graph = systemGraphToGraphLib(graph_state);
+            if (!graphlib.alg.isAcyclic(graphlib_graph) ||
+                graphlib.alg.components(graphlib_graph).length !== 1) {
+                return [];
+            }
+            return yield allTopologicalSorts(graph_state);
+        });
+    }
+    function returnSuccessorMap(graph_state) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const node_neightbors = new Map();
+            const graphlib_graph = systemGraphToGraphLib(graph_state);
+            const my_nodes = graphlib_graph.nodes();
+            for (let i = 0; i < my_nodes.length; i++) {
+                const node = my_nodes[i];
+                const neighbors = graphlib_graph.successors(node);
+                if (neighbors) {
+                    const node_info = yield getNodeInfo(node);
+                    if (node_info) {
+                        const neighbors_node_info = [];
+                        neighbors.forEach((neighbor) => __awaiter(this, void 0, void 0, function* () {
+                            const neighbor_node_info = yield getNodeInfo(neighbor);
+                            if (neighbor_node_info) {
+                                neighbors_node_info.push(neighbor_node_info);
+                            }
+                        }));
+                        node_neightbors.set(node_info, neighbors_node_info);
+                    }
+                }
+            }
+            return node_neightbors;
+        });
+    }
+    function allTopologicalSorts(graph_state) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const all_orderings = [];
+            const graph = graph_state.getGraph();
+            const successor_map = yield returnSuccessorMap(graph_state);
+            const start_nodes = yield returnStartNodes(graph_state);
+            const in_degree_map = yield returnAllIndegree(graph_state);
+            const visited = new Map();
+            const node_list = graph.getNodesList();
+            node_list.forEach((node_info) => __awaiter(this, void 0, void 0, function* () {
+                visited.set(node_info, false);
+            }));
+            function helper(node, in_degree_map, visited, stack) {
+                visited.set(node, true);
+                stack.push(node);
+                if (stack.length === node_list.length) {
+                    all_orderings.push([...stack]);
+                }
+                else {
+                    const successors = successor_map.get(node);
+                    if (successors) {
+                        successors.forEach((successor) => {
+                            const count = in_degree_map.get(successor);
+                            const is_visited = visited.get(successor);
+                            if (count && is_visited != undefined) {
+                                const new_count = count - 1;
+                                in_degree_map.set(successor, new_count);
+                                if (new_count == 0 && !is_visited) {
+                                    helper(successor, in_degree_map, visited, stack);
+                                }
+                                in_degree_map.set(successor, count);
+                            }
+                        });
+                    }
+                }
+                visited.set(node, false);
+                stack.pop();
+            }
+            start_nodes.forEach((node) => {
+                helper(node, in_degree_map, visited, []);
+            });
+            return all_orderings;
+        });
+    }
+    function returnStartNodes(graph_state) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const start_nodes = [];
+            const graphlib_graph = systemGraphToGraphLib(graph_state);
+            const sources = graphlib_graph.sources();
+            sources.forEach((source_id) => __awaiter(this, void 0, void 0, function* () {
+                const val = yield getNodeInfo(source_id);
+                if (val) {
+                    start_nodes.push(val);
+                }
+            }));
+            return start_nodes;
+        });
+    }
+    function getNode(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const system_state = yield getSystemState();
-            const node = system_state.nodes.find((node) => {
-                // get the node with the id:
-                if (node.Node._id) {
-                    return getId(node) == id;
+            const nodes = system_state.getNodesList();
+            const node = nodes.find((node) => {
+                const test_id = node.getNodeInfo();
+                if (test_id) {
+                    return test_id.getId() == id;
                 }
             });
-            if (node) {
-                return node.Node.name;
-            }
+            return node;
         });
     }
-    function printEdge(edge) {
+    function getNodeInfo(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const sourceName = yield getNodeName(edge.v);
-            const targetName = yield getNodeName(edge.w);
-            console.log("edge: " + sourceName + " -> " + targetName);
+            const node_info = yield getNode(id);
+            return node_info.getNodeInfo();
         });
     }
-    function getId(node) {
-        var _a;
-        if (node) {
-            return (_a = node.Node._id) === null || _a === void 0 ? void 0 : _a.$oid;
-        }
-        return undefined;
+    function returnAllIndegree(graph_state) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const in_degree_map = new Map();
+            const graphlib_graph = systemGraphToGraphLib(graph_state);
+            graphlib_graph.nodes().forEach((source_id) => __awaiter(this, void 0, void 0, function* () {
+                const val = yield getNodeInfo(source_id);
+                let count = 0;
+                const maybe_count = graphlib_graph.predecessors(source_id);
+                if (maybe_count) {
+                    count = maybe_count.length;
+                }
+                if (val) {
+                    in_degree_map.set(val, count);
+                }
+            }));
+            return in_degree_map;
+        });
     }
+    // export async function getAncestorNodes(
+    //   node: string,
+    //   graph_state: GraphState
+    // ): Promise<Node[]> {
+    //   const graphlib_graph = systemGraphToGraphLib(graph_state);
+    //   const ancestors: Node[] = [];
+    //   const visitedNodes = new Set<string>();
+    //   const stack = [node];
+    //   while (stack.length) {
+    //     const currentNode = stack.pop()!;
+    //     visitedNodes.add(currentNode);
+    //     const parentNodes = graphlib_graph.predecessors(currentNode);
+    //     if (parentNodes) {
+    //       parentNodes.forEach(async (parentNode) => {
+    //         if (!visitedNodes.has(parentNode)) {
+    //           const parent_node = await getNode(parentNode);
+    //           if (parent_node) {
+    //             ancestors.push(parent_node);
+    //             stack.push(parentNode);
+    //           }
+    //         }
+    //       });
+    //     }
+    //   }
+    //   return ancestors;
+    // }
     function setSystemState(systemState) {
         return __awaiter(this, void 0, void 0, function* () {
             systemStateStore.set(systemState);
         });
     }
-    function addEdge(edge) {
+    function graphHasNode(node, graph_state) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield printEdge(edge);
-            const systemState = yield getSystemState();
-            // check if the edge already exists
-            const edgeExists = systemState.graphState.graph.hasEdge(edge);
-            if (!edgeExists) {
-                systemState.graphState.graph.setEdge(edge);
+            const graph = graph_state.getGraph();
+            const node_info = node.getNodeInfo();
+            if (!graph) {
+                yield handleError();
             }
-            systemState.graphState.lastAction = "addEdge";
-            systemState.graphState.actedOn = edge;
+            else {
+                const node_info_list = graph.getNodesList();
+                if (node_info) {
+                    //loop through node_info_list
+                    for (let i = 0; i < node_info_list.length; i++) {
+                        if ((node_info_list[i] = node_info)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        });
+    }
+    // export async function addEdge(graph_state: GraphState): Promise<void> {
+    //   const system_state = await getSystemState();
+    //   const action_history = system_state
+    //     .getGraphState()
+    //     ?.getActionHistoryList() as GraphAction[];
+    //   const last_action = action_history[action_history.length - 1];
+    //   if (last_action) {
+    //     if (last_action.getAction() == GraphAction.Action.ADD) {
+    //       const last_acted_on = last_action.getEdge() as Edge;
+    //     }
+    //   }
+    //   graph_state.last_action = "add";
+    //   graph_state.acted_on = edge;
+    //   system_state.graph_state = graph_state;
+    //   setSystemState(system_state);
+    // }
+    function addNode(node, graph_state) {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            const systemState = yield getSystemState();
+            // add the input and output variables to the graph state
+            //check if the node already exists in the graph
+            if (yield !graphHasNode(node, graph_state)) {
+                // Based on the definition of graphHasNode, we can assume that the graph is defined.
+                console.log("Adding node to graph");
+                const graph = systemGraphToGraphLib(graph_state);
+                graph.setNode((_a = node.getNodeInfo()) === null || _a === void 0 ? void 0 : _a.getId(), (_b = node.getNodeInfo()) === null || _b === void 0 ? void 0 : _b.getName());
+            }
+            else {
+                console.log("Node ", node, " is already in the graph, not adding it.");
+                return;
+            }
+            const graph_action = new system_types_pb_js.GraphAction();
+            graph_action.setAction(system_types_pb_js.GraphAction.Action.ADD);
+            graph_action.setNode(node);
+            const action_history = graph_state.getActionHistoryList();
+            action_history.push(graph_action);
+            graph_state.setActionHistoryList(action_history);
+            systemState.setGraphState(graph_state);
             setSystemState(systemState);
         });
+    }
+    // function for converting a process to a graph
+    function processToGraphVisualization(process, graph_state) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield resetGraph();
+            const graph = graph_state.getGraph();
+            const nodes = graph.getNodesList();
+            //loop through the nodes
+            for (let i = 0; i < nodes.length; i++) {
+                const node = yield getNode(nodes[i].getId());
+                if (node) {
+                    yield addNode(node, graph_state);
+                }
+            }
+            yield getAllTopologicalOrders(graph_state);
+            // This function doesn't exist yet.
+            findValidTopOrder();
+        });
+    }
+    function findValidTopOrder(topOrder) {
+        console.log("REPLACE ME WITH REAL VALID TOPOLOGICAL ORDER");
+        return [];
+    }
+    // export async function getParentOutputVariables(this_node_id: string): Promise<string[] | null> {
+    //   const systemState = await getSystemState();
+    //   // get topological order
+    //   const topological_order = systemState.execution_context.topological_order;
+    //   // get parent node id
+    //   const parent_node_id = topological_order[topological_order.indexOf(this_node_id) - 1];
+    //   // get the output variables of the parent node
+    //   const parent_output_variables = getOutputVariablesByNodeId(parent_node_id);
+    //   return parent_output_variables;
+    // }
+    function addVariablesToPrompt(prompt, variables) {
+        let new_prompt = prompt;
+        for (const [key, value] of variables) {
+            new_prompt = new_prompt.replace(key, value);
+        }
+        return new_prompt;
     }
     function removeNode(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield getNodeName(id);
             const systemState = yield getSystemState();
-            systemState.graphState.graph.removeNode(id);
-            systemState.graphState.lastAction = "removeNode";
-            const node_name = yield getNodeName(id);
-            const nodeInfo = {
-                id: id,
-                name: node_name ? node_name : ""
-            };
-            systemState.graphState.actedOn = nodeInfo;
-            setSystemState(systemState);
-        });
-    }
-    function removeSelectedNode() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const systemState = yield getSystemState();
-            if (Array.isArray(systemState.graphState.actedOn)) {
-                const selected = systemState.graphState.actedOn[0];
-                yield removeNode(selected);
-            }
-        });
-    }
-    function removeSelectedEdge() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const systemState = yield getSystemState();
-            if (!Array.isArray(systemState.graphState.actedOn) &&
-                systemState.graphState.lastAction == "selectEdge") {
-                const selected = systemState.graphState.actedOn;
-                if (selected != null) {
-                    const edge = selected;
-                    yield removeEdge(edge.v, edge.w);
-                }
+            const node_info = yield getNodeInfo(id);
+            if (node_info) {
+                const remove_index = systemState.graph_state.graph.nodes.indexOf(node_info);
+                systemState.graph_state.graph.nodes.splice(remove_index);
+                systemState.graph_state.last_action = "remove";
+                systemState.graph_state.acted_on = node_info;
+                setSystemState(systemState);
             }
         });
     }
@@ -9446,72 +9356,130 @@ var app = (function () {
             const systemState = yield getSystemState();
             // find the id of the edge to remove
             // console.log("removing edge:", sourceId, targetId, " from graph");
-            const edge = systemState.graphState.actedOn;
+            const edge = systemState.graph_state.acted_on;
             // graphState.graph.removeEdge(edge);
-            systemState.graphState.lastAction = "removeEdge";
-            systemState.graphState.actedOn = edge;
-            systemState.graphState.name = null;
+            systemState.graph_state.last_action = "remove";
+            systemState.graph_state.acted_on = edge;
             setSystemState(systemState);
+        });
+    }
+    function returnProcesses() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const systemState = yield getSystemState();
+            let nodes = systemState.nodes;
+            // filter out the prompts
+            nodes = nodes.filter((node) => {
+                return node.type_name == "Process";
+            });
+            // let processes = nodes.map((node: Node) => {
+            //   return node.node_content as Process;
+            // }
+            // );
+            return nodes;
         });
     }
     function selectNode(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const system_state = yield getSystemState();
             const nodes = system_state.nodes;
-            // const res = actions.find((action: Prompt) => {
-            //   return getId(action) == id;
-            // });
             const res = nodes.find((node) => getId(node) == id);
             if (res) {
                 const systemState = yield getSystemState();
-                systemState.selectedNode = res;
-                systemState.graphState.lastAction = "selectNode";
-                systemState.graphState.lastActedOn = systemState.graphState.actedOn;
-                systemState.graphState.actedOn = { id, name: res.Node.name };
-                systemState.graphState.name = res.Node.name;
+                systemState.selected_node = res;
+                systemState.graph_state.last_action = "select";
+                systemState.graph_state.last_acted_on = systemState.graph_state.acted_on;
+                systemState.graph_state.acted_on = { id, name: res.name };
                 setSystemState(systemState);
             }
         });
     }
-    function selectEdge(source, target) {
+    function selectEdge(edge) {
         return __awaiter(this, void 0, void 0, function* () {
             const systemState = yield getSystemState();
-            systemState.graphState.lastAction = "selectEdge";
-            systemState.graphState.actedOn = { v: source, w: target };
-            systemState.graphState.name = null;
+            systemState.graph_state.last_action = "select";
+            systemState.graph_state.acted_on = edge;
+            setSystemState(systemState);
+        });
+    }
+    function resetLastAction() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const systemState = yield getSystemState();
+            systemState.graph_state.last_action = "none";
+            systemState.graph_state.acted_on = undefined;
+            setSystemState(systemState);
+        });
+    }
+    function nodes(graph_state) {
+        return graph_state.graph.nodes;
+    }
+    function edges(graph_state) {
+        return graph_state.graph.edges;
+    }
+    // reset the graphState to a new empty graph
+    function resetGraph() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const systemState = yield getSystemState();
+            systemState.graph_state.graph = { edges: [], nodes: [] };
+            systemState.graph_state.last_action = "reset";
+            systemState.graph_state.acted_on = undefined;
             setSystemState(systemState);
         });
     }
 
+    var helper_functions = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        getSystemState: getSystemState,
+        systemGraphToGraphLib: systemGraphToGraphLib,
+        handleError: handleError,
+        validateGraph: validateGraph,
+        getAllTopologicalOrders: getAllTopologicalOrders,
+        returnSuccessorMap: returnSuccessorMap,
+        getNode: getNode,
+        getNodeInfo: getNodeInfo,
+        setSystemState: setSystemState,
+        graphHasNode: graphHasNode,
+        addNode: addNode,
+        processToGraphVisualization: processToGraphVisualization,
+        findValidTopOrder: findValidTopOrder,
+        addVariablesToPrompt: addVariablesToPrompt,
+        removeNode: removeNode,
+        removeEdge: removeEdge,
+        returnProcesses: returnProcesses,
+        selectNode: selectNode,
+        selectEdge: selectEdge,
+        resetLastAction: resetLastAction,
+        nodes: nodes,
+        edges: edges,
+        resetGraph: resetGraph
+    });
+
     /* src/components/sidebarComponents/CreateProcess.svelte generated by Svelte v3.59.1 */
+    const file$b = "src/components/sidebarComponents/CreateProcess.svelte";
 
-    const { console: console_1$2 } = globals;
-    const file$7 = "src/components/sidebarComponents/CreateProcess.svelte";
-
-    function get_each_context$2(ctx, list, i) {
+    function get_each_context$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[15] = list[i];
+    	child_ctx[16] = list[i];
     	return child_ctx;
     }
 
-    function get_each_context_1(ctx, list, i) {
+    function get_each_context_1$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[15] = list[i];
+    	child_ctx[16] = list[i];
     	return child_ctx;
     }
 
-    // (127:2) {#each nodes as node (node.Node._id)}
-    function create_each_block_1(key_1, ctx) {
+    // (121:2) {#each graph.getNodesList() as node (node.getId())}
+    function create_each_block_1$1(key_1, ctx) {
     	let li;
     	let button;
-    	let t0_value = /*node*/ ctx[15].Node.name + "";
+    	let t0_value = /*node*/ ctx[16].getName() + "";
     	let t0;
     	let t1;
     	let mounted;
     	let dispose;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[12](/*node*/ ctx[15]);
+    		return /*click_handler*/ ctx[13](/*node*/ ctx[16]);
     	}
 
     	const block = {
@@ -9523,9 +9491,9 @@ var app = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			attr_dev(button, "type", "button");
-    			toggle_class(button, "selected", /*isSelected*/ ctx[7](/*node*/ ctx[15]));
-    			add_location(button, file$7, 128, 6, 5008);
-    			add_location(li, file$7, 127, 4, 4997);
+    			toggle_class(button, "selected", /*isSelected*/ ctx[5](/*node*/ ctx[16]));
+    			add_location(button, file$b, 122, 6, 4580);
+    			add_location(li, file$b, 121, 4, 4569);
     			this.first = li;
     		},
     		m: function mount(target, anchor) {
@@ -9541,11 +9509,6 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*nodes*/ 1 && t0_value !== (t0_value = /*node*/ ctx[15].Node.name + "")) set_data_dev(t0, t0_value);
-
-    			if (dirty & /*isSelected, nodes*/ 129) {
-    				toggle_class(button, "selected", /*isSelected*/ ctx[7](/*node*/ ctx[15]));
-    			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(li);
@@ -9556,19 +9519,19 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_1.name,
+    		id: create_each_block_1$1.name,
     		type: "each",
-    		source: "(127:2) {#each nodes as node (node.Node._id)}",
+    		source: "(121:2) {#each graph.getNodesList() as node (node.getId())}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (140:0) {#each selectedNodes as node (node.Node._id)}
-    function create_each_block$2(key_1, ctx) {
+    // (134:0) {#each selected_nodes as node (node.getId())}
+    function create_each_block$3(key_1, ctx) {
     	let p;
-    	let t_value = /*node*/ ctx[15].Node.name + "";
+    	let t_value = /*node*/ ctx[16].getName() + "";
     	let t;
 
     	const block = {
@@ -9577,7 +9540,7 @@ var app = (function () {
     		c: function create() {
     			p = element$1("p");
     			t = text(t_value);
-    			add_location(p, file$7, 140, 2, 5256);
+    			add_location(p, file$b, 134, 2, 4832);
     			this.first = p;
     		},
     		m: function mount(target, anchor) {
@@ -9586,7 +9549,7 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*selectedNodes*/ 2 && t_value !== (t_value = /*node*/ ctx[15].Node.name + "")) set_data_dev(t, t_value);
+    			if (dirty & /*selected_nodes*/ 1 && t_value !== (t_value = /*node*/ ctx[16].getName() + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(p);
@@ -9595,16 +9558,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$2.name,
+    		id: create_each_block$3.name,
     		type: "each",
-    		source: "(140:0) {#each selectedNodes as node (node.Node._id)}",
+    		source: "(134:0) {#each selected_nodes as node (node.getId())}",
     		ctx
     	});
 
     	return block;
     }
 
-    function create_fragment$7(ctx) {
+    function create_fragment$b(ctx) {
     	let p0;
     	let t1;
     	let input0;
@@ -9635,26 +9598,26 @@ var app = (function () {
     	let button4;
     	let mounted;
     	let dispose;
-    	let each_value_1 = /*nodes*/ ctx[0];
+    	let each_value_1 = /*graph*/ ctx[3].getNodesList();
     	validate_each_argument(each_value_1);
-    	const get_key = ctx => /*node*/ ctx[15].Node._id;
-    	validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
+    	const get_key = ctx => /*node*/ ctx[16].getId();
+    	validate_each_keys(ctx, each_value_1, get_each_context_1$1, get_key);
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
-    		let child_ctx = get_each_context_1(ctx, each_value_1, i);
+    		let child_ctx = get_each_context_1$1(ctx, each_value_1, i);
     		let key = get_key(child_ctx);
-    		each0_lookup.set(key, each_blocks_1[i] = create_each_block_1(key, child_ctx));
+    		each0_lookup.set(key, each_blocks_1[i] = create_each_block_1$1(key, child_ctx));
     	}
 
-    	let each_value = /*selectedNodes*/ ctx[1];
+    	let each_value = /*selected_nodes*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key_1 = ctx => /*node*/ ctx[15].Node._id;
-    	validate_each_keys(ctx, each_value, get_each_context$2, get_key_1);
+    	const get_key_1 = ctx => /*node*/ ctx[16].getId();
+    	validate_each_keys(ctx, each_value, get_each_context$3, get_key_1);
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		let child_ctx = get_each_context$2(ctx, each_value, i);
+    		let child_ctx = get_each_context$3(ctx, each_value, i);
     		let key = get_key_1(child_ctx);
-    		each1_lookup.set(key, each_blocks[i] = create_each_block$2(key, child_ctx));
+    		each1_lookup.set(key, each_blocks[i] = create_each_block$3(key, child_ctx));
     	}
 
     	const block = {
@@ -9702,25 +9665,25 @@ var app = (function () {
     			t19 = space();
     			button4 = element$1("button");
     			button4.textContent = "Save Process";
-    			add_location(p0, file$7, 112, 0, 4578);
+    			add_location(p0, file$b, 106, 0, 4136);
     			attr_dev(input0, "type", "text");
-    			add_location(input0, file$7, 113, 0, 4633);
-    			add_location(p1, file$7, 114, 0, 4673);
+    			add_location(input0, file$b, 107, 0, 4191);
+    			add_location(p1, file$b, 108, 0, 4231);
     			attr_dev(input1, "type", "text");
-    			add_location(input1, file$7, 118, 0, 4771);
-    			add_location(p2, file$7, 120, 0, 4819);
-    			add_location(ul, file$7, 125, 0, 4948);
-    			add_location(h3, file$7, 137, 0, 5184);
+    			add_location(input1, file$b, 112, 0, 4329);
+    			add_location(p2, file$b, 114, 0, 4377);
+    			add_location(ul, file$b, 119, 0, 4506);
+    			add_location(h3, file$b, 131, 0, 4760);
     			attr_dev(button0, "class", "add-button");
-    			add_location(button0, file$7, 142, 0, 5288);
+    			add_location(button0, file$b, 136, 0, 4864);
     			attr_dev(button1, "class", "remove-button");
-    			add_location(button1, file$7, 143, 0, 5361);
+    			add_location(button1, file$b, 137, 0, 4932);
     			attr_dev(button2, "class", "add-button");
-    			add_location(button2, file$7, 146, 0, 5449);
+    			add_location(button2, file$b, 138, 0, 5009);
     			attr_dev(button3, "class", "remove-button");
-    			add_location(button3, file$7, 147, 0, 5518);
+    			add_location(button3, file$b, 139, 0, 5073);
     			attr_dev(button4, "class", "add-button");
-    			add_location(button4, file$7, 148, 0, 5599);
+    			add_location(button4, file$b, 140, 0, 5146);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -9729,12 +9692,12 @@ var app = (function () {
     			insert_dev(target, p0, anchor);
     			insert_dev(target, t1, anchor);
     			insert_dev(target, input0, anchor);
-    			set_input_value(input0, /*name*/ ctx[2]);
+    			set_input_value(input0, /*name*/ ctx[1]);
     			insert_dev(target, t2, anchor);
     			insert_dev(target, p1, anchor);
     			insert_dev(target, t4, anchor);
     			insert_dev(target, input1, anchor);
-    			set_input_value(input1, /*description*/ ctx[3]);
+    			set_input_value(input1, /*description*/ ctx[2]);
     			insert_dev(target, t5, anchor);
     			insert_dev(target, p2, anchor);
     			insert_dev(target, t7, anchor);
@@ -9769,39 +9732,39 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[10]),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[11]),
-    					listen_dev(button0, "click", /*localAddNodes*/ ctx[4], false, false, false, false),
-    					listen_dev(button1, "click", removeSelectedNode, false, false, false, false),
-    					listen_dev(button2, "click", /*localAddEdge*/ ctx[5], false, false, false, false),
-    					listen_dev(button3, "click", removeSelectedEdge, false, false, false, false),
-    					listen_dev(button4, "click", /*saveProcess*/ ctx[6], false, false, false, false)
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[11]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[12]),
+    					listen_dev(button0, "click", /*addNodes*/ ctx[7], false, false, false, false),
+    					listen_dev(button1, "click", /*removeNodes*/ ctx[6], false, false, false, false),
+    					listen_dev(button2, "click", /*addEdge*/ ctx[8], false, false, false, false),
+    					listen_dev(button3, "click", /*removeEdge*/ ctx[9], false, false, false, false),
+    					listen_dev(button4, "click", /*saveProcess*/ ctx[4], false, false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*name*/ 4 && input0.value !== /*name*/ ctx[2]) {
-    				set_input_value(input0, /*name*/ ctx[2]);
+    			if (dirty & /*name*/ 2 && input0.value !== /*name*/ ctx[1]) {
+    				set_input_value(input0, /*name*/ ctx[1]);
     			}
 
-    			if (dirty & /*description*/ 8 && input1.value !== /*description*/ ctx[3]) {
-    				set_input_value(input1, /*description*/ ctx[3]);
+    			if (dirty & /*description*/ 4 && input1.value !== /*description*/ ctx[2]) {
+    				set_input_value(input1, /*description*/ ctx[2]);
     			}
 
-    			if (dirty & /*isSelected, nodes, toggleSelect*/ 385) {
-    				each_value_1 = /*nodes*/ ctx[0];
+    			if (dirty & /*isSelected, graph, toggleNodeSelect*/ 1064) {
+    				each_value_1 = /*graph*/ ctx[3].getNodesList();
     				validate_each_argument(each_value_1);
-    				validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
-    				each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx, each_value_1, each0_lookup, ul, destroy_block, create_each_block_1, null, get_each_context_1);
+    				validate_each_keys(ctx, each_value_1, get_each_context_1$1, get_key);
+    				each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx, each_value_1, each0_lookup, ul, destroy_block, create_each_block_1$1, null, get_each_context_1$1);
     			}
 
-    			if (dirty & /*selectedNodes*/ 2) {
-    				each_value = /*selectedNodes*/ ctx[1];
+    			if (dirty & /*selected_nodes*/ 1) {
+    				each_value = /*selected_nodes*/ ctx[0];
     				validate_each_argument(each_value);
-    				validate_each_keys(ctx, each_value, get_each_context$2, get_key_1);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key_1, 1, ctx, each_value, each1_lookup, t11.parentNode, destroy_block, create_each_block$2, t11, get_each_context$2);
+    				validate_each_keys(ctx, each_value, get_each_context$3, get_key_1);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key_1, 1, ctx, each_value, each1_lookup, t11.parentNode, destroy_block, create_each_block$3, t11, get_each_context$3);
     			}
     		},
     		i: noop$2,
@@ -9848,7 +9811,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$7.name,
+    		id: create_fragment$b.name,
     		type: "component",
     		source: "",
     		ctx
@@ -9857,10 +9820,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$7($$self, $$props, $$invalidate) {
-    	let $systemStateStore;
-    	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(9, $systemStateStore = $$value));
+    function instance$b($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('CreateProcess', slots, []);
 
@@ -9900,46 +9860,15 @@ var app = (function () {
     			});
     	};
 
-    	let nodes = [];
-    	let selectedNodes = [];
+    	let selected_nodes = [];
+    	let selected_edge = null;
+    	let graph = new system_types_pb_js.Graph();
     	let name = "";
     	let description = "";
-    	let current_graph = new graphlib.Graph();
 
-    	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
-    		current_graph = $systemStateStore.graphState.graph;
-    		$$invalidate(0, nodes = $systemStateStore.nodes);
-    	}));
-
-    	function localAddNodes() {
-    		// for each of the selected actions, add a node to the graph
-    		// For each of the selected nodes, check if they are already in the $systemStore.nodes
-    		// If they are already in the nodes... don't do anything
-    		// clear out the selected actions
-    		selectedNodes.forEach(node => {
-    			if (!nodeContainedGlobally(node)) {
-    				$systemStateStore.nodes.push(node);
-    			}
-    		});
-    	}
-
-    	function localAddEdge() {
-    		// get the lastActedOn and actedOn from the graphStore
-    		let lastActedOn = null;
-
-    		let actedOn = null;
-    		lastActedOn = $systemStateStore.graphState.lastActedOn;
-    		actedOn = $systemStateStore.graphState.actedOn;
-
-    		// check that lastActedOn and actedOn are not null and are arrays
-    		if (lastActedOn !== null && actedOn !== null && lastActedOn.id) {
-    			// add an edge between the lastActedOn and actedOn
-    			let edge = { v: lastActedOn[0], w: actedOn[0] };
-
-    			addEdge(edge);
-    		} // console.log("lastActedOn or actedOn is null or not an array");
-    	}
-
+    	// async function handleGraphError() {
+    	//   await handleError({ name: "GraphDoesntExist" });
+    	// }
     	function saveProcess() {
     		return __awaiter(this, void 0, void 0, function* () {
     			// create an alert message if either name or description are null
@@ -9948,23 +9877,25 @@ var app = (function () {
     				return;
     			} else {
     				const systemState = yield getSystemState();
+    				let graph_state = systemState.getGraphState();
     				let maybe_topological_order = yield validateGraph(systemState);
 
-    				if (maybe_topological_order) {
+    				if (maybe_topological_order && graph_state != undefined) {
     					let topological_order = maybe_topological_order;
-    					let current_graph_string = JSON.stringify(graphlib.json.write(current_graph));
 
     					// console.log("current_graph_string: " + current_graph_string);
-    					let process = {
-    						Process: {
-    							graph: current_graph_string,
-    							initial_variables: [],
-    							topological_order
-    						}
-    					};
+    					let process = new system_types_pb_js.Process();
 
-    					// console.log("sending process: " + JSON.stringify(process));
-    					console.log("sending process: ", process);
+    					process.setGraphState(graph_state);
+    					process.setInitialVariablesList([]);
+    					process.setTopologicalOrderList(topological_order);
+    					let new_node = new system_types_pb_js.Node();
+    					let graph_node_info = new system_types_pb_js.GraphNodeInfo();
+    					graph_node_info.setName(name);
+    					new_node.setNodeInfo(graph_node_info);
+    					new_node.setDescription(description);
+    					new_node.setProcess(process);
+    					alert("todo: save process by sending websocket message");
     				} else {
     					alert("The process does not have a valid topological order :(");
     				}
@@ -9973,112 +9904,134 @@ var app = (function () {
     	}
 
     	function isSelected(node) {
-    		// check to see if selectedNodes : Node[] contains node : Node
-    		return selectedNodes.filter(val => {
-    			val.Node._id.$oid === node.Node._id.$oid;
+    		// check to see if selected_nodes : Node[] contains node : Node
+    		return selected_nodes.filter(val => {
+    			val.getId() === node.getId();
     		}).length > 0;
     	}
 
-    	function toggleSelect(node) {
-    		// if the node is already in the selectedNodes then remove it, otherwise add it
-    		console.log("The nodes that are currently selected are:");
+    	function removeNodes() {
+    		let current = graph.getNodesList();
 
-    		selectedNodes.forEach(node => {
-    			console.log(node.Node.name);
+    		let new_nodes = current.filter(node => {
+    			return !selected_nodes.includes(node);
     		});
 
-    		let should_remove = isSelected(node);
+    		graph.setNodesList(new_nodes);
+    		$$invalidate(0, selected_nodes = []);
+    	}
 
-    		if (should_remove) {
-    			$$invalidate(1, selectedNodes = selectedNodes.filter(val => {
-    				val.Node._id.$oid != node.Node._id.$oid;
-    			}));
-    		} else {
-    			selectedNodes.push(node);
+    	function addNodes() {
+    		let current_nodes = graph.getNodesList();
+
+    		selected_nodes.forEach(node => {
+    			// check if current_nodes already contains node
+    			if (!current_nodes.includes(node)) {
+    				current_nodes.push(node);
+    			}
+    		});
+
+    		graph.setNodesList(current_nodes);
+    		$$invalidate(0, selected_nodes = []);
+    	}
+
+    	function addEdge() {
+    		let current_edges = graph.getEdgesList();
+
+    		// add selected_edge : Edge to current_edges : Edge[]
+    		if (selected_edge != null) {
+    			current_edges.push(selected_edge);
     		}
 
-    		console.log("After running toggleSelect, the nodes are:");
+    		graph.setEdgesList(current_edges);
+    	}
 
-    		selectedNodes.forEach(node => {
-    			console.log(node.Node.name);
-    		});
+    	function removeEdge() {
+    		let current_edges = graph.getEdgesList();
+
+    		// remove selected_edge : Edge from current_edges : Edge[]
+    		if (selected_edge != null) {
+    			current_edges = current_edges.filter(edge => {
+    				return edge != selected_edge;
+    			});
+    		}
+
+    		graph.setEdgesList(current_edges);
+    	}
+
+    	function toggleNodeSelect(node) {
+    		if (isSelected(node)) {
+    			$$invalidate(0, selected_nodes = selected_nodes.filter(val => {
+    			}));
+    		} else {
+    			selected_nodes.push(node);
+    		}
     	}
 
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<CreateProcess> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<CreateProcess> was created with unknown prop '${key}'`);
     	});
 
     	function input0_input_handler() {
     		name = this.value;
-    		$$invalidate(2, name);
+    		$$invalidate(1, name);
     	}
 
     	function input1_input_handler() {
     		description = this.value;
-    		$$invalidate(3, description);
+    		$$invalidate(2, description);
     	}
 
-    	const click_handler = node => toggleSelect(node);
+    	const click_handler = node => toggleNodeSelect(node);
 
     	$$self.$capture_state = () => ({
     		__awaiter,
-    		onMount,
-    		addEdge,
-    		getSystemState,
-    		removeSelectedEdge,
-    		removeSelectedNode,
-    		validateGraph,
-    		Graph: graphlib.Graph,
-    		json: graphlib.json,
-    		systemStateStore,
-    		nodes,
-    		selectedNodes,
+    		GraphNodeInfo: system_types_pb_js.GraphNodeInfo,
+    		Graph: system_types_pb_js.Graph,
+    		Node: system_types_pb_js.Node,
+    		Process: system_types_pb_js.Process,
+    		helper_functions,
+    		selected_nodes,
+    		selected_edge,
+    		graph,
     		name,
     		description,
-    		current_graph,
-    		localAddNodes,
-    		localAddEdge,
     		saveProcess,
     		isSelected,
-    		toggleSelect,
-    		$systemStateStore
+    		removeNodes,
+    		addNodes,
+    		addEdge,
+    		removeEdge,
+    		toggleNodeSelect
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
-    		if ('nodes' in $$props) $$invalidate(0, nodes = $$props.nodes);
-    		if ('selectedNodes' in $$props) $$invalidate(1, selectedNodes = $$props.selectedNodes);
-    		if ('name' in $$props) $$invalidate(2, name = $$props.name);
-    		if ('description' in $$props) $$invalidate(3, description = $$props.description);
-    		if ('current_graph' in $$props) current_graph = $$props.current_graph;
+    		if ('selected_nodes' in $$props) $$invalidate(0, selected_nodes = $$props.selected_nodes);
+    		if ('selected_edge' in $$props) selected_edge = $$props.selected_edge;
+    		if ('graph' in $$props) $$invalidate(3, graph = $$props.graph);
+    		if ('name' in $$props) $$invalidate(1, name = $$props.name);
+    		if ('description' in $$props) $$invalidate(2, description = $$props.description);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$systemStateStore*/ 512) {
-    			{
-    				current_graph = $systemStateStore.graphState.graph;
-    				$$invalidate(0, nodes = $systemStateStore.nodes);
-    			}
-    		}
-    	};
-
     	return [
-    		nodes,
-    		selectedNodes,
+    		selected_nodes,
     		name,
     		description,
-    		localAddNodes,
-    		localAddEdge,
+    		graph,
     		saveProcess,
     		isSelected,
-    		toggleSelect,
-    		$systemStateStore,
+    		removeNodes,
+    		addNodes,
+    		addEdge,
+    		removeEdge,
+    		toggleNodeSelect,
     		input0_input_handler,
     		input1_input_handler,
     		click_handler
@@ -10088,22 +10041,22 @@ var app = (function () {
     class CreateProcess extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$7, create_fragment$7, safe_not_equal, {});
+    		init(this, options, instance$b, create_fragment$b, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "CreateProcess",
     			options,
-    			id: create_fragment$7.name
+    			id: create_fragment$b.name
     		});
     	}
     }
 
     /* src/components/sidebarComponents/BackgroundInfo.svelte generated by Svelte v3.59.1 */
 
-    const file$6 = "src/components/sidebarComponents/BackgroundInfo.svelte";
+    const file$a = "src/components/sidebarComponents/BackgroundInfo.svelte";
 
-    function create_fragment$6(ctx) {
+    function create_fragment$a(ctx) {
     	let h10;
     	let t1;
     	let p0;
@@ -10187,23 +10140,23 @@ var app = (function () {
     			t29 = space();
     			p6 = element$1("p");
     			p6.textContent = "In short, the Node Graph System allows for the handling of complex workflows in a way that is scalable, manageable, and easy to understand.";
-    			add_location(h10, file$6, 0, 0, 0);
-    			add_location(p0, file$6, 2, 0, 54);
-    			add_location(p1, file$6, 6, 0, 313);
-    			add_location(h20, file$6, 10, 0, 377);
-    			add_location(p2, file$6, 11, 0, 396);
-    			add_location(h21, file$6, 15, 0, 645);
-    			add_location(p3, file$6, 16, 0, 664);
-    			add_location(h22, file$6, 20, 0, 955);
-    			add_location(p4, file$6, 21, 0, 974);
-    			add_location(h11, file$6, 25, 0, 1171);
-    			add_location(p5, file$6, 27, 0, 1219);
-    			add_location(li0, file$6, 32, 4, 1376);
-    			add_location(li1, file$6, 33, 4, 1442);
-    			add_location(li2, file$6, 34, 4, 1512);
-    			add_location(li3, file$6, 35, 4, 1593);
-    			add_location(ul, file$6, 31, 0, 1367);
-    			add_location(p6, file$6, 38, 0, 1693);
+    			add_location(h10, file$a, 0, 0, 0);
+    			add_location(p0, file$a, 2, 0, 54);
+    			add_location(p1, file$a, 6, 0, 313);
+    			add_location(h20, file$a, 10, 0, 377);
+    			add_location(p2, file$a, 11, 0, 396);
+    			add_location(h21, file$a, 15, 0, 645);
+    			add_location(p3, file$a, 16, 0, 664);
+    			add_location(h22, file$a, 20, 0, 955);
+    			add_location(p4, file$a, 21, 0, 974);
+    			add_location(h11, file$a, 25, 0, 1171);
+    			add_location(p5, file$a, 27, 0, 1219);
+    			add_location(li0, file$a, 32, 4, 1376);
+    			add_location(li1, file$a, 33, 4, 1442);
+    			add_location(li2, file$a, 34, 4, 1512);
+    			add_location(li3, file$a, 35, 4, 1593);
+    			add_location(ul, file$a, 31, 0, 1367);
+    			add_location(p6, file$a, 38, 0, 1693);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10276,7 +10229,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$6.name,
+    		id: create_fragment$a.name,
     		type: "component",
     		source: "",
     		ctx
@@ -10285,7 +10238,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$6($$self, $$props) {
+    function instance$a($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('BackgroundInfo', slots, []);
     	const writable_props = [];
@@ -10300,28 +10253,28 @@ var app = (function () {
     class BackgroundInfo extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$6, create_fragment$6, safe_not_equal, {});
+    		init(this, options, instance$a, create_fragment$a, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "BackgroundInfo",
     			options,
-    			id: create_fragment$6.name
+    			id: create_fragment$a.name
     		});
     	}
     }
 
     /* src/components/sidebarComponents/InteractWithActionsAndProcesses.svelte generated by Svelte v3.59.1 */
-    const file$5 = "src/components/sidebarComponents/InteractWithActionsAndProcesses.svelte";
+    const file$9 = "src/components/sidebarComponents/InteractWithActionsAndProcesses.svelte";
 
-    function get_each_context$1(ctx, list, i) {
+    function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[6] = list[i];
     	return child_ctx;
     }
 
-    // (18:2) {#each nodes as node}
-    function create_each_block$1(ctx) {
+    // (19:2) {#each nodes as node}
+    function create_each_block$2(ctx) {
     	let option;
     	let t0_value = /*node*/ ctx[6].Node.type_name + "";
     	let t0;
@@ -10338,7 +10291,7 @@ var app = (function () {
     			t2 = text(t2_value);
     			option.__value = option_value_value = /*node*/ ctx[6];
     			option.value = option.__value;
-    			add_location(option, file$5, 18, 4, 575);
+    			add_location(option, file$9, 19, 4, 616);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -10362,16 +10315,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$1.name,
+    		id: create_each_block$2.name,
     		type: "each",
-    		source: "(18:2) {#each nodes as node}",
+    		source: "(19:2) {#each nodes as node}",
     		ctx
     	});
 
     	return block;
     }
 
-    function create_fragment$5(ctx) {
+    function create_fragment$9(ctx) {
     	let select;
     	let option;
     	let mounted;
@@ -10381,7 +10334,7 @@ var app = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
+    		each_blocks[i] = create_each_block$2(get_each_context$2(ctx, each_value, i));
     	}
 
     	const block = {
@@ -10396,9 +10349,9 @@ var app = (function () {
 
     			option.__value = "";
     			option.value = option.__value;
-    			add_location(option, file$5, 16, 2, 507);
+    			add_location(option, file$9, 17, 2, 548);
     			if (/*selectedNode*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[4].call(select));
-    			add_location(select, file$5, 15, 0, 433);
+    			add_location(select, file$9, 16, 0, 474);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10431,12 +10384,12 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$1(ctx, each_value, i);
+    					const child_ctx = get_each_context$2(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block$1(child_ctx);
+    						each_blocks[i] = create_each_block$2(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(select, null);
     					}
@@ -10465,7 +10418,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$5.name,
+    		id: create_fragment$9.name,
     		type: "component",
     		source: "",
     		ctx
@@ -10474,7 +10427,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$5($$self, $$props, $$invalidate) {
+    function instance$9($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
     	component_subscribe($$self, systemStateStore, $$value => $$invalidate(3, $systemStateStore = $$value));
@@ -10487,7 +10440,7 @@ var app = (function () {
 
     	// Function to handle dropdown change events
     	function onDropdownChange() {
-    		set_store_value(systemStateStore, $systemStateStore.selectedNode = selectedNode, $systemStateStore);
+    		set_store_value(systemStateStore, $systemStateStore.selected_node = selectedNode, $systemStateStore);
     	}
 
     	const writable_props = [];
@@ -10525,7 +10478,7 @@ var app = (function () {
     		if ($$self.$$.dirty & /*$systemStateStore*/ 8) {
     			{
     				$$invalidate(1, nodes = $systemStateStore.nodes);
-    				$$invalidate(0, selectedNode = $systemStateStore.selectedNode);
+    				$$invalidate(0, selectedNode = $systemStateStore.selected_node);
     			}
     		}
     	};
@@ -10543,13 +10496,1591 @@ var app = (function () {
     class InteractWithActionsAndProcesses extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$5, create_fragment$5, safe_not_equal, {});
+    		init(this, options, instance$9, create_fragment$9, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "InteractWithActionsAndProcesses",
     			options,
+    			id: create_fragment$9.name
+    		});
+    	}
+    }
+
+    /* src/components/sidebarComponents/subComponents/CommandComponent.svelte generated by Svelte v3.59.1 */
+
+    const { console: console_1$5 } = globals;
+    const file$8 = "src/components/sidebarComponents/subComponents/CommandComponent.svelte";
+
+    function create_fragment$8(ctx) {
+    	let div;
+
+    	const block = {
+    		c: function create() {
+    			div = element$1("div");
+    			add_location(div, file$8, 5, 0, 110);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    		},
+    		p: noop$2,
+    		i: noop$2,
+    		o: noop$2,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$8.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$8($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('CommandComponent', slots, []);
+    	let { command } = $$props;
+    	console.log(command);
+
+    	$$self.$$.on_mount.push(function () {
+    		if (command === undefined && !('command' in $$props || $$self.$$.bound[$$self.$$.props['command']])) {
+    			console_1$5.warn("<CommandComponent> was created without expected prop 'command'");
+    		}
+    	});
+
+    	const writable_props = ['command'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$5.warn(`<CommandComponent> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('command' in $$props) $$invalidate(0, command = $$props.command);
+    	};
+
+    	$$self.$capture_state = () => ({ command });
+
+    	$$self.$inject_state = $$props => {
+    		if ('command' in $$props) $$invalidate(0, command = $$props.command);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [command];
+    }
+
+    class CommandComponent extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$8, create_fragment$8, safe_not_equal, { command: 0 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "CommandComponent",
+    			options,
+    			id: create_fragment$8.name
+    		});
+    	}
+
+    	get command() {
+    		throw new Error("<CommandComponent>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set command(value) {
+    		throw new Error("<CommandComponent>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/components/sidebarComponents/subComponents/ConditionalComponent.svelte generated by Svelte v3.59.1 */
+
+    const { console: console_1$4 } = globals;
+    const file$7 = "src/components/sidebarComponents/subComponents/ConditionalComponent.svelte";
+
+    function create_fragment$7(ctx) {
+    	let div;
+
+    	const block = {
+    		c: function create() {
+    			div = element$1("div");
+    			add_location(div, file$7, 5, 0, 118);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    		},
+    		p: noop$2,
+    		i: noop$2,
+    		o: noop$2,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$7.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$7($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('ConditionalComponent', slots, []);
+    	let { conditional } = $$props;
+    	console.log(conditional);
+
+    	$$self.$$.on_mount.push(function () {
+    		if (conditional === undefined && !('conditional' in $$props || $$self.$$.bound[$$self.$$.props['conditional']])) {
+    			console_1$4.warn("<ConditionalComponent> was created without expected prop 'conditional'");
+    		}
+    	});
+
+    	const writable_props = ['conditional'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$4.warn(`<ConditionalComponent> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('conditional' in $$props) $$invalidate(0, conditional = $$props.conditional);
+    	};
+
+    	$$self.$capture_state = () => ({ conditional });
+
+    	$$self.$inject_state = $$props => {
+    		if ('conditional' in $$props) $$invalidate(0, conditional = $$props.conditional);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [conditional];
+    }
+
+    class ConditionalComponent extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$7, create_fragment$7, safe_not_equal, { conditional: 0 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "ConditionalComponent",
+    			options,
+    			id: create_fragment$7.name
+    		});
+    	}
+
+    	get conditional() {
+    		throw new Error("<ConditionalComponent>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set conditional(value) {
+    		throw new Error("<ConditionalComponent>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/components/sidebarComponents/subComponents/ProcessComponent.svelte generated by Svelte v3.59.1 */
+
+    const { console: console_1$3 } = globals;
+    const file$6 = "src/components/sidebarComponents/subComponents/ProcessComponent.svelte";
+
+    function create_fragment$6(ctx) {
+    	let div;
+
+    	const block = {
+    		c: function create() {
+    			div = element$1("div");
+    			add_location(div, file$6, 5, 0, 110);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    		},
+    		p: noop$2,
+    		i: noop$2,
+    		o: noop$2,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$6.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$6($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('ProcessComponent', slots, []);
+    	let { process } = $$props;
+    	console.log(process);
+
+    	$$self.$$.on_mount.push(function () {
+    		if (process === undefined && !('process' in $$props || $$self.$$.bound[$$self.$$.props['process']])) {
+    			console_1$3.warn("<ProcessComponent> was created without expected prop 'process'");
+    		}
+    	});
+
+    	const writable_props = ['process'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$3.warn(`<ProcessComponent> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('process' in $$props) $$invalidate(0, process = $$props.process);
+    	};
+
+    	$$self.$capture_state = () => ({ process });
+
+    	$$self.$inject_state = $$props => {
+    		if ('process' in $$props) $$invalidate(0, process = $$props.process);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [process];
+    }
+
+    class ProcessComponent extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$6, create_fragment$6, safe_not_equal, { process: 0 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "ProcessComponent",
+    			options,
+    			id: create_fragment$6.name
+    		});
+    	}
+
+    	get process() {
+    		throw new Error("<ProcessComponent>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set process(value) {
+    		throw new Error("<ProcessComponent>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/components/sidebarComponents/subComponents/PromptComponent.svelte generated by Svelte v3.59.1 */
+    const file$5 = "src/components/sidebarComponents/subComponents/PromptComponent.svelte";
+
+    function create_fragment$5(ctx) {
+    	let form;
+    	let label0;
+    	let t1;
+    	let input0;
+    	let t2;
+    	let label1;
+    	let t4;
+    	let input1;
+    	let t5;
+    	let button;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			form = element$1("form");
+    			label0 = element$1("label");
+    			label0.textContent = "Prompt";
+    			t1 = space();
+    			input0 = element$1("input");
+    			t2 = space();
+    			label1 = element$1("label");
+    			label1.textContent = "System";
+    			t4 = space();
+    			input1 = element$1("input");
+    			t5 = space();
+    			button = element$1("button");
+    			button.textContent = "Submit";
+    			attr_dev(label0, "for", "prompt");
+    			attr_dev(label0, "class", "required-label svelte-wwcf2i");
+    			add_location(label0, file$5, 22, 2, 1033);
+    			attr_dev(input0, "id", "prompt");
+    			attr_dev(input0, "type", "text");
+    			input0.required = true;
+    			attr_dev(input0, "class", "required-input svelte-wwcf2i");
+    			add_location(input0, file$5, 23, 2, 1093);
+    			attr_dev(label1, "for", "system");
+    			attr_dev(label1, "class", "required-label svelte-wwcf2i");
+    			add_location(label1, file$5, 31, 2, 1209);
+    			attr_dev(input1, "id", "system");
+    			attr_dev(input1, "type", "text");
+    			input1.required = true;
+    			attr_dev(input1, "class", "required-input svelte-wwcf2i");
+    			add_location(input1, file$5, 32, 2, 1269);
+    			attr_dev(button, "type", "submit");
+    			add_location(button, file$5, 39, 2, 1384);
+    			add_location(form, file$5, 21, 0, 984);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, form, anchor);
+    			append_dev(form, label0);
+    			append_dev(form, t1);
+    			append_dev(form, input0);
+    			set_input_value(input0, /*prompt_text*/ ctx[1]);
+    			append_dev(form, t2);
+    			append_dev(form, label1);
+    			append_dev(form, t4);
+    			append_dev(form, input1);
+    			set_input_value(input1, /*system_text*/ ctx[0]);
+    			append_dev(form, t5);
+    			append_dev(form, button);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[4]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[5]),
+    					listen_dev(form, "submit", prevent_default(/*submitPrompt*/ ctx[2]), false, true, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*prompt_text*/ 2 && input0.value !== /*prompt_text*/ ctx[1]) {
+    				set_input_value(input0, /*prompt_text*/ ctx[1]);
+    			}
+
+    			if (dirty & /*system_text*/ 1 && input1.value !== /*system_text*/ ctx[0]) {
+    				set_input_value(input1, /*system_text*/ ctx[0]);
+    			}
+    		},
+    		i: noop$2,
+    		o: noop$2,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(form);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$5.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$5($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('PromptComponent', slots, []);
+
+    	var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
+    		function adopt(value) {
+    			return value instanceof P
+    			? value
+    			: new P(function (resolve) {
+    						resolve(value);
+    					});
+    		}
+
+    		return new (P || (P = Promise))(function (resolve, reject) {
+    				function fulfilled(value) {
+    					try {
+    						step(generator.next(value));
+    					} catch(e) {
+    						reject(e);
+    					}
+    				}
+
+    				function rejected(value) {
+    					try {
+    						step(generator["throw"](value));
+    					} catch(e) {
+    						reject(e);
+    					}
+    				}
+
+    				function step(result) {
+    					result.done
+    					? resolve(result.value)
+    					: adopt(result.value).then(fulfilled, rejected);
+    				}
+
+    				step((generator = generator.apply(thisArg, _arguments || [])).next());
+    			});
+    	};
+
+    	let { prompt } = $$props;
+    	let system_text = "";
+    	let prompt_text = "";
+
+    	function submitPrompt() {
+    		return __awaiter(this, void 0, void 0, function* () {
+    			prompt.setPrompt(prompt_text);
+    			prompt.setSystem(system_text);
+    		});
+    	}
+
+    	$$self.$$.on_mount.push(function () {
+    		if (prompt === undefined && !('prompt' in $$props || $$self.$$.bound[$$self.$$.props['prompt']])) {
+    			console.warn("<PromptComponent> was created without expected prop 'prompt'");
+    		}
+    	});
+
+    	const writable_props = ['prompt'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<PromptComponent> was created with unknown prop '${key}'`);
+    	});
+
+    	function input0_input_handler() {
+    		prompt_text = this.value;
+    		$$invalidate(1, prompt_text);
+    	}
+
+    	function input1_input_handler() {
+    		system_text = this.value;
+    		$$invalidate(0, system_text);
+    	}
+
+    	$$self.$$set = $$props => {
+    		if ('prompt' in $$props) $$invalidate(3, prompt = $$props.prompt);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		__awaiter,
+    		prompt,
+    		system_text,
+    		prompt_text,
+    		submitPrompt
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
+    		if ('prompt' in $$props) $$invalidate(3, prompt = $$props.prompt);
+    		if ('system_text' in $$props) $$invalidate(0, system_text = $$props.system_text);
+    		if ('prompt_text' in $$props) $$invalidate(1, prompt_text = $$props.prompt_text);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [
+    		system_text,
+    		prompt_text,
+    		submitPrompt,
+    		prompt,
+    		input0_input_handler,
+    		input1_input_handler
+    	];
+    }
+
+    class PromptComponent extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$5, create_fragment$5, safe_not_equal, { prompt: 3 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "PromptComponent",
+    			options,
     			id: create_fragment$5.name
+    		});
+    	}
+
+    	get prompt() {
+    		throw new Error("<PromptComponent>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set prompt(value) {
+    		throw new Error("<PromptComponent>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/components/sidebarComponents/newNode.svelte generated by Svelte v3.59.1 */
+
+    const { Object: Object_1, console: console_1$2 } = globals;
+
+    const file$4 = "src/components/sidebarComponents/newNode.svelte";
+
+    function get_each_context$1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[27] = list[i];
+    	child_ctx[28] = list;
+    	child_ctx[29] = i;
+    	return child_ctx;
+    }
+
+    function get_each_context_1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[30] = list[i];
+    	child_ctx[31] = list;
+    	child_ctx[29] = i;
+    	return child_ctx;
+    }
+
+    function get_each_context_2(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[32] = list[i];
+    	return child_ctx;
+    }
+
+    // (36:6) {#each num_array as array_index}
+    function create_each_block_2(ctx) {
+    	let option;
+    	let t_value = /*key_list*/ ctx[9][/*array_index*/ ctx[32]] + "";
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			option = element$1("option");
+    			t = text(t_value);
+    			option.__value = /*array_index*/ ctx[32];
+    			option.value = option.__value;
+    			add_location(option, file$4, 36, 8, 1260);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, option, anchor);
+    			append_dev(option, t);
+    		},
+    		p: noop$2,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(option);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_2.name,
+    		type: "each",
+    		source: "(36:6) {#each num_array as array_index}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (44:6) {#each inputVariablesList as _inputVar, index}
+    function create_each_block_1(ctx) {
+    	let input;
+    	let t0;
+    	let button;
+    	let mounted;
+    	let dispose;
+
+    	function input_input_handler() {
+    		/*input_input_handler*/ ctx[15].call(input, /*index*/ ctx[29]);
+    	}
+
+    	function click_handler() {
+    		return /*click_handler*/ ctx[16](/*index*/ ctx[29]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			input = element$1("input");
+    			t0 = space();
+    			button = element$1("button");
+    			button.textContent = "x";
+    			attr_dev(input, "placeholder", `Input variable ${/*index*/ ctx[29] + 1}`);
+    			add_location(input, file$4, 44, 8, 1517);
+    			add_location(button, file$4, 48, 8, 1646);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, input, anchor);
+    			set_input_value(input, /*inputVariablesList*/ ctx[3][/*index*/ ctx[29]]);
+    			insert_dev(target, t0, anchor);
+    			insert_dev(target, button, anchor);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(input, "input", input_input_handler),
+    					listen_dev(button, "click", click_handler, false, false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+
+    			if (dirty[0] & /*inputVariablesList*/ 8 && input.value !== /*inputVariablesList*/ ctx[3][/*index*/ ctx[29]]) {
+    				set_input_value(input, /*inputVariablesList*/ ctx[3][/*index*/ ctx[29]]);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(input);
+    			if (detaching) detach_dev(t0);
+    			if (detaching) detach_dev(button);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1.name,
+    		type: "each",
+    		source: "(44:6) {#each inputVariablesList as _inputVar, index}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (59:6) {#each outputVariablesList as _outputVar, index}
+    function create_each_block$1(ctx) {
+    	let input;
+    	let t0;
+    	let button;
+    	let mounted;
+    	let dispose;
+
+    	function input_input_handler_1() {
+    		/*input_input_handler_1*/ ctx[18].call(input, /*index*/ ctx[29]);
+    	}
+
+    	function click_handler_2() {
+    		return /*click_handler_2*/ ctx[19](/*index*/ ctx[29]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			input = element$1("input");
+    			t0 = space();
+    			button = element$1("button");
+    			button.textContent = "x";
+    			attr_dev(input, "placeholder", `Output variable ${/*index*/ ctx[29] + 1}`);
+    			add_location(input, file$4, 59, 8, 1982);
+    			add_location(button, file$4, 63, 8, 2113);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, input, anchor);
+    			set_input_value(input, /*outputVariablesList*/ ctx[4][/*index*/ ctx[29]]);
+    			insert_dev(target, t0, anchor);
+    			insert_dev(target, button, anchor);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(input, "input", input_input_handler_1),
+    					listen_dev(button, "click", click_handler_2, false, false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+
+    			if (dirty[0] & /*outputVariablesList*/ 16 && input.value !== /*outputVariablesList*/ ctx[4][/*index*/ ctx[29]]) {
+    				set_input_value(input, /*outputVariablesList*/ ctx[4][/*index*/ ctx[29]]);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(input);
+    			if (detaching) detach_dev(t0);
+    			if (detaching) detach_dev(button);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block$1.name,
+    		type: "each",
+    		source: "(59:6) {#each outputVariablesList as _outputVar, index}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (71:4) {#if typeName === NodeTypeNames.PROMPT}
+    function create_if_block_3(ctx) {
+    	let promptcomponent;
+    	let updating_prompt;
+    	let current;
+
+    	function promptcomponent_prompt_binding(value) {
+    		/*promptcomponent_prompt_binding*/ ctx[21](value);
+    	}
+
+    	let promptcomponent_props = {};
+
+    	if (/*prompt*/ ctx[5] !== void 0) {
+    		promptcomponent_props.prompt = /*prompt*/ ctx[5];
+    	}
+
+    	promptcomponent = new PromptComponent({
+    			props: promptcomponent_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(promptcomponent, 'prompt', promptcomponent_prompt_binding));
+
+    	const block = {
+    		c: function create() {
+    			create_component(promptcomponent.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(promptcomponent, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const promptcomponent_changes = {};
+
+    			if (!updating_prompt && dirty[0] & /*prompt*/ 32) {
+    				updating_prompt = true;
+    				promptcomponent_changes.prompt = /*prompt*/ ctx[5];
+    				add_flush_callback(() => updating_prompt = false);
+    			}
+
+    			promptcomponent.$set(promptcomponent_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(promptcomponent.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(promptcomponent.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(promptcomponent, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_3.name,
+    		type: "if",
+    		source: "(71:4) {#if typeName === NodeTypeNames.PROMPT}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (74:4) {#if typeName === NodeTypeNames.PROCESS}
+    function create_if_block_2(ctx) {
+    	let processcomponent;
+    	let updating_process;
+    	let current;
+
+    	function processcomponent_process_binding(value) {
+    		/*processcomponent_process_binding*/ ctx[22](value);
+    	}
+
+    	let processcomponent_props = {};
+
+    	if (/*process*/ ctx[6] !== void 0) {
+    		processcomponent_props.process = /*process*/ ctx[6];
+    	}
+
+    	processcomponent = new ProcessComponent({
+    			props: processcomponent_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(processcomponent, 'process', processcomponent_process_binding));
+
+    	const block = {
+    		c: function create() {
+    			create_component(processcomponent.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(processcomponent, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const processcomponent_changes = {};
+
+    			if (!updating_process && dirty[0] & /*process*/ 64) {
+    				updating_process = true;
+    				processcomponent_changes.process = /*process*/ ctx[6];
+    				add_flush_callback(() => updating_process = false);
+    			}
+
+    			processcomponent.$set(processcomponent_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(processcomponent.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(processcomponent.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(processcomponent, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2.name,
+    		type: "if",
+    		source: "(74:4) {#if typeName === NodeTypeNames.PROCESS}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (77:4) {#if typeName === NodeTypeNames.CONDITIONAL}
+    function create_if_block_1$1(ctx) {
+    	let conditionalcomponent;
+    	let updating_conditional;
+    	let current;
+
+    	function conditionalcomponent_conditional_binding(value) {
+    		/*conditionalcomponent_conditional_binding*/ ctx[23](value);
+    	}
+
+    	let conditionalcomponent_props = {};
+
+    	if (/*conditional*/ ctx[7] !== void 0) {
+    		conditionalcomponent_props.conditional = /*conditional*/ ctx[7];
+    	}
+
+    	conditionalcomponent = new ConditionalComponent({
+    			props: conditionalcomponent_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(conditionalcomponent, 'conditional', conditionalcomponent_conditional_binding));
+
+    	const block = {
+    		c: function create() {
+    			create_component(conditionalcomponent.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(conditionalcomponent, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const conditionalcomponent_changes = {};
+
+    			if (!updating_conditional && dirty[0] & /*conditional*/ 128) {
+    				updating_conditional = true;
+    				conditionalcomponent_changes.conditional = /*conditional*/ ctx[7];
+    				add_flush_callback(() => updating_conditional = false);
+    			}
+
+    			conditionalcomponent.$set(conditionalcomponent_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(conditionalcomponent.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(conditionalcomponent.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(conditionalcomponent, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$1.name,
+    		type: "if",
+    		source: "(77:4) {#if typeName === NodeTypeNames.CONDITIONAL}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (80:4) {#if typeName === NodeTypeNames.COMMAND}
+    function create_if_block$3(ctx) {
+    	let commandcomponent;
+    	let updating_command;
+    	let current;
+
+    	function commandcomponent_command_binding(value) {
+    		/*commandcomponent_command_binding*/ ctx[24](value);
+    	}
+
+    	let commandcomponent_props = {};
+
+    	if (/*command*/ ctx[8] !== void 0) {
+    		commandcomponent_props.command = /*command*/ ctx[8];
+    	}
+
+    	commandcomponent = new CommandComponent({
+    			props: commandcomponent_props,
+    			$$inline: true
+    		});
+
+    	binding_callbacks.push(() => bind(commandcomponent, 'command', commandcomponent_command_binding));
+
+    	const block = {
+    		c: function create() {
+    			create_component(commandcomponent.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(commandcomponent, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const commandcomponent_changes = {};
+
+    			if (!updating_command && dirty[0] & /*command*/ 256) {
+    				updating_command = true;
+    				commandcomponent_changes.command = /*command*/ ctx[8];
+    				add_flush_callback(() => updating_command = false);
+    			}
+
+    			commandcomponent.$set(commandcomponent_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(commandcomponent.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(commandcomponent.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(commandcomponent, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$3.name,
+    		type: "if",
+    		source: "(80:4) {#if typeName === NodeTypeNames.COMMAND}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$4(ctx) {
+    	let div3;
+    	let div2;
+    	let input0;
+    	let t0;
+    	let select;
+    	let t1;
+    	let input1;
+    	let t2;
+    	let div0;
+    	let h40;
+    	let t4;
+    	let t5;
+    	let button0;
+    	let t7;
+    	let div1;
+    	let h41;
+    	let t9;
+    	let t10;
+    	let button1;
+    	let t12;
+    	let t13;
+    	let t14;
+    	let t15;
+    	let t16;
+    	let button2;
+    	let current;
+    	let mounted;
+    	let dispose;
+    	let each_value_2 = /*num_array*/ ctx[10];
+    	validate_each_argument(each_value_2);
+    	let each_blocks_2 = [];
+
+    	for (let i = 0; i < each_value_2.length; i += 1) {
+    		each_blocks_2[i] = create_each_block_2(get_each_context_2(ctx, each_value_2, i));
+    	}
+
+    	let each_value_1 = /*inputVariablesList*/ ctx[3];
+    	validate_each_argument(each_value_1);
+    	let each_blocks_1 = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks_1[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
+    	}
+
+    	let each_value = /*outputVariablesList*/ ctx[4];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
+    	}
+
+    	let if_block0 = /*typeName*/ ctx[1] === system_types_pb_js.NodeTypeNames.PROMPT && create_if_block_3(ctx);
+    	let if_block1 = /*typeName*/ ctx[1] === system_types_pb_js.NodeTypeNames.PROCESS && create_if_block_2(ctx);
+    	let if_block2 = /*typeName*/ ctx[1] === system_types_pb_js.NodeTypeNames.CONDITIONAL && create_if_block_1$1(ctx);
+    	let if_block3 = /*typeName*/ ctx[1] === system_types_pb_js.NodeTypeNames.COMMAND && create_if_block$3(ctx);
+
+    	const block = {
+    		c: function create() {
+    			div3 = element$1("div");
+    			div2 = element$1("div");
+    			input0 = element$1("input");
+    			t0 = space();
+    			select = element$1("select");
+
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				each_blocks_2[i].c();
+    			}
+
+    			t1 = space();
+    			input1 = element$1("input");
+    			t2 = space();
+    			div0 = element$1("div");
+    			h40 = element$1("h4");
+    			h40.textContent = "Input Variables";
+    			t4 = space();
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].c();
+    			}
+
+    			t5 = space();
+    			button0 = element$1("button");
+    			button0.textContent = "Add Input Variable";
+    			t7 = space();
+    			div1 = element$1("div");
+    			h41 = element$1("h4");
+    			h41.textContent = "Output Variables";
+    			t9 = space();
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t10 = space();
+    			button1 = element$1("button");
+    			button1.textContent = "Add Output Variable";
+    			t12 = space();
+    			if (if_block0) if_block0.c();
+    			t13 = space();
+    			if (if_block1) if_block1.c();
+    			t14 = space();
+    			if (if_block2) if_block2.c();
+    			t15 = space();
+    			if (if_block3) if_block3.c();
+    			t16 = space();
+    			button2 = element$1("button");
+    			button2.textContent = "Save";
+    			attr_dev(input0, "placeholder", "Name");
+    			add_location(input0, file$4, 33, 4, 1131);
+    			if (/*typeName*/ ctx[1] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[13].call(select));
+    			add_location(select, file$4, 34, 4, 1182);
+    			attr_dev(input1, "placeholder", "Description");
+    			add_location(input1, file$4, 39, 4, 1353);
+    			add_location(h40, file$4, 42, 6, 1431);
+    			add_location(button0, file$4, 50, 6, 1738);
+    			add_location(div0, file$4, 41, 4, 1419);
+    			add_location(h41, file$4, 57, 6, 1893);
+    			add_location(button1, file$4, 65, 6, 2206);
+    			add_location(div1, file$4, 56, 4, 1881);
+    			add_location(button2, file$4, 82, 4, 2710);
+    			add_location(div2, file$4, 32, 2, 1121);
+    			add_location(div3, file$4, 31, 0, 1113);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div3, anchor);
+    			append_dev(div3, div2);
+    			append_dev(div2, input0);
+    			set_input_value(input0, /*name*/ ctx[0]);
+    			append_dev(div2, t0);
+    			append_dev(div2, select);
+
+    			for (let i = 0; i < each_blocks_2.length; i += 1) {
+    				if (each_blocks_2[i]) {
+    					each_blocks_2[i].m(select, null);
+    				}
+    			}
+
+    			select_option(select, /*typeName*/ ctx[1], true);
+    			append_dev(div2, t1);
+    			append_dev(div2, input1);
+    			set_input_value(input1, /*description*/ ctx[2]);
+    			append_dev(div2, t2);
+    			append_dev(div2, div0);
+    			append_dev(div0, h40);
+    			append_dev(div0, t4);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				if (each_blocks_1[i]) {
+    					each_blocks_1[i].m(div0, null);
+    				}
+    			}
+
+    			append_dev(div0, t5);
+    			append_dev(div0, button0);
+    			append_dev(div2, t7);
+    			append_dev(div2, div1);
+    			append_dev(div1, h41);
+    			append_dev(div1, t9);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				if (each_blocks[i]) {
+    					each_blocks[i].m(div1, null);
+    				}
+    			}
+
+    			append_dev(div1, t10);
+    			append_dev(div1, button1);
+    			append_dev(div2, t12);
+    			if (if_block0) if_block0.m(div2, null);
+    			append_dev(div2, t13);
+    			if (if_block1) if_block1.m(div2, null);
+    			append_dev(div2, t14);
+    			if (if_block2) if_block2.m(div2, null);
+    			append_dev(div2, t15);
+    			if (if_block3) if_block3.m(div2, null);
+    			append_dev(div2, t16);
+    			append_dev(div2, button2);
+    			current = true;
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[12]),
+    					listen_dev(select, "change", /*select_change_handler*/ ctx[13]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[14]),
+    					listen_dev(button0, "click", /*click_handler_1*/ ctx[17], false, false, false, false),
+    					listen_dev(button1, "click", /*click_handler_3*/ ctx[20], false, false, false, false),
+    					listen_dev(button2, "click", /*click_handler_4*/ ctx[25], false, false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*name*/ 1 && input0.value !== /*name*/ ctx[0]) {
+    				set_input_value(input0, /*name*/ ctx[0]);
+    			}
+
+    			if (dirty[0] & /*num_array, key_list*/ 1536) {
+    				each_value_2 = /*num_array*/ ctx[10];
+    				validate_each_argument(each_value_2);
+    				let i;
+
+    				for (i = 0; i < each_value_2.length; i += 1) {
+    					const child_ctx = get_each_context_2(ctx, each_value_2, i);
+
+    					if (each_blocks_2[i]) {
+    						each_blocks_2[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_2[i] = create_each_block_2(child_ctx);
+    						each_blocks_2[i].c();
+    						each_blocks_2[i].m(select, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_2.length; i += 1) {
+    					each_blocks_2[i].d(1);
+    				}
+
+    				each_blocks_2.length = each_value_2.length;
+    			}
+
+    			if (dirty[0] & /*typeName, num_array*/ 1026) {
+    				select_option(select, /*typeName*/ ctx[1]);
+    			}
+
+    			if (dirty[0] & /*description*/ 4 && input1.value !== /*description*/ ctx[2]) {
+    				set_input_value(input1, /*description*/ ctx[2]);
+    			}
+
+    			if (dirty[0] & /*inputVariablesList*/ 8) {
+    				each_value_1 = /*inputVariablesList*/ ctx[3];
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
+
+    					if (each_blocks_1[i]) {
+    						each_blocks_1[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_1[i] = create_each_block_1(child_ctx);
+    						each_blocks_1[i].c();
+    						each_blocks_1[i].m(div0, t5);
+    					}
+    				}
+
+    				for (; i < each_blocks_1.length; i += 1) {
+    					each_blocks_1[i].d(1);
+    				}
+
+    				each_blocks_1.length = each_value_1.length;
+    			}
+
+    			if (dirty[0] & /*outputVariablesList*/ 16) {
+    				each_value = /*outputVariablesList*/ ctx[4];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context$1(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block$1(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div1, t10);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+
+    			if (/*typeName*/ ctx[1] === system_types_pb_js.NodeTypeNames.PROMPT) {
+    				if (if_block0) {
+    					if_block0.p(ctx, dirty);
+
+    					if (dirty[0] & /*typeName*/ 2) {
+    						transition_in(if_block0, 1);
+    					}
+    				} else {
+    					if_block0 = create_if_block_3(ctx);
+    					if_block0.c();
+    					transition_in(if_block0, 1);
+    					if_block0.m(div2, t13);
+    				}
+    			} else if (if_block0) {
+    				group_outros();
+
+    				transition_out(if_block0, 1, 1, () => {
+    					if_block0 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (/*typeName*/ ctx[1] === system_types_pb_js.NodeTypeNames.PROCESS) {
+    				if (if_block1) {
+    					if_block1.p(ctx, dirty);
+
+    					if (dirty[0] & /*typeName*/ 2) {
+    						transition_in(if_block1, 1);
+    					}
+    				} else {
+    					if_block1 = create_if_block_2(ctx);
+    					if_block1.c();
+    					transition_in(if_block1, 1);
+    					if_block1.m(div2, t14);
+    				}
+    			} else if (if_block1) {
+    				group_outros();
+
+    				transition_out(if_block1, 1, 1, () => {
+    					if_block1 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (/*typeName*/ ctx[1] === system_types_pb_js.NodeTypeNames.CONDITIONAL) {
+    				if (if_block2) {
+    					if_block2.p(ctx, dirty);
+
+    					if (dirty[0] & /*typeName*/ 2) {
+    						transition_in(if_block2, 1);
+    					}
+    				} else {
+    					if_block2 = create_if_block_1$1(ctx);
+    					if_block2.c();
+    					transition_in(if_block2, 1);
+    					if_block2.m(div2, t15);
+    				}
+    			} else if (if_block2) {
+    				group_outros();
+
+    				transition_out(if_block2, 1, 1, () => {
+    					if_block2 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (/*typeName*/ ctx[1] === system_types_pb_js.NodeTypeNames.COMMAND) {
+    				if (if_block3) {
+    					if_block3.p(ctx, dirty);
+
+    					if (dirty[0] & /*typeName*/ 2) {
+    						transition_in(if_block3, 1);
+    					}
+    				} else {
+    					if_block3 = create_if_block$3(ctx);
+    					if_block3.c();
+    					transition_in(if_block3, 1);
+    					if_block3.m(div2, t16);
+    				}
+    			} else if (if_block3) {
+    				group_outros();
+
+    				transition_out(if_block3, 1, 1, () => {
+    					if_block3 = null;
+    				});
+
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block0);
+    			transition_in(if_block1);
+    			transition_in(if_block2);
+    			transition_in(if_block3);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block0);
+    			transition_out(if_block1);
+    			transition_out(if_block2);
+    			transition_out(if_block3);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div3);
+    			destroy_each(each_blocks_2, detaching);
+    			destroy_each(each_blocks_1, detaching);
+    			destroy_each(each_blocks, detaching);
+    			if (if_block0) if_block0.d();
+    			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
+    			if (if_block3) if_block3.d();
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$4.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$4($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('NewNode', slots, []);
+    	let id = "";
+    	let name = "";
+    	let typeName = system_types_pb_js.NodeTypeNames.PROMPT;
+    	let description = "";
+    	let inputVariablesList = [];
+    	let outputVariablesList = [];
+    	let prompt = new system_types_pb_js.Prompt();
+    	let process = new system_types_pb_js.Process();
+    	let conditional = new system_types_pb_js.Conditional();
+    	let command = new system_types_pb_js.Command();
+    	let key_list = Object.keys(system_types_pb_js.NodeTypeNames);
+    	let num_array = Array.from({ length: key_list.length }, (_, i) => i);
+
+    	// Dummy function to collect the Node object (replace with actual logic)
+    	function getNodeObject() {
+    		return {
+    			id,
+    			name,
+    			typeName,
+    			description,
+    			inputVariablesList,
+    			outputVariablesList
+    		}; // Add logic for prompt, process, conditional, command
+    	}
+
+    	const writable_props = [];
+
+    	Object_1.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<NewNode> was created with unknown prop '${key}'`);
+    	});
+
+    	function input0_input_handler() {
+    		name = this.value;
+    		$$invalidate(0, name);
+    	}
+
+    	function select_change_handler() {
+    		typeName = select_value(this);
+    		$$invalidate(1, typeName);
+    		$$invalidate(10, num_array);
+    	}
+
+    	function input1_input_handler() {
+    		description = this.value;
+    		$$invalidate(2, description);
+    	}
+
+    	function input_input_handler(index) {
+    		inputVariablesList[index] = this.value;
+    		$$invalidate(3, inputVariablesList);
+    	}
+
+    	const click_handler = index => inputVariablesList.splice(index, 1);
+    	const click_handler_1 = () => inputVariablesList.push("");
+
+    	function input_input_handler_1(index) {
+    		outputVariablesList[index] = this.value;
+    		$$invalidate(4, outputVariablesList);
+    	}
+
+    	const click_handler_2 = index => outputVariablesList.splice(index, 1);
+    	const click_handler_3 = () => outputVariablesList.push("");
+
+    	function promptcomponent_prompt_binding(value) {
+    		prompt = value;
+    		$$invalidate(5, prompt);
+    	}
+
+    	function processcomponent_process_binding(value) {
+    		process = value;
+    		$$invalidate(6, process);
+    	}
+
+    	function conditionalcomponent_conditional_binding(value) {
+    		conditional = value;
+    		$$invalidate(7, conditional);
+    	}
+
+    	function commandcomponent_command_binding(value) {
+    		command = value;
+    		$$invalidate(8, command);
+    	}
+
+    	const click_handler_4 = () => console.log(getNodeObject());
+
+    	$$self.$capture_state = () => ({
+    		CommandComponent,
+    		ConditionalComponent,
+    		ProcessComponent,
+    		PromptComponent,
+    		NodeTypeNames: system_types_pb_js.NodeTypeNames,
+    		Prompt: system_types_pb_js.Prompt,
+    		Process: system_types_pb_js.Process,
+    		Conditional: system_types_pb_js.Conditional,
+    		Command: system_types_pb_js.Command,
+    		id,
+    		name,
+    		typeName,
+    		description,
+    		inputVariablesList,
+    		outputVariablesList,
+    		prompt,
+    		process,
+    		conditional,
+    		command,
+    		key_list,
+    		num_array,
+    		getNodeObject
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('id' in $$props) id = $$props.id;
+    		if ('name' in $$props) $$invalidate(0, name = $$props.name);
+    		if ('typeName' in $$props) $$invalidate(1, typeName = $$props.typeName);
+    		if ('description' in $$props) $$invalidate(2, description = $$props.description);
+    		if ('inputVariablesList' in $$props) $$invalidate(3, inputVariablesList = $$props.inputVariablesList);
+    		if ('outputVariablesList' in $$props) $$invalidate(4, outputVariablesList = $$props.outputVariablesList);
+    		if ('prompt' in $$props) $$invalidate(5, prompt = $$props.prompt);
+    		if ('process' in $$props) $$invalidate(6, process = $$props.process);
+    		if ('conditional' in $$props) $$invalidate(7, conditional = $$props.conditional);
+    		if ('command' in $$props) $$invalidate(8, command = $$props.command);
+    		if ('key_list' in $$props) $$invalidate(9, key_list = $$props.key_list);
+    		if ('num_array' in $$props) $$invalidate(10, num_array = $$props.num_array);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [
+    		name,
+    		typeName,
+    		description,
+    		inputVariablesList,
+    		outputVariablesList,
+    		prompt,
+    		process,
+    		conditional,
+    		command,
+    		key_list,
+    		num_array,
+    		getNodeObject,
+    		input0_input_handler,
+    		select_change_handler,
+    		input1_input_handler,
+    		input_input_handler,
+    		click_handler,
+    		click_handler_1,
+    		input_input_handler_1,
+    		click_handler_2,
+    		click_handler_3,
+    		promptcomponent_prompt_binding,
+    		processcomponent_process_binding,
+    		conditionalcomponent_conditional_binding,
+    		commandcomponent_command_binding,
+    		click_handler_4
+    	];
+    }
+
+    class NewNode extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {}, null, [-1, -1]);
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "NewNode",
+    			options,
+    			id: create_fragment$4.name
     		});
     	}
     }
@@ -10571,7 +12102,7 @@ var app = (function () {
             css: (_t, u) => `opacity: ${target_opacity - (od * u)}; filter: ${f} blur(${u * value}${unit});`
         };
     }
-    function fade(node, { delay = 0, duration = 400, easing = identity$3 } = {}) {
+    function fade(node, { delay = 0, duration = 400, easing = identity$1 } = {}) {
         const o = +getComputedStyle(node).opacity;
         return {
             delay,
@@ -10579,1883 +12110,6 @@ var app = (function () {
             easing,
             css: t => `opacity: ${t * o}`
         };
-    }
-
-    var __spreadArray$1 = (undefined && undefined.__spreadArray) || function (to, from, pack) {
-        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-            if (ar || !(i in from)) {
-                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-                ar[i] = from[i];
-            }
-        }
-        return to.concat(ar || Array.prototype.slice.call(from));
-    };
-    /**
-     * @since 2.0.0
-     */
-    function identity$2(a) {
-        return a;
-    }
-    function pipe(a, ab, bc, cd, de, ef, fg, gh, hi) {
-        switch (arguments.length) {
-            case 1:
-                return a;
-            case 2:
-                return ab(a);
-            case 3:
-                return bc(ab(a));
-            case 4:
-                return cd(bc(ab(a)));
-            case 5:
-                return de(cd(bc(ab(a))));
-            case 6:
-                return ef(de(cd(bc(ab(a)))));
-            case 7:
-                return fg(ef(de(cd(bc(ab(a))))));
-            case 8:
-                return gh(fg(ef(de(cd(bc(ab(a)))))));
-            case 9:
-                return hi(gh(fg(ef(de(cd(bc(ab(a))))))));
-            default: {
-                var ret = arguments[0];
-                for (var i = 1; i < arguments.length; i++) {
-                    ret = arguments[i](ret);
-                }
-                return ret;
-            }
-        }
-    }
-    /** @internal */
-    var dual = function (arity, body) {
-        var isDataFirst = typeof arity === 'number' ? function (args) { return args.length >= arity; } : arity;
-        return function () {
-            var args = Array.from(arguments);
-            if (isDataFirst(arguments)) {
-                return body.apply(this, args);
-            }
-            return function (self) { return body.apply(void 0, __spreadArray$1([self], args, false)); };
-        };
-    };
-
-    (undefined && undefined.__spreadArray) || function (to, from, pack) {
-        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-            if (ar || !(i in from)) {
-                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-                ar[i] = from[i];
-            }
-        }
-        return to.concat(ar || Array.prototype.slice.call(from));
-    };
-    // -------------------------------------------------------------------------------------
-    // Either
-    // -------------------------------------------------------------------------------------
-    /** @internal */
-    var isLeft$1 = function (ma) { return ma._tag === 'Left'; };
-    /** @internal */
-    var left$1 = function (e) { return ({ _tag: 'Left', left: e }); };
-    /** @internal */
-    var right$1 = function (a) { return ({ _tag: 'Right', right: a }); };
-
-    /**
-     * A `Functor` is a type constructor which supports a mapping operation `map`.
-     *
-     * `map` can be used to turn functions `a -> b` into functions `f a -> f b` whose argument and return types use the type
-     * constructor `f` to represent some computational context.
-     *
-     * Instances must satisfy the following laws:
-     *
-     * 1. Identity: `F.map(fa, a => a) <-> fa`
-     * 2. Composition: `F.map(fa, a => bc(ab(a))) <-> F.map(F.map(fa, ab), bc)`
-     *
-     * @since 2.0.0
-     */
-    /** @internal */
-    function as$1(F) {
-        return function (self, b) { return F.map(self, function () { return b; }); };
-    }
-
-    // -------------------------------------------------------------------------------------
-    // constructors
-    // -------------------------------------------------------------------------------------
-    /**
-     * Constructs a new `Either` holding a `Left` value. This usually represents a failure, due to the right-bias of this
-     * structure.
-     *
-     * @category constructors
-     * @since 2.0.0
-     */
-    var left = left$1;
-    /**
-     * Constructs a new `Either` holding a `Right` value. This usually represents a successful value due to the right bias
-     * of this structure.
-     *
-     * @category constructors
-     * @since 2.0.0
-     */
-    var right = right$1;
-    var _map = function (fa, f) { return pipe(fa, map$1(f)); };
-    /**
-     * @category type lambdas
-     * @since 2.0.0
-     */
-    var URI = 'Either';
-    /**
-     * @category mapping
-     * @since 2.0.0
-     */
-    var map$1 = function (f) { return function (fa) {
-        return isLeft(fa) ? fa : right(f(fa.right));
-    }; };
-    /**
-     * @category instances
-     * @since 2.7.0
-     */
-    var Functor$1 = {
-        URI: URI,
-        map: _map
-    };
-    /**
-     * Maps the `Right` value of this `Either` to the specified constant value.
-     *
-     * @category mapping
-     * @since 2.16.0
-     */
-    dual(2, as$1(Functor$1));
-    /**
-     * @category instances
-     * @since 2.10.0
-     */
-    var FromEither$1 = {
-        URI: URI,
-        fromEither: identity$2
-    };
-    // -------------------------------------------------------------------------------------
-    // refinements
-    // -------------------------------------------------------------------------------------
-    /**
-     * Returns `true` if the either is an instance of `Left`, `false` otherwise.
-     *
-     * @category refinements
-     * @since 2.0.0
-     */
-    var isLeft = isLeft$1;
-    /**
-     * Less strict version of [`match`](#match).
-     *
-     * The `W` suffix (short for **W**idening) means that the handler return types will be merged.
-     *
-     * @category pattern matching
-     * @since 2.10.0
-     */
-    var matchW = function (onLeft, onRight) {
-        return function (ma) {
-            return isLeft(ma) ? onLeft(ma.left) : onRight(ma.right);
-        };
-    };
-    /**
-     * Takes two functions and an `Either` value, if the value is a `Left` the inner value is applied to the first function,
-     * if the value is a `Right` the inner value is applied to the second function.
-     *
-     * @example
-     * import { match, left, right } from 'fp-ts/Either'
-     * import { pipe } from 'fp-ts/function'
-     *
-     * function onLeft(errors: Array<string>): string {
-     *   return `Errors: ${errors.join(', ')}`
-     * }
-     *
-     * function onRight(value: number): string {
-     *   return `Ok: ${value}`
-     * }
-     *
-     * assert.strictEqual(
-     *   pipe(
-     *     right(1),
-     *     match(onLeft, onRight)
-     *   ),
-     *   'Ok: 1'
-     * )
-     * assert.strictEqual(
-     *   pipe(
-     *     left(['error 1', 'error 2']),
-     *     match(onLeft, onRight)
-     *   ),
-     *   'Errors: error 1, error 2'
-     * )
-     *
-     * @category pattern matching
-     * @since 2.10.0
-     */
-    var match$1 = matchW;
-    /**
-     * Alias of [`match`](#match).
-     *
-     * @category pattern matching
-     * @since 2.0.0
-     */
-    var fold = match$1;
-    /** @internal */
-    ({
-        fromEither: FromEither$1.fromEither
-    });
-
-    var __extends = (undefined && undefined.__extends) || (function () {
-        var extendStatics = function (d, b) {
-            extendStatics = Object.setPrototypeOf ||
-                ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-                function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-            return extendStatics(d, b);
-        };
-        return function (d, b) {
-            if (typeof b !== "function" && b !== null)
-                throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-            extendStatics(d, b);
-            function __() { this.constructor = d; }
-            d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-        };
-    })();
-    var __assign = (undefined && undefined.__assign) || function () {
-        __assign = Object.assign || function(t) {
-            for (var s, i = 1, n = arguments.length; i < n; i++) {
-                s = arguments[i];
-                for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                    t[p] = s[p];
-            }
-            return t;
-        };
-        return __assign.apply(this, arguments);
-    };
-    var __spreadArray = (undefined && undefined.__spreadArray) || function (to, from, pack) {
-        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-            if (ar || !(i in from)) {
-                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-                ar[i] = from[i];
-            }
-        }
-        return to.concat(ar || Array.prototype.slice.call(from));
-    };
-    /**
-     * @category Decode error
-     * @since 1.0.0
-     */
-    var failures = left;
-    /**
-     * @category Decode error
-     * @since 1.0.0
-     */
-    var failure$1 = function (value, context, message) {
-        return failures([{ value: value, context: context, message: message }]);
-    };
-    /**
-     * @category Decode error
-     * @since 1.0.0
-     */
-    var success$1 = right;
-    /**
-     * @category Codec
-     * @since 1.0.0
-     */
-    var Type$1 = /** @class */ (function () {
-        function Type(
-        /** a unique name for this codec */
-        name, 
-        /** a custom type guard */
-        is, 
-        /** succeeds if a value of type I can be decoded to a value of type A */
-        validate, 
-        /** converts a value of type A to a value of type O */
-        encode) {
-            this.name = name;
-            this.is = is;
-            this.validate = validate;
-            this.encode = encode;
-            this.decode = this.decode.bind(this);
-        }
-        /**
-         * @since 1.0.0
-         */
-        Type.prototype.pipe = function (ab, name) {
-            var _this = this;
-            if (name === void 0) { name = "pipe(".concat(this.name, ", ").concat(ab.name, ")"); }
-            return new Type(name, ab.is, function (i, c) {
-                var e = _this.validate(i, c);
-                if (isLeft(e)) {
-                    return e;
-                }
-                return ab.validate(e.right, c);
-            }, this.encode === identity$1 && ab.encode === identity$1 ? identity$1 : function (b) { return _this.encode(ab.encode(b)); });
-        };
-        /**
-         * @since 1.0.0
-         */
-        Type.prototype.asDecoder = function () {
-            return this;
-        };
-        /**
-         * @since 1.0.0
-         */
-        Type.prototype.asEncoder = function () {
-            return this;
-        };
-        /**
-         * a version of `validate` with a default context
-         * @since 1.0.0
-         */
-        Type.prototype.decode = function (i) {
-            return this.validate(i, [{ key: '', type: this, actual: i }]);
-        };
-        return Type;
-    }());
-    // -------------------------------------------------------------------------------------
-    // utils
-    // -------------------------------------------------------------------------------------
-    /**
-     * @since 1.0.0
-     */
-    var identity$1 = function (a) { return a; };
-    /**
-     * @since 1.0.0
-     */
-    function getFunctionName(f) {
-        return f.displayName || f.name || "<function".concat(f.length, ">");
-    }
-    /**
-     * @since 1.0.0
-     */
-    function appendContext(c, key, decoder, actual) {
-        var len = c.length;
-        var r = Array(len + 1);
-        for (var i = 0; i < len; i++) {
-            r[i] = c[i];
-        }
-        r[len] = { key: key, type: decoder, actual: actual };
-        return r;
-    }
-    function pushAll(xs, ys) {
-        var l = ys.length;
-        for (var i = 0; i < l; i++) {
-            xs.push(ys[i]);
-        }
-    }
-    var hasOwnProperty = Object.prototype.hasOwnProperty;
-    function getNameFromProps(props) {
-        return Object.keys(props)
-            .map(function (k) { return "".concat(k, ": ").concat(props[k].name); })
-            .join(', ');
-    }
-    function useIdentity(codecs) {
-        for (var i = 0; i < codecs.length; i++) {
-            if (codecs[i].encode !== identity$1) {
-                return false;
-            }
-        }
-        return true;
-    }
-    function getInterfaceTypeName(props) {
-        return "{ ".concat(getNameFromProps(props), " }");
-    }
-    function getPartialTypeName(inner) {
-        return "Partial<".concat(inner, ">");
-    }
-    function enumerableRecord(keys, domain, codomain, name) {
-        if (name === void 0) { name = "{ [K in ".concat(domain.name, "]: ").concat(codomain.name, " }"); }
-        var len = keys.length;
-        return new DictionaryType(name, function (u) { return UnknownRecord.is(u) && keys.every(function (k) { return codomain.is(u[k]); }); }, function (u, c) {
-            var e = UnknownRecord.validate(u, c);
-            if (isLeft(e)) {
-                return e;
-            }
-            var o = e.right;
-            var a = {};
-            var errors = [];
-            var changed = false;
-            for (var i = 0; i < len; i++) {
-                var k = keys[i];
-                var ok = o[k];
-                var codomainResult = codomain.validate(ok, appendContext(c, k, codomain, ok));
-                if (isLeft(codomainResult)) {
-                    pushAll(errors, codomainResult.left);
-                }
-                else {
-                    var vok = codomainResult.right;
-                    changed = changed || vok !== ok;
-                    a[k] = vok;
-                }
-            }
-            return errors.length > 0 ? failures(errors) : success$1((changed || Object.keys(o).length !== len ? a : o));
-        }, codomain.encode === identity$1
-            ? identity$1
-            : function (a) {
-                var s = {};
-                for (var i = 0; i < len; i++) {
-                    var k = keys[i];
-                    s[k] = codomain.encode(a[k]);
-                }
-                return s;
-            }, domain, codomain);
-    }
-    /**
-     * @internal
-     */
-    function getDomainKeys(domain) {
-        var _a;
-        if (isLiteralC(domain)) {
-            var literal_1 = domain.value;
-            if (string$1.is(literal_1)) {
-                return _a = {}, _a[literal_1] = null, _a;
-            }
-        }
-        else if (isKeyofC(domain)) {
-            return domain.keys;
-        }
-        else if (isUnionC(domain)) {
-            var keys = domain.types.map(function (type) { return getDomainKeys(type); });
-            return keys.some(undefinedType.is) ? undefined : Object.assign.apply(Object, __spreadArray([{}], keys, false));
-        }
-        return undefined;
-    }
-    function nonEnumerableRecord(domain, codomain, name) {
-        if (name === void 0) { name = "{ [K in ".concat(domain.name, "]: ").concat(codomain.name, " }"); }
-        return new DictionaryType(name, function (u) {
-            if (UnknownRecord.is(u)) {
-                return Object.keys(u).every(function (k) { return domain.is(k) && codomain.is(u[k]); });
-            }
-            return isAnyC(codomain) && Array.isArray(u);
-        }, function (u, c) {
-            if (UnknownRecord.is(u)) {
-                var a = {};
-                var errors = [];
-                var keys = Object.keys(u);
-                var len = keys.length;
-                var changed = false;
-                for (var i = 0; i < len; i++) {
-                    var k = keys[i];
-                    var ok = u[k];
-                    var domainResult = domain.validate(k, appendContext(c, k, domain, k));
-                    if (isLeft(domainResult)) {
-                        pushAll(errors, domainResult.left);
-                    }
-                    else {
-                        var vk = domainResult.right;
-                        changed = changed || vk !== k;
-                        k = vk;
-                        var codomainResult = codomain.validate(ok, appendContext(c, k, codomain, ok));
-                        if (isLeft(codomainResult)) {
-                            pushAll(errors, codomainResult.left);
-                        }
-                        else {
-                            var vok = codomainResult.right;
-                            changed = changed || vok !== ok;
-                            a[k] = vok;
-                        }
-                    }
-                }
-                return errors.length > 0 ? failures(errors) : success$1((changed ? a : u));
-            }
-            if (isAnyC(codomain) && Array.isArray(u)) {
-                return success$1(u);
-            }
-            return failure$1(u, c);
-        }, domain.encode === identity$1 && codomain.encode === identity$1
-            ? identity$1
-            : function (a) {
-                var s = {};
-                var keys = Object.keys(a);
-                var len = keys.length;
-                for (var i = 0; i < len; i++) {
-                    var k = keys[i];
-                    s[String(domain.encode(k))] = codomain.encode(a[k]);
-                }
-                return s;
-            }, domain, codomain);
-    }
-    function getUnionName(codecs) {
-        return '(' + codecs.map(function (type) { return type.name; }).join(' | ') + ')';
-    }
-    function getProps(codec) {
-        switch (codec._tag) {
-            case 'RefinementType':
-            case 'ReadonlyType':
-                return getProps(codec.type);
-            case 'InterfaceType':
-            case 'StrictType':
-            case 'PartialType':
-                return codec.props;
-            case 'IntersectionType':
-                return codec.types.reduce(function (props, type) { return Object.assign(props, getProps(type)); }, {});
-        }
-    }
-    function stripKeys(o, props) {
-        var keys = Object.getOwnPropertyNames(o);
-        var shouldStrip = false;
-        var r = {};
-        for (var i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            if (!hasOwnProperty.call(props, key)) {
-                shouldStrip = true;
-            }
-            else {
-                r[key] = o[key];
-            }
-        }
-        return shouldStrip ? r : o;
-    }
-    function getExactTypeName(codec) {
-        if (isTypeC(codec)) {
-            return "{| ".concat(getNameFromProps(codec.props), " |}");
-        }
-        else if (isPartialC(codec)) {
-            return getPartialTypeName("{| ".concat(getNameFromProps(codec.props), " |}"));
-        }
-        return "Exact<".concat(codec.name, ">");
-    }
-    function isNonEmpty(as) {
-        return as.length > 0;
-    }
-    /**
-     * @internal
-     */
-    var emptyTags = {};
-    function intersect(a, b) {
-        var r = [];
-        for (var _i = 0, a_1 = a; _i < a_1.length; _i++) {
-            var v = a_1[_i];
-            if (b.indexOf(v) !== -1) {
-                r.push(v);
-            }
-        }
-        return r;
-    }
-    function mergeTags(a, b) {
-        if (a === emptyTags) {
-            return b;
-        }
-        if (b === emptyTags) {
-            return a;
-        }
-        var r = Object.assign({}, a);
-        for (var k in b) {
-            if (hasOwnProperty.call(a, k)) {
-                var intersection_1 = intersect(a[k], b[k]);
-                if (isNonEmpty(intersection_1)) {
-                    r[k] = intersection_1;
-                }
-                else {
-                    r = emptyTags;
-                    break;
-                }
-            }
-            else {
-                r[k] = b[k];
-            }
-        }
-        return r;
-    }
-    function intersectTags(a, b) {
-        if (a === emptyTags || b === emptyTags) {
-            return emptyTags;
-        }
-        var r = emptyTags;
-        for (var k in a) {
-            if (hasOwnProperty.call(b, k)) {
-                var intersection_2 = intersect(a[k], b[k]);
-                if (intersection_2.length === 0) {
-                    if (r === emptyTags) {
-                        r = {};
-                    }
-                    r[k] = a[k].concat(b[k]);
-                }
-            }
-        }
-        return r;
-    }
-    // tslint:disable-next-line: deprecation
-    function isAnyC(codec) {
-        return codec._tag === 'AnyType';
-    }
-    function isLiteralC(codec) {
-        return codec._tag === 'LiteralType';
-    }
-    function isKeyofC(codec) {
-        return codec._tag === 'KeyofType';
-    }
-    function isTypeC(codec) {
-        return codec._tag === 'InterfaceType';
-    }
-    function isPartialC(codec) {
-        return codec._tag === 'PartialType';
-    }
-    // tslint:disable-next-line: deprecation
-    function isStrictC(codec) {
-        return codec._tag === 'StrictType';
-    }
-    function isExactC(codec) {
-        return codec._tag === 'ExactType';
-    }
-    // tslint:disable-next-line: deprecation
-    function isRefinementC(codec) {
-        return codec._tag === 'RefinementType';
-    }
-    function isIntersectionC(codec) {
-        return codec._tag === 'IntersectionType';
-    }
-    function isUnionC(codec) {
-        return codec._tag === 'UnionType';
-    }
-    function isRecursiveC(codec) {
-        return codec._tag === 'RecursiveType';
-    }
-    var lazyCodecs = [];
-    /**
-     * @internal
-     */
-    function getTags(codec) {
-        if (lazyCodecs.indexOf(codec) !== -1) {
-            return emptyTags;
-        }
-        if (isTypeC(codec) || isStrictC(codec)) {
-            var index = emptyTags;
-            // tslint:disable-next-line: forin
-            for (var k in codec.props) {
-                var prop = codec.props[k];
-                if (isLiteralC(prop)) {
-                    if (index === emptyTags) {
-                        index = {};
-                    }
-                    index[k] = [prop.value];
-                }
-            }
-            return index;
-        }
-        else if (isExactC(codec) || isRefinementC(codec)) {
-            return getTags(codec.type);
-        }
-        else if (isIntersectionC(codec)) {
-            return codec.types.reduce(function (tags, codec) { return mergeTags(tags, getTags(codec)); }, emptyTags);
-        }
-        else if (isUnionC(codec)) {
-            return codec.types.slice(1).reduce(function (tags, codec) { return intersectTags(tags, getTags(codec)); }, getTags(codec.types[0]));
-        }
-        else if (isRecursiveC(codec)) {
-            lazyCodecs.push(codec);
-            var tags = getTags(codec.type);
-            lazyCodecs.pop();
-            return tags;
-        }
-        return emptyTags;
-    }
-    /**
-     * @internal
-     */
-    function getIndex(codecs) {
-        var tags = getTags(codecs[0]);
-        var keys = Object.keys(tags);
-        var len = codecs.length;
-        var _loop_1 = function (k) {
-            var all = tags[k].slice();
-            var index = [tags[k]];
-            for (var i = 1; i < len; i++) {
-                var codec = codecs[i];
-                var ctags = getTags(codec);
-                var values = ctags[k];
-                // tslint:disable-next-line: strict-type-predicates
-                if (values === undefined) {
-                    return "continue-keys";
-                }
-                else {
-                    if (values.some(function (v) { return all.indexOf(v) !== -1; })) {
-                        return "continue-keys";
-                    }
-                    else {
-                        all.push.apply(all, values);
-                        index.push(values);
-                    }
-                }
-            }
-            return { value: [k, index] };
-        };
-        keys: for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
-            var k = keys_1[_i];
-            var state_1 = _loop_1(k);
-            if (typeof state_1 === "object")
-                return state_1.value;
-            switch (state_1) {
-                case "continue-keys": continue keys;
-            }
-        }
-        return undefined;
-    }
-    // -------------------------------------------------------------------------------------
-    // primitives
-    // -------------------------------------------------------------------------------------
-    /**
-     * @since 1.0.0
-     */
-    var NullType = /** @class */ (function (_super) {
-        __extends(NullType, _super);
-        function NullType() {
-            var _this = _super.call(this, 'null', function (u) { return u === null; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'NullType';
-            return _this;
-        }
-        return NullType;
-    }(Type$1));
-    /**
-     * @category primitives
-     * @since 1.0.0
-     */
-    var nullType = new NullType();
-    /**
-     * @since 1.0.0
-     */
-    var UndefinedType = /** @class */ (function (_super) {
-        __extends(UndefinedType, _super);
-        function UndefinedType() {
-            var _this = _super.call(this, 'undefined', function (u) { return u === void 0; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'UndefinedType';
-            return _this;
-        }
-        return UndefinedType;
-    }(Type$1));
-    var undefinedType = new UndefinedType();
-    /**
-     * @since 1.2.0
-     */
-    var VoidType = /** @class */ (function (_super) {
-        __extends(VoidType, _super);
-        function VoidType() {
-            var _this = _super.call(this, 'void', undefinedType.is, undefinedType.validate, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'VoidType';
-            return _this;
-        }
-        return VoidType;
-    }(Type$1));
-    /**
-     * @category primitives
-     * @since 1.2.0
-     */
-    new VoidType();
-    /**
-     * @since 1.5.0
-     */
-    var UnknownType = /** @class */ (function (_super) {
-        __extends(UnknownType, _super);
-        function UnknownType() {
-            var _this = _super.call(this, 'unknown', function (_) { return true; }, success$1, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'UnknownType';
-            return _this;
-        }
-        return UnknownType;
-    }(Type$1));
-    /**
-     * @category primitives
-     * @since 1.5.0
-     */
-    new UnknownType();
-    /**
-     * @since 1.0.0
-     */
-    var StringType = /** @class */ (function (_super) {
-        __extends(StringType, _super);
-        function StringType() {
-            var _this = _super.call(this, 'string', function (u) { return typeof u === 'string'; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'StringType';
-            return _this;
-        }
-        return StringType;
-    }(Type$1));
-    /**
-     * @category primitives
-     * @since 1.0.0
-     */
-    var string$1 = new StringType();
-    /**
-     * @since 1.0.0
-     */
-    var NumberType = /** @class */ (function (_super) {
-        __extends(NumberType, _super);
-        function NumberType() {
-            var _this = _super.call(this, 'number', function (u) { return typeof u === 'number'; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'NumberType';
-            return _this;
-        }
-        return NumberType;
-    }(Type$1));
-    /**
-     * @category primitives
-     * @since 1.0.0
-     */
-    var number$2 = new NumberType();
-    /**
-     * @since 2.1.0
-     */
-    var BigIntType = /** @class */ (function (_super) {
-        __extends(BigIntType, _super);
-        function BigIntType() {
-            var _this = _super.call(this, 'bigint', 
-            // tslint:disable-next-line: valid-typeof
-            function (u) { return typeof u === 'bigint'; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'BigIntType';
-            return _this;
-        }
-        return BigIntType;
-    }(Type$1));
-    /**
-     * @category primitives
-     * @since 2.1.0
-     */
-    new BigIntType();
-    /**
-     * @since 1.0.0
-     */
-    var BooleanType = /** @class */ (function (_super) {
-        __extends(BooleanType, _super);
-        function BooleanType() {
-            var _this = _super.call(this, 'boolean', function (u) { return typeof u === 'boolean'; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'BooleanType';
-            return _this;
-        }
-        return BooleanType;
-    }(Type$1));
-    /**
-     * @category primitives
-     * @since 1.0.0
-     */
-    new BooleanType();
-    /**
-     * @since 1.0.0
-     */
-    var AnyArrayType = /** @class */ (function (_super) {
-        __extends(AnyArrayType, _super);
-        function AnyArrayType() {
-            var _this = _super.call(this, 'UnknownArray', Array.isArray, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'AnyArrayType';
-            return _this;
-        }
-        return AnyArrayType;
-    }(Type$1));
-    /**
-     * @category primitives
-     * @since 1.7.1
-     */
-    var UnknownArray = new AnyArrayType();
-    /**
-     * @since 1.0.0
-     */
-    var AnyDictionaryType = /** @class */ (function (_super) {
-        __extends(AnyDictionaryType, _super);
-        function AnyDictionaryType() {
-            var _this = _super.call(this, 'UnknownRecord', function (u) { return u !== null && typeof u === 'object' && !Array.isArray(u); }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'AnyDictionaryType';
-            return _this;
-        }
-        return AnyDictionaryType;
-    }(Type$1));
-    /**
-     * @category primitives
-     * @since 1.7.1
-     */
-    var UnknownRecord = new AnyDictionaryType();
-    /**
-     * @since 1.0.0
-     */
-    var LiteralType = /** @class */ (function (_super) {
-        __extends(LiteralType, _super);
-        function LiteralType(name, is, validate, encode, value) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.value = value;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'LiteralType';
-            return _this;
-        }
-        return LiteralType;
-    }(Type$1));
-    /**
-     * @category constructors
-     * @since 1.0.0
-     */
-    function literal(value, name) {
-        if (name === void 0) { name = JSON.stringify(value); }
-        var is = function (u) { return u === value; };
-        return new LiteralType(name, is, function (u, c) { return (is(u) ? success$1(value) : failure$1(u, c)); }, identity$1, value);
-    }
-    /**
-     * @since 1.0.0
-     */
-    var KeyofType = /** @class */ (function (_super) {
-        __extends(KeyofType, _super);
-        function KeyofType(name, is, validate, encode, keys) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.keys = keys;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'KeyofType';
-            return _this;
-        }
-        return KeyofType;
-    }(Type$1));
-    /**
-     * @category constructors
-     * @since 1.0.0
-     */
-    function keyof(keys, name) {
-        if (name === void 0) { name = Object.keys(keys)
-            .map(function (k) { return JSON.stringify(k); })
-            .join(' | '); }
-        var is = function (u) { return string$1.is(u) && hasOwnProperty.call(keys, u); };
-        return new KeyofType(name, is, function (u, c) { return (is(u) ? success$1(u) : failure$1(u, c)); }, identity$1, keys);
-    }
-    // -------------------------------------------------------------------------------------
-    // combinators
-    // -------------------------------------------------------------------------------------
-    /**
-     * @since 1.0.0
-     */
-    var RefinementType = /** @class */ (function (_super) {
-        __extends(RefinementType, _super);
-        function RefinementType(name, is, validate, encode, type, predicate) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.type = type;
-            _this.predicate = predicate;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'RefinementType';
-            return _this;
-        }
-        return RefinementType;
-    }(Type$1));
-    /**
-     * @category combinators
-     * @since 1.8.1
-     */
-    function brand(codec, predicate, name) {
-        return refinement(codec, predicate, name);
-    }
-    /**
-     * A branded codec representing an integer
-     *
-     * @category primitives
-     * @since 1.8.1
-     */
-    brand(number$2, function (n) { return Number.isInteger(n); }, 'Int');
-    /**
-     * @since 1.0.0
-     */
-    var RecursiveType = /** @class */ (function (_super) {
-        __extends(RecursiveType, _super);
-        function RecursiveType(name, is, validate, encode, runDefinition) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.runDefinition = runDefinition;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'RecursiveType';
-            return _this;
-        }
-        return RecursiveType;
-    }(Type$1));
-    Object.defineProperty(RecursiveType.prototype, 'type', {
-        get: function () {
-            return this.runDefinition();
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * @since 1.0.0
-     */
-    var ArrayType = /** @class */ (function (_super) {
-        __extends(ArrayType, _super);
-        function ArrayType(name, is, validate, encode, type) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.type = type;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'ArrayType';
-            return _this;
-        }
-        return ArrayType;
-    }(Type$1));
-    /**
-     * @category combinators
-     * @since 1.0.0
-     */
-    function array$1(item, name) {
-        if (name === void 0) { name = "Array<".concat(item.name, ">"); }
-        return new ArrayType(name, function (u) { return UnknownArray.is(u) && u.every(item.is); }, function (u, c) {
-            var e = UnknownArray.validate(u, c);
-            if (isLeft(e)) {
-                return e;
-            }
-            var us = e.right;
-            var len = us.length;
-            var as = us;
-            var errors = [];
-            for (var i = 0; i < len; i++) {
-                var ui = us[i];
-                var result = item.validate(ui, appendContext(c, String(i), item, ui));
-                if (isLeft(result)) {
-                    pushAll(errors, result.left);
-                }
-                else {
-                    var ai = result.right;
-                    if (ai !== ui) {
-                        if (as === us) {
-                            as = us.slice();
-                        }
-                        as[i] = ai;
-                    }
-                }
-            }
-            return errors.length > 0 ? failures(errors) : success$1(as);
-        }, item.encode === identity$1 ? identity$1 : function (a) { return a.map(item.encode); }, item);
-    }
-    /**
-     * @since 1.0.0
-     */
-    var InterfaceType = /** @class */ (function (_super) {
-        __extends(InterfaceType, _super);
-        function InterfaceType(name, is, validate, encode, props) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.props = props;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'InterfaceType';
-            return _this;
-        }
-        return InterfaceType;
-    }(Type$1));
-    /**
-     * @category combinators
-     * @since 1.0.0
-     */
-    function type(props, name) {
-        if (name === void 0) { name = getInterfaceTypeName(props); }
-        var keys = Object.keys(props);
-        var types = keys.map(function (key) { return props[key]; });
-        var len = keys.length;
-        return new InterfaceType(name, function (u) {
-            if (UnknownRecord.is(u)) {
-                for (var i = 0; i < len; i++) {
-                    var k = keys[i];
-                    var uk = u[k];
-                    if ((uk === undefined && !hasOwnProperty.call(u, k)) || !types[i].is(uk)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            return false;
-        }, function (u, c) {
-            var e = UnknownRecord.validate(u, c);
-            if (isLeft(e)) {
-                return e;
-            }
-            var o = e.right;
-            var a = o;
-            var errors = [];
-            for (var i = 0; i < len; i++) {
-                var k = keys[i];
-                var ak = a[k];
-                var type_1 = types[i];
-                var result = type_1.validate(ak, appendContext(c, k, type_1, ak));
-                if (isLeft(result)) {
-                    pushAll(errors, result.left);
-                }
-                else {
-                    var vak = result.right;
-                    if (vak !== ak || (vak === undefined && !hasOwnProperty.call(a, k))) {
-                        /* istanbul ignore next */
-                        if (a === o) {
-                            a = __assign({}, o);
-                        }
-                        a[k] = vak;
-                    }
-                }
-            }
-            return errors.length > 0 ? failures(errors) : success$1(a);
-        }, useIdentity(types)
-            ? identity$1
-            : function (a) {
-                var s = __assign({}, a);
-                for (var i = 0; i < len; i++) {
-                    var k = keys[i];
-                    var encode = types[i].encode;
-                    if (encode !== identity$1) {
-                        s[k] = encode(a[k]);
-                    }
-                }
-                return s;
-            }, props);
-    }
-    /**
-     * @since 1.0.0
-     */
-    /** @class */ ((function (_super) {
-        __extends(PartialType, _super);
-        function PartialType(name, is, validate, encode, props) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.props = props;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'PartialType';
-            return _this;
-        }
-        return PartialType;
-    })(Type$1));
-    /**
-     * @since 1.0.0
-     */
-    var DictionaryType = /** @class */ (function (_super) {
-        __extends(DictionaryType, _super);
-        function DictionaryType(name, is, validate, encode, domain, codomain) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.domain = domain;
-            _this.codomain = codomain;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'DictionaryType';
-            return _this;
-        }
-        return DictionaryType;
-    }(Type$1));
-    /**
-     * @category combinators
-     * @since 1.7.1
-     */
-    function record(domain, codomain, name) {
-        var keys = getDomainKeys(domain);
-        return keys
-            ? enumerableRecord(Object.keys(keys), domain, codomain, name)
-            : nonEnumerableRecord(domain, codomain, name);
-    }
-    /**
-     * @since 1.0.0
-     */
-    var UnionType = /** @class */ (function (_super) {
-        __extends(UnionType, _super);
-        function UnionType(name, is, validate, encode, types) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.types = types;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'UnionType';
-            return _this;
-        }
-        return UnionType;
-    }(Type$1));
-    /**
-     * @category combinators
-     * @since 1.0.0
-     */
-    function union(codecs, name) {
-        if (name === void 0) { name = getUnionName(codecs); }
-        var index = getIndex(codecs);
-        if (index !== undefined && codecs.length > 0) {
-            var tag_1 = index[0], groups_1 = index[1];
-            var len_1 = groups_1.length;
-            var find_1 = function (value) {
-                for (var i = 0; i < len_1; i++) {
-                    if (groups_1[i].indexOf(value) !== -1) {
-                        return i;
-                    }
-                }
-                return undefined;
-            };
-            // tslint:disable-next-line: deprecation
-            return new TaggedUnionType(name, function (u) {
-                if (UnknownRecord.is(u)) {
-                    var i = find_1(u[tag_1]);
-                    return i !== undefined ? codecs[i].is(u) : false;
-                }
-                return false;
-            }, function (u, c) {
-                var e = UnknownRecord.validate(u, c);
-                if (isLeft(e)) {
-                    return e;
-                }
-                var r = e.right;
-                var i = find_1(r[tag_1]);
-                if (i === undefined) {
-                    return failure$1(u, c);
-                }
-                var codec = codecs[i];
-                return codec.validate(r, appendContext(c, String(i), codec, r));
-            }, useIdentity(codecs)
-                ? identity$1
-                : function (a) {
-                    var i = find_1(a[tag_1]);
-                    if (i === undefined) {
-                        // https://github.com/gcanti/io-ts/pull/305
-                        throw new Error("no codec found to encode value in union codec ".concat(name));
-                    }
-                    else {
-                        return codecs[i].encode(a);
-                    }
-                }, codecs, tag_1);
-        }
-        else {
-            return new UnionType(name, function (u) { return codecs.some(function (type) { return type.is(u); }); }, function (u, c) {
-                var errors = [];
-                for (var i = 0; i < codecs.length; i++) {
-                    var codec = codecs[i];
-                    var result = codec.validate(u, appendContext(c, String(i), codec, u));
-                    if (isLeft(result)) {
-                        pushAll(errors, result.left);
-                    }
-                    else {
-                        return success$1(result.right);
-                    }
-                }
-                return failures(errors);
-            }, useIdentity(codecs)
-                ? identity$1
-                : function (a) {
-                    for (var _i = 0, codecs_1 = codecs; _i < codecs_1.length; _i++) {
-                        var codec = codecs_1[_i];
-                        if (codec.is(a)) {
-                            return codec.encode(a);
-                        }
-                    }
-                    // https://github.com/gcanti/io-ts/pull/305
-                    throw new Error("no codec found to encode value in union type ".concat(name));
-                }, codecs);
-        }
-    }
-    /**
-     * @since 1.0.0
-     */
-    /** @class */ ((function (_super) {
-        __extends(IntersectionType, _super);
-        function IntersectionType(name, is, validate, encode, types) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.types = types;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'IntersectionType';
-            return _this;
-        }
-        return IntersectionType;
-    })(Type$1));
-    /**
-     * @since 1.0.0
-     */
-    /** @class */ ((function (_super) {
-        __extends(TupleType, _super);
-        function TupleType(name, is, validate, encode, types) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.types = types;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'TupleType';
-            return _this;
-        }
-        return TupleType;
-    })(Type$1));
-    /**
-     * @since 1.0.0
-     */
-    /** @class */ ((function (_super) {
-        __extends(ReadonlyType, _super);
-        function ReadonlyType(name, is, validate, encode, type) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.type = type;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'ReadonlyType';
-            return _this;
-        }
-        return ReadonlyType;
-    })(Type$1));
-    /**
-     * @since 1.0.0
-     */
-    /** @class */ ((function (_super) {
-        __extends(ReadonlyArrayType, _super);
-        function ReadonlyArrayType(name, is, validate, encode, type) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.type = type;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'ReadonlyArrayType';
-            return _this;
-        }
-        return ReadonlyArrayType;
-    })(Type$1));
-    /**
-     * Strips additional properties, equivalent to `exact(type(props))`.
-     *
-     * @category combinators
-     * @since 1.0.0
-     */
-    var strict = function (props, name) { return exact(type(props), name); };
-    /**
-     * @since 1.1.0
-     */
-    var ExactType = /** @class */ (function (_super) {
-        __extends(ExactType, _super);
-        function ExactType(name, is, validate, encode, type) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.type = type;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'ExactType';
-            return _this;
-        }
-        return ExactType;
-    }(Type$1));
-    /**
-     * Strips additional properties.
-     *
-     * @category combinators
-     * @since 1.1.0
-     */
-    function exact(codec, name) {
-        if (name === void 0) { name = getExactTypeName(codec); }
-        var props = getProps(codec);
-        return new ExactType(name, codec.is, function (u, c) {
-            var e = UnknownRecord.validate(u, c);
-            if (isLeft(e)) {
-                return e;
-            }
-            var ce = codec.validate(u, c);
-            if (isLeft(ce)) {
-                return ce;
-            }
-            return right(stripKeys(ce.right, props));
-        }, function (a) { return codec.encode(stripKeys(a, props)); }, codec);
-    }
-    /**
-     * @since 1.0.0
-     */
-    var FunctionType = /** @class */ (function (_super) {
-        __extends(FunctionType, _super);
-        function FunctionType() {
-            var _this = _super.call(this, 'Function', 
-            // tslint:disable-next-line:strict-type-predicates
-            function (u) { return typeof u === 'function'; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'FunctionType';
-            return _this;
-        }
-        return FunctionType;
-    }(Type$1));
-    /**
-     * @category primitives
-     * @since 1.0.0
-     */
-    new FunctionType();
-    /**
-     * @since 1.0.0
-     */
-    var NeverType = /** @class */ (function (_super) {
-        __extends(NeverType, _super);
-        function NeverType() {
-            var _this = _super.call(this, 'never', function (_) { return false; }, function (u, c) { return failure$1(u, c); }, 
-            /* istanbul ignore next */
-            function () {
-                throw new Error('cannot encode never');
-            }) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'NeverType';
-            return _this;
-        }
-        return NeverType;
-    }(Type$1));
-    /**
-     * @category primitives
-     * @since 1.0.0
-     */
-    new NeverType();
-    /**
-     * @since 1.0.0
-     */
-    var AnyType = /** @class */ (function (_super) {
-        __extends(AnyType, _super);
-        function AnyType() {
-            var _this = _super.call(this, 'any', function (_) { return true; }, success$1, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'AnyType';
-            return _this;
-        }
-        return AnyType;
-    }(Type$1));
-    /**
-     * @category primitives
-     * @since 1.0.0
-     */
-    new AnyType();
-    function refinement(codec, predicate, name) {
-        if (name === void 0) { name = "(".concat(codec.name, " | ").concat(getFunctionName(predicate), ")"); }
-        return new RefinementType(name, function (u) { return codec.is(u) && predicate(u); }, function (i, c) {
-            var e = codec.validate(i, c);
-            if (isLeft(e)) {
-                return e;
-            }
-            var a = e.right;
-            return predicate(a) ? success$1(a) : failure$1(a, c);
-        }, codec.encode, codec, predicate);
-    }
-    /**
-     * @category primitives
-     * @since 1.0.0
-     */
-    refinement(number$2, Number.isInteger, 'Integer');
-    // -------------------------------------------------------------------------------------
-    // deprecated
-    // -------------------------------------------------------------------------------------
-    /**
-     * @since 1.3.0
-     * @deprecated
-     */
-    var TaggedUnionType = /** @class */ (function (_super) {
-        __extends(TaggedUnionType, _super);
-        function TaggedUnionType(name, 
-        // tslint:disable-next-line: deprecation
-        is, 
-        // tslint:disable-next-line: deprecation
-        validate, 
-        // tslint:disable-next-line: deprecation
-        encode, codecs, tag) {
-            var _this = _super.call(this, name, is, validate, encode, codecs) /* istanbul ignore next */ // <= workaround for https://github.com/Microsoft/TypeScript/issues/13455
-             || this;
-            _this.tag = tag;
-            return _this;
-        }
-        return TaggedUnionType;
-    }(UnionType));
-    /**
-     * @since 1.0.0
-     * @deprecated
-     */
-    var ObjectType = /** @class */ (function (_super) {
-        __extends(ObjectType, _super);
-        function ObjectType() {
-            var _this = _super.call(this, 'object', function (u) { return u !== null && typeof u === 'object'; }, function (u, c) { return (_this.is(u) ? success$1(u) : failure$1(u, c)); }, identity$1) || this;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'ObjectType';
-            return _this;
-        }
-        return ObjectType;
-    }(Type$1));
-    /**
-     * Use `UnknownRecord` instead.
-     *
-     * @category primitives
-     * @since 1.0.0
-     * @deprecated
-     */
-    // tslint:disable-next-line: deprecation
-    new ObjectType();
-    /**
-     * @since 1.0.0
-     * @deprecated
-     */
-    /** @class */ ((function (_super) {
-        __extends(StrictType, _super);
-        function StrictType(name, 
-        // tslint:disable-next-line: deprecation
-        is, 
-        // tslint:disable-next-line: deprecation
-        validate, 
-        // tslint:disable-next-line: deprecation
-        encode, props) {
-            var _this = _super.call(this, name, is, validate, encode) || this;
-            _this.props = props;
-            /**
-             * @since 1.0.0
-             */
-            _this._tag = 'StrictType';
-            return _this;
-        }
-        return StrictType;
-    })(Type$1));
-
-    var None = strict({
-        _tag: literal('None')
-    }, 'None');
-    var someLiteral = literal('Some');
-    /**
-     * @since 0.5.0
-     */
-    function option(codec, name) {
-        if (name === void 0) { name = "Option<" + codec.name + ">"; }
-        return union([
-            None,
-            strict({
-                _tag: someLiteral,
-                value: codec
-            }, "Some<" + codec.name + ">")
-        ], name);
-    }
-
-    const RuntimeNodeTypeNames = keyof({
-        "Prompt": null,
-        "Process": null,
-        "Conditional": null,
-        "Command": null
-    });
-    const RuntimeVerbTypeNames = keyof({
-        "POST": null,
-        "PUT": null,
-        "PATCH": null,
-        "DELETE": null,
-        "GET": null,
-    });
-    const RuntimeMongoId = type({
-        $oid: string$1,
-    });
-    const RuntimePrompt = type({
-        Prompt: type({
-            prompt: string$1,
-            system: string$1,
-        }),
-    });
-    const RuntimeProcess = type({
-        Process: type({
-            graph: string$1,
-            initial_variables: array$1(string$1),
-            topological_order: array$1(string$1),
-        }),
-    });
-    const RuntimeConditional = type({
-        Conditional: type({
-            system_variables: record(string$1, string$1),
-            statement: string$1,
-            options: record(string$1, string$1), // assuming ObjectId is replaced with string
-        }),
-    });
-    const RuntimeCommand = type({
-        Command: type({
-            command: string$1,
-        }),
-    });
-    const RuntimeNodeType = union([RuntimePrompt, RuntimeProcess, RuntimeConditional, RuntimeCommand]);
-    const RuntimeNode = type({
-        Node: type({
-            _id: RuntimeMongoId,
-            name: string$1,
-            type_name: RuntimeNodeTypeNames,
-            node_content: RuntimeNodeType,
-            description: string$1,
-            input_variables: array$1(string$1),
-            output_variables: array$1(string$1),
-        })
-    });
-    type({
-        topological_order: array$1(string$1),
-        current_node: RuntimeNode,
-        variables: record(string$1, string$1),
-        execution_id: string$1,
-        return_execution_id: option(string$1),
-    });
-    const RuntimeAuthenticationMessage = type({
-        AuthenticationMessage: type({
-            client_email: string$1,
-            client_password: string$1
-        }),
-    });
-    const RuntimeUserSettings = type({
-        UserSettings: type({
-            openai_api_key: string$1,
-            mongo_db_uri: string$1,
-        }),
-    });
-    type({
-        verb: RuntimeVerbTypeNames,
-        object: union([RuntimeNode, RuntimeAuthenticationMessage, RuntimeUserSettings]),
-    });
-    const RuntimeCommandResponse = type({
-        error: string$1,
-        output: string$1,
-    });
-    const RuntimePromptResponse = type({
-        response: string$1,
-    });
-    const RuntimeConditionalResponse = type({
-        chosen_option: string$1,
-    });
-    const RuntimeNodeExecutionResponse = union([
-        type({ Prompt: RuntimePromptResponse }),
-        type({ Command: RuntimeCommandResponse }),
-        type({ Conditional: RuntimeConditionalResponse }),
-    ]);
-    const RuntimeExecutionResponse = type({
-        execution_id: string$1,
-        container_execution_id: union([string$1, nullType]),
-        current_node_id: string$1,
-        current_node_type: RuntimeNodeTypeNames,
-        response: RuntimeNodeExecutionResponse,
-    });
-    const RuntimeResponseObject = union([
-        RuntimeNode,
-        literal("InitialMessage"),
-        literal("UserSettings"),
-        type({ ExecutionContext: RuntimeExecutionResponse }),
-    ]);
-
-    /* src/components/NodeInfo.svelte generated by Svelte v3.59.1 */
-
-    const { console: console_1$1 } = globals;
-    const file$4 = "src/components/NodeInfo.svelte";
-
-    // (34:0) {:else}
-    function create_else_block(ctx) {
-    	let p;
-
-    	const block = {
-    		c: function create() {
-    			p = element$1("p");
-    			p.textContent = "No node selected";
-    			add_location(p, file$4, 34, 2, 1150);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, p, anchor);
-    		},
-    		p: noop$2,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(p);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_else_block.name,
-    		type: "else",
-    		source: "(34:0) {:else}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (22:0) {#if has_selected_node && selected_node != null}
-    function create_if_block$3(ctx) {
-    	let t0;
-    	let t1_value = /*selected_node*/ ctx[1].Node.name + "";
-    	let t1;
-    	let t2;
-    	let br;
-    	let t3;
-    	let t4_value = /*selected_node*/ ctx[1].Node.description + "";
-    	let t4;
-
-    	const block = {
-    		c: function create() {
-    			t0 = text("Name: ");
-    			t1 = text(t1_value);
-    			t2 = space();
-    			br = element$1("br");
-    			t3 = text("\n  Description: ");
-    			t4 = text(t4_value);
-    			add_location(br, file$4, 22, 34, 765);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, t0, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, t2, anchor);
-    			insert_dev(target, br, anchor);
-    			insert_dev(target, t3, anchor);
-    			insert_dev(target, t4, anchor);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*selected_node*/ 2 && t1_value !== (t1_value = /*selected_node*/ ctx[1].Node.name + "")) set_data_dev(t1, t1_value);
-    			if (dirty & /*selected_node*/ 2 && t4_value !== (t4_value = /*selected_node*/ ctx[1].Node.description + "")) set_data_dev(t4, t4_value);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(t0);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(t2);
-    			if (detaching) detach_dev(br);
-    			if (detaching) detach_dev(t3);
-    			if (detaching) detach_dev(t4);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block$3.name,
-    		type: "if",
-    		source: "(22:0) {#if has_selected_node && selected_node != null}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment$4(ctx) {
-    	let if_block_anchor;
-
-    	function select_block_type(ctx, dirty) {
-    		if (/*has_selected_node*/ ctx[0] && /*selected_node*/ ctx[1] != null) return create_if_block$3;
-    		return create_else_block;
-    	}
-
-    	let current_block_type = select_block_type(ctx);
-    	let if_block = current_block_type(ctx);
-
-    	const block = {
-    		c: function create() {
-    			if_block.c();
-    			if_block_anchor = empty();
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			if_block.m(target, anchor);
-    			insert_dev(target, if_block_anchor, anchor);
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
-    				if_block.p(ctx, dirty);
-    			} else {
-    				if_block.d(1);
-    				if_block = current_block_type(ctx);
-
-    				if (if_block) {
-    					if_block.c();
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
-    				}
-    			}
-    		},
-    		i: noop$2,
-    		o: noop$2,
-    		d: function destroy(detaching) {
-    			if_block.d(detaching);
-    			if (detaching) detach_dev(if_block_anchor);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$4.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$4($$self, $$props, $$invalidate) {
-    	let $systemStateStore;
-    	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(2, $systemStateStore = $$value));
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('NodeInfo', slots, []);
-    	let selected_node;
-    	let has_selected_node = false;
-
-    	onMount(() => {
-    		console.log("on mount: Node Info");
-    		$$invalidate(0, has_selected_node = $systemStateStore.selectedNode != null);
-    		console.log("has_selected_node: ", has_selected_node);
-    	});
-
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<NodeInfo> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$capture_state = () => ({
-    		systemStateStore,
-    		onMount,
-    		selected_node,
-    		has_selected_node,
-    		$systemStateStore
-    	});
-
-    	$$self.$inject_state = $$props => {
-    		if ('selected_node' in $$props) $$invalidate(1, selected_node = $$props.selected_node);
-    		if ('has_selected_node' in $$props) $$invalidate(0, has_selected_node = $$props.has_selected_node);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$systemStateStore, has_selected_node*/ 5) {
-    			{
-    				console.log("Node Info: selectedNode: ", $systemStateStore.selectedNode);
-    				$$invalidate(0, has_selected_node = $systemStateStore.selectedNode != null);
-
-    				if (has_selected_node) {
-    					$$invalidate(1, selected_node = $systemStateStore.selectedNode);
-    				}
-    			}
-    		}
-    	};
-
-    	return [has_selected_node, selected_node, $systemStateStore];
-    }
-
-    class NodeInfo extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "NodeInfo",
-    			options,
-    			id: create_fragment$4.name
-    		});
-    	}
     }
 
     /* src/components/Sidebar.svelte generated by Svelte v3.59.1 */
@@ -12469,7 +12123,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (66:6) {#if section.open}
+    // (59:6) {#if section.open}
     function create_if_block$2(ctx) {
     	let div;
     	let switch_instance;
@@ -12491,7 +12145,7 @@ var app = (function () {
     			div = element$1("div");
     			if (switch_instance) create_component(switch_instance.$$.fragment);
     			attr_dev(div, "class", "section-content");
-    			add_location(div, file$3, 66, 8, 1845);
+    			add_location(div, file$3, 59, 8, 1598);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -12551,20 +12205,21 @@ var app = (function () {
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(66:6) {#if section.open}",
+    		source: "(59:6) {#if section.open}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (53:2) {#each sections as section (section.header)}
+    // (46:2) {#each sections as section (section.header)}
     function create_each_block(key_1, ctx) {
     	let div1;
     	let div0;
     	let t0_value = /*section*/ ctx[5].header + "";
     	let t0;
     	let t1;
+    	let t2;
     	let each_value = /*each_value*/ ctx[6];
     	let section_index = /*section_index*/ ctx[7];
     	let current;
@@ -12592,10 +12247,11 @@ var app = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			if (if_block) if_block.c();
+    			t2 = space();
     			attr_dev(div0, "class", "section-header");
-    			add_location(div0, file$3, 54, 6, 1551);
+    			add_location(div0, file$3, 47, 6, 1304);
     			attr_dev(div1, "class", "section");
-    			add_location(div1, file$3, 53, 4, 1499);
+    			add_location(div1, file$3, 46, 4, 1252);
     			this.first = div1;
     		},
     		m: function mount(target, anchor) {
@@ -12604,6 +12260,7 @@ var app = (function () {
     			append_dev(div0, t0);
     			append_dev(div1, t1);
     			if (if_block) if_block.m(div1, null);
+    			append_dev(div1, t2);
     			assign_div1();
     			current = true;
 
@@ -12631,7 +12288,7 @@ var app = (function () {
     					if_block = create_if_block$2(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
-    					if_block.m(div1, null);
+    					if_block.m(div1, t2);
     				}
     			} else if (if_block) {
     				group_outros();
@@ -12672,7 +12329,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(53:2) {#each sections as section (section.header)}",
+    		source: "(46:2) {#each sections as section (section.header)}",
     		ctx
     	});
 
@@ -12680,12 +12337,9 @@ var app = (function () {
     }
 
     function create_fragment$3(ctx) {
-    	let div1;
+    	let div;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
-    	let t;
-    	let div0;
-    	let nodeinfo;
     	let current;
     	let each_value = /*sections*/ ctx[0];
     	validate_each_argument(each_value);
@@ -12698,39 +12352,29 @@ var app = (function () {
     		each_1_lookup.set(key, each_blocks[i] = create_each_block(key, child_ctx));
     	}
 
-    	nodeinfo = new NodeInfo({ $$inline: true });
-
     	const block = {
     		c: function create() {
-    			div1 = element$1("div");
+    			div = element$1("div");
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			t = space();
-    			div0 = element$1("div");
-    			create_component(nodeinfo.$$.fragment);
-    			attr_dev(div0, "class", "section");
-    			add_location(div0, file$3, 76, 2, 2088);
-    			attr_dev(div1, "class", "sidebar");
-    			add_location(div1, file$3, 51, 0, 1426);
+    			attr_dev(div, "class", "sidebar");
+    			add_location(div, file$3, 44, 0, 1179);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div1, anchor);
+    			insert_dev(target, div, anchor);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				if (each_blocks[i]) {
-    					each_blocks[i].m(div1, null);
+    					each_blocks[i].m(div, null);
     				}
     			}
 
-    			append_dev(div1, t);
-    			append_dev(div1, div0);
-    			mount_component(nodeinfo, div0, null);
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
@@ -12739,7 +12383,7 @@ var app = (function () {
     				validate_each_argument(each_value);
     				group_outros();
     				validate_each_keys(ctx, each_value, get_each_context, get_key);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div1, outro_and_destroy_block, create_each_block, t, get_each_context);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block, null, get_each_context);
     				check_outros();
     			}
     		},
@@ -12750,7 +12394,6 @@ var app = (function () {
     				transition_in(each_blocks[i]);
     			}
 
-    			transition_in(nodeinfo.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
@@ -12758,17 +12401,14 @@ var app = (function () {
     				transition_out(each_blocks[i]);
     			}
 
-    			transition_out(nodeinfo.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div1);
+    			if (detaching) detach_dev(div);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].d();
     			}
-
-    			destroy_component(nodeinfo);
     		}
     	};
 
@@ -12789,28 +12429,24 @@ var app = (function () {
 
     	let sections = [
     		{
-    			header: "Explanation",
+    			header: "Background Information",
     			component: BackgroundInfo,
-    			open: false,
-    			ref: null
+    			open: false
     		},
     		{
-    			header: "Create Process (graph: edges and nodes)",
+    			header: "Create a New Node",
+    			component: NewNode,
+    			open: false
+    		},
+    		{
+    			header: "Create a New Process",
     			component: CreateProcess,
-    			open: false,
-    			ref: null
-    		},
-    		{
-    			header: "Create Action (node)",
-    			component: AddNodeButton,
-    			open: false,
-    			ref: null
+    			open: false
     		},
     		{
     			header: "Edit Action or Process",
     			component: InteractWithActionsAndProcesses,
-    			open: false,
-    			ref: null
+    			open: false
     		}
     	];
 
@@ -12818,11 +12454,6 @@ var app = (function () {
     		$$invalidate(0, sections = sections.map(section => {
     			if (section === clickedSection) {
     				let open = !section.open;
-
-    				if (open && section.ref) {
-    					section.ref.scrollIntoView({ behavior: "smooth" });
-    				}
-
     				return { ...section, open }; // just invert the `open` property of the clicked section
     			} else {
     				return section; // don't modify other sections
@@ -12852,13 +12483,12 @@ var app = (function () {
     	}
 
     	$$self.$capture_state = () => ({
-    		AddNodeButton,
     		CreateProcess,
     		BackgroundInfo,
     		InteractWithActionsAndProcesses,
+    		NewNode,
     		blur,
     		fade,
-    		NodeInfo,
     		sections,
     		toggleSection
     	});
@@ -46548,7 +46178,7 @@ var app = (function () {
     	    isArray = isArray_1,
     	    isArrayLikeObject = requireIsArrayLikeObject(),
     	    isBuffer = requireIsBuffer(),
-    	    isFunction = isFunction_1,
+    	    isFunction = requireIsFunction(),
     	    isObject = isObject_1,
     	    isPlainObject = requireIsPlainObject(),
     	    isTypedArray = requireIsTypedArray(),
@@ -50958,68 +50588,10 @@ var app = (function () {
     var cytoscapeDagreExports = cytoscapeDagre.exports;
     var dagre = /*@__PURE__*/getDefaultExportFromCjs(cytoscapeDagreExports);
 
-    var GraphStyles = [
-        {
-            selector: "node",
-            style: {
-                "width": "50",
-                "height": "50",
-                "font-size": "18",
-                "font-weight": "bold",
-                "content": "data(label)",
-                "text-valign": "center",
-                "text-wrap": "wrap",
-                "text-max-width": "140",
-                "background-color": "gold",
-                "border-color": "orange",
-                "border-width": "3",
-                "color": "darkred"
-            }
-        },
-        {
-            selector: "node:selected",
-            style: {
-                "background-color": "darkred",
-                color: "black",
-                "border-color": "darkred",
-                "line-color": "#0e76ba",
-                "target-arrow-color": "#0e76ba"
-            }
-        },
-        {
-            selector: "edge",
-            style: {
-                "curve-style": "bezier",
-                "color": "darkred",
-                "text-background-color": "#ffffff",
-                "text-background-opacity": "1",
-                "text-background-padding": "3",
-                "width": "3",
-                "target-arrow-shape": "triangle",
-                "line-color": "darkred",
-                "target-arrow-color": "darkred",
-                "font-weight": "bold"
-            }
-        },
-        {
-            selector: "edge[label]",
-            style: {
-                "content": "data(label)",
-            }
-        },
-        {
-            selector: "edge.label",
-            style: {
-                "line-color": "orange",
-                "target-arrow-color": "orange"
-            }
-        }
-    ];
-
     /* src/components/GraphComponent_graphlib.svelte generated by Svelte v3.59.1 */
     const file$2 = "src/components/GraphComponent_graphlib.svelte";
 
-    // (104:2) {#if cyInstance}
+    // (148:2) {#if cyInstance}
     function create_if_block$1(ctx) {
     	let current;
     	const default_slot_template = /*#slots*/ ctx[3].default;
@@ -51070,7 +50642,7 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(104:2) {#if cyInstance}",
+    		source: "(148:2) {#if cyInstance}",
     		ctx
     	});
 
@@ -51087,7 +50659,7 @@ var app = (function () {
     			div = element$1("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "graph");
-    			add_location(div, file$2, 102, 0, 3757);
+    			add_location(div, file$2, 146, 0, 6359);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -51189,88 +50761,151 @@ var app = (function () {
     			});
     	};
 
-    	setContext("graphSharedState", { getCyInstance: () => cyInstance });
-    	let refElement = null;
-    	let cyInstance = null;
-    	let g = new graphlib$1.Graph();
-    	let id_map = new Map();
-
-    	systemStateStore.subscribe(new_value => {
-    		let value = new_value.graphState;
-
-    		if (value !== null && value.lastAction === "addNode" && value.actedOn != null && Array.isArray(value.actedOn)) {
-    			// check if the node is already in the graph
-    			if (g.hasNode(value.actedOn[0])) {
-    				return;
-    			}
-
-    			id_map = id_map.set(value.actedOn[0], value.actedOn[1]);
-    			g.setNode(value.actedOn[0], value.actedOn[1]);
-
-    			if (cyInstance) {
-    				cyInstance.add({
-    					data: {
-    						id: value.actedOn[0],
-    						label: value.actedOn[1]
-    					}
-    				});
-
-    				cyInstance.layout({ name: "dagre" }).run();
-    			}
-    		} else if (value !== null && value.lastAction === "addEdge" && value.actedOn != null && !Array.isArray(value.actedOn)) {
-    			// check if the edge is already in the graph
-    			if (g.hasEdge(value.actedOn.v, value.actedOn.w)) {
-    				return;
-    			}
-
-    			g.setEdge(value.actedOn.v, value.actedOn.w, value.actedOn);
-
-    			if (cyInstance) {
-    				cyInstance.add({
-    					data: {
-    						source: value.actedOn.v,
-    						target: value.actedOn.w
-    					}
-    				});
-    			}
-    		} else if (value.lastAction === "removeEdge" && value.actedOn != null && !Array.isArray(value.actedOn)) {
-    			g.removeEdge(value.actedOn.v, value.actedOn.w);
-
-    			if (cyInstance) {
-    				cyInstance.remove(cyInstance.$id(value.actedOn.v).edgesTo(cyInstance.$id(value.actedOn.w)));
-    			}
-    		} else if (value.lastAction === "removeNode" && value.actedOn != null && Array.isArray(value.actedOn)) {
-    			g.removeNode(value.actedOn[0]);
-
-    			if (cyInstance) {
-    				cyInstance.remove(cyInstance.$id(value.actedOn[0]));
-    			}
-    		} else if (value.lastAction === "resetGraph") {
-    			g = new graphlib$1.Graph(); // reset graph
-
-    			if (cyInstance) {
-    				cyInstance.elements().remove();
-    			}
-    		}
-    	});
-
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
     		cytoscape$2.use(dagre);
 
     		$$invalidate(1, cyInstance = cytoscape$2({
     			container: refElement,
-    			style: GraphStyles
+    			style: [
+    				{
+    					selector: "node",
+    					style: {
+    						width: "label",
+    						height: "label",
+    						"font-size": "14px",
+    						"font-weight": "bold",
+    						content: "data(label)",
+    						"text-valign": "center",
+    						"text-wrap": "wrap",
+    						"text-max-width": "100px",
+    						"background-color": "#fff",
+    						"border-color": "#000",
+    						"border-width": "1px",
+    						"border-style": "solid"
+    					}
+    				},
+    				{
+    					selector: "edge",
+    					style: {
+    						"curve-style": "bezier",
+    						"target-arrow-shape": "triangle",
+    						"line-color": "#000",
+    						"target-arrow-color": "#000",
+    						"width": "2px"
+    					}
+    				}
+    			]
     		}));
 
-    		cyInstance.on("select", "node", evt => {
+    		cyInstance.on("select", "node", evt => __awaiter(void 0, void 0, void 0, function* () {
     			const selectedNode = evt.target.data();
-    			selectNode(selectedNode.id);
-    		});
+    			yield selectNode(selectedNode.id);
+    		}));
 
-    		cyInstance.on("select", "edge", event => {
-    			selectEdge(event.target.data().source, event.target.data().target);
-    		});
+    		cyInstance.on("select", "edge", event => __awaiter(void 0, void 0, void 0, function* () {
+    			let edge = new system_types_pb_js.Edge();
+    			edge.setSource(event.target.data().source);
+    			edge.setTarget(event.target.data().target);
+    			yield selectEdge(edge);
+    		}));
     	}));
+
+    	setContext("graphSharedState", { getCyInstance: () => cyInstance });
+    	let refElement = null;
+    	let cyInstance = null;
+    	let g = new graphlib.Graph();
+
+    	systemStateStore.subscribe(system_state => {
+    		var _a, _b, _c, _d;
+    		let graph_state = system_state.getGraphState();
+
+    		let action_list = graph_state === null || graph_state === void 0
+    		? void 0
+    		: graph_state.getActionHistoryList();
+
+    		if (cyInstance) {
+    			if (action_list != undefined && action_list.length > 0) {
+    				let last_action = action_list[action_list.length - 1];
+    				let action_type = last_action.getAction();
+
+    				// Node/edge agnostic actions:
+    				switch (action_type) {
+    					case system_types_pb_js.GraphAction.Action.RESET:
+    						cyInstance.remove(cyInstance.elements());
+    						break;
+    					case system_types_pb_js.GraphAction.Action.NONE:
+    						// Do the thing
+    						break;
+    					case system_types_pb_js.GraphAction.Action.SELECT:
+    						// Do the thing
+    						break;
+    					case system_types_pb_js.GraphAction.Action.DESELECT:
+    						// Do the thing
+    						break;
+    				}
+
+    				if (last_action.hasEdge()) {
+    					let edge = last_action.getEdge();
+
+    					let source = (_a = edge === null || edge === void 0
+    					? void 0
+    					: edge.getSource()) === null || _a === void 0
+    					? void 0
+    					: _a.getId();
+
+    					let target = (_b = edge === null || edge === void 0
+    					? void 0
+    					: edge.getTarget()) === null || _b === void 0
+    					? void 0
+    					: _b.getId();
+
+    					if (source != undefined && target != undefined) {
+    						switch (action_type) {
+    							case system_types_pb_js.GraphAction.Action.ADD:
+    								g.setEdge({ v: source, w: target });
+    								cyInstance.add({ data: { source, target } });
+    								break;
+    							case system_types_pb_js.GraphAction.Action.REMOVE:
+    								g.removeEdge(source, target);
+    								cyInstance.remove(cyInstance.$id(source).edgesTo(cyInstance.$id(target)));
+    								break;
+    						}
+    					}
+    				}
+
+    				if (last_action.hasNode()) {
+    					let node = last_action.getNode();
+
+    					let id = (_c = node === null || node === void 0
+    					? void 0
+    					: node.getNodeInfo()) === null || _c === void 0
+    					? void 0
+    					: _c.getId();
+
+    					let name = (_d = node === null || node === void 0
+    					? void 0
+    					: node.getNodeInfo()) === null || _d === void 0
+    					? void 0
+    					: _d.getName();
+
+    					if (name != undefined && id != undefined) {
+    						switch (action_type) {
+    							case system_types_pb_js.GraphAction.Action.ADD:
+    								g.setNode(id, name);
+    								cyInstance.add({ data: { id, label: name } });
+    								break;
+    							case system_types_pb_js.GraphAction.Action.REMOVE:
+    								g.removeNode(name);
+    								cyInstance.remove(id);
+    								break;
+    						}
+    					}
+    				}
+    			}
+    		} else {
+    			alert("cytoscape not initialized");
+    		}
+    	});
 
     	const writable_props = [];
 
@@ -51295,15 +50930,15 @@ var app = (function () {
     		setContext,
     		cytoscape: cytoscape$2,
     		dagre,
-    		GraphStyles,
     		systemStateStore,
     		selectNode,
     		selectEdge,
+    		Edge: system_types_pb_js.Edge,
+    		GraphAction: system_types_pb_js.GraphAction,
     		graphlib: graphlib$1,
     		refElement,
     		cyInstance,
-    		g,
-    		id_map
+    		g
     	});
 
     	$$self.$inject_state = $$props => {
@@ -51311,7 +50946,6 @@ var app = (function () {
     		if ('refElement' in $$props) $$invalidate(0, refElement = $$props.refElement);
     		if ('cyInstance' in $$props) $$invalidate(1, cyInstance = $$props.cyInstance);
     		if ('g' in $$props) g = $$props.g;
-    		if ('id_map' in $$props) id_map = $$props.id_map;
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -51365,4388 +50999,10 @@ var app = (function () {
     var css_248z = "* {\n  box-sizing: border-box;\n  font-family: 'Roboto', sans-serif;\n  color: #2c3e50;\n  /* Dark Blue */\n}\n\n.section-header {\n  cursor: pointer;\n  transition: background-color 0.2s ease;\n  padding: 10px;\n  border-radius: 4px;\n}\n\n.section-header:hover {\n  background-color: #f0f0f0;\n}\n\n.section-header::after {\n  content: \"▼\";\n  /* You can replace with any symbol or icon font you like */\n  margin-left: 5px;\n}\n\ntextarea,\ninput {\n  resize: vertical;\n  width: 100%;\n  height: 100%;\n  white-space: pre-wrap;\n  border-radius: 4px;\n  border: 2px solid #27ae60;\n  /* Green */\n  background-color: #ecf0f1;\n  /* Light Gray */\n}\n\nbutton.selected {\n  background-color: #2ecc71;\n  /* Green */\n  color: #ecf0f1;\n  /* Light Gray */\n}\n\n.add-button {\n  background-color: #16a085;\n  /* Green */\n  margin-top: 20px;\n  margin-bottom: 10px;\n}\n\n.remove-button {\n  background-color: #c0392b;\n  /* Dark Red */\n}\n\n.section-content {\n  background-color: #ecf0f1;\n  /* Light Gray */\n}\n\n\nform {\n  display: flex;\n  flex-direction: column;\n  gap: 1em;\n}\n\n/* Mobile Styles */\n@media (max-width: 800px) {\n  .app-container {\n    display: flex;\n    flex-direction: column;\n    height: 100vh;\n  }\n\n  .graph {\n    width: 100%;\n    /* height should take up rest of screen */\n    height: 60vh;\n    order: 2;\n  }\n\n  .sidebar {\n    width: 100%;\n    height: 40vh;\n    min-height: 200px;\n    order: 1;\n    padding: 2vw;\n    overflow-y: auto;\n    outline: 2px solid #333;\n    /* Outline added */\n  }\n\n  .section {\n    margin-bottom: 2vh;\n    border-radius: 1vh;\n    background-color: #9b59b6;\n    /* Purple */\n  }\n\n  .section-header {\n    padding: 1vh;\n    background-color: #f1c40f;\n    /* Yellow */\n    border-radius: 1vh;\n  }\n}\n\n\n\n/* Larger screen styles */\n@media (min-width: 801px) {\n\n  /* Styles specific to components */\n  .app-container {\n    display: grid;\n    grid-template-columns: 25vw 1fr;\n  }\n\n\n  /* ./components/GraphComponent_graphlib.svelte */\n  .graph {\n    grid-column: 2;\n    height: 100%;\n  }\n\n  /* ./components/Sidebar.svelte */\n  .sidebar {\n    grid-column: 1;\n    position: sticky;\n    top: 0;\n    height: 100vh;\n    background-color: #2ecc71;\n    /* Green */\n    overflow-y: auto;\n    box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.541);\n    border-radius: 12px;\n  }\n\n}";
     styleInject(css_248z);
 
-    var PathReporter = {};
-
-    var lib = {};
-
-    var Either = {};
-
-    var Applicative = {};
-
-    var Apply = {};
-
-    var _function = {};
-
-    (function (exports) {
-    	var __spreadArray = (commonjsGlobal && commonjsGlobal.__spreadArray) || function (to, from, pack) {
-    	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-    	        if (ar || !(i in from)) {
-    	            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-    	            ar[i] = from[i];
-    	        }
-    	    }
-    	    return to.concat(ar || Array.prototype.slice.call(from));
-    	};
-    	Object.defineProperty(exports, "__esModule", { value: true });
-    	exports.dual = exports.getEndomorphismMonoid = exports.not = exports.SK = exports.hole = exports.pipe = exports.untupled = exports.tupled = exports.absurd = exports.decrement = exports.increment = exports.tuple = exports.flow = exports.flip = exports.constVoid = exports.constUndefined = exports.constNull = exports.constFalse = exports.constTrue = exports.constant = exports.unsafeCoerce = exports.identity = exports.apply = exports.getRing = exports.getSemiring = exports.getMonoid = exports.getSemigroup = exports.getBooleanAlgebra = void 0;
-    	// -------------------------------------------------------------------------------------
-    	// instances
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	var getBooleanAlgebra = function (B) {
-    	    return function () { return ({
-    	        meet: function (x, y) { return function (a) { return B.meet(x(a), y(a)); }; },
-    	        join: function (x, y) { return function (a) { return B.join(x(a), y(a)); }; },
-    	        zero: function () { return B.zero; },
-    	        one: function () { return B.one; },
-    	        implies: function (x, y) { return function (a) { return B.implies(x(a), y(a)); }; },
-    	        not: function (x) { return function (a) { return B.not(x(a)); }; }
-    	    }); };
-    	};
-    	exports.getBooleanAlgebra = getBooleanAlgebra;
-    	/**
-    	 * Unary functions form a semigroup as long as you can provide a semigroup for the codomain.
-    	 *
-    	 * @example
-    	 * import { Predicate, getSemigroup } from 'fp-ts/function'
-    	 * import * as B from 'fp-ts/boolean'
-    	 *
-    	 * const f: Predicate<number> = (n) => n <= 2
-    	 * const g: Predicate<number> = (n) => n >= 0
-    	 *
-    	 * const S1 = getSemigroup(B.SemigroupAll)<number>()
-    	 *
-    	 * assert.deepStrictEqual(S1.concat(f, g)(1), true)
-    	 * assert.deepStrictEqual(S1.concat(f, g)(3), false)
-    	 *
-    	 * const S2 = getSemigroup(B.SemigroupAny)<number>()
-    	 *
-    	 * assert.deepStrictEqual(S2.concat(f, g)(1), true)
-    	 * assert.deepStrictEqual(S2.concat(f, g)(3), true)
-    	 *
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	var getSemigroup = function (S) {
-    	    return function () { return ({
-    	        concat: function (f, g) { return function (a) { return S.concat(f(a), g(a)); }; }
-    	    }); };
-    	};
-    	exports.getSemigroup = getSemigroup;
-    	/**
-    	 * Unary functions form a monoid as long as you can provide a monoid for the codomain.
-    	 *
-    	 * @example
-    	 * import { Predicate } from 'fp-ts/Predicate'
-    	 * import { getMonoid } from 'fp-ts/function'
-    	 * import * as B from 'fp-ts/boolean'
-    	 *
-    	 * const f: Predicate<number> = (n) => n <= 2
-    	 * const g: Predicate<number> = (n) => n >= 0
-    	 *
-    	 * const M1 = getMonoid(B.MonoidAll)<number>()
-    	 *
-    	 * assert.deepStrictEqual(M1.concat(f, g)(1), true)
-    	 * assert.deepStrictEqual(M1.concat(f, g)(3), false)
-    	 *
-    	 * const M2 = getMonoid(B.MonoidAny)<number>()
-    	 *
-    	 * assert.deepStrictEqual(M2.concat(f, g)(1), true)
-    	 * assert.deepStrictEqual(M2.concat(f, g)(3), true)
-    	 *
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	var getMonoid = function (M) {
-    	    var getSemigroupM = (0, exports.getSemigroup)(M);
-    	    return function () { return ({
-    	        concat: getSemigroupM().concat,
-    	        empty: function () { return M.empty; }
-    	    }); };
-    	};
-    	exports.getMonoid = getMonoid;
-    	/**
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	var getSemiring = function (S) { return ({
-    	    add: function (f, g) { return function (x) { return S.add(f(x), g(x)); }; },
-    	    zero: function () { return S.zero; },
-    	    mul: function (f, g) { return function (x) { return S.mul(f(x), g(x)); }; },
-    	    one: function () { return S.one; }
-    	}); };
-    	exports.getSemiring = getSemiring;
-    	/**
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	var getRing = function (R) {
-    	    var S = (0, exports.getSemiring)(R);
-    	    return {
-    	        add: S.add,
-    	        mul: S.mul,
-    	        one: S.one,
-    	        zero: S.zero,
-    	        sub: function (f, g) { return function (x) { return R.sub(f(x), g(x)); }; }
-    	    };
-    	};
-    	exports.getRing = getRing;
-    	// -------------------------------------------------------------------------------------
-    	// utils
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @since 2.11.0
-    	 */
-    	var apply = function (a) {
-    	    return function (f) {
-    	        return f(a);
-    	    };
-    	};
-    	exports.apply = apply;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	function identity(a) {
-    	    return a;
-    	}
-    	exports.identity = identity;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	exports.unsafeCoerce = identity;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	function constant(a) {
-    	    return function () { return a; };
-    	}
-    	exports.constant = constant;
-    	/**
-    	 * A thunk that returns always `true`.
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	exports.constTrue = constant(true);
-    	/**
-    	 * A thunk that returns always `false`.
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	exports.constFalse = constant(false);
-    	/**
-    	 * A thunk that returns always `null`.
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	exports.constNull = constant(null);
-    	/**
-    	 * A thunk that returns always `undefined`.
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	exports.constUndefined = constant(undefined);
-    	/**
-    	 * A thunk that returns always `void`.
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	exports.constVoid = exports.constUndefined;
-    	function flip(f) {
-    	    return function () {
-    	        var args = [];
-    	        for (var _i = 0; _i < arguments.length; _i++) {
-    	            args[_i] = arguments[_i];
-    	        }
-    	        if (args.length > 1) {
-    	            return f(args[1], args[0]);
-    	        }
-    	        return function (a) { return f(a)(args[0]); };
-    	    };
-    	}
-    	exports.flip = flip;
-    	function flow(ab, bc, cd, de, ef, fg, gh, hi, ij) {
-    	    switch (arguments.length) {
-    	        case 1:
-    	            return ab;
-    	        case 2:
-    	            return function () {
-    	                return bc(ab.apply(this, arguments));
-    	            };
-    	        case 3:
-    	            return function () {
-    	                return cd(bc(ab.apply(this, arguments)));
-    	            };
-    	        case 4:
-    	            return function () {
-    	                return de(cd(bc(ab.apply(this, arguments))));
-    	            };
-    	        case 5:
-    	            return function () {
-    	                return ef(de(cd(bc(ab.apply(this, arguments)))));
-    	            };
-    	        case 6:
-    	            return function () {
-    	                return fg(ef(de(cd(bc(ab.apply(this, arguments))))));
-    	            };
-    	        case 7:
-    	            return function () {
-    	                return gh(fg(ef(de(cd(bc(ab.apply(this, arguments)))))));
-    	            };
-    	        case 8:
-    	            return function () {
-    	                return hi(gh(fg(ef(de(cd(bc(ab.apply(this, arguments))))))));
-    	            };
-    	        case 9:
-    	            return function () {
-    	                return ij(hi(gh(fg(ef(de(cd(bc(ab.apply(this, arguments)))))))));
-    	            };
-    	    }
-    	    return;
-    	}
-    	exports.flow = flow;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	function tuple() {
-    	    var t = [];
-    	    for (var _i = 0; _i < arguments.length; _i++) {
-    	        t[_i] = arguments[_i];
-    	    }
-    	    return t;
-    	}
-    	exports.tuple = tuple;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	function increment(n) {
-    	    return n + 1;
-    	}
-    	exports.increment = increment;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	function decrement(n) {
-    	    return n - 1;
-    	}
-    	exports.decrement = decrement;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	function absurd(_) {
-    	    throw new Error('Called `absurd` function which should be uncallable');
-    	}
-    	exports.absurd = absurd;
-    	/**
-    	 * Creates a tupled version of this function: instead of `n` arguments, it accepts a single tuple argument.
-    	 *
-    	 * @example
-    	 * import { tupled } from 'fp-ts/function'
-    	 *
-    	 * const add = tupled((x: number, y: number): number => x + y)
-    	 *
-    	 * assert.strictEqual(add([1, 2]), 3)
-    	 *
-    	 * @since 2.4.0
-    	 */
-    	function tupled(f) {
-    	    return function (a) { return f.apply(void 0, a); };
-    	}
-    	exports.tupled = tupled;
-    	/**
-    	 * Inverse function of `tupled`
-    	 *
-    	 * @since 2.4.0
-    	 */
-    	function untupled(f) {
-    	    return function () {
-    	        var a = [];
-    	        for (var _i = 0; _i < arguments.length; _i++) {
-    	            a[_i] = arguments[_i];
-    	        }
-    	        return f(a);
-    	    };
-    	}
-    	exports.untupled = untupled;
-    	function pipe(a, ab, bc, cd, de, ef, fg, gh, hi) {
-    	    switch (arguments.length) {
-    	        case 1:
-    	            return a;
-    	        case 2:
-    	            return ab(a);
-    	        case 3:
-    	            return bc(ab(a));
-    	        case 4:
-    	            return cd(bc(ab(a)));
-    	        case 5:
-    	            return de(cd(bc(ab(a))));
-    	        case 6:
-    	            return ef(de(cd(bc(ab(a)))));
-    	        case 7:
-    	            return fg(ef(de(cd(bc(ab(a))))));
-    	        case 8:
-    	            return gh(fg(ef(de(cd(bc(ab(a)))))));
-    	        case 9:
-    	            return hi(gh(fg(ef(de(cd(bc(ab(a))))))));
-    	        default: {
-    	            var ret = arguments[0];
-    	            for (var i = 1; i < arguments.length; i++) {
-    	                ret = arguments[i](ret);
-    	            }
-    	            return ret;
-    	        }
-    	    }
-    	}
-    	exports.pipe = pipe;
-    	/**
-    	 * Type hole simulation
-    	 *
-    	 * @since 2.7.0
-    	 */
-    	exports.hole = absurd;
-    	/**
-    	 * @since 2.11.0
-    	 */
-    	var SK = function (_, b) { return b; };
-    	exports.SK = SK;
-    	/**
-    	 * Use `Predicate` module instead.
-    	 *
-    	 * @category zone of death
-    	 * @since 2.0.0
-    	 * @deprecated
-    	 */
-    	function not(predicate) {
-    	    return function (a) { return !predicate(a); };
-    	}
-    	exports.not = not;
-    	/**
-    	 * Use `Endomorphism` module instead.
-    	 *
-    	 * @category zone of death
-    	 * @since 2.10.0
-    	 * @deprecated
-    	 */
-    	var getEndomorphismMonoid = function () { return ({
-    	    concat: function (first, second) { return flow(first, second); },
-    	    empty: identity
-    	}); };
-    	exports.getEndomorphismMonoid = getEndomorphismMonoid;
-    	/** @internal */
-    	var dual = function (arity, body) {
-    	    var isDataFirst = typeof arity === 'number' ? function (args) { return args.length >= arity; } : arity;
-    	    return function () {
-    	        var args = Array.from(arguments);
-    	        if (isDataFirst(arguments)) {
-    	            return body.apply(this, args);
-    	        }
-    	        return function (self) { return body.apply(void 0, __spreadArray([self], args, false)); };
-    	    };
-    	};
-    	exports.dual = dual; 
-    } (_function));
-
-    var internal = {};
-
-    (function (exports) {
-    	var __spreadArray = (commonjsGlobal && commonjsGlobal.__spreadArray) || function (to, from, pack) {
-    	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-    	        if (ar || !(i in from)) {
-    	            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-    	            ar[i] = from[i];
-    	        }
-    	    }
-    	    return to.concat(ar || Array.prototype.slice.call(from));
-    	};
-    	Object.defineProperty(exports, "__esModule", { value: true });
-    	exports.flatMapReader = exports.flatMapTask = exports.flatMapIO = exports.flatMapEither = exports.flatMapOption = exports.flatMapNullable = exports.liftOption = exports.liftNullable = exports.fromReadonlyNonEmptyArray = exports.has = exports.emptyRecord = exports.emptyReadonlyArray = exports.tail = exports.head = exports.isNonEmpty = exports.singleton = exports.right = exports.left = exports.isRight = exports.isLeft = exports.some = exports.none = exports.isSome = exports.isNone = void 0;
-    	var function_1 = _function;
-    	// -------------------------------------------------------------------------------------
-    	// Option
-    	// -------------------------------------------------------------------------------------
-    	/** @internal */
-    	var isNone = function (fa) { return fa._tag === 'None'; };
-    	exports.isNone = isNone;
-    	/** @internal */
-    	var isSome = function (fa) { return fa._tag === 'Some'; };
-    	exports.isSome = isSome;
-    	/** @internal */
-    	exports.none = { _tag: 'None' };
-    	/** @internal */
-    	var some = function (a) { return ({ _tag: 'Some', value: a }); };
-    	exports.some = some;
-    	// -------------------------------------------------------------------------------------
-    	// Either
-    	// -------------------------------------------------------------------------------------
-    	/** @internal */
-    	var isLeft = function (ma) { return ma._tag === 'Left'; };
-    	exports.isLeft = isLeft;
-    	/** @internal */
-    	var isRight = function (ma) { return ma._tag === 'Right'; };
-    	exports.isRight = isRight;
-    	/** @internal */
-    	var left = function (e) { return ({ _tag: 'Left', left: e }); };
-    	exports.left = left;
-    	/** @internal */
-    	var right = function (a) { return ({ _tag: 'Right', right: a }); };
-    	exports.right = right;
-    	// -------------------------------------------------------------------------------------
-    	// ReadonlyNonEmptyArray
-    	// -------------------------------------------------------------------------------------
-    	/** @internal */
-    	var singleton = function (a) { return [a]; };
-    	exports.singleton = singleton;
-    	/** @internal */
-    	var isNonEmpty = function (as) { return as.length > 0; };
-    	exports.isNonEmpty = isNonEmpty;
-    	/** @internal */
-    	var head = function (as) { return as[0]; };
-    	exports.head = head;
-    	/** @internal */
-    	var tail = function (as) { return as.slice(1); };
-    	exports.tail = tail;
-    	// -------------------------------------------------------------------------------------
-    	// empty
-    	// -------------------------------------------------------------------------------------
-    	/** @internal */
-    	exports.emptyReadonlyArray = [];
-    	/** @internal */
-    	exports.emptyRecord = {};
-    	// -------------------------------------------------------------------------------------
-    	// Record
-    	// -------------------------------------------------------------------------------------
-    	/** @internal */
-    	exports.has = Object.prototype.hasOwnProperty;
-    	// -------------------------------------------------------------------------------------
-    	// NonEmptyArray
-    	// -------------------------------------------------------------------------------------
-    	/** @internal */
-    	var fromReadonlyNonEmptyArray = function (as) { return __spreadArray([as[0]], as.slice(1), true); };
-    	exports.fromReadonlyNonEmptyArray = fromReadonlyNonEmptyArray;
-    	/** @internal */
-    	var liftNullable = function (F) {
-    	    return function (f, onNullable) {
-    	        return function () {
-    	            var a = [];
-    	            for (var _i = 0; _i < arguments.length; _i++) {
-    	                a[_i] = arguments[_i];
-    	            }
-    	            var o = f.apply(void 0, a);
-    	            return F.fromEither(o == null ? (0, exports.left)(onNullable.apply(void 0, a)) : (0, exports.right)(o));
-    	        };
-    	    };
-    	};
-    	exports.liftNullable = liftNullable;
-    	/** @internal */
-    	var liftOption = function (F) {
-    	    return function (f, onNone) {
-    	        return function () {
-    	            var a = [];
-    	            for (var _i = 0; _i < arguments.length; _i++) {
-    	                a[_i] = arguments[_i];
-    	            }
-    	            var o = f.apply(void 0, a);
-    	            return F.fromEither((0, exports.isNone)(o) ? (0, exports.left)(onNone.apply(void 0, a)) : (0, exports.right)(o.value));
-    	        };
-    	    };
-    	};
-    	exports.liftOption = liftOption;
-    	/** @internal */
-    	var flatMapNullable = function (F, M) {
-    	     return (0, function_1.dual)(3, function (self, f, onNullable) {
-    	        return M.flatMap(self, (0, exports.liftNullable)(F)(f, onNullable));
-    	    });
-    	};
-    	exports.flatMapNullable = flatMapNullable;
-    	/** @internal */
-    	var flatMapOption = function (F, M) {
-    	     return (0, function_1.dual)(3, function (self, f, onNone) { return M.flatMap(self, (0, exports.liftOption)(F)(f, onNone)); });
-    	};
-    	exports.flatMapOption = flatMapOption;
-    	/** @internal */
-    	var flatMapEither = function (F, M) {
-    	     return (0, function_1.dual)(2, function (self, f) {
-    	        return M.flatMap(self, function (a) { return F.fromEither(f(a)); });
-    	    });
-    	};
-    	exports.flatMapEither = flatMapEither;
-    	/** @internal */
-    	var flatMapIO = function (F, M) {
-    	     return (0, function_1.dual)(2, function (self, f) {
-    	        return M.flatMap(self, function (a) { return F.fromIO(f(a)); });
-    	    });
-    	};
-    	exports.flatMapIO = flatMapIO;
-    	/** @internal */
-    	var flatMapTask = function (F, M) {
-    	     return (0, function_1.dual)(2, function (self, f) {
-    	        return M.flatMap(self, function (a) { return F.fromTask(f(a)); });
-    	    });
-    	};
-    	exports.flatMapTask = flatMapTask;
-    	/** @internal */
-    	var flatMapReader = function (F, M) {
-    	     return (0, function_1.dual)(2, function (self, f) {
-    	        return M.flatMap(self, function (a) { return F.fromReader(f(a)); });
-    	    });
-    	};
-    	exports.flatMapReader = flatMapReader; 
-    } (internal));
-
-    var __createBinding$2 = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        var desc = Object.getOwnPropertyDescriptor(m, k);
-        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-          desc = { enumerable: true, get: function() { return m[k]; } };
-        }
-        Object.defineProperty(o, k2, desc);
-    }) : (function(o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        o[k2] = m[k];
-    }));
-    var __setModuleDefault$2 = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-        Object.defineProperty(o, "default", { enumerable: true, value: v });
-    }) : function(o, v) {
-        o["default"] = v;
-    });
-    var __importStar$2 = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding$2(result, mod, k);
-        __setModuleDefault$2(result, mod);
-        return result;
-    };
-    Object.defineProperty(Apply, "__esModule", { value: true });
-    Apply.sequenceS = Apply.sequenceT = Apply.getApplySemigroup = Apply.apS = Apply.apSecond = Apply.apFirst = Apply.ap = void 0;
-    /**
-     * The `Apply` class provides the `ap` which is used to apply a function to an argument under a type constructor.
-     *
-     * `Apply` can be used to lift functions of two or more arguments to work on values wrapped with the type constructor
-     * `f`.
-     *
-     * Instances must satisfy the following law in addition to the `Functor` laws:
-     *
-     * 1. Associative composition: `F.ap(F.ap(F.map(fbc, bc => ab => a => bc(ab(a))), fab), fa) <-> F.ap(fbc, F.ap(fab, fa))`
-     *
-     * Formally, `Apply` represents a strong lax semi-monoidal endofunctor.
-     *
-     * @example
-     * import * as O from 'fp-ts/Option'
-     * import { pipe } from 'fp-ts/function'
-     *
-     * const f = (a: string) => (b: number) => (c: boolean) => a + String(b) + String(c)
-     * const fa: O.Option<string> = O.some('s')
-     * const fb: O.Option<number> = O.some(1)
-     * const fc: O.Option<boolean> = O.some(true)
-     *
-     * assert.deepStrictEqual(
-     *   pipe(
-     *     // lift a function
-     *     O.some(f),
-     *     // apply the first argument
-     *     O.ap(fa),
-     *     // apply the second argument
-     *     O.ap(fb),
-     *     // apply the third argument
-     *     O.ap(fc)
-     *   ),
-     *   O.some('s1true')
-     * )
-     *
-     * @since 2.0.0
-     */
-    var function_1$3 = _function;
-    var _$2 = __importStar$2(internal);
-    function ap(F, G) {
-        return function (fa) {
-            return function (fab) {
-                return F.ap(F.map(fab, function (gab) { return function (ga) { return G.ap(gab, ga); }; }), fa);
-            };
-        };
+    function stringToUint8Array(str) {
+        const utf8Encoder = new TextEncoder();
+        return utf8Encoder.encode(str);
     }
-    Apply.ap = ap;
-    function apFirst(A) {
-        return function (second) { return function (first) {
-            return A.ap(A.map(first, function (a) { return function () { return a; }; }), second);
-        }; };
-    }
-    Apply.apFirst = apFirst;
-    function apSecond(A) {
-        return function (second) {
-            return function (first) {
-                return A.ap(A.map(first, function () { return function (b) { return b; }; }), second);
-            };
-        };
-    }
-    Apply.apSecond = apSecond;
-    function apS(F) {
-        return function (name, fb) {
-            return function (fa) {
-                return F.ap(F.map(fa, function (a) { return function (b) {
-                    var _a;
-                    return Object.assign({}, a, (_a = {}, _a[name] = b, _a));
-                }; }), fb);
-            };
-        };
-    }
-    Apply.apS = apS;
-    function getApplySemigroup(F) {
-        return function (S) { return ({
-            concat: function (first, second) {
-                return F.ap(F.map(first, function (x) { return function (y) { return S.concat(x, y); }; }), second);
-            }
-        }); };
-    }
-    Apply.getApplySemigroup = getApplySemigroup;
-    function curried(f, n, acc) {
-        return function (x) {
-            var combined = Array(acc.length + 1);
-            for (var i = 0; i < acc.length; i++) {
-                combined[i] = acc[i];
-            }
-            combined[acc.length] = x;
-            return n === 0 ? f.apply(null, combined) : curried(f, n - 1, combined);
-        };
-    }
-    var tupleConstructors = {
-        1: function (a) { return [a]; },
-        2: function (a) { return function (b) { return [a, b]; }; },
-        3: function (a) { return function (b) { return function (c) { return [a, b, c]; }; }; },
-        4: function (a) { return function (b) { return function (c) { return function (d) { return [a, b, c, d]; }; }; }; },
-        5: function (a) { return function (b) { return function (c) { return function (d) { return function (e) { return [a, b, c, d, e]; }; }; }; }; }
-    };
-    function getTupleConstructor(len) {
-        if (!_$2.has.call(tupleConstructors, len)) {
-            tupleConstructors[len] = curried(function_1$3.tuple, len - 1, []);
-        }
-        return tupleConstructors[len];
-    }
-    function sequenceT(F) {
-        return function () {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
-            }
-            var len = args.length;
-            var f = getTupleConstructor(len);
-            var fas = F.map(args[0], f);
-            for (var i = 1; i < len; i++) {
-                fas = F.ap(fas, args[i]);
-            }
-            return fas;
-        };
-    }
-    Apply.sequenceT = sequenceT;
-    function getRecordConstructor(keys) {
-        var len = keys.length;
-        switch (len) {
-            case 1:
-                return function (a) {
-                    var _a;
-                    return (_a = {}, _a[keys[0]] = a, _a);
-                };
-            case 2:
-                return function (a) { return function (b) {
-                    var _a;
-                    return (_a = {}, _a[keys[0]] = a, _a[keys[1]] = b, _a);
-                }; };
-            case 3:
-                return function (a) { return function (b) { return function (c) {
-                    var _a;
-                    return (_a = {}, _a[keys[0]] = a, _a[keys[1]] = b, _a[keys[2]] = c, _a);
-                }; }; };
-            case 4:
-                return function (a) { return function (b) { return function (c) { return function (d) {
-                    var _a;
-                    return (_a = {},
-                        _a[keys[0]] = a,
-                        _a[keys[1]] = b,
-                        _a[keys[2]] = c,
-                        _a[keys[3]] = d,
-                        _a);
-                }; }; }; };
-            case 5:
-                return function (a) { return function (b) { return function (c) { return function (d) { return function (e) {
-                    var _a;
-                    return (_a = {},
-                        _a[keys[0]] = a,
-                        _a[keys[1]] = b,
-                        _a[keys[2]] = c,
-                        _a[keys[3]] = d,
-                        _a[keys[4]] = e,
-                        _a);
-                }; }; }; }; };
-            default:
-                return curried(function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
-                    var r = {};
-                    for (var i = 0; i < len; i++) {
-                        r[keys[i]] = args[i];
-                    }
-                    return r;
-                }, len - 1, []);
-        }
-    }
-    function sequenceS(F) {
-        return function (r) {
-            var keys = Object.keys(r);
-            var len = keys.length;
-            var f = getRecordConstructor(keys);
-            var fr = F.map(r[keys[0]], f);
-            for (var i = 1; i < len; i++) {
-                fr = F.ap(fr, r[keys[i]]);
-            }
-            return fr;
-        };
-    }
-    Apply.sequenceS = sequenceS;
-
-    var Functor = {};
-
-    Object.defineProperty(Functor, "__esModule", { value: true });
-    Functor.asUnit = Functor.as = Functor.getFunctorComposition = Functor.let = Functor.bindTo = Functor.flap = Functor.map = void 0;
-    /**
-     * A `Functor` is a type constructor which supports a mapping operation `map`.
-     *
-     * `map` can be used to turn functions `a -> b` into functions `f a -> f b` whose argument and return types use the type
-     * constructor `f` to represent some computational context.
-     *
-     * Instances must satisfy the following laws:
-     *
-     * 1. Identity: `F.map(fa, a => a) <-> fa`
-     * 2. Composition: `F.map(fa, a => bc(ab(a))) <-> F.map(F.map(fa, ab), bc)`
-     *
-     * @since 2.0.0
-     */
-    var function_1$2 = _function;
-    function map(F, G) {
-        return function (f) { return function (fa) { return F.map(fa, function (ga) { return G.map(ga, f); }); }; };
-    }
-    Functor.map = map;
-    function flap(F) {
-        return function (a) { return function (fab) { return F.map(fab, function (f) { return f(a); }); }; };
-    }
-    Functor.flap = flap;
-    function bindTo(F) {
-        return function (name) { return function (fa) { return F.map(fa, function (a) {
-            var _a;
-            return (_a = {}, _a[name] = a, _a);
-        }); }; };
-    }
-    Functor.bindTo = bindTo;
-    function let_(F) {
-        return function (name, f) { return function (fa) { return F.map(fa, function (a) {
-            var _a;
-            return Object.assign({}, a, (_a = {}, _a[name] = f(a), _a));
-        }); }; };
-    }
-    Functor.let = let_;
-    /** @deprecated */
-    function getFunctorComposition(F, G) {
-        var _map = map(F, G);
-        return {
-            map: function (fga, f) { return (0, function_1$2.pipe)(fga, _map(f)); }
-        };
-    }
-    Functor.getFunctorComposition = getFunctorComposition;
-    /** @internal */
-    function as(F) {
-        return function (self, b) { return F.map(self, function () { return b; }); };
-    }
-    Functor.as = as;
-    /** @internal */
-    function asUnit(F) {
-        var asM = as(F);
-        return function (self) { return asM(self, undefined); };
-    }
-    Functor.asUnit = asUnit;
-
-    Object.defineProperty(Applicative, "__esModule", { value: true });
-    Applicative.getApplicativeComposition = Applicative.getApplicativeMonoid = void 0;
-    /**
-     * The `Applicative` type class extends the `Apply` type class with a `of` function, which can be used to create values
-     * of type `f a` from values of type `a`.
-     *
-     * Where `Apply` provides the ability to lift functions of two or more arguments to functions whose arguments are
-     * wrapped using `f`, and `Functor` provides the ability to lift functions of one argument, `pure` can be seen as the
-     * function which lifts functions of _zero_ arguments. That is, `Applicative` functors support a lifting operation for
-     * any number of function arguments.
-     *
-     * Instances must satisfy the following laws in addition to the `Apply` laws:
-     *
-     * 1. Identity: `A.ap(A.of(a => a), fa) <-> fa`
-     * 2. Homomorphism: `A.ap(A.of(ab), A.of(a)) <-> A.of(ab(a))`
-     * 3. Interchange: `A.ap(fab, A.of(a)) <-> A.ap(A.of(ab => ab(a)), fab)`
-     *
-     * Note. `Functor`'s `map` can be derived: `A.map(x, f) = A.ap(A.of(f), x)`
-     *
-     * @since 2.0.0
-     */
-    var Apply_1 = Apply;
-    var function_1$1 = _function;
-    var Functor_1 = Functor;
-    function getApplicativeMonoid(F) {
-        var f = (0, Apply_1.getApplySemigroup)(F);
-        return function (M) { return ({
-            concat: f(M).concat,
-            empty: F.of(M.empty)
-        }); };
-    }
-    Applicative.getApplicativeMonoid = getApplicativeMonoid;
-    /** @deprecated */
-    function getApplicativeComposition(F, G) {
-        var map = (0, Functor_1.getFunctorComposition)(F, G).map;
-        var _ap = (0, Apply_1.ap)(F, G);
-        return {
-            map: map,
-            of: function (a) { return F.of(G.of(a)); },
-            ap: function (fgab, fga) { return (0, function_1$1.pipe)(fgab, _ap(fga)); }
-        };
-    }
-    Applicative.getApplicativeComposition = getApplicativeComposition;
-
-    var Chain = {};
-
-    Object.defineProperty(Chain, "__esModule", { value: true });
-    Chain.bind = Chain.tap = Chain.chainFirst = void 0;
-    function chainFirst(M) {
-        var tapM = tap(M);
-        return function (f) { return function (first) { return tapM(first, f); }; };
-    }
-    Chain.chainFirst = chainFirst;
-    /** @internal */
-    function tap(M) {
-        return function (first, f) { return M.chain(first, function (a) { return M.map(f(a), function () { return a; }); }); };
-    }
-    Chain.tap = tap;
-    function bind(M) {
-        return function (name, f) { return function (ma) { return M.chain(ma, function (a) { return M.map(f(a), function (b) {
-            var _a;
-            return Object.assign({}, a, (_a = {}, _a[name] = b, _a));
-        }); }); }; };
-    }
-    Chain.bind = bind;
-
-    var ChainRec = {};
-
-    Object.defineProperty(ChainRec, "__esModule", { value: true });
-    ChainRec.tailRec = void 0;
-    /**
-     * @since 2.0.0
-     */
-    var tailRec = function (startWith, f) {
-        var ab = f(startWith);
-        while (ab._tag === 'Left') {
-            ab = f(ab.left);
-        }
-        return ab.right;
-    };
-    ChainRec.tailRec = tailRec;
-
-    var FromEither = {};
-
-    /**
-     * The `FromEither` type class represents those data types which support errors.
-     *
-     * @since 2.10.0
-     */
-    var __createBinding$1 = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        var desc = Object.getOwnPropertyDescriptor(m, k);
-        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-          desc = { enumerable: true, get: function() { return m[k]; } };
-        }
-        Object.defineProperty(o, k2, desc);
-    }) : (function(o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        o[k2] = m[k];
-    }));
-    var __setModuleDefault$1 = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-        Object.defineProperty(o, "default", { enumerable: true, value: v });
-    }) : function(o, v) {
-        o["default"] = v;
-    });
-    var __importStar$1 = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding$1(result, mod, k);
-        __setModuleDefault$1(result, mod);
-        return result;
-    };
-    Object.defineProperty(FromEither, "__esModule", { value: true });
-    FromEither.tapEither = FromEither.filterOrElse = FromEither.chainFirstEitherK = FromEither.chainEitherK = FromEither.fromEitherK = FromEither.chainOptionK = FromEither.fromOptionK = FromEither.fromPredicate = FromEither.fromOption = void 0;
-    var Chain_1 = Chain;
-    var function_1 = _function;
-    var _$1 = __importStar$1(internal);
-    function fromOption(F) {
-        return function (onNone) { return function (ma) { return F.fromEither(_$1.isNone(ma) ? _$1.left(onNone()) : _$1.right(ma.value)); }; };
-    }
-    FromEither.fromOption = fromOption;
-    function fromPredicate(F) {
-        return function (predicate, onFalse) {
-            return function (a) {
-                return F.fromEither(predicate(a) ? _$1.right(a) : _$1.left(onFalse(a)));
-            };
-        };
-    }
-    FromEither.fromPredicate = fromPredicate;
-    function fromOptionK(F) {
-        var fromOptionF = fromOption(F);
-        return function (onNone) {
-            var from = fromOptionF(onNone);
-            return function (f) { return (0, function_1.flow)(f, from); };
-        };
-    }
-    FromEither.fromOptionK = fromOptionK;
-    function chainOptionK(F, M) {
-        var fromOptionKF = fromOptionK(F);
-        return function (onNone) {
-            var from = fromOptionKF(onNone);
-            return function (f) { return function (ma) { return M.chain(ma, from(f)); }; };
-        };
-    }
-    FromEither.chainOptionK = chainOptionK;
-    function fromEitherK(F) {
-        return function (f) { return (0, function_1.flow)(f, F.fromEither); };
-    }
-    FromEither.fromEitherK = fromEitherK;
-    function chainEitherK(F, M) {
-        var fromEitherKF = fromEitherK(F);
-        return function (f) { return function (ma) { return M.chain(ma, fromEitherKF(f)); }; };
-    }
-    FromEither.chainEitherK = chainEitherK;
-    function chainFirstEitherK(F, M) {
-        var tapEitherM = tapEither(F, M);
-        return function (f) { return function (ma) { return tapEitherM(ma, f); }; };
-    }
-    FromEither.chainFirstEitherK = chainFirstEitherK;
-    function filterOrElse(F, M) {
-        return function (predicate, onFalse) {
-            return function (ma) {
-                return M.chain(ma, function (a) { return F.fromEither(predicate(a) ? _$1.right(a) : _$1.left(onFalse(a))); });
-            };
-        };
-    }
-    FromEither.filterOrElse = filterOrElse;
-    /** @internal */
-    function tapEither(F, M) {
-        var fromEither = fromEitherK(F);
-        var tapM = (0, Chain_1.tap)(M);
-        return function (self, f) { return tapM(self, fromEither(f)); };
-    }
-    FromEither.tapEither = tapEither;
-
-    var Separated = {};
-
-    (function (exports) {
-    	/**
-    	 * ```ts
-    	 * interface Separated<E, A> {
-    	 *    readonly left: E
-    	 *    readonly right: A
-    	 * }
-    	 * ```
-    	 *
-    	 * Represents a result of separating a whole into two parts.
-    	 *
-    	 * @since 2.10.0
-    	 */
-    	Object.defineProperty(exports, "__esModule", { value: true });
-    	exports.right = exports.left = exports.flap = exports.Functor = exports.Bifunctor = exports.URI = exports.bimap = exports.mapLeft = exports.map = exports.separated = void 0;
-    	var function_1 = _function;
-    	var Functor_1 = Functor;
-    	// -------------------------------------------------------------------------------------
-    	// constructors
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @category constructors
-    	 * @since 2.10.0
-    	 */
-    	var separated = function (left, right) { return ({ left: left, right: right }); };
-    	exports.separated = separated;
-    	var _map = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.map)(f)); };
-    	var _mapLeft = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.mapLeft)(f)); };
-    	var _bimap = function (fa, g, f) { return (0, function_1.pipe)(fa, (0, exports.bimap)(g, f)); };
-    	/**
-    	 * `map` can be used to turn functions `(a: A) => B` into functions `(fa: F<A>) => F<B>` whose argument and return types
-    	 * use the type constructor `F` to represent some computational context.
-    	 *
-    	 * @category mapping
-    	 * @since 2.10.0
-    	 */
-    	var map = function (f) {
-    	    return function (fa) {
-    	        return (0, exports.separated)((0, exports.left)(fa), f((0, exports.right)(fa)));
-    	    };
-    	};
-    	exports.map = map;
-    	/**
-    	 * Map a function over the first type argument of a bifunctor.
-    	 *
-    	 * @category error handling
-    	 * @since 2.10.0
-    	 */
-    	var mapLeft = function (f) {
-    	    return function (fa) {
-    	        return (0, exports.separated)(f((0, exports.left)(fa)), (0, exports.right)(fa));
-    	    };
-    	};
-    	exports.mapLeft = mapLeft;
-    	/**
-    	 * Map a pair of functions over the two type arguments of the bifunctor.
-    	 *
-    	 * @category mapping
-    	 * @since 2.10.0
-    	 */
-    	var bimap = function (f, g) {
-    	    return function (fa) {
-    	        return (0, exports.separated)(f((0, exports.left)(fa)), g((0, exports.right)(fa)));
-    	    };
-    	};
-    	exports.bimap = bimap;
-    	/**
-    	 * @category type lambdas
-    	 * @since 2.10.0
-    	 */
-    	exports.URI = 'Separated';
-    	/**
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	exports.Bifunctor = {
-    	    URI: exports.URI,
-    	    mapLeft: _mapLeft,
-    	    bimap: _bimap
-    	};
-    	/**
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	exports.Functor = {
-    	    URI: exports.URI,
-    	    map: _map
-    	};
-    	/**
-    	 * @category mapping
-    	 * @since 2.10.0
-    	 */
-    	exports.flap = (0, Functor_1.flap)(exports.Functor);
-    	// -------------------------------------------------------------------------------------
-    	// utils
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @since 2.10.0
-    	 */
-    	var left = function (s) { return s.left; };
-    	exports.left = left;
-    	/**
-    	 * @since 2.10.0
-    	 */
-    	var right = function (s) { return s.right; };
-    	exports.right = right; 
-    } (Separated));
-
-    var Witherable = {};
-
-    var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        var desc = Object.getOwnPropertyDescriptor(m, k);
-        if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-          desc = { enumerable: true, get: function() { return m[k]; } };
-        }
-        Object.defineProperty(o, k2, desc);
-    }) : (function(o, m, k, k2) {
-        if (k2 === undefined) k2 = k;
-        o[k2] = m[k];
-    }));
-    var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-        Object.defineProperty(o, "default", { enumerable: true, value: v });
-    }) : function(o, v) {
-        o["default"] = v;
-    });
-    var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-    Object.defineProperty(Witherable, "__esModule", { value: true });
-    Witherable.filterE = Witherable.witherDefault = Witherable.wiltDefault = void 0;
-    var _ = __importStar(internal);
-    function wiltDefault(T, C) {
-        return function (F) {
-            var traverseF = T.traverse(F);
-            return function (wa, f) { return F.map(traverseF(wa, f), C.separate); };
-        };
-    }
-    Witherable.wiltDefault = wiltDefault;
-    function witherDefault(T, C) {
-        return function (F) {
-            var traverseF = T.traverse(F);
-            return function (wa, f) { return F.map(traverseF(wa, f), C.compact); };
-        };
-    }
-    Witherable.witherDefault = witherDefault;
-    function filterE(W) {
-        return function (F) {
-            var witherF = W.wither(F);
-            return function (predicate) { return function (ga) { return witherF(ga, function (a) { return F.map(predicate(a), function (b) { return (b ? _.some(a) : _.none); }); }); }; };
-        };
-    }
-    Witherable.filterE = filterE;
-
-    (function (exports) {
-    	var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    	    if (k2 === undefined) k2 = k;
-    	    var desc = Object.getOwnPropertyDescriptor(m, k);
-    	    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-    	      desc = { enumerable: true, get: function() { return m[k]; } };
-    	    }
-    	    Object.defineProperty(o, k2, desc);
-    	}) : (function(o, m, k, k2) {
-    	    if (k2 === undefined) k2 = k;
-    	    o[k2] = m[k];
-    	}));
-    	var __setModuleDefault = (commonjsGlobal && commonjsGlobal.__setModuleDefault) || (Object.create ? (function(o, v) {
-    	    Object.defineProperty(o, "default", { enumerable: true, value: v });
-    	}) : function(o, v) {
-    	    o["default"] = v;
-    	});
-    	var __importStar = (commonjsGlobal && commonjsGlobal.__importStar) || function (mod) {
-    	    if (mod && mod.__esModule) return mod;
-    	    var result = {};
-    	    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    	    __setModuleDefault(result, mod);
-    	    return result;
-    	};
-    	Object.defineProperty(exports, "__esModule", { value: true });
-    	exports.match = exports.foldW = exports.matchW = exports.isRight = exports.isLeft = exports.fromOption = exports.fromPredicate = exports.FromEither = exports.MonadThrow = exports.throwError = exports.ChainRec = exports.Extend = exports.extend = exports.Alt = exports.alt = exports.altW = exports.Bifunctor = exports.mapLeft = exports.bimap = exports.Traversable = exports.sequence = exports.traverse = exports.Foldable = exports.reduceRight = exports.foldMap = exports.reduce = exports.Monad = exports.Chain = exports.Applicative = exports.Apply = exports.ap = exports.apW = exports.Pointed = exports.of = exports.asUnit = exports.as = exports.Functor = exports.map = exports.getAltValidation = exports.getApplicativeValidation = exports.getWitherable = exports.getFilterable = exports.getCompactable = exports.getSemigroup = exports.getEq = exports.getShow = exports.URI = exports.flatMap = exports.right = exports.left = void 0;
-    	exports.chainFirstW = exports.chainFirst = exports.chain = exports.chainW = exports.sequenceArray = exports.traverseArray = exports.traverseArrayWithIndex = exports.traverseReadonlyArrayWithIndex = exports.traverseReadonlyNonEmptyArrayWithIndex = exports.ApT = exports.apSW = exports.apS = exports.bindW = exports.bind = exports.let = exports.bindTo = exports.Do = exports.exists = exports.elem = exports.toError = exports.toUnion = exports.chainNullableK = exports.fromNullableK = exports.tryCatchK = exports.tryCatch = exports.fromNullable = exports.orElse = exports.orElseW = exports.swap = exports.filterOrElseW = exports.filterOrElse = exports.flatMapOption = exports.flatMapNullable = exports.liftOption = exports.liftNullable = exports.chainOptionKW = exports.chainOptionK = exports.fromOptionK = exports.duplicate = exports.flatten = exports.flattenW = exports.tap = exports.apSecondW = exports.apSecond = exports.apFirstW = exports.apFirst = exports.flap = exports.getOrElse = exports.getOrElseW = exports.fold = void 0;
-    	exports.getValidation = exports.getValidationMonoid = exports.getValidationSemigroup = exports.getApplyMonoid = exports.getApplySemigroup = exports.either = exports.stringifyJSON = exports.parseJSON = void 0;
-    	var Applicative_1 = Applicative;
-    	var Apply_1 = Apply;
-    	var chainable = __importStar(Chain);
-    	var ChainRec_1 = ChainRec;
-    	var FromEither_1 = FromEither;
-    	var function_1 = _function;
-    	var Functor_1 = Functor;
-    	var _ = __importStar(internal);
-    	var Separated_1 = Separated;
-    	var Witherable_1 = Witherable;
-    	// -------------------------------------------------------------------------------------
-    	// constructors
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * Constructs a new `Either` holding a `Left` value. This usually represents a failure, due to the right-bias of this
-    	 * structure.
-    	 *
-    	 * @category constructors
-    	 * @since 2.0.0
-    	 */
-    	exports.left = _.left;
-    	/**
-    	 * Constructs a new `Either` holding a `Right` value. This usually represents a successful value due to the right bias
-    	 * of this structure.
-    	 *
-    	 * @category constructors
-    	 * @since 2.0.0
-    	 */
-    	exports.right = _.right;
-    	/**
-    	 * @category sequencing
-    	 * @since 2.14.0
-    	 */
-    	exports.flatMap = (0, function_1.dual)(2, function (ma, f) { return ((0, exports.isLeft)(ma) ? ma : f(ma.right)); });
-    	var _map = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.map)(f)); };
-    	var _ap = function (fab, fa) { return (0, function_1.pipe)(fab, (0, exports.ap)(fa)); };
-    	/* istanbul ignore next */
-    	var _reduce = function (fa, b, f) { return (0, function_1.pipe)(fa, (0, exports.reduce)(b, f)); };
-    	/* istanbul ignore next */
-    	var _foldMap = function (M) { return function (fa, f) {
-    	    var foldMapM = (0, exports.foldMap)(M);
-    	    return (0, function_1.pipe)(fa, foldMapM(f));
-    	}; };
-    	/* istanbul ignore next */
-    	var _reduceRight = function (fa, b, f) { return (0, function_1.pipe)(fa, (0, exports.reduceRight)(b, f)); };
-    	var _traverse = function (F) {
-    	    var traverseF = (0, exports.traverse)(F);
-    	    return function (ta, f) { return (0, function_1.pipe)(ta, traverseF(f)); };
-    	};
-    	var _bimap = function (fa, f, g) { return (0, function_1.pipe)(fa, (0, exports.bimap)(f, g)); };
-    	var _mapLeft = function (fa, f) { return (0, function_1.pipe)(fa, (0, exports.mapLeft)(f)); };
-    	/* istanbul ignore next */
-    	var _alt = function (fa, that) { return (0, function_1.pipe)(fa, (0, exports.alt)(that)); };
-    	/* istanbul ignore next */
-    	var _extend = function (wa, f) { return (0, function_1.pipe)(wa, (0, exports.extend)(f)); };
-    	var _chainRec = function (a, f) {
-    	    return (0, ChainRec_1.tailRec)(f(a), function (e) {
-    	        return (0, exports.isLeft)(e) ? (0, exports.right)((0, exports.left)(e.left)) : (0, exports.isLeft)(e.right) ? (0, exports.left)(f(e.right.left)) : (0, exports.right)((0, exports.right)(e.right.right));
-    	    });
-    	};
-    	/**
-    	 * @category type lambdas
-    	 * @since 2.0.0
-    	 */
-    	exports.URI = 'Either';
-    	/**
-    	 * @category instances
-    	 * @since 2.0.0
-    	 */
-    	var getShow = function (SE, SA) { return ({
-    	    show: function (ma) { return ((0, exports.isLeft)(ma) ? "left(".concat(SE.show(ma.left), ")") : "right(".concat(SA.show(ma.right), ")")); }
-    	}); };
-    	exports.getShow = getShow;
-    	/**
-    	 * @category instances
-    	 * @since 2.0.0
-    	 */
-    	var getEq = function (EL, EA) { return ({
-    	    equals: function (x, y) {
-    	        return x === y || ((0, exports.isLeft)(x) ? (0, exports.isLeft)(y) && EL.equals(x.left, y.left) : (0, exports.isRight)(y) && EA.equals(x.right, y.right));
-    	    }
-    	}); };
-    	exports.getEq = getEq;
-    	/**
-    	 * Semigroup returning the left-most non-`Left` value. If both operands are `Right`s then the inner values are
-    	 * concatenated using the provided `Semigroup`
-    	 *
-    	 * @example
-    	 * import { getSemigroup, left, right } from 'fp-ts/Either'
-    	 * import { SemigroupSum } from 'fp-ts/number'
-    	 *
-    	 * const S = getSemigroup<string, number>(SemigroupSum)
-    	 * assert.deepStrictEqual(S.concat(left('a'), left('b')), left('a'))
-    	 * assert.deepStrictEqual(S.concat(left('a'), right(2)), right(2))
-    	 * assert.deepStrictEqual(S.concat(right(1), left('b')), right(1))
-    	 * assert.deepStrictEqual(S.concat(right(1), right(2)), right(3))
-    	 *
-    	 * @category instances
-    	 * @since 2.0.0
-    	 */
-    	var getSemigroup = function (S) { return ({
-    	    concat: function (x, y) { return ((0, exports.isLeft)(y) ? x : (0, exports.isLeft)(x) ? y : (0, exports.right)(S.concat(x.right, y.right))); }
-    	}); };
-    	exports.getSemigroup = getSemigroup;
-    	/**
-    	 * Builds a `Compactable` instance for `Either` given `Monoid` for the left side.
-    	 *
-    	 * @category filtering
-    	 * @since 2.10.0
-    	 */
-    	var getCompactable = function (M) {
-    	    var empty = (0, exports.left)(M.empty);
-    	    return {
-    	        URI: exports.URI,
-    	        _E: undefined,
-    	        compact: function (ma) { return ((0, exports.isLeft)(ma) ? ma : ma.right._tag === 'None' ? empty : (0, exports.right)(ma.right.value)); },
-    	        separate: function (ma) {
-    	            return (0, exports.isLeft)(ma)
-    	                ? (0, Separated_1.separated)(ma, ma)
-    	                : (0, exports.isLeft)(ma.right)
-    	                    ? (0, Separated_1.separated)((0, exports.right)(ma.right.left), empty)
-    	                    : (0, Separated_1.separated)(empty, (0, exports.right)(ma.right.right));
-    	        }
-    	    };
-    	};
-    	exports.getCompactable = getCompactable;
-    	/**
-    	 * Builds a `Filterable` instance for `Either` given `Monoid` for the left side
-    	 *
-    	 * @category filtering
-    	 * @since 2.10.0
-    	 */
-    	var getFilterable = function (M) {
-    	    var empty = (0, exports.left)(M.empty);
-    	    var _a = (0, exports.getCompactable)(M), compact = _a.compact, separate = _a.separate;
-    	    var filter = function (ma, predicate) {
-    	        return (0, exports.isLeft)(ma) ? ma : predicate(ma.right) ? ma : empty;
-    	    };
-    	    var partition = function (ma, p) {
-    	        return (0, exports.isLeft)(ma)
-    	            ? (0, Separated_1.separated)(ma, ma)
-    	            : p(ma.right)
-    	                ? (0, Separated_1.separated)(empty, (0, exports.right)(ma.right))
-    	                : (0, Separated_1.separated)((0, exports.right)(ma.right), empty);
-    	    };
-    	    return {
-    	        URI: exports.URI,
-    	        _E: undefined,
-    	        map: _map,
-    	        compact: compact,
-    	        separate: separate,
-    	        filter: filter,
-    	        filterMap: function (ma, f) {
-    	            if ((0, exports.isLeft)(ma)) {
-    	                return ma;
-    	            }
-    	            var ob = f(ma.right);
-    	            return ob._tag === 'None' ? empty : (0, exports.right)(ob.value);
-    	        },
-    	        partition: partition,
-    	        partitionMap: function (ma, f) {
-    	            if ((0, exports.isLeft)(ma)) {
-    	                return (0, Separated_1.separated)(ma, ma);
-    	            }
-    	            var e = f(ma.right);
-    	            return (0, exports.isLeft)(e) ? (0, Separated_1.separated)((0, exports.right)(e.left), empty) : (0, Separated_1.separated)(empty, (0, exports.right)(e.right));
-    	        }
-    	    };
-    	};
-    	exports.getFilterable = getFilterable;
-    	/**
-    	 * Builds `Witherable` instance for `Either` given `Monoid` for the left side
-    	 *
-    	 * @category filtering
-    	 * @since 2.0.0
-    	 */
-    	var getWitherable = function (M) {
-    	    var F_ = (0, exports.getFilterable)(M);
-    	    var C = (0, exports.getCompactable)(M);
-    	    return {
-    	        URI: exports.URI,
-    	        _E: undefined,
-    	        map: _map,
-    	        compact: F_.compact,
-    	        separate: F_.separate,
-    	        filter: F_.filter,
-    	        filterMap: F_.filterMap,
-    	        partition: F_.partition,
-    	        partitionMap: F_.partitionMap,
-    	        traverse: _traverse,
-    	        sequence: exports.sequence,
-    	        reduce: _reduce,
-    	        foldMap: _foldMap,
-    	        reduceRight: _reduceRight,
-    	        wither: (0, Witherable_1.witherDefault)(exports.Traversable, C),
-    	        wilt: (0, Witherable_1.wiltDefault)(exports.Traversable, C)
-    	    };
-    	};
-    	exports.getWitherable = getWitherable;
-    	/**
-    	 * The default [`Applicative`](#applicative) instance returns the first error, if you want to
-    	 * get all errors you need to provide a way to concatenate them via a `Semigroup`.
-    	 *
-    	 * @example
-    	 * import * as A from 'fp-ts/Apply'
-    	 * import * as E from 'fp-ts/Either'
-    	 * import { pipe } from 'fp-ts/function'
-    	 * import * as S from 'fp-ts/Semigroup'
-    	 * import * as string from 'fp-ts/string'
-    	 *
-    	 * const parseString = (u: unknown): E.Either<string, string> =>
-    	 *   typeof u === 'string' ? E.right(u) : E.left('not a string')
-    	 *
-    	 * const parseNumber = (u: unknown): E.Either<string, number> =>
-    	 *   typeof u === 'number' ? E.right(u) : E.left('not a number')
-    	 *
-    	 * interface Person {
-    	 *   readonly name: string
-    	 *   readonly age: number
-    	 * }
-    	 *
-    	 * const parsePerson = (
-    	 *   input: Record<string, unknown>
-    	 * ): E.Either<string, Person> =>
-    	 *   pipe(
-    	 *     E.Do,
-    	 *     E.apS('name', parseString(input.name)),
-    	 *     E.apS('age', parseNumber(input.age))
-    	 *   )
-    	 *
-    	 * assert.deepStrictEqual(parsePerson({}), E.left('not a string')) // <= first error
-    	 *
-    	 * const Applicative = E.getApplicativeValidation(
-    	 *   pipe(string.Semigroup, S.intercalate(', '))
-    	 * )
-    	 *
-    	 * const apS = A.apS(Applicative)
-    	 *
-    	 * const parsePersonAll = (
-    	 *   input: Record<string, unknown>
-    	 * ): E.Either<string, Person> =>
-    	 *   pipe(
-    	 *     E.Do,
-    	 *     apS('name', parseString(input.name)),
-    	 *     apS('age', parseNumber(input.age))
-    	 *   )
-    	 *
-    	 * assert.deepStrictEqual(parsePersonAll({}), E.left('not a string, not a number')) // <= all errors
-    	 *
-    	 * @category error handling
-    	 * @since 2.7.0
-    	 */
-    	var getApplicativeValidation = function (SE) { return ({
-    	    URI: exports.URI,
-    	    _E: undefined,
-    	    map: _map,
-    	    ap: function (fab, fa) {
-    	        return (0, exports.isLeft)(fab)
-    	            ? (0, exports.isLeft)(fa)
-    	                ? (0, exports.left)(SE.concat(fab.left, fa.left))
-    	                : fab
-    	            : (0, exports.isLeft)(fa)
-    	                ? fa
-    	                : (0, exports.right)(fab.right(fa.right));
-    	    },
-    	    of: exports.of
-    	}); };
-    	exports.getApplicativeValidation = getApplicativeValidation;
-    	/**
-    	 * The default [`Alt`](#alt) instance returns the last error, if you want to
-    	 * get all errors you need to provide a way to concatenate them via a `Semigroup`.
-    	 *
-    	 * @example
-    	 * import * as E from 'fp-ts/Either'
-    	 * import { pipe } from 'fp-ts/function'
-    	 * import * as S from 'fp-ts/Semigroup'
-    	 * import * as string from 'fp-ts/string'
-    	 *
-    	 * const parseString = (u: unknown): E.Either<string, string> =>
-    	 *   typeof u === 'string' ? E.right(u) : E.left('not a string')
-    	 *
-    	 * const parseNumber = (u: unknown): E.Either<string, number> =>
-    	 *   typeof u === 'number' ? E.right(u) : E.left('not a number')
-    	 *
-    	 * const parse = (u: unknown): E.Either<string, string | number> =>
-    	 *   pipe(
-    	 *     parseString(u),
-    	 *     E.alt<string, string | number>(() => parseNumber(u))
-    	 *   )
-    	 *
-    	 * assert.deepStrictEqual(parse(true), E.left('not a number')) // <= last error
-    	 *
-    	 * const Alt = E.getAltValidation(pipe(string.Semigroup, S.intercalate(', ')))
-    	 *
-    	 * const parseAll = (u: unknown): E.Either<string, string | number> =>
-    	 *   Alt.alt<string | number>(parseString(u), () => parseNumber(u))
-    	 *
-    	 * assert.deepStrictEqual(parseAll(true), E.left('not a string, not a number')) // <= all errors
-    	 *
-    	 * @category error handling
-    	 * @since 2.7.0
-    	 */
-    	var getAltValidation = function (SE) { return ({
-    	    URI: exports.URI,
-    	    _E: undefined,
-    	    map: _map,
-    	    alt: function (me, that) {
-    	        if ((0, exports.isRight)(me)) {
-    	            return me;
-    	        }
-    	        var ea = that();
-    	        return (0, exports.isLeft)(ea) ? (0, exports.left)(SE.concat(me.left, ea.left)) : ea;
-    	    }
-    	}); };
-    	exports.getAltValidation = getAltValidation;
-    	/**
-    	 * @category mapping
-    	 * @since 2.0.0
-    	 */
-    	var map = function (f) { return function (fa) {
-    	    return (0, exports.isLeft)(fa) ? fa : (0, exports.right)(f(fa.right));
-    	}; };
-    	exports.map = map;
-    	/**
-    	 * @category instances
-    	 * @since 2.7.0
-    	 */
-    	exports.Functor = {
-    	    URI: exports.URI,
-    	    map: _map
-    	};
-    	/**
-    	 * Maps the `Right` value of this `Either` to the specified constant value.
-    	 *
-    	 * @category mapping
-    	 * @since 2.16.0
-    	 */
-    	exports.as = (0, function_1.dual)(2, (0, Functor_1.as)(exports.Functor));
-    	/**
-    	 * Maps the `Right` value of this `Either` to the void constant value.
-    	 *
-    	 * @category mapping
-    	 * @since 2.16.0
-    	 */
-    	exports.asUnit = (0, Functor_1.asUnit)(exports.Functor);
-    	/**
-    	 * @category constructors
-    	 * @since 2.7.0
-    	 */
-    	exports.of = exports.right;
-    	/**
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	exports.Pointed = {
-    	    URI: exports.URI,
-    	    of: exports.of
-    	};
-    	/**
-    	 * Less strict version of [`ap`](#ap).
-    	 *
-    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
-    	 *
-    	 * @since 2.8.0
-    	 */
-    	var apW = function (fa) { return function (fab) {
-    	    return (0, exports.isLeft)(fab) ? fab : (0, exports.isLeft)(fa) ? fa : (0, exports.right)(fab.right(fa.right));
-    	}; };
-    	exports.apW = apW;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	exports.ap = exports.apW;
-    	/**
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	exports.Apply = {
-    	    URI: exports.URI,
-    	    map: _map,
-    	    ap: _ap
-    	};
-    	/**
-    	 * @category instances
-    	 * @since 2.7.0
-    	 */
-    	exports.Applicative = {
-    	    URI: exports.URI,
-    	    map: _map,
-    	    ap: _ap,
-    	    of: exports.of
-    	};
-    	/**
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	exports.Chain = {
-    	    URI: exports.URI,
-    	    map: _map,
-    	    ap: _ap,
-    	    chain: exports.flatMap
-    	};
-    	/**
-    	 * @category instances
-    	 * @since 2.7.0
-    	 */
-    	exports.Monad = {
-    	    URI: exports.URI,
-    	    map: _map,
-    	    ap: _ap,
-    	    of: exports.of,
-    	    chain: exports.flatMap
-    	};
-    	/**
-    	 * Left-associative fold of a structure.
-    	 *
-    	 * @example
-    	 * import { pipe } from 'fp-ts/function'
-    	 * import * as E from 'fp-ts/Either'
-    	 *
-    	 * const startWith = 'prefix'
-    	 * const concat = (a: string, b: string) => `${a}:${b}`
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(E.right('a'), E.reduce(startWith, concat)),
-    	 *   'prefix:a'
-    	 * )
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(E.left('e'), E.reduce(startWith, concat)),
-    	 *   'prefix'
-    	 * )
-    	 *
-    	 * @category folding
-    	 * @since 2.0.0
-    	 */
-    	var reduce = function (b, f) { return function (fa) {
-    	    return (0, exports.isLeft)(fa) ? b : f(b, fa.right);
-    	}; };
-    	exports.reduce = reduce;
-    	/**
-    	 * Map each element of the structure to a monoid, and combine the results.
-    	 *
-    	 * @example
-    	 * import { pipe } from 'fp-ts/function'
-    	 * import * as E from 'fp-ts/Either'
-    	 * import * as S from 'fp-ts/string'
-    	 *
-    	 * const yell = (a: string) => `${a}!`
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(E.right('a'), E.foldMap(S.Monoid)(yell)),
-    	 *   'a!'
-    	 * )
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(E.left('e'), E.foldMap(S.Monoid)(yell)),
-    	 *   S.Monoid.empty
-    	 * )
-    	 *
-    	 * @category folding
-    	 * @since 2.0.0
-    	 */
-    	var foldMap = function (M) { return function (f) { return function (fa) {
-    	    return (0, exports.isLeft)(fa) ? M.empty : f(fa.right);
-    	}; }; };
-    	exports.foldMap = foldMap;
-    	/**
-    	 * Right-associative fold of a structure.
-    	 *
-    	 * @example
-    	 * import { pipe } from 'fp-ts/function'
-    	 * import * as E from 'fp-ts/Either'
-    	 *
-    	 * const startWith = 'postfix'
-    	 * const concat = (a: string, b: string) => `${a}:${b}`
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(E.right('a'), E.reduceRight(startWith, concat)),
-    	 *   'a:postfix'
-    	 * )
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(E.left('e'), E.reduceRight(startWith, concat)),
-    	 *   'postfix'
-    	 * )
-    	 *
-    	 * @category folding
-    	 * @since 2.0.0
-    	 */
-    	var reduceRight = function (b, f) { return function (fa) {
-    	    return (0, exports.isLeft)(fa) ? b : f(fa.right, b);
-    	}; };
-    	exports.reduceRight = reduceRight;
-    	/**
-    	 * @category instances
-    	 * @since 2.7.0
-    	 */
-    	exports.Foldable = {
-    	    URI: exports.URI,
-    	    reduce: _reduce,
-    	    foldMap: _foldMap,
-    	    reduceRight: _reduceRight
-    	};
-    	/**
-    	 * Map each element of a structure to an action, evaluate these actions from left to right, and collect the results.
-    	 *
-    	 * @example
-    	 * import { pipe } from 'fp-ts/function'
-    	 * import * as RA from 'fp-ts/ReadonlyArray'
-    	 * import * as E from 'fp-ts/Either'
-    	 * import * as O from 'fp-ts/Option'
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(E.right(['a']), E.traverse(O.Applicative)(RA.head)),
-    	 *   O.some(E.right('a'))
-    	 *  )
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(E.right([]), E.traverse(O.Applicative)(RA.head)),
-    	 *   O.none
-    	 * )
-    	 *
-    	 * @category traversing
-    	 * @since 2.6.3
-    	 */
-    	var traverse = function (F) {
-    	    return function (f) {
-    	        return function (ta) {
-    	            return (0, exports.isLeft)(ta) ? F.of((0, exports.left)(ta.left)) : F.map(f(ta.right), exports.right);
-    	        };
-    	    };
-    	};
-    	exports.traverse = traverse;
-    	/**
-    	 * Evaluate each monadic action in the structure from left to right, and collect the results.
-    	 *
-    	 * @example
-    	 * import { pipe } from 'fp-ts/function'
-    	 * import * as E from 'fp-ts/Either'
-    	 * import * as O from 'fp-ts/Option'
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(E.right(O.some('a')), E.sequence(O.Applicative)),
-    	 *   O.some(E.right('a'))
-    	 *  )
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(E.right(O.none), E.sequence(O.Applicative)),
-    	 *   O.none
-    	 * )
-    	 *
-    	 * @category traversing
-    	 * @since 2.6.3
-    	 */
-    	var sequence = function (F) {
-    	    return function (ma) {
-    	        return (0, exports.isLeft)(ma) ? F.of((0, exports.left)(ma.left)) : F.map(ma.right, exports.right);
-    	    };
-    	};
-    	exports.sequence = sequence;
-    	/**
-    	 * @category instances
-    	 * @since 2.7.0
-    	 */
-    	exports.Traversable = {
-    	    URI: exports.URI,
-    	    map: _map,
-    	    reduce: _reduce,
-    	    foldMap: _foldMap,
-    	    reduceRight: _reduceRight,
-    	    traverse: _traverse,
-    	    sequence: exports.sequence
-    	};
-    	/**
-    	 * Map a pair of functions over the two type arguments of the bifunctor.
-    	 *
-    	 * @category mapping
-    	 * @since 2.0.0
-    	 */
-    	var bimap = function (f, g) { return function (fa) {
-    	    return (0, exports.isLeft)(fa) ? (0, exports.left)(f(fa.left)) : (0, exports.right)(g(fa.right));
-    	}; };
-    	exports.bimap = bimap;
-    	/**
-    	 * Map a function over the first type argument of a bifunctor.
-    	 *
-    	 * @category error handling
-    	 * @since 2.0.0
-    	 */
-    	var mapLeft = function (f) { return function (fa) {
-    	    return (0, exports.isLeft)(fa) ? (0, exports.left)(f(fa.left)) : fa;
-    	}; };
-    	exports.mapLeft = mapLeft;
-    	/**
-    	 * @category instances
-    	 * @since 2.7.0
-    	 */
-    	exports.Bifunctor = {
-    	    URI: exports.URI,
-    	    bimap: _bimap,
-    	    mapLeft: _mapLeft
-    	};
-    	/**
-    	 * Less strict version of [`alt`](#alt).
-    	 *
-    	 * The `W` suffix (short for **W**idening) means that the error and the return types will be merged.
-    	 *
-    	 * @category error handling
-    	 * @since 2.9.0
-    	 */
-    	var altW = function (that) { return function (fa) {
-    	    return (0, exports.isLeft)(fa) ? that() : fa;
-    	}; };
-    	exports.altW = altW;
-    	/**
-    	 * Identifies an associative operation on a type constructor. It is similar to `Semigroup`, except that it applies to
-    	 * types of kind `* -> *`.
-    	 *
-    	 * In case of `Either` returns the left-most non-`Left` value (or the right-most `Left` value if both values are `Left`).
-    	 *
-    	 * | x        | y        | pipe(x, alt(() => y) |
-    	 * | -------- | -------- | -------------------- |
-    	 * | left(a)  | left(b)  | left(b)              |
-    	 * | left(a)  | right(2) | right(2)             |
-    	 * | right(1) | left(b)  | right(1)             |
-    	 * | right(1) | right(2) | right(1)             |
-    	 *
-    	 * @example
-    	 * import * as E from 'fp-ts/Either'
-    	 * import { pipe } from 'fp-ts/function'
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     E.left('a'),
-    	 *     E.alt(() => E.left('b'))
-    	 *   ),
-    	 *   E.left('b')
-    	 * )
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     E.left('a'),
-    	 *     E.alt(() => E.right(2))
-    	 *   ),
-    	 *   E.right(2)
-    	 * )
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     E.right(1),
-    	 *     E.alt(() => E.left('b'))
-    	 *   ),
-    	 *   E.right(1)
-    	 * )
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     E.right(1),
-    	 *     E.alt(() => E.right(2))
-    	 *   ),
-    	 *   E.right(1)
-    	 * )
-    	 *
-    	 * @category error handling
-    	 * @since 2.0.0
-    	 */
-    	exports.alt = exports.altW;
-    	/**
-    	 * @category instances
-    	 * @since 2.7.0
-    	 */
-    	exports.Alt = {
-    	    URI: exports.URI,
-    	    map: _map,
-    	    alt: _alt
-    	};
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	var extend = function (f) { return function (wa) {
-    	    return (0, exports.isLeft)(wa) ? wa : (0, exports.right)(f(wa));
-    	}; };
-    	exports.extend = extend;
-    	/**
-    	 * @category instances
-    	 * @since 2.7.0
-    	 */
-    	exports.Extend = {
-    	    URI: exports.URI,
-    	    map: _map,
-    	    extend: _extend
-    	};
-    	/**
-    	 * @category instances
-    	 * @since 2.7.0
-    	 */
-    	exports.ChainRec = {
-    	    URI: exports.URI,
-    	    map: _map,
-    	    ap: _ap,
-    	    chain: exports.flatMap,
-    	    chainRec: _chainRec
-    	};
-    	/**
-    	 * @since 2.6.3
-    	 */
-    	exports.throwError = exports.left;
-    	/**
-    	 * @category instances
-    	 * @since 2.7.0
-    	 */
-    	exports.MonadThrow = {
-    	    URI: exports.URI,
-    	    map: _map,
-    	    ap: _ap,
-    	    of: exports.of,
-    	    chain: exports.flatMap,
-    	    throwError: exports.throwError
-    	};
-    	/**
-    	 * @category instances
-    	 * @since 2.10.0
-    	 */
-    	exports.FromEither = {
-    	    URI: exports.URI,
-    	    fromEither: function_1.identity
-    	};
-    	/**
-    	 * @example
-    	 * import { fromPredicate, left, right } from 'fp-ts/Either'
-    	 * import { pipe } from 'fp-ts/function'
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     1,
-    	 *     fromPredicate(
-    	 *       (n) => n > 0,
-    	 *       () => 'error'
-    	 *     )
-    	 *   ),
-    	 *   right(1)
-    	 * )
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     -1,
-    	 *     fromPredicate(
-    	 *       (n) => n > 0,
-    	 *       () => 'error'
-    	 *     )
-    	 *   ),
-    	 *   left('error')
-    	 * )
-    	 *
-    	 * @category lifting
-    	 * @since 2.0.0
-    	 */
-    	exports.fromPredicate = (0, FromEither_1.fromPredicate)(exports.FromEither);
-    	// -------------------------------------------------------------------------------------
-    	// conversions
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @example
-    	 * import * as E from 'fp-ts/Either'
-    	 * import { pipe } from 'fp-ts/function'
-    	 * import * as O from 'fp-ts/Option'
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     O.some(1),
-    	 *     E.fromOption(() => 'error')
-    	 *   ),
-    	 *   E.right(1)
-    	 * )
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     O.none,
-    	 *     E.fromOption(() => 'error')
-    	 *   ),
-    	 *   E.left('error')
-    	 * )
-    	 *
-    	 * @category conversions
-    	 * @since 2.0.0
-    	 */
-    	exports.fromOption = 
-    	/*#__PURE__*/ (0, FromEither_1.fromOption)(exports.FromEither);
-    	// -------------------------------------------------------------------------------------
-    	// refinements
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * Returns `true` if the either is an instance of `Left`, `false` otherwise.
-    	 *
-    	 * @category refinements
-    	 * @since 2.0.0
-    	 */
-    	exports.isLeft = _.isLeft;
-    	/**
-    	 * Returns `true` if the either is an instance of `Right`, `false` otherwise.
-    	 *
-    	 * @category refinements
-    	 * @since 2.0.0
-    	 */
-    	exports.isRight = _.isRight;
-    	/**
-    	 * Less strict version of [`match`](#match).
-    	 *
-    	 * The `W` suffix (short for **W**idening) means that the handler return types will be merged.
-    	 *
-    	 * @category pattern matching
-    	 * @since 2.10.0
-    	 */
-    	var matchW = function (onLeft, onRight) {
-    	    return function (ma) {
-    	        return (0, exports.isLeft)(ma) ? onLeft(ma.left) : onRight(ma.right);
-    	    };
-    	};
-    	exports.matchW = matchW;
-    	/**
-    	 * Alias of [`matchW`](#matchw).
-    	 *
-    	 * @category pattern matching
-    	 * @since 2.10.0
-    	 */
-    	exports.foldW = exports.matchW;
-    	/**
-    	 * Takes two functions and an `Either` value, if the value is a `Left` the inner value is applied to the first function,
-    	 * if the value is a `Right` the inner value is applied to the second function.
-    	 *
-    	 * @example
-    	 * import { match, left, right } from 'fp-ts/Either'
-    	 * import { pipe } from 'fp-ts/function'
-    	 *
-    	 * function onLeft(errors: Array<string>): string {
-    	 *   return `Errors: ${errors.join(', ')}`
-    	 * }
-    	 *
-    	 * function onRight(value: number): string {
-    	 *   return `Ok: ${value}`
-    	 * }
-    	 *
-    	 * assert.strictEqual(
-    	 *   pipe(
-    	 *     right(1),
-    	 *     match(onLeft, onRight)
-    	 *   ),
-    	 *   'Ok: 1'
-    	 * )
-    	 * assert.strictEqual(
-    	 *   pipe(
-    	 *     left(['error 1', 'error 2']),
-    	 *     match(onLeft, onRight)
-    	 *   ),
-    	 *   'Errors: error 1, error 2'
-    	 * )
-    	 *
-    	 * @category pattern matching
-    	 * @since 2.10.0
-    	 */
-    	exports.match = exports.matchW;
-    	/**
-    	 * Alias of [`match`](#match).
-    	 *
-    	 * @category pattern matching
-    	 * @since 2.0.0
-    	 */
-    	exports.fold = exports.match;
-    	/**
-    	 * Less strict version of [`getOrElse`](#getorelse).
-    	 *
-    	 * The `W` suffix (short for **W**idening) means that the handler return type will be merged.
-    	 *
-    	 * @category error handling
-    	 * @since 2.6.0
-    	 */
-    	var getOrElseW = function (onLeft) {
-    	    return function (ma) {
-    	        return (0, exports.isLeft)(ma) ? onLeft(ma.left) : ma.right;
-    	    };
-    	};
-    	exports.getOrElseW = getOrElseW;
-    	/**
-    	 * Returns the wrapped value if it's a `Right` or a default value if is a `Left`.
-    	 *
-    	 * @example
-    	 * import { getOrElse, left, right } from 'fp-ts/Either'
-    	 * import { pipe } from 'fp-ts/function'
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     right(1),
-    	 *     getOrElse(() => 0)
-    	 *   ),
-    	 *   1
-    	 * )
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     left('error'),
-    	 *     getOrElse(() => 0)
-    	 *   ),
-    	 *   0
-    	 * )
-    	 *
-    	 * @category error handling
-    	 * @since 2.0.0
-    	 */
-    	exports.getOrElse = exports.getOrElseW;
-    	// -------------------------------------------------------------------------------------
-    	// combinators
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @category mapping
-    	 * @since 2.10.0
-    	 */
-    	exports.flap = (0, Functor_1.flap)(exports.Functor);
-    	/**
-    	 * Combine two effectful actions, keeping only the result of the first.
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	exports.apFirst = (0, Apply_1.apFirst)(exports.Apply);
-    	/**
-    	 * Less strict version of [`apFirst`](#apfirst)
-    	 *
-    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
-    	 *
-    	 * @since 2.12.0
-    	 */
-    	exports.apFirstW = exports.apFirst;
-    	/**
-    	 * Combine two effectful actions, keeping only the result of the second.
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	exports.apSecond = (0, Apply_1.apSecond)(exports.Apply);
-    	/**
-    	 * Less strict version of [`apSecond`](#apsecond)
-    	 *
-    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
-    	 *
-    	 * @since 2.12.0
-    	 */
-    	exports.apSecondW = exports.apSecond;
-    	/**
-    	 * Composes computations in sequence, using the return value of one computation to determine the next computation and
-    	 * keeping only the result of the first.
-    	 *
-    	 * @category combinators
-    	 * @since 2.15.0
-    	 */
-    	exports.tap = (0, function_1.dual)(2, chainable.tap(exports.Chain));
-    	/**
-    	 * Less strict version of [`flatten`](#flatten).
-    	 *
-    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
-    	 *
-    	 * @category sequencing
-    	 * @since 2.11.0
-    	 */
-    	exports.flattenW = 
-    	/*#__PURE__*/ (0, exports.flatMap)(function_1.identity);
-    	/**
-    	 * The `flatten` function is the conventional monad join operator. It is used to remove one level of monadic structure, projecting its bound argument into the outer level.
-    	 *
-    	 * @example
-    	 * import * as E from 'fp-ts/Either'
-    	 *
-    	 * assert.deepStrictEqual(E.flatten(E.right(E.right('a'))), E.right('a'))
-    	 * assert.deepStrictEqual(E.flatten(E.right(E.left('e'))), E.left('e'))
-    	 * assert.deepStrictEqual(E.flatten(E.left('e')), E.left('e'))
-    	 *
-    	 * @category sequencing
-    	 * @since 2.0.0
-    	 */
-    	exports.flatten = exports.flattenW;
-    	/**
-    	 * @since 2.0.0
-    	 */
-    	exports.duplicate = (0, exports.extend)(function_1.identity);
-    	/**
-    	 * Use `liftOption`.
-    	 *
-    	 * @category legacy
-    	 * @since 2.10.0
-    	 */
-    	exports.fromOptionK = 
-    	/*#__PURE__*/ (0, FromEither_1.fromOptionK)(exports.FromEither);
-    	/**
-    	 * Use `flatMapOption`.
-    	 *
-    	 * @category legacy
-    	 * @since 2.11.0
-    	 */
-    	exports.chainOptionK = (0, FromEither_1.chainOptionK)(exports.FromEither, exports.Chain);
-    	/**
-    	 * Use `flatMapOption`.
-    	 *
-    	 * @category legacy
-    	 * @since 2.13.2
-    	 */
-    	exports.chainOptionKW = exports.chainOptionK;
-    	/** @internal */
-    	var _FromEither = {
-    	    fromEither: exports.FromEither.fromEither
-    	};
-    	/**
-    	 * @category lifting
-    	 * @since 2.15.0
-    	 */
-    	exports.liftNullable = _.liftNullable(_FromEither);
-    	/**
-    	 * @category lifting
-    	 * @since 2.15.0
-    	 */
-    	exports.liftOption = _.liftOption(_FromEither);
-    	/** @internal */
-    	var _FlatMap = {
-    	    flatMap: exports.flatMap
-    	};
-    	/**
-    	 * @category sequencing
-    	 * @since 2.15.0
-    	 */
-    	exports.flatMapNullable = _.flatMapNullable(_FromEither, _FlatMap);
-    	/**
-    	 * @category sequencing
-    	 * @since 2.15.0
-    	 */
-    	exports.flatMapOption = _.flatMapOption(_FromEither, _FlatMap);
-    	/**
-    	 * @example
-    	 * import * as E from 'fp-ts/Either'
-    	 * import { pipe } from 'fp-ts/function'
-    	 *
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     E.right(1),
-    	 *     E.filterOrElse(
-    	 *       (n) => n > 0,
-    	 *       () => 'error'
-    	 *     )
-    	 *   ),
-    	 *   E.right(1)
-    	 * )
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     E.right(-1),
-    	 *     E.filterOrElse(
-    	 *       (n) => n > 0,
-    	 *       () => 'error'
-    	 *     )
-    	 *   ),
-    	 *   E.left('error')
-    	 * )
-    	 * assert.deepStrictEqual(
-    	 *   pipe(
-    	 *     E.left('a'),
-    	 *     E.filterOrElse(
-    	 *       (n) => n > 0,
-    	 *       () => 'error'
-    	 *     )
-    	 *   ),
-    	 *   E.left('a')
-    	 * )
-    	 *
-    	 * @category filtering
-    	 * @since 2.0.0
-    	 */
-    	exports.filterOrElse = (0, FromEither_1.filterOrElse)(exports.FromEither, exports.Chain);
-    	/**
-    	 * Less strict version of [`filterOrElse`](#filterorelse).
-    	 *
-    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
-    	 *
-    	 * @category filtering
-    	 * @since 2.9.0
-    	 */
-    	exports.filterOrElseW = exports.filterOrElse;
-    	/**
-    	 * Returns a `Right` if is a `Left` (and vice versa).
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	var swap = function (ma) { return ((0, exports.isLeft)(ma) ? (0, exports.right)(ma.left) : (0, exports.left)(ma.right)); };
-    	exports.swap = swap;
-    	/**
-    	 * Less strict version of [`orElse`](#orelse).
-    	 *
-    	 * The `W` suffix (short for **W**idening) means that the return types will be merged.
-    	 *
-    	 * @category error handling
-    	 * @since 2.10.0
-    	 */
-    	var orElseW = function (onLeft) {
-    	    return function (ma) {
-    	        return (0, exports.isLeft)(ma) ? onLeft(ma.left) : ma;
-    	    };
-    	};
-    	exports.orElseW = orElseW;
-    	/**
-    	 * Useful for recovering from errors.
-    	 *
-    	 * @category error handling
-    	 * @since 2.0.0
-    	 */
-    	exports.orElse = exports.orElseW;
-    	/**
-    	 * Takes a default and a nullable value, if the value is not nully, turn it into a `Right`, if the value is nully use
-    	 * the provided default as a `Left`.
-    	 *
-    	 * @example
-    	 * import { fromNullable, left, right } from 'fp-ts/Either'
-    	 *
-    	 * const parse = fromNullable('nully')
-    	 *
-    	 * assert.deepStrictEqual(parse(1), right(1))
-    	 * assert.deepStrictEqual(parse(null), left('nully'))
-    	 *
-    	 * @category conversions
-    	 * @since 2.0.0
-    	 */
-    	var fromNullable = function (e) {
-    	    return function (a) {
-    	        return a == null ? (0, exports.left)(e) : (0, exports.right)(a);
-    	    };
-    	};
-    	exports.fromNullable = fromNullable;
-    	/**
-    	 * Constructs a new `Either` from a function that might throw.
-    	 *
-    	 * See also [`tryCatchK`](#trycatchk).
-    	 *
-    	 * @example
-    	 * import * as E from 'fp-ts/Either'
-    	 *
-    	 * const unsafeHead = <A>(as: ReadonlyArray<A>): A => {
-    	 *   if (as.length > 0) {
-    	 *     return as[0]
-    	 *   } else {
-    	 *     throw new Error('empty array')
-    	 *   }
-    	 * }
-    	 *
-    	 * const head = <A>(as: ReadonlyArray<A>): E.Either<Error, A> =>
-    	 *   E.tryCatch(() => unsafeHead(as), e => (e instanceof Error ? e : new Error('unknown error')))
-    	 *
-    	 * assert.deepStrictEqual(head([]), E.left(new Error('empty array')))
-    	 * assert.deepStrictEqual(head([1, 2, 3]), E.right(1))
-    	 *
-    	 * @category interop
-    	 * @since 2.0.0
-    	 */
-    	var tryCatch = function (f, onThrow) {
-    	    try {
-    	        return (0, exports.right)(f());
-    	    }
-    	    catch (e) {
-    	        return (0, exports.left)(onThrow(e));
-    	    }
-    	};
-    	exports.tryCatch = tryCatch;
-    	/**
-    	 * Converts a function that may throw to one returning a `Either`.
-    	 *
-    	 * @category interop
-    	 * @since 2.10.0
-    	 */
-    	var tryCatchK = function (f, onThrow) {
-    	    return function () {
-    	        var a = [];
-    	        for (var _i = 0; _i < arguments.length; _i++) {
-    	            a[_i] = arguments[_i];
-    	        }
-    	        return (0, exports.tryCatch)(function () { return f.apply(void 0, a); }, onThrow);
-    	    };
-    	};
-    	exports.tryCatchK = tryCatchK;
-    	/**
-    	 * Use `liftNullable`.
-    	 *
-    	 * @category legacy
-    	 * @since 2.9.0
-    	 */
-    	var fromNullableK = function (e) {
-    	    var from = (0, exports.fromNullable)(e);
-    	    return function (f) { return (0, function_1.flow)(f, from); };
-    	};
-    	exports.fromNullableK = fromNullableK;
-    	/**
-    	 * Use `flatMapNullable`.
-    	 *
-    	 * @category legacy
-    	 * @since 2.9.0
-    	 */
-    	var chainNullableK = function (e) {
-    	    var from = (0, exports.fromNullableK)(e);
-    	    return function (f) { return (0, exports.flatMap)(from(f)); };
-    	};
-    	exports.chainNullableK = chainNullableK;
-    	/**
-    	 * @category conversions
-    	 * @since 2.10.0
-    	 */
-    	exports.toUnion = (0, exports.foldW)(function_1.identity, function_1.identity);
-    	// -------------------------------------------------------------------------------------
-    	// utils
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * Default value for the `onError` argument of `tryCatch`
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	function toError(e) {
-    	    return e instanceof Error ? e : new Error(String(e));
-    	}
-    	exports.toError = toError;
-    	function elem(E) {
-    	    return function (a, ma) {
-    	        if (ma === undefined) {
-    	            var elemE_1 = elem(E);
-    	            return function (ma) { return elemE_1(a, ma); };
-    	        }
-    	        return (0, exports.isLeft)(ma) ? false : E.equals(a, ma.right);
-    	    };
-    	}
-    	exports.elem = elem;
-    	/**
-    	 * Returns `false` if `Left` or returns the result of the application of the given predicate to the `Right` value.
-    	 *
-    	 * @example
-    	 * import { exists, left, right } from 'fp-ts/Either'
-    	 *
-    	 * const gt2 = exists((n: number) => n > 2)
-    	 *
-    	 * assert.strictEqual(gt2(left('a')), false)
-    	 * assert.strictEqual(gt2(right(1)), false)
-    	 * assert.strictEqual(gt2(right(3)), true)
-    	 *
-    	 * @since 2.0.0
-    	 */
-    	var exists = function (predicate) {
-    	    return function (ma) {
-    	        return (0, exports.isLeft)(ma) ? false : predicate(ma.right);
-    	    };
-    	};
-    	exports.exists = exists;
-    	// -------------------------------------------------------------------------------------
-    	// do notation
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @category do notation
-    	 * @since 2.9.0
-    	 */
-    	exports.Do = (0, exports.of)(_.emptyRecord);
-    	/**
-    	 * @category do notation
-    	 * @since 2.8.0
-    	 */
-    	exports.bindTo = (0, Functor_1.bindTo)(exports.Functor);
-    	var let_ = /*#__PURE__*/ (0, Functor_1.let)(exports.Functor);
-    	exports.let = let_;
-    	/**
-    	 * @category do notation
-    	 * @since 2.8.0
-    	 */
-    	exports.bind = chainable.bind(exports.Chain);
-    	/**
-    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
-    	 *
-    	 * @category do notation
-    	 * @since 2.8.0
-    	 */
-    	exports.bindW = exports.bind;
-    	/**
-    	 * @category do notation
-    	 * @since 2.8.0
-    	 */
-    	exports.apS = (0, Apply_1.apS)(exports.Apply);
-    	/**
-    	 * Less strict version of [`apS`](#aps).
-    	 *
-    	 * The `W` suffix (short for **W**idening) means that the error types will be merged.
-    	 *
-    	 * @category do notation
-    	 * @since 2.8.0
-    	 */
-    	exports.apSW = exports.apS;
-    	/**
-    	 * @since 2.11.0
-    	 */
-    	exports.ApT = (0, exports.of)(_.emptyReadonlyArray);
-    	// -------------------------------------------------------------------------------------
-    	// array utils
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * Equivalent to `ReadonlyNonEmptyArray#traverseWithIndex(Applicative)`.
-    	 *
-    	 * @category traversing
-    	 * @since 2.11.0
-    	 */
-    	var traverseReadonlyNonEmptyArrayWithIndex = function (f) {
-    	    return function (as) {
-    	        var e = f(0, _.head(as));
-    	        if ((0, exports.isLeft)(e)) {
-    	            return e;
-    	        }
-    	        var out = [e.right];
-    	        for (var i = 1; i < as.length; i++) {
-    	            var e_1 = f(i, as[i]);
-    	            if ((0, exports.isLeft)(e_1)) {
-    	                return e_1;
-    	            }
-    	            out.push(e_1.right);
-    	        }
-    	        return (0, exports.right)(out);
-    	    };
-    	};
-    	exports.traverseReadonlyNonEmptyArrayWithIndex = traverseReadonlyNonEmptyArrayWithIndex;
-    	/**
-    	 * Equivalent to `ReadonlyArray#traverseWithIndex(Applicative)`.
-    	 *
-    	 * @category traversing
-    	 * @since 2.11.0
-    	 */
-    	var traverseReadonlyArrayWithIndex = function (f) {
-    	    var g = (0, exports.traverseReadonlyNonEmptyArrayWithIndex)(f);
-    	    return function (as) { return (_.isNonEmpty(as) ? g(as) : exports.ApT); };
-    	};
-    	exports.traverseReadonlyArrayWithIndex = traverseReadonlyArrayWithIndex;
-    	/**
-    	 * Equivalent to `ReadonlyArray#traverseWithIndex(Applicative)`.
-    	 *
-    	 * @category traversing
-    	 * @since 2.9.0
-    	 */
-    	exports.traverseArrayWithIndex = exports.traverseReadonlyArrayWithIndex;
-    	/**
-    	 * Equivalent to `ReadonlyArray#traverse(Applicative)`.
-    	 *
-    	 * @category traversing
-    	 * @since 2.9.0
-    	 */
-    	var traverseArray = function (f) { return (0, exports.traverseReadonlyArrayWithIndex)(function (_, a) { return f(a); }); };
-    	exports.traverseArray = traverseArray;
-    	/**
-    	 * Equivalent to `ReadonlyArray#sequence(Applicative)`.
-    	 *
-    	 * @category traversing
-    	 * @since 2.9.0
-    	 */
-    	exports.sequenceArray = 
-    	/*#__PURE__*/ (0, exports.traverseArray)(function_1.identity);
-    	// -------------------------------------------------------------------------------------
-    	// legacy
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * Alias of `flatMap`.
-    	 *
-    	 * @category legacy
-    	 * @since 2.6.0
-    	 */
-    	exports.chainW = exports.flatMap;
-    	/**
-    	 * Alias of `flatMap`.
-    	 *
-    	 * @category legacy
-    	 * @since 2.0.0
-    	 */
-    	exports.chain = exports.flatMap;
-    	/**
-    	 * Alias of `tap`.
-    	 *
-    	 * @category legacy
-    	 * @since 2.0.0
-    	 */
-    	exports.chainFirst = exports.tap;
-    	/**
-    	 * Alias of `tap`.
-    	 *
-    	 * @category legacy
-    	 * @since 2.8.0
-    	 */
-    	exports.chainFirstW = exports.tap;
-    	/**
-    	 * Use [`parse`](./Json.ts.html#parse) instead.
-    	 *
-    	 * @category zone of death
-    	 * @since 2.0.0
-    	 * @deprecated
-    	 */
-    	function parseJSON(s, onError) {
-    	    return (0, exports.tryCatch)(function () { return JSON.parse(s); }, onError);
-    	}
-    	exports.parseJSON = parseJSON;
-    	/**
-    	 * Use [`stringify`](./Json.ts.html#stringify) instead.
-    	 *
-    	 * @category zone of death
-    	 * @since 2.0.0
-    	 * @deprecated
-    	 */
-    	var stringifyJSON = function (u, onError) {
-    	    return (0, exports.tryCatch)(function () {
-    	        var s = JSON.stringify(u);
-    	        if (typeof s !== 'string') {
-    	            throw new Error('Converting unsupported structure to JSON');
-    	        }
-    	        return s;
-    	    }, onError);
-    	};
-    	exports.stringifyJSON = stringifyJSON;
-    	/**
-    	 * This instance is deprecated, use small, specific instances instead.
-    	 * For example if a function needs a `Functor` instance, pass `E.Functor` instead of `E.either`
-    	 * (where `E` is from `import E from 'fp-ts/Either'`)
-    	 *
-    	 * @category zone of death
-    	 * @since 2.0.0
-    	 * @deprecated
-    	 */
-    	exports.either = {
-    	    URI: exports.URI,
-    	    map: _map,
-    	    of: exports.of,
-    	    ap: _ap,
-    	    chain: exports.flatMap,
-    	    reduce: _reduce,
-    	    foldMap: _foldMap,
-    	    reduceRight: _reduceRight,
-    	    traverse: _traverse,
-    	    sequence: exports.sequence,
-    	    bimap: _bimap,
-    	    mapLeft: _mapLeft,
-    	    alt: _alt,
-    	    extend: _extend,
-    	    chainRec: _chainRec,
-    	    throwError: exports.throwError
-    	};
-    	/**
-    	 * Use [`getApplySemigroup`](./Apply.ts.html#getapplysemigroup) instead.
-    	 *
-    	 * Semigroup returning the left-most `Left` value. If both operands are `Right`s then the inner values
-    	 * are concatenated using the provided `Semigroup`
-    	 *
-    	 * @category zone of death
-    	 * @since 2.0.0
-    	 * @deprecated
-    	 */
-    	exports.getApplySemigroup = 
-    	/*#__PURE__*/ (0, Apply_1.getApplySemigroup)(exports.Apply);
-    	/**
-    	 * Use [`getApplicativeMonoid`](./Applicative.ts.html#getapplicativemonoid) instead.
-    	 *
-    	 * @category zone of death
-    	 * @since 2.0.0
-    	 * @deprecated
-    	 */
-    	exports.getApplyMonoid = 
-    	/*#__PURE__*/ (0, Applicative_1.getApplicativeMonoid)(exports.Applicative);
-    	/**
-    	 * Use [`getApplySemigroup`](./Apply.ts.html#getapplysemigroup) instead.
-    	 *
-    	 * @category zone of death
-    	 * @since 2.0.0
-    	 * @deprecated
-    	 */
-    	var getValidationSemigroup = function (SE, SA) {
-    	    return (0, Apply_1.getApplySemigroup)((0, exports.getApplicativeValidation)(SE))(SA);
-    	};
-    	exports.getValidationSemigroup = getValidationSemigroup;
-    	/**
-    	 * Use [`getApplicativeMonoid`](./Applicative.ts.html#getapplicativemonoid) instead.
-    	 *
-    	 * @category zone of death
-    	 * @since 2.0.0
-    	 * @deprecated
-    	 */
-    	var getValidationMonoid = function (SE, MA) {
-    	    return (0, Applicative_1.getApplicativeMonoid)((0, exports.getApplicativeValidation)(SE))(MA);
-    	};
-    	exports.getValidationMonoid = getValidationMonoid;
-    	/**
-    	 * Use [`getApplicativeValidation`](#getapplicativevalidation) and [`getAltValidation`](#getaltvalidation) instead.
-    	 *
-    	 * @category zone of death
-    	 * @since 2.0.0
-    	 * @deprecated
-    	 */
-    	function getValidation(SE) {
-    	    var ap = (0, exports.getApplicativeValidation)(SE).ap;
-    	    var alt = (0, exports.getAltValidation)(SE).alt;
-    	    return {
-    	        URI: exports.URI,
-    	        _E: undefined,
-    	        map: _map,
-    	        of: exports.of,
-    	        chain: exports.flatMap,
-    	        bimap: _bimap,
-    	        mapLeft: _mapLeft,
-    	        reduce: _reduce,
-    	        foldMap: _foldMap,
-    	        reduceRight: _reduceRight,
-    	        extend: _extend,
-    	        traverse: _traverse,
-    	        sequence: exports.sequence,
-    	        chainRec: _chainRec,
-    	        throwError: exports.throwError,
-    	        ap: ap,
-    	        alt: alt
-    	    };
-    	}
-    	exports.getValidation = getValidation; 
-    } (Either));
-
-    (function (exports) {
-    	var __extends = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
-    	    var extendStatics = function (d, b) {
-    	        extendStatics = Object.setPrototypeOf ||
-    	            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-    	            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-    	        return extendStatics(d, b);
-    	    };
-    	    return function (d, b) {
-    	        if (typeof b !== "function" && b !== null)
-    	            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-    	        extendStatics(d, b);
-    	        function __() { this.constructor = d; }
-    	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    	    };
-    	})();
-    	var __assign = (commonjsGlobal && commonjsGlobal.__assign) || function () {
-    	    __assign = Object.assign || function(t) {
-    	        for (var s, i = 1, n = arguments.length; i < n; i++) {
-    	            s = arguments[i];
-    	            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-    	                t[p] = s[p];
-    	        }
-    	        return t;
-    	    };
-    	    return __assign.apply(this, arguments);
-    	};
-    	var __spreadArray = (commonjsGlobal && commonjsGlobal.__spreadArray) || function (to, from, pack) {
-    	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-    	        if (ar || !(i in from)) {
-    	            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-    	            ar[i] = from[i];
-    	        }
-    	    }
-    	    return to.concat(ar || Array.prototype.slice.call(from));
-    	};
-    	Object.defineProperty(exports, "__esModule", { value: true });
-    	exports.partial = exports.PartialType = exports.type = exports.InterfaceType = exports.array = exports.ArrayType = exports.recursion = exports.RecursiveType = exports.Int = exports.brand = exports.RefinementType = exports.keyof = exports.KeyofType = exports.literal = exports.LiteralType = exports.void = exports.undefined = exports.null = exports.UnknownRecord = exports.AnyDictionaryType = exports.UnknownArray = exports.AnyArrayType = exports.boolean = exports.BooleanType = exports.bigint = exports.BigIntType = exports.number = exports.NumberType = exports.string = exports.StringType = exports.unknown = exports.UnknownType = exports.voidType = exports.VoidType = exports.UndefinedType = exports.nullType = exports.NullType = exports.getIndex = exports.getTags = exports.emptyTags = exports.mergeAll = exports.getDomainKeys = exports.appendContext = exports.getContextEntry = exports.getFunctionName = exports.identity = exports.Type = exports.success = exports.failure = exports.failures = void 0;
-    	exports.alias = exports.clean = exports.StrictType = exports.dictionary = exports.object = exports.ObjectType = exports.Dictionary = exports.getDefaultContext = exports.getValidationError = exports.interface = exports.Array = exports.taggedUnion = exports.TaggedUnionType = exports.Integer = exports.refinement = exports.any = exports.AnyType = exports.never = exports.NeverType = exports.Function = exports.FunctionType = exports.exact = exports.ExactType = exports.strict = exports.readonlyArray = exports.ReadonlyArrayType = exports.readonly = exports.ReadonlyType = exports.tuple = exports.TupleType = exports.intersection = exports.IntersectionType = exports.union = exports.UnionType = exports.record = exports.DictionaryType = void 0;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var Either_1 = Either;
-    	/**
-    	 * @category Decode error
-    	 * @since 1.0.0
-    	 */
-    	exports.failures = Either_1.left;
-    	/**
-    	 * @category Decode error
-    	 * @since 1.0.0
-    	 */
-    	var failure = function (value, context, message) {
-    	    return (0, exports.failures)([{ value: value, context: context, message: message }]);
-    	};
-    	exports.failure = failure;
-    	/**
-    	 * @category Decode error
-    	 * @since 1.0.0
-    	 */
-    	exports.success = Either_1.right;
-    	/**
-    	 * @category Codec
-    	 * @since 1.0.0
-    	 */
-    	var Type = /** @class */ (function () {
-    	    function Type(
-    	    /** a unique name for this codec */
-    	    name, 
-    	    /** a custom type guard */
-    	    is, 
-    	    /** succeeds if a value of type I can be decoded to a value of type A */
-    	    validate, 
-    	    /** converts a value of type A to a value of type O */
-    	    encode) {
-    	        this.name = name;
-    	        this.is = is;
-    	        this.validate = validate;
-    	        this.encode = encode;
-    	        this.decode = this.decode.bind(this);
-    	    }
-    	    /**
-    	     * @since 1.0.0
-    	     */
-    	    Type.prototype.pipe = function (ab, name) {
-    	        var _this = this;
-    	        if (name === void 0) { name = "pipe(".concat(this.name, ", ").concat(ab.name, ")"); }
-    	        return new Type(name, ab.is, function (i, c) {
-    	            var e = _this.validate(i, c);
-    	            if ((0, Either_1.isLeft)(e)) {
-    	                return e;
-    	            }
-    	            return ab.validate(e.right, c);
-    	        }, this.encode === exports.identity && ab.encode === exports.identity ? exports.identity : function (b) { return _this.encode(ab.encode(b)); });
-    	    };
-    	    /**
-    	     * @since 1.0.0
-    	     */
-    	    Type.prototype.asDecoder = function () {
-    	        return this;
-    	    };
-    	    /**
-    	     * @since 1.0.0
-    	     */
-    	    Type.prototype.asEncoder = function () {
-    	        return this;
-    	    };
-    	    /**
-    	     * a version of `validate` with a default context
-    	     * @since 1.0.0
-    	     */
-    	    Type.prototype.decode = function (i) {
-    	        return this.validate(i, [{ key: '', type: this, actual: i }]);
-    	    };
-    	    return Type;
-    	}());
-    	exports.Type = Type;
-    	// -------------------------------------------------------------------------------------
-    	// utils
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var identity = function (a) { return a; };
-    	exports.identity = identity;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	function getFunctionName(f) {
-    	    return f.displayName || f.name || "<function".concat(f.length, ">");
-    	}
-    	exports.getFunctionName = getFunctionName;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	function getContextEntry(key, decoder) {
-    	    return { key: key, type: decoder };
-    	}
-    	exports.getContextEntry = getContextEntry;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	function appendContext(c, key, decoder, actual) {
-    	    var len = c.length;
-    	    var r = Array(len + 1);
-    	    for (var i = 0; i < len; i++) {
-    	        r[i] = c[i];
-    	    }
-    	    r[len] = { key: key, type: decoder, actual: actual };
-    	    return r;
-    	}
-    	exports.appendContext = appendContext;
-    	function pushAll(xs, ys) {
-    	    var l = ys.length;
-    	    for (var i = 0; i < l; i++) {
-    	        xs.push(ys[i]);
-    	    }
-    	}
-    	var hasOwnProperty = Object.prototype.hasOwnProperty;
-    	function getNameFromProps(props) {
-    	    return Object.keys(props)
-    	        .map(function (k) { return "".concat(k, ": ").concat(props[k].name); })
-    	        .join(', ');
-    	}
-    	function useIdentity(codecs) {
-    	    for (var i = 0; i < codecs.length; i++) {
-    	        if (codecs[i].encode !== exports.identity) {
-    	            return false;
-    	        }
-    	    }
-    	    return true;
-    	}
-    	function getInterfaceTypeName(props) {
-    	    return "{ ".concat(getNameFromProps(props), " }");
-    	}
-    	function getPartialTypeName(inner) {
-    	    return "Partial<".concat(inner, ">");
-    	}
-    	function enumerableRecord(keys, domain, codomain, name) {
-    	    if (name === void 0) { name = "{ [K in ".concat(domain.name, "]: ").concat(codomain.name, " }"); }
-    	    var len = keys.length;
-    	    return new DictionaryType(name, function (u) { return exports.UnknownRecord.is(u) && keys.every(function (k) { return codomain.is(u[k]); }); }, function (u, c) {
-    	        var e = exports.UnknownRecord.validate(u, c);
-    	        if ((0, Either_1.isLeft)(e)) {
-    	            return e;
-    	        }
-    	        var o = e.right;
-    	        var a = {};
-    	        var errors = [];
-    	        var changed = false;
-    	        for (var i = 0; i < len; i++) {
-    	            var k = keys[i];
-    	            var ok = o[k];
-    	            var codomainResult = codomain.validate(ok, appendContext(c, k, codomain, ok));
-    	            if ((0, Either_1.isLeft)(codomainResult)) {
-    	                pushAll(errors, codomainResult.left);
-    	            }
-    	            else {
-    	                var vok = codomainResult.right;
-    	                changed = changed || vok !== ok;
-    	                a[k] = vok;
-    	            }
-    	        }
-    	        return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)((changed || Object.keys(o).length !== len ? a : o));
-    	    }, codomain.encode === exports.identity
-    	        ? exports.identity
-    	        : function (a) {
-    	            var s = {};
-    	            for (var i = 0; i < len; i++) {
-    	                var k = keys[i];
-    	                s[k] = codomain.encode(a[k]);
-    	            }
-    	            return s;
-    	        }, domain, codomain);
-    	}
-    	/**
-    	 * @internal
-    	 */
-    	function getDomainKeys(domain) {
-    	    var _a;
-    	    if (isLiteralC(domain)) {
-    	        var literal_1 = domain.value;
-    	        if (exports.string.is(literal_1)) {
-    	            return _a = {}, _a[literal_1] = null, _a;
-    	        }
-    	    }
-    	    else if (isKeyofC(domain)) {
-    	        return domain.keys;
-    	    }
-    	    else if (isUnionC(domain)) {
-    	        var keys = domain.types.map(function (type) { return getDomainKeys(type); });
-    	        return keys.some(undefinedType.is) ? undefined : Object.assign.apply(Object, __spreadArray([{}], keys, false));
-    	    }
-    	    return undefined;
-    	}
-    	exports.getDomainKeys = getDomainKeys;
-    	function nonEnumerableRecord(domain, codomain, name) {
-    	    if (name === void 0) { name = "{ [K in ".concat(domain.name, "]: ").concat(codomain.name, " }"); }
-    	    return new DictionaryType(name, function (u) {
-    	        if (exports.UnknownRecord.is(u)) {
-    	            return Object.keys(u).every(function (k) { return domain.is(k) && codomain.is(u[k]); });
-    	        }
-    	        return isAnyC(codomain) && Array.isArray(u);
-    	    }, function (u, c) {
-    	        if (exports.UnknownRecord.is(u)) {
-    	            var a = {};
-    	            var errors = [];
-    	            var keys = Object.keys(u);
-    	            var len = keys.length;
-    	            var changed = false;
-    	            for (var i = 0; i < len; i++) {
-    	                var k = keys[i];
-    	                var ok = u[k];
-    	                var domainResult = domain.validate(k, appendContext(c, k, domain, k));
-    	                if ((0, Either_1.isLeft)(domainResult)) {
-    	                    pushAll(errors, domainResult.left);
-    	                }
-    	                else {
-    	                    var vk = domainResult.right;
-    	                    changed = changed || vk !== k;
-    	                    k = vk;
-    	                    var codomainResult = codomain.validate(ok, appendContext(c, k, codomain, ok));
-    	                    if ((0, Either_1.isLeft)(codomainResult)) {
-    	                        pushAll(errors, codomainResult.left);
-    	                    }
-    	                    else {
-    	                        var vok = codomainResult.right;
-    	                        changed = changed || vok !== ok;
-    	                        a[k] = vok;
-    	                    }
-    	                }
-    	            }
-    	            return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)((changed ? a : u));
-    	        }
-    	        if (isAnyC(codomain) && Array.isArray(u)) {
-    	            return (0, exports.success)(u);
-    	        }
-    	        return (0, exports.failure)(u, c);
-    	    }, domain.encode === exports.identity && codomain.encode === exports.identity
-    	        ? exports.identity
-    	        : function (a) {
-    	            var s = {};
-    	            var keys = Object.keys(a);
-    	            var len = keys.length;
-    	            for (var i = 0; i < len; i++) {
-    	                var k = keys[i];
-    	                s[String(domain.encode(k))] = codomain.encode(a[k]);
-    	            }
-    	            return s;
-    	        }, domain, codomain);
-    	}
-    	function getUnionName(codecs) {
-    	    return '(' + codecs.map(function (type) { return type.name; }).join(' | ') + ')';
-    	}
-    	/**
-    	 * @internal
-    	 */
-    	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    	function mergeAll(base, us) {
-    	    var equal = true;
-    	    var primitive = true;
-    	    var baseIsNotADictionary = !exports.UnknownRecord.is(base);
-    	    for (var _i = 0, us_1 = us; _i < us_1.length; _i++) {
-    	        var u = us_1[_i];
-    	        if (u !== base) {
-    	            equal = false;
-    	        }
-    	        if (exports.UnknownRecord.is(u)) {
-    	            primitive = false;
-    	        }
-    	    }
-    	    if (equal) {
-    	        return base;
-    	    }
-    	    else if (primitive) {
-    	        return us[us.length - 1];
-    	    }
-    	    var r = {};
-    	    for (var _a = 0, us_2 = us; _a < us_2.length; _a++) {
-    	        var u = us_2[_a];
-    	        for (var k in u) {
-    	            if (!hasOwnProperty.call(r, k) || baseIsNotADictionary || u[k] !== base[k]) {
-    	                r[k] = u[k];
-    	            }
-    	        }
-    	    }
-    	    return r;
-    	}
-    	exports.mergeAll = mergeAll;
-    	function getProps(codec) {
-    	    switch (codec._tag) {
-    	        case 'RefinementType':
-    	        case 'ReadonlyType':
-    	            return getProps(codec.type);
-    	        case 'InterfaceType':
-    	        case 'StrictType':
-    	        case 'PartialType':
-    	            return codec.props;
-    	        case 'IntersectionType':
-    	            return codec.types.reduce(function (props, type) { return Object.assign(props, getProps(type)); }, {});
-    	    }
-    	}
-    	function stripKeys(o, props) {
-    	    var keys = Object.getOwnPropertyNames(o);
-    	    var shouldStrip = false;
-    	    var r = {};
-    	    for (var i = 0; i < keys.length; i++) {
-    	        var key = keys[i];
-    	        if (!hasOwnProperty.call(props, key)) {
-    	            shouldStrip = true;
-    	        }
-    	        else {
-    	            r[key] = o[key];
-    	        }
-    	    }
-    	    return shouldStrip ? r : o;
-    	}
-    	function getExactTypeName(codec) {
-    	    if (isTypeC(codec)) {
-    	        return "{| ".concat(getNameFromProps(codec.props), " |}");
-    	    }
-    	    else if (isPartialC(codec)) {
-    	        return getPartialTypeName("{| ".concat(getNameFromProps(codec.props), " |}"));
-    	    }
-    	    return "Exact<".concat(codec.name, ">");
-    	}
-    	function isNonEmpty(as) {
-    	    return as.length > 0;
-    	}
-    	/**
-    	 * @internal
-    	 */
-    	exports.emptyTags = {};
-    	function intersect(a, b) {
-    	    var r = [];
-    	    for (var _i = 0, a_1 = a; _i < a_1.length; _i++) {
-    	        var v = a_1[_i];
-    	        if (b.indexOf(v) !== -1) {
-    	            r.push(v);
-    	        }
-    	    }
-    	    return r;
-    	}
-    	function mergeTags(a, b) {
-    	    if (a === exports.emptyTags) {
-    	        return b;
-    	    }
-    	    if (b === exports.emptyTags) {
-    	        return a;
-    	    }
-    	    var r = Object.assign({}, a);
-    	    for (var k in b) {
-    	        if (hasOwnProperty.call(a, k)) {
-    	            var intersection_1 = intersect(a[k], b[k]);
-    	            if (isNonEmpty(intersection_1)) {
-    	                r[k] = intersection_1;
-    	            }
-    	            else {
-    	                r = exports.emptyTags;
-    	                break;
-    	            }
-    	        }
-    	        else {
-    	            r[k] = b[k];
-    	        }
-    	    }
-    	    return r;
-    	}
-    	function intersectTags(a, b) {
-    	    if (a === exports.emptyTags || b === exports.emptyTags) {
-    	        return exports.emptyTags;
-    	    }
-    	    var r = exports.emptyTags;
-    	    for (var k in a) {
-    	        if (hasOwnProperty.call(b, k)) {
-    	            var intersection_2 = intersect(a[k], b[k]);
-    	            if (intersection_2.length === 0) {
-    	                if (r === exports.emptyTags) {
-    	                    r = {};
-    	                }
-    	                r[k] = a[k].concat(b[k]);
-    	            }
-    	        }
-    	    }
-    	    return r;
-    	}
-    	// tslint:disable-next-line: deprecation
-    	function isAnyC(codec) {
-    	    return codec._tag === 'AnyType';
-    	}
-    	function isLiteralC(codec) {
-    	    return codec._tag === 'LiteralType';
-    	}
-    	function isKeyofC(codec) {
-    	    return codec._tag === 'KeyofType';
-    	}
-    	function isTypeC(codec) {
-    	    return codec._tag === 'InterfaceType';
-    	}
-    	function isPartialC(codec) {
-    	    return codec._tag === 'PartialType';
-    	}
-    	// tslint:disable-next-line: deprecation
-    	function isStrictC(codec) {
-    	    return codec._tag === 'StrictType';
-    	}
-    	function isExactC(codec) {
-    	    return codec._tag === 'ExactType';
-    	}
-    	// tslint:disable-next-line: deprecation
-    	function isRefinementC(codec) {
-    	    return codec._tag === 'RefinementType';
-    	}
-    	function isIntersectionC(codec) {
-    	    return codec._tag === 'IntersectionType';
-    	}
-    	function isUnionC(codec) {
-    	    return codec._tag === 'UnionType';
-    	}
-    	function isRecursiveC(codec) {
-    	    return codec._tag === 'RecursiveType';
-    	}
-    	var lazyCodecs = [];
-    	/**
-    	 * @internal
-    	 */
-    	function getTags(codec) {
-    	    if (lazyCodecs.indexOf(codec) !== -1) {
-    	        return exports.emptyTags;
-    	    }
-    	    if (isTypeC(codec) || isStrictC(codec)) {
-    	        var index = exports.emptyTags;
-    	        // tslint:disable-next-line: forin
-    	        for (var k in codec.props) {
-    	            var prop = codec.props[k];
-    	            if (isLiteralC(prop)) {
-    	                if (index === exports.emptyTags) {
-    	                    index = {};
-    	                }
-    	                index[k] = [prop.value];
-    	            }
-    	        }
-    	        return index;
-    	    }
-    	    else if (isExactC(codec) || isRefinementC(codec)) {
-    	        return getTags(codec.type);
-    	    }
-    	    else if (isIntersectionC(codec)) {
-    	        return codec.types.reduce(function (tags, codec) { return mergeTags(tags, getTags(codec)); }, exports.emptyTags);
-    	    }
-    	    else if (isUnionC(codec)) {
-    	        return codec.types.slice(1).reduce(function (tags, codec) { return intersectTags(tags, getTags(codec)); }, getTags(codec.types[0]));
-    	    }
-    	    else if (isRecursiveC(codec)) {
-    	        lazyCodecs.push(codec);
-    	        var tags = getTags(codec.type);
-    	        lazyCodecs.pop();
-    	        return tags;
-    	    }
-    	    return exports.emptyTags;
-    	}
-    	exports.getTags = getTags;
-    	/**
-    	 * @internal
-    	 */
-    	function getIndex(codecs) {
-    	    var tags = getTags(codecs[0]);
-    	    var keys = Object.keys(tags);
-    	    var len = codecs.length;
-    	    var _loop_1 = function (k) {
-    	        var all = tags[k].slice();
-    	        var index = [tags[k]];
-    	        for (var i = 1; i < len; i++) {
-    	            var codec = codecs[i];
-    	            var ctags = getTags(codec);
-    	            var values = ctags[k];
-    	            // tslint:disable-next-line: strict-type-predicates
-    	            if (values === undefined) {
-    	                return "continue-keys";
-    	            }
-    	            else {
-    	                if (values.some(function (v) { return all.indexOf(v) !== -1; })) {
-    	                    return "continue-keys";
-    	                }
-    	                else {
-    	                    all.push.apply(all, values);
-    	                    index.push(values);
-    	                }
-    	            }
-    	        }
-    	        return { value: [k, index] };
-    	    };
-    	    keys: for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
-    	        var k = keys_1[_i];
-    	        var state_1 = _loop_1(k);
-    	        if (typeof state_1 === "object")
-    	            return state_1.value;
-    	        switch (state_1) {
-    	            case "continue-keys": continue keys;
-    	        }
-    	    }
-    	    return undefined;
-    	}
-    	exports.getIndex = getIndex;
-    	// -------------------------------------------------------------------------------------
-    	// primitives
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var NullType = /** @class */ (function (_super) {
-    	    __extends(NullType, _super);
-    	    function NullType() {
-    	        var _this = _super.call(this, 'null', function (u) { return u === null; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'NullType';
-    	        return _this;
-    	    }
-    	    return NullType;
-    	}(Type));
-    	exports.NullType = NullType;
-    	/**
-    	 * @category primitives
-    	 * @since 1.0.0
-    	 */
-    	exports.nullType = new NullType();
-    	exports.null = exports.nullType;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var UndefinedType = /** @class */ (function (_super) {
-    	    __extends(UndefinedType, _super);
-    	    function UndefinedType() {
-    	        var _this = _super.call(this, 'undefined', function (u) { return u === void 0; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'UndefinedType';
-    	        return _this;
-    	    }
-    	    return UndefinedType;
-    	}(Type));
-    	exports.UndefinedType = UndefinedType;
-    	var undefinedType = new UndefinedType();
-    	exports.undefined = undefinedType;
-    	/**
-    	 * @since 1.2.0
-    	 */
-    	var VoidType = /** @class */ (function (_super) {
-    	    __extends(VoidType, _super);
-    	    function VoidType() {
-    	        var _this = _super.call(this, 'void', undefinedType.is, undefinedType.validate, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'VoidType';
-    	        return _this;
-    	    }
-    	    return VoidType;
-    	}(Type));
-    	exports.VoidType = VoidType;
-    	/**
-    	 * @category primitives
-    	 * @since 1.2.0
-    	 */
-    	exports.voidType = new VoidType();
-    	exports.void = exports.voidType;
-    	/**
-    	 * @since 1.5.0
-    	 */
-    	var UnknownType = /** @class */ (function (_super) {
-    	    __extends(UnknownType, _super);
-    	    function UnknownType() {
-    	        var _this = _super.call(this, 'unknown', function (_) { return true; }, exports.success, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'UnknownType';
-    	        return _this;
-    	    }
-    	    return UnknownType;
-    	}(Type));
-    	exports.UnknownType = UnknownType;
-    	/**
-    	 * @category primitives
-    	 * @since 1.5.0
-    	 */
-    	exports.unknown = new UnknownType();
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var StringType = /** @class */ (function (_super) {
-    	    __extends(StringType, _super);
-    	    function StringType() {
-    	        var _this = _super.call(this, 'string', function (u) { return typeof u === 'string'; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'StringType';
-    	        return _this;
-    	    }
-    	    return StringType;
-    	}(Type));
-    	exports.StringType = StringType;
-    	/**
-    	 * @category primitives
-    	 * @since 1.0.0
-    	 */
-    	exports.string = new StringType();
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var NumberType = /** @class */ (function (_super) {
-    	    __extends(NumberType, _super);
-    	    function NumberType() {
-    	        var _this = _super.call(this, 'number', function (u) { return typeof u === 'number'; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'NumberType';
-    	        return _this;
-    	    }
-    	    return NumberType;
-    	}(Type));
-    	exports.NumberType = NumberType;
-    	/**
-    	 * @category primitives
-    	 * @since 1.0.0
-    	 */
-    	exports.number = new NumberType();
-    	/**
-    	 * @since 2.1.0
-    	 */
-    	var BigIntType = /** @class */ (function (_super) {
-    	    __extends(BigIntType, _super);
-    	    function BigIntType() {
-    	        var _this = _super.call(this, 'bigint', 
-    	        // tslint:disable-next-line: valid-typeof
-    	        function (u) { return typeof u === 'bigint'; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'BigIntType';
-    	        return _this;
-    	    }
-    	    return BigIntType;
-    	}(Type));
-    	exports.BigIntType = BigIntType;
-    	/**
-    	 * @category primitives
-    	 * @since 2.1.0
-    	 */
-    	exports.bigint = new BigIntType();
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var BooleanType = /** @class */ (function (_super) {
-    	    __extends(BooleanType, _super);
-    	    function BooleanType() {
-    	        var _this = _super.call(this, 'boolean', function (u) { return typeof u === 'boolean'; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'BooleanType';
-    	        return _this;
-    	    }
-    	    return BooleanType;
-    	}(Type));
-    	exports.BooleanType = BooleanType;
-    	/**
-    	 * @category primitives
-    	 * @since 1.0.0
-    	 */
-    	exports.boolean = new BooleanType();
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var AnyArrayType = /** @class */ (function (_super) {
-    	    __extends(AnyArrayType, _super);
-    	    function AnyArrayType() {
-    	        var _this = _super.call(this, 'UnknownArray', Array.isArray, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'AnyArrayType';
-    	        return _this;
-    	    }
-    	    return AnyArrayType;
-    	}(Type));
-    	exports.AnyArrayType = AnyArrayType;
-    	/**
-    	 * @category primitives
-    	 * @since 1.7.1
-    	 */
-    	exports.UnknownArray = new AnyArrayType();
-    	exports.Array = exports.UnknownArray;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var AnyDictionaryType = /** @class */ (function (_super) {
-    	    __extends(AnyDictionaryType, _super);
-    	    function AnyDictionaryType() {
-    	        var _this = _super.call(this, 'UnknownRecord', function (u) { return u !== null && typeof u === 'object' && !Array.isArray(u); }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'AnyDictionaryType';
-    	        return _this;
-    	    }
-    	    return AnyDictionaryType;
-    	}(Type));
-    	exports.AnyDictionaryType = AnyDictionaryType;
-    	/**
-    	 * @category primitives
-    	 * @since 1.7.1
-    	 */
-    	exports.UnknownRecord = new AnyDictionaryType();
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var LiteralType = /** @class */ (function (_super) {
-    	    __extends(LiteralType, _super);
-    	    function LiteralType(name, is, validate, encode, value) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.value = value;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'LiteralType';
-    	        return _this;
-    	    }
-    	    return LiteralType;
-    	}(Type));
-    	exports.LiteralType = LiteralType;
-    	/**
-    	 * @category constructors
-    	 * @since 1.0.0
-    	 */
-    	function literal(value, name) {
-    	    if (name === void 0) { name = JSON.stringify(value); }
-    	    var is = function (u) { return u === value; };
-    	    return new LiteralType(name, is, function (u, c) { return (is(u) ? (0, exports.success)(value) : (0, exports.failure)(u, c)); }, exports.identity, value);
-    	}
-    	exports.literal = literal;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var KeyofType = /** @class */ (function (_super) {
-    	    __extends(KeyofType, _super);
-    	    function KeyofType(name, is, validate, encode, keys) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.keys = keys;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'KeyofType';
-    	        return _this;
-    	    }
-    	    return KeyofType;
-    	}(Type));
-    	exports.KeyofType = KeyofType;
-    	/**
-    	 * @category constructors
-    	 * @since 1.0.0
-    	 */
-    	function keyof(keys, name) {
-    	    if (name === void 0) { name = Object.keys(keys)
-    	        .map(function (k) { return JSON.stringify(k); })
-    	        .join(' | '); }
-    	    var is = function (u) { return exports.string.is(u) && hasOwnProperty.call(keys, u); };
-    	    return new KeyofType(name, is, function (u, c) { return (is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity, keys);
-    	}
-    	exports.keyof = keyof;
-    	// -------------------------------------------------------------------------------------
-    	// combinators
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var RefinementType = /** @class */ (function (_super) {
-    	    __extends(RefinementType, _super);
-    	    function RefinementType(name, is, validate, encode, type, predicate) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.type = type;
-    	        _this.predicate = predicate;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'RefinementType';
-    	        return _this;
-    	    }
-    	    return RefinementType;
-    	}(Type));
-    	exports.RefinementType = RefinementType;
-    	/**
-    	 * @category combinators
-    	 * @since 1.8.1
-    	 */
-    	function brand(codec, predicate, name) {
-    	    return refinement(codec, predicate, name);
-    	}
-    	exports.brand = brand;
-    	/**
-    	 * A branded codec representing an integer
-    	 *
-    	 * @category primitives
-    	 * @since 1.8.1
-    	 */
-    	exports.Int = brand(exports.number, function (n) { return Number.isInteger(n); }, 'Int');
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var RecursiveType = /** @class */ (function (_super) {
-    	    __extends(RecursiveType, _super);
-    	    function RecursiveType(name, is, validate, encode, runDefinition) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.runDefinition = runDefinition;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'RecursiveType';
-    	        return _this;
-    	    }
-    	    return RecursiveType;
-    	}(Type));
-    	exports.RecursiveType = RecursiveType;
-    	Object.defineProperty(RecursiveType.prototype, 'type', {
-    	    get: function () {
-    	        return this.runDefinition();
-    	    },
-    	    enumerable: true,
-    	    configurable: true
-    	});
-    	/**
-    	 * @category combinators
-    	 * @since 1.0.0
-    	 */
-    	function recursion(name, definition) {
-    	    var cache;
-    	    var runDefinition = function () {
-    	        if (!cache) {
-    	            cache = definition(Self);
-    	            cache.name = name;
-    	        }
-    	        return cache;
-    	    };
-    	    var Self = new RecursiveType(name, function (u) { return runDefinition().is(u); }, function (u, c) { return runDefinition().validate(u, c); }, function (a) { return runDefinition().encode(a); }, runDefinition);
-    	    return Self;
-    	}
-    	exports.recursion = recursion;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var ArrayType = /** @class */ (function (_super) {
-    	    __extends(ArrayType, _super);
-    	    function ArrayType(name, is, validate, encode, type) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.type = type;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'ArrayType';
-    	        return _this;
-    	    }
-    	    return ArrayType;
-    	}(Type));
-    	exports.ArrayType = ArrayType;
-    	/**
-    	 * @category combinators
-    	 * @since 1.0.0
-    	 */
-    	function array(item, name) {
-    	    if (name === void 0) { name = "Array<".concat(item.name, ">"); }
-    	    return new ArrayType(name, function (u) { return exports.UnknownArray.is(u) && u.every(item.is); }, function (u, c) {
-    	        var e = exports.UnknownArray.validate(u, c);
-    	        if ((0, Either_1.isLeft)(e)) {
-    	            return e;
-    	        }
-    	        var us = e.right;
-    	        var len = us.length;
-    	        var as = us;
-    	        var errors = [];
-    	        for (var i = 0; i < len; i++) {
-    	            var ui = us[i];
-    	            var result = item.validate(ui, appendContext(c, String(i), item, ui));
-    	            if ((0, Either_1.isLeft)(result)) {
-    	                pushAll(errors, result.left);
-    	            }
-    	            else {
-    	                var ai = result.right;
-    	                if (ai !== ui) {
-    	                    if (as === us) {
-    	                        as = us.slice();
-    	                    }
-    	                    as[i] = ai;
-    	                }
-    	            }
-    	        }
-    	        return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)(as);
-    	    }, item.encode === exports.identity ? exports.identity : function (a) { return a.map(item.encode); }, item);
-    	}
-    	exports.array = array;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var InterfaceType = /** @class */ (function (_super) {
-    	    __extends(InterfaceType, _super);
-    	    function InterfaceType(name, is, validate, encode, props) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.props = props;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'InterfaceType';
-    	        return _this;
-    	    }
-    	    return InterfaceType;
-    	}(Type));
-    	exports.InterfaceType = InterfaceType;
-    	/**
-    	 * @category combinators
-    	 * @since 1.0.0
-    	 */
-    	function type(props, name) {
-    	    if (name === void 0) { name = getInterfaceTypeName(props); }
-    	    var keys = Object.keys(props);
-    	    var types = keys.map(function (key) { return props[key]; });
-    	    var len = keys.length;
-    	    return new InterfaceType(name, function (u) {
-    	        if (exports.UnknownRecord.is(u)) {
-    	            for (var i = 0; i < len; i++) {
-    	                var k = keys[i];
-    	                var uk = u[k];
-    	                if ((uk === undefined && !hasOwnProperty.call(u, k)) || !types[i].is(uk)) {
-    	                    return false;
-    	                }
-    	            }
-    	            return true;
-    	        }
-    	        return false;
-    	    }, function (u, c) {
-    	        var e = exports.UnknownRecord.validate(u, c);
-    	        if ((0, Either_1.isLeft)(e)) {
-    	            return e;
-    	        }
-    	        var o = e.right;
-    	        var a = o;
-    	        var errors = [];
-    	        for (var i = 0; i < len; i++) {
-    	            var k = keys[i];
-    	            var ak = a[k];
-    	            var type_1 = types[i];
-    	            var result = type_1.validate(ak, appendContext(c, k, type_1, ak));
-    	            if ((0, Either_1.isLeft)(result)) {
-    	                pushAll(errors, result.left);
-    	            }
-    	            else {
-    	                var vak = result.right;
-    	                if (vak !== ak || (vak === undefined && !hasOwnProperty.call(a, k))) {
-    	                    /* istanbul ignore next */
-    	                    if (a === o) {
-    	                        a = __assign({}, o);
-    	                    }
-    	                    a[k] = vak;
-    	                }
-    	            }
-    	        }
-    	        return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)(a);
-    	    }, useIdentity(types)
-    	        ? exports.identity
-    	        : function (a) {
-    	            var s = __assign({}, a);
-    	            for (var i = 0; i < len; i++) {
-    	                var k = keys[i];
-    	                var encode = types[i].encode;
-    	                if (encode !== exports.identity) {
-    	                    s[k] = encode(a[k]);
-    	                }
-    	            }
-    	            return s;
-    	        }, props);
-    	}
-    	exports.type = type;
-    	exports.interface = type;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var PartialType = /** @class */ (function (_super) {
-    	    __extends(PartialType, _super);
-    	    function PartialType(name, is, validate, encode, props) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.props = props;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'PartialType';
-    	        return _this;
-    	    }
-    	    return PartialType;
-    	}(Type));
-    	exports.PartialType = PartialType;
-    	/**
-    	 * @category combinators
-    	 * @since 1.0.0
-    	 */
-    	function partial(props, name) {
-    	    if (name === void 0) { name = getPartialTypeName(getInterfaceTypeName(props)); }
-    	    var keys = Object.keys(props);
-    	    var types = keys.map(function (key) { return props[key]; });
-    	    var len = keys.length;
-    	    return new PartialType(name, function (u) {
-    	        if (exports.UnknownRecord.is(u)) {
-    	            for (var i = 0; i < len; i++) {
-    	                var k = keys[i];
-    	                var uk = u[k];
-    	                if (uk !== undefined && !props[k].is(uk)) {
-    	                    return false;
-    	                }
-    	            }
-    	            return true;
-    	        }
-    	        return false;
-    	    }, function (u, c) {
-    	        var e = exports.UnknownRecord.validate(u, c);
-    	        if ((0, Either_1.isLeft)(e)) {
-    	            return e;
-    	        }
-    	        var o = e.right;
-    	        var a = o;
-    	        var errors = [];
-    	        for (var i = 0; i < len; i++) {
-    	            var k = keys[i];
-    	            var ak = a[k];
-    	            var type_2 = props[k];
-    	            var result = type_2.validate(ak, appendContext(c, k, type_2, ak));
-    	            if ((0, Either_1.isLeft)(result)) {
-    	                if (ak !== undefined) {
-    	                    pushAll(errors, result.left);
-    	                }
-    	            }
-    	            else {
-    	                var vak = result.right;
-    	                if (vak !== ak) {
-    	                    /* istanbul ignore next */
-    	                    if (a === o) {
-    	                        a = __assign({}, o);
-    	                    }
-    	                    a[k] = vak;
-    	                }
-    	            }
-    	        }
-    	        return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)(a);
-    	    }, useIdentity(types)
-    	        ? exports.identity
-    	        : function (a) {
-    	            var s = __assign({}, a);
-    	            for (var i = 0; i < len; i++) {
-    	                var k = keys[i];
-    	                var ak = a[k];
-    	                if (ak !== undefined) {
-    	                    s[k] = types[i].encode(ak);
-    	                }
-    	            }
-    	            return s;
-    	        }, props);
-    	}
-    	exports.partial = partial;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var DictionaryType = /** @class */ (function (_super) {
-    	    __extends(DictionaryType, _super);
-    	    function DictionaryType(name, is, validate, encode, domain, codomain) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.domain = domain;
-    	        _this.codomain = codomain;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'DictionaryType';
-    	        return _this;
-    	    }
-    	    return DictionaryType;
-    	}(Type));
-    	exports.DictionaryType = DictionaryType;
-    	/**
-    	 * @category combinators
-    	 * @since 1.7.1
-    	 */
-    	function record(domain, codomain, name) {
-    	    var keys = getDomainKeys(domain);
-    	    return keys
-    	        ? enumerableRecord(Object.keys(keys), domain, codomain, name)
-    	        : nonEnumerableRecord(domain, codomain, name);
-    	}
-    	exports.record = record;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var UnionType = /** @class */ (function (_super) {
-    	    __extends(UnionType, _super);
-    	    function UnionType(name, is, validate, encode, types) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.types = types;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'UnionType';
-    	        return _this;
-    	    }
-    	    return UnionType;
-    	}(Type));
-    	exports.UnionType = UnionType;
-    	/**
-    	 * @category combinators
-    	 * @since 1.0.0
-    	 */
-    	function union(codecs, name) {
-    	    if (name === void 0) { name = getUnionName(codecs); }
-    	    var index = getIndex(codecs);
-    	    if (index !== undefined && codecs.length > 0) {
-    	        var tag_1 = index[0], groups_1 = index[1];
-    	        var len_1 = groups_1.length;
-    	        var find_1 = function (value) {
-    	            for (var i = 0; i < len_1; i++) {
-    	                if (groups_1[i].indexOf(value) !== -1) {
-    	                    return i;
-    	                }
-    	            }
-    	            return undefined;
-    	        };
-    	        // tslint:disable-next-line: deprecation
-    	        return new TaggedUnionType(name, function (u) {
-    	            if (exports.UnknownRecord.is(u)) {
-    	                var i = find_1(u[tag_1]);
-    	                return i !== undefined ? codecs[i].is(u) : false;
-    	            }
-    	            return false;
-    	        }, function (u, c) {
-    	            var e = exports.UnknownRecord.validate(u, c);
-    	            if ((0, Either_1.isLeft)(e)) {
-    	                return e;
-    	            }
-    	            var r = e.right;
-    	            var i = find_1(r[tag_1]);
-    	            if (i === undefined) {
-    	                return (0, exports.failure)(u, c);
-    	            }
-    	            var codec = codecs[i];
-    	            return codec.validate(r, appendContext(c, String(i), codec, r));
-    	        }, useIdentity(codecs)
-    	            ? exports.identity
-    	            : function (a) {
-    	                var i = find_1(a[tag_1]);
-    	                if (i === undefined) {
-    	                    // https://github.com/gcanti/io-ts/pull/305
-    	                    throw new Error("no codec found to encode value in union codec ".concat(name));
-    	                }
-    	                else {
-    	                    return codecs[i].encode(a);
-    	                }
-    	            }, codecs, tag_1);
-    	    }
-    	    else {
-    	        return new UnionType(name, function (u) { return codecs.some(function (type) { return type.is(u); }); }, function (u, c) {
-    	            var errors = [];
-    	            for (var i = 0; i < codecs.length; i++) {
-    	                var codec = codecs[i];
-    	                var result = codec.validate(u, appendContext(c, String(i), codec, u));
-    	                if ((0, Either_1.isLeft)(result)) {
-    	                    pushAll(errors, result.left);
-    	                }
-    	                else {
-    	                    return (0, exports.success)(result.right);
-    	                }
-    	            }
-    	            return (0, exports.failures)(errors);
-    	        }, useIdentity(codecs)
-    	            ? exports.identity
-    	            : function (a) {
-    	                for (var _i = 0, codecs_1 = codecs; _i < codecs_1.length; _i++) {
-    	                    var codec = codecs_1[_i];
-    	                    if (codec.is(a)) {
-    	                        return codec.encode(a);
-    	                    }
-    	                }
-    	                // https://github.com/gcanti/io-ts/pull/305
-    	                throw new Error("no codec found to encode value in union type ".concat(name));
-    	            }, codecs);
-    	    }
-    	}
-    	exports.union = union;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var IntersectionType = /** @class */ (function (_super) {
-    	    __extends(IntersectionType, _super);
-    	    function IntersectionType(name, is, validate, encode, types) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.types = types;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'IntersectionType';
-    	        return _this;
-    	    }
-    	    return IntersectionType;
-    	}(Type));
-    	exports.IntersectionType = IntersectionType;
-    	function intersection(codecs, name) {
-    	    if (name === void 0) { name = "(".concat(codecs.map(function (type) { return type.name; }).join(' & '), ")"); }
-    	    var len = codecs.length;
-    	    return new IntersectionType(name, function (u) { return codecs.every(function (type) { return type.is(u); }); }, codecs.length === 0
-    	        ? exports.success
-    	        : function (u, c) {
-    	            var us = [];
-    	            var errors = [];
-    	            for (var i = 0; i < len; i++) {
-    	                var codec = codecs[i];
-    	                var result = codec.validate(u, appendContext(c, String(i), codec, u));
-    	                if ((0, Either_1.isLeft)(result)) {
-    	                    pushAll(errors, result.left);
-    	                }
-    	                else {
-    	                    us.push(result.right);
-    	                }
-    	            }
-    	            return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)(mergeAll(u, us));
-    	        }, codecs.length === 0
-    	        ? exports.identity
-    	        : function (a) {
-    	            return mergeAll(a, codecs.map(function (codec) { return codec.encode(a); }));
-    	        }, codecs);
-    	}
-    	exports.intersection = intersection;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var TupleType = /** @class */ (function (_super) {
-    	    __extends(TupleType, _super);
-    	    function TupleType(name, is, validate, encode, types) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.types = types;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'TupleType';
-    	        return _this;
-    	    }
-    	    return TupleType;
-    	}(Type));
-    	exports.TupleType = TupleType;
-    	function tuple(codecs, name) {
-    	    if (name === void 0) { name = "[".concat(codecs.map(function (type) { return type.name; }).join(', '), "]"); }
-    	    var len = codecs.length;
-    	    return new TupleType(name, function (u) { return exports.UnknownArray.is(u) && u.length === len && codecs.every(function (type, i) { return type.is(u[i]); }); }, function (u, c) {
-    	        var e = exports.UnknownArray.validate(u, c);
-    	        if ((0, Either_1.isLeft)(e)) {
-    	            return e;
-    	        }
-    	        var us = e.right;
-    	        var as = us.length > len ? us.slice(0, len) : us; // strip additional components
-    	        var errors = [];
-    	        for (var i = 0; i < len; i++) {
-    	            var a = us[i];
-    	            var type_3 = codecs[i];
-    	            var result = type_3.validate(a, appendContext(c, String(i), type_3, a));
-    	            if ((0, Either_1.isLeft)(result)) {
-    	                pushAll(errors, result.left);
-    	            }
-    	            else {
-    	                var va = result.right;
-    	                if (va !== a) {
-    	                    /* istanbul ignore next */
-    	                    if (as === us) {
-    	                        as = us.slice();
-    	                    }
-    	                    as[i] = va;
-    	                }
-    	            }
-    	        }
-    	        return errors.length > 0 ? (0, exports.failures)(errors) : (0, exports.success)(as);
-    	    }, useIdentity(codecs) ? exports.identity : function (a) { return codecs.map(function (type, i) { return type.encode(a[i]); }); }, codecs);
-    	}
-    	exports.tuple = tuple;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var ReadonlyType = /** @class */ (function (_super) {
-    	    __extends(ReadonlyType, _super);
-    	    function ReadonlyType(name, is, validate, encode, type) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.type = type;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'ReadonlyType';
-    	        return _this;
-    	    }
-    	    return ReadonlyType;
-    	}(Type));
-    	exports.ReadonlyType = ReadonlyType;
-    	/**
-    	 * @category combinators
-    	 * @since 1.0.0
-    	 */
-    	function readonly(codec, name) {
-    	    if (name === void 0) { name = "Readonly<".concat(codec.name, ">"); }
-    	    return new ReadonlyType(name, codec.is, codec.validate, codec.encode, codec);
-    	}
-    	exports.readonly = readonly;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var ReadonlyArrayType = /** @class */ (function (_super) {
-    	    __extends(ReadonlyArrayType, _super);
-    	    function ReadonlyArrayType(name, is, validate, encode, type) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.type = type;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'ReadonlyArrayType';
-    	        return _this;
-    	    }
-    	    return ReadonlyArrayType;
-    	}(Type));
-    	exports.ReadonlyArrayType = ReadonlyArrayType;
-    	/**
-    	 * @category combinators
-    	 * @since 1.0.0
-    	 */
-    	function readonlyArray(item, name) {
-    	    if (name === void 0) { name = "ReadonlyArray<".concat(item.name, ">"); }
-    	    var codec = array(item);
-    	    return new ReadonlyArrayType(name, codec.is, codec.validate, codec.encode, item);
-    	}
-    	exports.readonlyArray = readonlyArray;
-    	/**
-    	 * Strips additional properties, equivalent to `exact(type(props))`.
-    	 *
-    	 * @category combinators
-    	 * @since 1.0.0
-    	 */
-    	var strict = function (props, name) { return exact(type(props), name); };
-    	exports.strict = strict;
-    	/**
-    	 * @since 1.1.0
-    	 */
-    	var ExactType = /** @class */ (function (_super) {
-    	    __extends(ExactType, _super);
-    	    function ExactType(name, is, validate, encode, type) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.type = type;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'ExactType';
-    	        return _this;
-    	    }
-    	    return ExactType;
-    	}(Type));
-    	exports.ExactType = ExactType;
-    	/**
-    	 * Strips additional properties.
-    	 *
-    	 * @category combinators
-    	 * @since 1.1.0
-    	 */
-    	function exact(codec, name) {
-    	    if (name === void 0) { name = getExactTypeName(codec); }
-    	    var props = getProps(codec);
-    	    return new ExactType(name, codec.is, function (u, c) {
-    	        var e = exports.UnknownRecord.validate(u, c);
-    	        if ((0, Either_1.isLeft)(e)) {
-    	            return e;
-    	        }
-    	        var ce = codec.validate(u, c);
-    	        if ((0, Either_1.isLeft)(ce)) {
-    	            return ce;
-    	        }
-    	        return (0, Either_1.right)(stripKeys(ce.right, props));
-    	    }, function (a) { return codec.encode(stripKeys(a, props)); }, codec);
-    	}
-    	exports.exact = exact;
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var FunctionType = /** @class */ (function (_super) {
-    	    __extends(FunctionType, _super);
-    	    function FunctionType() {
-    	        var _this = _super.call(this, 'Function', 
-    	        // tslint:disable-next-line:strict-type-predicates
-    	        function (u) { return typeof u === 'function'; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'FunctionType';
-    	        return _this;
-    	    }
-    	    return FunctionType;
-    	}(Type));
-    	exports.FunctionType = FunctionType;
-    	/**
-    	 * @category primitives
-    	 * @since 1.0.0
-    	 */
-    	exports.Function = new FunctionType();
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var NeverType = /** @class */ (function (_super) {
-    	    __extends(NeverType, _super);
-    	    function NeverType() {
-    	        var _this = _super.call(this, 'never', function (_) { return false; }, function (u, c) { return (0, exports.failure)(u, c); }, 
-    	        /* istanbul ignore next */
-    	        function () {
-    	            throw new Error('cannot encode never');
-    	        }) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'NeverType';
-    	        return _this;
-    	    }
-    	    return NeverType;
-    	}(Type));
-    	exports.NeverType = NeverType;
-    	/**
-    	 * @category primitives
-    	 * @since 1.0.0
-    	 */
-    	exports.never = new NeverType();
-    	/**
-    	 * @since 1.0.0
-    	 */
-    	var AnyType = /** @class */ (function (_super) {
-    	    __extends(AnyType, _super);
-    	    function AnyType() {
-    	        var _this = _super.call(this, 'any', function (_) { return true; }, exports.success, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'AnyType';
-    	        return _this;
-    	    }
-    	    return AnyType;
-    	}(Type));
-    	exports.AnyType = AnyType;
-    	/**
-    	 * @category primitives
-    	 * @since 1.0.0
-    	 */
-    	exports.any = new AnyType();
-    	function refinement(codec, predicate, name) {
-    	    if (name === void 0) { name = "(".concat(codec.name, " | ").concat(getFunctionName(predicate), ")"); }
-    	    return new RefinementType(name, function (u) { return codec.is(u) && predicate(u); }, function (i, c) {
-    	        var e = codec.validate(i, c);
-    	        if ((0, Either_1.isLeft)(e)) {
-    	            return e;
-    	        }
-    	        var a = e.right;
-    	        return predicate(a) ? (0, exports.success)(a) : (0, exports.failure)(a, c);
-    	    }, codec.encode, codec, predicate);
-    	}
-    	exports.refinement = refinement;
-    	/**
-    	 * @category primitives
-    	 * @since 1.0.0
-    	 */
-    	exports.Integer = refinement(exports.number, Number.isInteger, 'Integer');
-    	// -------------------------------------------------------------------------------------
-    	// deprecated
-    	// -------------------------------------------------------------------------------------
-    	/**
-    	 * @since 1.3.0
-    	 * @deprecated
-    	 */
-    	var TaggedUnionType = /** @class */ (function (_super) {
-    	    __extends(TaggedUnionType, _super);
-    	    function TaggedUnionType(name, 
-    	    // tslint:disable-next-line: deprecation
-    	    is, 
-    	    // tslint:disable-next-line: deprecation
-    	    validate, 
-    	    // tslint:disable-next-line: deprecation
-    	    encode, codecs, tag) {
-    	        var _this = _super.call(this, name, is, validate, encode, codecs) /* istanbul ignore next */ // <= workaround for https://github.com/Microsoft/TypeScript/issues/13455
-    	         || this;
-    	        _this.tag = tag;
-    	        return _this;
-    	    }
-    	    return TaggedUnionType;
-    	}(UnionType));
-    	exports.TaggedUnionType = TaggedUnionType;
-    	/**
-    	 * Use `union` instead.
-    	 *
-    	 * @category combinators
-    	 * @since 1.3.0
-    	 * @deprecated
-    	 */
-    	var taggedUnion = function (tag, codecs, name
-    	// tslint:disable-next-line: deprecation
-    	) {
-    	    if (name === void 0) { name = getUnionName(codecs); }
-    	    var U = union(codecs, name);
-    	    // tslint:disable-next-line: deprecation
-    	    if (U instanceof TaggedUnionType) {
-    	        return U;
-    	    }
-    	    else {
-    	        console.warn("[io-ts] Cannot build a tagged union for ".concat(name, ", returning a de-optimized union"));
-    	        // tslint:disable-next-line: deprecation
-    	        return new TaggedUnionType(name, U.is, U.validate, U.encode, codecs, tag);
-    	    }
-    	};
-    	exports.taggedUnion = taggedUnion;
-    	/**
-    	 * @since 1.0.0
-    	 * @deprecated
-    	 */
-    	var getValidationError /* istanbul ignore next */ = function (value, context) { return ({
-    	    value: value,
-    	    context: context
-    	}); };
-    	exports.getValidationError /* istanbul ignore next */ = getValidationError;
-    	/**
-    	 * @since 1.0.0
-    	 * @deprecated
-    	 */
-    	var getDefaultContext /* istanbul ignore next */ = function (decoder) { return [
-    	    { key: '', type: decoder }
-    	]; };
-    	exports.getDefaultContext /* istanbul ignore next */ = getDefaultContext;
-    	/**
-    	 * Use `UnknownRecord` instead.
-    	 *
-    	 * @category primitives
-    	 * @since 1.0.0
-    	 * @deprecated
-    	 */
-    	exports.Dictionary = exports.UnknownRecord;
-    	/**
-    	 * @since 1.0.0
-    	 * @deprecated
-    	 */
-    	var ObjectType = /** @class */ (function (_super) {
-    	    __extends(ObjectType, _super);
-    	    function ObjectType() {
-    	        var _this = _super.call(this, 'object', function (u) { return u !== null && typeof u === 'object'; }, function (u, c) { return (_this.is(u) ? (0, exports.success)(u) : (0, exports.failure)(u, c)); }, exports.identity) || this;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'ObjectType';
-    	        return _this;
-    	    }
-    	    return ObjectType;
-    	}(Type));
-    	exports.ObjectType = ObjectType;
-    	/**
-    	 * Use `UnknownRecord` instead.
-    	 *
-    	 * @category primitives
-    	 * @since 1.0.0
-    	 * @deprecated
-    	 */
-    	// tslint:disable-next-line: deprecation
-    	exports.object = new ObjectType();
-    	/**
-    	 * Use `record` instead.
-    	 *
-    	 * @category combinators
-    	 * @since 1.0.0
-    	 * @deprecated
-    	 */
-    	exports.dictionary = record;
-    	/**
-    	 * @since 1.0.0
-    	 * @deprecated
-    	 */
-    	var StrictType = /** @class */ (function (_super) {
-    	    __extends(StrictType, _super);
-    	    function StrictType(name, 
-    	    // tslint:disable-next-line: deprecation
-    	    is, 
-    	    // tslint:disable-next-line: deprecation
-    	    validate, 
-    	    // tslint:disable-next-line: deprecation
-    	    encode, props) {
-    	        var _this = _super.call(this, name, is, validate, encode) || this;
-    	        _this.props = props;
-    	        /**
-    	         * @since 1.0.0
-    	         */
-    	        _this._tag = 'StrictType';
-    	        return _this;
-    	    }
-    	    return StrictType;
-    	}(Type));
-    	exports.StrictType = StrictType;
-    	/**
-    	 * Drops the codec "kind".
-    	 *
-    	 * @category combinators
-    	 * @since 1.1.0
-    	 * @deprecated
-    	 */
-    	function clean(codec) {
-    	    return codec;
-    	}
-    	exports.clean = clean;
-    	function alias(codec) {
-    	    return function () { return codec; };
-    	}
-    	exports.alias = alias; 
-    } (lib));
-
-    Object.defineProperty(PathReporter, "__esModule", { value: true });
-    var PathReporter_1 = PathReporter.PathReporter = PathReporter.success = PathReporter.failure = void 0;
-    var _1 = lib;
-    var Either_1 = Either;
-    function stringify(v) {
-        if (typeof v === 'function') {
-            return (0, _1.getFunctionName)(v);
-        }
-        if (typeof v === 'number' && !isFinite(v)) {
-            if (isNaN(v)) {
-                return 'NaN';
-            }
-            return v > 0 ? 'Infinity' : '-Infinity';
-        }
-        return JSON.stringify(v);
-    }
-    function getContextPath(context) {
-        return context.map(function (_a) {
-            var key = _a.key, type = _a.type;
-            return "".concat(key, ": ").concat(type.name);
-        }).join('/');
-    }
-    function getMessage(e) {
-        return e.message !== undefined
-            ? e.message
-            : "Invalid value ".concat(stringify(e.value), " supplied to ").concat(getContextPath(e.context));
-    }
-    /**
-     * @since 1.0.0
-     */
-    function failure(es) {
-        return es.map(getMessage);
-    }
-    PathReporter.failure = failure;
-    /**
-     * @since 1.0.0
-     */
-    function success() {
-        return ['No errors!'];
-    }
-    PathReporter.success = success;
-    /**
-     * @since 1.0.0
-     */
-    PathReporter_1 = PathReporter.PathReporter = {
-        report: (0, Either_1.fold)(failure, success)
-    };
 
     function setupWebsocketConnection() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -55755,38 +51011,45 @@ var app = (function () {
             // start the websocket connection
             websocket.addEventListener("open", () => __awaiter(this, void 0, void 0, function* () {
                 // setup message processor
-                websocket = yield setupWebsocketMessageHandler(websocket, system_state);
-                system_state.websocketReady = true;
-                system_state.websocket = websocket;
+                websocket = yield setupWebsocketMessageHandler(websocket);
+                system_state.setWebsocketReady(true);
                 yield setSystemState(system_state);
             }));
+            return websocket;
         });
     }
-    function setupWebsocketMessageHandler(websocket, system_state) {
+    function setupWebsocketMessageHandler(websocket) {
         return __awaiter(this, void 0, void 0, function* () {
             websocket.addEventListener("message", (event) => {
                 console.log("websocket message received: ", event.data);
                 let data;
                 try {
-                    data = JSON.parse(event.data);
-                    const responseResult = RuntimeResponseObject.decode(data);
-                    pipe(responseResult, fold((errors) => {
-                        console.log("Error decoding websocket message: ", errors);
-                        console.error(PathReporter_1.report(responseResult));
-                    }, (response_object) => __awaiter(this, void 0, void 0, function* () {
-                        // if response_object is a node then add it to the system state store
-                        if (typeof response_object === "object" &&
-                            response_object !== null &&
-                            "Node" in response_object) {
-                            const { Node } = response_object;
-                            console.log(Node.type_name); // Will log "Prompt", "Process", "Conditional", or "Command"
-                            system_state.nodes.push({ Node });
-                        }
-                        else {
-                            console.log("\n---------------\nresponse_object is not a node\n---------------\n");
-                        }
-                        yield setSystemState(system_state);
-                    })));
+                    data = event.data;
+                    const u8Array = stringToUint8Array(data);
+                    const response_object = system_types_pb_js.ResponseObject.deserializeBinary(u8Array);
+                    const res = response_object.getObjectCase();
+                    alert("Need to handle switch statement for websocket message processing --> Adding object into local system state.");
+                    switch (res) {
+                        case system_types_pb_js.ResponseObject.ObjectCase.NODE:
+                            console.log("NODE");
+                            break;
+                        case system_types_pb_js.ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
+                            console.log("AUTHENTICATION_MESSAGE");
+                            break;
+                        case system_types_pb_js.ResponseObject.ObjectCase.USER_SETTINGS:
+                            console.log("USER_SETTINGS");
+                            break;
+                        case system_types_pb_js.ResponseObject.ObjectCase.EXECUTION_RESPONSE:
+                            console.log("EXECUTION_RESPONSE");
+                            break;
+                        case system_types_pb_js.ResponseObject.ObjectCase.OBJECT_NOT_SET:
+                            console.log("OBJECT_NOT_SET");
+                            break;
+                        default:
+                            console.log("default");
+                            alert("Fallen through response object switch statement... This is not good.");
+                            break;
+                    }
                 }
                 catch (_a) {
                     console.log("Error parsing websocket message");
@@ -55796,9 +51059,12 @@ var app = (function () {
         });
     }
 
+    const websocket = null;
+    const websocketStore = writable(websocket);
+
     /* src/components/AuthPage.svelte generated by Svelte v3.59.1 */
 
-    const { console: console_1 } = globals;
+    const { console: console_1$1 } = globals;
     const file$1 = "src/components/AuthPage.svelte";
 
     function create_fragment$1(ctx) {
@@ -55906,7 +51172,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<AuthPage> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<AuthPage> was created with unknown prop '${key}'`);
     	});
 
     	function input0_input_handler() {
@@ -55954,9 +51220,11 @@ var app = (function () {
     }
 
     /* src/App.svelte generated by Svelte v3.59.1 */
+
+    const { console: console_1 } = globals;
     const file = "src/App.svelte";
 
-    // (30:0) {#if !authenticated}
+    // (36:0) {#if !authenticated}
     function create_if_block_1(ctx) {
     	let authpage;
     	let current;
@@ -55988,14 +51256,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(30:0) {#if !authenticated}",
+    		source: "(36:0) {#if !authenticated}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (34:0) {#if authenticated}
+    // (40:0) {#if authenticated}
     function create_if_block(ctx) {
     	let div;
     	let sidebar;
@@ -56012,7 +51280,7 @@ var app = (function () {
     			t = space();
     			create_component(graphcomponentgraphlib.$$.fragment);
     			attr_dev(div, "class", "app-container");
-    			add_location(div, file, 34, 2, 1513);
+    			add_location(div, file, 40, 2, 1758);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -56043,7 +51311,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(34:0) {#if authenticated}",
+    		source: "(40:0) {#if authenticated}",
     		ctx
     	});
 
@@ -56191,18 +51459,21 @@ var app = (function () {
     	};
 
     	let authenticated = false;
+    	let websocket;
 
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
-    		if (!$systemStateStore.websocketReady) {
+    		if (!$systemStateStore.getWebsocketReady()) {
     			// startup websocket connection
-    			yield setupWebsocketConnection();
+    			websocket = yield setupWebsocketConnection();
+
+    			websocketStore.set(websocket);
     		}
     	}));
 
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<App> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
@@ -56212,14 +51483,17 @@ var app = (function () {
     		setupWebsocketConnection,
     		onMount,
     		systemStateStore,
+    		websocketStore,
     		AuthPage,
     		authenticated,
+    		websocket,
     		$systemStateStore
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
     		if ('authenticated' in $$props) $$invalidate(0, authenticated = $$props.authenticated);
+    		if ('websocket' in $$props) websocket = $$props.websocket;
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -56229,7 +51503,11 @@ var app = (function () {
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*$systemStateStore*/ 2) {
     			{
-    				$$invalidate(0, authenticated = $systemStateStore.authenticated);
+    				$$invalidate(0, authenticated = $systemStateStore.getAuthenticated());
+
+    				if ($systemStateStore.getWebsocketReady()) {
+    					console.log("Websocket Ready to send Messages!");
+    				}
     			}
     		}
     	};
@@ -56257,5 +51535,5 @@ var app = (function () {
 
     return app;
 
-})();
+})(system_types_pb_js);
 //# sourceMappingURL=bundle.js.map

@@ -44,7 +44,10 @@
 
         let new_node = new Node();
 
-        new_node.setName(name);
+        let graph_node_info = new GraphNodeInfo();
+        graph_node_info.setName(name);
+
+        new_node.setNodeInfo(graph_node_info);
         new_node.setDescription(description);
         new_node.setProcess(process);
 

@@ -76,8 +76,7 @@ message Process {
 
 // Node
 message Node {
-  string id = 1;
-  string name = 2;
+  GraphNodeInfo node_info = 1;
   NodeTypeNames type_name = 3;
   oneof node_content {
     Prompt prompt = 4;

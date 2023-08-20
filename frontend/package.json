@@ -1,7 +1,6 @@
 {
   "name": "svelte-app",
   "version": "1.0.0",
-  "types": "src/generated/system_types_pb.d.ts",
   "license": "Apache License 2.0",
   "devDependencies": {
     "@jridgewell/sourcemap-codec": "^1.4.15",
@@ -49,10 +48,12 @@
     "cytoscape-dagre": "^2.2.2",
     "eslint-plugin-svelte": "^2.14.1",
     "fp-ts": "^2.16.0",
+    "grpc-tools": "^1.12.4",
     "http-server": "^14.1.1",
     "io-ts": "^2.2.20",
     "io-ts-types": "^0.5.19",
     "postcss": "^8.4.21",
+    "protoc-gen-js": "^3.21.2",
     "svelte-select": "^5.6.0",
     "svelte-split-pane": "^0.1.2",
     "ts-protoc-gen": "^0.15.0"

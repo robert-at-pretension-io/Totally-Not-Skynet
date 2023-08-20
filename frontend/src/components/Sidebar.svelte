@@ -1,36 +1,32 @@
 <script>
-  import AddNodeButton from "./sidebarComponents/AddNodeButton.svelte";
   import CreateProcess from "./sidebarComponents/CreateProcess.svelte";
   import BackgroundInfo from "./sidebarComponents/BackgroundInfo.svelte";
   import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
+  import NewNode from "./sidebarComponents/newNode.svelte";
 
   import { blur, fade } from "svelte/transition";
-  import NodeInfo from "./NodeInfo.svelte";
 
   let sections = [
     {
-      header: "Explanation",
+      header: "Background Information",
       component: BackgroundInfo,
       open: false,
-      ref: null,
+    },
+
+    {
+      header: "Create a New Node",
+      component: NewNode,
+      open: false,
     },
     {
-      header: "Create Process (graph: edges and nodes)",
+      header: "Create a New Process",
       component: CreateProcess,
       open: false,
-      ref: null,
-    },
-    {
-      header: "Create Action (node)",
-      component: AddNodeButton,
-      open: false,
-      ref: null,
     },
     {
       header: "Edit Action or Process",
       component: InteractWithActionsAndProcesses,
       open: false,
-      ref: null,
     },
   ];
 
@@ -38,9 +34,6 @@
     sections = sections.map((section) => {
       if (section === clickedSection) {
         let open = !section.open;
-        if (open && section.ref) {
-          section.ref.scrollIntoView({ behavior: "smooth" });
-        }
         return { ...section, open }; // just invert the `open` property of the clicked section
       } else {
         return section; // don't modify other sections
@@ -74,7 +67,4 @@
       {/if}
     </div>
   {/each}
-  <div class="section">
-    <NodeInfo />
-  </div>
 </div>

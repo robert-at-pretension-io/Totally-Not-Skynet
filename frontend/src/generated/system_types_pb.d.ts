@@ -239,11 +239,10 @@ export namespace Process {
 }
 
 export class Node extends jspb.Message {
-  getId(): string;
-  setId(value: string): void;
-
-  getName(): string;
-  setName(value: string): void;
+  hasNodeInfo(): boolean;
+  clearNodeInfo(): void;
+  getNodeInfo(): GraphNodeInfo | undefined;
+  setNodeInfo(value?: GraphNodeInfo): void;
 
   getTypeName(): NodeTypeNamesMap[keyof NodeTypeNamesMap];
   setTypeName(value: NodeTypeNamesMap[keyof NodeTypeNamesMap]): void;
@@ -294,8 +293,7 @@ export class Node extends jspb.Message {
 
 export namespace Node {
   export type AsObject = {
-    id: string,
-    name: string,
+    nodeInfo?: GraphNodeInfo.AsObject,
     typeName: NodeTypeNamesMap[keyof NodeTypeNamesMap],
     prompt?: Prompt.AsObject,
     process?: Process.AsObject,

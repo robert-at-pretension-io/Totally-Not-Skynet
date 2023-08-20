@@ -5,21 +5,23 @@
   import { setupWebsocketConnection } from "helper_functions/websocket";
   import { onMount } from "svelte";
   import systemStateStore from "stores/systemStateStore";
+  import { websocketStore } from "stores/websocketStore";
   import AuthPage from "./components/AuthPage.svelte";
 
   let authenticated = false;
   let websocket: WebSocket;
 
   onMount(async () => {
-    if (!$systemStateStore.websocket_ready) {
+    if (!$systemStateStore.getWebsocketReady()) {
       // startup websocket connection
-      websocket = await setupWebsocwketConnection();
+      websocket = await setupWebsocketConnection();
+      websocketStore.set(websocket);
     }
   });
 
   $: {
-    authenticated = $systemStateStore.authenticated;
-    if ($systemStateStore.websocket_ready) {
+    authenticated = $systemStateStore.getAuthenticated();
+    if ($systemStateStore.getWebsocketReady()) {
       console.log("Websocket Ready to send Messages!");
     }
   }
