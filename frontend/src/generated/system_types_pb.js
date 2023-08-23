@@ -915,7 +915,7 @@ proto.skynet.types.GraphAction.prototype.toObject = function(opt_includeInstance
 proto.skynet.types.GraphAction.toObject = function(includeInstance, msg) {
   var f, obj = {
     action: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    node: (f = msg.getNode()) && proto.skynet.types.Node.toObject(includeInstance, f),
+    node: (f = msg.getNode()) && proto.skynet.types.GraphNodeInfo.toObject(includeInstance, f),
     edge: (f = msg.getEdge()) && proto.skynet.types.Edge.toObject(includeInstance, f)
   };
 
@@ -958,8 +958,8 @@ proto.skynet.types.GraphAction.deserializeBinaryFromReader = function(msg, reade
       msg.setAction(value);
       break;
     case 2:
-      var value = new proto.skynet.types.Node;
-      reader.readMessage(value,proto.skynet.types.Node.deserializeBinaryFromReader);
+      var value = new proto.skynet.types.GraphNodeInfo;
+      reader.readMessage(value,proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader);
       msg.setNode(value);
       break;
     case 3:
@@ -1008,7 +1008,7 @@ proto.skynet.types.GraphAction.serializeBinaryToWriter = function(message, write
     writer.writeMessage(
       2,
       f,
-      proto.skynet.types.Node.serializeBinaryToWriter
+      proto.skynet.types.GraphNodeInfo.serializeBinaryToWriter
     );
   }
   f = message.getEdge();
@@ -1053,17 +1053,17 @@ proto.skynet.types.GraphAction.prototype.setAction = function(value) {
 
 
 /**
- * optional Node node = 2;
- * @return {?proto.skynet.types.Node}
+ * optional GraphNodeInfo node = 2;
+ * @return {?proto.skynet.types.GraphNodeInfo}
  */
 proto.skynet.types.GraphAction.prototype.getNode = function() {
-  return /** @type{?proto.skynet.types.Node} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.Node, 2));
+  return /** @type{?proto.skynet.types.GraphNodeInfo} */ (
+    jspb.Message.getWrapperField(this, proto.skynet.types.GraphNodeInfo, 2));
 };
 
 
 /**
- * @param {?proto.skynet.types.Node|undefined} value
+ * @param {?proto.skynet.types.GraphNodeInfo|undefined} value
  * @return {!proto.skynet.types.GraphAction} returns this
 */
 proto.skynet.types.GraphAction.prototype.setNode = function(value) {

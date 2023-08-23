@@ -62,8 +62,8 @@ export class GraphAction extends jspb.Message {
 
   hasNode(): boolean;
   clearNode(): void;
-  getNode(): Node | undefined;
-  setNode(value?: Node): void;
+  getNode(): GraphNodeInfo | undefined;
+  setNode(value?: GraphNodeInfo): void;
 
   hasEdge(): boolean;
   clearEdge(): void;
@@ -84,7 +84,7 @@ export class GraphAction extends jspb.Message {
 export namespace GraphAction {
   export type AsObject = {
     action: GraphAction.ActionMap[keyof GraphAction.ActionMap],
-    node?: Node.AsObject,
+    node?: GraphNodeInfo.AsObject,
     edge?: Edge.AsObject,
   }
 

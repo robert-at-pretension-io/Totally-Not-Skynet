@@ -2,7 +2,6 @@
   import { onMount, setContext } from "svelte";
   import cytoscape, { Core } from "cytoscape";
   import dagre from "cytoscape-dagre";
-  import GraphStyles from "./GraphStyles.js";
   import systemStateStore from "stores/systemStateStore.js";
   import { selectNode, selectEdge } from "../helper_functions/graph";
 
@@ -39,7 +38,7 @@
             "target-arrow-shape": "triangle",
             "line-color": "#000",
             "target-arrow-color": "#000",
-            "width": "2px",
+            width: "2px",
           },
         },
       ],
@@ -126,8 +125,8 @@
 
         if (last_action.hasNode()) {
           let node = last_action.getNode();
-          let id = node?.getNodeInfo()?.getId();
-          let name = node?.getNodeInfo()?.getName();
+          let id = node?.getId();
+          let name = node?.getName();
 
           if (name != undefined && id != undefined) {
             switch (action_type) {

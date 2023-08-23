@@ -4,6 +4,7 @@
   "license": "Apache License 2.0",
   "devDependencies": {
     "@jridgewell/sourcemap-codec": "^1.4.15",
+    "@rollup/plugin-alias": "^5.0.0",
     "@rollup/plugin-commonjs": "^25.0.0",
     "@rollup/plugin-eslint": "^9.0.3",
     "@rollup/plugin-node-resolve": "^15.0.2",

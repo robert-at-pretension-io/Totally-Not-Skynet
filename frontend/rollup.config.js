@@ -8,6 +8,7 @@ import typescript from "@rollup/plugin-typescript";
 import eslint from "@rollup/plugin-eslint";
 import postcss from 'rollup-plugin-postcss';
 
+
 const production = !process.env.ROLLUP_WATCH;
 
 export default {
@@ -33,7 +34,8 @@ export default {
     postcss({
       extensions: ['.css'],
     }),
-    typescript({ sourceMap: !production }),
+    typescript({ sourceMap: true }),
+
 
     // If you have external dependencies installed from
     // npm, you'll most likely need these plugins. In

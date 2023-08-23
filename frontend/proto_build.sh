@@ -5,7 +5,8 @@
 # Path to your .proto files
 PROTO_SPEC_DIR="../common/protobuf"
 
-ABSOLUTE_SPEC_DIR="/home/robert/Projects/totally_not_skynet/common/protobuf"
+ABSOLUTE_SPEC_DIR=$(realpath "$PROTO_SPEC_DIR")
+# ABSOLUTE_SPEC_DIR="/home/robert/Projects/totally_not_skynet/common/protobuf"
 
 # Path to protoc executable
 # PROTOC_EXECUTABLE="/usr/local/bin/protoc"

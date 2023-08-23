@@ -1,24 +1,29 @@
 {
-    "compilerOptions": {
-      "allowJs": true,
-      "lib": ["ES2022", "dom"],
-      "baseUrl": "./src",
-      "sourceMap": true,
-      "outDir": "./dist",
-      "target": "es6",
-      "module": "esnext",
-      "moduleResolution": "node",
-      "strict": true,
-      "esModuleInterop": true,
-      "noImplicitAny": true,
-      "noImplicitThis": true,
-      "strictNullChecks": true,
-      "strictFunctionTypes": true,
-      "typeRoots": [
-        "./node_modules/@types"
-      ],
-    },
-    "include": [
-      "src/**/*"
-    ]
-  }
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": [
+      "ES2022",
+      "dom"
+    ],
+    "baseUrl": "./src",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "target": "es6",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/generated/system_types_pb.js"
+    ],
+  },
+  "include": [
+    "src/**/*",
+    "src/generated"
+  ]
+}

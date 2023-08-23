@@ -6,7 +6,6 @@ import {
   GraphState,
   Graph,
   Process,
-  NodeTypeNames,
   GraphAction,
 } from "generated/system_types_pb.js";
 
@@ -293,7 +292,6 @@ export async function graphHasNode(
   node: Node,
   graph_state: GraphState
 ): Promise<boolean | void> {
-  const node_name = "";
 
   const graph = graph_state.getGraph();
   const node_info = node.getNodeInfo();
@@ -358,9 +356,11 @@ export async function addNode(
     return;
   }
 
+  const node_info = node.getNodeInfo() as GraphNodeInfo;
+
   const graph_action = new GraphAction();
   graph_action.setAction(GraphAction.Action.ADD);
-  graph_action.setNode(node);
+  graph_action.setNode(node_info);
 
   const action_history = graph_state.getActionHistoryList();
   action_history.push(graph_action);
@@ -398,6 +398,7 @@ export async function processToGraphVisualization(
 export function findValidTopOrder(
   topOrder: GraphNodeInfo[][]
 ): GraphNodeInfo[] {
+  console.log(topOrder);
   console.log("REPLACE ME WITH REAL VALID TOPOLOGICAL ORDER");
   return [];
 }
@@ -432,94 +433,148 @@ export function addVariablesToPrompt(
 export async function removeNode(id: string): Promise<void> {
   const systemState = await getSystemState();
   const node_info = await getNodeInfo(id);
+  const node = await getNode(id);
   if (node_info) {
-    const remove_index = systemState.graph_state.graph.nodes.indexOf(node_info);
-    systemState.graph_state.graph.nodes.splice(remove_index);
-    systemState.graph_state.last_action = "remove";
-    systemState.graph_state.acted_on = node_info;
-    setSystemState(systemState);
+    const graph_state = systemState.getGraphState() as GraphState;
+    const graph = graph_state.getGraph() as Graph;
+    const node_array = graph.getNodesList() as GraphNodeInfo[];
+    const remove_index = node_array.indexOf(node_info);
+    node_array.splice(remove_index);
+    graph.setNodesList(node_array);
+    graph_state.setGraph(graph);
+
+    const action_history = graph_state.getActionHistoryList();
+
+    const latest_action = new GraphAction();
+    latest_action.setAction(GraphAction.Action.REMOVE);
+    latest_action.setNode(node.getNodeInfo() as GraphNodeInfo);
+
+    action_history.push(latest_action);
+
+    graph_state.setActionHistoryList(action_history);
+
+    systemState.setGraphState(graph_state);
+
+    await setSystemState(systemState);
   }
 }
 
 export async function removeEdge(
-  _sourceId: string,
-  _targetId: string
+  remove_edge: Edge
 ): Promise<void> {
   const systemState = await getSystemState();
-  // find the id of the edge to remove
 
-  // console.log("removing edge:", sourceId, targetId, " from graph");
+  const graph_state = systemState.getGraphState() as GraphState;
+  const graph = graph_state.getGraph() as Graph;
+  const edge_array = graph.getEdgesList() as Edge[];
+  const remove_index = edge_array.indexOf(remove_edge);
+  edge_array.splice(remove_index);
+  graph.setEdgesList(edge_array);
+  graph_state.setGraph(graph);
 
-  const edge = systemState.graph_state.acted_on;
-  // graphState.graph.removeEdge(edge);
+  const action_history = graph_state.getActionHistoryList();
 
-  systemState.graph_state.last_action = "remove";
-  systemState.graph_state.acted_on = edge;
+  const latest_action = new GraphAction();
+  latest_action.setAction(GraphAction.Action.REMOVE);
+  latest_action.setEdge(remove_edge);
 
-  setSystemState(systemState);
-}
+  action_history.push(latest_action);
 
-export async function returnProcesses(): Promise<Node[]> {
-  const systemState = await getSystemState();
-  let nodes = systemState.nodes;
+  graph_state.setActionHistoryList(action_history);
 
-  // filter out the prompts
-  nodes = nodes.filter((node: Node) => {
-    return node.type_name == "Process";
-  });
+  systemState.setGraphState(graph_state);
 
-  // let processes = nodes.map((node: Node) => {
-  //   return node.node_content as Process;
-  // }
-  // );
-
-  return nodes;
+  await setSystemState(systemState);
 }
 
 export async function selectNode(id: string): Promise<void> {
   const system_state = await getSystemState();
-  const nodes = system_state.nodes;
+  const graph_state = system_state.getGraphState() as GraphState;
+  const graph = graph_state.getGraph();
+  const nodes = graph?.getNodesList() as GraphNodeInfo[];
 
-  const res = nodes.find((node: Node) => getId(node) == id);
+  const found_index = nodes.find((node_info) => {
+    return node_info.getId() == id;
+  }) as GraphNodeInfo;
 
-  if (res) {
-    const systemState = await getSystemState();
-    systemState.selected_node = res;
-    systemState.graph_state.last_action = "select";
-    systemState.graph_state.last_acted_on = systemState.graph_state.acted_on;
-    systemState.graph_state.acted_on = { id, name: res.name };
-    setSystemState(systemState);
-  }
+  const graph_action = new GraphAction();
+
+  graph_action.setAction(GraphAction.Action.SELECT);
+  graph_action.setNode(found_index);
+
+  const action_history = graph_state.getActionHistoryList();
+
+  action_history.push(graph_action);
+
+  graph_state.setActionHistoryList(action_history);
+
+  system_state.setGraphState(graph_state);
+  await setSystemState(system_state);
+
 }
 
 export async function selectEdge(edge: Edge): Promise<void> {
-  const systemState = await getSystemState();
+  const system_state = await getSystemState();
+  const graph_state = system_state.getGraphState() as GraphState;
+  const graph = graph_state.getGraph();
+  const edges = graph?.getEdgesList() as Edge[];
 
-  systemState.graph_state.last_action = "select";
-  systemState.graph_state.acted_on = edge;
-  setSystemState(systemState);
+  const found_index = edges.find((edge_info) => {
+    return edge == edge_info;
+  }) as Edge;
+
+  const graph_action = new GraphAction();
+
+  graph_action.setAction(GraphAction.Action.SELECT);
+  graph_action.setEdge(found_index);
+
+  const action_history = graph_state.getActionHistoryList();
+
+  action_history.push(graph_action);
+
+  graph_state.setActionHistoryList(action_history);
+
+  system_state.setGraphState(graph_state);
+  await setSystemState(system_state);
+
 }
 
 export async function resetLastAction(): Promise<void> {
   const systemState = await getSystemState();
-  systemState.graph_state.last_action = "none";
-  systemState.graph_state.acted_on = undefined;
+
+  const graph_state = systemState.getGraphState() as GraphState;
+
+  const graph_action = new GraphAction();
+
+  graph_action.setAction(GraphAction.Action.NONE);
+  graph_action.setEdge();
+  graph_action.setNode();
+
+  const action_history = graph_state.getActionHistoryList();
+
+  action_history.push(graph_action);
+
+  graph_state.setActionHistoryList(action_history);
   setSystemState(systemState);
-}
-
-export function nodes(graph_state: GraphState): GraphNodeInfo[] {
-  return graph_state.graph.nodes;
-}
-
-export function edges(graph_state: GraphState): Edge[] {
-  return graph_state.graph.edges;
 }
 
 // reset the graphState to a new empty graph
 export async function resetGraph(): Promise<void> {
+
   const systemState = await getSystemState();
-  systemState.graph_state.graph = { edges: [], nodes: [] };
-  systemState.graph_state.last_action = "reset";
-  systemState.graph_state.acted_on = undefined;
+
+  const graph_state = systemState.getGraphState() as GraphState;
+
+  const graph_action = new GraphAction();
+
+  graph_action.setAction(GraphAction.Action.RESET);
+  graph_action.setEdge();
+  graph_action.setNode();
+
+  const action_history = graph_state.getActionHistoryList();
+
+  action_history.push(graph_action);
+
+  graph_state.setActionHistoryList(action_history);
   setSystemState(systemState);
 }
