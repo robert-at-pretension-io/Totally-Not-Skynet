@@ -8,10 +8,12 @@
   import { websocketStore } from "stores/websocketStore";
   import AuthPage from "./components/AuthPage.svelte";
   import { SystemState } from "generated/system_types_pb";
+  import Loading from "./components/Loading.svelte";
 
   let authenticated = false;
   let websocket: WebSocket;
   let system_state: SystemState;
+  let websocket_ready = false;
 
   onMount(async () => {
     // subscribe to system state:
@@ -32,6 +34,7 @@
     );
     authenticated = $systemStateStore.getAuthenticated();
     if ($systemStateStore.getWebsocketReady()) {
+      websocket_ready = true;
       console.log("Websocket Ready to send Messages!");
     }
   }
@@ -39,7 +42,11 @@
 
 <!-- Show the following component if the system is not authenticated-->
 {#if !authenticated}
-  <AuthPage />
+  {#if websocket_ready}
+    <AuthPage />
+  {:else}
+    <Loading />
+  {/if}
 {/if}
 
 {#if authenticated}
