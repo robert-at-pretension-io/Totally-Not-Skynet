@@ -7,21 +7,19 @@
   import systemStateStore from "stores/systemStateStore";
   import { websocketStore } from "stores/websocketStore";
   import AuthPage from "./components/AuthPage.svelte";
+  import { SystemState } from "generated/system_types_pb";
 
   let authenticated = false;
   let websocket: WebSocket;
-  // let system_store;
+  let system_state: SystemState;
 
   onMount(async () => {
     // subscribe to system state:
-    // system_store = $systemStateStore;
-    console.log(
-      "System State Changed: " + JSON.stringify($systemStateStore.toObject())
-    );
+    system_state = $systemStateStore;
 
     if (!$systemStateStore.getWebsocketReady()) {
       // startup websocket connection
-      websocket = await setupWebsocketConnection();
+      [websocket, system_state] = await setupWebsocketConnection(system_state);
       console.log("websocket: ", websocket);
       websocketStore.set(websocket);
     }
@@ -29,17 +27,12 @@
 
   $: {
     console.log(
-      "System State Changed: " + JSON.stringify($systemStateStore.toObject())
+      "System State Changed (App.svelte): " +
+        JSON.stringify($systemStateStore.toObject())
     );
-    // system_store = $systemStateStore;
     authenticated = $systemStateStore.getAuthenticated();
     if ($systemStateStore.getWebsocketReady()) {
       console.log("Websocket Ready to send Messages!");
-    } else {
-      // setupWebsocketConnection().then((ws) => {
-      //   websocket = ws;
-      //   websocketStore.set(websocket);
-      // });
     }
   }
 </script>

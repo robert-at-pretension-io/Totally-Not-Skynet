@@ -9096,7 +9096,7 @@ var app = (function () {
      * @param {*} value The value to query.
      * @returns {string} Returns the `toStringTag`.
      */
-    function baseGetTag$2(value) {
+    function baseGetTag$1(value) {
       if (value == null) {
         return value === undefined ? undefinedTag : nullTag;
       }
@@ -9105,7 +9105,7 @@ var app = (function () {
         : objectToString(value);
     }
 
-    var _baseGetTag = baseGetTag$2;
+    var _baseGetTag = baseGetTag$1;
 
     /**
      * Checks if `value` is the
@@ -9133,50 +9133,58 @@ var app = (function () {
      * // => false
      */
 
-    function isObject$5(value) {
+    function isObject$4(value) {
       var type = typeof value;
       return value != null && (type == 'object' || type == 'function');
     }
 
-    var isObject_1 = isObject$5;
+    var isObject_1 = isObject$4;
 
-    var baseGetTag$1 = _baseGetTag,
-        isObject$4 = isObject_1;
+    var isFunction_1;
+    var hasRequiredIsFunction;
 
-    /** `Object#toString` result references. */
-    var asyncTag = '[object AsyncFunction]',
-        funcTag = '[object Function]',
-        genTag = '[object GeneratorFunction]',
-        proxyTag = '[object Proxy]';
+    function requireIsFunction () {
+    	if (hasRequiredIsFunction) return isFunction_1;
+    	hasRequiredIsFunction = 1;
+    	var baseGetTag = _baseGetTag,
+    	    isObject = isObject_1;
 
-    /**
-     * Checks if `value` is classified as a `Function` object.
-     *
-     * @static
-     * @memberOf _
-     * @since 0.1.0
-     * @category Lang
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a function, else `false`.
-     * @example
-     *
-     * _.isFunction(_);
-     * // => true
-     *
-     * _.isFunction(/abc/);
-     * // => false
-     */
-    function isFunction$1(value) {
-      if (!isObject$4(value)) {
-        return false;
-      }
-      // The use of `Object#toString` avoids issues with the `typeof` operator
-      // in Safari 9 which returns 'object' for typed arrays and other constructors.
-      var tag = baseGetTag$1(value);
-      return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
+    	/** `Object#toString` result references. */
+    	var asyncTag = '[object AsyncFunction]',
+    	    funcTag = '[object Function]',
+    	    genTag = '[object GeneratorFunction]',
+    	    proxyTag = '[object Proxy]';
+
+    	/**
+    	 * Checks if `value` is classified as a `Function` object.
+    	 *
+    	 * @static
+    	 * @memberOf _
+    	 * @since 0.1.0
+    	 * @category Lang
+    	 * @param {*} value The value to check.
+    	 * @returns {boolean} Returns `true` if `value` is a function, else `false`.
+    	 * @example
+    	 *
+    	 * _.isFunction(_);
+    	 * // => true
+    	 *
+    	 * _.isFunction(/abc/);
+    	 * // => false
+    	 */
+    	function isFunction(value) {
+    	  if (!isObject(value)) {
+    	    return false;
+    	  }
+    	  // The use of `Object#toString` avoids issues with the `typeof` operator
+    	  // in Safari 9 which returns 'object' for typed arrays and other constructors.
+    	  var tag = baseGetTag(value);
+    	  return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
+    	}
+
+    	isFunction_1 = isFunction;
+    	return isFunction_1;
     }
-
-    var isFunction_1 = isFunction$1;
 
     var root$2 = _root;
 
@@ -9242,7 +9250,7 @@ var app = (function () {
     	return _toSource;
     }
 
-    var isFunction = isFunction_1,
+    var isFunction = requireIsFunction(),
         isMasked = _isMasked,
         isObject$3 = isObject_1,
         toSource = require_toSource();
@@ -10536,7 +10544,7 @@ var app = (function () {
     function requireIsArrayLike () {
     	if (hasRequiredIsArrayLike) return isArrayLike_1;
     	hasRequiredIsArrayLike = 1;
-    	var isFunction = isFunction_1,
+    	var isFunction = requireIsFunction(),
     	    isLength = requireIsLength();
 
     	/**
@@ -14527,7 +14535,7 @@ var app = (function () {
     	    getPrototype = require_getPrototype(),
     	    isArray = isArray_1,
     	    isBuffer = requireIsBuffer(),
-    	    isFunction = isFunction_1,
+    	    isFunction = requireIsFunction(),
     	    isObject = isObject_1,
     	    isTypedArray = requireIsTypedArray();
 
@@ -15341,7 +15349,7 @@ var app = (function () {
           has:  requireHas(),
           isArray: isArray_1,
           isEmpty: requireIsEmpty(),
-          isFunction: isFunction_1,
+          isFunction: requireIsFunction(),
           isUndefined: requireIsUndefined(),
           keys: requireKeys(),
           map: requireMap(),
@@ -53732,7 +53740,7 @@ var app = (function () {
     	    isArray = isArray_1,
     	    isArrayLikeObject = requireIsArrayLikeObject(),
     	    isBuffer = requireIsBuffer(),
-    	    isFunction = isFunction_1,
+    	    isFunction = requireIsFunction(),
     	    isObject = isObject_1,
     	    isPlainObject = requireIsPlainObject(),
     	    isTypedArray = requireIsTypedArray(),
@@ -58552,62 +58560,57 @@ var app = (function () {
         return utf8Encoder.encode(str);
     }
 
-    function setupWebsocketConnection() {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log("setting up websocket connection");
-            let websocket = new WebSocket("ws://138.197.70.163:8080");
-            const system_state = yield getSystemState();
-            // start the websocket connection
-            websocket.addEventListener("open", () => __awaiter(this, void 0, void 0, function* () {
-                console.log("websocket connection opened");
-                // setup message processor
-                websocket = yield setupWebsocketMessageHandler(websocket);
-                system_state.setWebsocketReady(true);
-                yield setSystemState(system_state);
-            }));
-            console.log("returning websocket");
-            return websocket;
+    function setupWebsocketConnection(system_state) {
+        console.log("setting up websocket connection");
+        let websocket = new WebSocket("ws://138.197.70.163:8080");
+        // start the websocket connection
+        websocket.addEventListener("open", () => {
+            console.log("websocket connection opened");
+            // setup message processor
+            system_state.setWebsocketReady(true);
+            systemStateStore.set(system_state); // <-- update your Svelte store
         });
+        websocket = setupWebsocketMessageHandler(websocket);
+        console.log("returning websocket");
+        return [websocket, system_state];
     }
     function setupWebsocketMessageHandler(websocket) {
-        return __awaiter(this, void 0, void 0, function* () {
-            websocket.addEventListener("message", (event) => {
-                console.log("websocket message received: ", event.data);
-                let data;
-                try {
-                    data = event.data;
-                    const u8Array = stringToUint8Array(data);
-                    const response_object = system_types_pb$1.ResponseObject.deserializeBinary(u8Array);
-                    const res = response_object.getObjectCase();
-                    alert("Need to handle switch statement for websocket message processing --> Adding object into local system state.");
-                    switch (res) {
-                        case system_types_pb$1.ResponseObject.ObjectCase.NODE:
-                            console.log("NODE");
-                            break;
-                        case system_types_pb$1.ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
-                            console.log("AUTHENTICATION_MESSAGE");
-                            break;
-                        case system_types_pb$1.ResponseObject.ObjectCase.USER_SETTINGS:
-                            console.log("USER_SETTINGS");
-                            break;
-                        case system_types_pb$1.ResponseObject.ObjectCase.EXECUTION_RESPONSE:
-                            console.log("EXECUTION_RESPONSE");
-                            break;
-                        case system_types_pb$1.ResponseObject.ObjectCase.OBJECT_NOT_SET:
-                            console.log("OBJECT_NOT_SET");
-                            break;
-                        default:
-                            console.log("default");
-                            alert("Fallen through response object switch statement... This is not good.");
-                            break;
-                    }
+        websocket.addEventListener("message", (event) => {
+            console.log("websocket message received: ", event.data);
+            let data;
+            try {
+                data = event.data;
+                const u8Array = stringToUint8Array(data);
+                const response_object = system_types_pb$1.ResponseObject.deserializeBinary(u8Array);
+                const res = response_object.getObjectCase();
+                alert("Need to handle switch statement for websocket message processing --> Adding object into local system state.");
+                switch (res) {
+                    case system_types_pb$1.ResponseObject.ObjectCase.NODE:
+                        console.log("NODE");
+                        break;
+                    case system_types_pb$1.ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
+                        console.log("AUTHENTICATION_MESSAGE");
+                        break;
+                    case system_types_pb$1.ResponseObject.ObjectCase.USER_SETTINGS:
+                        console.log("USER_SETTINGS");
+                        break;
+                    case system_types_pb$1.ResponseObject.ObjectCase.EXECUTION_RESPONSE:
+                        console.log("EXECUTION_RESPONSE");
+                        break;
+                    case system_types_pb$1.ResponseObject.ObjectCase.OBJECT_NOT_SET:
+                        console.log("OBJECT_NOT_SET");
+                        break;
+                    default:
+                        console.log("default");
+                        alert("Fallen through response object switch statement... This is not good.");
+                        break;
                 }
-                catch (_a) {
-                    console.log("Error parsing websocket message");
-                }
-            });
-            return websocket;
+            }
+            catch (_a) {
+                console.log("Error parsing websocket message");
+            }
         });
+        return websocket;
     }
 
     const websocket = null;
@@ -58775,7 +58778,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src/App.svelte";
 
-    // (49:0) {#if !authenticated}
+    // (43:0) {#if !authenticated}
     function create_if_block_1(ctx) {
     	let authpage;
     	let current;
@@ -58807,14 +58810,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(49:0) {#if !authenticated}",
+    		source: "(43:0) {#if !authenticated}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (53:0) {#if authenticated}
+    // (47:0) {#if authenticated}
     function create_if_block(ctx) {
     	let div;
     	let sidebar;
@@ -58831,7 +58834,7 @@ var app = (function () {
     			t = space();
     			create_component(graphcomponentgraphlib.$$.fragment);
     			attr_dev(div, "class", "app-container");
-    			add_location(div, file, 53, 2, 2280);
+    			add_location(div, file, 47, 2, 2070);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -58862,7 +58865,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(53:0) {#if authenticated}",
+    		source: "(47:0) {#if authenticated}",
     		ctx
     	});
 
@@ -59011,16 +59014,15 @@ var app = (function () {
 
     	let authenticated = false;
     	let websocket;
+    	let system_state;
 
-    	// let system_store;
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
     		// subscribe to system state:
-    		// system_store = $systemStateStore;
-    		console.log("System State Changed: " + JSON.stringify($systemStateStore.toObject()));
+    		system_state = $systemStateStore;
 
     		if (!$systemStateStore.getWebsocketReady()) {
     			// startup websocket connection
-    			websocket = yield setupWebsocketConnection();
+    			[websocket, system_state] = yield setupWebsocketConnection(system_state);
 
     			console.log("websocket: ", websocket);
     			websocketStore.set(websocket);
@@ -59044,6 +59046,7 @@ var app = (function () {
     		AuthPage,
     		authenticated,
     		websocket,
+    		system_state,
     		$systemStateStore
     	});
 
@@ -59051,6 +59054,7 @@ var app = (function () {
     		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
     		if ('authenticated' in $$props) $$invalidate(0, authenticated = $$props.authenticated);
     		if ('websocket' in $$props) websocket = $$props.websocket;
+    		if ('system_state' in $$props) system_state = $$props.system_state;
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -59060,17 +59064,13 @@ var app = (function () {
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*$systemStateStore*/ 2) {
     			{
-    				console.log("System State Changed: " + JSON.stringify($systemStateStore.toObject()));
-
-    				// system_store = $systemStateStore;
+    				console.log("System State Changed (App.svelte): " + JSON.stringify($systemStateStore.toObject()));
     				$$invalidate(0, authenticated = $systemStateStore.getAuthenticated());
 
     				if ($systemStateStore.getWebsocketReady()) {
     					console.log("Websocket Ready to send Messages!");
-    				} // setupWebsocketConnection().then((ws) => {
-    				//   websocket = ws;
-    			} //   websocketStore.set(websocket);
-    			// });
+    				}
+    			}
     		}
     	};
 
