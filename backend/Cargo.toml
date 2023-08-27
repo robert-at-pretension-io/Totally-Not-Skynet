@@ -28,6 +28,7 @@ base64 = "0.21.2"
 rusqlite = "*"
 r2d2 = "*"
 r2d2_sqlite = "*"
+colored = "2.0.4"
 
 
 [build-dependencies]
