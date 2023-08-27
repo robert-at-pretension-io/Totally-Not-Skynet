@@ -1,14 +1,37 @@
 <script>
+  import {
+    AuthenticationMessage,
+    CrudBundle,
+    VerbTypeNames,
+  } from "../generated/system_types_pb";
+  import { sendWebsocketMessage } from "helper_functions/websocket";
   import systemStateStore from "stores/systemStateStore";
+  import { websocketStore } from "stores/websocketStore";
 
   let username = "";
   let password = "";
 
-  function handleSubmit() {
+  async function handleSubmit() {
     console.log("Username:", username);
     console.log("Password:", password);
     $systemStateStore = $systemStateStore.setAuthenticated(true);
+    let websocket = $websocketStore.websocket;
+
+    let crud_bundle = new CrudBundle();
+
+    let authentication_message = new AuthenticationMessage();
+
+    // authentication_message.sest
+
+    let verb = VerbTypeNames.POST;
+
+    crud_bundle.setVerb(verb);
+    crud_bundle.setAuthenticationMessage(authentication_message);
+
+    await sendWebsocketMessage(crud_bundle, websocket);
   }
+
+  // Send POST with authentication Message
 </script>
 
 <div class="container">

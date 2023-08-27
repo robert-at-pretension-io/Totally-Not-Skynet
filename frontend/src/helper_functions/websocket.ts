@@ -79,6 +79,6 @@ export async function sendWebsocketMessage(
   websocket: WebSocket
 ) {
   console.log("sending websocket message: ", message);
-  const message_string = JSON.stringify(message);
+  const message_string = message.serializeBinary();
   websocket.send(message_string);
 }

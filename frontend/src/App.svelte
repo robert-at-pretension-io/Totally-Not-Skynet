@@ -23,7 +23,7 @@
       // startup websocket connection
       [websocket, system_state] = await setupWebsocketConnection(system_state);
       console.log("websocket: ", websocket);
-      websocketStore.set(websocket);
+      websocketStore.set({ websocket: websocket });
     }
   });
 

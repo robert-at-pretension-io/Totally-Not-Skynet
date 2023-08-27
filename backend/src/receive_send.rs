@@ -243,6 +243,9 @@ pub async fn start_message_sending_loop(
 
             None => {
                 println!("odd...");
+                println!(
+                    "This probably means that the websocket connection has closed... Should remove it from the identity hash"
+                );
             }
         }
     }
