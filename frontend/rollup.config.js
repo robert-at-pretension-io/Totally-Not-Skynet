@@ -15,10 +15,14 @@ export default {
   input: "src/main.js",
   output: {
     sourcemap: true,
-    format: "iife",
+    format: "es",
+    globals: {
+      'proto.skynet.types': 'proto.skynet.types'
+    },
     name: "app",
     file: "public/bundle.js",
   },
+  external: ['proto.skynet.types'],
   plugins: [
     svelte({
       // enable run-time checks when not in production

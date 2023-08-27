@@ -1,7 +1,8 @@
 import { getSystemState, setSystemState } from "./graph";
-import { CrudBundle, ResponseObject } from "generated/system_types_pb.js";
 
 import { stringToUint8Array } from "./misc";
+
+import * as proto from "../../src/generated/system_types_pb";
 
 export async function setupWebsocketConnection(): Promise<WebSocket> {
   let websocket = new WebSocket("ws://138.197.70.163:8080");
@@ -30,7 +31,7 @@ export async function setupWebsocketMessageHandler(
 
       const u8Array = stringToUint8Array(data);
 
-      const response_object = ResponseObject.deserializeBinary(u8Array);
+      const response_object = proto.ResponseObject.deserializeBinary(u8Array);
 
       const res = response_object.getObjectCase();
 
@@ -39,19 +40,19 @@ export async function setupWebsocketMessageHandler(
       );
 
       switch (res) {
-      case ResponseObject.ObjectCase.NODE:
+      case proto.ResponseObject.ObjectCase.NODE:
         console.log("NODE");
         break;
-      case ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
+      case proto.ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
         console.log("AUTHENTICATION_MESSAGE");
         break;
-      case ResponseObject.ObjectCase.USER_SETTINGS:
+      case proto.ResponseObject.ObjectCase.USER_SETTINGS:
         console.log("USER_SETTINGS");
         break;
-      case ResponseObject.ObjectCase.EXECUTION_RESPONSE:
+      case proto.ResponseObject.ObjectCase.EXECUTION_RESPONSE:
         console.log("EXECUTION_RESPONSE");
         break;
-      case ResponseObject.ObjectCase.OBJECT_NOT_SET:
+      case proto.ResponseObject.ObjectCase.OBJECT_NOT_SET:
         console.log("OBJECT_NOT_SET");
         break;
       default:
@@ -70,7 +71,7 @@ export async function setupWebsocketMessageHandler(
 }
 
 export async function sendWebsocketMessage(
-  message: CrudBundle,
+  message: proto.CrudBundle,
   websocket: WebSocket
 ) {
   console.log("sending websocket message: ", message);

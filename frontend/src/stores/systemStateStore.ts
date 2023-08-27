@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
-import { SystemState } from "generated/system_types_pb.js";
+import * as proto from 
 
-const system_state: SystemState = new SystemState();
+const system_state: proto.skynet.types.SystemState = new proto.skynet.types.SystemState();
 
 const systemStateStore = writable(system_state);
 
