@@ -13742,78 +13742,102 @@ var app = (function () {
     	return _baseToString;
     }
 
-    var baseToString = require_baseToString();
+    var toString_1;
+    var hasRequiredToString;
 
-    /**
-     * Converts `value` to a string. An empty string is returned for `null`
-     * and `undefined` values. The sign of `-0` is preserved.
-     *
-     * @static
-     * @memberOf _
-     * @since 4.0.0
-     * @category Lang
-     * @param {*} value The value to convert.
-     * @returns {string} Returns the converted string.
-     * @example
-     *
-     * _.toString(null);
-     * // => ''
-     *
-     * _.toString(-0);
-     * // => '-0'
-     *
-     * _.toString([1, 2, 3]);
-     * // => '1,2,3'
-     */
-    function toString$3(value) {
-      return value == null ? '' : baseToString(value);
+    function requireToString () {
+    	if (hasRequiredToString) return toString_1;
+    	hasRequiredToString = 1;
+    	var baseToString = require_baseToString();
+
+    	/**
+    	 * Converts `value` to a string. An empty string is returned for `null`
+    	 * and `undefined` values. The sign of `-0` is preserved.
+    	 *
+    	 * @static
+    	 * @memberOf _
+    	 * @since 4.0.0
+    	 * @category Lang
+    	 * @param {*} value The value to convert.
+    	 * @returns {string} Returns the converted string.
+    	 * @example
+    	 *
+    	 * _.toString(null);
+    	 * // => ''
+    	 *
+    	 * _.toString(-0);
+    	 * // => '-0'
+    	 *
+    	 * _.toString([1, 2, 3]);
+    	 * // => '1,2,3'
+    	 */
+    	function toString(value) {
+    	  return value == null ? '' : baseToString(value);
+    	}
+
+    	toString_1 = toString;
+    	return toString_1;
     }
 
-    var toString_1 = toString$3;
+    var _castPath;
+    var hasRequired_castPath;
 
-    var isArray$1 = requireIsArray(),
-        isKey = require_isKey(),
-        stringToPath$1 = require_stringToPath(),
-        toString$2 = toString_1;
+    function require_castPath () {
+    	if (hasRequired_castPath) return _castPath;
+    	hasRequired_castPath = 1;
+    	var isArray = requireIsArray(),
+    	    isKey = require_isKey(),
+    	    stringToPath = require_stringToPath(),
+    	    toString = requireToString();
 
-    /**
-     * Casts `value` to a path array if it's not one.
-     *
-     * @private
-     * @param {*} value The value to inspect.
-     * @param {Object} [object] The object to query keys on.
-     * @returns {Array} Returns the cast property path array.
-     */
-    function castPath$1(value, object) {
-      if (isArray$1(value)) {
-        return value;
-      }
-      return isKey(value, object) ? [value] : stringToPath$1(toString$2(value));
+    	/**
+    	 * Casts `value` to a path array if it's not one.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to inspect.
+    	 * @param {Object} [object] The object to query keys on.
+    	 * @returns {Array} Returns the cast property path array.
+    	 */
+    	function castPath(value, object) {
+    	  if (isArray(value)) {
+    	    return value;
+    	  }
+    	  return isKey(value, object) ? [value] : stringToPath(toString(value));
+    	}
+
+    	_castPath = castPath;
+    	return _castPath;
     }
 
-    var _castPath = castPath$1;
+    var _toKey;
+    var hasRequired_toKey;
 
-    var isSymbol$2 = requireIsSymbol();
+    function require_toKey () {
+    	if (hasRequired_toKey) return _toKey;
+    	hasRequired_toKey = 1;
+    	var isSymbol = requireIsSymbol();
 
-    /** Used as references for various `Number` constants. */
-    var INFINITY = 1 / 0;
+    	/** Used as references for various `Number` constants. */
+    	var INFINITY = 1 / 0;
 
-    /**
-     * Converts `value` to a string key if it's not a string or symbol.
-     *
-     * @private
-     * @param {*} value The value to inspect.
-     * @returns {string|symbol} Returns the key.
-     */
-    function toKey$2(value) {
-      if (typeof value == 'string' || isSymbol$2(value)) {
-        return value;
-      }
-      var result = (value + '');
-      return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+    	/**
+    	 * Converts `value` to a string key if it's not a string or symbol.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to inspect.
+    	 * @returns {string|symbol} Returns the key.
+    	 */
+    	function toKey(value) {
+    	  if (typeof value == 'string' || isSymbol(value)) {
+    	    return value;
+    	  }
+    	  var result = (value + '');
+    	  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+    	}
+
+    	_toKey = toKey;
+    	return _toKey;
     }
-
-    var _toKey = toKey$2;
 
     var _baseGet;
     var hasRequired_baseGet;
@@ -13821,8 +13845,8 @@ var app = (function () {
     function require_baseGet () {
     	if (hasRequired_baseGet) return _baseGet;
     	hasRequired_baseGet = 1;
-    	var castPath = _castPath,
-    	    toKey = _toKey;
+    	var castPath = require_castPath(),
+    	    toKey = require_toKey();
 
     	/**
     	 * The base implementation of `_.get` without support for default values.
@@ -13911,12 +13935,12 @@ var app = (function () {
     function require_hasPath () {
     	if (hasRequired_hasPath) return _hasPath;
     	hasRequired_hasPath = 1;
-    	var castPath = _castPath,
+    	var castPath = require_castPath(),
     	    isArguments = requireIsArguments(),
     	    isArray = requireIsArray(),
     	    isIndex = require_isIndex(),
     	    isLength = requireIsLength(),
-    	    toKey = _toKey;
+    	    toKey = require_toKey();
 
     	/**
     	 * Checks if `path` exists on `object`.
@@ -14008,7 +14032,7 @@ var app = (function () {
     	    isKey = require_isKey(),
     	    isStrictComparable = require_isStrictComparable(),
     	    matchesStrictComparable = require_matchesStrictComparable(),
-    	    toKey = _toKey;
+    	    toKey = require_toKey();
 
     	/** Used to compose bitmasks for value comparisons. */
     	var COMPARE_PARTIAL_FLAG = 1,
@@ -14096,7 +14120,7 @@ var app = (function () {
     	var baseProperty = require_baseProperty(),
     	    basePropertyDeep = require_basePropertyDeep(),
     	    isKey = require_isKey(),
-    	    toKey = _toKey;
+    	    toKey = require_toKey();
 
     	/**
     	 * Creates a function that returns the value at `path` of a given object.
@@ -18423,7 +18447,7 @@ var app = (function () {
 
     /* src/components/sidebarComponents/subComponents/CommandComponent.svelte generated by Svelte v3.59.1 */
 
-    const { console: console_1$5 } = globals;
+    const { console: console_1$6 } = globals;
     const file$8 = "src/components/sidebarComponents/subComponents/CommandComponent.svelte";
 
     function create_fragment$8(ctx) {
@@ -18467,14 +18491,14 @@ var app = (function () {
 
     	$$self.$$.on_mount.push(function () {
     		if (command === undefined && !('command' in $$props || $$self.$$.bound[$$self.$$.props['command']])) {
-    			console_1$5.warn("<CommandComponent> was created without expected prop 'command'");
+    			console_1$6.warn("<CommandComponent> was created without expected prop 'command'");
     		}
     	});
 
     	const writable_props = ['command'];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$5.warn(`<CommandComponent> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$6.warn(`<CommandComponent> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$$set = $$props => {
@@ -18518,7 +18542,7 @@ var app = (function () {
 
     /* src/components/sidebarComponents/subComponents/ConditionalComponent.svelte generated by Svelte v3.59.1 */
 
-    const { console: console_1$4 } = globals;
+    const { console: console_1$5 } = globals;
     const file$7 = "src/components/sidebarComponents/subComponents/ConditionalComponent.svelte";
 
     function create_fragment$7(ctx) {
@@ -18562,14 +18586,14 @@ var app = (function () {
 
     	$$self.$$.on_mount.push(function () {
     		if (conditional === undefined && !('conditional' in $$props || $$self.$$.bound[$$self.$$.props['conditional']])) {
-    			console_1$4.warn("<ConditionalComponent> was created without expected prop 'conditional'");
+    			console_1$5.warn("<ConditionalComponent> was created without expected prop 'conditional'");
     		}
     	});
 
     	const writable_props = ['conditional'];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$4.warn(`<ConditionalComponent> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$5.warn(`<ConditionalComponent> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$$set = $$props => {
@@ -18613,7 +18637,7 @@ var app = (function () {
 
     /* src/components/sidebarComponents/subComponents/ProcessComponent.svelte generated by Svelte v3.59.1 */
 
-    const { console: console_1$3 } = globals;
+    const { console: console_1$4 } = globals;
     const file$6 = "src/components/sidebarComponents/subComponents/ProcessComponent.svelte";
 
     function create_fragment$6(ctx) {
@@ -18657,14 +18681,14 @@ var app = (function () {
 
     	$$self.$$.on_mount.push(function () {
     		if (process === undefined && !('process' in $$props || $$self.$$.bound[$$self.$$.props['process']])) {
-    			console_1$3.warn("<ProcessComponent> was created without expected prop 'process'");
+    			console_1$4.warn("<ProcessComponent> was created without expected prop 'process'");
     		}
     	});
 
     	const writable_props = ['process'];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$3.warn(`<ProcessComponent> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$4.warn(`<ProcessComponent> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$$set = $$props => {
@@ -18944,7 +18968,7 @@ var app = (function () {
 
     /* src/components/sidebarComponents/newNode.svelte generated by Svelte v3.59.1 */
 
-    const { Object: Object_1, console: console_1$2 } = globals;
+    const { Object: Object_1, console: console_1$3 } = globals;
 
     const file$4 = "src/components/sidebarComponents/newNode.svelte";
 
@@ -19854,7 +19878,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object_1.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<NewNode> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$3.warn(`<NewNode> was created with unknown prop '${key}'`);
     	});
 
     	function input0_input_handler() {
@@ -21137,10 +21161,10 @@ var app = (function () {
     var heap = heapExports;
 
     var assignValue = require_assignValue(),
-        castPath = _castPath,
+        castPath = require_castPath(),
         isIndex = require_isIndex(),
         isObject = requireIsObject(),
-        toKey$1 = _toKey;
+        toKey$1 = require_toKey();
 
     /**
      * The base implementation of `_.set`.
@@ -21229,8 +21253,8 @@ var app = (function () {
         isArray = requireIsArray(),
         isSymbol = requireIsSymbol(),
         stringToPath = require_stringToPath(),
-        toKey = _toKey,
-        toString$1 = toString_1;
+        toKey = require_toKey(),
+        toString$1 = requireToString();
 
     /**
      * Converts `value` to a property path array.
@@ -54438,7 +54462,7 @@ var app = (function () {
     	hasRequired_basePickBy = 1;
     	var baseGet = require_baseGet(),
     	    baseSet = _baseSet,
-    	    castPath = _castPath;
+    	    castPath = require_castPath();
 
     	/**
     	 * The base implementation of  `_.pickBy` without support for iteratee shorthands.
@@ -54943,7 +54967,7 @@ var app = (function () {
     function requireUniqueId () {
     	if (hasRequiredUniqueId) return uniqueId_1;
     	hasRequiredUniqueId = 1;
-    	var toString = toString_1;
+    	var toString = requireToString();
 
     	/** Used to generate unique IDs. */
     	var idCounter = 0;
@@ -58503,6 +58527,8 @@ var app = (function () {
     var dagre = /*@__PURE__*/getDefaultExportFromCjs(cytoscapeDagreExports);
 
     /* src/components/GraphComponent_graphlib.svelte generated by Svelte v3.59.1 */
+
+    const { console: console_1$2 } = globals;
     const file$2 = "src/components/GraphComponent_graphlib.svelte";
 
     // (147:2) {#if cyInstance}
@@ -58573,7 +58599,7 @@ var app = (function () {
     			div = element$1("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "graph");
-    			add_location(div, file$2, 145, 0, 6243);
+    			add_location(div, file$2, 145, 0, 6242);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -58810,14 +58836,14 @@ var app = (function () {
     				}
     			}
     		} else {
-    			alert("cytoscape not initialized");
+    			console.log("cyInstance is null");
     		}
     	});
 
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<GraphComponent_graphlib> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<GraphComponent_graphlib> was created with unknown prop '${key}'`);
     	});
 
     	function div_binding($$value) {
@@ -58996,16 +59022,16 @@ var app = (function () {
     			button.textContent = "Submit";
     			attr_dev(input0, "type", "text");
     			attr_dev(input0, "placeholder", "Username");
-    			add_location(input0, file$1, 15, 8, 351);
+    			add_location(input0, file$1, 15, 4, 351);
     			attr_dev(input1, "type", "password");
     			attr_dev(input1, "placeholder", "Password");
-    			add_location(input1, file$1, 16, 8, 426);
-    			attr_dev(button, "class", "submit-button svelte-1vzwa14");
-    			add_location(button, file$1, 17, 8, 505);
-    			attr_dev(div0, "class", "fields svelte-1vzwa14");
-    			add_location(div0, file$1, 14, 4, 322);
-    			attr_dev(div1, "class", "container svelte-1vzwa14");
-    			add_location(div1, file$1, 13, 0, 294);
+    			add_location(input1, file$1, 16, 4, 422);
+    			attr_dev(button, "class", "submit-button svelte-t3p93c");
+    			add_location(button, file$1, 17, 4, 497);
+    			attr_dev(div0, "class", "fields svelte-t3p93c");
+    			add_location(div0, file$1, 14, 2, 326);
+    			attr_dev(div1, "class", "container svelte-t3p93c");
+    			add_location(div1, file$1, 13, 0, 300);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -59072,7 +59098,7 @@ var app = (function () {
     	function handleSubmit() {
     		console.log("Username:", username);
     		console.log("Password:", password);
-    		set_store_value(systemStateStore, $systemStateStore.authenticated = true, $systemStateStore);
+    		set_store_value(systemStateStore, $systemStateStore = $systemStateStore.setAuthenticated(true), $systemStateStore);
     	}
 
     	const writable_props = [];
@@ -59130,7 +59156,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src/App.svelte";
 
-    // (36:0) {#if !authenticated}
+    // (41:0) {#if !authenticated}
     function create_if_block_1(ctx) {
     	let authpage;
     	let current;
@@ -59162,14 +59188,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(36:0) {#if !authenticated}",
+    		source: "(41:0) {#if !authenticated}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (40:0) {#if authenticated}
+    // (45:0) {#if authenticated}
     function create_if_block(ctx) {
     	let div;
     	let sidebar;
@@ -59186,7 +59212,7 @@ var app = (function () {
     			t = space();
     			create_component(graphcomponentgraphlib.$$.fragment);
     			attr_dev(div, "class", "app-container");
-    			add_location(div, file, 40, 2, 1758);
+    			add_location(div, file, 45, 2, 1985);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -59217,7 +59243,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(40:0) {#if authenticated}",
+    		source: "(45:0) {#if authenticated}",
     		ctx
     	});
 
@@ -59367,7 +59393,10 @@ var app = (function () {
     	let authenticated = false;
     	let websocket;
 
+    	// let system_store;
     	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
+    		// subscribe to system state:
+    		// system_store = $systemStateStore;
     		if (!$systemStateStore.getWebsocketReady()) {
     			// startup websocket connection
     			websocket = yield setupWebsocketConnection();
@@ -59409,6 +59438,9 @@ var app = (function () {
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*$systemStateStore*/ 2) {
     			{
+    				console.log("System State Changed: " + JSON.stringify($systemStateStore.toObject()));
+
+    				// system_store = $systemStateStore;
     				$$invalidate(0, authenticated = $systemStateStore.getAuthenticated());
 
     				if ($systemStateStore.getWebsocketReady()) {

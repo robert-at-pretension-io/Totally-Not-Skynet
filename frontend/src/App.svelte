@@ -10,8 +10,12 @@
 
   let authenticated = false;
   let websocket: WebSocket;
+  // let system_store;
 
   onMount(async () => {
+    // subscribe to system state:
+    // system_store = $systemStateStore;
+
     if (!$systemStateStore.getWebsocketReady()) {
       // startup websocket connection
       websocket = await setupWebsocketConnection();
@@ -20,9 +24,18 @@
   });
 
   $: {
+    console.log(
+      "System State Changed: " + JSON.stringify($systemStateStore.toObject())
+    );
+    // system_store = $systemStateStore;
     authenticated = $systemStateStore.getAuthenticated();
     if ($systemStateStore.getWebsocketReady()) {
       console.log("Websocket Ready to send Messages!");
+    } else {
+      setupWebsocketConnection().then((ws) => {
+        websocket = ws;
+        websocketStore.set(websocket);
+      });
     }
   }
 </script>

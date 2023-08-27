@@ -1,4 +1,4 @@
-.container.svelte-1vzwa14{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh}.fields.svelte-1vzwa14{display:flex;flex-direction:column;gap:10px}.submit-button.svelte-1vzwa14{background-color:green;color:white;padding:10px 20px;border:none;cursor:pointer;font-size:16px;transition:0.3s}.submit-button.svelte-1vzwa14:hover{background-color:darkgreen}
+.container.svelte-t3p93c{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh}.fields.svelte-t3p93c{display:flex;flex-direction:column;gap:10px}.submit-button.svelte-t3p93c{background-color:green;color:white;padding:10px 20px;border:none;cursor:pointer;font-size:16px;transition:0.3s}.submit-button.svelte-t3p93c:hover{background-color:darkgreen}
 .required-input.svelte-wwcf2i:invalid{border:2px solid red}.required-label.svelte-wwcf2i::after{content:" *";color:red}
 
 /*# sourceMappingURL=bundle.css.map */

@@ -1,20 +1,21 @@
-use std::sync::Arc;
-use tokio::sync::{ mpsc, Mutex };
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use std::env;
+use std::sync::Arc;
+use tokio::sync::{mpsc, Mutex};
 
 // mod domain;
+mod check_installed_programs;
+mod env_vars_checker;
 mod mongo;
 mod openai;
 mod receive_send;
 mod settings;
+mod sqlite_helper_functions;
 mod utils;
 mod websocket;
-mod env_vars_checker;
-mod check_installed_programs;
-mod sqlite_helper_functions;
 
+#[allow(non_snake_case)]
 pub mod generated_types {
     include!(concat!(env!("OUT_DIR"), "/skynet.types.rs"));
 }

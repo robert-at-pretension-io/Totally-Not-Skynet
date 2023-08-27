@@ -1,10 +1,8 @@
-use std::fmt;
+// use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE};
 use serde::{Deserialize, Serialize};
-use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE};
-use serde_json::{json, Value as JsonValue};
-use serde_json::Result;
-
-
+// use serde_json::Result;
+// use serde_json::{json, Value as JsonValue};
+use std::fmt;
 
 // types used for sending messages to openai
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -64,66 +62,66 @@ impl fmt::Display for Role {
     }
 }
 
-pub async fn get_openai_completion(messages: Vec<ChatMessage>, api_key: String, model : String) -> Result<String> {
-    // Define the URL for the API endpoint
-    let url = "https://api.openai.com/v1/chat/completions";
+// pub async fn get_openai_completion(messages: Vec<ChatMessage>, api_key: String, model : String) -> Result<String> {
+//     // Define the URL for the API endpoint
+//     let url = "https://api.openai.com/v1/chat/completions";
 
-    // Define the initial request body
-    let mut body: JsonValue = json!({
-        "model": model,
-        "messages": messages,
-        "temperature": 0.7
-    });
+//     // Define the initial request body
+//     let mut body: JsonValue = json!({
+//         "model": model,
+//         "messages": messages,
+//         "temperature": 0.7
+//     });
 
-    // Set up the headers
-    let mut headers = HeaderMap::new();
-    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-    headers.insert(
-        AUTHORIZATION,
-        HeaderValue::from_str(&format!("Bearer {}", api_key)).unwrap(),
-    );
+//     // Set up the headers
+//     let mut headers = HeaderMap::new();
+//     headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+//     headers.insert(
+//         AUTHORIZATION,
+//         HeaderValue::from_str(&format!("Bearer {}", api_key)).unwrap(),
+//     );
 
-    // Create an HTTP client
-    let client = reqwest::Client::new();
+//     // Create an HTTP client
+//     let client = reqwest::Client::new();
 
-    let mut response_string = String::new();
+//     let mut response_string = String::new();
 
-    // Loop to make repeated API requests
-    loop {
-        // Make the HTTP POST request asynchronously
-        let response = client
-            .post(url)
-            .headers(headers.clone())
-            .body(body.to_string())
-            .send()
-            .await
-            .unwrap();
+//     // Loop to make repeated API requests
+//     loop {
+//         // Make the HTTP POST request asynchronously
+//         let response = client
+//             .post(url)
+//             .headers(headers.clone())
+//             .body(body.to_string())
+//             .send()
+//             .await
+//             .unwrap();
 
-        // Deserialize the response JSON into the ChatCompletion struct
-        let chat_completion: ChatCompletion =
-            serde_json::from_str(&response.text().await.unwrap())?;
+//         // Deserialize the response JSON into the ChatCompletion struct
+//         let chat_completion: ChatCompletion =
+//             serde_json::from_str(&response.text().await.unwrap())?;
 
-        // Print the result
-        println!("{:#?}", chat_completion);
+//         // Print the result
+//         println!("{:#?}", chat_completion);
 
-        // Check if the finish_reason is "stop"
-        if let Some(choice) = chat_completion.choices.first() {
-            if choice.finish_reason == "stop" {
-                // If the finish_reason is "stop", exit the loop
-                response_string = choice.message.content.clone();
-                break;
-            } else {
-                // If the finish_reason is not "stop", update the request body
-                // to include the assistant's response and make another request
-                if let JsonValue::Array(messages) = &mut body["messages"] {
-                    messages.push(json!(choice.message));
-                }
-            }
-        } else {
-            // If there are no choices, exit the loop
-            break;
-        }
-    }
+//         // Check if the finish_reason is "stop"
+//         if let Some(choice) = chat_completion.choices.first() {
+//             if choice.finish_reason == "stop" {
+//                 // If the finish_reason is "stop", exit the loop
+//                 response_string = choice.message.content.clone();
+//                 break;
+//             } else {
+//                 // If the finish_reason is not "stop", update the request body
+//                 // to include the assistant's response and make another request
+//                 if let JsonValue::Array(messages) = &mut body["messages"] {
+//                     messages.push(json!(choice.message));
+//                 }
+//             }
+//         } else {
+//             // If there are no choices, exit the loop
+//             break;
+//         }
+//     }
 
-    Ok(response_string)
-}
+//     Ok(response_string)
+// }

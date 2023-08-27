@@ -147,7 +147,7 @@
         }
       }
     } else {
-      alert("cytoscape not initialized");
+      console.log("cyInstance is null");
     }
   });
 </script>

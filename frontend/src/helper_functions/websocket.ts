@@ -5,6 +5,7 @@ import { stringToUint8Array } from "./misc";
 import * as proto from "../../src/generated/system_types_pb";
 
 export async function setupWebsocketConnection(): Promise<WebSocket> {
+  console.log("setting up websocket connection");
   let websocket = new WebSocket("ws://138.197.70.163:8080");
   const system_state = await getSystemState();
 
@@ -40,27 +41,27 @@ export async function setupWebsocketMessageHandler(
       );
 
       switch (res) {
-      case proto.ResponseObject.ObjectCase.NODE:
-        console.log("NODE");
-        break;
-      case proto.ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
-        console.log("AUTHENTICATION_MESSAGE");
-        break;
-      case proto.ResponseObject.ObjectCase.USER_SETTINGS:
-        console.log("USER_SETTINGS");
-        break;
-      case proto.ResponseObject.ObjectCase.EXECUTION_RESPONSE:
-        console.log("EXECUTION_RESPONSE");
-        break;
-      case proto.ResponseObject.ObjectCase.OBJECT_NOT_SET:
-        console.log("OBJECT_NOT_SET");
-        break;
-      default:
-        console.log("default");
-        alert(
-          "Fallen through response object switch statement... This is not good."
-        );
-        break;
+        case proto.ResponseObject.ObjectCase.NODE:
+          console.log("NODE");
+          break;
+        case proto.ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
+          console.log("AUTHENTICATION_MESSAGE");
+          break;
+        case proto.ResponseObject.ObjectCase.USER_SETTINGS:
+          console.log("USER_SETTINGS");
+          break;
+        case proto.ResponseObject.ObjectCase.EXECUTION_RESPONSE:
+          console.log("EXECUTION_RESPONSE");
+          break;
+        case proto.ResponseObject.ObjectCase.OBJECT_NOT_SET:
+          console.log("OBJECT_NOT_SET");
+          break;
+        default:
+          console.log("default");
+          alert(
+            "Fallen through response object switch statement... This is not good."
+          );
+          break;
       }
     } catch {
       console.log("Error parsing websocket message");

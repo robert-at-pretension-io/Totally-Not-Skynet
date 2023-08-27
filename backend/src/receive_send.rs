@@ -1,44 +1,31 @@
 use crate::generated_types::{
-    CrudBundle,
-    VerbTypeNames,
-    ResponseObject,
-    ExecutionContext,
-    NodeExecutionResponse,
-    PromptResponse,
-    UserSettings,
-    CommandResponse,
-    node,
-    crud_bundle,
-    node_execution_response,
+    crud_bundle, CrudBundle, GraphNodeInfo, ResponseObject, UserSettings, VerbTypeNames,
 };
 
 use std::sync::Arc;
 
 use crate::generated_types::response_object::Object::Node;
 
-use crate::openai::{ get_openai_completion, ChatMessage, Role };
-use crate::utils::{ parse_message, create_node_response_object };
+use crate::utils::parse_message;
 
-use crate::sqlite_helper_functions::{ update_node, insert_node, setup_sqlite_db };
+use crate::sqlite_helper_functions::{insert_node, update_node};
 
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
-use rusqlite::Connection;
 use tokio::sync::mpsc::UnboundedSender;
 
 // use bollard::container::Config;
 // use bollard::exec::{ CreateExecOptions, StartExecResults };
-use bollard::Docker;
+// use bollard::Docker;
 use bson::doc;
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tokio::sync::mpsc;
 use tokio_tungstenite::tungstenite::Message;
-use crate::generated_types::node_execution_response::Response;
 
 // create a "models" type that can be used to select the model to use
 // it should be one of a couple of strings: "gpt-4", "gpt3.5-turbo", etc
-const DEFAULT_MODEL: &str = "gpt-4";
+// const DEFAULT_MODEL: &str = "gpt-4";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Identity {
@@ -57,14 +44,14 @@ pub async fn start_message_sending_loop(
     // docker: Docker,
     tx: UnboundedSender<(Identity, Message)>,
     mut client_rx: mpsc::Receiver<(Identity, String)>,
-    pool: Arc<Pool<SqliteConnectionManager>>
+    pool: Arc<Pool<SqliteConnectionManager>>,
 ) {
     let mut runtime_settings: HashMap<Identity, UserSettings> = HashMap::new();
     // let mut messages_thus_far: HashMap<Identity, Vec<String>> = HashMap::new();
     // let mut docker_containers: HashMap<Identity, String> = HashMap::new();
 
     // startup the docker container here
-    let docker = Docker::connect_with_local_defaults().unwrap();
+    // let docker = Docker::connect_with_local_defaults().unwrap();
     //read messages from the client
     while let Some(msg) = client_rx.recv().await {
         println!("Received a message from the client: {}", msg.1);
@@ -78,7 +65,10 @@ pub async fn start_message_sending_loop(
             continue;
         } else {
             message_contents = received_message.unwrap();
-            println!("Received a parsed message from the client: {:?}", message_contents);
+            println!(
+                "Received a parsed message from the client: {:?}",
+                message_contents
+            );
         }
 
         let verb: VerbTypeNames = VerbTypeNames::from_i32(message_contents.verb).unwrap();
@@ -89,17 +79,22 @@ pub async fn start_message_sending_loop(
                     VerbTypeNames::Post => {
                         let mut mutable_node = node.clone();
 
+                        let new_node_info = GraphNodeInfo {
+                            id: uuid::Uuid::new_v4().to_string(),
+                            name: node.node_info.unwrap().name.clone(),
+                        };
+
                         // create a uuid for the node:
-                        mutable_node.id = uuid::Uuid::new_v4().to_string();
+                        mutable_node.node_info = Some(new_node_info);
 
                         // get_sqlite_db is a function that returns a connection to the sqlite db
 
                         //insert the node into the db
-                        match insert_node(pool.clone(), &mutable_node) {
+                        match insert_node(pool.clone(), mutable_node.clone()) {
                             Ok(_) => {
                                 println!("Node inserted successfully");
                                 let response_object = ResponseObject {
-                                    object: Some(Node(mutable_node.to_owned())),
+                                    object: Some(Node(mutable_node.clone())),
                                 };
 
                                 send_message(&tx, msg.0.clone(), response_object).await;
@@ -198,10 +193,13 @@ pub async fn start_message_sending_loop(
                                 if runtime_settings.contains_key(&msg.0) {
                                     println!("Settings for user {} already exist", msg.0.name);
                                 } else {
-                                    runtime_settings.insert(msg.0.clone(), UserSettings {
-                                        openai_api_key: settings.openai_api_key,
-                                        mongo_db_uri: settings.mongo_db_uri,
-                                    });
+                                    runtime_settings.insert(
+                                        msg.0.clone(),
+                                        UserSettings {
+                                            openai_api_key: settings.openai_api_key,
+                                            mongo_db_uri: settings.mongo_db_uri,
+                                        },
+                                    );
                                     println!("Settings for user {} have been set", msg.0.name);
                                 }
                             }
@@ -227,153 +225,12 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            Some(crud_bundle::Object::ExecutionContext(execution_context)) => {
-                match verb {
-                    _ => {
-                        todo!("Handle execution context");
-                    }
+            Some(crud_bundle::Object::ExecutionContext(_execution_context)) => match verb {
+                _ => {
+                    todo!("Handle execution context");
                 }
-            }
-            // Some(crud_bundle::Object::ExecutionContext(execution_context)) => {
-            //     let node = execution_context.current_node.clone();
-            //     let execution_clone: ExecutionContext = execution_context.clone();
+            },
 
-            //     match node.node_content {
-            //         Some(node::NodeContent::Prompt(prompt)) => {
-            //             match verb {
-            //                 VerbTypeNames::Post => {
-            //                     let openai_api_key = match runtime_settings.get(&msg.0) {
-            //                         Some(settings) => Some(settings.openai_api_key.clone()),
-            //                         None => {
-            //                             println!("No openai key set for {}", msg.0.name);
-            //                             None
-            //                         }
-            //                     };
-
-            //                     if openai_api_key.is_some() {
-            //                         let messages = vec![
-            //                             ChatMessage {
-            //                                 role: Role::System,
-            //                                 content: prompt.system.clone(),
-            //                             },
-            //                             ChatMessage {
-            //                                 role: Role::User,
-            //                                 content: prompt.prompt.clone(),
-            //                             }
-            //                         ];
-
-            //                         let response = get_openai_completion(
-            //                             messages,
-            //                             openai_api_key.unwrap(),
-            //                             DEFAULT_MODEL.to_string()
-            //                         ).await;
-
-            //                         match response {
-            //                             Ok(res) => {
-            //                                 let response_object = create_node_response_object(
-            //                                     execution_clone,
-            //                                     NodeExecutionResponse {
-            //                                         response: Some(
-            //                                             Response::PromptResponse(PromptResponse {
-            //                                                 ai_text_response: res,
-            //                                             })
-            //                                         ),
-            //                                     }
-            //                                 );
-
-            //                                 send_message(&tx, msg.0.clone(), response_object).await;
-            //                             }
-            //                             Err(_) => todo!(),
-            //                         }
-            //                     }
-            //                 }
-            //                 _ => {
-            //                     println!("Verb not supported for prompt: {:?}", verb);
-            //                 }
-            //             }
-            //         }
-            //         Some(node::NodeContent::Process(_process)) => {
-            //             println!(
-            //                 "Processes cannot be executed directly. Instead, the frontend should break the process into nodes and send a execution context to the backend."
-            //             );
-            //         }
-            //         Some(node::NodeContent::Conditional(_conditional)) => {
-            //             todo!("Conditional not implemented yet");
-            //         }
-
-            //         Some(node::NodeContent::Command(command)) => {
-            //             match verb {
-            //                 VerbTypeNames::Post => {
-            //                     if let Some(container_id) = docker_containers.get(&msg.0) {
-            //                         let exec_options = CreateExecOptions {
-            //                             attach_stdout: Some(true),
-            //                             cmd: Some(vec!["sh", "-c", &command.command]),
-            //                             ..Default::default()
-            //                         };
-
-            //                         let exec_created = docker
-            //                             .create_exec(container_id, exec_options).await
-            //                             .unwrap();
-
-            //                         // Start the exec instance
-            //                         let exec_started = docker
-            //                             .start_exec(&exec_created.id, None).await
-            //                             .unwrap();
-
-            //                         match exec_started {
-            //                             StartExecResults::Attached { mut output, .. } => {
-            //                                 let mut full_output = String::new(); // used to accumulate the output
-
-            //                                 while let Some(item) = output.next().await {
-            //                                     match item {
-            //                                         Ok(log) => {
-            //                                             println!("{:?}", log);
-            //                                             let log_str = log.to_string();
-            //                                             full_output.push_str(&log_str);
-            //                                             full_output.push('\n'); // add a newline between each piece of output
-            //                                         }
-            //                                         Err(e) => eprintln!("Error: {:?}", e),
-            //                                     }
-            //                                 }
-
-            //                                 // Once we've read all the output, send it to the client
-
-            //                                 let node_execution_response = NodeExecutionResponse {
-            //                                     response: Some(
-            //                                         node_execution_response::Response::CommandResponse(
-            //                                             generated_types::CommandResponse {
-            //                                                 error: None,
-            //                                                 output: Some(full_output),
-            //                                             }
-            //                                         )
-            //                                     ),
-            //                                 };
-
-            //                                 let response_object: ResponseObject =
-            //                                     create_node_response_object(
-            //                                         execution_clone,
-            //                                         node_execution_response
-            //                                     );
-
-            //                                 send_message(&tx, msg.0.clone(), response_object).await;
-            //                             }
-            //                             StartExecResults::Detached => {
-            //                                 println!(
-            //                                     "The exec instance completed execution and detached"
-            //                                 );
-            //                             }
-            //                         }
-            //                     } else {
-            //                         println!("No container found for this client.");
-            //                     }
-            //                 }
-            //                 _ => {
-            //                     println!("Verb not supported for command: {:?}", verb);
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
             None => {
                 println!("odd...");
             }
@@ -385,7 +242,7 @@ use crate::utils::to_u8_vec;
 pub async fn send_message(
     tx: &UnboundedSender<(Identity, Message)>,
     identity: Identity,
-    message: ResponseObject
+    message: ResponseObject,
 ) {
     match to_u8_vec(&message) {
         Ok(u8_vec) => {
