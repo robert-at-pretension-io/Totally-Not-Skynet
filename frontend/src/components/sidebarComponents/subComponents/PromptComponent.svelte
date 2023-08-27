@@ -1,6 +1,6 @@
 <script lang="ts">
   export let prompt: Prompt;
-  import { Prompt } from "generated/system_types_pb.js";
+  import { Prompt } from "../../../generated/system_types_pb";
 
   let system_text = "";
   let prompt_text = "";

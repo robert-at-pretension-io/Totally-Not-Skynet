@@ -1,14 +1,21 @@
 import { sendWebsocketMessage } from "./websocket";
 
-import { AuthenticationMessage, CrudBundle, VerbTypeNames } from "generated/system_types_pb.js";
+import {
+  AuthenticationMessage,
+  CrudBundle,
+  VerbTypeNames,
+} from "../generated/system_types_pb";
 
 import { getSystemState, setSystemState } from "./graph";
 
-export async function authenticate(websocket: WebSocket, email: string, password: string) {
+export async function authenticate(
+  websocket: WebSocket,
+  email: string,
+  password: string
+) {
   let system_state = await getSystemState();
 
   if (system_state.getWebsocketReady()) {
-
     let auth_bundle = new CrudBundle();
     auth_bundle.setVerb(VerbTypeNames.POST);
 

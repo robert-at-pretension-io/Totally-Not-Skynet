@@ -1,7 +1,6 @@
-
 import systemStateStore from "stores/systemStateStore";
 import * as graphlib from "graphlib";
-import * as proto from "../../src/generated/system_types_pb";
+import * as proto from "../generated/system_types_pb";
 
 // Define the getter and setter
 
@@ -13,7 +12,9 @@ export async function getSystemState(): Promise<proto.SystemState> {
   });
 }
 
-export function systemGraphToGraphLib(graph_state: proto.GraphState): graphlib.Graph {
+export function systemGraphToGraphLib(
+  graph_state: proto.GraphState
+): graphlib.Graph {
   const graph = graph_state.getGraph() as proto.Graph;
 
   const g = new graphlib.Graph();
@@ -96,7 +97,8 @@ export async function getAllTopologicalOrders(
 export async function returnSuccessorMap(
   graph_state: proto.GraphState
 ): Promise<Map<proto.GraphNodeInfo, proto.GraphNodeInfo[]>> {
-  const node_neightbors: Map<proto.GraphNodeInfo, proto.GraphNodeInfo[]> = new Map();
+  const node_neightbors: Map<proto.GraphNodeInfo, proto.GraphNodeInfo[]> =
+    new Map();
 
   const graphlib_graph = systemGraphToGraphLib(graph_state);
   const my_nodes = graphlib_graph.nodes();
@@ -283,7 +285,6 @@ export async function graphHasNode(
   node: proto.Node,
   graph_state: proto.GraphState
 ): Promise<boolean | void> {
-
   const graph = graph_state.getGraph();
   const node_info = node.getNodeInfo();
 
@@ -350,7 +351,7 @@ export async function addNode(
   const node_info = node.getNodeInfo() as proto.GraphNodeInfo;
 
   const graph_action = new proto.GraphAction();
-  graph_action.setAction(GraphAction.Action.ADD);
+  graph_action.setAction(proto.GraphAction.Action.ADD);
   graph_action.setNode(node_info);
 
   const action_history = graph_state.getActionHistoryList();
@@ -364,7 +365,7 @@ export async function addNode(
 
 // function for converting a process to a graph
 export async function processToGraphVisualization(
-  process: Process,
+  process: proto.Process,
   graph_state: proto.GraphState
 ): Promise<void> {
   await resetGraph();
@@ -380,7 +381,9 @@ export async function processToGraphVisualization(
     }
   }
 
-  const topOrder: proto.GraphNodeInfo[][] = await getAllTopologicalOrders(graph_state);
+  const topOrder: proto.GraphNodeInfo[][] = await getAllTopologicalOrders(
+    graph_state
+  );
 
   // This function doesn't exist yet.
   findValidTopOrder(topOrder);
@@ -437,7 +440,7 @@ export async function removeNode(id: string): Promise<void> {
     const action_history = graph_state.getActionHistoryList();
 
     const latest_action = new proto.GraphAction();
-    latest_action.setAction(GraphAction.Action.REMOVE);
+    latest_action.setAction(proto.GraphAction.Action.REMOVE);
     latest_action.setNode(node.getNodeInfo() as proto.GraphNodeInfo);
 
     action_history.push(latest_action);
@@ -450,14 +453,12 @@ export async function removeNode(id: string): Promise<void> {
   }
 }
 
-export async function removeEdge(
-  remove_edge: Edge
-): Promise<void> {
+export async function removeEdge(remove_edge: proto.Edge): Promise<void> {
   const systemState = await getSystemState();
 
   const graph_state = systemState.getGraphState() as proto.GraphState;
   const graph = graph_state.getGraph() as proto.Graph;
-  const edge_array = graph.getEdgesList() as Edge[];
+  const edge_array = graph.getEdgesList() as proto.Edge[];
   const remove_index = edge_array.indexOf(remove_edge);
   edge_array.splice(remove_index);
   graph.setEdgesList(edge_array);
@@ -466,7 +467,7 @@ export async function removeEdge(
   const action_history = graph_state.getActionHistoryList();
 
   const latest_action = new proto.GraphAction();
-  latest_action.setAction(GraphAction.Action.REMOVE);
+  latest_action.setAction(proto.GraphAction.Action.REMOVE);
   latest_action.setEdge(remove_edge);
 
   action_history.push(latest_action);
@@ -490,7 +491,7 @@ export async function selectNode(id: string): Promise<void> {
 
   const graph_action = new proto.GraphAction();
 
-  graph_action.setAction(GraphAction.Action.SELECT);
+  graph_action.setAction(proto.GraphAction.Action.SELECT);
   graph_action.setNode(found_index);
 
   const action_history = graph_state.getActionHistoryList();
@@ -501,22 +502,21 @@ export async function selectNode(id: string): Promise<void> {
 
   system_state.setGraphState(graph_state);
   await setSystemState(system_state);
-
 }
 
-export async function selectEdge(edge: Edge): Promise<void> {
+export async function selectEdge(edge: proto.Edge): Promise<void> {
   const system_state = await getSystemState();
   const graph_state = system_state.getGraphState() as proto.GraphState;
   const graph = graph_state.getGraph();
-  const edges = graph?.getEdgesList() as Edge[];
+  const edges = graph?.getEdgesList() as proto.Edge[];
 
   const found_index = edges.find((edge_info) => {
     return edge == edge_info;
-  }) as Edge;
+  }) as proto.Edge;
 
   const graph_action = new proto.GraphAction();
 
-  graph_action.setAction(GraphAction.Action.SELECT);
+  graph_action.setAction(proto.GraphAction.Action.SELECT);
   graph_action.setEdge(found_index);
 
   const action_history = graph_state.getActionHistoryList();
@@ -527,7 +527,6 @@ export async function selectEdge(edge: Edge): Promise<void> {
 
   system_state.setGraphState(graph_state);
   await setSystemState(system_state);
-
 }
 
 export async function resetLastAction(): Promise<void> {
@@ -537,7 +536,7 @@ export async function resetLastAction(): Promise<void> {
 
   const graph_action = new proto.GraphAction();
 
-  graph_action.setAction(GraphAction.Action.NONE);
+  graph_action.setAction(proto.GraphAction.Action.NONE);
   graph_action.setEdge();
   graph_action.setNode();
 
@@ -551,14 +550,13 @@ export async function resetLastAction(): Promise<void> {
 
 // reset the proto.GraphState to a new empty graph
 export async function resetGraph(): Promise<void> {
-
   const systemState = await getSystemState();
 
   const graph_state = systemState.getGraphState() as proto.GraphState;
 
   const graph_action = new proto.GraphAction();
 
-  graph_action.setAction(GraphAction.Action.RESET);
+  graph_action.setAction(proto.GraphAction.Action.RESET);
   graph_action.setEdge();
   graph_action.setNode();
 

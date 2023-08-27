@@ -1,6 +1,6 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
-  import { Node } from "generated/system_types_pb.js";
+  import { Node } from "../../generated/system_types_pb";
 
   let selectedNode: Node | null;
 
@@ -8,13 +8,13 @@
   let nodes: Node[] = [];
 
   $: {
-    nodes = $systemStateStore.nodes;
-    selectedNode = $systemStateStore.selected_node;
+    nodes = $systemStateStore.getNodesList();
+    selectedNode = $systemStateStore.getSelectedNodeList()[0];
   }
 
   // Function to handle dropdown change events
   function onDropdownChange() {
-    $systemStateStore.selected_node = selectedNode;
+    alert("should implement onDropdownChange");
   }
 </script>
 
@@ -22,6 +22,8 @@
 <select bind:value={selectedNode} on:change={() => onDropdownChange()}>
   <option value="">Select a node</option>
   {#each nodes as node}
-    <option value={node}>{node.Node.type_name} : {node.Node.name}</option>
+    <option value={node}
+      >{node.getNodeInfo()?.getName()} : {node.getNodeInfo()?.getName()}</option
+    >
   {/each}
 </select>

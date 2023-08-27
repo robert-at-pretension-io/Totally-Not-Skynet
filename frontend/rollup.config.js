@@ -6,8 +6,7 @@ import terser from "@rollup/plugin-terser";
 import autoPreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
 import eslint from "@rollup/plugin-eslint";
-import postcss from 'rollup-plugin-postcss';
-
+import postcss from "rollup-plugin-postcss";
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -15,14 +14,14 @@ export default {
   input: "src/main.js",
   output: {
     sourcemap: true,
-    format: "es",
+    format: "iife",
     globals: {
-      'proto.skynet.types': 'proto.skynet.types'
+      "proto.skynet.types": "proto.skynet.types",
     },
     name: "app",
     file: "public/bundle.js",
   },
-  external: ['proto.skynet.types'],
+  external: ["proto.skynet.types"],
   plugins: [
     svelte({
       // enable run-time checks when not in production
@@ -36,10 +35,9 @@ export default {
       },
     }),
     postcss({
-      extensions: ['.css'],
+      extensions: [".css"],
     }),
     typescript({ sourceMap: true }),
-
 
     // If you have external dependencies installed from
     // npm, you'll most likely need these plugins. In

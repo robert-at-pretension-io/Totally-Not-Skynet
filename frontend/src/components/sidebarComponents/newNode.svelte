@@ -9,7 +9,7 @@
     Process,
     Conditional,
     Command,
-  } from "generated/system_types_pb.js";
+  } from "../../generated/system_types_pb";
 
   let id = "";
   let name = "";

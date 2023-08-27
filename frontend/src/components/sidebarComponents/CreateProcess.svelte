@@ -1,18 +1,20 @@
 <script lang="ts">
-  import {
-    GraphNodeInfo,
-    Graph,
-    Node,
-    Edge,
-    Process,
-  } from "generated/system_types_pb.js";
+  // import {
+  //   GraphNodeInfo,
+  //   Graph,
+  //   Node,
+  //   Edge,
+  //   Process,
+  // } from  "@generated/system_types_pb.js";
+
+  import * as proto from "../../generated/system_types_pb";
 
   import * as helper_functions from "../../helper_functions/graph";
 
-  let selected_nodes: GraphNodeInfo[] = [];
-  let selected_edge: Edge | null = null;
+  let selected_nodes: proto.GraphNodeInfo[] = [];
+  let selected_edge: proto.Edge | null = null;
 
-  let graph = new Graph();
+  let graph = new proto.Graph();
   let name = "";
   let description = "";
 
@@ -33,18 +35,19 @@
       );
 
       if (maybe_topological_order && graph_state != undefined) {
-        let topological_order = maybe_topological_order as GraphNodeInfo[];
+        let topological_order =
+          maybe_topological_order as proto.GraphNodeInfo[];
 
         // console.log("current_graph_string: " + current_graph_string);
-        let process = new Process();
+        let process = new proto.Process();
 
         process.setGraphState(graph_state);
         process.setInitialVariablesList([]);
         process.setTopologicalOrderList(topological_order);
 
-        let new_node = new Node();
+        let new_node = new proto.Node();
 
-        let graph_node_info = new GraphNodeInfo();
+        let graph_node_info = new proto.GraphNodeInfo();
         graph_node_info.setName(name);
 
         new_node.setNodeInfo(graph_node_info);
@@ -57,7 +60,7 @@
       }
     }
   }
-  function isSelected(node: GraphNodeInfo): boolean {
+  function isSelected(node: proto.GraphNodeInfo): boolean {
     // check to see if selected_nodes : Node[] contains node : Node
     return (
       selected_nodes.filter((val) => {
@@ -68,7 +71,7 @@
   function removeNodes() {
     let current = graph.getNodesList();
 
-    let new_nodes = current.filter((node: GraphNodeInfo) => {
+    let new_nodes = current.filter((node: proto.GraphNodeInfo) => {
       return !selected_nodes.includes(node);
     });
 
@@ -78,7 +81,7 @@
   }
   function addNodes() {
     let current_nodes = graph.getNodesList();
-    selected_nodes.forEach((node: GraphNodeInfo) => {
+    selected_nodes.forEach((node: proto.GraphNodeInfo) => {
       // check if current_nodes already contains node
       if (!current_nodes.includes(node)) {
         current_nodes.push(node);
@@ -99,14 +102,14 @@
     let current_edges = graph.getEdgesList();
     // remove selected_edge : Edge from current_edges : Edge[]
     if (selected_edge != null) {
-      current_edges = current_edges.filter((edge: Edge) => {
+      current_edges = current_edges.filter((edge: proto.Edge) => {
         return edge != selected_edge;
       });
     }
     graph.setEdgesList(current_edges);
   }
 
-  function toggleNodeSelect(node: GraphNodeInfo) {
+  function toggleNodeSelect(node: proto.GraphNodeInfo) {
     if (isSelected(node)) {
       selected_nodes = selected_nodes.filter((val) => {
         val != node;

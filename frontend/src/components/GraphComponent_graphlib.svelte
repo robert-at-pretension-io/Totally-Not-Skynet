@@ -4,6 +4,7 @@
   import dagre from "cytoscape-dagre";
   import systemStateStore from "stores/systemStateStore.js";
   import { selectNode, selectEdge } from "../helper_functions/graph";
+  import * as proto from "../generated/system_types_pb";
 
   import * as graphlib from "graphlib";
 
@@ -49,7 +50,7 @@
     });
 
     cyInstance.on("select", "edge", async (event) => {
-      let edge = new proto.skynet.types.Edge();
+      let edge = new proto.Edge();
       edge.setSource(event.target.data().source);
       edge.setTarget(event.target.data().target);
 
@@ -65,7 +66,7 @@
   let cyInstance: Core | null = null;
   let g = new graphlib.Graph();
 
-  systemStateStore.subscribe((system_state: proto.skynet.types.SystemState) => {
+  systemStateStore.subscribe((system_state: proto.SystemState) => {
     let graph_state = system_state.getGraphState();
     let action_list = graph_state?.getActionHistoryList();
 
@@ -77,16 +78,16 @@
 
         // Node/edge agnostic actions:
         switch (action_type) {
-        case proto.skynet.types.GraphAction.Action.RESET:
+        case proto.GraphAction.Action.RESET:
           cyInstance.remove(cyInstance.elements());
           break;
-        case proto.skynet.types.GraphAction.Action.NONE:
+        case proto.GraphAction.Action.NONE:
           // Do the thing
           break;
-        case proto.skynet.types.GraphAction.Action.SELECT:
+        case proto.GraphAction.Action.SELECT:
           // Do the thing
           break;
-        case proto.skynet.types.GraphAction.Action.DESELECT:
+        case proto.GraphAction.Action.DESELECT:
           // Do the thing
           break;
         default:
@@ -101,14 +102,13 @@
 
           if (source != undefined && target != undefined) {
             switch (action_type) {
-            case proto.skynet.types.GraphAction.Action.ADD:
+            case proto.GraphAction.Action.ADD:
               g.setEdge({ v: source, w: target });
               cyInstance.add({
                 data: { source: source, target: target },
               });
-
               break;
-            case proto.skynet.types.GraphAction.Action.REMOVE:
+            case proto.GraphAction.Action.REMOVE:
               g.removeEdge(source, target);
               cyInstance.remove(
                 cyInstance.$id(source).edgesTo(cyInstance.$id(target))
@@ -129,13 +129,13 @@
 
           if (name != undefined && id != undefined) {
             switch (action_type) {
-            case proto.skynet.types.GraphAction.Action.ADD:
+            case proto.GraphAction.Action.ADD:
               g.setNode(id, name);
               cyInstance.add({
                 data: { id: id, label: name },
               });
               break;
-            case proto.skynet.types.GraphAction.Action.REMOVE:
+            case proto.GraphAction.Action.REMOVE:
               g.removeNode(name);
               cyInstance.remove(id);
               break;
