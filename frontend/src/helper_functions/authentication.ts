@@ -15,7 +15,10 @@ export async function authenticate(
 ) {
   let system_state = await getSystemState();
 
+  console.log(JSON.stringify(system_state.toObject()));
+
   if (system_state.getWebsocketReady()) {
+    console.log("websocket is ready... sending auth");
     let auth_bundle = new CrudBundle();
     auth_bundle.setVerb(VerbTypeNames.POST);
 

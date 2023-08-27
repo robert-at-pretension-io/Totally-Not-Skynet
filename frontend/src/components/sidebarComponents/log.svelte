@@ -39,7 +39,6 @@
         // and if the current node has a prompt
         if (prompts.has(current_node) && !responses.has(current_node)) {
           // send the response to the backend
-          //$systemStateStore.websocket.send(JSON.stringify({ response: responses.get(previous_node) }));
           console.log("sending response here: ", responses.get(previous_node));
           getParentOutputVariables(current_node).then((output_variables) => {
             console.log("output_variables: ", output_variables);

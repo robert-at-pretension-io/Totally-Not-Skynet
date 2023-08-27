@@ -11,12 +11,15 @@ export async function setupWebsocketConnection(): Promise<WebSocket> {
 
   // start the websocket connection
   websocket.addEventListener("open", async () => {
+    console.log("websocket connection opened");
     // setup message processor
     websocket = await setupWebsocketMessageHandler(websocket);
 
     system_state.setWebsocketReady(true);
     await setSystemState(system_state);
   });
+
+  console.log("returning websocket");
 
   return websocket;
 }

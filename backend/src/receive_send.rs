@@ -54,7 +54,7 @@ pub async fn start_message_sending_loop(
     // let docker = Docker::connect_with_local_defaults().unwrap();
     //read messages from the client
     while let Some(msg) = client_rx.recv().await {
-        println!("Received a message from the client: {}", msg.1);
+        println!("Received a message from the client: {:?}", msg);
 
         let received_message: Option<CrudBundle> = parse_message(&msg.1);
 
