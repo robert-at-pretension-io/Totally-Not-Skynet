@@ -1,5 +1,10 @@
 use crate::generated_types::{
-    crud_bundle, CrudBundle, GraphNodeInfo, ResponseObject, UserSettings, VerbTypeNames,
+    crud_bundle,
+    CrudBundle,
+    GraphNodeInfo,
+    ResponseObject,
+    UserSettings,
+    VerbTypeNames,
 };
 
 use std::sync::Arc;
@@ -8,7 +13,7 @@ use crate::generated_types::response_object::Object::Node;
 
 use crate::utils::parse_message;
 
-use crate::sqlite_helper_functions::{insert_node, update_node};
+use crate::sqlite_helper_functions::{ insert_node, update_node, fetch_all_nodes };
 
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
@@ -18,7 +23,7 @@ use tokio::sync::mpsc::UnboundedSender;
 // use bollard::exec::{ CreateExecOptions, StartExecResults };
 // use bollard::Docker;
 use bson::doc;
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 use std::collections::HashMap;
 use tokio::sync::mpsc;
 use tokio_tungstenite::tungstenite::Message;
@@ -44,7 +49,7 @@ pub async fn start_message_sending_loop(
     // docker: Docker,
     tx: UnboundedSender<(Identity, Message)>,
     mut client_rx: mpsc::Receiver<(Identity, String)>,
-    pool: Arc<Pool<SqliteConnectionManager>>,
+    pool: Arc<Pool<SqliteConnectionManager>>
 ) {
     let mut runtime_settings: HashMap<Identity, UserSettings> = HashMap::new();
     // let mut messages_thus_far: HashMap<Identity, Vec<String>> = HashMap::new();
@@ -65,10 +70,7 @@ pub async fn start_message_sending_loop(
             continue;
         } else {
             message_contents = received_message.unwrap();
-            println!(
-                "Received a parsed message from the client: {:?}",
-                message_contents
-            );
+            println!("Received a parsed message from the client: {:?}", message_contents);
         }
 
         let verb: VerbTypeNames = VerbTypeNames::from_i32(message_contents.verb).unwrap();
@@ -129,7 +131,23 @@ pub async fn start_message_sending_loop(
                             runtime_settings.get(&msg.0)
                         );
 
-                        todo!("Get nodes, settings, etc from db!");
+                        println!("Get nodes, settings, etc from db!");
+
+                        match fetch_all_nodes(pool.clone()) {
+                            Ok(nodes) => {
+                                for node in &nodes {
+                                    send_message(&tx, msg.0.clone(), ResponseObject {
+                                        object: Some(Node(node.clone())),
+                                    }).await;
+                                }
+                            }
+                            Err(err) => {
+                                println!(
+                                    "Have the following errors when attempting to pull nodes from sqlite : {:?}",
+                                    err
+                                );
+                            }
+                        }
 
                         // let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
 
@@ -138,12 +156,6 @@ pub async fn start_message_sending_loop(
                         // let nodes = get_nodes(&db).await;
 
                         // println!("Found the following nodes: {:?}", nodes);
-
-                        // for node in &nodes {
-                        //     send_message(&tx, msg.0.clone(), ResponseObject {
-                        //         object: Node(node.clone()),
-                        //     }).await;
-                        // }
 
                         // Get the docker image from env variables:
                         // const IMAGE: &str = env::var("DOCKER_OPERATING_SYSTEM").unwrap();
@@ -193,13 +205,10 @@ pub async fn start_message_sending_loop(
                                 if runtime_settings.contains_key(&msg.0) {
                                     println!("Settings for user {} already exist", msg.0.name);
                                 } else {
-                                    runtime_settings.insert(
-                                        msg.0.clone(),
-                                        UserSettings {
-                                            openai_api_key: settings.openai_api_key,
-                                            mongo_db_uri: settings.mongo_db_uri,
-                                        },
-                                    );
+                                    runtime_settings.insert(msg.0.clone(), UserSettings {
+                                        openai_api_key: settings.openai_api_key,
+                                        mongo_db_uri: settings.mongo_db_uri,
+                                    });
                                     println!("Settings for user {} have been set", msg.0.name);
                                 }
                             }
@@ -225,11 +234,12 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            Some(crud_bundle::Object::ExecutionContext(_execution_context)) => match verb {
-                _ => {
-                    todo!("Handle execution context");
+            Some(crud_bundle::Object::ExecutionContext(_execution_context)) =>
+                match verb {
+                    _ => {
+                        todo!("Handle execution context");
+                    }
                 }
-            },
 
             None => {
                 println!("odd...");
@@ -242,7 +252,7 @@ use crate::utils::to_u8_vec;
 pub async fn send_message(
     tx: &UnboundedSender<(Identity, Message)>,
     identity: Identity,
-    message: ResponseObject,
+    message: ResponseObject
 ) {
     match to_u8_vec(&message) {
         Ok(u8_vec) => {
