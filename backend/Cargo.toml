@@ -29,6 +29,8 @@ rusqlite = "*"
 r2d2 = "*"
 r2d2_sqlite = "*"
 colored = "2.0.4"
+log = "0.4.20"
+env_logger = "0.10.0"
 
 
 [build-dependencies]

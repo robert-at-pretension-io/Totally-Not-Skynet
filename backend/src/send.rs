@@ -359,15 +359,15 @@ pub async fn start_message_sending_loop(
     }
 }
 
-pub async fn send_message<T: Serialize + Sized>(
-    tx: &UnboundedSender<(Identity, Message)>,
-    identity: Identity,
-    message: T
-) {
-    match tx.send((identity, Message::Text(json!(message).to_string()))) {
-        Ok(_) => {}
-        Err(e) => {
-            println!("Error sending message to client: {:?}", e);
-        }
-    }
-}
+// pub async fn send_message<T: Serialize + Sized>(
+//     tx: &UnboundedSender<(Identity, Message)>,
+//     identity: Identity,
+//     message: T
+// ) {
+//     match tx.send((identity, Message::Text(json!(message).to_string()))) {
+//         Ok(_) => {}
+//         Err(e) => {
+//             println!("Error sending message to client: {:?}", e);
+//         }
+//     }
+// }

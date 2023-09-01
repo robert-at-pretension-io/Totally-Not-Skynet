@@ -19,6 +19,8 @@ use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use tokio::sync::mpsc::UnboundedSender;
 
+use prost::Message;
+
 // use bollard::container::Config;
 // use bollard::exec::{ CreateExecOptions, StartExecResults };
 // use bollard::Docker;
@@ -257,20 +259,27 @@ pub async fn send_message(
     identity: Identity,
     message: ResponseObject
 ) {
-    match to_u8_vec(&message) {
-        Ok(u8_vec) => {
-            // //convert u8_vec to string
-            // let send_string = String::from_utf8(u8_vec).unwrap();
-
-            match tx.send((identity, Message::Binary(u8_vec))) {
-                Ok(_) => {}
-                Err(e) => {
-                    println!("Error sending message to client: {:?}", e);
-                }
-            }
-        }
+    match tx.send((identity, Message::Binary(message.encode()))) {
+        Ok(_) => {}
         Err(e) => {
-            println!("Error encoding message: {:?}", e);
+            println!("Error sending message to client: {:?}", e);
         }
     }
+
+    // match to_u8_vec(&message) {
+    //     Ok(u8_vec) => {
+    //         // //convert u8_vec to string
+    //         // let send_string = String::from_utf8(u8_vec).unwrap();
+
+    //         match tx.send((identity, Message::Binary(u8_vec))) {
+    //             Ok(_) => {}
+    //             Err(e) => {
+    //                 println!("Error sending message to client: {:?}", e);
+    //             }
+    //         }
+    //     }
+    //     Err(e) => {
+    //         println!("Error encoding message: {:?}", e);
+    //     }
+    // }
 }
