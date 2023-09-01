@@ -8996,31 +8996,31 @@ var app = (function () {
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$3 = freeGlobal || freeSelf || Function('return this')();
+    var root$2 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$3;
+    var _root = root$2;
 
-    var root$2 = _root;
+    var root$1 = _root;
 
     /** Built-in value references. */
-    var Symbol$4 = root$2.Symbol;
+    var Symbol$4 = root$1.Symbol;
 
     var _Symbol = Symbol$4;
 
     var Symbol$3 = _Symbol;
 
     /** Used for built-in method references. */
-    var objectProto$5 = Object.prototype;
+    var objectProto$4 = Object.prototype;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty$4 = objectProto$5.hasOwnProperty;
+    var hasOwnProperty$3 = objectProto$4.hasOwnProperty;
 
     /**
      * Used to resolve the
      * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
      * of values.
      */
-    var nativeObjectToString$1 = objectProto$5.toString;
+    var nativeObjectToString$1 = objectProto$4.toString;
 
     /** Built-in value references. */
     var symToStringTag$1 = Symbol$3 ? Symbol$3.toStringTag : undefined;
@@ -9033,7 +9033,7 @@ var app = (function () {
      * @returns {string} Returns the raw `toStringTag`.
      */
     function getRawTag$1(value) {
-      var isOwn = hasOwnProperty$4.call(value, symToStringTag$1),
+      var isOwn = hasOwnProperty$3.call(value, symToStringTag$1),
           tag = value[symToStringTag$1];
 
       try {
@@ -9056,14 +9056,14 @@ var app = (function () {
 
     /** Used for built-in method references. */
 
-    var objectProto$4 = Object.prototype;
+    var objectProto$3 = Object.prototype;
 
     /**
      * Used to resolve the
      * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
      * of values.
      */
-    var nativeObjectToString = objectProto$4.toString;
+    var nativeObjectToString = objectProto$3.toString;
 
     /**
      * Converts `value` to a string using `Object.prototype.toString`.
@@ -9133,12 +9133,12 @@ var app = (function () {
      * // => false
      */
 
-    function isObject$4(value) {
+    function isObject$3(value) {
       var type = typeof value;
       return value != null && (type == 'object' || type == 'function');
     }
 
-    var isObject_1 = isObject$4;
+    var isObject_1 = isObject$3;
 
     var isFunction_1;
     var hasRequiredIsFunction;
@@ -9186,33 +9186,49 @@ var app = (function () {
     	return isFunction_1;
     }
 
-    var root$1 = _root;
+    var _coreJsData;
+    var hasRequired_coreJsData;
 
-    /** Used to detect overreaching core-js shims. */
-    var coreJsData$1 = root$1['__core-js_shared__'];
+    function require_coreJsData () {
+    	if (hasRequired_coreJsData) return _coreJsData;
+    	hasRequired_coreJsData = 1;
+    	var root = _root;
 
-    var _coreJsData = coreJsData$1;
+    	/** Used to detect overreaching core-js shims. */
+    	var coreJsData = root['__core-js_shared__'];
 
-    var coreJsData = _coreJsData;
-
-    /** Used to detect methods masquerading as native. */
-    var maskSrcKey = (function() {
-      var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
-      return uid ? ('Symbol(src)_1.' + uid) : '';
-    }());
-
-    /**
-     * Checks if `func` has its source masked.
-     *
-     * @private
-     * @param {Function} func The function to check.
-     * @returns {boolean} Returns `true` if `func` is masked, else `false`.
-     */
-    function isMasked$1(func) {
-      return !!maskSrcKey && (maskSrcKey in func);
+    	_coreJsData = coreJsData;
+    	return _coreJsData;
     }
 
-    var _isMasked = isMasked$1;
+    var _isMasked;
+    var hasRequired_isMasked;
+
+    function require_isMasked () {
+    	if (hasRequired_isMasked) return _isMasked;
+    	hasRequired_isMasked = 1;
+    	var coreJsData = require_coreJsData();
+
+    	/** Used to detect methods masquerading as native. */
+    	var maskSrcKey = (function() {
+    	  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+    	  return uid ? ('Symbol(src)_1.' + uid) : '';
+    	}());
+
+    	/**
+    	 * Checks if `func` has its source masked.
+    	 *
+    	 * @private
+    	 * @param {Function} func The function to check.
+    	 * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+    	 */
+    	function isMasked(func) {
+    	  return !!maskSrcKey && (maskSrcKey in func);
+    	}
+
+    	_isMasked = isMasked;
+    	return _isMasked;
+    }
 
     /** Used for built-in method references. */
 
@@ -9250,53 +9266,61 @@ var app = (function () {
     	return _toSource;
     }
 
-    var isFunction = requireIsFunction(),
-        isMasked = _isMasked,
-        isObject$3 = isObject_1,
-        toSource = require_toSource();
+    var _baseIsNative;
+    var hasRequired_baseIsNative;
 
-    /**
-     * Used to match `RegExp`
-     * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
-     */
-    var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+    function require_baseIsNative () {
+    	if (hasRequired_baseIsNative) return _baseIsNative;
+    	hasRequired_baseIsNative = 1;
+    	var isFunction = requireIsFunction(),
+    	    isMasked = require_isMasked(),
+    	    isObject = isObject_1,
+    	    toSource = require_toSource();
 
-    /** Used to detect host constructors (Safari). */
-    var reIsHostCtor = /^\[object .+?Constructor\]$/;
+    	/**
+    	 * Used to match `RegExp`
+    	 * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+    	 */
+    	var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
 
-    /** Used for built-in method references. */
-    var funcProto = Function.prototype,
-        objectProto$3 = Object.prototype;
+    	/** Used to detect host constructors (Safari). */
+    	var reIsHostCtor = /^\[object .+?Constructor\]$/;
 
-    /** Used to resolve the decompiled source of functions. */
-    var funcToString = funcProto.toString;
+    	/** Used for built-in method references. */
+    	var funcProto = Function.prototype,
+    	    objectProto = Object.prototype;
 
-    /** Used to check objects for own properties. */
-    var hasOwnProperty$3 = objectProto$3.hasOwnProperty;
+    	/** Used to resolve the decompiled source of functions. */
+    	var funcToString = funcProto.toString;
 
-    /** Used to detect if a method is native. */
-    var reIsNative = RegExp('^' +
-      funcToString.call(hasOwnProperty$3).replace(reRegExpChar, '\\$&')
-      .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-    );
+    	/** Used to check objects for own properties. */
+    	var hasOwnProperty = objectProto.hasOwnProperty;
 
-    /**
-     * The base implementation of `_.isNative` without bad shim checks.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a native function,
-     *  else `false`.
-     */
-    function baseIsNative$1(value) {
-      if (!isObject$3(value) || isMasked(value)) {
-        return false;
-      }
-      var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
-      return pattern.test(toSource(value));
+    	/** Used to detect if a method is native. */
+    	var reIsNative = RegExp('^' +
+    	  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
+    	  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+    	);
+
+    	/**
+    	 * The base implementation of `_.isNative` without bad shim checks.
+    	 *
+    	 * @private
+    	 * @param {*} value The value to check.
+    	 * @returns {boolean} Returns `true` if `value` is a native function,
+    	 *  else `false`.
+    	 */
+    	function baseIsNative(value) {
+    	  if (!isObject(value) || isMasked(value)) {
+    	    return false;
+    	  }
+    	  var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
+    	  return pattern.test(toSource(value));
+    	}
+
+    	_baseIsNative = baseIsNative;
+    	return _baseIsNative;
     }
-
-    var _baseIsNative = baseIsNative$1;
 
     /**
      * Gets the value at `key` of `object`.
@@ -9307,29 +9331,45 @@ var app = (function () {
      * @returns {*} Returns the property value.
      */
 
-    function getValue$2(object, key) {
-      return object == null ? undefined : object[key];
+    var _getValue;
+    var hasRequired_getValue;
+
+    function require_getValue () {
+    	if (hasRequired_getValue) return _getValue;
+    	hasRequired_getValue = 1;
+    	function getValue(object, key) {
+    	  return object == null ? undefined : object[key];
+    	}
+
+    	_getValue = getValue;
+    	return _getValue;
     }
 
-    var _getValue = getValue$2;
+    var _getNative;
+    var hasRequired_getNative;
 
-    var baseIsNative = _baseIsNative,
-        getValue$1 = _getValue;
+    function require_getNative () {
+    	if (hasRequired_getNative) return _getNative;
+    	hasRequired_getNative = 1;
+    	var baseIsNative = require_baseIsNative(),
+    	    getValue = require_getValue();
 
-    /**
-     * Gets the native function at `key` of `object`.
-     *
-     * @private
-     * @param {Object} object The object to query.
-     * @param {string} key The key of the method to get.
-     * @returns {*} Returns the function if it's native, else `undefined`.
-     */
-    function getNative$2(object, key) {
-      var value = getValue$1(object, key);
-      return baseIsNative(value) ? value : undefined;
+    	/**
+    	 * Gets the native function at `key` of `object`.
+    	 *
+    	 * @private
+    	 * @param {Object} object The object to query.
+    	 * @param {string} key The key of the method to get.
+    	 * @returns {*} Returns the function if it's native, else `undefined`.
+    	 */
+    	function getNative(object, key) {
+    	  var value = getValue(object, key);
+    	  return baseIsNative(value) ? value : undefined;
+    	}
+
+    	_getNative = getNative;
+    	return _getNative;
     }
-
-    var _getNative = getNative$2;
 
     var _Map;
     var hasRequired_Map;
@@ -9337,7 +9377,7 @@ var app = (function () {
     function require_Map () {
     	if (hasRequired_Map) return _Map;
     	hasRequired_Map = 1;
-    	var getNative = _getNative,
+    	var getNative = require_getNative(),
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -9347,7 +9387,7 @@ var app = (function () {
     	return _Map;
     }
 
-    var getNative$1 = _getNative;
+    var getNative$1 = require_getNative();
 
     /* Built-in method references that are verified to be native. */
     var nativeCreate$4 = getNative$1(Object, 'create');
@@ -9779,7 +9819,7 @@ var app = (function () {
     	return _arrayEach;
     }
 
-    var getNative = _getNative;
+    var getNative = require_getNative();
 
     var defineProperty$1 = (function() {
       try {
@@ -11192,7 +11232,7 @@ var app = (function () {
     function require_DataView () {
     	if (hasRequired_DataView) return _DataView;
     	hasRequired_DataView = 1;
-    	var getNative = _getNative,
+    	var getNative = require_getNative(),
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -11208,7 +11248,7 @@ var app = (function () {
     function require_Promise () {
     	if (hasRequired_Promise) return _Promise;
     	hasRequired_Promise = 1;
-    	var getNative = _getNative,
+    	var getNative = require_getNative(),
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -11224,7 +11264,7 @@ var app = (function () {
     function require_Set () {
     	if (hasRequired_Set) return _Set;
     	hasRequired_Set = 1;
-    	var getNative = _getNative,
+    	var getNative = require_getNative(),
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -11240,7 +11280,7 @@ var app = (function () {
     function require_WeakMap () {
     	if (hasRequired_WeakMap) return _WeakMap;
     	hasRequired_WeakMap = 1;
-    	var getNative = _getNative,
+    	var getNative = require_getNative(),
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -18365,62 +18405,68 @@ var app = (function () {
     const websocket = { websocket: null };
     const websocketStore = writable(websocket);
 
-    function stringToUint8Array(str) {
-        const utf8Encoder = new TextEncoder();
-        return utf8Encoder.encode(str);
-    }
-
     function setupWebsocketConnection(system_state) {
-        console.log("setting up websocket connection");
-        let websocket = new WebSocket("ws://138.197.70.163:8080");
-        // start the websocket connection
-        websocket.addEventListener("open", () => {
-            console.log("websocket connection opened");
-            // setup message processor
-            system_state.setWebsocketReady(true);
-            systemStateStore.set(system_state); // <-- update your Svelte store
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("setting up websocket connection");
+            let websocket = new WebSocket("ws://138.197.70.163:8080");
+            // start the websocket connection
+            websocket.addEventListener("open", () => {
+                console.log("websocket connection opened");
+                // setup message processor
+                system_state.setWebsocketReady(true);
+                systemStateStore.set(system_state); // <-- update your Svelte store
+            });
+            websocket = yield setupWebsocketMessageHandler(websocket);
+            console.log("returning websocket");
+            return [websocket, system_state];
         });
-        websocket = setupWebsocketMessageHandler(websocket);
-        console.log("returning websocket");
-        return [websocket, system_state];
     }
     function setupWebsocketMessageHandler(websocket) {
-        websocket.addEventListener("message", (event) => {
-            console.log("websocket message received: ", event.data);
-            let data;
-            try {
-                data = event.data;
-                const u8Array = stringToUint8Array(data);
-                const response_object = system_types_pb$1.ResponseObject.deserializeBinary(u8Array);
-                const res = response_object.getObjectCase();
-                alert("Need to handle switch statement for websocket message processing --> Adding object into local system state.");
-                switch (res) {
-                    case system_types_pb$1.ResponseObject.ObjectCase.NODE:
-                        console.log("NODE");
-                        break;
-                    case system_types_pb$1.ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
-                        console.log("AUTHENTICATION_MESSAGE");
-                        break;
-                    case system_types_pb$1.ResponseObject.ObjectCase.USER_SETTINGS:
-                        console.log("USER_SETTINGS");
-                        break;
-                    case system_types_pb$1.ResponseObject.ObjectCase.EXECUTION_RESPONSE:
-                        console.log("EXECUTION_RESPONSE");
-                        break;
-                    case system_types_pb$1.ResponseObject.ObjectCase.OBJECT_NOT_SET:
-                        console.log("OBJECT_NOT_SET");
-                        break;
-                    default:
-                        console.log("default");
-                        alert("Fallen through response object switch statement... This is not good.");
-                        break;
-                }
-            }
-            catch (_a) {
-                console.log("Error parsing websocket message");
-            }
+        return __awaiter(this, void 0, void 0, function* () {
+            websocket.addEventListener("message", (event) => {
+                console.log("websocket message received: ", event.data);
+                event.data.arrayBuffer().then((buffer) => __awaiter(this, void 0, void 0, function* () {
+                    console.log("buffer: ", buffer);
+                    const u8Array = new Uint8Array(buffer);
+                    console.log("u8Array: ", u8Array);
+                    const response_object = system_types_pb$1.ResponseObject.deserializeBinary(u8Array);
+                    console.log("response_object: ", response_object);
+                    const res = response_object.getObjectCase();
+                    console.log("res: ", res);
+                    switch (res) {
+                        case system_types_pb$1.ResponseObject.ObjectCase.NODE:
+                            {
+                                console.log("NODE");
+                                const add_node = response_object.getNode();
+                                console.log("add_node: ", add_node.toObject());
+                                const system_state = yield getSystemState();
+                                const nodes = system_state.getNodesList();
+                                nodes.push(add_node);
+                                system_state.setNodesList(nodes);
+                                yield setSystemState(system_state);
+                                break;
+                            }
+                        case system_types_pb$1.ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
+                            console.log("AUTHENTICATION_MESSAGE");
+                            break;
+                        case system_types_pb$1.ResponseObject.ObjectCase.USER_SETTINGS:
+                            console.log("USER_SETTINGS");
+                            break;
+                        case system_types_pb$1.ResponseObject.ObjectCase.EXECUTION_RESPONSE:
+                            console.log("EXECUTION_RESPONSE");
+                            break;
+                        case system_types_pb$1.ResponseObject.ObjectCase.OBJECT_NOT_SET:
+                            console.log("OBJECT_NOT_SET");
+                            break;
+                        default:
+                            console.log("default");
+                            alert("Fallen through response object switch statement... This is not good.");
+                            break;
+                    }
+                }));
+            });
+            return websocket;
         });
-        return websocket;
     }
     function sendWebsocketMessage(message, websocket) {
         return __awaiter(this, void 0, void 0, function* () {

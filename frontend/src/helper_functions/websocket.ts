@@ -3,10 +3,11 @@ import { stringToUint8Array } from "./misc";
 import * as proto from "../../src/generated/system_types_pb";
 
 import systemStateStore from "stores/systemStateStore";
+import { getSystemState, setSystemState } from "./graph";
 
-export function setupWebsocketConnection(
+export async function setupWebsocketConnection(
   system_state: proto.SystemState
-): [WebSocket, proto.SystemState] {
+): Promise<[WebSocket, proto.SystemState]> {
   console.log("setting up websocket connection");
   let websocket = new WebSocket("ws://138.197.70.163:8080");
 
@@ -19,34 +20,42 @@ export function setupWebsocketConnection(
     systemStateStore.set(system_state); // <-- update your Svelte store
   });
 
-  websocket = setupWebsocketMessageHandler(websocket);
+  websocket = await setupWebsocketMessageHandler(websocket);
 
   console.log("returning websocket");
 
   return [websocket, system_state];
 }
 
-export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
+export async function setupWebsocketMessageHandler(websocket: WebSocket): Promise<WebSocket> {
   websocket.addEventListener("message", (event) => {
     console.log("websocket message received: ", event.data);
-    let data: any;
-    try {
-      data = event.data;
 
-      const u8Array = stringToUint8Array(data);
-
+    event.data.arrayBuffer().then(async (buffer: any) => {
+      console.log("buffer: ", buffer);
+      const u8Array = new Uint8Array(buffer);
+      console.log("u8Array: ", u8Array);
       const response_object = proto.ResponseObject.deserializeBinary(u8Array);
-
+      console.log("response_object: ", response_object);
       const res = response_object.getObjectCase();
-
-      alert(
-        "Need to handle switch statement for websocket message processing --> Adding object into local system state."
-      );
+      console.log("res: ", res);
 
       switch (res) {
       case proto.ResponseObject.ObjectCase.NODE:
+      {
         console.log("NODE");
+        const add_node = response_object.getNode() as proto.Node;
+
+        console.log("add_node: ", add_node.toObject());
+
+        const system_state = await getSystemState();
+        const nodes = system_state.getNodesList();
+        nodes.push(add_node);
+        system_state.setNodesList(nodes);
+        await setSystemState(system_state);
+
         break;
+      }
       case proto.ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
         console.log("AUTHENTICATION_MESSAGE");
         break;
@@ -66,9 +75,9 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
         );
         break;
       }
-    } catch {
-      console.log("Error parsing websocket message");
-    }
+
+    });
+
   });
 
   return websocket;
