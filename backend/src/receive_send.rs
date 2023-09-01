@@ -21,6 +21,8 @@ use tokio::sync::mpsc::UnboundedSender;
 
 use prost::Message;
 
+use prost::bytes::BytesMut;
+
 // use bollard::container::Config;
 // use bollard::exec::{ CreateExecOptions, StartExecResults };
 // use bollard::Docker;
@@ -28,7 +30,7 @@ use bson::doc;
 use serde::{ Deserialize, Serialize };
 use std::collections::HashMap;
 use tokio::sync::mpsc;
-use tokio_tungstenite::tungstenite::Message;
+// use tokio_tungstenite::tungstenite::Message;
 
 // create a "models" type that can be used to select the model to use
 // it should be one of a couple of strings: "gpt-4", "gpt3.5-turbo", etc
@@ -49,7 +51,7 @@ impl Identity {
 
 pub async fn start_message_sending_loop(
     // docker: Docker,
-    tx: UnboundedSender<(Identity, Message)>,
+    tx: UnboundedSender<(Identity, tokio_tungstenite::tungstenite::Message)>,
     mut client_rx: mpsc::Receiver<(Identity, String)>,
     pool: Arc<Pool<SqliteConnectionManager>>
 ) {
@@ -255,11 +257,14 @@ pub async fn start_message_sending_loop(
 use crate::utils::to_u8_vec;
 
 pub async fn send_message(
-    tx: &UnboundedSender<(Identity, Message)>,
+    tx: &UnboundedSender<(Identity, tokio_tungstenite::tungstenite::Message)>,
     identity: Identity,
     message: ResponseObject
 ) {
-    match tx.send((identity, Message::Binary(message.encode()))) {
+    let mut buf = BytesMut::new();
+    message.encode(&mut buf).unwrap();
+
+    match tx.send((identity, tokio_tungstenite::tungstenite::Message::Binary(buf.to_vec()))) {
         Ok(_) => {}
         Err(e) => {
             println!("Error sending message to client: {:?}", e);
