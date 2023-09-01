@@ -140,6 +140,8 @@ pub async fn start_message_sending_loop(
                         match fetch_all_nodes(pool.clone()) {
                             Ok(nodes) => {
                                 for node in &nodes {
+                                    println!("Found node: {:?}", node);
+
                                     send_message(&tx, msg.0.clone(), ResponseObject {
                                         object: Some(Node(node.clone())),
                                     }).await;
@@ -256,6 +258,8 @@ pub async fn start_message_sending_loop(
 }
 use crate::utils::to_u8_vec;
 
+use colored::*;
+
 pub async fn send_message(
     tx: &UnboundedSender<(Identity, tokio_tungstenite::tungstenite::Message)>,
     identity: Identity,
@@ -263,6 +267,8 @@ pub async fn send_message(
 ) {
     let mut buf = BytesMut::new();
     message.encode(&mut buf).unwrap();
+
+    println!("{}: {:?}", "Sending message to client".green(), message);
 
     match tx.send((identity, tokio_tungstenite::tungstenite::Message::Binary(buf.to_vec()))) {
         Ok(_) => {}
