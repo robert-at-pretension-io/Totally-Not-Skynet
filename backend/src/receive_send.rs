@@ -259,10 +259,10 @@ pub async fn send_message(
 ) {
     match to_u8_vec(&message) {
         Ok(u8_vec) => {
-            //convert u8_vec to string
-            let send_string = String::from_utf8(u8_vec).unwrap();
+            // //convert u8_vec to string
+            // let send_string = String::from_utf8(u8_vec).unwrap();
 
-            match tx.send((identity, Message::Text(send_string))) {
+            match tx.send((identity, Message::Binary(u8_vec))) {
                 Ok(_) => {}
                 Err(e) => {
                     println!("Error sending message to client: {:?}", e);

@@ -2,7 +2,11 @@ use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use std::env;
 use std::sync::Arc;
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::{ mpsc, Mutex };
+extern crate log;
+extern crate env_logger;
+
+use log::{ info, debug, warn, error };
 
 // mod domain;
 mod check_installed_programs;
@@ -27,6 +31,8 @@ use crate::websocket::start_websocket_server;
 
 #[tokio::main]
 async fn main() {
+    env_logger::init();
+
     // Check that the environmental variables are set:
     let file_location = "./req_env_vars.txt";
     match env_vars_checker::check_env_vars(file_location) {
