@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  // import { onMount } from "svelte";
   // import {
   //   GraphNodeInfo,
   //   Graph,
@@ -14,7 +14,14 @@
 
   import systemStateStore from "stores/systemStateStore";
 
-  let selected_nodes: proto.GraphNodeInfo[] = [];
+  let selected_node_ids: string[] = [];
+
+  import { writable } from "svelte/store";
+
+  const selected_node_ids_store = writable(selected_node_ids);
+
+  let node_id_list: string[] = [];
+
   let selected_edge: proto.Edge | null = null;
 
   let graph = new proto.Graph();
@@ -22,17 +29,15 @@
   let description = "";
   let node_list: proto.Node[] = [];
 
-  let system_state;
-
   let key_list = Object.keys(proto.NodeTypeNames);
-
-  onMount(async () => {
-    system_state = await helper_functions.getSystemState();
-  });
 
   $: {
     // Whenever the system state changes, update the nodes_available
     node_list = $systemStateStore.getNodesList();
+
+    node_id_list = $selected_node_ids_store;
+
+    console.log("The node_id_list is now: " + node_id_list);
   }
 
   async function saveProcess() {
@@ -76,34 +81,39 @@
   function isSelected(node: proto.Node): boolean {
     // check to see if selected_nodes : Node[] contains node : Node
 
-    return (
-      selected_nodes.filter((val) => {
-        val.getId() === node.getNodeInfo()?.getId();
-      }).length > 0
+    console.log(
+      " Checking to see if node " +
+        node.getNodeInfo()?.getId() +
+        " is contained in " +
+        $selected_node_ids_store
     );
+
+    let node_id = node.getNodeInfo()?.getId() as string;
+
+    return $selected_node_ids_store.includes(node_id);
   }
   function removeNodes() {
     let current = graph.getNodesList();
 
     let new_nodes = current.filter((node: proto.GraphNodeInfo) => {
-      return !selected_nodes.includes(node);
+      return !selected_node_ids.includes(node.getId());
     });
 
     graph.setNodesList(new_nodes);
 
-    selected_nodes = [];
+    selected_node_ids = [];
   }
-  function addNodes() {
-    let current_nodes = graph.getNodesList();
-    selected_nodes.forEach((node: proto.GraphNodeInfo) => {
-      // check if current_nodes already contains node
-      if (!current_nodes.includes(node)) {
-        current_nodes.push(node);
-      }
-    });
-    graph.setNodesList(current_nodes);
-    selected_nodes = [];
-  }
+  // function addNodes() {
+  //   let current_nodes = graph.getNodesList();
+  //   selected_node_ids.forEach((node_id: string) => {
+  //     // check if current_nodes already contains node
+  //     if (!current_nodes.includes(node)) {
+  //       current_nodes.push(node);
+  //     }
+  //   });
+  //   graph.setNodesList(current_nodes);
+  //   selected_nodes = [];
+  // }
   function addEdge() {
     let current_edges = graph.getEdgesList();
     // add selected_edge : Edge to current_edges : Edge[]
@@ -124,13 +134,16 @@
   }
 
   function toggleNodeSelect(node: proto.Node) {
+    let node_id = node.getNodeInfo()?.getId() as string;
+
     if (isSelected(node)) {
-      selected_nodes = selected_nodes.filter((val) => {
-        val != node.getNodeInfo();
-      });
+      selected_node_ids_store.update((val) =>
+        val.filter((item) => item !== node_id)
+      );
+      console.log("removing node: " + node_id);
     } else {
-      let node_info = node.getNodeInfo() as proto.GraphNodeInfo;
-      selected_nodes.push(node_info);
+      selected_node_ids_store.update((val) => [...val, node_id]);
+      console.log("adding node");
     }
   }
 </script>
@@ -165,10 +178,11 @@
 
 <h3>Nodes to add:</h3>
 
-{#each selected_nodes as node (node.getId())}
-  <p>{node.getName()}</p>
+{#each $selected_node_ids_store as id}
+  <p>{id}</p>
 {/each}
-<button class="add-button" on:click={addNodes}>Add Node(s)</button>
+
+<!-- <button class="add-button" on:click={addNodes}>Add Node(s)</button> -->
 <button class="remove-button" on:click={removeNodes}>Remove Node(s)</button>
 <button class="add-button" on:click={addEdge}>Add Edge</button>
 <button class="remove-button" on:click={removeEdge}>Remove Edge</button>
