@@ -81,12 +81,12 @@
   function isSelected(node: proto.Node): boolean {
     // check to see if selected_nodes : Node[] contains node : Node
 
-    console.log(
-      " Checking to see if node " +
-        node.getNodeInfo()?.getId() +
-        " is contained in " +
-        $selected_node_ids_store
-    );
+    // console.log(
+    //   " Checking to see if node " +
+    //     node.getNodeInfo()?.getId() +
+    //     " is contained in " +
+    //     $selected_node_ids_store
+    // );
 
     let node_id = node.getNodeInfo()?.getId() as string;
 
@@ -103,17 +103,33 @@
 
     selected_node_ids = [];
   }
-  // function addNodes() {
-  //   let current_nodes = graph.getNodesList();
-  //   selected_node_ids.forEach((node_id: string) => {
-  //     // check if current_nodes already contains node
-  //     if (!current_nodes.includes(node)) {
-  //       current_nodes.push(node);
-  //     }
-  //   });
-  //   graph.setNodesList(current_nodes);
-  //   selected_nodes = [];
-  // }
+  function addNodes() {
+    let current_graph_state: proto.GraphState;
+    systemStateStore.subscribe((val) => {
+      current_graph_state = val.getGraphState() as proto.GraphState;
+
+      console.log("current_graph_state: " + current_graph_state);
+
+      let filtered_nodes = node_list.filter((node: proto.Node) => {
+        return selected_node_ids.includes(
+          node.getNodeInfo()?.getId() as string
+        );
+      });
+
+      console.log("filtered_nodes: " + filtered_nodes);
+
+      filtered_nodes.forEach(async (node: proto.Node) => {
+        // check if current_nodes already contains node
+        // let node_info = node.getNodeInfo() as proto.GraphNodeInfo;
+        // if (!current_nodes.includes(node_info)) {
+        //   current_nodes.push(node_info);
+        // }
+        await helper_functions.addNode(node, current_graph_state);
+      });
+
+      selected_node_ids_store.set([]);
+    });
+  }
   function addEdge() {
     let current_edges = graph.getEdgesList();
     // add selected_edge : Edge to current_edges : Edge[]
@@ -182,7 +198,7 @@
   <p>{id}</p>
 {/each}
 
-<!-- <button class="add-button" on:click={addNodes}>Add Node(s)</button> -->
+<button class="add-button" on:click={addNodes}>Add Node(s)</button>
 <button class="remove-button" on:click={removeNodes}>Remove Node(s)</button>
 <button class="add-button" on:click={addEdge}>Add Edge</button>
 <button class="remove-button" on:click={removeEdge}>Remove Edge</button>

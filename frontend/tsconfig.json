@@ -19,7 +19,6 @@
     "strictFunctionTypes": true,
     "typeRoots": [
       "./node_modules/@types",
-      "./src/generated/system_types_pb.js"
     ],
   },
   "include": [

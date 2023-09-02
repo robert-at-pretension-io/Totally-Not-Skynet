@@ -17,6 +17,7 @@ export default {
     format: "iife",
     globals: {
       "proto.skynet.types": "proto.skynet.types",
+      "generated/system_types_pb": "system_types_pb",
     },
     name: "app",
     file: "public/bundle.js",
