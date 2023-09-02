@@ -27,7 +27,9 @@ export async function setupWebsocketConnection(
   return [websocket, system_state];
 }
 
-export async function setupWebsocketMessageHandler(websocket: WebSocket): Promise<WebSocket> {
+export async function setupWebsocketMessageHandler(
+  websocket: WebSocket
+): Promise<WebSocket> {
   websocket.addEventListener("message", (event) => {
     console.log("websocket message received: ", event.data);
 
@@ -41,18 +43,31 @@ export async function setupWebsocketMessageHandler(websocket: WebSocket): Promis
       console.log("res: ", res);
 
       switch (res) {
-      case proto.ResponseObject.ObjectCase.NODE:
-      {
+      case proto.ResponseObject.ObjectCase.NODE: {
         console.log("NODE");
         const add_node = response_object.getNode() as proto.Node;
 
         console.log("add_node: ", add_node.toObject());
 
-        const system_state = await getSystemState();
-        const nodes = system_state.getNodesList();
-        nodes.push(add_node);
-        system_state.setNodesList(nodes);
-        await setSystemState(system_state);
+        // import { SystemState } from "../../src/generated/system_types_pb";
+        // import systemStateStore from "stores/systemStateStore";
+
+        const system_state = systemStateStore.update(
+          (n: proto.SystemState) => {
+            const nodes = n.getNodesList();
+            nodes.push(add_node);
+            n.setNodesList(nodes);
+            return n;
+          }
+        );
+
+        // console.log("system_state: ", system_state.toObject());
+
+        // const nodes = system_state.getNodesList();
+
+        // nodes.push(add_node);
+        // system_state.setNodesList(nodes);
+        // await setSystemState(system_state);
 
         break;
       }
@@ -75,9 +90,7 @@ export async function setupWebsocketMessageHandler(websocket: WebSocket): Promis
         );
         break;
       }
-
     });
-
   });
 
   return websocket;

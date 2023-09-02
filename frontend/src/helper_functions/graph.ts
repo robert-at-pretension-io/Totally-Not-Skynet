@@ -278,6 +278,8 @@ async function returnAllIndegree(
 // }
 
 export async function setSystemState(systemState: proto.SystemState) {
+  console.log("setting system state: ", systemState.toObject());
+
   systemStateStore.set(systemState);
 }
 

@@ -8996,31 +8996,31 @@ var app = (function () {
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$2 = freeGlobal || freeSelf || Function('return this')();
+    var root$4 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$2;
+    var _root = root$4;
 
-    var root$1 = _root;
+    var root$3 = _root;
 
     /** Built-in value references. */
-    var Symbol$4 = root$1.Symbol;
+    var Symbol$4 = root$3.Symbol;
 
     var _Symbol = Symbol$4;
 
     var Symbol$3 = _Symbol;
 
     /** Used for built-in method references. */
-    var objectProto$4 = Object.prototype;
+    var objectProto$5 = Object.prototype;
 
     /** Used to check objects for own properties. */
-    var hasOwnProperty$3 = objectProto$4.hasOwnProperty;
+    var hasOwnProperty$4 = objectProto$5.hasOwnProperty;
 
     /**
      * Used to resolve the
      * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
      * of values.
      */
-    var nativeObjectToString$1 = objectProto$4.toString;
+    var nativeObjectToString$1 = objectProto$5.toString;
 
     /** Built-in value references. */
     var symToStringTag$1 = Symbol$3 ? Symbol$3.toStringTag : undefined;
@@ -9033,7 +9033,7 @@ var app = (function () {
      * @returns {string} Returns the raw `toStringTag`.
      */
     function getRawTag$1(value) {
-      var isOwn = hasOwnProperty$3.call(value, symToStringTag$1),
+      var isOwn = hasOwnProperty$4.call(value, symToStringTag$1),
           tag = value[symToStringTag$1];
 
       try {
@@ -9056,14 +9056,14 @@ var app = (function () {
 
     /** Used for built-in method references. */
 
-    var objectProto$3 = Object.prototype;
+    var objectProto$4 = Object.prototype;
 
     /**
      * Used to resolve the
      * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
      * of values.
      */
-    var nativeObjectToString = objectProto$3.toString;
+    var nativeObjectToString = objectProto$4.toString;
 
     /**
      * Converts `value` to a string using `Object.prototype.toString`.
@@ -9133,12 +9133,12 @@ var app = (function () {
      * // => false
      */
 
-    function isObject$3(value) {
+    function isObject$4(value) {
       var type = typeof value;
       return value != null && (type == 'object' || type == 'function');
     }
 
-    var isObject_1 = isObject$3;
+    var isObject_1 = isObject$4;
 
     var isFunction_1;
     var hasRequiredIsFunction;
@@ -9186,49 +9186,33 @@ var app = (function () {
     	return isFunction_1;
     }
 
-    var _coreJsData;
-    var hasRequired_coreJsData;
+    var root$2 = _root;
 
-    function require_coreJsData () {
-    	if (hasRequired_coreJsData) return _coreJsData;
-    	hasRequired_coreJsData = 1;
-    	var root = _root;
+    /** Used to detect overreaching core-js shims. */
+    var coreJsData$1 = root$2['__core-js_shared__'];
 
-    	/** Used to detect overreaching core-js shims. */
-    	var coreJsData = root['__core-js_shared__'];
+    var _coreJsData = coreJsData$1;
 
-    	_coreJsData = coreJsData;
-    	return _coreJsData;
+    var coreJsData = _coreJsData;
+
+    /** Used to detect methods masquerading as native. */
+    var maskSrcKey = (function() {
+      var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+      return uid ? ('Symbol(src)_1.' + uid) : '';
+    }());
+
+    /**
+     * Checks if `func` has its source masked.
+     *
+     * @private
+     * @param {Function} func The function to check.
+     * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+     */
+    function isMasked$1(func) {
+      return !!maskSrcKey && (maskSrcKey in func);
     }
 
-    var _isMasked;
-    var hasRequired_isMasked;
-
-    function require_isMasked () {
-    	if (hasRequired_isMasked) return _isMasked;
-    	hasRequired_isMasked = 1;
-    	var coreJsData = require_coreJsData();
-
-    	/** Used to detect methods masquerading as native. */
-    	var maskSrcKey = (function() {
-    	  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
-    	  return uid ? ('Symbol(src)_1.' + uid) : '';
-    	}());
-
-    	/**
-    	 * Checks if `func` has its source masked.
-    	 *
-    	 * @private
-    	 * @param {Function} func The function to check.
-    	 * @returns {boolean} Returns `true` if `func` is masked, else `false`.
-    	 */
-    	function isMasked(func) {
-    	  return !!maskSrcKey && (maskSrcKey in func);
-    	}
-
-    	_isMasked = isMasked;
-    	return _isMasked;
-    }
+    var _isMasked = isMasked$1;
 
     /** Used for built-in method references. */
 
@@ -9266,61 +9250,53 @@ var app = (function () {
     	return _toSource;
     }
 
-    var _baseIsNative;
-    var hasRequired_baseIsNative;
+    var isFunction = requireIsFunction(),
+        isMasked = _isMasked,
+        isObject$3 = isObject_1,
+        toSource = require_toSource();
 
-    function require_baseIsNative () {
-    	if (hasRequired_baseIsNative) return _baseIsNative;
-    	hasRequired_baseIsNative = 1;
-    	var isFunction = requireIsFunction(),
-    	    isMasked = require_isMasked(),
-    	    isObject = isObject_1,
-    	    toSource = require_toSource();
+    /**
+     * Used to match `RegExp`
+     * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+     */
+    var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
 
-    	/**
-    	 * Used to match `RegExp`
-    	 * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
-    	 */
-    	var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+    /** Used to detect host constructors (Safari). */
+    var reIsHostCtor = /^\[object .+?Constructor\]$/;
 
-    	/** Used to detect host constructors (Safari). */
-    	var reIsHostCtor = /^\[object .+?Constructor\]$/;
+    /** Used for built-in method references. */
+    var funcProto = Function.prototype,
+        objectProto$3 = Object.prototype;
 
-    	/** Used for built-in method references. */
-    	var funcProto = Function.prototype,
-    	    objectProto = Object.prototype;
+    /** Used to resolve the decompiled source of functions. */
+    var funcToString = funcProto.toString;
 
-    	/** Used to resolve the decompiled source of functions. */
-    	var funcToString = funcProto.toString;
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$3 = objectProto$3.hasOwnProperty;
 
-    	/** Used to check objects for own properties. */
-    	var hasOwnProperty = objectProto.hasOwnProperty;
+    /** Used to detect if a method is native. */
+    var reIsNative = RegExp('^' +
+      funcToString.call(hasOwnProperty$3).replace(reRegExpChar, '\\$&')
+      .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+    );
 
-    	/** Used to detect if a method is native. */
-    	var reIsNative = RegExp('^' +
-    	  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
-    	  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
-    	);
-
-    	/**
-    	 * The base implementation of `_.isNative` without bad shim checks.
-    	 *
-    	 * @private
-    	 * @param {*} value The value to check.
-    	 * @returns {boolean} Returns `true` if `value` is a native function,
-    	 *  else `false`.
-    	 */
-    	function baseIsNative(value) {
-    	  if (!isObject(value) || isMasked(value)) {
-    	    return false;
-    	  }
-    	  var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
-    	  return pattern.test(toSource(value));
-    	}
-
-    	_baseIsNative = baseIsNative;
-    	return _baseIsNative;
+    /**
+     * The base implementation of `_.isNative` without bad shim checks.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a native function,
+     *  else `false`.
+     */
+    function baseIsNative$1(value) {
+      if (!isObject$3(value) || isMasked(value)) {
+        return false;
+      }
+      var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
+      return pattern.test(toSource(value));
     }
+
+    var _baseIsNative = baseIsNative$1;
 
     /**
      * Gets the value at `key` of `object`.
@@ -9331,63 +9307,39 @@ var app = (function () {
      * @returns {*} Returns the property value.
      */
 
-    var _getValue;
-    var hasRequired_getValue;
-
-    function require_getValue () {
-    	if (hasRequired_getValue) return _getValue;
-    	hasRequired_getValue = 1;
-    	function getValue(object, key) {
-    	  return object == null ? undefined : object[key];
-    	}
-
-    	_getValue = getValue;
-    	return _getValue;
+    function getValue$2(object, key) {
+      return object == null ? undefined : object[key];
     }
 
-    var _getNative;
-    var hasRequired_getNative;
+    var _getValue = getValue$2;
 
-    function require_getNative () {
-    	if (hasRequired_getNative) return _getNative;
-    	hasRequired_getNative = 1;
-    	var baseIsNative = require_baseIsNative(),
-    	    getValue = require_getValue();
+    var baseIsNative = _baseIsNative,
+        getValue$1 = _getValue;
 
-    	/**
-    	 * Gets the native function at `key` of `object`.
-    	 *
-    	 * @private
-    	 * @param {Object} object The object to query.
-    	 * @param {string} key The key of the method to get.
-    	 * @returns {*} Returns the function if it's native, else `undefined`.
-    	 */
-    	function getNative(object, key) {
-    	  var value = getValue(object, key);
-    	  return baseIsNative(value) ? value : undefined;
-    	}
-
-    	_getNative = getNative;
-    	return _getNative;
+    /**
+     * Gets the native function at `key` of `object`.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @param {string} key The key of the method to get.
+     * @returns {*} Returns the function if it's native, else `undefined`.
+     */
+    function getNative$3(object, key) {
+      var value = getValue$1(object, key);
+      return baseIsNative(value) ? value : undefined;
     }
 
-    var _Map;
-    var hasRequired_Map;
+    var _getNative = getNative$3;
 
-    function require_Map () {
-    	if (hasRequired_Map) return _Map;
-    	hasRequired_Map = 1;
-    	var getNative = require_getNative(),
-    	    root = _root;
+    var getNative$2 = _getNative,
+        root$1 = _root;
 
-    	/* Built-in method references that are verified to be native. */
-    	var Map = getNative(root, 'Map');
+    /* Built-in method references that are verified to be native. */
+    var Map$3 = getNative$2(root$1, 'Map');
 
-    	_Map = Map;
-    	return _Map;
-    }
+    var _Map = Map$3;
 
-    var getNative$1 = require_getNative();
+    var getNative$1 = _getNative;
 
     /* Built-in method references that are verified to be native. */
     var nativeCreate$4 = getNative$1(Object, 'create');
@@ -9543,7 +9495,7 @@ var app = (function () {
 
     var Hash = _Hash,
         ListCache = require_ListCache(),
-        Map$2 = require_Map();
+        Map$2 = _Map;
 
     /**
      * Removes all key-value entries from the map.
@@ -9715,7 +9667,7 @@ var app = (function () {
     	if (hasRequired_stackSet) return _stackSet;
     	hasRequired_stackSet = 1;
     	var ListCache = require_ListCache(),
-    	    Map = require_Map(),
+    	    Map = _Map,
     	    MapCache = _MapCache;
 
     	/** Used as the size to enable large array optimizations. */
@@ -9819,7 +9771,7 @@ var app = (function () {
     	return _arrayEach;
     }
 
-    var getNative = require_getNative();
+    var getNative = _getNative;
 
     var defineProperty$1 = (function() {
       try {
@@ -11232,7 +11184,7 @@ var app = (function () {
     function require_DataView () {
     	if (hasRequired_DataView) return _DataView;
     	hasRequired_DataView = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -11248,7 +11200,7 @@ var app = (function () {
     function require_Promise () {
     	if (hasRequired_Promise) return _Promise;
     	hasRequired_Promise = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -11264,7 +11216,7 @@ var app = (function () {
     function require_Set () {
     	if (hasRequired_Set) return _Set;
     	hasRequired_Set = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -11280,7 +11232,7 @@ var app = (function () {
     function require_WeakMap () {
     	if (hasRequired_WeakMap) return _WeakMap;
     	hasRequired_WeakMap = 1;
-    	var getNative = require_getNative(),
+    	var getNative = _getNative,
     	    root = _root;
 
     	/* Built-in method references that are verified to be native. */
@@ -11297,7 +11249,7 @@ var app = (function () {
     	if (hasRequired_getTag) return _getTag;
     	hasRequired_getTag = 1;
     	var DataView = require_DataView(),
-    	    Map = require_Map(),
+    	    Map = _Map,
     	    Promise = require_Promise(),
     	    Set = require_Set(),
     	    WeakMap = require_WeakMap(),
@@ -16831,6 +16783,7 @@ var app = (function () {
     // }
     function setSystemState(systemState) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("setting system state: ", systemState.toObject());
             systemStateStore.set(systemState);
         });
     }
@@ -17075,53 +17028,59 @@ var app = (function () {
     });
 
     /* src/components/sidebarComponents/CreateProcess.svelte generated by Svelte v3.59.1 */
+
+    const { Object: Object_1$1 } = globals;
     const file$c = "src/components/sidebarComponents/CreateProcess.svelte";
 
     function get_each_context$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[16] = list[i];
+    	child_ctx[20] = list[i];
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[16] = list[i];
+    	child_ctx[20] = list[i];
     	return child_ctx;
     }
 
-    // (128:2) {#each graph.getNodesList() as node (node.getId())}
-    function create_each_block_1(key_1, ctx) {
+    // (139:2) {#each node_list as node}
+    function create_each_block_1(ctx) {
     	let li;
     	let button;
-    	let t0_value = /*node*/ ctx[16].getName() + "";
+    	let t0_value = /*key_list*/ ctx[4][/*node*/ ctx[20].getTypeName()] + "";
     	let t0;
     	let t1;
+    	let t2_value = /*node*/ ctx[20].getNodeInfo()?.getName() + "";
+    	let t2;
+    	let t3;
     	let mounted;
     	let dispose;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[13](/*node*/ ctx[16]);
+    		return /*click_handler*/ ctx[15](/*node*/ ctx[20]);
     	}
 
     	const block = {
-    		key: key_1,
-    		first: null,
     		c: function create() {
     			li = element$1("li");
     			button = element$1("button");
     			t0 = text(t0_value);
-    			t1 = space();
+    			t1 = text(" : ");
+    			t2 = text(t2_value);
+    			t3 = space();
     			attr_dev(button, "type", "button");
-    			toggle_class(button, "selected", /*isSelected*/ ctx[5](/*node*/ ctx[16]));
-    			add_location(button, file$c, 129, 6, 4701);
-    			add_location(li, file$c, 128, 4, 4690);
-    			this.first = li;
+    			toggle_class(button, "selected", /*isSelected*/ ctx[6](/*node*/ ctx[20]));
+    			add_location(button, file$c, 140, 6, 5150);
+    			add_location(li, file$c, 139, 4, 5139);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, li, anchor);
     			append_dev(li, button);
     			append_dev(button, t0);
-    			append_dev(li, t1);
+    			append_dev(button, t1);
+    			append_dev(button, t2);
+    			append_dev(li, t3);
 
     			if (!mounted) {
     				dispose = listen_dev(button, "click", click_handler, false, false, false, false);
@@ -17130,6 +17089,12 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
+    			if (dirty & /*node_list*/ 8 && t0_value !== (t0_value = /*key_list*/ ctx[4][/*node*/ ctx[20].getTypeName()] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*node_list*/ 8 && t2_value !== (t2_value = /*node*/ ctx[20].getNodeInfo()?.getName() + "")) set_data_dev(t2, t2_value);
+
+    			if (dirty & /*isSelected, node_list*/ 72) {
+    				toggle_class(button, "selected", /*isSelected*/ ctx[6](/*node*/ ctx[20]));
+    			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(li);
@@ -17142,17 +17107,17 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(128:2) {#each graph.getNodesList() as node (node.getId())}",
+    		source: "(139:2) {#each node_list as node}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (141:0) {#each selected_nodes as node (node.getId())}
+    // (155:0) {#each selected_nodes as node (node.getId())}
     function create_each_block$3(key_1, ctx) {
     	let p;
-    	let t_value = /*node*/ ctx[16].getName() + "";
+    	let t_value = /*node*/ ctx[20].getName() + "";
     	let t;
 
     	const block = {
@@ -17161,7 +17126,7 @@ var app = (function () {
     		c: function create() {
     			p = element$1("p");
     			t = text(t_value);
-    			add_location(p, file$c, 141, 2, 4953);
+    			add_location(p, file$c, 155, 2, 5481);
     			this.first = p;
     		},
     		m: function mount(target, anchor) {
@@ -17170,7 +17135,7 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*selected_nodes*/ 1 && t_value !== (t_value = /*node*/ ctx[16].getName() + "")) set_data_dev(t, t_value);
+    			if (dirty & /*selected_nodes*/ 1 && t_value !== (t_value = /*node*/ ctx[20].getName() + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(p);
@@ -17181,7 +17146,7 @@ var app = (function () {
     		block,
     		id: create_each_block$3.name,
     		type: "each",
-    		source: "(141:0) {#each selected_nodes as node (node.getId())}",
+    		source: "(155:0) {#each selected_nodes as node (node.getId())}",
     		ctx
     	});
 
@@ -17200,8 +17165,6 @@ var app = (function () {
     	let p2;
     	let t7;
     	let ul;
-    	let each_blocks_1 = [];
-    	let each0_lookup = new Map();
     	let t8;
     	let h3;
     	let t10;
@@ -17219,25 +17182,22 @@ var app = (function () {
     	let button4;
     	let mounted;
     	let dispose;
-    	let each_value_1 = /*graph*/ ctx[3].getNodesList();
+    	let each_value_1 = /*node_list*/ ctx[3];
     	validate_each_argument(each_value_1);
-    	const get_key = ctx => /*node*/ ctx[16].getId();
-    	validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
+    	let each_blocks_1 = [];
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
-    		let child_ctx = get_each_context_1(ctx, each_value_1, i);
-    		let key = get_key(child_ctx);
-    		each0_lookup.set(key, each_blocks_1[i] = create_each_block_1(key, child_ctx));
+    		each_blocks_1[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
     	}
 
     	let each_value = /*selected_nodes*/ ctx[0];
     	validate_each_argument(each_value);
-    	const get_key_1 = ctx => /*node*/ ctx[16].getId();
-    	validate_each_keys(ctx, each_value, get_each_context$3, get_key_1);
+    	const get_key = ctx => /*node*/ ctx[20].getId();
+    	validate_each_keys(ctx, each_value, get_each_context$3, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context$3(ctx, each_value, i);
-    		let key = get_key_1(child_ctx);
+    		let key = get_key(child_ctx);
     		each1_lookup.set(key, each_blocks[i] = create_each_block$3(key, child_ctx));
     	}
 
@@ -17286,25 +17246,25 @@ var app = (function () {
     			t19 = space();
     			button4 = element$1("button");
     			button4.textContent = "Save Process";
-    			add_location(p0, file$c, 113, 0, 4257);
+    			add_location(p0, file$c, 124, 0, 4732);
     			attr_dev(input0, "type", "text");
-    			add_location(input0, file$c, 114, 0, 4312);
-    			add_location(p1, file$c, 115, 0, 4352);
+    			add_location(input0, file$c, 125, 0, 4787);
+    			add_location(p1, file$c, 126, 0, 4827);
     			attr_dev(input1, "type", "text");
-    			add_location(input1, file$c, 119, 0, 4450);
-    			add_location(p2, file$c, 121, 0, 4498);
-    			add_location(ul, file$c, 126, 0, 4627);
-    			add_location(h3, file$c, 138, 0, 4881);
+    			add_location(input1, file$c, 130, 0, 4925);
+    			add_location(p2, file$c, 132, 0, 4973);
+    			add_location(ul, file$c, 137, 0, 5102);
+    			add_location(h3, file$c, 152, 0, 5409);
     			attr_dev(button0, "class", "add-button");
-    			add_location(button0, file$c, 143, 0, 4985);
+    			add_location(button0, file$c, 157, 0, 5513);
     			attr_dev(button1, "class", "remove-button");
-    			add_location(button1, file$c, 144, 0, 5053);
+    			add_location(button1, file$c, 158, 0, 5581);
     			attr_dev(button2, "class", "add-button");
-    			add_location(button2, file$c, 145, 0, 5130);
+    			add_location(button2, file$c, 159, 0, 5658);
     			attr_dev(button3, "class", "remove-button");
-    			add_location(button3, file$c, 146, 0, 5194);
+    			add_location(button3, file$c, 160, 0, 5722);
     			attr_dev(button4, "class", "add-button");
-    			add_location(button4, file$c, 147, 0, 5267);
+    			add_location(button4, file$c, 161, 0, 5795);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -17353,13 +17313,13 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[11]),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[12]),
-    					listen_dev(button0, "click", /*addNodes*/ ctx[7], false, false, false, false),
-    					listen_dev(button1, "click", /*removeNodes*/ ctx[6], false, false, false, false),
-    					listen_dev(button2, "click", /*addEdge*/ ctx[8], false, false, false, false),
-    					listen_dev(button3, "click", /*removeEdge*/ ctx[9], false, false, false, false),
-    					listen_dev(button4, "click", /*saveProcess*/ ctx[4], false, false, false, false)
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[13]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[14]),
+    					listen_dev(button0, "click", /*addNodes*/ ctx[8], false, false, false, false),
+    					listen_dev(button1, "click", /*removeNodes*/ ctx[7], false, false, false, false),
+    					listen_dev(button2, "click", /*addEdge*/ ctx[9], false, false, false, false),
+    					listen_dev(button3, "click", /*removeEdge*/ ctx[10], false, false, false, false),
+    					listen_dev(button4, "click", /*saveProcess*/ ctx[5], false, false, false, false)
     				];
 
     				mounted = true;
@@ -17374,18 +17334,35 @@ var app = (function () {
     				set_input_value(input1, /*description*/ ctx[2]);
     			}
 
-    			if (dirty & /*isSelected, graph, toggleNodeSelect*/ 1064) {
-    				each_value_1 = /*graph*/ ctx[3].getNodesList();
+    			if (dirty & /*isSelected, node_list, toggleNodeSelect, key_list*/ 2136) {
+    				each_value_1 = /*node_list*/ ctx[3];
     				validate_each_argument(each_value_1);
-    				validate_each_keys(ctx, each_value_1, get_each_context_1, get_key);
-    				each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx, each_value_1, each0_lookup, ul, destroy_block, create_each_block_1, null, get_each_context_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
+
+    					if (each_blocks_1[i]) {
+    						each_blocks_1[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_1[i] = create_each_block_1(child_ctx);
+    						each_blocks_1[i].c();
+    						each_blocks_1[i].m(ul, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_1.length; i += 1) {
+    					each_blocks_1[i].d(1);
+    				}
+
+    				each_blocks_1.length = each_value_1.length;
     			}
 
     			if (dirty & /*selected_nodes*/ 1) {
     				each_value = /*selected_nodes*/ ctx[0];
     				validate_each_argument(each_value);
-    				validate_each_keys(ctx, each_value, get_each_context$3, get_key_1);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key_1, 1, ctx, each_value, each1_lookup, t11.parentNode, destroy_block, create_each_block$3, t11, get_each_context$3);
+    				validate_each_keys(ctx, each_value, get_each_context$3, get_key);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each1_lookup, t11.parentNode, destroy_block, create_each_block$3, t11, get_each_context$3);
     			}
     		},
     		i: noop$2,
@@ -17402,11 +17379,7 @@ var app = (function () {
     			if (detaching) detach_dev(p2);
     			if (detaching) detach_dev(t7);
     			if (detaching) detach_dev(ul);
-
-    			for (let i = 0; i < each_blocks_1.length; i += 1) {
-    				each_blocks_1[i].d();
-    			}
-
+    			destroy_each(each_blocks_1, detaching);
     			if (detaching) detach_dev(t8);
     			if (detaching) detach_dev(h3);
     			if (detaching) detach_dev(t10);
@@ -17442,6 +17415,9 @@ var app = (function () {
     }
 
     function instance$c($$self, $$props, $$invalidate) {
+    	let $systemStateStore;
+    	validate_store(systemStateStore, 'systemStateStore');
+    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(12, $systemStateStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('CreateProcess', slots, []);
 
@@ -17486,10 +17462,14 @@ var app = (function () {
     	let graph = new system_types_pb$1.Graph();
     	let name = "";
     	let description = "";
+    	let node_list = [];
+    	let system_state;
+    	let key_list = Object.keys(system_types_pb$1.NodeTypeNames);
 
-    	// async function handleGraphError() {
-    	//   await handleError({ name: "GraphDoesntExist" });
-    	// }
+    	onMount(() => __awaiter(void 0, void 0, void 0, function* () {
+    		system_state = yield getSystemState();
+    	}));
+
     	function saveProcess() {
     		return __awaiter(this, void 0, void 0, function* () {
     			// create an alert message if either name or description are null
@@ -17527,7 +17507,11 @@ var app = (function () {
     	function isSelected(node) {
     		// check to see if selected_nodes : Node[] contains node : Node
     		return selected_nodes.filter(val => {
-    			val.getId() === node.getId();
+    			var _a;
+
+    			val.getId() === ((_a = node.getNodeInfo()) === null || _a === void 0
+    			? void 0
+    			: _a.getId());
     		}).length > 0;
     	}
 
@@ -17583,15 +17567,17 @@ var app = (function () {
     	function toggleNodeSelect(node) {
     		if (isSelected(node)) {
     			$$invalidate(0, selected_nodes = selected_nodes.filter(val => {
+    				val != node.getNodeInfo();
     			}));
     		} else {
-    			selected_nodes.push(node);
+    			let node_info = node.getNodeInfo();
+    			selected_nodes.push(node_info);
     		}
     	}
 
     	const writable_props = [];
 
-    	Object.keys($$props).forEach(key => {
+    	Object_1$1.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<CreateProcess> was created with unknown prop '${key}'`);
     	});
 
@@ -17609,40 +17595,18 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		__awaiter,
+    		onMount,
     		proto: proto$1,
     		helper_functions,
+    		systemStateStore,
     		selected_nodes,
     		selected_edge,
     		graph,
     		name,
     		description,
-    		saveProcess,
-    		isSelected,
-    		removeNodes,
-    		addNodes,
-    		addEdge,
-    		removeEdge,
-    		toggleNodeSelect
-    	});
-
-    	$$self.$inject_state = $$props => {
-    		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
-    		if ('selected_nodes' in $$props) $$invalidate(0, selected_nodes = $$props.selected_nodes);
-    		if ('selected_edge' in $$props) selected_edge = $$props.selected_edge;
-    		if ('graph' in $$props) $$invalidate(3, graph = $$props.graph);
-    		if ('name' in $$props) $$invalidate(1, name = $$props.name);
-    		if ('description' in $$props) $$invalidate(2, description = $$props.description);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [
-    		selected_nodes,
-    		name,
-    		description,
-    		graph,
+    		node_list,
+    		system_state,
+    		key_list,
     		saveProcess,
     		isSelected,
     		removeNodes,
@@ -17650,6 +17614,48 @@ var app = (function () {
     		addEdge,
     		removeEdge,
     		toggleNodeSelect,
+    		$systemStateStore
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
+    		if ('selected_nodes' in $$props) $$invalidate(0, selected_nodes = $$props.selected_nodes);
+    		if ('selected_edge' in $$props) selected_edge = $$props.selected_edge;
+    		if ('graph' in $$props) graph = $$props.graph;
+    		if ('name' in $$props) $$invalidate(1, name = $$props.name);
+    		if ('description' in $$props) $$invalidate(2, description = $$props.description);
+    		if ('node_list' in $$props) $$invalidate(3, node_list = $$props.node_list);
+    		if ('system_state' in $$props) system_state = $$props.system_state;
+    		if ('key_list' in $$props) $$invalidate(4, key_list = $$props.key_list);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$systemStateStore*/ 4096) {
+    			{
+    				// Whenever the system state changes, update the nodes_available
+    				$$invalidate(3, node_list = $systemStateStore.getNodesList());
+    			}
+    		}
+    	};
+
+    	return [
+    		selected_nodes,
+    		name,
+    		description,
+    		node_list,
+    		key_list,
+    		saveProcess,
+    		isSelected,
+    		removeNodes,
+    		addNodes,
+    		addEdge,
+    		removeEdge,
+    		toggleNodeSelect,
+    		$systemStateStore,
     		input0_input_handler,
     		input1_input_handler,
     		click_handler
@@ -18434,18 +18440,25 @@ var app = (function () {
                     const res = response_object.getObjectCase();
                     console.log("res: ", res);
                     switch (res) {
-                        case system_types_pb$1.ResponseObject.ObjectCase.NODE:
-                            {
-                                console.log("NODE");
-                                const add_node = response_object.getNode();
-                                console.log("add_node: ", add_node.toObject());
-                                const system_state = yield getSystemState();
-                                const nodes = system_state.getNodesList();
+                        case system_types_pb$1.ResponseObject.ObjectCase.NODE: {
+                            console.log("NODE");
+                            const add_node = response_object.getNode();
+                            console.log("add_node: ", add_node.toObject());
+                            // import { SystemState } from "../../src/generated/system_types_pb";
+                            // import systemStateStore from "stores/systemStateStore";
+                            systemStateStore.update((n) => {
+                                const nodes = n.getNodesList();
                                 nodes.push(add_node);
-                                system_state.setNodesList(nodes);
-                                yield setSystemState(system_state);
-                                break;
-                            }
+                                n.setNodesList(nodes);
+                                return n;
+                            });
+                            // console.log("system_state: ", system_state.toObject());
+                            // const nodes = system_state.getNodesList();
+                            // nodes.push(add_node);
+                            // system_state.setNodesList(nodes);
+                            // await setSystemState(system_state);
+                            break;
+                        }
                         case system_types_pb$1.ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
                             console.log("AUTHENTICATION_MESSAGE");
                             break;
@@ -18521,30 +18534,30 @@ var app = (function () {
     			button = element$1("button");
     			button.textContent = "Submit";
     			attr_dev(input0, "placeholder", "Name");
-    			add_location(input0, file$6, 41, 6, 1802);
+    			add_location(input0, file$6, 48, 6, 1941);
     			attr_dev(input1, "placeholder", "Description");
-    			add_location(input1, file$6, 43, 6, 1856);
+    			add_location(input1, file$6, 50, 6, 1995);
     			attr_dev(label0, "for", "prompt");
     			attr_dev(label0, "class", "required-label svelte-wwcf2i");
-    			add_location(label0, file$6, 73, 6, 2867);
+    			add_location(label0, file$6, 80, 6, 3006);
     			attr_dev(input2, "id", "prompt");
     			attr_dev(input2, "type", "text");
     			input2.required = true;
     			attr_dev(input2, "class", "required-input svelte-wwcf2i");
-    			add_location(input2, file$6, 74, 6, 2931);
+    			add_location(input2, file$6, 81, 6, 3070);
     			attr_dev(label1, "for", "system");
     			attr_dev(label1, "class", "required-label svelte-wwcf2i");
-    			add_location(label1, file$6, 82, 6, 3075);
+    			add_location(label1, file$6, 89, 6, 3214);
     			attr_dev(input3, "id", "system");
     			attr_dev(input3, "type", "text");
     			input3.required = true;
     			attr_dev(input3, "class", "required-input svelte-wwcf2i");
-    			add_location(input3, file$6, 83, 6, 3139);
+    			add_location(input3, file$6, 90, 6, 3278);
     			attr_dev(button, "type", "submit");
-    			add_location(button, file$6, 90, 6, 3282);
-    			add_location(div0, file$6, 40, 4, 1790);
-    			add_location(div1, file$6, 39, 2, 1780);
-    			add_location(form, file$6, 38, 0, 1731);
+    			add_location(button, file$6, 97, 6, 3421);
+    			add_location(div0, file$6, 47, 4, 1929);
+    			add_location(div1, file$6, 46, 2, 1919);
+    			add_location(form, file$6, 45, 0, 1870);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -18688,7 +18701,15 @@ var app = (function () {
     			crud_bundle.setVerb(verb);
     			let websocket = $websocketStore.websocket;
     			yield sendWebsocketMessage(crud_bundle, websocket);
+    			reset_component();
     		});
+    	}
+
+    	function reset_component() {
+    		$$invalidate(0, system_text = "");
+    		$$invalidate(1, prompt_text = "");
+    		$$invalidate(2, description = "");
+    		$$invalidate(3, name = "");
     	}
 
     	$$self.$$.on_mount.push(function () {
@@ -18741,6 +18762,7 @@ var app = (function () {
     		description,
     		name,
     		submitPrompt,
+    		reset_component,
     		$websocketStore
     	});
 

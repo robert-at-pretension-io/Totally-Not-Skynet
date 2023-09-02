@@ -39,6 +39,15 @@
     let websocket = $websocketStore.websocket as WebSocket;
 
     await sendWebsocketMessage(crud_bundle, websocket);
+
+    reset_component();
+  }
+
+  function reset_component() {
+    system_text = "";
+    prompt_text = "";
+    description = "";
+    name = "";
   }
 </script>
 

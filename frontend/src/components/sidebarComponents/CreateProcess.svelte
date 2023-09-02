@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   // import {
   //   GraphNodeInfo,
   //   Graph,
@@ -11,16 +12,28 @@
 
   import * as helper_functions from "../../helper_functions/graph";
 
+  import systemStateStore from "stores/systemStateStore";
+
   let selected_nodes: proto.GraphNodeInfo[] = [];
   let selected_edge: proto.Edge | null = null;
 
   let graph = new proto.Graph();
   let name = "";
   let description = "";
+  let node_list: proto.Node[] = [];
 
-  // async function handleGraphError() {
-  //   await handleError({ name: "GraphDoesntExist" });
-  // }
+  let system_state;
+
+  let key_list = Object.keys(proto.NodeTypeNames);
+
+  onMount(async () => {
+    system_state = await helper_functions.getSystemState();
+  });
+
+  $: {
+    // Whenever the system state changes, update the nodes_available
+    node_list = $systemStateStore.getNodesList();
+  }
 
   async function saveProcess() {
     // create an alert message if either name or description are null
@@ -60,11 +73,12 @@
       }
     }
   }
-  function isSelected(node: proto.GraphNodeInfo): boolean {
+  function isSelected(node: proto.Node): boolean {
     // check to see if selected_nodes : Node[] contains node : Node
+
     return (
       selected_nodes.filter((val) => {
-        val.getId() === node.getId();
+        val.getId() === node.getNodeInfo()?.getId();
       }).length > 0
     );
   }
@@ -109,13 +123,14 @@
     graph.setEdgesList(current_edges);
   }
 
-  function toggleNodeSelect(node: proto.GraphNodeInfo) {
+  function toggleNodeSelect(node: proto.Node) {
     if (isSelected(node)) {
       selected_nodes = selected_nodes.filter((val) => {
-        val != node;
+        val != node.getNodeInfo();
       });
     } else {
-      selected_nodes.push(node);
+      let node_info = node.getNodeInfo() as proto.GraphNodeInfo;
+      selected_nodes.push(node_info);
     }
   }
 </script>
@@ -134,12 +149,15 @@
 </p>
 
 <ul>
-  {#each graph.getNodesList() as node (node.getId())}
+  {#each node_list as node}
     <li>
       <button
         class:selected={isSelected(node)}
         type="button"
-        on:click={() => toggleNodeSelect(node)}>{node.getName()}</button
+        on:click={() => toggleNodeSelect(node)}
+        >{key_list[node.getTypeName()]} : {node
+          .getNodeInfo()
+          ?.getName()}</button
       >
     </li>
   {/each}
