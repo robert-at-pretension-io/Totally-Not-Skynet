@@ -35,6 +35,7 @@ export function systemGraphToGraphLib(
 }
 
 export async function handleError(_error: any) {
+  console.log("handleError: ", _error);
   // switch (error.name) {
   // case "GraphDoesntExist": {
   //   console.log(error);
@@ -287,6 +288,9 @@ export async function graphHasNode(
   node: proto.Node,
   graph_state: proto.GraphState
 ): Promise<boolean | void> {
+
+  console.log("graphHasNode function with inputs: ", node.toObject(), graph_state.toObject());
+
   const graph = graph_state.getGraph();
   const node_info = node.getNodeInfo();
 
@@ -331,13 +335,24 @@ export async function graphHasNode(
 
 export async function addNode(
   node: proto.Node,
-  graph_state: proto.GraphState
+  // graph_state: proto.GraphState
+  system_state: proto.SystemState
 ): Promise<void> {
-  const systemState = await getSystemState();
+
+  console.log("addNode system_state: ", system_state.toObject());
+
+  const graph_state = system_state.getGraphState() as proto.GraphState;
+
+  console.log("add the addNode function with inputs: ", node.toObject(), graph_state.toObject());
+  // const systemState = await getSystemState();
   // add the input and output variables to the graph state
 
+  const has_node = await graphHasNode(node, graph_state);
+
+  console.log("has_node: ", has_node);
+
   //check if the node already exists in the graph
-  if (await !graphHasNode(node, graph_state)) {
+  if (!has_node) {
     // Based on the definition of graphHasNode, we can assume that the graph is defined.
     console.log("Adding node to graph");
     const graph = systemGraphToGraphLib(graph_state);
@@ -360,17 +375,19 @@ export async function addNode(
   action_history.push(graph_action);
   graph_state.setActionHistoryList(action_history);
 
-  systemState.setGraphState(graph_state);
+  system_state.setGraphState(graph_state);
 
-  setSystemState(systemState);
+  setSystemState(system_state);
 }
 
 // function for converting a process to a graph
 export async function processToGraphVisualization(
   process: proto.Process,
-  graph_state: proto.GraphState
+  system_state: proto.SystemState
 ): Promise<void> {
   await resetGraph();
+
+  const graph_state = system_state.getGraphState() as proto.GraphState;
 
   const graph = graph_state.getGraph() as proto.Graph;
   const nodes = graph.getNodesList() as proto.GraphNodeInfo[];
@@ -379,7 +396,7 @@ export async function processToGraphVisualization(
   for (let i = 0; i < nodes.length; i++) {
     const node = await getNode(nodes[i].getId() as string);
     if (node) {
-      await addNode(node, graph_state);
+      await addNode(node, system_state);
     }
   }
 

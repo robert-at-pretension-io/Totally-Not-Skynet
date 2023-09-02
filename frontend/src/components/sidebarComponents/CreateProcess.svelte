@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   // import { onMount } from "svelte";
   // import {
   //   GraphNodeInfo,
@@ -31,9 +32,19 @@
 
   let key_list = Object.keys(proto.NodeTypeNames);
 
-  $: {
-    // Whenever the system state changes, update the nodes_available
+  // setup onmount:
+  onMount(async () => {
     node_list = $systemStateStore.getNodesList();
+    let graph_state = $systemStateStore.getGraphState() as proto.GraphState;
+    node_list.forEach(async (node: proto.Node) => {
+      await helper_functions.addNode(node, graph_state);
+    });
+  });
+
+  $: {
+    console.log("System state store:", $systemStateStore.toObject()); // Debug log
+    node_list = $systemStateStore.getNodesList();
+    console.log("Node List:", node_list); // Debug log
 
     node_id_list = $selected_node_ids_store;
 
@@ -103,33 +114,114 @@
 
     selected_node_ids = [];
   }
-  function addNodes() {
-    let current_graph_state: proto.GraphState;
-    systemStateStore.subscribe((val) => {
-      current_graph_state = val.getGraphState() as proto.GraphState;
 
-      console.log("current_graph_state: " + current_graph_state);
+  async function addNodes() {
+    let system_state = $systemStateStore;
+    // let current_graph_state = system_state.getGraphState();
 
-      let filtered_nodes = node_list.filter((node: proto.Node) => {
-        return selected_node_ids.includes(
-          node.getNodeInfo()?.getId() as string
-        );
-      });
+    // if (current_graph_state === undefined) {
+    //   let new_graph_state = new proto.GraphState();
 
-      console.log("filtered_nodes: " + filtered_nodes);
+    //   let new_graph = new proto.Graph();
 
-      filtered_nodes.forEach(async (node: proto.Node) => {
-        // check if current_nodes already contains node
-        // let node_info = node.getNodeInfo() as proto.GraphNodeInfo;
-        // if (!current_nodes.includes(node_info)) {
-        //   current_nodes.push(node_info);
-        // }
-        await helper_functions.addNode(node, current_graph_state);
-      });
+    //   new_graph_state.setGraph(new_graph);
+    //   current_graph_state = new_graph_state;
+    // }
 
-      selected_node_ids_store.set([]);
+    // let defined_graph_state = current_graph_state as proto.GraphState;
+
+    let filtered_nodes = node_list.filter((node: proto.Node) => {
+      return $selected_node_ids_store.includes(
+        node.getNodeInfo()?.getId() as string
+      );
     });
+
+    for (const node of filtered_nodes) {
+      try {
+        await helper_functions.addNode(node, system_state);
+      } catch (error) {
+        console.error("Error in addNode:", error);
+      }
+    }
+
+    selected_node_ids_store.set([]);
   }
+
+  // function addNodes() {
+  //   let system_state = $systemStateStore;
+
+  //   let current_graph_state = system_state.getGraphState();
+
+  //   if (current_graph_state !== undefined) {
+  //     let defined_graph_state = current_graph_state as proto.GraphState;
+
+  //     console.log("system_state: " + system_state);
+
+  //     console.log("defined_graph_state: " + defined_graph_state);
+
+  //     console.log("node list: " + node_list);
+
+  //     console.log("selected_node_ids: " + $selected_node_ids_store);
+
+  //     let filtered_nodes = node_list.filter((node: proto.Node) => {
+  //       return $selected_node_ids_store.includes(
+  //         node.getNodeInfo()?.getId() as string
+  //       );
+  //     });
+
+  //     console.log("filtered_nodes: " + filtered_nodes);
+
+  //     filtered_nodes.forEach((node: proto.Node) => {
+  //       // check if current_nodes already contains node
+  //       // let node_info = node.getNodeInfo() as proto.GraphNodeInfo;
+  //       // if (!current_nodes.includes(node_info)) {
+  //       //   current_nodes.push(node_info);
+  //       // }
+  //       helper_functions.addNode(node, defined_graph_state).then((result) => {
+  //         console.log("result: " + result);
+  //       });
+  //     });
+
+  //     selected_node_ids_store.set([]);
+  //   } else {
+  //     console.log("current_graph_state is undefined");
+
+  //     let new_graph_state = new proto.GraphState();
+
+  //     let new_graph = new proto.Graph();
+
+  //     new_graph_state.setGraph(new_graph);
+
+  //     console.log("system_state: " + system_state.toObject());
+
+  //     console.log("defined_graph_state: " + new_graph_state.toObject());
+
+  //     console.log("node list: " + node_list);
+
+  //     console.log("selected_node_ids: " + $selected_node_ids_store);
+
+  //     let filtered_nodes = node_list.filter((node: proto.Node) => {
+  //       return $selected_node_ids_store.includes(
+  //         node.getNodeInfo()?.getId() as string
+  //       );
+  //     });
+
+  //     console.log("filtered_nodes: " + filtered_nodes);
+
+  //     filtered_nodes.forEach((node: proto.Node) => {
+  //       // check if current_nodes already contains node
+  //       // let node_info = node.getNodeInfo() as proto.GraphNodeInfo;
+  //       // if (!current_nodes.includes(node_info)) {
+  //       //   current_nodes.push(node_info);
+  //       // }
+  //       helper_functions.addNode(node, new_graph_state).then((result) => {
+  //         console.log("result: " + result);
+  //       });
+  //     });
+
+  //     selected_node_ids_store.set([]);
+  //   }
+  // }
   function addEdge() {
     let current_edges = graph.getEdgesList();
     // add selected_edge : Edge to current_edges : Edge[]

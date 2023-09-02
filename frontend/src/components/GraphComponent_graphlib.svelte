@@ -70,6 +70,8 @@
     let graph_state = system_state.getGraphState();
     let action_list = graph_state?.getActionHistoryList();
 
+    console.log("action taken in graph: ", action_list);
+
     if (cyInstance) {
       if (action_list != undefined && action_list.length > 0) {
         let last_action = action_list[action_list.length - 1];
@@ -157,3 +159,10 @@
     <slot />
   {/if}
 </div>
+
+<style>
+  .graph {
+    grid-column: 2;
+    height: 100%;
+  }
+</style>

@@ -68,3 +68,48 @@
     </div>
   {/each}
 </div>
+
+<style>
+  /* Sidebar container */
+  .sidebar {
+    grid-column: 1;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    background-color: #2ecc71;
+    /* Green */
+    overflow-y: auto;
+    box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.541);
+    border-radius: 12px;
+  }
+
+  /* Section styling */
+  .section {
+    margin-bottom: 20px;
+  }
+
+  /* Section header */
+  .section-header {
+    font-size: 18px;
+    padding: 10px;
+    cursor: pointer;
+    background-color: #e9e9e9;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  /* Hover effect on section header */
+  .section-header:hover {
+    background-color: #ddd;
+  }
+
+  /* Section content */
+  .section-content {
+    margin-top: 10px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+  }
+</style>

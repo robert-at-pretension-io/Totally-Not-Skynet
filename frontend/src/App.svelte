@@ -26,7 +26,7 @@
     // check to see that the graph state is not set yet:
 
     if ($systemStateStore.getGraphState() == undefined) {
-      console.log("Graph State is already set!");
+      console.log("Graph State is not already set!");
       let new_graph_state = new GraphState();
       $systemStateStore.setGraphState(new_graph_state);
     }
@@ -70,3 +70,10 @@
     <GraphComponentGraphlib />
   </div>
 {/if}
+
+<style>
+  .app-container {
+    display: grid;
+    grid-template-columns: 25vw 1fr;
+  }
+</style>

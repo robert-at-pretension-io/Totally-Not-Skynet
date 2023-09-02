@@ -41,52 +41,52 @@ export async function setupWebsocketMessageHandler(
       console.log("res: ", res);
 
       switch (res) {
-        case proto.ResponseObject.ObjectCase.NODE: {
-          console.log("NODE");
-          const add_node = response_object.getNode() as proto.Node;
+      case proto.ResponseObject.ObjectCase.NODE: {
+        console.log("NODE");
+        const add_node = response_object.getNode() as proto.Node;
 
-          console.log("add_node: ", add_node.toObject());
+        console.log("add_node: ", add_node.toObject());
 
-          // import { SystemState } from "../../src/generated/system_types_pb";
-          // import systemStateStore from "stores/systemStateStore";
+        // import { SystemState } from "../../src/generated/system_types_pb";
+        // import systemStateStore from "stores/systemStateStore";
 
-          systemStateStore.update(
-            (n: proto.SystemState) => {
-              const nodes = n.getNodesList();
-              nodes.push(add_node);
-              n.setNodesList(nodes);
-              return n;
-            }
-          );
+        systemStateStore.update(
+          (n: proto.SystemState) => {
+            const nodes = n.getNodesList();
+            nodes.push(add_node);
+            n.setNodesList(nodes);
+            return n;
+          }
+        );
 
-          // console.log("system_state: ", system_state.toObject());
+        // console.log("system_state: ", system_state.toObject());
 
-          // const nodes = system_state.getNodesList();
+        // const nodes = system_state.getNodesList();
 
-          // nodes.push(add_node);
-          // system_state.setNodesList(nodes);
-          // await setSystemState(system_state);
+        // nodes.push(add_node);
+        // system_state.setNodesList(nodes);
+        // await setSystemState(system_state);
 
-          break;
-        }
-        case proto.ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
-          console.log("AUTHENTICATION_MESSAGE");
-          break;
-        case proto.ResponseObject.ObjectCase.USER_SETTINGS:
-          console.log("USER_SETTINGS");
-          break;
-        case proto.ResponseObject.ObjectCase.EXECUTION_RESPONSE:
-          console.log("EXECUTION_RESPONSE");
-          break;
-        case proto.ResponseObject.ObjectCase.OBJECT_NOT_SET:
-          console.log("OBJECT_NOT_SET");
-          break;
-        default:
-          console.log("default");
-          alert(
-            "Fallen through response object switch statement... This is not good."
-          );
-          break;
+        break;
+      }
+      case proto.ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
+        console.log("AUTHENTICATION_MESSAGE");
+        break;
+      case proto.ResponseObject.ObjectCase.USER_SETTINGS:
+        console.log("USER_SETTINGS");
+        break;
+      case proto.ResponseObject.ObjectCase.EXECUTION_RESPONSE:
+        console.log("EXECUTION_RESPONSE");
+        break;
+      case proto.ResponseObject.ObjectCase.OBJECT_NOT_SET:
+        console.log("OBJECT_NOT_SET");
+        break;
+      default:
+        console.log("default");
+        alert(
+          "Fallen through response object switch statement... This is not good."
+        );
+        break;
       }
     });
   });
