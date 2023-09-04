@@ -62,10 +62,10 @@
 
       let edge = new proto.Edge();
 
-      console.log("selectedEdge: ", event.target.data());
+      console.log("selectedEdge: ", evt.target.data());
 
-      edge.setSource(event.target.data().source);
-      edge.setTarget(event.target.data().target);
+      edge.setSource(evt.target.data().source);
+      edge.setTarget(evt.target.data().target);
 
       await helper_functions.selectEdge(edge, $systemStateStore);
     });
@@ -78,17 +78,35 @@
   let refElement: HTMLElement | null = null;
   let cyInstance: Core | null = null;
   let g = new graphlib.Graph();
+  let last_action: proto.GraphAction;
 
   systemStateStore.subscribe((system_state: proto.SystemState) => {
     let graph_state = system_state.getGraphState();
     let action_list =
       graph_state?.getActionHistoryList() as proto.GraphAction[];
+    let latest_action: proto.GraphAction;
 
     if (action_list && action_list.length > 0) {
+      latest_action = action_list[action_list.length - 1];
       console.log(
         "action taken in graph: ",
         action_list[action_list.length - 1].toObject()
       );
+
+      if (last_action != undefined) {
+        console.log("last action: ", last_action.toObject());
+
+        if (
+          last_action.getAction() == latest_action.getAction() &&
+          last_action.getNode()?.getId() == latest_action.getNode()?.getId()
+        ) {
+          console.log("same action taken twice");
+          return;
+        }
+      }
+    } else {
+      console.log("action_list is empty or undefined");
+      return;
     }
 
     if (cyInstance) {
@@ -99,12 +117,7 @@
       console.log("cyInstance is available");
 
       if (action_list != undefined && action_list.length > 0) {
-        console.log("action_list is not empty");
-
-        let last_action = action_list[action_list.length - 1];
-        console.log("Last action:", last_action.toObject());
-
-        let action_type = last_action.getAction();
+        let action_type = latest_action.getAction();
         console.log("Action type:", action_type);
 
         // Node/edge agnostic actions:
@@ -121,7 +134,7 @@
           console.log("Selecting element");
           break;
         case proto.GraphAction.Action.DESELECT:
-          helper_functions.console.log("Deselecting element");
+          console.log("Deselecting element");
           break;
 
         default:
@@ -129,10 +142,10 @@
           break;
         }
 
-        if (last_action.hasEdge()) {
+        if (latest_action.hasEdge()) {
           console.log("Last action has edge");
 
-          let edge = last_action.getEdge();
+          let edge = latest_action.getEdge();
           let source = edge?.getSource()?.getId();
           let target = edge?.getTarget()?.getId();
 
@@ -146,6 +159,7 @@
               cyInstance.add({
                 data: { source: source, target: target },
               });
+              layout.run();
 
               break;
             case proto.GraphAction.Action.REMOVE:
@@ -154,6 +168,7 @@
               cyInstance.remove(
                 cyInstance.$id(source).edgesTo(cyInstance.$id(target))
               );
+              layout.run();
 
               break;
             default:
@@ -163,10 +178,10 @@
           }
         }
 
-        if (last_action.hasNode()) {
+        if (latest_action.hasNode()) {
           console.log("Last action has node");
 
-          let node = last_action.getNode();
+          let node = latest_action.getNode();
           let id = node?.getId();
           let name = node?.getName();
 
@@ -180,12 +195,19 @@
               cyInstance.add({
                 data: { id: id, label: name },
               });
+              layout.run();
 
               break;
             case proto.GraphAction.Action.REMOVE:
               console.log("Removing node from graph");
               g.removeNode(name);
-              cyInstance.remove(id);
+
+              alert(
+                "Also need to remove the edges connected to this node from the system_state"
+              );
+
+              cyInstance.remove(cyInstance.$id(id));
+              // layout.run();
 
               break;
             default:
@@ -194,10 +216,11 @@
             }
           }
         }
+
+        last_action = latest_action;
       } else {
         console.log("action_list is empty or undefined");
       }
-      layout.run();
     } else {
       console.log("cyInstance is null");
     }

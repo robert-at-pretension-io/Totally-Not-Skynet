@@ -122,14 +122,13 @@
 
     for (const node of filtered_nodes) {
       try {
-        let new_state = helper_functions.addNode(node, system_state);
-        if (new_state) {
-          $systemStateStore = new_state;
-        }
+        system_state = helper_functions.addNode(node, system_state);
       } catch (error) {
         console.error("Error in addNode:", error);
       }
     }
+
+    $systemStateStore = system_state;
 
     selected_node_ids_store.set([]);
   }

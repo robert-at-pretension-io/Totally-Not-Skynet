@@ -279,6 +279,10 @@ export function graphHasNode(
   } else {
     const node_info_list = graph.getNodesList();
     if (node_info) {
+
+      console.log("The node info is: ", node_info.toObject());
+
+      console.log("The node info list is: ", node_info_list);
       //loop through node_info_list
       for (let i = 0; i < node_info_list.length; i++) {
         if ((node_info_list[i] = node_info)) {
@@ -318,7 +322,7 @@ export function addNode(
   node: proto.Node,
   // graph_state: proto.GraphState
   system_state: proto.SystemState
-): proto.SystemState | undefined {
+): proto.SystemState {
 
   console.log("addNode system_state: ", system_state.toObject());
 
@@ -352,12 +356,11 @@ export function addNode(
 
     system_state.setGraphState(graph_state);
 
-    return system_state;
-
   } else {
     console.log("Node ", node, " is already in the graph, not adding it.");
-    return;
   }
+
+  return system_state;
 
 }
 
