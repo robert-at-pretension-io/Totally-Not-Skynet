@@ -32,16 +32,21 @@
 
   let key_list = Object.keys(proto.NodeTypeNames);
 
+  let system_state : proto.SystemState;
+
   // setup onmount:
   onMount(async () => {
+    system_state = $systemStateStore;
     node_list = $systemStateStore.getNodesList();
     let graph_state = $systemStateStore.getGraphState() as proto.GraphState;
     node_list.forEach(async (node: proto.Node) => {
-      await helper_functions.addNode(node, graph_state);
+      await helper_functions.addNode(node, $systemStateStore);
     });
   });
 
   $: {
+    system_state = $systemStateStore;
+
     console.log("System state store:", $systemStateStore.toObject()); // Debug log
     node_list = $systemStateStore.getNodesList();
     console.log("Node List:", node_list); // Debug log
@@ -57,10 +62,10 @@
       alert("Please enter a name and description for the process");
       return;
     } else {
-      const systemState = await helper_functions.getSystemState();
-      let graph_state = systemState.getGraphState();
+
+      let graph_state = system_state.getGraphState();
       let maybe_topological_order = await helper_functions.validateGraph(
-        systemState
+        system_state
       );
 
       if (maybe_topological_order && graph_state != undefined) {

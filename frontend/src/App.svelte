@@ -7,7 +7,7 @@
   import systemStateStore from "stores/systemStateStore";
   import { websocketStore } from "stores/websocketStore";
   import AuthPage from "./components/AuthPage.svelte";
-  import { SystemState, GraphState } from "./generated/system_types_pb";
+  import { SystemState } from "./generated/system_types_pb";
   import Loading from "./components/Loading.svelte";
 
   let authenticated = false;
@@ -16,21 +16,6 @@
   let websocket_ready = false;
 
   onMount(async () => {
-    // subscribe to system state:
-    // systemStateStore.update((system_state) => {
-    //   let new_graph_state = new proto.skynet.types.GraphState();
-    //   system_state.setGraphState(new_graph_state);
-    //   return system_state;
-    // });
-
-    // check to see that the graph state is not set yet:
-
-    if ($systemStateStore.getGraphState() == undefined) {
-      console.log("Graph State is not already set!");
-      let new_graph_state = new GraphState();
-      $systemStateStore.setGraphState(new_graph_state);
-    }
-
     system_state = $systemStateStore;
 
     if (!$systemStateStore.getWebsocketReady()) {

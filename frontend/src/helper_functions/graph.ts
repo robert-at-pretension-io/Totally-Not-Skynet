@@ -2,19 +2,10 @@ import systemStateStore from "stores/systemStateStore";
 import * as graphlib from "graphlib";
 import * as proto from "../generated/system_types_pb";
 
-// Define the getter and setter
-
-export async function getSystemState(): Promise<proto.SystemState> {
-  return new Promise((_resolve, _rej) => {
-    systemStateStore.subscribe((systemStateStore) => {
-      return systemStateStore;
-    });
-  });
-}
-
 export function systemGraphToGraphLib(
-  graph_state: proto.GraphState
+  system_state: proto.SystemState
 ): graphlib.Graph {
+  const graph_state = system_state.getGraphState() as proto.GraphState;
   const graph = graph_state.getGraph() as proto.Graph;
 
   const g = new graphlib.Graph();
@@ -69,7 +60,7 @@ export async function validateGraph(
     await handleError({ name: "GraphDoesntExist" });
   } else {
     const test_orders: proto.GraphNodeInfo[][] = await getAllTopologicalOrders(
-      graph_state
+      system_state
     );
     console.log("test_orders: ", test_orders);
   }
@@ -78,12 +69,12 @@ export async function validateGraph(
 }
 
 export async function getAllTopologicalOrders(
-  graph_state: proto.GraphState
+  system_state: proto.SystemState
 ): Promise<proto.GraphNodeInfo[][]> {
   // check that there is a single component (that the graph is connected) AND
   // that there are no cycles in the graph
 
-  const graphlib_graph = systemGraphToGraphLib(graph_state);
+  const graphlib_graph = systemGraphToGraphLib(system_state);
 
   if (
     !graphlib.alg.isAcyclic(graphlib_graph) ||
@@ -92,27 +83,28 @@ export async function getAllTopologicalOrders(
     return [];
   }
 
-  return await allTopologicalSorts(graph_state);
+  return await allTopologicalSorts(system_state);
 }
 
 export async function returnSuccessorMap(
-  graph_state: proto.GraphState
+  system_state: proto.SystemState
+  // graph_state: proto.GraphState
 ): Promise<Map<proto.GraphNodeInfo, proto.GraphNodeInfo[]>> {
   const node_neightbors: Map<proto.GraphNodeInfo, proto.GraphNodeInfo[]> =
     new Map();
-
-  const graphlib_graph = systemGraphToGraphLib(graph_state);
+  const graph_state = system_state.getGraphState() as proto.GraphState;
+  const graphlib_graph = systemGraphToGraphLib(system_state);
   const my_nodes = graphlib_graph.nodes();
 
   for (let i = 0; i < my_nodes.length; i++) {
     const node = my_nodes[i];
     const neighbors = graphlib_graph.successors(node);
     if (neighbors) {
-      const node_info = await getNodeInfo(node);
+      const node_info = await getNodeInfo(node, system_state);
       if (node_info) {
         const neighbors_node_info: proto.GraphNodeInfo[] = [];
         neighbors.forEach(async (neighbor) => {
-          const neighbor_node_info = await getNodeInfo(neighbor);
+          const neighbor_node_info = await getNodeInfo(neighbor, system_state);
           if (neighbor_node_info) {
             neighbors_node_info.push(neighbor_node_info);
           }
@@ -125,13 +117,14 @@ export async function returnSuccessorMap(
 }
 
 async function allTopologicalSorts(
-  graph_state: proto.GraphState
+  system_state: proto.SystemState
 ): Promise<proto.GraphNodeInfo[][]> {
+  const graph_state = system_state.getGraphState() as proto.GraphState;
   const all_orderings: proto.GraphNodeInfo[][] = [];
   const graph = graph_state.getGraph() as proto.Graph;
-  const successor_map = await returnSuccessorMap(graph_state);
-  const start_nodes = await returnStartNodes(graph_state);
-  const in_degree_map = await returnAllIndegree(graph_state);
+  const successor_map = await returnSuccessorMap(system_state);
+  const start_nodes = await returnStartNodes(system_state);
+  const in_degree_map = await returnAllIndegree(system_state);
   const visited: Map<proto.GraphNodeInfo, boolean> = new Map();
 
   const node_list = graph.getNodesList();
@@ -186,8 +179,10 @@ async function allTopologicalSorts(
 }
 
 async function returnStartNodes(
-  graph_state: proto.GraphState
+  system_state: proto.SystemState
 ): Promise<proto.GraphNodeInfo[]> {
+
+  const graph_state = system_state.getGraphState() as proto.GraphState;
   const start_nodes: proto.GraphNodeInfo[] = [];
 
   const graphlib_graph = systemGraphToGraphLib(graph_state);
@@ -195,7 +190,7 @@ async function returnStartNodes(
   const sources = graphlib_graph.sources();
 
   sources.forEach(async (source_id: string) => {
-    const val = await getNodeInfo(source_id);
+    const val = await getNodeInfo(source_id, system_state);
     if (val) {
       start_nodes.push(val);
     }
@@ -203,8 +198,7 @@ async function returnStartNodes(
   return start_nodes;
 }
 
-export async function getNode(id: string): Promise<proto.Node> {
-  const system_state = await getSystemState();
+export async function getNode(id: string, system_state: proto.SystemState): Promise<proto.Node> {
 
   const nodes = system_state.getNodesList();
 
@@ -218,20 +212,22 @@ export async function getNode(id: string): Promise<proto.Node> {
   return node as proto.Node;
 }
 
-export async function getNodeInfo(id: string): Promise<proto.GraphNodeInfo> {
-  const node_info = await getNode(id);
+export async function getNodeInfo(id: string, system_state: proto.SystemState): Promise<proto.GraphNodeInfo> {
+  const node_info = await getNode(id, system_state);
   return node_info.getNodeInfo() as proto.GraphNodeInfo;
 }
 
 async function returnAllIndegree(
-  graph_state: proto.GraphState
+  // graph_state: proto.GraphState
+  system_state: proto.SystemState
 ): Promise<Map<proto.GraphNodeInfo, number>> {
+
   const in_degree_map: Map<proto.GraphNodeInfo, number> = new Map();
 
-  const graphlib_graph = systemGraphToGraphLib(graph_state);
+  const graphlib_graph = systemGraphToGraphLib(system_state);
 
   graphlib_graph.nodes().forEach(async (source_id: string) => {
-    const val = await getNodeInfo(source_id);
+    const val = await getNodeInfo(source_id, system_state);
 
     let count = 0;
     const maybe_count = graphlib_graph.predecessors(source_id);
@@ -277,12 +273,6 @@ async function returnAllIndegree(
 
 //   return ancestors;
 // }
-
-export async function setSystemState(systemState: proto.SystemState) {
-  console.log("setting system state: ", systemState.toObject());
-
-  systemStateStore.set(systemState);
-}
 
 export async function graphHasNode(
   node: proto.Node,
@@ -337,7 +327,7 @@ export async function addNode(
   node: proto.Node,
   // graph_state: proto.GraphState
   system_state: proto.SystemState
-): Promise<void> {
+): Promise<proto.SystemState> {
 
   console.log("addNode system_state: ", system_state.toObject());
 
@@ -377,7 +367,7 @@ export async function addNode(
 
   system_state.setGraphState(graph_state);
 
-  setSystemState(system_state);
+  return system_state;
 }
 
 // function for converting a process to a graph
