@@ -1,4 +1,3 @@
-import systemStateStore from "stores/systemStateStore";
 import * as graphlib from "graphlib";
 import * as proto from "../generated/system_types_pb";
 
@@ -68,9 +67,9 @@ export async function validateGraph(
   return true;
 }
 
-export async function getAllTopologicalOrders(
+export function getAllTopologicalOrders(
   system_state: proto.SystemState
-): Promise<proto.GraphNodeInfo[][]> {
+): proto.GraphNodeInfo[][] {
   // check that there is a single component (that the graph is connected) AND
   // that there are no cycles in the graph
 
@@ -83,16 +82,15 @@ export async function getAllTopologicalOrders(
     return [];
   }
 
-  return await allTopologicalSorts(system_state);
+  return allTopologicalSorts(system_state);
 }
 
-export async function returnSuccessorMap(
+export function returnSuccessorMap(
   system_state: proto.SystemState
   // graph_state: proto.GraphState
-): Promise<Map<proto.GraphNodeInfo, proto.GraphNodeInfo[]>> {
+): Map<proto.GraphNodeInfo, proto.GraphNodeInfo[]> {
   const node_neightbors: Map<proto.GraphNodeInfo, proto.GraphNodeInfo[]> =
     new Map();
-  const graph_state = system_state.getGraphState() as proto.GraphState;
   const graphlib_graph = systemGraphToGraphLib(system_state);
   const my_nodes = graphlib_graph.nodes();
 
@@ -100,11 +98,11 @@ export async function returnSuccessorMap(
     const node = my_nodes[i];
     const neighbors = graphlib_graph.successors(node);
     if (neighbors) {
-      const node_info = await getNodeInfo(node, system_state);
+      const node_info = getNodeInfo(node, system_state);
       if (node_info) {
         const neighbors_node_info: proto.GraphNodeInfo[] = [];
         neighbors.forEach(async (neighbor) => {
-          const neighbor_node_info = await getNodeInfo(neighbor, system_state);
+          const neighbor_node_info = getNodeInfo(neighbor, system_state);
           if (neighbor_node_info) {
             neighbors_node_info.push(neighbor_node_info);
           }
@@ -116,15 +114,15 @@ export async function returnSuccessorMap(
   return node_neightbors;
 }
 
-async function allTopologicalSorts(
+function allTopologicalSorts(
   system_state: proto.SystemState
-): Promise<proto.GraphNodeInfo[][]> {
+): proto.GraphNodeInfo[][] {
   const graph_state = system_state.getGraphState() as proto.GraphState;
   const all_orderings: proto.GraphNodeInfo[][] = [];
   const graph = graph_state.getGraph() as proto.Graph;
-  const successor_map = await returnSuccessorMap(system_state);
-  const start_nodes = await returnStartNodes(system_state);
-  const in_degree_map = await returnAllIndegree(system_state);
+  const successor_map = returnSuccessorMap(system_state);
+  const start_nodes = returnStartNodes(system_state);
+  const in_degree_map = returnAllIndegree(system_state);
   const visited: Map<proto.GraphNodeInfo, boolean> = new Map();
 
   const node_list = graph.getNodesList();
@@ -178,14 +176,13 @@ async function allTopologicalSorts(
   return all_orderings;
 }
 
-async function returnStartNodes(
+function returnStartNodes(
   system_state: proto.SystemState
-): Promise<proto.GraphNodeInfo[]> {
+): proto.GraphNodeInfo[] {
 
-  const graph_state = system_state.getGraphState() as proto.GraphState;
   const start_nodes: proto.GraphNodeInfo[] = [];
 
-  const graphlib_graph = systemGraphToGraphLib(graph_state);
+  const graphlib_graph = systemGraphToGraphLib(system_state);
 
   const sources = graphlib_graph.sources();
 
@@ -198,7 +195,7 @@ async function returnStartNodes(
   return start_nodes;
 }
 
-export async function getNode(id: string, system_state: proto.SystemState): Promise<proto.Node> {
+export function getNode(id: string, system_state: proto.SystemState): proto.Node {
 
   const nodes = system_state.getNodesList();
 
@@ -212,22 +209,22 @@ export async function getNode(id: string, system_state: proto.SystemState): Prom
   return node as proto.Node;
 }
 
-export async function getNodeInfo(id: string, system_state: proto.SystemState): Promise<proto.GraphNodeInfo> {
-  const node_info = await getNode(id, system_state);
+export function getNodeInfo(id: string, system_state: proto.SystemState): proto.GraphNodeInfo {
+  const node_info = getNode(id, system_state);
   return node_info.getNodeInfo() as proto.GraphNodeInfo;
 }
 
-async function returnAllIndegree(
+function returnAllIndegree(
   // graph_state: proto.GraphState
   system_state: proto.SystemState
-): Promise<Map<proto.GraphNodeInfo, number>> {
+): Map<proto.GraphNodeInfo, number> {
 
   const in_degree_map: Map<proto.GraphNodeInfo, number> = new Map();
 
   const graphlib_graph = systemGraphToGraphLib(system_state);
 
-  graphlib_graph.nodes().forEach(async (source_id: string) => {
-    const val = await getNodeInfo(source_id, system_state);
+  graphlib_graph.nodes().forEach((source_id: string) => {
+    const val = getNodeInfo(source_id, system_state);
 
     let count = 0;
     const maybe_count = graphlib_graph.predecessors(source_id);
@@ -274,10 +271,12 @@ async function returnAllIndegree(
 //   return ancestors;
 // }
 
-export async function graphHasNode(
+export function graphHasNode(
   node: proto.Node,
-  graph_state: proto.GraphState
-): Promise<boolean | void> {
+  system_state: proto.SystemState
+): boolean | void {
+
+  const graph_state = system_state.getGraphState() as proto.GraphState;
 
   console.log("graphHasNode function with inputs: ", node.toObject(), graph_state.toObject());
 
@@ -285,7 +284,7 @@ export async function graphHasNode(
   const node_info = node.getNodeInfo();
 
   if (!graph) {
-    await handleError({ name: "GraphDoesntExist" });
+    return;
   } else {
     const node_info_list = graph.getNodesList();
     if (node_info) {
@@ -323,11 +322,11 @@ export async function graphHasNode(
 //   setSystemState(system_state);
 // }
 
-export async function addNode(
+export function addNode(
   node: proto.Node,
   // graph_state: proto.GraphState
   system_state: proto.SystemState
-): Promise<proto.SystemState> {
+): proto.SystemState | undefined {
 
   console.log("addNode system_state: ", system_state.toObject());
 
@@ -337,45 +336,40 @@ export async function addNode(
   // const systemState = await getSystemState();
   // add the input and output variables to the graph state
 
-  const has_node = await graphHasNode(node, graph_state);
+  const has_node = graphHasNode(node, system_state);
 
   console.log("has_node: ", has_node);
 
   //check if the node already exists in the graph
   if (!has_node) {
-    // Based on the definition of graphHasNode, we can assume that the graph is defined.
-    console.log("Adding node to graph");
-    const graph = systemGraphToGraphLib(graph_state);
-    graph.setNode(
-      node.getNodeInfo()?.getId() as string,
-      node.getNodeInfo()?.getName() as string
-    );
+
+    const node_info = node.getNodeInfo() as proto.GraphNodeInfo;
+
+    const graph_action = new proto.GraphAction();
+    graph_action.setAction(proto.GraphAction.Action.ADD);
+    graph_action.setNode(node_info);
+
+    const action_history = graph_state.getActionHistoryList();
+    action_history.push(graph_action);
+    graph_state.setActionHistoryList(action_history);
+
+    system_state.setGraphState(graph_state);
+
+    return system_state;
+
   } else {
     console.log("Node ", node, " is already in the graph, not adding it.");
     return;
   }
 
-  const node_info = node.getNodeInfo() as proto.GraphNodeInfo;
-
-  const graph_action = new proto.GraphAction();
-  graph_action.setAction(proto.GraphAction.Action.ADD);
-  graph_action.setNode(node_info);
-
-  const action_history = graph_state.getActionHistoryList();
-  action_history.push(graph_action);
-  graph_state.setActionHistoryList(action_history);
-
-  system_state.setGraphState(graph_state);
-
-  return system_state;
 }
 
 // function for converting a process to a graph
-export async function processToGraphVisualization(
-  process: proto.Process,
+export function processToGraphVisualization(
+
   system_state: proto.SystemState
-): Promise<void> {
-  await resetGraph();
+): void {
+  resetGraph(system_state);
 
   const graph_state = system_state.getGraphState() as proto.GraphState;
 
@@ -384,14 +378,14 @@ export async function processToGraphVisualization(
 
   //loop through the nodes
   for (let i = 0; i < nodes.length; i++) {
-    const node = await getNode(nodes[i].getId() as string);
+    const node = getNode(nodes[i].getId() as string, system_state);
     if (node) {
-      await addNode(node, system_state);
+      addNode(node, system_state);
     }
   }
 
-  const topOrder: proto.GraphNodeInfo[][] = await getAllTopologicalOrders(
-    graph_state
+  const topOrder: proto.GraphNodeInfo[][] = getAllTopologicalOrders(
+    system_state
   );
 
   // This function doesn't exist yet.
@@ -433,12 +427,11 @@ export function addVariablesToPrompt(
   return new_prompt;
 }
 
-export async function removeNode(id: string): Promise<void> {
-  const systemState = await getSystemState();
-  const node_info = await getNodeInfo(id);
-  const node = await getNode(id);
+export async function removeNode(id: string, system_state: proto.SystemState): Promise<proto.SystemState | void> {
+  const node_info = await getNodeInfo(id, system_state);
+  const node = await getNode(id, system_state);
   if (node_info) {
-    const graph_state = systemState.getGraphState() as proto.GraphState;
+    const graph_state = system_state.getGraphState() as proto.GraphState;
     const graph = graph_state.getGraph() as proto.Graph;
     const node_array = graph.getNodesList() as proto.GraphNodeInfo[];
     const remove_index = node_array.indexOf(node_info);
@@ -456,16 +449,15 @@ export async function removeNode(id: string): Promise<void> {
 
     graph_state.setActionHistoryList(action_history);
 
-    systemState.setGraphState(graph_state);
+    system_state.setGraphState(graph_state);
 
-    await setSystemState(systemState);
+    return system_state;
   }
 }
 
-export async function removeEdge(remove_edge: proto.Edge): Promise<void> {
-  const systemState = await getSystemState();
+export async function removeEdge(remove_edge: proto.Edge, system_state: proto.SystemState): Promise<proto.SystemState> {
 
-  const graph_state = systemState.getGraphState() as proto.GraphState;
+  const graph_state = system_state.getGraphState() as proto.GraphState;
   const graph = graph_state.getGraph() as proto.Graph;
   const edge_array = graph.getEdgesList() as proto.Edge[];
   const remove_index = edge_array.indexOf(remove_edge);
@@ -483,13 +475,13 @@ export async function removeEdge(remove_edge: proto.Edge): Promise<void> {
 
   graph_state.setActionHistoryList(action_history);
 
-  systemState.setGraphState(graph_state);
+  system_state.setGraphState(graph_state);
 
-  await setSystemState(systemState);
+  return system_state;
 }
 
-export async function selectNode(id: string): Promise<void> {
-  const system_state = await getSystemState();
+export async function selectNode(id: string, system_state: proto.SystemState): Promise<proto.SystemState> {
+
   const graph_state = system_state.getGraphState() as proto.GraphState;
   const graph = graph_state.getGraph();
   const nodes = graph?.getNodesList() as proto.GraphNodeInfo[];
@@ -510,11 +502,12 @@ export async function selectNode(id: string): Promise<void> {
   graph_state.setActionHistoryList(action_history);
 
   system_state.setGraphState(graph_state);
-  await setSystemState(system_state);
+
+  return system_state;
 }
 
-export async function selectEdge(edge: proto.Edge): Promise<void> {
-  const system_state = await getSystemState();
+export async function selectEdge(edge: proto.Edge, system_state: proto.SystemState): Promise<proto.SystemState> {
+
   const graph_state = system_state.getGraphState() as proto.GraphState;
   const graph = graph_state.getGraph();
   const edges = graph?.getEdgesList() as proto.Edge[];
@@ -535,13 +528,13 @@ export async function selectEdge(edge: proto.Edge): Promise<void> {
   graph_state.setActionHistoryList(action_history);
 
   system_state.setGraphState(graph_state);
-  await setSystemState(system_state);
+
+  return system_state;
 }
 
-export async function resetLastAction(): Promise<void> {
-  const systemState = await getSystemState();
+export async function resetLastAction(system_state: proto.SystemState): Promise<proto.SystemState> {
 
-  const graph_state = systemState.getGraphState() as proto.GraphState;
+  const graph_state = system_state.getGraphState() as proto.GraphState;
 
   const graph_action = new proto.GraphAction();
 
@@ -554,14 +547,16 @@ export async function resetLastAction(): Promise<void> {
   action_history.push(graph_action);
 
   graph_state.setActionHistoryList(action_history);
-  setSystemState(systemState);
+
+  system_state.setGraphState(graph_state);
+
+  return system_state;
 }
 
 // reset the proto.GraphState to a new empty graph
-export async function resetGraph(): Promise<void> {
-  const systemState = await getSystemState();
+export function resetGraph(system_state: proto.SystemState): proto.SystemState {
 
-  const graph_state = systemState.getGraphState() as proto.GraphState;
+  const graph_state = system_state.getGraphState() as proto.GraphState;
 
   const graph_action = new proto.GraphAction();
 
@@ -574,5 +569,8 @@ export async function resetGraph(): Promise<void> {
   action_history.push(graph_action);
 
   graph_state.setActionHistoryList(action_history);
-  setSystemState(systemState);
+
+  system_state.setGraphState(graph_state);
+
+  return system_state;
 }

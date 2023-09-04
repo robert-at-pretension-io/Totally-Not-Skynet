@@ -21,8 +21,6 @@
 
   const selected_node_ids_store = writable(selected_node_ids);
 
-  let node_id_list: string[] = [];
-
   let selected_edge: proto.Edge | null = null;
 
   let graph = new proto.Graph();
@@ -32,28 +30,18 @@
 
   let key_list = Object.keys(proto.NodeTypeNames);
 
-  let system_state : proto.SystemState;
+  let system_state: proto.SystemState;
 
   // setup onmount:
   onMount(async () => {
     system_state = $systemStateStore;
     node_list = $systemStateStore.getNodesList();
-    let graph_state = $systemStateStore.getGraphState() as proto.GraphState;
-    node_list.forEach(async (node: proto.Node) => {
-      await helper_functions.addNode(node, $systemStateStore);
-    });
   });
 
   $: {
     system_state = $systemStateStore;
 
-    console.log("System state store:", $systemStateStore.toObject()); // Debug log
     node_list = $systemStateStore.getNodesList();
-    console.log("Node List:", node_list); // Debug log
-
-    node_id_list = $selected_node_ids_store;
-
-    console.log("The node_id_list is now: " + node_id_list);
   }
 
   async function saveProcess() {
@@ -62,7 +50,6 @@
       alert("Please enter a name and description for the process");
       return;
     } else {
-
       let graph_state = system_state.getGraphState();
       let maybe_topological_order = await helper_functions.validateGraph(
         system_state
@@ -72,7 +59,6 @@
         let topological_order =
           maybe_topological_order as proto.GraphNodeInfo[];
 
-        // console.log("current_graph_string: " + current_graph_string);
         let process = new proto.Process();
 
         process.setGraphState(graph_state);
@@ -95,15 +81,6 @@
     }
   }
   function isSelected(node: proto.Node): boolean {
-    // check to see if selected_nodes : Node[] contains node : Node
-
-    // console.log(
-    //   " Checking to see if node " +
-    //     node.getNodeInfo()?.getId() +
-    //     " is contained in " +
-    //     $selected_node_ids_store
-    // );
-
     let node_id = node.getNodeInfo()?.getId() as string;
 
     return $selected_node_ids_store.includes(node_id);
@@ -122,18 +99,6 @@
 
   async function addNodes() {
     let system_state = $systemStateStore;
-    // let current_graph_state = system_state.getGraphState();
-
-    // if (current_graph_state === undefined) {
-    //   let new_graph_state = new proto.GraphState();
-
-    //   let new_graph = new proto.Graph();
-
-    //   new_graph_state.setGraph(new_graph);
-    //   current_graph_state = new_graph_state;
-    // }
-
-    // let defined_graph_state = current_graph_state as proto.GraphState;
 
     let filtered_nodes = node_list.filter((node: proto.Node) => {
       return $selected_node_ids_store.includes(
@@ -143,7 +108,10 @@
 
     for (const node of filtered_nodes) {
       try {
-        await helper_functions.addNode(node, system_state);
+        let new_state = helper_functions.addNode(node, system_state);
+        if (new_state) {
+          $systemStateStore = new_state;
+        }
       } catch (error) {
         console.error("Error in addNode:", error);
       }
@@ -152,81 +120,6 @@
     selected_node_ids_store.set([]);
   }
 
-  // function addNodes() {
-  //   let system_state = $systemStateStore;
-
-  //   let current_graph_state = system_state.getGraphState();
-
-  //   if (current_graph_state !== undefined) {
-  //     let defined_graph_state = current_graph_state as proto.GraphState;
-
-  //     console.log("system_state: " + system_state);
-
-  //     console.log("defined_graph_state: " + defined_graph_state);
-
-  //     console.log("node list: " + node_list);
-
-  //     console.log("selected_node_ids: " + $selected_node_ids_store);
-
-  //     let filtered_nodes = node_list.filter((node: proto.Node) => {
-  //       return $selected_node_ids_store.includes(
-  //         node.getNodeInfo()?.getId() as string
-  //       );
-  //     });
-
-  //     console.log("filtered_nodes: " + filtered_nodes);
-
-  //     filtered_nodes.forEach((node: proto.Node) => {
-  //       // check if current_nodes already contains node
-  //       // let node_info = node.getNodeInfo() as proto.GraphNodeInfo;
-  //       // if (!current_nodes.includes(node_info)) {
-  //       //   current_nodes.push(node_info);
-  //       // }
-  //       helper_functions.addNode(node, defined_graph_state).then((result) => {
-  //         console.log("result: " + result);
-  //       });
-  //     });
-
-  //     selected_node_ids_store.set([]);
-  //   } else {
-  //     console.log("current_graph_state is undefined");
-
-  //     let new_graph_state = new proto.GraphState();
-
-  //     let new_graph = new proto.Graph();
-
-  //     new_graph_state.setGraph(new_graph);
-
-  //     console.log("system_state: " + system_state.toObject());
-
-  //     console.log("defined_graph_state: " + new_graph_state.toObject());
-
-  //     console.log("node list: " + node_list);
-
-  //     console.log("selected_node_ids: " + $selected_node_ids_store);
-
-  //     let filtered_nodes = node_list.filter((node: proto.Node) => {
-  //       return $selected_node_ids_store.includes(
-  //         node.getNodeInfo()?.getId() as string
-  //       );
-  //     });
-
-  //     console.log("filtered_nodes: " + filtered_nodes);
-
-  //     filtered_nodes.forEach((node: proto.Node) => {
-  //       // check if current_nodes already contains node
-  //       // let node_info = node.getNodeInfo() as proto.GraphNodeInfo;
-  //       // if (!current_nodes.includes(node_info)) {
-  //       //   current_nodes.push(node_info);
-  //       // }
-  //       helper_functions.addNode(node, new_graph_state).then((result) => {
-  //         console.log("result: " + result);
-  //       });
-  //     });
-
-  //     selected_node_ids_store.set([]);
-  //   }
-  // }
   function addEdge() {
     let current_edges = graph.getEdgesList();
     // add selected_edge : Edge to current_edges : Edge[]
@@ -253,10 +146,8 @@
       selected_node_ids_store.update((val) =>
         val.filter((item) => item !== node_id)
       );
-      console.log("removing node: " + node_id);
     } else {
       selected_node_ids_store.update((val) => [...val, node_id]);
-      console.log("adding node");
     }
   }
 </script>

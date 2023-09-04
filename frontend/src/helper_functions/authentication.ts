@@ -4,16 +4,17 @@ import {
   AuthenticationMessage,
   CrudBundle,
   VerbTypeNames,
+  SystemState
 } from "../generated/system_types_pb";
 
-import { getSystemState, setSystemState } from "./graph";
 
 export async function authenticate(
   websocket: WebSocket,
   email: string,
-  password: string
+  password: string,
+  system_state: SystemState
 ) {
-  let system_state = await getSystemState();
+
 
   console.log(JSON.stringify(system_state.toObject()));
 
