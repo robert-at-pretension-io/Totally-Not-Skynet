@@ -3,7 +3,7 @@
   import cytoscape, { Core } from "cytoscape";
   import dagre from "cytoscape-dagre";
   import systemStateStore from "stores/systemStateStore.js";
-  import { selectNode, selectEdge } from "../helper_functions/graph";
+  import * as helper_functions from "../helper_functions/graph";
   import * as proto from "../generated/system_types_pb";
 
   import * as graphlib from "graphlib";
@@ -45,16 +45,29 @@
     });
 
     cyInstance.on("select", "node", async (evt) => {
+      console.log("event: ", evt);
+
       const selectedNode = evt.target.data();
-      await selectNode(selectedNode.id, $systemStateStore);
+
+      console.log("selectedNode: ", selectedNode);
+
+      $systemStateStore = helper_functions.selectNode(
+        selectedNode.id,
+        $systemStateStore
+      );
     });
 
-    cyInstance.on("select", "edge", async (event) => {
+    cyInstance.on("select", "edge", async (evt) => {
+      console.log("event: ", evt);
+
       let edge = new proto.Edge();
+
+      console.log("selectedEdge: ", event.target.data());
+
       edge.setSource(event.target.data().source);
       edge.setTarget(event.target.data().target);
 
-      await selectEdge(edge, $systemStateStore);
+      await helper_functions.selectEdge(edge, $systemStateStore);
     });
   });
 
@@ -108,7 +121,7 @@
           console.log("Selecting element");
           break;
         case proto.GraphAction.Action.DESELECT:
-          console.log("Deselecting element");
+          helper_functions.console.log("Deselecting element");
           break;
 
         default:
@@ -133,7 +146,6 @@
               cyInstance.add({
                 data: { source: source, target: target },
               });
-              layout.run();
 
               break;
             case proto.GraphAction.Action.REMOVE:
@@ -142,7 +154,6 @@
               cyInstance.remove(
                 cyInstance.$id(source).edgesTo(cyInstance.$id(target))
               );
-              layout.run();
 
               break;
             default:
@@ -169,14 +180,12 @@
               cyInstance.add({
                 data: { id: id, label: name },
               });
-              layout.run();
 
               break;
             case proto.GraphAction.Action.REMOVE:
               console.log("Removing node from graph");
               g.removeNode(name);
               cyInstance.remove(id);
-              layout.run();
 
               break;
             default:
@@ -188,6 +197,7 @@
       } else {
         console.log("action_list is empty or undefined");
       }
+      layout.run();
     } else {
       console.log("cyInstance is null");
     }

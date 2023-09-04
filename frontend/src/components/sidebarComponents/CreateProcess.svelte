@@ -21,9 +21,6 @@
 
   const selected_node_ids_store = writable(selected_node_ids);
 
-  let selected_edge: proto.Edge | null = null;
-
-  let graph = new proto.Graph();
   let name = "";
   let description = "";
   let node_list: proto.Node[] = [];
@@ -44,16 +41,15 @@
     node_list = $systemStateStore.getNodesList();
   }
 
-  async function saveProcess() {
+  function saveProcess() {
     // create an alert message if either name or description are null
     if (name === null || description === null) {
       alert("Please enter a name and description for the process");
       return;
     } else {
       let graph_state = system_state.getGraphState();
-      let maybe_topological_order = await helper_functions.validateGraph(
-        system_state
-      );
+      let maybe_topological_order =
+        helper_functions.validateGraph(system_state);
 
       if (maybe_topological_order && graph_state != undefined) {
         let topological_order =
@@ -86,15 +82,33 @@
     return $selected_node_ids_store.includes(node_id);
   }
   function removeNodes() {
-    let current = graph.getNodesList();
+    let graph_state = system_state.getGraphState();
+    let action_list = graph_state?.getActionHistoryList();
 
-    let new_nodes = current.filter((node: proto.GraphNodeInfo) => {
-      return !selected_node_ids.includes(node.getId());
-    });
+    // check if the last action was a select edge action
 
-    graph.setNodesList(new_nodes);
+    let last_action: proto.GraphAction;
+    let last_action_type: proto.GraphAction.ActionMap[keyof proto.GraphAction.ActionMap];
 
-    selected_node_ids = [];
+    if (action_list != undefined && action_list.length > 0) {
+      last_action = action_list[action_list.length - 1];
+
+      last_action_type = last_action.getAction();
+
+      console.log("remove node action:", last_action.toObject());
+
+      if (last_action_type == proto.GraphAction.Action.SELECT) {
+        if (last_action.hasNode()) {
+          let last_node = last_action.getNode();
+          if (last_node) {
+            $systemStateStore = helper_functions.removeNode(
+              last_node.getId() as string,
+              system_state
+            );
+          }
+        }
+      }
+    }
   }
 
   async function addNodes() {
@@ -121,22 +135,76 @@
   }
 
   function addEdge() {
-    let current_edges = graph.getEdgesList();
-    // add selected_edge : Edge to current_edges : Edge[]
-    if (selected_edge != null) {
-      current_edges.push(selected_edge);
+    let graph_state = system_state.getGraphState();
+    let action_list = graph_state?.getActionHistoryList();
+
+    // check if the last action was a select edge action
+
+    let last_action: proto.GraphAction;
+    let two_actions_ago: proto.GraphAction;
+    let last_action_type: proto.GraphAction.ActionMap[keyof proto.GraphAction.ActionMap];
+    let two_actions_ago_type: proto.GraphAction.ActionMap[keyof proto.GraphAction.ActionMap];
+
+    if (action_list != undefined && action_list.length > 1) {
+      last_action = action_list[action_list.length - 1];
+      two_actions_ago = action_list[action_list.length - 2];
+      console.log("Last action:", last_action.toObject());
+
+      last_action_type = last_action.getAction();
+      two_actions_ago_type = two_actions_ago.getAction();
+      console.log("Action type:", last_action_type);
+
+      if (
+        last_action_type == proto.GraphAction.Action.SELECT &&
+        two_actions_ago_type == proto.GraphAction.Action.SELECT
+      ) {
+        if (last_action.hasNode() && two_actions_ago.hasNode()) {
+          let last_node = last_action.getNode();
+          let two_actions_ago_node = two_actions_ago.getNode();
+          if (last_node && two_actions_ago_node) {
+            let add_edge = new proto.Edge();
+            add_edge.setSource(two_actions_ago_node);
+            add_edge.setTarget(last_node);
+
+            $systemStateStore = helper_functions.addEdge(
+              add_edge,
+              system_state
+            );
+          }
+        }
+      }
     }
-    graph.setEdgesList(current_edges);
+
+    // add selected_edge : Edge to current_edges : Edge[]
   }
   function removeEdge() {
-    let current_edges = graph.getEdgesList();
-    // remove selected_edge : Edge from current_edges : Edge[]
-    if (selected_edge != null) {
-      current_edges = current_edges.filter((edge: proto.Edge) => {
-        return edge != selected_edge;
-      });
+    let graph_state = system_state.getGraphState();
+    let action_list = graph_state?.getActionHistoryList();
+
+    // check if the last action was a select edge action
+
+    let last_action: proto.GraphAction;
+    let last_action_type: proto.GraphAction.ActionMap[keyof proto.GraphAction.ActionMap];
+
+    if (action_list != undefined && action_list.length > 0) {
+      last_action = action_list[action_list.length - 1];
+      console.log("Last action:", last_action.toObject());
+
+      last_action_type = last_action.getAction();
+      console.log("Action type:", last_action_type);
+
+      if (last_action_type == proto.GraphAction.Action.SELECT) {
+        if (last_action.hasEdge()) {
+          let selected_edge = last_action.getEdge();
+          if (selected_edge) {
+            $systemStateStore = helper_functions.removeEdge(
+              selected_edge,
+              system_state
+            );
+          }
+        }
+      }
     }
-    graph.setEdgesList(current_edges);
   }
 
   function toggleNodeSelect(node: proto.Node) {
