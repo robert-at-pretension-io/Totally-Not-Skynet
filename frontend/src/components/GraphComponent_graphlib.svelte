@@ -48,7 +48,7 @@
       name: "dagre" /* or whatever layout you're using */,
     });
 
-    cyInstance.on("select", "node", async (evt) => {
+    cyInstance.on("select", "node", (evt) => {
       console.log("event: ", evt);
 
       const selectedNode = evt.target.data();
@@ -61,20 +61,23 @@
       );
     });
 
-    cyInstance.on("select", "edge", async (evt) => {
+    cyInstance.on("select", "edge", (evt) => {
       console.log("event: ", evt);
 
       let edge = new proto.Edge();
 
+      let source = new proto.GraphNodeInfo();
+      let target = new proto.GraphNodeInfo();
+
+      source.setId(evt.target.data().source);
+      target.setId(evt.target.data().target);
+
+      edge.setSource(source);
+      edge.setTarget(target);
+
       console.log("selectedEdge: ", evt.target.data());
 
-      edge.setSource(evt.target.data().source);
-      edge.setTarget(evt.target.data().target);
-
-      $systemStateStore = await helper_functions.selectEdge(
-        edge,
-        $systemStateStore
-      );
+      $systemStateStore = helper_functions.selectEdge(edge, $systemStateStore);
     });
   });
 

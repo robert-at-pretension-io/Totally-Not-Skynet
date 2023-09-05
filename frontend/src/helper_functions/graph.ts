@@ -376,7 +376,7 @@ export function addEdge(
   system_state: proto.SystemState
 ): proto.SystemState {
 
-  console.log("addNode system_state: ", system_state.toObject());
+  console.log("addEdge system_state: ", system_state.toObject());
 
   const graph_state = system_state.getGraphState() as proto.GraphState;
 
@@ -385,7 +385,7 @@ export function addEdge(
 
   console.log("Attempting to add edge: ", edge.toObject());
 
-  const edge_list = graph_state.getGraph()?.getEdgesList();
+  const edge_list = graph_state.getGraph()?.getEdgesList() as proto.Edge[];
 
   console.log("edge_list: ", edge_list);
   console.log("edge_list?.includes(edge): ", edge_list?.includes(edge));
@@ -400,6 +400,11 @@ export function addEdge(
     const action_history = graph_state.getActionHistoryList();
     action_history.push(graph_action);
     graph_state.setActionHistoryList(action_history);
+
+    edge_list?.push(edge);
+    const graph = graph_state.getGraph() as proto.Graph;
+    graph.setEdgesList(edge_list);
+    graph_state.setGraph(graph);
 
     system_state.setGraphState(graph_state);
 
@@ -576,28 +581,46 @@ export function selectNode(id: string, system_state: proto.SystemState): proto.S
 }
 
 export function selectEdge(edge: proto.Edge, system_state: proto.SystemState): proto.SystemState {
+  console.log("Function selectEdge called.");
 
   const graph_state = system_state.getGraphState() as proto.GraphState;
+  console.log("Current Graph State:", graph_state);
+
   const graph = graph_state.getGraph();
+  console.log("Current Graph:", graph);
+
   const edges = graph?.getEdgesList() as proto.Edge[];
+  console.log("Current Edges List:", edges);
 
   const found_index = edges.find((edge_info) => {
-    return edge == edge_info;
+    console.log("Checking edge:", edge_info);
+    return edge.getSource()?.getId() == edge_info.getSource()?.getId() && edge.getTarget()?.getId() == edge_info.getTarget()?.getId();
   }) as proto.Edge;
 
+  console.log("Found Edge:", found_index);
+
   const graph_action = new proto.GraphAction();
+  console.log("New GraphAction instance created.");
 
   graph_action.setAction(proto.GraphAction.Action.SELECT);
+  console.log("GraphAction set to SELECT.");
+
   graph_action.setEdge(found_index);
+  console.log("Selected Edge set in GraphAction:", found_index);
 
   const action_history = graph_state.getActionHistoryList();
+  console.log("Current Action History:", action_history);
 
   action_history.push(graph_action);
+  console.log("GraphAction pushed to Action History.");
 
   graph_state.setActionHistoryList(action_history);
+  console.log("Updated Action History set in GraphState.");
 
   system_state.setGraphState(graph_state);
+  console.log("Updated GraphState set in SystemState.");
 
+  console.log("Function selectEdge finished.");
   return system_state;
 }
 
