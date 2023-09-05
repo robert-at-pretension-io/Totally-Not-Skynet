@@ -177,6 +177,7 @@
     // add selected_edge : Edge to current_edges : Edge[]
   }
   function removeEdge() {
+    console.log("Attempting to remove the edge:");
     let graph_state = system_state.getGraphState();
     let action_list = graph_state?.getActionHistoryList();
 

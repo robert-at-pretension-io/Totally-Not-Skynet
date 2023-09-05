@@ -44,6 +44,10 @@
       ],
     });
 
+    layout = cyInstance.layout({
+      name: "dagre" /* or whatever layout you're using */,
+    });
+
     cyInstance.on("select", "node", async (evt) => {
       console.log("event: ", evt);
 
@@ -67,7 +71,10 @@
       edge.setSource(evt.target.data().source);
       edge.setTarget(evt.target.data().target);
 
-      await helper_functions.selectEdge(edge, $systemStateStore);
+      $systemStateStore = await helper_functions.selectEdge(
+        edge,
+        $systemStateStore
+      );
     });
   });
 
@@ -79,6 +86,7 @@
   let cyInstance: Core | null = null;
   let g = new graphlib.Graph();
   let last_action: proto.GraphAction;
+  let layout: cytoscape.Layouts;
 
   systemStateStore.subscribe((system_state: proto.SystemState) => {
     let graph_state = system_state.getGraphState();
@@ -110,9 +118,7 @@
     }
 
     if (cyInstance) {
-      let layout = cyInstance.layout({
-        name: "dagre" /* or whatever layout you're using */,
-      });
+      layout.run();
 
       console.log("cyInstance is available");
 
@@ -125,7 +131,6 @@
         case proto.GraphAction.Action.RESET:
           console.log("Removing all elements from cyInstance");
           cyInstance.remove(cyInstance.elements());
-          layout.run();
           break;
         case proto.GraphAction.Action.NONE:
           console.log("No action to be taken");
@@ -159,16 +164,17 @@
               cyInstance.add({
                 data: { source: source, target: target },
               });
-              layout.run();
 
               break;
             case proto.GraphAction.Action.REMOVE:
-              console.log("Removing edge from graph");
-              g.removeEdge(source, target);
-              cyInstance.remove(
-                cyInstance.$id(source).edgesTo(cyInstance.$id(target))
-              );
-              layout.run();
+              {
+                console.log("Removing edge from graph");
+                let sourceNode = cyInstance.getElementById(source);
+                let targetNode = cyInstance.getElementById(target);
+                let edge = sourceNode.edgesTo(targetNode).first();
+
+                cyInstance.remove(edge);
+              }
 
               break;
             default:
@@ -195,7 +201,6 @@
               cyInstance.add({
                 data: { id: id, label: name },
               });
-              layout.run();
 
               break;
             case proto.GraphAction.Action.REMOVE:

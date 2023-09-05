@@ -332,7 +332,13 @@ export function addNode(
   // const systemState = await getSystemState();
   // add the input and output variables to the graph state
 
-  const has_node = graphHasNode(node, system_state);
+  const node_list = graph_state.getGraph()?.getNodesList();
+
+  if (node_list == undefined) {
+    alert("node_list is undefined");
+  }
+
+  const has_node = node_list?.includes(node.getNodeInfo() as proto.GraphNodeInfo);
 
   console.log("has_node: ", has_node);
 
@@ -377,7 +383,14 @@ export function addEdge(
   const source = edge.getSource();
   const target = edge.getTarget();
 
-  if (source && target && graphHasEdge(edge, system_state)) {
+  console.log("Attempting to add edge: ", edge.toObject());
+
+  const edge_list = graph_state.getGraph()?.getEdgesList();
+
+  console.log("edge_list: ", edge_list);
+  console.log("edge_list?.includes(edge): ", edge_list?.includes(edge));
+
+  if (source && target && !graphHasEdge(edge, system_state)) {
 
     const graph_action = new proto.GraphAction();
     graph_action.setAction(proto.GraphAction.Action.ADD);
@@ -485,7 +498,20 @@ export function removeEdge(remove_edge: proto.Edge, system_state: proto.SystemSt
   const graph_state = system_state.getGraphState() as proto.GraphState;
   const graph = graph_state.getGraph() as proto.Graph;
   const edge_array = graph.getEdgesList() as proto.Edge[];
-  const remove_index = edge_array.indexOf(remove_edge);
+  // const remove_index = edge_array.indexOf(remove_edge);
+
+  //find the index where the edge has the source that is the same as the remove_edge
+  // and the target that is the same as the remove_edge
+  const remove_index = edge_array.findIndex((edge: proto.Edge) => {
+    const source = edge.getSource();
+    const target = edge.getTarget();
+    if (source && target) {
+      return source.getId() == remove_edge.getSource()?.getId() && target.getId() == remove_edge.getTarget()?.getId();
+    }
+  });
+
+  console.log("remove_index: ", remove_index);
+
   edge_array.splice(remove_index);
   graph.setEdgesList(edge_array);
   graph_state.setGraph(graph);
