@@ -13,8 +13,8 @@ export function stringToUint8Array(str: string): Uint8Array {
   return utf8Encoder.encode(str);
 }
 
-export function initializeSystemState(): SystemState {
-  const system_state = new SystemState();
+export function initializeSystemState(system_state: SystemState): SystemState {
+  // const system_state = new SystemState();
   const graph_state = new GraphState();
   const graph = new Graph();
   const action_history: GraphAction[] = [];

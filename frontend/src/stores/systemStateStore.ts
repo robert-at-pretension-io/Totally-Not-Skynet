@@ -1,9 +1,9 @@
 import { writable } from "svelte/store";
 import { SystemState } from "../generated/system_types_pb";
-import { initializeSystemState } from "helper_functions/misc";
+// import { initializeSystemState } from "helper_functions/misc";
 
-const system_state: SystemState = initializeSystemState();
+const new_system_state: SystemState = new SystemState();
 
-const systemStateStore = writable(system_state);
+const systemStateStore = writable<SystemState>(new_system_state);
 
 export default systemStateStore;

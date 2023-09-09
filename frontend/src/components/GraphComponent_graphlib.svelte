@@ -127,7 +127,32 @@
 
       if (action_list != undefined && action_list.length > 0) {
         let action_type = latest_action.getAction();
-        console.log("Action type:", action_type);
+
+        if (
+          action_type == proto.GraphAction.Action.ADD &&
+          latest_action.hasNode()
+        ) {
+          console.log("syncing cytoscape graph with system state graph");
+
+          let nodes = system_state.getGraphState()?.getGraph()?.getNodesList();
+
+          // check to make sure that all of the nodes are in the cytoscape graph
+
+          nodes?.forEach((node) => {
+            let id = node.getId();
+            let name = node.getName();
+
+            if (id != undefined && name != undefined && cyInstance != null) {
+              if (cyInstance.getElementById(id).length == 0) {
+                console.log("adding node to cytoscape graph");
+
+                cyInstance.add({
+                  data: { id: id, label: name },
+                });
+              }
+            }
+          });
+        }
 
         // Node/edge agnostic actions:
         switch (action_type) {
@@ -199,11 +224,13 @@
           if (name != undefined && id != undefined) {
             switch (action_type) {
             case proto.GraphAction.Action.ADD:
-              console.log("Adding node to graph");
-              g.setNode(id, name);
-              cyInstance.add({
-                data: { id: id, label: name },
-              });
+              console.log(
+                "Adding node to graph. Anothe mechanism will be used for keeping the system state node list updated with the graph nodes."
+              );
+              // g.setNode(id, name);
+              // cyInstance.add({
+              //   data: { id: id, label: name },
+              // });
 
               break;
             case proto.GraphAction.Action.REMOVE:

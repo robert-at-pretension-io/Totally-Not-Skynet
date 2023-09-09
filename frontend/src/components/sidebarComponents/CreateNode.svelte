@@ -112,7 +112,10 @@
   }
 
   async function addNodes() {
-    let system_state = $systemStateStore;
+    console.log(
+      "The currently selected node ids are:",
+      $selected_node_ids_store
+    );
 
     let filtered_nodes = node_list.filter((node: proto.Node) => {
       return $selected_node_ids_store.includes(
@@ -122,13 +125,11 @@
 
     for (const node of filtered_nodes) {
       try {
-        system_state = helper_functions.addNode(node, system_state);
+        $systemStateStore = helper_functions.addNode(node, $systemStateStore);
       } catch (error) {
         console.error("Error in addNode:", error);
       }
     }
-
-    $systemStateStore = system_state;
 
     selected_node_ids_store.set([]);
   }

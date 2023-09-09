@@ -1,5 +1,5 @@
 <script>
-  import CreateProcess from "./sidebarComponents/CreateProcess.svelte";
+  import CreateNode from "./sidebarComponents/CreateNode.svelte";
   import BackgroundInfo from "./sidebarComponents/BackgroundInfo.svelte";
   import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
   import NewNode from "./sidebarComponents/newNode.svelte";
@@ -19,8 +19,8 @@
       open: false,
     },
     {
-      header: "Create a New Process",
-      component: CreateProcess,
+      header: "Create a New Node",
+      component: CreateNode,
       open: false,
     },
     {

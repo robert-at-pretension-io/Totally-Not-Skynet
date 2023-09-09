@@ -14,7 +14,10 @@
   async function handleSubmit() {
     console.log("Username:", username);
     console.log("Password:", password);
-    $systemStateStore = $systemStateStore.setAuthenticated(true);
+
+    // set authentication to true
+    $systemStateStore.setAuthenticated(true);
+
     let websocket = $websocketStore.websocket;
 
     let crud_bundle = new CrudBundle();

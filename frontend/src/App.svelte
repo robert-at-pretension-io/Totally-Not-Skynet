@@ -1,7 +1,6 @@
 <script lang="ts">
   import Sidebar from "./components/Sidebar.svelte";
   import GraphComponentGraphlib from "./components/GraphComponent_graphlib.svelte";
-  // import "../public/global.css";
   import { setupWebsocketConnection } from "helper_functions/websocket";
   import { onMount } from "svelte";
   import systemStateStore from "stores/systemStateStore";
@@ -9,6 +8,9 @@
   import AuthPage from "./components/AuthPage.svelte";
   import { SystemState } from "./generated/system_types_pb";
   import Loading from "./components/Loading.svelte";
+  // import { initializeSystemState } from "helper_functions/misc";
+
+  console.log("Script started");
 
   let authenticated = false;
   let websocket: WebSocket;
@@ -16,30 +18,38 @@
   let websocket_ready = false;
 
   onMount(async () => {
-    system_state = $systemStateStore;
+    console.log("onMount triggered");
 
-    if (!$systemStateStore.getWebsocketReady()) {
-      // startup websocket connection
+    system_state = $systemStateStore;
+    console.log("Initial system_state:", system_state);
+
+    // let intialized_system = initializeSystemState(system_state);
+    // console.log("Initialized system:", intialized_system);
+
+    // systemStateStore.set(intialized_system);
+
+    if (!system_state.getWebsocketReady()) {
+      console.log("Websocket not ready. Initializing...");
       [websocket, system_state] = await setupWebsocketConnection(system_state);
-      console.log("websocket: ", websocket);
-      websocketStore.set({ websocket: websocket });
+      console.log("Websocket initialized:", websocket);
+      websocketStore.set({ websocket });
+      websocket_ready = true;
+      $systemStateStore = system_state;
     }
   });
 
   $: {
-    console.log(
-      "System State Changed (App.svelte): " +
-        JSON.stringify($systemStateStore.toObject())
-    );
-    authenticated = $systemStateStore.getAuthenticated();
-    if ($systemStateStore.getWebsocketReady()) {
+    console.log("Reactive statement triggered");
+    authenticated = system_state?.getAuthenticated();
+    console.log("Authenticated state:", authenticated);
+
+    if (system_state?.getWebsocketReady()) {
+      console.log("Websocket ready");
       websocket_ready = true;
-      console.log("Websocket Ready to send Messages!");
     }
   }
 </script>
 
-<!-- Show the following component if the system is not authenticated-->
 {#if !authenticated}
   {#if websocket_ready}
     <AuthPage />
@@ -50,7 +60,6 @@
 
 {#if authenticated}
   <div class="app-container">
-    <!-- Show the following two components if the system is authenticated-->
     <Sidebar />
     <GraphComponentGraphlib />
   </div>
