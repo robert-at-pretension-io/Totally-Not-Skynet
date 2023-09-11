@@ -12,12 +12,12 @@
 
   console.log("Script started");
 
-  let authenticated = false;
+  // let authenticated = true;
   let websocket: WebSocket;
   let system_state: SystemState;
   let websocket_ready = false;
 
-  onMount(async () => {
+  onMount(() => {
     console.log("onMount triggered");
 
     system_state = $systemStateStore;
@@ -28,9 +28,13 @@
 
     // systemStateStore.set(intialized_system);
 
-    if (!system_state.getWebsocketReady()) {
+    alert("onMount triggered... auth: " + system_state.getAuthenticated());
+
+    // authenticated = true;
+
+    if (!websocket_ready) {
       console.log("Websocket not ready. Initializing...");
-      [websocket, system_state] = await setupWebsocketConnection(system_state);
+      websocket = setupWebsocketConnection();
       console.log("Websocket initialized:", websocket);
       websocketStore.set({ websocket });
       websocket_ready = true;
@@ -38,19 +42,21 @@
     }
   });
 
-  $: {
-    console.log("Reactive statement triggered");
-    authenticated = system_state?.getAuthenticated();
-    console.log("Authenticated state:", authenticated);
+  // $: {
+  //   console.log("Reactive statement triggered");
+  //   // authenticated = system_state?.getAuthenticated();
 
-    if (system_state?.getWebsocketReady()) {
-      console.log("Websocket ready");
-      websocket_ready = true;
-    }
-  }
+  //   // authenticated = $systemStateStore.getAuthenticated();
+  //   console.log("Authenticated state:", authenticated);
+
+  //   if (system_state?.getWebsocketReady()) {
+  //     console.log("Websocket ready");
+  //     websocket_ready = true;
+  //   }
+  // }
 </script>
 
-{#if !authenticated}
+{#if !$systemStateStore.getAuthenticated()}
   {#if websocket_ready}
     <AuthPage />
   {:else}
@@ -58,7 +64,7 @@
   {/if}
 {/if}
 
-{#if authenticated}
+{#if $systemStateStore.getAuthenticated()}
   <div class="app-container">
     <Sidebar />
     <GraphComponentGraphlib />

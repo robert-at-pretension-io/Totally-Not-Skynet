@@ -30,7 +30,7 @@
   let system_state: proto.SystemState;
 
   // setup onmount:
-  onMount(async () => {
+  onMount(() => {
     system_state = $systemStateStore;
     node_list = $systemStateStore.getNodesList();
   });
@@ -111,7 +111,7 @@
     }
   }
 
-  async function addNodes() {
+  function addNodes() {
     console.log(
       "The currently selected node ids are:",
       $selected_node_ids_store

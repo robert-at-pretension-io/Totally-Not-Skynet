@@ -24,7 +24,7 @@ export function systemGraphToGraphLib(
   return g;
 }
 
-export async function handleError(_error: any) {
+export function handleError(_error: any) {
   console.log("handleError: ", _error);
   // switch (error.name) {
   // case "GraphDoesntExist": {

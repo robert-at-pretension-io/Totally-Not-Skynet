@@ -1,10 +1,20 @@
 <script>
-  import CreateNode from "./sidebarComponents/CreateNode.svelte";
   import BackgroundInfo from "./sidebarComponents/BackgroundInfo.svelte";
   import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
   import NewNode from "./sidebarComponents/newNode.svelte";
 
   import { blur, fade } from "svelte/transition";
+  import { onMount } from "svelte";
+  import CreateNode from "./sidebarComponents/CreateNode.svelte";
+  import { authenticate } from "helper_functions/authentication";
+  import { websocketStore } from "stores/websocketStore";
+  import systemStateStore from "stores/systemStateStore";
+
+  // onmount
+
+  onMount(() => {
+    console.log("Sidebar mounted");
+  });
 
   let sections = [
     {
@@ -19,10 +29,11 @@
       open: false,
     },
     {
-      header: "Create a New Node",
+      header: "Create a process",
       component: CreateNode,
       open: false,
     },
+
     {
       header: "Edit Action or Process",
       component: InteractWithActionsAndProcesses,

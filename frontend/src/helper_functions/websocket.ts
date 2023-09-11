@@ -2,10 +2,10 @@
 import { SystemState, ResponseObject, CrudBundle, Node } from "../../src/generated/system_types_pb";
 
 import systemStateStore from "stores/systemStateStore";
+import { authenticate } from "./authentication";
 
-export async function setupWebsocketConnection(
-  system_state: SystemState
-): Promise<[WebSocket, SystemState]> {
+export function setupWebsocketConnection(
+): WebSocket {
   console.log("setting up websocket connection");
   let websocket = new WebSocket("ws://138.197.70.163:8080");
 
@@ -13,25 +13,23 @@ export async function setupWebsocketConnection(
   websocket.addEventListener("open", () => {
     console.log("websocket connection opened");
     // setup message processor
+    websocket = setupWebsocketMessageHandler(websocket);
 
-    system_state.setWebsocketReady(true);
-    systemStateStore.set(system_state); // <-- update your Svelte store
   });
 
-  websocket = await setupWebsocketMessageHandler(websocket);
-
-  console.log("returning websocket");
-
-  return [websocket, system_state];
+  return websocket;
 }
 
-export async function setupWebsocketMessageHandler(
+export function setupWebsocketMessageHandler(
   websocket: WebSocket
-): Promise<WebSocket> {
+): WebSocket {
+
+  console.log("setting up websocket message handler");
+
   websocket.addEventListener("message", (event) => {
     console.log("websocket message received: ", event.data);
 
-    event.data.arrayBuffer().then(async (buffer: any) => {
+    event.data.arrayBuffer().then((buffer: any) => {
       console.log("buffer: ", buffer);
       const u8Array = new Uint8Array(buffer);
       console.log("u8Array: ", u8Array);
@@ -56,41 +54,41 @@ export async function setupWebsocketMessageHandler(
 
           // let node_list = [];
 
-          systemStateStore.subscribe((system_state: SystemState) => {
-            console.log("Type of system_state:", typeof system_state);
-            console.log("Keys of system_state:", Object.keys(system_state));
+          // systemStateStore.subscribe((system_state: SystemState) => {
+          //   console.log("Type of system_state:", typeof system_state);
+          //   console.log("Keys of system_state:", Object.keys(system_state));
 
-            if (system_state && typeof system_state.toObject === "function") {
+          //   if (system_state && typeof system_state.toObject === "function") {
 
-              console.log("system_state: ", system_state.toObject());
-              const node_list = system_state.getNodesList();
-              console.log("node_list: ", node_list);
+          //     console.log("system_state: ", system_state.toObject());
+          //     const node_list = system_state.getNodesList();
+          //     console.log("node_list: ", node_list);
 
-              system_state.setNodesList(node_list);
+          //     system_state.setNodesList(node_list);
 
-              systemStateStore.set(system_state);
-            }
-          });
+          //     systemStateStore.set(system_state);
+          //   }
+          // });
 
           // node_list.push(add_node);
 
           // console.log("node_list after push: ", node_list);
 
-          // systemStateStore.update(
-          //   (n: SystemState) => {
+          systemStateStore.update(
+            (n: SystemState) => {
 
-          //     console.log("n: ", n);
+              console.log("n: ", n);
 
-          //     const m = n as SystemState;
+              const m = n as SystemState;
 
-          //     console.log("m: ", m);
+              console.log("m: ", m);
 
-          //     const nodes = m.getNodesList();
-          //     nodes.push(add_node);
-          //     m.setNodesList(nodes);
-          //     return m;
-          //   }
-          // );
+              const nodes = m.getNodesList();
+              nodes.push(add_node);
+              m.setNodesList(nodes);
+              return m;
+            }
+          );
 
           // console.log("system_state: ", system_state.toObject());
 
@@ -127,7 +125,7 @@ export async function setupWebsocketMessageHandler(
   return websocket;
 }
 
-export async function sendWebsocketMessage(
+export function sendWebsocketMessage(
   message: CrudBundle,
   websocket: WebSocket
 ) {

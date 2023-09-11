@@ -7,11 +7,12 @@
   import { sendWebsocketMessage } from "helper_functions/websocket";
   import systemStateStore from "stores/systemStateStore";
   import { websocketStore } from "stores/websocketStore";
+  import { authenticate } from "helper_functions/authentication";
 
   let username = "";
   let password = "";
 
-  async function handleSubmit() {
+  function handleSubmit() {
     console.log("Username:", username);
     console.log("Password:", password);
 
@@ -19,19 +20,7 @@
     $systemStateStore.setAuthenticated(true);
 
     let websocket = $websocketStore.websocket;
-
-    let crud_bundle = new CrudBundle();
-
-    let authentication_message = new AuthenticationMessage();
-
-    // authentication_message.sest
-
-    let verb = VerbTypeNames.POST;
-
-    crud_bundle.setVerb(verb);
-    crud_bundle.setAuthenticationMessage(authentication_message);
-
-    await sendWebsocketMessage(crud_bundle, websocket);
+    authenticate(websocket, "", "");
   }
 
   // Send POST with authentication Message

@@ -8,7 +8,9 @@
 
   import * as graphlib from "graphlib";
 
-  onMount(async () => {
+  onMount(() => {
+    console.log("Graph Component Mounted");
+
     cytoscape.use(dagre);
 
     cyInstance = cytoscape({

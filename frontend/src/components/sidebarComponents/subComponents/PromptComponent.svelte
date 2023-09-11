@@ -15,7 +15,7 @@
   let description = "";
   let name = "";
 
-  async function submitPrompt() {
+  function submitPrompt() {
     prompt.setPrompt(prompt_text);
     prompt.setSystem(system_text);
 
@@ -38,7 +38,7 @@
 
     let websocket = $websocketStore.websocket as WebSocket;
 
-    await sendWebsocketMessage(crud_bundle, websocket);
+    sendWebsocketMessage(crud_bundle, websocket);
 
     reset_component();
   }

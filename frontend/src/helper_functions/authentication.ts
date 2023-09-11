@@ -7,29 +7,23 @@ import {
   SystemState
 } from "../generated/system_types_pb";
 
-
-export async function authenticate(
+export function authenticate(
   websocket: WebSocket,
   email: string,
   password: string,
-  system_state: SystemState
 ) {
 
+  console.log("websocket is ready... sending auth");
+  const auth_bundle = new CrudBundle();
+  auth_bundle.setVerb(VerbTypeNames.POST);
 
-  console.log(JSON.stringify(system_state.toObject()));
+  const auth_content = new AuthenticationMessage();
 
-  if (system_state.getWebsocketReady()) {
-    console.log("websocket is ready... sending auth");
-    let auth_bundle = new CrudBundle();
-    auth_bundle.setVerb(VerbTypeNames.POST);
+  auth_content.setClientEmail(email);
+  auth_content.setClientPassword(password);
 
-    let auth_content = new AuthenticationMessage();
+  auth_bundle.setAuthenticationMessage(auth_content);
 
-    auth_content.setClientEmail(email);
-    auth_content.setClientPassword(password);
+  sendWebsocketMessage(auth_bundle, websocket);
 
-    auth_bundle.setAuthenticationMessage(auth_content);
-
-    await sendWebsocketMessage(auth_bundle, websocket);
-  }
 }
