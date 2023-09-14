@@ -69,7 +69,7 @@ message Graph {
 
 // Process
 message Process {
-  GraphState graph_state = 1;
+  Graph graph = 1;
   repeated string initial_variables = 2;
   repeated GraphNodeInfo topological_order = 3;
 }
