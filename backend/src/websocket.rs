@@ -5,17 +5,15 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::{ mpsc, Mutex };
 use tokio_tungstenite::tungstenite::Message;
 
 use futures_util::StreamExt;
 use futures_util::SinkExt;
 
-
-
 pub async fn start_websocket_server(
     rx: Arc<tokio::sync::Mutex<UnboundedReceiver<(Identity, Message)>>>,
-    client_tx: mpsc::Sender<(Identity, String)>,
+    client_tx: mpsc::Sender<(Identity, String)>
 ) {
     let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
 
@@ -29,15 +27,11 @@ pub async fn start_websocket_server(
     //dispatch the message to the appropriate client
     tokio::spawn(async move {
         while let Some(outgoing_msg) = rx.lock().await.recv().await {
-            println!(
-                "\n\nSending message:\n {} \nto: {}",
-                outgoing_msg.1, outgoing_msg.0.name
-            );
+            println!("\n\nSending message:\n {} \nto: {}", outgoing_msg.1, outgoing_msg.0.name);
 
             //get the client's outgoing channel
             let sending_channel = thread_safe_request_dispatcher_clone_1
-                .lock()
-                .await
+                .lock().await
                 .get_mut(&outgoing_msg.0)
                 .unwrap()
                 .clone();
@@ -62,8 +56,7 @@ pub async fn start_websocket_server(
             let id = Uuid::new();
 
             thread_safe_request_dispatcher_clone_3
-                .lock()
-                .await
+                .lock().await
                 .insert(Identity::new(id.to_string()), local_tx);
 
             let this_client = Identity {
@@ -87,7 +80,8 @@ pub async fn start_websocket_server(
                 while let Some(outgoing_msg) = local_rx.recv().await {
                     println!(
                         "\n\nSending message:\n {} \nto: {}",
-                        outgoing_msg, cloned_client.name
+                        outgoing_msg,
+                        cloned_client.name
                     );
 
                     match outgoing.send(outgoing_msg.clone()).await {
@@ -104,11 +98,7 @@ pub async fn start_websocket_server(
             while let Some(msg) = incoming.next().await {
                 match msg {
                     Ok(msg) => {
-                        println!(
-                            "Received a message from {}: {}",
-                            addr,
-                            msg.to_text().unwrap()
-                        );
+                        println!("Received a message from {}: {:?}", addr, msg.to_text());
 
                         match client_tx.send((this_client.clone(), msg.to_string())).await {
                             Ok(_) => {}
