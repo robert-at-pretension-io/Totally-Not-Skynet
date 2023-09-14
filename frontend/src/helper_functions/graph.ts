@@ -326,9 +326,13 @@ export function addNode(
 
   console.log("addNode system_state: ", system_state.toObject());
 
-  const graph_state = system_state.getGraphState() as proto.GraphState;
+  let graph_state = system_state.getGraphState() as proto.GraphState;
 
-  console.log("add the addNode function with inputs: ", node.toObject(), graph_state.toObject());
+  if (!graph_state) {
+    graph_state = new proto.GraphState();
+  }
+
+  // console.log("add the addNode function with inputs: ", node.toObject(), graph_state.toObject());
   // const systemState = await getSystemState();
   // add the input and output variables to the graph state
 

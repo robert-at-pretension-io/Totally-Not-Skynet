@@ -85,6 +85,8 @@ pub async fn start_message_sending_loop(
                     VerbTypeNames::Post => {
                         let mut mutable_node = node.clone();
 
+                        println!("Creating node: {:?}", mutable_node);
+
                         let new_node_info = GraphNodeInfo {
                             id: uuid::Uuid::new_v4().to_string(),
                             name: node.node_info.unwrap().name.clone(),

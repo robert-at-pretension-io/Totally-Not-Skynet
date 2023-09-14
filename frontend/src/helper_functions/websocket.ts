@@ -131,5 +131,7 @@ export function sendWebsocketMessage(
 ) {
   console.log("sending websocket message: ", message);
   const message_string = message.serializeBinary();
+  console.log("serialized message is: ", message_string);
+
   websocket.send(message_string);
 }

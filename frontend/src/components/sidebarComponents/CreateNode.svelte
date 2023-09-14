@@ -14,10 +14,12 @@
   import * as helper_functions from "../../helper_functions/graph";
 
   import systemStateStore from "stores/systemStateStore";
+  import { websocketStore } from "stores/websocketStore";
 
   let selected_node_ids: string[] = [];
 
   import { writable } from "svelte/store";
+  import { sendWebsocketMessage } from "helper_functions/websocket";
 
   const selected_node_ids_store = writable(selected_node_ids);
 
@@ -47,34 +49,46 @@
       alert("Please enter a name and description for the process");
       return;
     } else {
-      let graph_state = system_state.getGraphState();
-      let maybe_topological_order =
-        helper_functions.validateGraph(system_state);
+      alert("No checks to ensure graph is correct");
+      let graph_state = $systemStateStore.getGraphState();
+      // let maybe_topological_order =
+      //   helper_functions.validateGraph(system_state);
 
-      if (maybe_topological_order && graph_state != undefined) {
-        let topological_order =
-          maybe_topological_order as proto.GraphNodeInfo[];
+      // if (maybe_topological_order && graph_state != undefined) {
+      //   let topological_order =
+      //     maybe_topological_order as proto.GraphNodeInfo[];
 
-        let process = new proto.Process();
+      let process = new proto.Process();
 
-        process.setGraphState(graph_state);
-        process.setInitialVariablesList([]);
-        process.setTopologicalOrderList(topological_order);
+      process.setGraphState(graph_state);
+      process.setInitialVariablesList([]);
+      process.setTopologicalOrderList([]);
 
-        let new_node = new proto.Node();
+      let new_node = new proto.Node();
 
-        let graph_node_info = new proto.GraphNodeInfo();
-        graph_node_info.setName(name);
+      let graph_node_info = new proto.GraphNodeInfo();
+      graph_node_info.setName(name);
 
-        new_node.setNodeInfo(graph_node_info);
-        new_node.setDescription(description);
-        new_node.setProcess(process);
+      new_node.setNodeInfo(graph_node_info);
+      new_node.setDescription(description);
+      new_node.setProcess(process);
+      new_node.setTypeName(proto.NodeTypeNames.PROCESS);
 
-        alert("todo: save process by sending websocket message");
-      } else {
-        alert("The process does not have a valid topological order :(");
-      }
+      let crud_bundle = new proto.CrudBundle();
+
+      crud_bundle.setNode(new_node);
+      crud_bundle.setVerb(proto.VerbTypeNames.POST);
+
+      // let websocket = $websocketStore as WebSocket;
+
+      sendWebsocketMessage(crud_bundle, $websocketStore.websocket as WebSocket);
+
+      alert("todo: save process by sending websocket message");
     }
+    // else {
+    //   alert("The process does not have a valid topological order :(");
+    // }
+    // }
   }
   function isSelected(node: proto.Node): boolean {
     let node_id = node.getNodeInfo()?.getId() as string;

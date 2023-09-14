@@ -1,11 +1,13 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
-  import { Node } from "../../generated/system_types_pb";
+  import { Node, NodeTypeNames } from "../../generated/system_types_pb";
 
   let selectedNode: Node | null;
 
   // Subscribe to the graphStore to get the latest values
   let nodes: Node[] = [];
+
+  let key_list = Object.keys(NodeTypeNames);
 
   $: {
     nodes = $systemStateStore.getNodesList();
@@ -23,7 +25,7 @@
   <option value="">Select a node</option>
   {#each nodes as node}
     <option value={node}
-      >{node.getNodeInfo()?.getName()} : {node.getNodeInfo()?.getName()}</option
+      >{key_list[node.getTypeName()]} : {node.getNodeInfo()?.getName()}</option
     >
   {/each}
 </select>

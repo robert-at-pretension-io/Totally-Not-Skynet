@@ -8,6 +8,7 @@
   import AuthPage from "./components/AuthPage.svelte";
   import { SystemState } from "./generated/system_types_pb";
   import Loading from "./components/Loading.svelte";
+  import { initializeSystemState } from "helper_functions/misc";
   // import { initializeSystemState } from "helper_functions/misc";
 
   console.log("Script started");
@@ -19,6 +20,8 @@
 
   onMount(() => {
     console.log("onMount triggered");
+
+    $systemStateStore = initializeSystemState($systemStateStore);
 
     system_state = $systemStateStore;
     console.log("Initial system_state:", system_state);
