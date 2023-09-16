@@ -54,7 +54,6 @@ message Graph {
 message Process {
   Graph graph = 1;
   repeated string initial_variables = 2;
-  repeated GraphNodeInfo topological_order = 3;
 }
 
 // Node

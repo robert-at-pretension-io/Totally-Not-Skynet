@@ -5,7 +5,8 @@
 
   import { blur, fade } from "svelte/transition";
   import { onMount } from "svelte";
-  import CreateNode from "./sidebarComponents/CreateNode.svelte";
+  import CreateNode from "./sidebarComponents/CreateProcess.svelte";
+    import CreateProcess from "./sidebarComponents/CreateProcess.svelte";
 
   // onmount
 
@@ -27,7 +28,7 @@
     },
     {
       header: "Create a process",
-      component: CreateNode,
+      component: CreateProcess,
       open: false,
     },
 

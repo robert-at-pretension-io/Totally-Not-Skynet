@@ -56,56 +56,6 @@ export namespace Edge {
   }
 }
 
-export class GraphAction extends jspb.Message {
-  getAction(): GraphAction.ActionMap[keyof GraphAction.ActionMap];
-  setAction(value: GraphAction.ActionMap[keyof GraphAction.ActionMap]): void;
-
-  hasNode(): boolean;
-  clearNode(): void;
-  getNode(): GraphNodeInfo | undefined;
-  setNode(value?: GraphNodeInfo): void;
-
-  hasEdge(): boolean;
-  clearEdge(): void;
-  getEdge(): Edge | undefined;
-  setEdge(value?: Edge): void;
-
-  getObjectCase(): GraphAction.ObjectCase;
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): GraphAction.AsObject;
-  static toObject(includeInstance: boolean, msg: GraphAction): GraphAction.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: GraphAction, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): GraphAction;
-  static deserializeBinaryFromReader(message: GraphAction, reader: jspb.BinaryReader): GraphAction;
-}
-
-export namespace GraphAction {
-  export type AsObject = {
-    action: GraphAction.ActionMap[keyof GraphAction.ActionMap],
-    node?: GraphNodeInfo.AsObject,
-    edge?: Edge.AsObject,
-  }
-
-  export interface ActionMap {
-    ADD: 0;
-    REMOVE: 1;
-    SELECT: 2;
-    DESELECT: 3;
-    RESET: 4;
-    NONE: 5;
-  }
-
-  export const Action: ActionMap;
-
-  export enum ObjectCase {
-    OBJECT_NOT_SET = 0,
-    NODE = 2,
-    EDGE = 3,
-  }
-}
-
 export class Prompt extends jspb.Message {
   getPrompt(): string;
   setPrompt(value: string): void;
