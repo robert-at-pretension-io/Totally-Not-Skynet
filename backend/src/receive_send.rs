@@ -1,10 +1,10 @@
 use crate::generated_types::{
-    crud_bundle,
     CrudBundle,
     GraphNodeInfo,
     ResponseObject,
     UserSettings,
     VerbTypeNames,
+    ValidateNodes,
 };
 
 use std::sync::Arc;
@@ -248,6 +248,16 @@ pub async fn start_message_sending_loop(
                         todo!("Handle execution context");
                     }
                 }
+            Some(crud_bundle::Object::ValidateNodes(nodes)) => {
+                match verb {
+                    VerbTypeNames::Post => {
+                        // generate maximal graph from nodes (based on input_variables and output_variables)
+                        println!("Validating nodes: {:?}", nodes);
+                        println!("Validating nodes for user: {:?}", msg.0);
+                        println!("need to return a Graph object");
+                    }
+                }
+            }
 
             None => {
                 println!("odd...");

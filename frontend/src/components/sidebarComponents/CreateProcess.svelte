@@ -6,6 +6,8 @@
   import systemStateStore from "stores/systemStateStore";
 
   import { writable } from "svelte/store";
+  import { websocketStore } from "stores/websocketStore";
+  import { sendWebsocketMessage } from "helper_functions/websocket";
 
   let selected_node_ids: string[] = [];
 
@@ -57,9 +59,21 @@
       );
     });
 
-    alert(
-      "Send the filtered nodes to the backend with the ValidateNodes message"
-    );
+    console.log("sending filtered_nodes: ", filtered_nodes);
+
+    let crud_message = new proto.CrudBundle();
+
+    crud_message.setVerb(proto.VerbTypeNames.POST);
+
+    let validate_nodes = new proto.ValidateNodes();
+
+    validate_nodes.setNodesList(filtered_nodes);
+
+    crud_message.setValidateNodes(validate_nodes);
+
+    sendWebsocketMessage(crud_message, $websocketStore.websocket as WebSocket);
+
+    $selected_node_ids_store = [];
   }
 </script>
 

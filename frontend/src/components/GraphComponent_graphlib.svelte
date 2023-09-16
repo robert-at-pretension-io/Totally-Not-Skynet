@@ -8,10 +8,14 @@
 
   import * as graphlib from "graphlib";
 
+  let current_graph: proto.Graph = new proto.Graph();
+
   onMount(() => {
     console.log("Graph Component Mounted");
 
-    cytoscape.use(dagre);
+    // cytoscape.use(dagre);
+
+    current_graph = $systemStateStore.getGraph() as proto.Graph;
 
     cyInstance = cytoscape({
       container: refElement,
@@ -81,7 +85,79 @@
 
       $systemStateStore = helper_functions.selectEdge(edge, $systemStateStore);
     });
+
+    cyInstance.on("unselect", "node", function (evt) {
+      const node = evt.target;
+      console.log("deselected " + node.id());
+
+      let selected_list = $systemStateStore.getSelectedNodeList();
+
+      // remove the node the graphNodeInfo from the selected_list where the id is the same as the node.id()
+
+      selected_list = selected_list.filter((graphNodeInfo) => {
+        return graphNodeInfo.getId() == node.id();
+      });
+
+      $systemStateStore.setSelectedNodeList(selected_list);
+    });
+
+    // Listen to unselect event on any edge
+    cyInstance.on("unselect", "edge", function (evt) {
+      const edge = evt.target;
+      console.log(
+        "deselected " + edge.data().source + " -> " + edge.data().target
+      );
+    });
   });
+
+  $: {
+    // Whenever the systemState.getGraph() changes, we will change the cytoscape graph. It might be good to check if the graph has actually changed rather than always re-draw
+
+    let test_graph = $systemStateStore.getGraph() as proto.Graph;
+
+    // check that the test_graph is different from the current_graph
+    if (test_graph != current_graph) {
+      current_graph = test_graph;
+
+      // clear the cytoscape graph
+      cyInstance?.elements().remove();
+
+      // add the nodes to the cytoscape graph
+      let nodes = current_graph.getNodesList();
+
+      nodes.forEach((node_info) => {
+        if (node_info) {
+          cyInstance?.add({
+            data: {
+              id: node_info.getId(),
+              label: node_info.getName(),
+            },
+          });
+        }
+      });
+
+      // add the edges to the cytoscape graph
+      let edges = current_graph.getEdgesList();
+
+      edges.forEach((edge) => {
+        let source = edge.getSource();
+        let target = edge.getTarget();
+
+        if (source && target) {
+          cyInstance?.add({
+            data: {
+              source: source.getId(),
+              target: target.getId(),
+            },
+          });
+        }
+      });
+
+      // layout the graph
+      layout.run();
+      cyInstance?.fit();
+    }
+  }
 
   setContext("graphSharedState", {
     getCyInstance: () => cyInstance,
