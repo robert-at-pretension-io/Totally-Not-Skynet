@@ -165,11 +165,6 @@ export class Process extends jspb.Message {
   setInitialVariablesList(value: Array<string>): void;
   addInitialVariables(value: string, index?: number): string;
 
-  clearTopologicalOrderList(): void;
-  getTopologicalOrderList(): Array<GraphNodeInfo>;
-  setTopologicalOrderList(value: Array<GraphNodeInfo>): void;
-  addTopologicalOrder(value?: GraphNodeInfo, index?: number): GraphNodeInfo;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Process.AsObject;
   static toObject(includeInstance: boolean, msg: Process): Process.AsObject;
@@ -184,7 +179,6 @@ export namespace Process {
   export type AsObject = {
     graph?: Graph.AsObject,
     initialVariablesList: Array<string>,
-    topologicalOrderList: Array<GraphNodeInfo.AsObject>,
   }
 }
 

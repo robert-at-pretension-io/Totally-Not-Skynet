@@ -1,4 +1,5 @@
 import { sendWebsocketMessage } from "./websocket";
+import systemStateStore from "stores/systemStateStore";
 
 import {
   AuthenticationMessage,
@@ -22,6 +23,12 @@ export function authenticate(
   auth_content.setClientPassword(password);
 
   auth_bundle.setAuthenticationMessage(auth_content);
+
+  systemStateStore.update((s) => {
+    console.log("setting authenticated to true");
+    s.setAuthenticated(true);
+    return s;
+  });
 
   sendWebsocketMessage(auth_bundle, websocket);
 

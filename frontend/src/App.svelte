@@ -17,6 +17,7 @@
   let websocket: WebSocket;
   let system_state: SystemState;
   let websocket_ready = false;
+  let authenticated: boolean;
 
   onMount(() => {
     console.log("onMount triggered");
@@ -45,21 +46,13 @@
     }
   });
 
-  // $: {
-  //   console.log("Reactive statement triggered");
-  //   // authenticated = system_state?.getAuthenticated();
-
-  //   // authenticated = $systemStateStore.getAuthenticated();
-  //   console.log("Authenticated state:", authenticated);
-
-  //   if (system_state?.getWebsocketReady()) {
-  //     console.log("Websocket ready");
-  //     websocket_ready = true;
-  //   }
-  // }
+  $: {
+    console.log("auth state", $systemStateStore.getAuthenticated());
+    authenticated = $systemStateStore.getAuthenticated();
+  }
 </script>
 
-{#if !$systemStateStore.getAuthenticated()}
+{#if !authenticated}
   {#if websocket_ready}
     <AuthPage />
   {:else}
@@ -67,7 +60,7 @@
   {/if}
 {/if}
 
-{#if $systemStateStore.getAuthenticated()}
+{#if authenticated}
   <div class="app-container">
     <Sidebar />
     <GraphComponentGraphlib />

@@ -1561,7 +1561,7 @@ proto.skynet.types.Graph.prototype.clearEdgesList = function() {
  * @private {!Array<number>}
  * @const
  */
-proto.skynet.types.Process.repeatedFields_ = [2,3];
+proto.skynet.types.Process.repeatedFields_ = [2];
 
 
 
@@ -1595,9 +1595,7 @@ proto.skynet.types.Process.prototype.toObject = function(opt_includeInstance) {
 proto.skynet.types.Process.toObject = function(includeInstance, msg) {
   var f, obj = {
     graph: (f = msg.getGraph()) && proto.skynet.types.Graph.toObject(includeInstance, f),
-    initialVariablesList: (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f,
-    topologicalOrderList: jspb.Message.toObjectList(msg.getTopologicalOrderList(),
-    proto.skynet.types.GraphNodeInfo.toObject, includeInstance)
+    initialVariablesList: (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f
   };
 
   if (includeInstance) {
@@ -1643,11 +1641,6 @@ proto.skynet.types.Process.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.addInitialVariables(value);
       break;
-    case 3:
-      var value = new proto.skynet.types.GraphNodeInfo;
-      reader.readMessage(value,proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader);
-      msg.addTopologicalOrder(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -1690,14 +1683,6 @@ proto.skynet.types.Process.serializeBinaryToWriter = function(message, writer) {
     writer.writeRepeatedString(
       2,
       f
-    );
-  }
-  f = message.getTopologicalOrderList();
-  if (f.length > 0) {
-    writer.writeRepeatedMessage(
-      3,
-      f,
-      proto.skynet.types.GraphNodeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -1774,44 +1759,6 @@ proto.skynet.types.Process.prototype.addInitialVariables = function(value, opt_i
  */
 proto.skynet.types.Process.prototype.clearInitialVariablesList = function() {
   return this.setInitialVariablesList([]);
-};
-
-
-/**
- * repeated GraphNodeInfo topological_order = 3;
- * @return {!Array<!proto.skynet.types.GraphNodeInfo>}
- */
-proto.skynet.types.Process.prototype.getTopologicalOrderList = function() {
-  return /** @type{!Array<!proto.skynet.types.GraphNodeInfo>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.skynet.types.GraphNodeInfo, 3));
-};
-
-
-/**
- * @param {!Array<!proto.skynet.types.GraphNodeInfo>} value
- * @return {!proto.skynet.types.Process} returns this
-*/
-proto.skynet.types.Process.prototype.setTopologicalOrderList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 3, value);
-};
-
-
-/**
- * @param {!proto.skynet.types.GraphNodeInfo=} opt_value
- * @param {number=} opt_index
- * @return {!proto.skynet.types.GraphNodeInfo}
- */
-proto.skynet.types.Process.prototype.addTopologicalOrder = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 3, opt_value, proto.skynet.types.GraphNodeInfo, opt_index);
-};
-
-
-/**
- * Clears the list making it empty but non-null.
- * @return {!proto.skynet.types.Process} returns this
- */
-proto.skynet.types.Process.prototype.clearTopologicalOrderList = function() {
-  return this.setTopologicalOrderList([]);
 };
 
 

@@ -24,13 +24,10 @@
 
   // setup onmount:
   onMount(() => {
-    system_state = $systemStateStore;
     node_list = $systemStateStore.getNodesList();
   });
 
   $: {
-    system_state = $systemStateStore;
-
     node_list = $systemStateStore.getNodesList();
   }
 

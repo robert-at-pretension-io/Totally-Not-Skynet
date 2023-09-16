@@ -1,12 +1,9 @@
 <script lang="ts">
   import { onMount, setContext } from "svelte";
   import cytoscape, { Core } from "cytoscape";
-  import dagre from "cytoscape-dagre";
   import systemStateStore from "stores/systemStateStore.js";
   import * as helper_functions from "../helper_functions/graph";
   import * as proto from "../generated/system_types_pb";
-
-  import * as graphlib from "graphlib";
 
   let current_graph: proto.Graph = new proto.Graph();
 
@@ -15,7 +12,11 @@
 
     // cytoscape.use(dagre);
 
-    current_graph = $systemStateStore.getGraph() as proto.Graph;
+    if ($systemStateStore.getGraph() != undefined) {
+      current_graph = $systemStateStore.getGraph() as proto.Graph;
+    } else {
+      current_graph = new proto.Graph();
+    }
 
     cyInstance = cytoscape({
       container: refElement,
@@ -48,10 +49,6 @@
           },
         },
       ],
-    });
-
-    layout = cyInstance.layout({
-      name: "dagre" /* or whatever layout you're using */,
     });
 
     cyInstance.on("select", "node", (evt) => {
@@ -113,10 +110,10 @@
   $: {
     // Whenever the systemState.getGraph() changes, we will change the cytoscape graph. It might be good to check if the graph has actually changed rather than always re-draw
 
-    let test_graph = $systemStateStore.getGraph() as proto.Graph;
+    let test_graph = $systemStateStore.getGraph();
 
     // check that the test_graph is different from the current_graph
-    if (test_graph != current_graph) {
+    if (test_graph != current_graph && test_graph != undefined) {
       current_graph = test_graph;
 
       // clear the cytoscape graph
@@ -153,8 +150,6 @@
         }
       });
 
-      // layout the graph
-      layout.run();
       cyInstance?.fit();
     }
   }
@@ -165,9 +160,6 @@
 
   let refElement: HTMLElement | null = null;
   let cyInstance: Core | null = null;
-  let g = new graphlib.Graph();
-
-  let layout: cytoscape.Layouts;
 </script>
 
 <div class="graph" bind:this={refElement}>

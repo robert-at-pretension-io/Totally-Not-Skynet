@@ -1,5 +1,4 @@
 <script>
-  import systemStateStore from "stores/systemStateStore";
   import { websocketStore } from "stores/websocketStore";
   import { authenticate } from "helper_functions/authentication";
 
@@ -11,7 +10,6 @@
     console.log("Password:", password);
 
     // set authentication to true
-    $systemStateStore.setAuthenticated(true);
 
     let websocket = $websocketStore.websocket;
     authenticate(websocket, "", "");
