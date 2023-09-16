@@ -4,7 +4,6 @@ import {
   AuthenticationMessage,
   CrudBundle,
   VerbTypeNames,
-  SystemState
 } from "../generated/system_types_pb";
 
 export function authenticate(

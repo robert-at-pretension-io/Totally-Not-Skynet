@@ -43,86 +43,62 @@
     node_list = $systemStateStore.getNodesList();
   }
 
-  function saveProcess() {
-    // create an alert message if either name or description are null
-    if (name === null || description === null) {
-      alert("Please enter a name and description for the process");
-      return;
-    } else {
-      alert("No checks to ensure graph is correct");
-      let graph_state = $systemStateStore.getGraphState();
-      // let maybe_topological_order =
-      //   helper_functions.validateGraph(system_state);
+  // function saveProcess() {
+  //   // create an alert message if either name or description are null
+  //   if (name === null || description === null) {
+  //     alert("Please enter a name and description for the process");
+  //     return;
+  //   } else {
+  //     alert("No checks to ensure graph is correct");
+  //     let graph_state = $systemStateStore.getGraphState();
+  //     // let maybe_topological_order =
+  //     //   helper_functions.validateGraph(system_state);
 
-      // if (maybe_topological_order && graph_state != undefined) {
-      //   let topological_order =
-      //     maybe_topological_order as proto.GraphNodeInfo[];
+  //     // if (maybe_topological_order && graph_state != undefined) {
+  //     //   let topological_order =
+  //     //     maybe_topological_order as proto.GraphNodeInfo[];
 
-      let process = new proto.Process();
+  //     let process = new proto.Process();
 
-      process.setGraphState(graph_state);
-      process.setInitialVariablesList([]);
-      process.setTopologicalOrderList([]);
+  //     process.setGraphState(graph_state);
+  //     process.setInitialVariablesList([]);
+  //     process.setTopologicalOrderList([]);
 
-      let new_node = new proto.Node();
+  //     let new_node = new proto.Node();
 
-      let graph_node_info = new proto.GraphNodeInfo();
-      graph_node_info.setName(name);
+  //     let graph_node_info = new proto.GraphNodeInfo();
+  //     graph_node_info.setName(name);
 
-      new_node.setNodeInfo(graph_node_info);
-      new_node.setDescription(description);
-      new_node.setProcess(process);
-      new_node.setTypeName(proto.NodeTypeNames.PROCESS);
+  //     new_node.setNodeInfo(graph_node_info);
+  //     new_node.setDescription(description);
+  //     new_node.setProcess(process);
+  //     new_node.setTypeName(proto.NodeTypeNames.PROCESS);
 
-      let crud_bundle = new proto.CrudBundle();
+  //     let crud_bundle = new proto.CrudBundle();
 
-      crud_bundle.setNode(new_node);
-      crud_bundle.setVerb(proto.VerbTypeNames.POST);
+  //     crud_bundle.setNode(new_node);
+  //     crud_bundle.setVerb(proto.VerbTypeNames.POST);
 
-      // let websocket = $websocketStore as WebSocket;
+  //     // let websocket = $websocketStore as WebSocket;
 
-      sendWebsocketMessage(crud_bundle, $websocketStore.websocket as WebSocket);
+  //     sendWebsocketMessage(crud_bundle, $websocketStore.websocket as WebSocket);
 
-      alert("todo: save process by sending websocket message");
-    }
-    // else {
-    //   alert("The process does not have a valid topological order :(");
-    // }
-    // }
-  }
+  //     alert("todo: save process by sending websocket message");
+  //   }
+  //   // else {
+  //   //   alert("The process does not have a valid topological order :(");
+  //   // }
+  //   // }
+  // }
   function isSelected(node: proto.Node): boolean {
     let node_id = node.getNodeInfo()?.getId() as string;
 
     return $selected_node_ids_store.includes(node_id);
   }
+
   function removeNodes() {
-    let graph_state = system_state.getGraphState();
-    let action_list = graph_state?.getActionHistoryList();
-
     // check if the last action was a select edge action
-
-    let last_action: proto.GraphAction;
-    let last_action_type: proto.GraphAction.ActionMap[keyof proto.GraphAction.ActionMap];
-
-    if (action_list != undefined && action_list.length > 0) {
-      last_action = action_list[action_list.length - 1];
-
-      last_action_type = last_action.getAction();
-
-      console.log("remove node action:", last_action.toObject());
-
-      if (last_action_type == proto.GraphAction.Action.SELECT) {
-        if (last_action.hasNode()) {
-          let last_node = last_action.getNode();
-          if (last_node) {
-            $systemStateStore = helper_functions.removeNode(
-              last_node.getId() as string,
-              system_state
-            );
-          }
-        }
-      }
-    }
+    alert("no way to remove nodes yet"")
   }
 
   function addNodes() {

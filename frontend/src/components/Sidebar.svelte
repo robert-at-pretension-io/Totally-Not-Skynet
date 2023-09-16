@@ -6,9 +6,6 @@
   import { blur, fade } from "svelte/transition";
   import { onMount } from "svelte";
   import CreateNode from "./sidebarComponents/CreateNode.svelte";
-  import { authenticate } from "helper_functions/authentication";
-  import { websocketStore } from "stores/websocketStore";
-  import systemStateStore from "stores/systemStateStore";
 
   // onmount
 

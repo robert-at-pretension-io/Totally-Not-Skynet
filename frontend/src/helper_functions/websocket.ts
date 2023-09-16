@@ -2,7 +2,6 @@
 import { SystemState, ResponseObject, CrudBundle, Node } from "../../src/generated/system_types_pb";
 
 import systemStateStore from "stores/systemStateStore";
-import { authenticate } from "./authentication";
 
 export function setupWebsocketConnection(
 ): WebSocket {

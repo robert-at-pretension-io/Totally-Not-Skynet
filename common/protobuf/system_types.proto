@@ -15,23 +15,6 @@ message Edge {
   GraphNodeInfo target = 2;
 }
 
-// GraphAction
-message GraphAction {
-  enum Action {
-    ADD = 0;
-    REMOVE = 1;
-    SELECT = 2;
-    DESELECT = 3;
-    RESET = 4;
-    NONE = 5;
-  }
-  Action action = 1;
-
-    oneof object {
-    GraphNodeInfo node = 2;
-    Edge edge = 3;
-  }
-}
 
 
 
@@ -89,11 +72,6 @@ message Node {
   repeated string output_variables = 10;
 }
 
-// GraphState
-message GraphState {
-  Graph graph = 1;
-  repeated GraphAction action_history = 2;
-}
 
 // SystemErrors
 enum SystemErrors {
@@ -126,10 +104,11 @@ message ExecutionContext {
 message SystemState {
   bool authenticated = 1;
   bool websocket_ready = 2;
-  GraphState graph_state = 3;
+  Graph graph = 3;
   repeated Node nodes = 4;
-  repeated Node selected_node = 5; // Adapted to non-optional
-  ExecutionContext execution_context = 6; // Adapted to non-optional
+  repeated GraphNodeInfo selected_node = 5; 
+  repeated Edge selected_edge = 6; 
+  ExecutionContext execution_context = 7;
 }
 
 // AuthenticationMessage
@@ -144,6 +123,10 @@ message UserSettings {
   string mongo_db_uri = 2;
 }
 
+message ValidateNodes {
+  repeated Node nodes = 1;
+}
+
 // CrudBundle
 message CrudBundle {
   VerbTypeNames verb = 1;
@@ -152,6 +135,7 @@ message CrudBundle {
     AuthenticationMessage authentication_message = 3;
     UserSettings user_settings = 4;
     ExecutionContext execution_context = 5;
+    ValidateNodes validate_nodes = 6;
   }
 }
 
@@ -189,6 +173,11 @@ message ExecutionResponse {
   NodeExecutionResponse response = 5;
 }
 
+message ValidateNodesResponse {
+  repeated string errors = 1;
+  repeated Graph graph = 2;
+}
+
 // ResponseObject
 message ResponseObject {
   oneof object {
@@ -196,5 +185,6 @@ message ResponseObject {
     string authentication_message = 2; // Adapted to string
     string user_settings = 3; // Adapted to string
     ExecutionResponse execution_response = 4;
+    ValidateNodesResponse validate_nodes_response = 5;
   }
 }

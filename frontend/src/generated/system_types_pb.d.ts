@@ -205,10 +205,10 @@ export namespace Graph {
 }
 
 export class Process extends jspb.Message {
-  hasGraphState(): boolean;
-  clearGraphState(): void;
-  getGraphState(): GraphState | undefined;
-  setGraphState(value?: GraphState): void;
+  hasGraph(): boolean;
+  clearGraph(): void;
+  getGraph(): Graph | undefined;
+  setGraph(value?: Graph): void;
 
   clearInitialVariablesList(): void;
   getInitialVariablesList(): Array<string>;
@@ -232,7 +232,7 @@ export class Process extends jspb.Message {
 
 export namespace Process {
   export type AsObject = {
-    graphState?: GraphState.AsObject,
+    graph?: Graph.AsObject,
     initialVariablesList: Array<string>,
     topologicalOrderList: Array<GraphNodeInfo.AsObject>,
   }
@@ -313,34 +313,6 @@ export namespace Node {
   }
 }
 
-export class GraphState extends jspb.Message {
-  hasGraph(): boolean;
-  clearGraph(): void;
-  getGraph(): Graph | undefined;
-  setGraph(value?: Graph): void;
-
-  clearActionHistoryList(): void;
-  getActionHistoryList(): Array<GraphAction>;
-  setActionHistoryList(value: Array<GraphAction>): void;
-  addActionHistory(value?: GraphAction, index?: number): GraphAction;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): GraphState.AsObject;
-  static toObject(includeInstance: boolean, msg: GraphState): GraphState.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: GraphState, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): GraphState;
-  static deserializeBinaryFromReader(message: GraphState, reader: jspb.BinaryReader): GraphState;
-}
-
-export namespace GraphState {
-  export type AsObject = {
-    graph?: Graph.AsObject,
-    actionHistoryList: Array<GraphAction.AsObject>,
-  }
-}
-
 export class ExecutionContext extends jspb.Message {
   clearTopologicalOrderList(): void;
   getTopologicalOrderList(): Array<string>;
@@ -387,10 +359,10 @@ export class SystemState extends jspb.Message {
   getWebsocketReady(): boolean;
   setWebsocketReady(value: boolean): void;
 
-  hasGraphState(): boolean;
-  clearGraphState(): void;
-  getGraphState(): GraphState | undefined;
-  setGraphState(value?: GraphState): void;
+  hasGraph(): boolean;
+  clearGraph(): void;
+  getGraph(): Graph | undefined;
+  setGraph(value?: Graph): void;
 
   clearNodesList(): void;
   getNodesList(): Array<Node>;
@@ -398,9 +370,14 @@ export class SystemState extends jspb.Message {
   addNodes(value?: Node, index?: number): Node;
 
   clearSelectedNodeList(): void;
-  getSelectedNodeList(): Array<Node>;
-  setSelectedNodeList(value: Array<Node>): void;
-  addSelectedNode(value?: Node, index?: number): Node;
+  getSelectedNodeList(): Array<GraphNodeInfo>;
+  setSelectedNodeList(value: Array<GraphNodeInfo>): void;
+  addSelectedNode(value?: GraphNodeInfo, index?: number): GraphNodeInfo;
+
+  clearSelectedEdgeList(): void;
+  getSelectedEdgeList(): Array<Edge>;
+  setSelectedEdgeList(value: Array<Edge>): void;
+  addSelectedEdge(value?: Edge, index?: number): Edge;
 
   hasExecutionContext(): boolean;
   clearExecutionContext(): void;
@@ -421,9 +398,10 @@ export namespace SystemState {
   export type AsObject = {
     authenticated: boolean,
     websocketReady: boolean,
-    graphState?: GraphState.AsObject,
+    graph?: Graph.AsObject,
     nodesList: Array<Node.AsObject>,
-    selectedNodeList: Array<Node.AsObject>,
+    selectedNodeList: Array<GraphNodeInfo.AsObject>,
+    selectedEdgeList: Array<Edge.AsObject>,
     executionContext?: ExecutionContext.AsObject,
   }
 }
@@ -476,6 +454,28 @@ export namespace UserSettings {
   }
 }
 
+export class ValidateNodes extends jspb.Message {
+  clearNodesList(): void;
+  getNodesList(): Array<Node>;
+  setNodesList(value: Array<Node>): void;
+  addNodes(value?: Node, index?: number): Node;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ValidateNodes.AsObject;
+  static toObject(includeInstance: boolean, msg: ValidateNodes): ValidateNodes.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ValidateNodes, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ValidateNodes;
+  static deserializeBinaryFromReader(message: ValidateNodes, reader: jspb.BinaryReader): ValidateNodes;
+}
+
+export namespace ValidateNodes {
+  export type AsObject = {
+    nodesList: Array<Node.AsObject>,
+  }
+}
+
 export class CrudBundle extends jspb.Message {
   getVerb(): VerbTypeNamesMap[keyof VerbTypeNamesMap];
   setVerb(value: VerbTypeNamesMap[keyof VerbTypeNamesMap]): void;
@@ -500,6 +500,11 @@ export class CrudBundle extends jspb.Message {
   getExecutionContext(): ExecutionContext | undefined;
   setExecutionContext(value?: ExecutionContext): void;
 
+  hasValidateNodes(): boolean;
+  clearValidateNodes(): void;
+  getValidateNodes(): ValidateNodes | undefined;
+  setValidateNodes(value?: ValidateNodes): void;
+
   getObjectCase(): CrudBundle.ObjectCase;
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): CrudBundle.AsObject;
@@ -518,6 +523,7 @@ export namespace CrudBundle {
     authenticationMessage?: AuthenticationMessage.AsObject,
     userSettings?: UserSettings.AsObject,
     executionContext?: ExecutionContext.AsObject,
+    validateNodes?: ValidateNodes.AsObject,
   }
 
   export enum ObjectCase {
@@ -526,6 +532,7 @@ export namespace CrudBundle {
     AUTHENTICATION_MESSAGE = 3,
     USER_SETTINGS = 4,
     EXECUTION_CONTEXT = 5,
+    VALIDATE_NODES = 6,
   }
 }
 
@@ -677,6 +684,34 @@ export namespace ExecutionResponse {
   }
 }
 
+export class ValidateNodesResponse extends jspb.Message {
+  clearErrorsList(): void;
+  getErrorsList(): Array<string>;
+  setErrorsList(value: Array<string>): void;
+  addErrors(value: string, index?: number): string;
+
+  clearGraphList(): void;
+  getGraphList(): Array<Graph>;
+  setGraphList(value: Array<Graph>): void;
+  addGraph(value?: Graph, index?: number): Graph;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ValidateNodesResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ValidateNodesResponse): ValidateNodesResponse.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: ValidateNodesResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ValidateNodesResponse;
+  static deserializeBinaryFromReader(message: ValidateNodesResponse, reader: jspb.BinaryReader): ValidateNodesResponse;
+}
+
+export namespace ValidateNodesResponse {
+  export type AsObject = {
+    errorsList: Array<string>,
+    graphList: Array<Graph.AsObject>,
+  }
+}
+
 export class ResponseObject extends jspb.Message {
   hasNode(): boolean;
   clearNode(): void;
@@ -698,6 +733,11 @@ export class ResponseObject extends jspb.Message {
   getExecutionResponse(): ExecutionResponse | undefined;
   setExecutionResponse(value?: ExecutionResponse): void;
 
+  hasValidateNodesResponse(): boolean;
+  clearValidateNodesResponse(): void;
+  getValidateNodesResponse(): ValidateNodesResponse | undefined;
+  setValidateNodesResponse(value?: ValidateNodesResponse): void;
+
   getObjectCase(): ResponseObject.ObjectCase;
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ResponseObject.AsObject;
@@ -715,6 +755,7 @@ export namespace ResponseObject {
     authenticationMessage: string,
     userSettings: string,
     executionResponse?: ExecutionResponse.AsObject,
+    validateNodesResponse?: ValidateNodesResponse.AsObject,
   }
 
   export enum ObjectCase {
@@ -723,6 +764,7 @@ export namespace ResponseObject {
     AUTHENTICATION_MESSAGE = 2,
     USER_SETTINGS = 3,
     EXECUTION_RESPONSE = 4,
+    VALIDATE_NODES_RESPONSE = 5,
   }
 }
 

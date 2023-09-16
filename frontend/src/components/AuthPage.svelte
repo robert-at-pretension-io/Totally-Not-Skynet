@@ -1,10 +1,4 @@
 <script>
-  import {
-    AuthenticationMessage,
-    CrudBundle,
-    VerbTypeNames,
-  } from "../generated/system_types_pb";
-  import { sendWebsocketMessage } from "helper_functions/websocket";
   import systemStateStore from "stores/systemStateStore";
   import { websocketStore } from "stores/websocketStore";
   import { authenticate } from "helper_functions/authentication";

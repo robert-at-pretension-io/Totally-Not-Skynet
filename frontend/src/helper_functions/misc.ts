@@ -1,4 +1,4 @@
-import { Graph, GraphAction, GraphState, SystemState } from "../generated/system_types_pb";
+import { Graph, SystemState } from "../generated/system_types_pb";
 
 export function areAllPropertiesUndefined<T extends object>(obj: T): boolean {
   return Object.values(obj).every((value) => value === undefined);
@@ -14,15 +14,8 @@ export function stringToUint8Array(str: string): Uint8Array {
 }
 
 export function initializeSystemState(system_state: SystemState): SystemState {
-  // const system_state = new SystemState();
-  const graph_state = new GraphState();
   const graph = new Graph();
-  const action_history: GraphAction[] = [];
-
-  graph_state.setGraph(graph);
-  graph_state.setActionHistoryList(action_history);
-
-  system_state.setGraphState(graph_state);
+  system_state.setGraph(graph);
   system_state.setAuthenticated(false);
   system_state.setWebsocketReady(false);
   system_state.setNodesList([]);

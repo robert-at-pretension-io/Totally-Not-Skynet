@@ -4,8 +4,8 @@ import * as proto from "../generated/system_types_pb";
 export function systemGraphToGraphLib(
   system_state: proto.SystemState
 ): graphlib.Graph {
-  const graph_state = system_state.getGraphState() as proto.GraphState;
-  const graph = graph_state.getGraph() as proto.Graph;
+  const graph = system_state.getGraph() as proto.Graph;
+  // const graph = graph_state.getGraph() as proto.Graph;
 
   const g = new graphlib.Graph();
 
@@ -51,49 +51,49 @@ export function handleError(_error: any) {
   alert("REIMPLEMENT THIS USING PROTO BUF");
 }
 
-export function validateGraph(
-  system_state: proto.SystemState
-): proto.GraphNodeInfo[] | boolean {
-  const graph_state = system_state.getGraphState() as proto.GraphState;
-  if (!graph_state) {
-    // await handleError({ name: "GraphDoesntExist" });
-    console.log("Graph doesn't exist");
-    return false;
-  } else {
-    const test_orders: proto.GraphNodeInfo[][] = getAllTopologicalOrders(
-      system_state
-    );
-    console.log("test_orders: ", test_orders);
-    alert("For the time being, just return the first topological order");
-    if (test_orders.length >= 0) {
-      return test_orders[0];
+// export function validateGraph(
+//   system_state: proto.SystemState
+// ): proto.GraphNodeInfo[] | boolean {
+//   const graph_state = system_state.getGraphState() as proto.GraphState;
+//   if (!graph_state) {
+//     // await handleError({ name: "GraphDoesntExist" });
+//     console.log("Graph doesn't exist");
+//     return false;
+//   } else {
+//     const test_orders: proto.GraphNodeInfo[][] = getAllTopologicalOrders(
+//       system_state
+//     );
+//     console.log("test_orders: ", test_orders);
+//     alert("For the time being, just return the first topological order");
+//     if (test_orders.length >= 0) {
+//       return test_orders[0];
 
-    }
-    else {
-      console.log("There are no topologic");
-      return false;
-    }
-  }
+//     }
+//     else {
+//       console.log("There are no topologic");
+//       return false;
+//     }
+//   }
 
-}
+// }
 
-export function getAllTopologicalOrders(
-  system_state: proto.SystemState
-): proto.GraphNodeInfo[][] {
-  // check that there is a single component (that the graph is connected) AND
-  // that there are no cycles in the graph
+// export function getAllTopologicalOrders(
+//   system_state: proto.SystemState
+// ): proto.GraphNodeInfo[][] {
+//   // check that there is a single component (that the graph is connected) AND
+//   // that there are no cycles in the graph
 
-  const graphlib_graph = systemGraphToGraphLib(system_state);
+//   const graphlib_graph = systemGraphToGraphLib(system_state);
 
-  if (
-    !graphlib.alg.isAcyclic(graphlib_graph) ||
-    graphlib.alg.components(graphlib_graph).length !== 1
-  ) {
-    return [];
-  }
+//   if (
+//     !graphlib.alg.isAcyclic(graphlib_graph) ||
+//     graphlib.alg.components(graphlib_graph).length !== 1
+//   ) {
+//     return [];
+//   }
 
-  return allTopologicalSorts(system_state);
-}
+//   return allTopologicalSorts(system_state);
+// }
 
 export function returnSuccessorMap(
   system_state: proto.SystemState
@@ -124,86 +124,86 @@ export function returnSuccessorMap(
   return node_neightbors;
 }
 
-function allTopologicalSorts(
-  system_state: proto.SystemState
-): proto.GraphNodeInfo[][] {
-  const graph_state = system_state.getGraphState() as proto.GraphState;
-  const all_orderings: proto.GraphNodeInfo[][] = [];
-  const graph = graph_state.getGraph() as proto.Graph;
-  const successor_map = returnSuccessorMap(system_state);
-  const start_nodes = returnStartNodes(system_state);
-  const in_degree_map = returnAllIndegree(system_state);
-  const visited: Map<proto.GraphNodeInfo, boolean> = new Map();
+// function allTopologicalSorts(
+//   system_state: proto.SystemState
+// ): proto.GraphNodeInfo[][] {
+//   const graph_state = system_state.getGraphState() as proto.GraphState;
+//   const all_orderings: proto.GraphNodeInfo[][] = [];
+//   const graph = graph_state.getGraph() as proto.Graph;
+//   const successor_map = returnSuccessorMap(system_state);
+//   const start_nodes = returnStartNodes(system_state);
+//   const in_degree_map = returnAllIndegree(system_state);
+//   const visited: Map<proto.GraphNodeInfo, boolean> = new Map();
 
-  const node_list = graph.getNodesList();
+//   const node_list = graph.getNodesList();
 
-  node_list.forEach(async (node_info) => {
-    visited.set(node_info, false);
-  });
+//   node_list.forEach(async (node_info) => {
+//     visited.set(node_info, false);
+//   });
 
-  function helper(
-    node: proto.GraphNodeInfo,
-    in_degree_map: Map<proto.GraphNodeInfo, number>,
-    visited: Map<proto.GraphNodeInfo, boolean>,
-    stack: proto.GraphNodeInfo[]
-  ): void {
-    visited.set(node, true);
+//   function helper(
+//     node: proto.GraphNodeInfo,
+//     in_degree_map: Map<proto.GraphNodeInfo, number>,
+//     visited: Map<proto.GraphNodeInfo, boolean>,
+//     stack: proto.GraphNodeInfo[]
+//   ): void {
+//     visited.set(node, true);
 
-    stack.push(node);
+//     stack.push(node);
 
-    if (stack.length === node_list.length) {
-      all_orderings.push([...stack]);
-    } else {
-      const successors = successor_map.get(node);
+//     if (stack.length === node_list.length) {
+//       all_orderings.push([...stack]);
+//     } else {
+//       const successors = successor_map.get(node);
 
-      if (successors) {
-        successors.forEach((successor) => {
-          const count = in_degree_map.get(successor);
-          const is_visited = visited.get(successor);
+//       if (successors) {
+//         successors.forEach((successor) => {
+//           const count = in_degree_map.get(successor);
+//           const is_visited = visited.get(successor);
 
-          if (count && is_visited != undefined) {
-            const new_count = count - 1;
-            in_degree_map.set(successor, new_count);
+//           if (count && is_visited != undefined) {
+//             const new_count = count - 1;
+//             in_degree_map.set(successor, new_count);
 
-            if (new_count == 0 && !is_visited) {
-              helper(successor, in_degree_map, visited, stack);
-            }
+//             if (new_count == 0 && !is_visited) {
+//               helper(successor, in_degree_map, visited, stack);
+//             }
 
-            in_degree_map.set(successor, count);
-          }
-        });
-      }
-    }
+//             in_degree_map.set(successor, count);
+//           }
+//         });
+//       }
+//     }
 
-    visited.set(node, false);
-    stack.pop();
-  }
+//     visited.set(node, false);
+//     stack.pop();
+//   }
 
-  start_nodes.forEach((node) => {
-    helper(node, in_degree_map, visited, []);
-  });
+//   start_nodes.forEach((node) => {
+//     helper(node, in_degree_map, visited, []);
+//   });
 
-  return all_orderings;
-}
+//   return all_orderings;
+// }
 
-function returnStartNodes(
-  system_state: proto.SystemState
-): proto.GraphNodeInfo[] {
+// function returnStartNodes(
+//   system_state: proto.SystemState
+// ): proto.GraphNodeInfo[] {
 
-  const start_nodes: proto.GraphNodeInfo[] = [];
+//   const start_nodes: proto.GraphNodeInfo[] = [];
 
-  const graphlib_graph = systemGraphToGraphLib(system_state);
+//   const graphlib_graph = systemGraphToGraphLib(system_state);
 
-  const sources = graphlib_graph.sources();
+//   const sources = graphlib_graph.sources();
 
-  sources.forEach(async (source_id: string) => {
-    const val = await getNodeInfo(source_id, system_state);
-    if (val) {
-      start_nodes.push(val);
-    }
-  });
-  return start_nodes;
-}
+//   sources.forEach(async (source_id: string) => {
+//     const val = await getNodeInfo(source_id, system_state);
+//     if (val) {
+//       start_nodes.push(val);
+//     }
+//   });
+//   return start_nodes;
+// }
 
 export function getNode(id: string, system_state: proto.SystemState): proto.Node {
 
@@ -237,225 +237,225 @@ export function getNodeInfo(id: string, system_state: proto.SystemState): proto.
   return node_info;
 }
 
-function returnAllIndegree(
-  // graph_state: proto.GraphState
-  system_state: proto.SystemState
-): Map<proto.GraphNodeInfo, number> {
+// function returnAllIndegree(
+//   // graph_state: proto.GraphState
+//   system_state: proto.SystemState
+// ): Map<proto.GraphNodeInfo, number> {
 
-  const in_degree_map: Map<proto.GraphNodeInfo, number> = new Map();
+//   const in_degree_map: Map<proto.GraphNodeInfo, number> = new Map();
 
-  const graphlib_graph = systemGraphToGraphLib(system_state);
+//   const graphlib_graph = systemGraphToGraphLib(system_state);
 
-  graphlib_graph.nodes().forEach((source_id: string) => {
-    const val = getNodeInfo(source_id, system_state);
+//   graphlib_graph.nodes().forEach((source_id: string) => {
+//     const val = getNodeInfo(source_id, system_state);
 
-    let count = 0;
-    const maybe_count = graphlib_graph.predecessors(source_id);
+//     let count = 0;
+//     const maybe_count = graphlib_graph.predecessors(source_id);
 
-    if (maybe_count) {
-      count = maybe_count.length;
-    }
+//     if (maybe_count) {
+//       count = maybe_count.length;
+//     }
 
-    if (val) {
-      in_degree_map.set(val, count);
-    }
-  });
-  return in_degree_map;
-}
+//     if (val) {
+//       in_degree_map.set(val, count);
+//     }
+//   });
+//   return in_degree_map;
+// }
 
-export function graphHasNode(
-  node: proto.Node,
-  system_state: proto.SystemState
-): boolean | void {
+// export function graphHasNode(
+//   node: proto.Node,
+//   system_state: proto.SystemState
+// ): boolean | void {
 
-  const graph_state = system_state.getGraphState() as proto.GraphState;
+//   const graph_state = system_state.getGraphState() as proto.GraphState;
 
-  const graph = graph_state.getGraph();
-  const node_info = node.getNodeInfo();
+//   const graph = graph_state.getGraph();
+//   const node_info = node.getNodeInfo();
 
-  if (!graph) {
-    console.log("Graph doesn't exist");
-    false;
-  } else {
-    const node_info_list = graph.getNodesList();
-    if (node_info) {
+//   if (!graph) {
+//     console.log("Graph doesn't exist");
+//     false;
+//   } else {
+//     const node_info_list = graph.getNodesList();
+//     if (node_info) {
 
-      console.log("The node info is: ", node_info.toObject());
+//       console.log("The node info is: ", node_info.toObject());
 
-      console.log("The node info list is: ", node_info_list);
-      //loop through node_info_list
-      for (let i = 0; i < node_info_list.length; i++) {
-        if ((node_info_list[i] = node_info)) {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
-}
+//       console.log("The node info list is: ", node_info_list);
+//       //loop through node_info_list
+//       for (let i = 0; i < node_info_list.length; i++) {
+//         if ((node_info_list[i] = node_info)) {
+//           return true;
+//         }
+//       }
+//     }
+//   }
+//   return false;
+// }
 
-export function graphHasEdge(
-  edge: proto.Edge,
-  system_state: proto.SystemState
-): boolean | void {
+// export function graphHasEdge(
+//   edge: proto.Edge,
+//   system_state: proto.SystemState
+// ): boolean | void {
 
-  const graph_state = system_state.getGraphState() as proto.GraphState;
+//   const graph_state = system_state.getGraphState() as proto.GraphState;
 
-  const graph = graph_state.getGraph();
+//   const graph = graph_state.getGraph();
 
-  if (!graph) {
-    console.log("Graph doesn't exist");
-    false;
-  } else {
-    const edge_list = graph.getEdgesList();
+//   if (!graph) {
+//     console.log("Graph doesn't exist");
+//     false;
+//   } else {
+//     const edge_list = graph.getEdgesList();
 
-    if (edge_list.includes(edge)) {
+//     if (edge_list.includes(edge)) {
 
-      return true;
-    }
+//       return true;
+//     }
 
-  }
-  return false;
-}
+//   }
+//   return false;
+// }
 
-export function addNode(
-  node: proto.Node,
-  // graph_state: proto.GraphState
-  system_state: proto.SystemState
-): proto.SystemState {
+// export function addNode(
+//   node: proto.Node,
+//   // graph_state: proto.GraphState
+//   system_state: proto.SystemState
+// ): proto.SystemState {
 
-  console.log("addNode system_state: ", system_state.toObject());
+//   console.log("addNode system_state: ", system_state.toObject());
 
-  let graph_state = system_state.getGraphState() as proto.GraphState;
+//   let graph_state = system_state.getGraphState() as proto.GraphState;
 
-  if (!graph_state) {
-    graph_state = new proto.GraphState();
-  }
+//   if (!graph_state) {
+//     graph_state = new proto.GraphState();
+//   }
 
-  // console.log("add the addNode function with inputs: ", node.toObject(), graph_state.toObject());
-  // const systemState = await getSystemState();
-  // add the input and output variables to the graph state
+//   // console.log("add the addNode function with inputs: ", node.toObject(), graph_state.toObject());
+//   // const systemState = await getSystemState();
+//   // add the input and output variables to the graph state
 
-  const node_list = graph_state.getGraph()?.getNodesList();
+//   const node_list = graph_state.getGraph()?.getNodesList();
 
-  if (node_list == undefined) {
-    alert("node_list is undefined");
-  }
+//   if (node_list == undefined) {
+//     alert("node_list is undefined");
+//   }
 
-  const has_node = node_list?.includes(node.getNodeInfo() as proto.GraphNodeInfo);
+//   const has_node = node_list?.includes(node.getNodeInfo() as proto.GraphNodeInfo);
 
-  console.log("has_node: ", has_node);
+//   console.log("has_node: ", has_node);
 
-  //check if the node already exists in the graph
-  if (!has_node) {
+//   //check if the node already exists in the graph
+//   if (!has_node) {
 
-    const node_info = node.getNodeInfo() as proto.GraphNodeInfo;
+//     const node_info = node.getNodeInfo() as proto.GraphNodeInfo;
 
-    const graph_action = new proto.GraphAction();
-    graph_action.setAction(proto.GraphAction.Action.ADD);
-    graph_action.setNode(node_info);
+//     const graph_action = new proto.GraphAction();
+//     graph_action.setAction(proto.GraphAction.Action.ADD);
+//     graph_action.setNode(node_info);
 
-    const action_history = graph_state.getActionHistoryList();
-    action_history.push(graph_action);
-    graph_state.setActionHistoryList(action_history);
+//     const action_history = graph_state.getActionHistoryList();
+//     action_history.push(graph_action);
+//     graph_state.setActionHistoryList(action_history);
 
-    const graph = graph_state.getGraph() as proto.Graph;
-    const node_array = graph.getNodesList() as proto.GraphNodeInfo[];
-    node_array.push(node_info);
-    graph.setNodesList(node_array);
+//     const graph = graph_state.getGraph() as proto.Graph;
+//     const node_array = graph.getNodesList() as proto.GraphNodeInfo[];
+//     node_array.push(node_info);
+//     graph.setNodesList(node_array);
 
-    system_state.setGraphState(graph_state);
+//     system_state.setGraphState(graph_state);
 
-  } else {
-    console.log("Node ", node, " is already in the graph, not adding it.");
-  }
+//   } else {
+//     console.log("Node ", node, " is already in the graph, not adding it.");
+//   }
 
-  return system_state;
+//   return system_state;
 
-}
+// }
 
-export function addEdge(
-  edge: proto.Edge,
-  // graph_state: proto.GraphState
-  system_state: proto.SystemState
-): proto.SystemState {
+// export function addEdge(
+//   edge: proto.Edge,
+//   // graph_state: proto.GraphState
+//   system_state: proto.SystemState
+// ): proto.SystemState {
 
-  console.log("addEdge system_state: ", system_state.toObject());
+//   console.log("addEdge system_state: ", system_state.toObject());
 
-  const graph_state = system_state.getGraphState() as proto.GraphState;
+//   const graph_state = system_state.getGraphState() as proto.GraphState;
 
-  const source = edge.getSource();
-  const target = edge.getTarget();
+//   const source = edge.getSource();
+//   const target = edge.getTarget();
 
-  console.log("Attempting to add edge: ", edge.toObject());
+//   console.log("Attempting to add edge: ", edge.toObject());
 
-  const edge_list = graph_state.getGraph()?.getEdgesList() as proto.Edge[];
+//   const edge_list = graph_state.getGraph()?.getEdgesList() as proto.Edge[];
 
-  console.log("edge_list: ", edge_list);
-  console.log("edge_list?.includes(edge): ", edge_list?.includes(edge));
+//   console.log("edge_list: ", edge_list);
+//   console.log("edge_list?.includes(edge): ", edge_list?.includes(edge));
 
-  if (source && target && !graphHasEdge(edge, system_state)) {
+//   if (source && target && !graphHasEdge(edge, system_state)) {
 
-    const graph_action = new proto.GraphAction();
-    graph_action.setAction(proto.GraphAction.Action.ADD);
-    graph_action.setNode();
-    graph_action.setEdge(edge);
+//     const graph_action = new proto.GraphAction();
+//     graph_action.setAction(proto.GraphAction.Action.ADD);
+//     graph_action.setNode();
+//     graph_action.setEdge(edge);
 
-    const action_history = graph_state.getActionHistoryList();
-    action_history.push(graph_action);
-    graph_state.setActionHistoryList(action_history);
+//     const action_history = graph_state.getActionHistoryList();
+//     action_history.push(graph_action);
+//     graph_state.setActionHistoryList(action_history);
 
-    edge_list?.push(edge);
-    const graph = graph_state.getGraph() as proto.Graph;
-    graph.setEdgesList(edge_list);
-    graph_state.setGraph(graph);
+//     edge_list?.push(edge);
+//     const graph = graph_state.getGraph() as proto.Graph;
+//     graph.setEdgesList(edge_list);
+//     graph_state.setGraph(graph);
 
-    system_state.setGraphState(graph_state);
+//     system_state.setGraphState(graph_state);
 
-    return system_state;
+//     return system_state;
 
-  } else {
-    console.log("Edge ", edge, " is already in the graph, not adding it.");
-    return system_state;
-  }
+//   } else {
+//     console.log("Edge ", edge, " is already in the graph, not adding it.");
+//     return system_state;
+//   }
 
-}
+// }
 
 // function for converting a process to a graph
-export function processToGraphVisualization(
+// export function processToGraphVisualization(
 
-  system_state: proto.SystemState
-): void {
-  resetGraph(system_state);
+//   system_state: proto.SystemState
+// ): void {
+//   resetGraph(system_state);
 
-  const graph_state = system_state.getGraphState() as proto.GraphState;
+//   const graph_state = system_state.getGraphState() as proto.GraphState;
 
-  const graph = graph_state.getGraph() as proto.Graph;
-  const nodes = graph.getNodesList() as proto.GraphNodeInfo[];
+//   const graph = graph_state.getGraph() as proto.Graph;
+//   const nodes = graph.getNodesList() as proto.GraphNodeInfo[];
 
-  //loop through the nodes
-  for (let i = 0; i < nodes.length; i++) {
-    const node = getNode(nodes[i].getId() as string, system_state);
-    if (node) {
-      addNode(node, system_state);
-    }
-  }
+//   //loop through the nodes
+//   for (let i = 0; i < nodes.length; i++) {
+//     const node = getNode(nodes[i].getId() as string, system_state);
+//     if (node) {
+//       addNode(node, system_state);
+//     }
+//   }
 
-  const topOrder: proto.GraphNodeInfo[][] = getAllTopologicalOrders(
-    system_state
-  );
+//   const topOrder: proto.GraphNodeInfo[][] = getAllTopologicalOrders(
+//     system_state
+//   );
 
-  // This function doesn't exist yet.
-  findValidTopOrder(topOrder);
-}
+//   // This function doesn't exist yet.
+//   findValidTopOrder(topOrder);
+// }
 
-export function findValidTopOrder(
-  topOrder: proto.GraphNodeInfo[][]
-): proto.GraphNodeInfo[] {
-  console.log(topOrder);
-  console.log("REPLACE ME WITH REAL VALID TOPOLOGICAL ORDER");
-  return [];
-}
+// export function findValidTopOrder(
+//   topOrder: proto.GraphNodeInfo[][]
+// ): proto.GraphNodeInfo[] {
+//   console.log(topOrder);
+//   console.log("REPLACE ME WITH REAL VALID TOPOLOGICAL ORDER");
+//   return [];
+// }
 
 export function addVariablesToPrompt(
   prompt: string,
@@ -468,130 +468,94 @@ export function addVariablesToPrompt(
   return new_prompt;
 }
 
-export function removeNode(id: string, system_state: proto.SystemState): proto.SystemState {
-  const node_info = getNodeInfo(id, system_state);
-  if (node_info) {
+// export function removeNode(id: string, system_state: proto.SystemState): proto.SystemState {
+//   const node_info = getNodeInfo(id, system_state);
+//   if (node_info) {
 
-    const latest_action = new proto.GraphAction();
-    latest_action.setAction(proto.GraphAction.Action.REMOVE);
-    latest_action.setNode(node_info);
+//     const latest_action = new proto.GraphAction();
+//     latest_action.setAction(proto.GraphAction.Action.REMOVE);
+//     latest_action.setNode(node_info);
 
-    const graph_state = system_state.getGraphState() as proto.GraphState;
-    const graph = graph_state.getGraph() as proto.Graph;
-    const node_array = graph.getNodesList() as proto.GraphNodeInfo[];
-    const remove_index = node_array.indexOf(node_info);
-    node_array.splice(remove_index);
-    graph.setNodesList(node_array);
-    graph_state.setGraph(graph);
+//     const graph_state = system_state.getGraphState() as proto.GraphState;
+//     const graph = graph_state.getGraph() as proto.Graph;
+//     const node_array = graph.getNodesList() as proto.GraphNodeInfo[];
+//     const remove_index = node_array.indexOf(node_info);
+//     node_array.splice(remove_index);
+//     graph.setNodesList(node_array);
+//     graph_state.setGraph(graph);
 
-    const action_history = graph_state.getActionHistoryList();
+//     const action_history = graph_state.getActionHistoryList();
 
-    action_history.push(latest_action);
+//     action_history.push(latest_action);
 
-    graph_state.setActionHistoryList(action_history);
+//     graph_state.setActionHistoryList(action_history);
 
-    system_state.setGraphState(graph_state);
+//     system_state.setGraphState(graph_state);
 
-    return system_state;
+//     return system_state;
 
-  }
-  else {
-    console.log("Node ", id, " doesn't exist, not removing it.");
-    return system_state;
-  }
+//   }
+//   else {
+//     console.log("Node ", id, " doesn't exist, not removing it.");
+//     return system_state;
+//   }
 
-}
+// }
 
-export function removeEdge(remove_edge: proto.Edge, system_state: proto.SystemState): proto.SystemState {
+// export function removeEdge(remove_edge: proto.Edge, system_state: proto.SystemState): proto.SystemState {
 
-  const graph_state = system_state.getGraphState() as proto.GraphState;
-  const graph = graph_state.getGraph() as proto.Graph;
-  const edge_array = graph.getEdgesList() as proto.Edge[];
-  // const remove_index = edge_array.indexOf(remove_edge);
+//   const graph_state = system_state.getGraphState() as proto.GraphState;
+//   const graph = graph_state.getGraph() as proto.Graph;
+//   const edge_array = graph.getEdgesList() as proto.Edge[];
+//   // const remove_index = edge_array.indexOf(remove_edge);
 
-  //find the index where the edge has the source that is the same as the remove_edge
-  // and the target that is the same as the remove_edge
-  const remove_index = edge_array.findIndex((edge: proto.Edge) => {
-    const source = edge.getSource();
-    const target = edge.getTarget();
-    if (source && target) {
-      return source.getId() == remove_edge.getSource()?.getId() && target.getId() == remove_edge.getTarget()?.getId();
-    }
-  });
+//   //find the index where the edge has the source that is the same as the remove_edge
+//   // and the target that is the same as the remove_edge
+//   const remove_index = edge_array.findIndex((edge: proto.Edge) => {
+//     const source = edge.getSource();
+//     const target = edge.getTarget();
+//     if (source && target) {
+//       return source.getId() == remove_edge.getSource()?.getId() && target.getId() == remove_edge.getTarget()?.getId();
+//     }
+//   });
 
-  console.log("remove_index: ", remove_index);
+//   console.log("remove_index: ", remove_index);
 
-  edge_array.splice(remove_index);
-  graph.setEdgesList(edge_array);
-  graph_state.setGraph(graph);
+//   edge_array.splice(remove_index);
+//   graph.setEdgesList(edge_array);
+//   graph_state.setGraph(graph);
 
-  const action_history = graph_state.getActionHistoryList();
+//   const action_history = graph_state.getActionHistoryList();
 
-  const latest_action = new proto.GraphAction();
-  latest_action.setAction(proto.GraphAction.Action.REMOVE);
-  latest_action.setEdge(remove_edge);
+//   const latest_action = new proto.GraphAction();
+//   latest_action.setAction(proto.GraphAction.Action.REMOVE);
+//   latest_action.setEdge(remove_edge);
 
-  action_history.push(latest_action);
+//   action_history.push(latest_action);
 
-  graph_state.setActionHistoryList(action_history);
+//   graph_state.setActionHistoryList(action_history);
 
-  system_state.setGraphState(graph_state);
+//   system_state.setGraphState(graph_state);
 
-  return system_state;
-}
+//   return system_state;
+// }
 
-export function selectNode(id: string, system_state: proto.SystemState): proto.SystemState {
+export function selectNode(id: proto.GraphNodeInfo, system_state: proto.SystemState): proto.SystemState {
 
   console.log("Entering selectNode function with ID:", id);
 
-  const graph_state = system_state.getGraphState() as proto.GraphState;
-  const graph = graph_state.getGraph();
-  const nodes = graph?.getNodesList() as proto.GraphNodeInfo[];
+  const selected_nodes = system_state.getSelectedNodeList();
 
-  console.log("Total nodes in graph:", nodes.length);
+  selected_nodes.push(id);
 
-  const found_index = nodes.find((node_info) => {
-    return node_info.getId() == id;
-  }) as proto.GraphNodeInfo;
-
-  if (found_index) {
-    console.log("Node found with ID:", found_index.getId());
-  } else {
-    console.log("Node not found with ID:", id);
-  }
-
-  const graph_action = new proto.GraphAction();
-  console.log("New GraphAction instance created");
-
-  const action_history = graph_state.getActionHistoryList();
-  console.log("Current action history length:", action_history.length);
-
-  action_history.push(graph_action);
-  console.log("Pushed new action to history");
-
-  graph_state.setActionHistoryList(action_history);
-  console.log("Updated action history in graph state");
-
-  system_state.setGraphState(graph_state);
-  console.log("Updated graph state in system state");
-
-  graph_action.setAction(proto.GraphAction.Action.SELECT);
-  console.log("Set action type to SELECT");
-
-  graph_action.setNode(found_index);
-  console.log("Set node in graph action");
+  system_state.setSelectedNodeList(selected_nodes);
 
   return system_state;
 }
 
 export function selectEdge(edge: proto.Edge, system_state: proto.SystemState): proto.SystemState {
-  console.log("Function selectEdge called.");
 
-  const graph_state = system_state.getGraphState() as proto.GraphState;
-  console.log("Current Graph State:", graph_state);
-
-  const graph = graph_state.getGraph();
-  console.log("Current Graph:", graph);
+  const graph = system_state.getGraph() as proto.Graph;
 
   const edges = graph?.getEdgesList() as proto.Edge[];
   console.log("Current Edges List:", edges);
@@ -601,72 +565,55 @@ export function selectEdge(edge: proto.Edge, system_state: proto.SystemState): p
     return edge.getSource()?.getId() == edge_info.getSource()?.getId() && edge.getTarget()?.getId() == edge_info.getTarget()?.getId();
   }) as proto.Edge;
 
-  console.log("Found Edge:", found_index);
+  if (found_index) {
+    const selected_edges = system_state.getSelectedEdgeList();
 
-  const graph_action = new proto.GraphAction();
-  console.log("New GraphAction instance created.");
+    selected_edges.push(found_index);
 
-  graph_action.setAction(proto.GraphAction.Action.SELECT);
-  console.log("GraphAction set to SELECT.");
-
-  graph_action.setEdge(found_index);
-  console.log("Selected Edge set in GraphAction:", found_index);
-
-  const action_history = graph_state.getActionHistoryList();
-  console.log("Current Action History:", action_history);
-
-  action_history.push(graph_action);
-  console.log("GraphAction pushed to Action History.");
-
-  graph_state.setActionHistoryList(action_history);
-  console.log("Updated Action History set in GraphState.");
-
-  system_state.setGraphState(graph_state);
-  console.log("Updated GraphState set in SystemState.");
-
-  console.log("Function selectEdge finished.");
+    system_state.setSelectedEdgeList([found_index]);
+  }
   return system_state;
 }
 
-export function resetLastAction(system_state: proto.SystemState): proto.SystemState {
+// export function resetLastAction(system_state: proto.SystemState): proto.SystemState {
 
-  const graph_state = system_state.getGraphState() as proto.GraphState;
+//   const graph_state = system_state.getGraphState() as proto.GraphState;
 
-  const graph_action = new proto.GraphAction();
+//   const graph_action = new proto.GraphAction();
 
-  graph_action.setAction(proto.GraphAction.Action.NONE);
-  graph_action.setEdge();
-  graph_action.setNode();
+//   graph_action.setAction(proto.GraphAction.Action.NONE);
+//   graph_action.setEdge();
+//   graph_action.setNode();
 
-  const action_history = graph_state.getActionHistoryList();
+//   const action_history = graph_state.getActionHistoryList();
 
-  action_history.push(graph_action);
+//   action_history.push(graph_action);
 
-  graph_state.setActionHistoryList(action_history);
+//   graph_state.setActionHistoryList(action_history);
 
-  system_state.setGraphState(graph_state);
+//   system_state.setGraphState(graph_state);
 
-  return system_state;
-}
+//   return system_state;
+// }
 
 // reset the proto.GraphState to a new empty graph
-export function resetGraph(system_state: proto.SystemState): proto.SystemState {
+// export function resetGraph(system_state: proto.SystemState): proto.SystemState {
 
-  const graph_state = system_state.getGraphState() as proto.GraphState;
+//   const graph_state = system_state.getGraphState() as proto.GraphState;
 
-  const graph_action = new proto.GraphAction();
+//   const graph_action = new proto.GraphAction();
 
-  graph_action.setAction(proto.GraphAction.Action.RESET);
-  graph_action.setEdge();
-  graph_action.setNode();
+//   graph_action.setAction(proto.GraphAction.Action.RESET);
+//   graph_action.setEdge();
+//   graph_action.setNode();
 
-  const action_history = graph_state.getActionHistoryList();
+//   const action_history = graph_state.getActionHistoryList();
 
-  action_history.push(graph_action);
+//   action_history.push(graph_action);
 
-  graph_state.setActionHistoryList(action_history);
+//   graph_state.setActionHistoryList(action_history);
 
-  system_state.setGraphState(graph_state);
+//   system_state.setGraphState(graph_state);
 
-  return system_state;
-}
+//   return system_state;
+// }
