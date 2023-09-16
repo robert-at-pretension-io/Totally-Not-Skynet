@@ -1,4 +1,5 @@
 use crate::generated_types::{
+    crud_bundle,
     CrudBundle,
     GraphNodeInfo,
     ResponseObject,
@@ -255,6 +256,9 @@ pub async fn start_message_sending_loop(
                         println!("Validating nodes: {:?}", nodes);
                         println!("Validating nodes for user: {:?}", msg.0);
                         println!("need to return a Graph object");
+                    }
+                    _ => {
+                        println!("Verb not supported for node validation: {:?}", verb);
                     }
                 }
             }
