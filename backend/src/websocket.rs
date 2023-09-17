@@ -95,6 +95,13 @@ pub async fn start_websocket_server(
             while let Some(msg) = incoming.next().await {
                 match msg {
                     Ok(msg) => {
+                        if msg.is_binary() {
+                            println!("message is binary 0️⃣1️⃣");
+                        }
+                        if msg.is_text() {
+                            println!("message is text 📝");
+                        }
+
                         println!(
                             "{} {} {:?}",
                             "Received a message from: ".yellow(),
