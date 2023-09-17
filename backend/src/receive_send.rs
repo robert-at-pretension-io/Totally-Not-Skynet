@@ -13,7 +13,10 @@ use crate::generated_types::{
 
 use std::sync::Arc;
 
-use crate::generated_types::response_object::Object::Node;
+use crate::generated_types::response_object::Object::{
+    Node,
+    ValidateNodesResponse as ValidateNodesResponseEnum,
+};
 
 use crate::utils::parse_message;
 
@@ -256,24 +259,32 @@ pub async fn start_message_sending_loop(
                 match verb {
                     VerbTypeNames::Post => {
                         // generate maximal graph from nodes (based on input_variables and output_variables)
-                        println!("Validating nodes: {:?}", nodes);
+                        println!("Validating nodes");
                         println!("Validating nodes for user: {:?}", msg.0);
                         println!("need to return a Graph object");
 
                         let nodes = node_container.nodes;
 
-                        let mut new_graph = Graph {
-                            nodes: nodes,
+                        let mut nodes_info = Vec::new();
+
+                        for node in nodes {
+                            if node.node_info.is_some() {
+                                nodes_info.push(node.node_info.unwrap());
+                            }
+                        }
+
+                        let new_graph = Graph {
+                            nodes: nodes_info,
                             edges: Vec::new(),
                         };
 
                         let validate_nodes_response = ValidateNodesResponse {
                             errors: Vec::new(),
-                            graph: new_graph,
+                            graph: Some(new_graph),
                         };
 
                         let response_object = ResponseObject {
-                            object: Some(validate_nodes_response),
+                            object: Some(ValidateNodesResponseEnum(validate_nodes_response)),
                         };
 
                         send_message(&tx, msg.0.clone(), response_object).await;

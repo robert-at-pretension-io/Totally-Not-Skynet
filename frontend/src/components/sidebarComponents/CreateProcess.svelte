@@ -20,8 +20,6 @@
 
   let key_list = Object.keys(proto.NodeTypeNames);
 
-  let system_state: proto.SystemState;
-
   // setup onmount:
   onMount(() => {
     node_list = $systemStateStore.getNodesList();
