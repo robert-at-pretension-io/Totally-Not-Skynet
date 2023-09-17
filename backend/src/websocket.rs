@@ -29,8 +29,6 @@ pub async fn start_websocket_server(
     //dispatch the message to the appropriate client
     tokio::spawn(async move {
         while let Some(outgoing_msg) = rx.lock().await.recv().await {
-            println!("\n\nSending message:\n {} \nto: {}", outgoing_msg.1, outgoing_msg.0.name);
-
             //get the client's outgoing channel
             let sending_channel = thread_safe_request_dispatcher_clone_1
                 .lock().await
@@ -38,8 +36,11 @@ pub async fn start_websocket_server(
                 .unwrap()
                 .clone();
             match sending_channel.send(outgoing_msg.1) {
-                Ok(_res) => println!("sent message to client"),
-                Err(_) => todo!(),
+                Ok(_res) => println!("{}", "Successfully sent message to client".green()),
+                Err(err) => {
+                    println("{}, {:?}", "Err sending message to client".red(), err);
+                    todo!();
+                }
             }
         }
     });
