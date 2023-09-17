@@ -70,7 +70,7 @@ pub async fn start_message_sending_loop(
     // let docker = Docker::connect_with_local_defaults().unwrap();
     //read messages from the client
     while let Some(msg) = client_rx.recv().await {
-        println!("Received a message from the client: {:?}", msg);
+        println!("Received a message from the client: {:?}".yellow(), msg);
 
         let received_message: Option<CrudBundle> = parse_message(&msg.1);
 
@@ -163,41 +163,6 @@ pub async fn start_message_sending_loop(
                                 );
                             }
                         }
-
-                        // let db_uri = runtime_settings.get(&msg.0).unwrap().mongo_db_uri.clone();
-
-                        // let db = return_db(db_uri).await;
-
-                        // let nodes = get_nodes(&db).await;
-
-                        // println!("Found the following nodes: {:?}", nodes);
-
-                        // Get the docker image from env variables:
-                        // const IMAGE: &str = env::var("DOCKER_OPERATING_SYSTEM").unwrap();
-
-                        // let alpine_config = Config {
-                        //     image: Some(IMAGE),
-                        //     tty: Some(true),
-                        //     attach_stdin: Some(true),
-                        //     attach_stdout: Some(true),
-                        //     attach_stderr: Some(true),
-                        //     open_stdin: Some(true),
-                        //     ..Default::default()
-                        // };
-
-                        // let id = docker
-                        //     .create_container::<&str, &str>(None, alpine_config.clone()).await
-                        //     .unwrap().id;
-
-                        // println!("Created container with id: {}", id);
-                        // docker_containers.insert(msg.0.clone(), id);
-
-                        // // need to send an additional message to the client to let them know that the project has been initialized
-
-                        // // send_message(&tx, msg.0.clone(), ResponseObject::AuthorizationToken).await;
-                        // todo!(
-                        //     "send auth token to user that will be required to execute other commands"
-                        // );
                     }
                     _ => {
                         println!("Verb not supported for initial message: {:?}", verb);

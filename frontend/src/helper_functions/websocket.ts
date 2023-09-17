@@ -98,7 +98,7 @@ export function sendWebsocketMessage(
   message: CrudBundle,
   websocket: WebSocket
 ) {
-  console.log("sending websocket message: ", message);
+  console.log("sending websocket message: ", message.toObject());
   const message_string = message.serializeBinary();
   console.log("serialized message is: ", message_string);
 

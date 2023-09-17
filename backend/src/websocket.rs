@@ -11,6 +11,8 @@ use tokio_tungstenite::tungstenite::Message;
 use futures_util::StreamExt;
 use futures_util::SinkExt;
 
+use colored::*;
+
 pub async fn start_websocket_server(
     rx: Arc<tokio::sync::Mutex<UnboundedReceiver<(Identity, Message)>>>,
     client_tx: mpsc::Sender<(Identity, String)>
@@ -98,7 +100,7 @@ pub async fn start_websocket_server(
             while let Some(msg) = incoming.next().await {
                 match msg {
                     Ok(msg) => {
-                        println!("Received a message from {}: {:?}", addr, msg.to_text());
+                        println!("Received a message from {}: {:?}".yellow(), addr, msg.to_text());
 
                         match client_tx.send((this_client.clone(), msg.to_string())).await {
                             Ok(_) => {}
