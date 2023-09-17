@@ -100,7 +100,12 @@ pub async fn start_websocket_server(
             while let Some(msg) = incoming.next().await {
                 match msg {
                     Ok(msg) => {
-                        println!("Received a message from {}: {:?}".yellow(), addr, msg.to_text());
+                        println!(
+                            "{} {:?}",
+                            "Received a message from {}: ".yellow(),
+                            addr,
+                            msg.to_text()
+                        );
 
                         match client_tx.send((this_client.clone(), msg.to_string())).await {
                             Ok(_) => {}

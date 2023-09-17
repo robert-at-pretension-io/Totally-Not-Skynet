@@ -41,7 +41,7 @@ pub async fn start_message_sending_loop(
 
     //read messages from the client
     while let Some(msg) = client_rx.recv().await {
-        println!("Received a message from the client: {}".yellow(), msg.1);
+        println!("{} {}", "Received a message from the client:".yellow(), msg.1);
 
         let received_message: Option<MessageTypes> = parse_message(&msg.1);
 
