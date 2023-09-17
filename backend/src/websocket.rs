@@ -38,7 +38,7 @@ pub async fn start_websocket_server(
             match sending_channel.send(outgoing_msg.1) {
                 Ok(_res) => println!("{}", "Successfully sent message to client".green()),
                 Err(err) => {
-                    println("{}, {:?}", "Err sending message to client".red(), err);
+                    println!("{}, {:?}", "Err sending message to client".red(), err);
                     todo!();
                 }
             }
