@@ -101,8 +101,8 @@ pub async fn start_websocket_server(
                 match msg {
                     Ok(msg) => {
                         println!(
-                            "{} {:?}",
-                            "Received a message from {}: ".yellow(),
+                            "{} {} {:?}",
+                            "Received a message from: ".yellow(),
                             addr,
                             msg.to_text()
                         );
