@@ -81,12 +81,6 @@ pub async fn start_websocket_server(
 
             tokio::spawn(async move {
                 while let Some(outgoing_msg) = local_rx.recv().await {
-                    println!(
-                        "\n\nSending message:\n {} \nto: {}",
-                        outgoing_msg,
-                        cloned_client.name
-                    );
-
                     match outgoing.send(outgoing_msg.clone()).await {
                         Ok(_) => {}
                         Err(e) => {
