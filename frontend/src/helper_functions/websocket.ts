@@ -1,5 +1,5 @@
 
-import { SystemState, ResponseObject, CrudBundle, Node } from "../../src/generated/system_types_pb";
+import { SystemState, ResponseObject, CrudBundle, Node, ValidateNodesResponse } from "../../src/generated/system_types_pb";
 
 import systemStateStore from "stores/systemStateStore";
 
@@ -45,57 +45,16 @@ export function setupWebsocketMessageHandler(
         if (add_node && typeof add_node.toObject === "function") {
           console.log("add_node: ", add_node.toObject());
 
-          // import { SystemState } from "../../src/generated/system_types_pb";
-          // import systemStateStore from "stores/systemStateStore";
-
-          // const system_state = systemStateStore.
-          //   console.log("system_state: ", system_state.toObject());
-
-          // let node_list = [];
-
-          // systemStateStore.subscribe((system_state: SystemState) => {
-          //   console.log("Type of system_state:", typeof system_state);
-          //   console.log("Keys of system_state:", Object.keys(system_state));
-
-          //   if (system_state && typeof system_state.toObject === "function") {
-
-          //     console.log("system_state: ", system_state.toObject());
-          //     const node_list = system_state.getNodesList();
-          //     console.log("node_list: ", node_list);
-
-          //     system_state.setNodesList(node_list);
-
-          //     systemStateStore.set(system_state);
-          //   }
-          // });
-
-          // node_list.push(add_node);
-
-          // console.log("node_list after push: ", node_list);
-
           systemStateStore.update(
             (n: SystemState) => {
 
-              console.log("n: ", n);
-
-              const m = n as SystemState;
-
-              console.log("m: ", m);
-
-              const nodes = m.getNodesList();
+              const nodes = n.getNodesList();
               nodes.push(add_node);
-              m.setNodesList(nodes);
-              return m;
+              n.setNodesList(nodes);
+              return n;
             }
           );
 
-          // console.log("system_state: ", system_state.toObject());
-
-          // const nodes = system_state.getNodesList();
-
-          // nodes.push(add_node);
-          // system_state.setNodesList(nodes);
-          // await setSystemState(system_state);
         }
         break;
       }
@@ -104,6 +63,17 @@ export function setupWebsocketMessageHandler(
         break;
       case ResponseObject.ObjectCase.USER_SETTINGS:
         console.log("USER_SETTINGS");
+        break;
+      case ResponseObject.ObjectCase.VALIDATE_NODES_RESPONSE: {
+        const graph_container = response_object.getValidateNodesResponse() as ValidateNodesResponse;
+        const graph = graph_container.getGraph();
+        systemStateStore.update(
+          (n: SystemState) => {
+            n.setGraph(graph);
+            return n;
+          }
+        );
+      }
         break;
       case ResponseObject.ObjectCase.EXECUTION_RESPONSE:
         console.log("EXECUTION_RESPONSE");

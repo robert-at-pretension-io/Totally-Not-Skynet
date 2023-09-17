@@ -634,10 +634,10 @@ export class ValidateNodesResponse extends jspb.Message {
   setErrorsList(value: Array<string>): void;
   addErrors(value: string, index?: number): string;
 
-  clearGraphList(): void;
-  getGraphList(): Array<Graph>;
-  setGraphList(value: Array<Graph>): void;
-  addGraph(value?: Graph, index?: number): Graph;
+  hasGraph(): boolean;
+  clearGraph(): void;
+  getGraph(): Graph | undefined;
+  setGraph(value?: Graph): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ValidateNodesResponse.AsObject;
@@ -652,7 +652,7 @@ export class ValidateNodesResponse extends jspb.Message {
 export namespace ValidateNodesResponse {
   export type AsObject = {
     errorsList: Array<string>,
-    graphList: Array<Graph.AsObject>,
+    graph?: Graph.AsObject,
   }
 }
 

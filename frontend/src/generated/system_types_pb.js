@@ -4952,7 +4952,7 @@ proto.skynet.types.ExecutionResponse.prototype.hasResponse = function() {
  * @private {!Array<number>}
  * @const
  */
-proto.skynet.types.ValidateNodesResponse.repeatedFields_ = [1,2];
+proto.skynet.types.ValidateNodesResponse.repeatedFields_ = [1];
 
 
 
@@ -4986,8 +4986,7 @@ proto.skynet.types.ValidateNodesResponse.prototype.toObject = function(opt_inclu
 proto.skynet.types.ValidateNodesResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     errorsList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f,
-    graphList: jspb.Message.toObjectList(msg.getGraphList(),
-    proto.skynet.types.Graph.toObject, includeInstance)
+    graph: (f = msg.getGraph()) && proto.skynet.types.Graph.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -5031,7 +5030,7 @@ proto.skynet.types.ValidateNodesResponse.deserializeBinaryFromReader = function(
     case 2:
       var value = new proto.skynet.types.Graph;
       reader.readMessage(value,proto.skynet.types.Graph.deserializeBinaryFromReader);
-      msg.addGraph(value);
+      msg.setGraph(value);
       break;
     default:
       reader.skipField();
@@ -5069,9 +5068,9 @@ proto.skynet.types.ValidateNodesResponse.serializeBinaryToWriter = function(mess
       f
     );
   }
-  f = message.getGraphList();
-  if (f.length > 0) {
-    writer.writeRepeatedMessage(
+  f = message.getGraph();
+  if (f != null) {
+    writer.writeMessage(
       2,
       f,
       proto.skynet.types.Graph.serializeBinaryToWriter
@@ -5118,40 +5117,39 @@ proto.skynet.types.ValidateNodesResponse.prototype.clearErrorsList = function() 
 
 
 /**
- * repeated Graph graph = 2;
- * @return {!Array<!proto.skynet.types.Graph>}
+ * optional Graph graph = 2;
+ * @return {?proto.skynet.types.Graph}
  */
-proto.skynet.types.ValidateNodesResponse.prototype.getGraphList = function() {
-  return /** @type{!Array<!proto.skynet.types.Graph>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.skynet.types.Graph, 2));
+proto.skynet.types.ValidateNodesResponse.prototype.getGraph = function() {
+  return /** @type{?proto.skynet.types.Graph} */ (
+    jspb.Message.getWrapperField(this, proto.skynet.types.Graph, 2));
 };
 
 
 /**
- * @param {!Array<!proto.skynet.types.Graph>} value
+ * @param {?proto.skynet.types.Graph|undefined} value
  * @return {!proto.skynet.types.ValidateNodesResponse} returns this
 */
-proto.skynet.types.ValidateNodesResponse.prototype.setGraphList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 2, value);
+proto.skynet.types.ValidateNodesResponse.prototype.setGraph = function(value) {
+  return jspb.Message.setWrapperField(this, 2, value);
 };
 
 
 /**
- * @param {!proto.skynet.types.Graph=} opt_value
- * @param {number=} opt_index
- * @return {!proto.skynet.types.Graph}
- */
-proto.skynet.types.ValidateNodesResponse.prototype.addGraph = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 2, opt_value, proto.skynet.types.Graph, opt_index);
-};
-
-
-/**
- * Clears the list making it empty but non-null.
+ * Clears the message field making it undefined.
  * @return {!proto.skynet.types.ValidateNodesResponse} returns this
  */
-proto.skynet.types.ValidateNodesResponse.prototype.clearGraphList = function() {
-  return this.setGraphList([]);
+proto.skynet.types.ValidateNodesResponse.prototype.clearGraph = function() {
+  return this.setGraph(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.skynet.types.ValidateNodesResponse.prototype.hasGraph = function() {
+  return jspb.Message.getField(this, 2) != null;
 };
 
 
