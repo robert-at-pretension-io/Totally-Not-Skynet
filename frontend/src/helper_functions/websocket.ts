@@ -100,7 +100,14 @@ export function sendWebsocketMessage(
 ) {
   console.log("sending websocket message: ", message.toObject());
   const message_string = message.serializeBinary();
+
+  // const messageArray = Array.from(message_string);
+
   console.log("serialized message is: ", message_string);
+
+  // message_string.buffer
+
+  console.log("deserialized message is: ", CrudBundle.deserializeBinary(message_string).toObject());
 
   websocket.send(message_string);
 }

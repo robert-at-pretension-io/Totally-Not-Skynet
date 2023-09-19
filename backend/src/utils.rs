@@ -25,11 +25,8 @@ pub fn parse_message(message_str: &str) -> Option<CrudBundle> {
 
 use prost::bytes::Bytes;
 fn typed_object_from_base64_string<M: Message + Default>(
-    base64_string: &str,
+    base64_string: &str
 ) -> Result<M, Box<dyn std::error::Error>> {
-    // Decode the base64 string into bytes
-    // let bytes = Engine::decode(base64_string)?;
-
     let my_bytes = Bytes::from(base64_string.to_owned());
 
     // Parse the bytes into the specific Prost-generated type
