@@ -104,6 +104,8 @@ pub async fn start_websocket_server(
 
                         println!("{} {} {:?}", "Received a message from: ".yellow(), addr, msg);
 
+                        println!("{} : {}", "The length of the message:".yellow(), msg.len());
+
                         match client_tx.send((this_client.clone(), msg.to_string())).await {
                             Ok(_) => {}
                             Err(e) => {
