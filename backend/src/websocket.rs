@@ -102,12 +102,7 @@ pub async fn start_websocket_server(
                             println!("message is text 📝");
                         }
 
-                        println!(
-                            "{} {} {:?}",
-                            "Received a message from: ".yellow(),
-                            addr,
-                            msg.to_text()
-                        );
+                        println!("{} {} {:?}", "Received a message from: ".yellow(), addr, msg);
 
                         match client_tx.send((this_client.clone(), msg.to_string())).await {
                             Ok(_) => {}
