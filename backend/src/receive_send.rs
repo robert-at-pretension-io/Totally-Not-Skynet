@@ -11,6 +11,10 @@ use crate::generated_types::{
     ValidateNodesResponse,
 };
 
+use crate::utils::to_u8_vec;
+
+use colored::*;
+
 use std::sync::Arc;
 
 use crate::generated_types::response_object::Object::{
@@ -269,9 +273,6 @@ pub async fn start_message_sending_loop(
         }
     }
 }
-use crate::utils::to_u8_vec;
-
-use colored::*;
 
 pub async fn send_message(
     tx: &UnboundedSender<(Identity, tokio_tungstenite::tungstenite::Message)>,
