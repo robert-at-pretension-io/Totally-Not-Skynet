@@ -35,14 +35,18 @@ fn typed_object_from_base64_string<M: Message + Default>(
     let message = M::decode(my_bytes);
 
     match message {
-        Ok(val) => Ok(val),
+        Ok(val) => {
+            return Ok(val);
+        }
         Err(err) => {
             println!("{} {}", "Could not parse message.".red(), err);
             println!("{}", "Attempting to parse using alternate parsing function".yellow());
 
             let message = M::decode_length_delimited(&mut base64::decode(base64_string)?[..]);
             match message {
-                Ok(val) => Ok(val),
+                Ok(val) => {
+                    return Ok(val);
+                }
                 Err(err) => {
                     println!(
                         "{} {}",
@@ -53,8 +57,6 @@ fn typed_object_from_base64_string<M: Message + Default>(
                     return Err(Box::new(err));
                 }
             }
-
-            return Err(Box::new(err));
         }
     }
 }
