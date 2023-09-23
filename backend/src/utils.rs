@@ -42,7 +42,7 @@ fn typed_object_from_base64_string<M: Message + Default>(
             println!("{} {}", "Could not parse message.".red(), err);
             println!("{}", "Attempting to parse using alternate parsing function".yellow());
 
-            let message = M::decode_length_delimited(&mut base64::decode(base64_string)?[..]);
+            let message = M::decode_length_delimited(my_bytes.clone());
             match message {
                 Ok(val) => {
                     return Ok(val);
