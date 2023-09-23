@@ -32,7 +32,7 @@ fn typed_object_from_base64_string<M: Message + Default>(
     let my_bytes = Bytes::from(base64_string.to_owned());
 
     // Parse the bytes into the specific Prost-generated type
-    let message = M::decode(my_bytes);
+    let message = M::decode(my_bytes.clone());
 
     match message {
         Ok(val) => {
