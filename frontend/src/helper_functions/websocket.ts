@@ -4,6 +4,7 @@ import { ResponseObject, Node, SystemState, ValidateNodesResponse, Graph, CrudBu
 import systemStateStore from "stores/systemStateStore";
 
 import { BinaryWriter } from "google-protobuf";
+import { Json } from "io-ts-types";
 
 export function setupWebsocketConnection(
 ): WebSocket {
@@ -41,54 +42,54 @@ export function setupWebsocketMessageHandler(
       console.log("res: ", res);
 
       switch (res) {
-      case "node": {
-        console.log("NODE");
-        const add_node = response_object.node as Node;
+        case "node": {
+          console.log("NODE");
+          const add_node = response_object.node as Node;
 
-        if (add_node && typeof add_node.toObject === "function") {
-          console.log("add_node: ", add_node.toObject());
+          if (add_node && typeof add_node.toObject === "function") {
+            console.log("add_node: ", add_node.toObject());
 
+            systemStateStore.update(
+              (n: SystemState) => {
+
+                n.nodes.push(add_node);
+
+                return n;
+              }
+            );
+
+          }
+          break;
+        }
+        case "authentication_message":
+          console.log("AUTHENTICATION_MESSAGE");
+          break;
+        case "user_settings":
+          console.log("USER_SETTINGS");
+          break;
+        case "validate_nodes_response": {
+          const graph_container = response_object.validate_nodes_response as ValidateNodesResponse;
+          const graph = graph_container.graph as Graph;
           systemStateStore.update(
             (n: SystemState) => {
-
-              n.nodes.push(add_node);
-
+              n.graph = graph;
               return n;
             }
           );
-
         }
-        break;
-      }
-      case "authentication_message":
-        console.log("AUTHENTICATION_MESSAGE");
-        break;
-      case "user_settings":
-        console.log("USER_SETTINGS");
-        break;
-      case "validate_nodes_response": {
-        const graph_container = response_object.validate_nodes_response as ValidateNodesResponse;
-        const graph = graph_container.graph as Graph;
-        systemStateStore.update(
-          (n: SystemState) => {
-            n.graph = graph;
-            return n;
-          }
-        );
-      }
-        break;
-      case "execution_response":
-        console.log("EXECUTION_RESPONSE");
-        break;
-      case "none":
-        console.log("OBJECT_NOT_SET");
-        break;
-      default:
-        console.log("default");
-        alert(
-          "Fallen through response object switch statement... This is not good."
-        );
-        break;
+          break;
+        case "execution_response":
+          console.log("EXECUTION_RESPONSE");
+          break;
+        case "none":
+          console.log("OBJECT_NOT_SET");
+          break;
+        default:
+          console.log("default");
+          alert(
+            "Fallen through response object switch statement... This is not good."
+          );
+          break;
       }
     });
   });
@@ -103,21 +104,25 @@ export function sendWebsocketMessage(
   console.log("sending websocket message: ", message.toObject());
   const message_string = message.serializeBinary();
 
-  const writer = new BinaryWriter();
+  // const writer = new BinaryWriter();
 
-  message.serialize(writer);
-  const result = writer.getResultBase64String();
+  // message.serialize(writer);
+  // const result = writer.getResultBase64String();
 
-  // message.serialize
+  // // message.serialize
 
-  // const messageArray = Array.from(message_string);
+  // // const messageArray = Array.from(message_string);
 
   console.log("serialized message is: ", message_string);
   // console.log("other serialize message", result);
 
-  // message_string.buffer
+  // // message_string.buffer
 
-  console.log("deserialized message is: ", CrudBundle.deserializeBinary(message_string).toObject());
+  // console.log("deserialized message is: ", CrudBundle.deserializeBinary(message_string).toObject());
 
-  websocket.send(result);
+  // console.log("other deserialzed message:", CrudBundle.deser)
+
+  // const string = JSON.stringify(message.toObject());
+
+  websocket.send(message_string);
 }
