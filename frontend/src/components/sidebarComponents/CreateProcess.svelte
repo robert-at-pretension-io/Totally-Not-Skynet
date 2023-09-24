@@ -1,7 +1,15 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import * as proto from "../../generated/system_types_pb";
+  import {
+    NodeTypeNames,
+    Node,
+    CrudBundle,
+    ValidateNodes,
+    VerbTypeNames,
+  } from "generated/system_types";
+
+  // proto from "../../generated/system_types";
 
   import systemStateStore from "stores/systemStateStore";
 
@@ -15,28 +23,28 @@
 
   let name = "";
   let description = "";
-  let node_list: proto.Node[] = [];
-  // let node_info_list : proto.GraphNodeInfo[] = [];
+  let node_list: Node[] = [];
+  // let node_info_list : GraphNodeInfo[] = [];
 
-  let key_list = Object.keys(proto.NodeTypeNames);
+  let key_list = Object.keys(NodeTypeNames);
 
   // setup onmount:
   onMount(() => {
-    node_list = $systemStateStore.getNodesList();
+    node_list = $systemStateStore.nodes;
   });
 
   $: {
-    node_list = $systemStateStore.getNodesList();
+    node_list = $systemStateStore.nodes;
   }
 
-  function isSelected(node: proto.Node): boolean {
-    let node_id = node.getNodeInfo()?.getId() as string;
+  function isSelected(node: Node): boolean {
+    let node_id = node.node_info.id as string;
 
     return $selected_node_ids_store.includes(node_id);
   }
 
-  function toggleNodeSelect(node: proto.Node) {
-    let node_id = node.getNodeInfo()?.getId() as string;
+  function toggleNodeSelect(node: Node) {
+    let node_id = node.node_info.id as string;
 
     if (isSelected(node)) {
       selected_node_ids_store.update((val) =>
@@ -48,27 +56,30 @@
   }
 
   function sendNodes() {
-    let filtered_nodes = node_list.filter((node: proto.Node) => {
-      return $selected_node_ids_store.includes(
-        node.getNodeInfo()?.getId() as string
-      );
+    let filtered_nodes = node_list.filter((node: Node) => {
+      return $selected_node_ids_store.includes(node.node_info.id as string);
     });
 
     console.log("sending filtered_nodes: ", filtered_nodes);
 
-    let crud_message = new proto.CrudBundle();
+    let crud_message = new CrudBundle();
 
-    crud_message.setVerb(proto.VerbTypeNames.POST);
+    crud_message.verb = VerbTypeNames.Post;
 
-    let validate_nodes = new proto.ValidateNodes();
+    let validate_nodes = new ValidateNodes();
 
-    validate_nodes.setNodesList(filtered_nodes);
+    validate_nodes.description = description;
+    validate_nodes.name = name;
 
-    crud_message.setValidateNodes(validate_nodes);
+    validate_nodes.nodes = filtered_nodes;
+
+    crud_message.validate_nodes = validate_nodes;
 
     sendWebsocketMessage(crud_message, $websocketStore.websocket as WebSocket);
 
     $selected_node_ids_store = [];
+    description = "";
+    name = "";
   }
 </script>
 
@@ -92,9 +103,7 @@
         class:selected={isSelected(node)}
         type="button"
         on:click={() => toggleNodeSelect(node)}
-        >{key_list[node.getTypeName()]} : {node
-          .getNodeInfo()
-          ?.getName()}</button
+        >{key_list[node.type_name]} : {node.node_info.name}</button
       >
     </li>
   {/each}

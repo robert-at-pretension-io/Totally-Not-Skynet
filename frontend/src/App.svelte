@@ -6,7 +6,7 @@
   import systemStateStore from "stores/systemStateStore";
   import { websocketStore } from "stores/websocketStore";
   import AuthPage from "./components/AuthPage.svelte";
-  import { SystemState } from "./generated/system_types_pb";
+  import { SystemState } from "./generated/system_types";
   import Loading from "./components/Loading.svelte";
   import { initializeSystemState } from "helper_functions/misc";
   // import { initializeSystemState } from "helper_functions/misc";
@@ -32,7 +32,7 @@
 
     // systemStateStore.set(intialized_system);
 
-    alert("onMount triggered... auth: " + system_state.getAuthenticated());
+    alert("onMount triggered... auth: " + system_state.authenticated);
 
     // authenticated = true;
 
@@ -47,8 +47,8 @@
   });
 
   $: {
-    console.log("auth state", $systemStateStore.getAuthenticated());
-    authenticated = $systemStateStore.getAuthenticated();
+    console.log("auth state", $systemStateStore.authenticated);
+    authenticated = $systemStateStore.authenticated;
   }
 </script>
 

@@ -7,6 +7,7 @@ import "google/protobuf/wrappers.proto";
 message GraphNodeInfo {
   string id = 1;
   string name = 2;
+  string description = 3;
 }
 
 // Edge
@@ -14,9 +15,6 @@ message Edge {
   GraphNodeInfo source = 1;
   GraphNodeInfo target = 2;
 }
-
-
-
 
 // Prompt
 message Prompt {
@@ -66,9 +64,8 @@ message Node {
     Conditional conditional = 6;
     Command command = 7;
   }
-  string description = 8;
-  repeated string input_variables = 9;
-  repeated string output_variables = 10;
+  repeated string input_variables = 8;
+  repeated string output_variables = 9;
 }
 
 
@@ -124,6 +121,8 @@ message UserSettings {
 
 message ValidateNodes {
   repeated Node nodes = 1;
+  string name = 2;
+  string description = 3;
 }
 
 // CrudBundle

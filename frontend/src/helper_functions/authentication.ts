@@ -5,7 +5,7 @@ import {
   AuthenticationMessage,
   CrudBundle,
   VerbTypeNames,
-} from "../generated/system_types_pb";
+} from "../generated/system_types";
 
 export function authenticate(
   websocket: WebSocket,
@@ -15,18 +15,18 @@ export function authenticate(
 
   console.log("websocket is ready... sending auth");
   const auth_bundle = new CrudBundle();
-  auth_bundle.setVerb(VerbTypeNames.POST);
+  auth_bundle.verb = VerbTypeNames.Post;
 
   const auth_content = new AuthenticationMessage();
 
-  auth_content.setClientEmail(email);
-  auth_content.setClientPassword(password);
+  auth_content.client_email = email;
+  auth_content.client_password = password;
 
-  auth_bundle.setAuthenticationMessage(auth_content);
+  auth_bundle.authentication_message = auth_content;
 
   systemStateStore.update((s) => {
     console.log("setting authenticated to true");
-    s.setAuthenticated(true);
+    s.authenticated = true;
     return s;
   });
 

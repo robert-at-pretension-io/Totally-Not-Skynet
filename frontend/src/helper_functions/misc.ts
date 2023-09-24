@@ -1,4 +1,4 @@
-import { Graph, SystemState } from "../generated/system_types_pb";
+import { Graph, SystemState } from "../generated/system_types";
 
 export function areAllPropertiesUndefined<T extends object>(obj: T): boolean {
   return Object.values(obj).every((value) => value === undefined);
@@ -15,11 +15,11 @@ export function stringToUint8Array(str: string): Uint8Array {
 
 export function initializeSystemState(system_state: SystemState): SystemState {
   const graph = new Graph();
-  system_state.setGraph(graph);
-  system_state.setAuthenticated(false);
-  system_state.setWebsocketReady(false);
-  system_state.setNodesList([]);
-  system_state.setSelectedNodeList([]);
+  system_state.graph = graph;
+  system_state.authenticated = (false);
+  system_state.websocket_ready = (false);
+  system_state.nodes = [];
+  system_state.selected_node = [];
 
   return system_state;
 }

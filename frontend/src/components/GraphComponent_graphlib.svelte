@@ -3,7 +3,7 @@
   import cytoscape, { Core } from "cytoscape";
   import systemStateStore from "stores/systemStateStore.js";
   import * as helper_functions from "../helper_functions/graph";
-  import * as proto from "../generated/system_types_pb";
+  import * as proto from "../generated/system_types";
 
   let current_graph: proto.Graph = new proto.Graph();
 
@@ -12,8 +12,8 @@
 
     // cytoscape.use(dagre);
 
-    if ($systemStateStore.getGraph() != undefined) {
-      current_graph = $systemStateStore.getGraph() as proto.Graph;
+    if ($systemStateStore.graph != undefined) {
+      current_graph = $systemStateStore.graph as proto.Graph;
     } else {
       current_graph = new proto.Graph();
     }
@@ -72,11 +72,11 @@
       let source = new proto.GraphNodeInfo();
       let target = new proto.GraphNodeInfo();
 
-      source.setId(evt.target.data().source);
-      target.setId(evt.target.data().target);
+      source.id = evt.target.data().source;
+      target.id = evt.target.data().target;
 
-      edge.setSource(source);
-      edge.setTarget(target);
+      edge.source = source;
+      edge.target = target;
 
       console.log("selectedEdge: ", evt.target.data());
 
@@ -91,9 +91,11 @@
 
       // remove the node the graphNodeInfo from the selected_list where the id is the same as the node.id()
 
-      selected_list = selected_list.filter((graphNodeInfo) => {
-        return graphNodeInfo.getId() == node.id();
-      });
+      selected_list = selected_list.filter(
+        (graphNodeInfo: proto.GraphNodeInfo) => {
+          return graphNodeInfo.id == node.id();
+        }
+      );
 
       $systemStateStore.setSelectedNodeList(selected_list);
     });
@@ -108,9 +110,9 @@
   });
 
   $: {
-    // Whenever the systemState.getGraph() changes, we will change the cytoscape graph. It might be good to check if the graph has actually changed rather than always re-draw
+    // Whenever the systemState.graph changes, we will change the cytoscape graph. It might be good to check if the graph has actually changed rather than always re-draw
 
-    let test_graph = $systemStateStore.getGraph();
+    let test_graph = $systemStateStore.graph;
 
     // check that the test_graph is different from the current_graph
     if (test_graph != current_graph && test_graph != undefined) {
@@ -120,31 +122,31 @@
       cyInstance?.elements().remove();
 
       // add the nodes to the cytoscape graph
-      let nodes = current_graph.getNodesList();
+      let nodes = current_graph.nodes;
 
       nodes.forEach((node_info) => {
         if (node_info) {
           cyInstance?.add({
             data: {
-              id: node_info.getId(),
-              label: node_info.getName(),
+              id: node_info.id,
+              label: node_info.name,
             },
           });
         }
       });
 
       // add the edges to the cytoscape graph
-      let edges = current_graph.getEdgesList();
+      let edges = current_graph.edges;
 
-      edges.forEach((edge) => {
-        let source = edge.getSource();
-        let target = edge.getTarget();
+      edges.forEach((edge: proto.Edge) => {
+        let source = edge.source;
+        let target = edge.target;
 
         if (source && target) {
           cyInstance?.add({
             data: {
-              source: source.getId(),
-              target: target.getId(),
+              source: source.id,
+              target: target.id,
             },
           });
         }

@@ -1,8 +1,12 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
-  import { Node, NodeTypeNames } from "../../generated/system_types_pb";
+  import {
+    GraphNodeInfo,
+    Node,
+    NodeTypeNames,
+  } from "../../generated/system_types";
 
-  let selectedNode: Node | null;
+  let selectedNode: GraphNodeInfo | null;
 
   // Subscribe to the graphStore to get the latest values
   let nodes: Node[] = [];
@@ -10,8 +14,8 @@
   let key_list = Object.keys(NodeTypeNames);
 
   $: {
-    nodes = $systemStateStore.getNodesList();
-    selectedNode = $systemStateStore.getSelectedNodeList()[0];
+    nodes = $systemStateStore.nodes;
+    selectedNode = $systemStateStore.selected_node[0];
   }
 
   // Function to handle dropdown change events
@@ -25,7 +29,7 @@
   <option value="">Select a node</option>
   {#each nodes as node}
     <option value={node}
-      >{key_list[node.getTypeName()]} : {node.getNodeInfo()?.getName()}</option
+      >{key_list[node.type_name]} : {node.node_info.name}</option
     >
   {/each}
 </select>

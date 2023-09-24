@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Process } from "../../../generated/system_types_pb";
+  import { Process } from "../../../generated/system_types";
 
   export let process: Process;
   console.log(process);

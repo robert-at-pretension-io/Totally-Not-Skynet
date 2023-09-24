@@ -9,7 +9,7 @@
     Process,
     Conditional,
     Command,
-  } from "../../generated/system_types_pb";
+  } from "../../generated/system_types";
 
   let typeName: number = NodeTypeNames.PROMPT;
 

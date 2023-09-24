@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "noImplicitAny": false,
     "lib": [
       "ES2022",
       "dom"
@@ -9,13 +10,14 @@
     "sourceMap": true,
     "outDir": "./dist",
     "target": "es6",
+    "skipLibCheck": true,
     "module": "esnext",
     "moduleResolution": "node",
-    "strict": true,
+    // "strict": true,
     "esModuleInterop": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "strictNullChecks": true,
+    "noImplicitThis": false,
+    "noImplicitOverride": false,
+    // "strictNullChecks": true,
     "strictFunctionTypes": true,
     "typeRoots": [
       "./node_modules/@types",

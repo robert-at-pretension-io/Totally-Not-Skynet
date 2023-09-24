@@ -15,14 +15,9 @@ export default {
   output: {
     sourcemap: true,
     format: "iife",
-    globals: {
-      "proto.skynet.types": "proto.skynet.types",
-      "generated/system_types_pb": "system_types_pb",
-    },
     name: "app",
     file: "public/bundle.js",
   },
-  external: ["proto.skynet.types"],
   plugins: [
     svelte({
       // enable run-time checks when not in production

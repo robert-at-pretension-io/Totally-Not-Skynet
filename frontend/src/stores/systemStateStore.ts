@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import { SystemState } from "../generated/system_types_pb";
+import { SystemState } from "../generated/system_types";
 // import { initializeSystemState } from "helper_functions/misc";
 
 const new_system_state: SystemState = new SystemState();

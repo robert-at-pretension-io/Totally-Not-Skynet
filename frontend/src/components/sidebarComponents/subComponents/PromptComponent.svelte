@@ -7,7 +7,7 @@
     VerbTypeNames,
     Node,
     GraphNodeInfo,
-  } from "../../../generated/system_types_pb";
+  } from "../../../generated/system_types";
   import { sendWebsocketMessage } from "helper_functions/websocket";
 
   let system_text = "";

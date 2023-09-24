@@ -1,5 +1,5 @@
 
-import { SystemState, ResponseObject, CrudBundle, Node, ValidateNodesResponse } from "../../src/generated/system_types_pb";
+import { ResponseObject, Node, SystemState, ValidateNodesResponse, Graph, CrudBundle } from "../../src/generated/system_types";
 
 import systemStateStore from "stores/systemStateStore";
 
@@ -33,14 +33,15 @@ export function setupWebsocketMessageHandler(
       const u8Array = new Uint8Array(buffer);
       console.log("u8Array: ", u8Array);
       const response_object: ResponseObject = ResponseObject.deserializeBinary(u8Array);
+
       console.log("response_object: ", response_object);
-      const res = response_object.getObjectCase();
+      const res = response_object.object;
       console.log("res: ", res);
 
       switch (res) {
-      case ResponseObject.ObjectCase.NODE: {
+      case "node": {
         console.log("NODE");
-        const add_node = response_object.getNode() as Node;
+        const add_node = response_object.node as Node;
 
         if (add_node && typeof add_node.toObject === "function") {
           console.log("add_node: ", add_node.toObject());
@@ -48,9 +49,8 @@ export function setupWebsocketMessageHandler(
           systemStateStore.update(
             (n: SystemState) => {
 
-              const nodes = n.getNodesList();
-              nodes.push(add_node);
-              n.setNodesList(nodes);
+              n.nodes.push(add_node);
+
               return n;
             }
           );
@@ -58,27 +58,27 @@ export function setupWebsocketMessageHandler(
         }
         break;
       }
-      case ResponseObject.ObjectCase.AUTHENTICATION_MESSAGE:
+      case "authentication_message":
         console.log("AUTHENTICATION_MESSAGE");
         break;
-      case ResponseObject.ObjectCase.USER_SETTINGS:
+      case "user_settings":
         console.log("USER_SETTINGS");
         break;
-      case ResponseObject.ObjectCase.VALIDATE_NODES_RESPONSE: {
-        const graph_container = response_object.getValidateNodesResponse() as ValidateNodesResponse;
-        const graph = graph_container.getGraph();
+      case "validate_nodes_response": {
+        const graph_container = response_object.validate_nodes_response as ValidateNodesResponse;
+        const graph = graph_container.graph as Graph;
         systemStateStore.update(
           (n: SystemState) => {
-            n.setGraph(graph);
+            n.graph = graph;
             return n;
           }
         );
       }
         break;
-      case ResponseObject.ObjectCase.EXECUTION_RESPONSE:
+      case "execution_response":
         console.log("EXECUTION_RESPONSE");
         break;
-      case ResponseObject.ObjectCase.OBJECT_NOT_SET:
+      case "none":
         console.log("OBJECT_NOT_SET");
         break;
       default:
