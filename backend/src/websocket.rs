@@ -95,22 +95,27 @@ pub async fn start_websocket_server(
             while let Some(msg) = incoming.next().await {
                 match msg {
                     Ok(msg) => {
-                        if msg.is_binary() {
-                            println!("message is binary 0️⃣1️⃣");
-                        }
-                        if msg.is_text() {
-                            println!("message is text 📝");
-                        }
-
                         println!("{} {} {:?}", "Received a message from: ".yellow(), addr, msg);
 
                         println!("{} : {}", "The length of the message:".yellow(), msg.len());
-
-                        match client_tx.send((this_client.clone(), msg.to_string())).await {
-                            Ok(_) => {}
-                            Err(e) => {
-                                println!("Error sending message to client: {:?}", e);
-                                break;
+                        if msg.is_binary() {
+                            println!("message is binary 0️⃣1️⃣");
+                            match client_tx.send((this_client.clone(), msg.to_string())).await {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    println!("Error sending message to client: {:?}", e);
+                                    break;
+                                }
+                            }
+                        }
+                        if msg.is_text() {
+                            println!("message is text 📝");
+                            match client_tx.send((this_client.clone(), msg)).await {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    println!("Error sending message to client: {:?}", e);
+                                    break;
+                                }
                             }
                         }
                     }
