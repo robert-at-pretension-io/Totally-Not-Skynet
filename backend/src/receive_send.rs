@@ -63,7 +63,7 @@ impl Identity {
 pub async fn start_message_sending_loop(
     // docker: Docker,
     tx: UnboundedSender<(Identity, tokio_tungstenite::tungstenite::Message)>,
-    mut client_rx: mpsc::Receiver<(Identity, Message)>,
+    mut client_rx: mpsc::Receiver<(Identity, dyn Message)>,
     pool: Arc<Pool<SqliteConnectionManager>>
 ) {
     let mut runtime_settings: HashMap<Identity, UserSettings> = HashMap::new();
