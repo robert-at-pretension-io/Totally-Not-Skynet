@@ -100,6 +100,7 @@ pub async fn start_message_sending_loop(
 
                         let new_node_info = GraphNodeInfo {
                             id: uuid::Uuid::new_v4().to_string(),
+                            description: node.node_info.unwrap().description.clone(),
                             name: node.node_info.unwrap().name.clone(),
                         };
 
