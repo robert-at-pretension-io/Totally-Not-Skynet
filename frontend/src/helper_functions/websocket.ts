@@ -3,6 +3,8 @@ import { ResponseObject, Node, SystemState, ValidateNodesResponse, Graph, CrudBu
 
 import systemStateStore from "stores/systemStateStore";
 
+import { BinaryWriter } from "google-protobuf";
+
 export function setupWebsocketConnection(
 ): WebSocket {
   console.log("setting up websocket connection");
@@ -101,9 +103,16 @@ export function sendWebsocketMessage(
   console.log("sending websocket message: ", message.toObject());
   const message_string = message.serializeBinary();
 
+  const writer = new BinaryWriter();
+
+  message.serialize(writer);
+
+  // message.serialize
+
   // const messageArray = Array.from(message_string);
 
   console.log("serialized message is: ", message_string);
+  console.log("other serialize message", writer.getResultBase64String());
 
   // message_string.buffer
 
