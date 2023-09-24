@@ -13,9 +13,11 @@ pub fn to_u8_vec<M: Message>(message: &M) -> Result<Vec<u8>, prost::EncodeError>
     Ok(bytes)
 }
 
-pub fn parse_message(message_str: &str) -> Option<CrudBundle> {
+pub fn parse_message<M: Message + Default>(message: M) -> Option<CrudBundle> {
     println!("{}", "calling parse_message".yellow());
-    let res: Result<CrudBundle, _> = typed_object_from_base64_string(message_str);
+    // let res: Result<CrudBundle, _> = typed_object_from_base64_string(message_str);
+
+    let res = M::decode(message);
 
     match res {
         Ok(val) => Some(val),

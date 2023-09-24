@@ -15,7 +15,7 @@ use colored::*;
 
 pub async fn start_websocket_server(
     rx: Arc<tokio::sync::Mutex<UnboundedReceiver<(Identity, Message)>>>,
-    client_tx: mpsc::Sender<(Identity, String)>
+    client_tx: mpsc::Sender<(Identity, Message)>
 ) {
     let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
 
@@ -111,7 +111,7 @@ pub async fn start_websocket_server(
 
                         println!("{} : {}", "The length of the message:".yellow(), msg.len());
 
-                        match client_tx.send((this_client.clone(), msg.to_string())).await {
+                        match client_tx.send((this_client.clone(), msg)).await {
                             Ok(_) => {}
                             Err(e) => {
                                 println!("Error sending message to client: {:?}", e);
