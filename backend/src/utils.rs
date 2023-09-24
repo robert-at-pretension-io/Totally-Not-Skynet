@@ -1,6 +1,7 @@
 use crate::generated_types::CrudBundle;
 use prost::Message;
 use colored::*;
+use base64;
 
 pub fn to_u8_vec<M: Message>(message: &M) -> Result<Vec<u8>, prost::EncodeError> {
     // Create a buffer to hold the serialized bytes
@@ -32,7 +33,8 @@ fn typed_object_from_base64_string<M: Message + Default>(
 ) -> Result<M, Box<dyn std::error::Error>> {
     println!("{}", "calling typed_object_from_base64_string".yellow());
 
-    let my_bytes = Bytes::from(base64_string.to_owned());
+    // let my_bytes = Bytes::from(base64_string.to_owned());
+    let my_bytes = base64::decode(base64_string.to_owned()).unwrap();
 
     println!("The bytes are: {:?}", my_bytes.clone());
 
