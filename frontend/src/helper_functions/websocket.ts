@@ -106,17 +106,18 @@ export function sendWebsocketMessage(
   const writer = new BinaryWriter();
 
   message.serialize(writer);
+  const result = writer.getResultBase64String();
 
   // message.serialize
 
   // const messageArray = Array.from(message_string);
 
   console.log("serialized message is: ", message_string);
-  console.log("other serialize message", writer.getResultBase64String());
+  // console.log("other serialize message", result);
 
   // message_string.buffer
 
   console.log("deserialized message is: ", CrudBundle.deserializeBinary(message_string).toObject());
 
-  websocket.send(message_string);
+  websocket.send(result);
 }
