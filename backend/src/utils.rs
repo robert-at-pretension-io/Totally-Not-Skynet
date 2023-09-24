@@ -33,8 +33,8 @@ fn typed_object_from_base64_string<M: Message + Default>(
 ) -> Result<M, Box<dyn std::error::Error>> {
     println!("{}", "calling typed_object_from_base64_string".yellow());
 
-    // let my_bytes = Bytes::from(base64_string.to_owned());
-    let my_bytes = base64::decode(base64_string.to_owned()).unwrap().into_buf();
+    let my_bytes = Bytes::from(base64_string.to_owned());
+    // let my_bytes = base64::decode(base64_string.to_owned()).unwrap().into_buf();
 
     println!("The bytes are: {:?}", my_bytes.clone());
 
