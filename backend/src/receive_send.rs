@@ -63,7 +63,7 @@ impl Identity {
 pub async fn start_message_sending_loop(
     // docker: Docker,
     tx: UnboundedSender<(Identity, tokio_tungstenite::tungstenite::Message)>,
-    mut client_rx: mpsc::Receiver<Identity, String>,
+    mut client_rx: mpsc::Receiver<(Identity, tokio_tungstenite::tungstenite::Message)>,
     pool: Arc<Pool<SqliteConnectionManager>>
 ) {
     let mut runtime_settings: HashMap<Identity, UserSettings> = HashMap::new();
@@ -76,202 +76,206 @@ pub async fn start_message_sending_loop(
     while let Some(msg) = client_rx.recv().await {
         println!("{} {:?}", "Received a message from the client:".yellow(), msg);
 
-        let received_message: Option<CrudBundle> = parse_message(&msg.1);
+        // let received_message: Option<CrudBundle> = parse_message(&msg.1);
 
-        let message_contents: CrudBundle;
 
-        if received_message.is_none() {
-            print!("Received an invalid message from the client: {}", msg.1);
-            continue;
-        } else {
-            message_contents = received_message.unwrap();
-            println!("Received a parsed message from the client: {:?}", message_contents);
-        }
+        println!("message data: {:?}",msg.1.into_data());
 
-        let verb: VerbTypeNames = VerbTypeNames::from_i32(message_contents.verb).unwrap();
+        // let message_contents: CrudBundle;
 
-        match message_contents.object {
-            Some(crud_bundle::Object::Node(node)) => {
-                match verb {
-                    VerbTypeNames::Post => {
-                        let mut mutable_node = node.clone();
+        // if received_message.is_none() {
+        //     print!("Received an invalid message from the client: {}", msg.1);
+        //     continue;
+        // } else {
+        //     message_contents = received_message.unwrap();
+        //     println!("Received a parsed message from the client: {:?}", message_contents);
+        // }
 
-                        println!("Creating node: {:?}", mutable_node);
+        // let verb: VerbTypeNames = VerbTypeNames::from_i32(message_contents.verb).unwrap();
 
-                        let new_node_info = GraphNodeInfo {
-                            id: uuid::Uuid::new_v4().to_string(),
-                            description: node.clone().node_info.unwrap().description.clone(),
-                            name: node.node_info.unwrap().name.clone(),
-                        };
+        // match message_contents.object {
+        //     Some(crud_bundle::Object::Node(node)) => {
+        //         match verb {
+        //             VerbTypeNames::Post => {
+        //                 let mut mutable_node = node.clone();
 
-                        // create a uuid for the node:
-                        mutable_node.node_info = Some(new_node_info);
+        //                 println!("Creating node: {:?}", mutable_node);
 
-                        // get_sqlite_db is a function that returns a connection to the sqlite db
+        //                 let new_node_info = GraphNodeInfo {
+        //                     id: uuid::Uuid::new_v4().to_string(),
+        //                     description: node.clone().node_info.unwrap().description.clone(),
+        //                     name: node.node_info.unwrap().name.clone(),
+        //                 };
 
-                        //insert the node into the db
-                        match insert_node(pool.clone(), mutable_node.clone()) {
-                            Ok(_) => {
-                                println!("Node inserted successfully");
-                                let response_object = ResponseObject {
-                                    object: Some(Node(mutable_node.clone())),
-                                };
+        //                 // create a uuid for the node:
+        //                 mutable_node.node_info = Some(new_node_info);
 
-                                send_message(&tx, msg.0.clone(), response_object).await;
-                            }
-                            Err(err) => {
-                                println!("Error inserting node: {:?}", err);
-                            }
-                        }
-                    }
-                    VerbTypeNames::Put => {
-                        let updated_node = node.clone();
+        //                 // get_sqlite_db is a function that returns a connection to the sqlite db
 
-                        update_node(pool.clone(), &updated_node).unwrap();
+        //                 //insert the node into the db
+        //                 match insert_node(pool.clone(), mutable_node.clone()) {
+        //                     Ok(_) => {
+        //                         println!("Node inserted successfully");
+        //                         let response_object = ResponseObject {
+        //                             object: Some(Node(mutable_node.clone())),
+        //                         };
 
-                        let response_object: ResponseObject = ResponseObject {
-                            object: Some(Node(updated_node)),
-                        };
+        //                         send_message(&tx, msg.0.clone(), response_object).await;
+        //                     }
+        //                     Err(err) => {
+        //                         println!("Error inserting node: {:?}", err);
+        //                     }
+        //                 }
+        //             }
+        //             VerbTypeNames::Put => {
+        //                 let updated_node = node.clone();
 
-                        send_message(&tx, msg.0.clone(), response_object).await;
-                    }
-                    _ => {
-                        println!("Verb not supported for node: {:?}", verb);
-                    }
-                }
-            }
-            Some(crud_bundle::Object::AuthenticationMessage(_authentication_message)) => {
-                match verb {
-                    VerbTypeNames::Post => {
-                        println!("Initializing project for {}", msg.0.name);
-                        println!(
-                            "Found the following settings: {:?}",
-                            runtime_settings.get(&msg.0)
-                        );
+        //                 update_node(pool.clone(), &updated_node).unwrap();
 
-                        println!("Get nodes, settings, etc from db!");
+        //                 let response_object: ResponseObject = ResponseObject {
+        //                     object: Some(Node(updated_node)),
+        //                 };
 
-                        match fetch_all_nodes(pool.clone()) {
-                            Ok(nodes) => {
-                                for node in &nodes {
-                                    println!("Found node: {:?}", node);
+        //                 send_message(&tx, msg.0.clone(), response_object).await;
+        //             }
+        //             _ => {
+        //                 println!("Verb not supported for node: {:?}", verb);
+        //             }
+        //         }
+        //     }
+        //     Some(crud_bundle::Object::AuthenticationMessage(_authentication_message)) => {
+        //         match verb {
+        //             VerbTypeNames::Post => {
+        //                 println!("Initializing project for {}", msg.0.name);
+        //                 println!(
+        //                     "Found the following settings: {:?}",
+        //                     runtime_settings.get(&msg.0)
+        //                 );
 
-                                    send_message(&tx, msg.0.clone(), ResponseObject {
-                                        object: Some(Node(node.clone())),
-                                    }).await;
-                                }
-                            }
-                            Err(err) => {
-                                println!(
-                                    "Have the following errors when attempting to pull nodes from sqlite : {:?}",
-                                    err
-                                );
-                            }
-                        }
-                    }
-                    _ => {
-                        println!("Verb not supported for initial message: {:?}", verb);
-                    }
-                }
-            }
-            Some(crud_bundle::Object::UserSettings(_user_settings)) => {
-                match verb {
-                    VerbTypeNames::Get => {
-                        println!("Setting user settings for {}", msg.0.name);
+        //                 println!("Get nodes, settings, etc from db!");
 
-                        // attempt to set them from environment variables
-                        let system_settings = UserSettings::new();
+        //                 match fetch_all_nodes(pool.clone()) {
+        //                     Ok(nodes) => {
+        //                         for node in &nodes {
+        //                             println!("Found node: {:?}", node);
 
-                        match system_settings {
-                            Some(settings) => {
-                                println!("settings: {:?}", settings);
+        //                             send_message(&tx, msg.0.clone(), ResponseObject {
+        //                                 object: Some(Node(node.clone())),
+        //                             }).await;
+        //                         }
+        //                     }
+        //                     Err(err) => {
+        //                         println!(
+        //                             "Have the following errors when attempting to pull nodes from sqlite : {:?}",
+        //                             err
+        //                         );
+        //                     }
+        //                 }
+        //             }
+        //             _ => {
+        //                 println!("Verb not supported for initial message: {:?}", verb);
+        //             }
+        //         }
+        //     }
+        //     Some(crud_bundle::Object::UserSettings(_user_settings)) => {
+        //         match verb {
+        //             VerbTypeNames::Get => {
+        //                 println!("Setting user settings for {}", msg.0.name);
 
-                                // Check if runtime_settings already have settings for the user
-                                if runtime_settings.contains_key(&msg.0) {
-                                    println!("Settings for user {} already exist", msg.0.name);
-                                } else {
-                                    runtime_settings.insert(msg.0.clone(), UserSettings {
-                                        openai_api_key: settings.openai_api_key,
-                                        mongo_db_uri: settings.mongo_db_uri,
-                                    });
-                                    println!("Settings for user {} have been set", msg.0.name);
-                                }
-                            }
-                            None => {
-                                // runtime_settings.insert(msg.0.clone(), UserSettings {
-                                //     openai_api_key: user_settings.openai_api_key,
-                                //     mongo_db_uri: user_settings.mongo_db_uri,
-                                // });
-                                panic!("fug... the settings are not set.");
-                            }
-                        }
+        //                 // attempt to set them from environment variables
+        //                 let system_settings = UserSettings::new();
 
-                        // respond to the client
-                        // send_message(&tx, msg.0.clone(), ResponseObject::UserSettings).await;
+        //                 match system_settings {
+        //                     Some(settings) => {
+        //                         println!("settings: {:?}", settings);
 
-                        todo!("send some acknowledgement that user settings are in the system");
-                    }
-                    _ => {
-                        println!(
-                            "\n-------------------\nVerb not supported for user settings: {:?}\n-------------------\n",
-                            verb
-                        );
-                    }
-                }
-            }
-            Some(crud_bundle::Object::ExecutionContext(_execution_context)) =>
-                match verb {
-                    _ => {
-                        todo!("Handle execution context");
-                    }
-                }
-            Some(crud_bundle::Object::ValidateNodes(node_container)) => {
-                match verb {
-                    VerbTypeNames::Post => {
-                        // generate maximal graph from nodes (based on input_variables and output_variables)
-                        println!("Validating nodes");
-                        println!("Validating nodes for user: {:?}", msg.0);
-                        println!("need to return a Graph object");
+        //                         // Check if runtime_settings already have settings for the user
+        //                         if runtime_settings.contains_key(&msg.0) {
+        //                             println!("Settings for user {} already exist", msg.0.name);
+        //                         } else {
+        //                             runtime_settings.insert(msg.0.clone(), UserSettings {
+        //                                 openai_api_key: settings.openai_api_key,
+        //                                 mongo_db_uri: settings.mongo_db_uri,
+        //                             });
+        //                             println!("Settings for user {} have been set", msg.0.name);
+        //                         }
+        //                     }
+        //                     None => {
+        //                         // runtime_settings.insert(msg.0.clone(), UserSettings {
+        //                         //     openai_api_key: user_settings.openai_api_key,
+        //                         //     mongo_db_uri: user_settings.mongo_db_uri,
+        //                         // });
+        //                         panic!("fug... the settings are not set.");
+        //                     }
+        //                 }
 
-                        let nodes = node_container.nodes;
+        //                 // respond to the client
+        //                 // send_message(&tx, msg.0.clone(), ResponseObject::UserSettings).await;
 
-                        let mut nodes_info = Vec::new();
+        //                 todo!("send some acknowledgement that user settings are in the system");
+        //             }
+        //             _ => {
+        //                 println!(
+        //                     "\n-------------------\nVerb not supported for user settings: {:?}\n-------------------\n",
+        //                     verb
+        //                 );
+        //             }
+        //         }
+        //     }
+        //     Some(crud_bundle::Object::ExecutionContext(_execution_context)) =>
+        //         match verb {
+        //             _ => {
+        //                 todo!("Handle execution context");
+        //             }
+        //         }
+        //     Some(crud_bundle::Object::ValidateNodes(node_container)) => {
+        //         match verb {
+        //             VerbTypeNames::Post => {
+        //                 // generate maximal graph from nodes (based on input_variables and output_variables)
+        //                 println!("Validating nodes");
+        //                 println!("Validating nodes for user: {:?}", msg.0);
+        //                 println!("need to return a Graph object");
 
-                        for node in nodes {
-                            if node.node_info.is_some() {
-                                nodes_info.push(node.node_info.unwrap());
-                            }
-                        }
+        //                 let nodes = node_container.nodes;
 
-                        let new_graph = Graph {
-                            nodes: nodes_info,
-                            edges: Vec::new(),
-                        };
+        //                 let mut nodes_info = Vec::new();
 
-                        let validate_nodes_response = ValidateNodesResponse {
-                            errors: Vec::new(),
-                            graph: Some(new_graph),
-                        };
+        //                 for node in nodes {
+        //                     if node.node_info.is_some() {
+        //                         nodes_info.push(node.node_info.unwrap());
+        //                     }
+        //                 }
 
-                        let response_object = ResponseObject {
-                            object: Some(ValidateNodesResponseEnum(validate_nodes_response)),
-                        };
+        //                 let new_graph = Graph {
+        //                     nodes: nodes_info,
+        //                     edges: Vec::new(),
+        //                 };
 
-                        send_message(&tx, msg.0.clone(), response_object).await;
-                    }
-                    _ => {
-                        println!("Verb not supported for node validation: {:?}", verb);
-                    }
-                }
-            }
+        //                 let validate_nodes_response = ValidateNodesResponse {
+        //                     errors: Vec::new(),
+        //                     graph: Some(new_graph),
+        //                 };
 
-            None => {
-                println!("odd...");
-                println!(
-                    "This probably means that the websocket connection has closed... Should remove it from the identity hash"
-                );
-            }
-        }
+        //                 let response_object = ResponseObject {
+        //                     object: Some(ValidateNodesResponseEnum(validate_nodes_response)),
+        //                 };
+
+        //                 send_message(&tx, msg.0.clone(), response_object).await;
+        //             }
+        //             _ => {
+        //                 println!("Verb not supported for node validation: {:?}", verb);
+        //             }
+        //         }
+        //     }
+
+        //     None => {
+        //         println!("odd...");
+        //         println!(
+        //             "This probably means that the websocket connection has closed... Should remove it from the identity hash"
+        //         );
+        //     }
+        // }
+    
     }
 }
 

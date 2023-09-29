@@ -17,6 +17,8 @@ pub fn parse_message<M: Message + Default>(message: M) -> Option<CrudBundle> {
     println!("{}", "calling parse_message".yellow());
     // let res: Result<CrudBundle, _> = typed_object_from_base64_string(message_str);
 
+    // message.
+
     let res = Message::decode(message);
 
     match res {
