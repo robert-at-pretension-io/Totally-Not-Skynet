@@ -42,54 +42,54 @@ export function setupWebsocketMessageHandler(
       console.log("res: ", res);
 
       switch (res) {
-        case "node": {
-          console.log("NODE");
-          const add_node = response_object.node as Node;
+      case "node": {
+        console.log("NODE");
+        const add_node = response_object.node as Node;
 
-          if (add_node && typeof add_node.toObject === "function") {
-            console.log("add_node: ", add_node.toObject());
+        if (add_node && typeof add_node.toObject === "function") {
+          console.log("add_node: ", add_node.toObject());
 
-            systemStateStore.update(
-              (n: SystemState) => {
-
-                n.nodes.push(add_node);
-
-                return n;
-              }
-            );
-
-          }
-          break;
-        }
-        case "authentication_message":
-          console.log("AUTHENTICATION_MESSAGE");
-          break;
-        case "user_settings":
-          console.log("USER_SETTINGS");
-          break;
-        case "validate_nodes_response": {
-          const graph_container = response_object.validate_nodes_response as ValidateNodesResponse;
-          const graph = graph_container.graph as Graph;
           systemStateStore.update(
             (n: SystemState) => {
-              n.graph = graph;
+
+              n.nodes.push(add_node);
+
               return n;
             }
           );
+
         }
-          break;
-        case "execution_response":
-          console.log("EXECUTION_RESPONSE");
-          break;
-        case "none":
-          console.log("OBJECT_NOT_SET");
-          break;
-        default:
-          console.log("default");
-          alert(
-            "Fallen through response object switch statement... This is not good."
-          );
-          break;
+        break;
+      }
+      case "authentication_message":
+        console.log("AUTHENTICATION_MESSAGE");
+        break;
+      case "user_settings":
+        console.log("USER_SETTINGS");
+        break;
+      case "validate_nodes_response": {
+        const graph_container = response_object.validate_nodes_response as ValidateNodesResponse;
+        const graph = graph_container.graph as Graph;
+        systemStateStore.update(
+          (n: SystemState) => {
+            n.graph = graph;
+            return n;
+          }
+        );
+      }
+        break;
+      case "execution_response":
+        console.log("EXECUTION_RESPONSE");
+        break;
+      case "none":
+        console.log("OBJECT_NOT_SET");
+        break;
+      default:
+        console.log("default");
+        alert(
+          "Fallen through response object switch statement... This is not good."
+        );
+        break;
       }
     });
   });
