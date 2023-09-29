@@ -5,6 +5,8 @@
   import * as helper_functions from "../helper_functions/graph";
   import * as proto from "../generated/system_types";
 
+  import { generateDynamicStyles } from "../helper_functions/graph";
+
   let current_graph: proto.Graph = new proto.Graph();
 
   onMount(() => {
@@ -17,6 +19,8 @@
     } else {
       current_graph = new proto.Graph();
     }
+
+    const dynamicStyles = generateDynamicStyles();  // Generate the dynamic styles
 
     cyInstance = cytoscape({
       container: refElement,
@@ -48,6 +52,7 @@
             width: "2px",
           },
         },
+        ...dynamicStyles,
       ],
     });
 
