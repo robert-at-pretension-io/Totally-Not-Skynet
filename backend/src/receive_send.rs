@@ -22,7 +22,7 @@ use crate::generated_types::response_object::Object::{
     ValidateNodesResponse as ValidateNodesResponseEnum,
 };
 
-use crate::utils::parse_message;
+// use crate::utils::parse_message;
 
 use crate::sqlite_helper_functions::{ insert_node, update_node, fetch_all_nodes };
 
