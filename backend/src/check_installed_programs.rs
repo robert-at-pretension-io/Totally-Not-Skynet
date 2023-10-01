@@ -131,7 +131,7 @@ fn run_command(command: &str, args: &[&str]) -> Result<()> {
 }
 
 pub fn check_all_programs() -> Result<()> {
-    docker_check()?;
+    // docker_check()?;
     sqlite_check()?;
     Ok(())
 }

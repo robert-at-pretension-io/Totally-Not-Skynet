@@ -26,6 +26,7 @@ pub mod generated_types {
 
 use crate::receive_send::start_message_sending_loop;
 use crate::websocket::start_websocket_server;
+use colored::*;
 
 // use bollard::container::{CreateExecOptions, StartExecResults};
 
@@ -44,7 +45,9 @@ async fn main() {
     }
 
     // assert check required installed programs
-    assert!(check_installed_programs::check_all_programs().is_ok());
+    // assert!(check_installed_programs::check_all_programs().is_ok());
+
+    println!("{}", "Need to re-enable check when changing environments back".red());
 
     // Setup the db:
     match sqlite_helper_functions::setup_sqlite_db() {

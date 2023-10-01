@@ -9,11 +9,13 @@ use crate::generated_types::{
     ValidateNodes,
     response_object,
     ValidateNodesResponse,
+    Edge,
 };
 
 use crate::utils::to_u8_vec;
 
 use colored::*;
+use petgraph::prelude::DiGraph;
 
 use std::sync::Arc;
 
@@ -78,12 +80,11 @@ pub async fn start_message_sending_loop(
 
         // let received_message: Option<CrudBundle> = parse_message(&msg.1);
 
-
         // println!("message data: {:?}",msg.1.into_data());
 
         let slice = msg.1.clone().into_data().as_slice().to_vec();
-        let message_contents : CrudBundle;
-        
+        let message_contents: CrudBundle;
+
         match CrudBundle::decode(&*slice) {
             Ok(val) => {
                 message_contents = val;
@@ -233,12 +234,13 @@ pub async fn start_message_sending_loop(
                     }
                 }
             }
-            Some(crud_bundle::Object::ExecutionContext(_execution_context)) =>
+            Some(crud_bundle::Object::ExecutionContext(_execution_context)) => {
                 match verb {
                     _ => {
                         todo!("Handle execution context");
                     }
                 }
+            }
             Some(crud_bundle::Object::ValidateNodes(node_container)) => {
                 match verb {
                     VerbTypeNames::Post => {
@@ -247,19 +249,62 @@ pub async fn start_message_sending_loop(
                         println!("Validating nodes for user: {:?}", msg.0);
                         println!("need to return a Graph object");
 
+                        // create a petgraph digraph:
+
                         let nodes = node_container.nodes;
 
-                        let mut nodes_info = Vec::new();
+                        // From the nodes and their dependencies, we need to populate a petgraph graph so that we can run the transitive reduction algorithm on it
+                        // This will give a "minimal" graph that has the same topological order as the larger graph
+                        // This will allow the user to have a visualization of the graph that is not cluttered with unnecessary nodes and is easy to understand the topological order
 
-                        for node in nodes {
-                            if node.node_info.is_some() {
-                                nodes_info.push(node.node_info.unwrap());
+                        let mut graph = DiGraph::new();
+
+                        let mut new_nodes: Vec<GraphNodeInfo> = Vec::new();
+
+                        for node in &nodes {
+                            let node_info = node.node_info.clone().unwrap();
+                            new_nodes.push(node_info);
+                            let node_index = graph.add_node(node.clone());
+                            node_indices.insert(node.type_name, node_index);
+                        }
+
+                        // Add edges based on input_variables and output_variables
+                        for node in &nodes {
+                            let node_index = node_indices[&node.type_name];
+                            for input_var in &node.input_variables {
+                                // Find nodes that output this input_var
+                                // For demonstration, using the same list of nodes
+                                for other_node in &nodes {
+                                    if other_node.output_variables.contains(input_var) {
+                                        let other_node_index = node_indices[&other_node.type_name];
+                                        graph.add_edge(other_node_index, node_index, ());
+                                    }
+                                }
                             }
                         }
 
+                        let mut new_edges: Vec<Edge> = Vec::new();
+
+                        graph
+                            .raw_edges()
+                            .iter()
+                            .for_each(
+                                foreach(|edge| {
+                                    let source_node = graph.node_weight(edge.source()).unwrap();
+                                    let target_node = graph.node_weight(edge.target()).unwrap();
+
+                                    let new_edge: Edge = Edge {
+                                        source: source_node.node_info.clone(),
+                                        target: target_node.node_info.clone(),
+                                    };
+
+                                    new_edges.push(new_edge);
+                                })
+                            );
+
                         let new_graph = Graph {
-                            nodes: nodes_info,
-                            edges: Vec::new(),
+                            nodes: new_nodes,
+                            edges: new_edges,
                         };
 
                         let validate_nodes_response = ValidateNodesResponse {
@@ -286,7 +331,6 @@ pub async fn start_message_sending_loop(
                 );
             }
         }
-    
     }
 }
 
