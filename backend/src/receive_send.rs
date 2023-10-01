@@ -252,55 +252,86 @@ pub async fn start_message_sending_loop(
                         // create a petgraph digraph:
 
                         let nodes = node_container.nodes;
+                        println!("Number of nodes: {:?}", nodes.len());
 
                         // From the nodes and their dependencies, we need to populate a petgraph graph so that we can run the transitive reduction algorithm on it
                         // This will give a "minimal" graph that has the same topological order as the larger graph
                         // This will allow the user to have a visualization of the graph that is not cluttered with unnecessary nodes and is easy to understand the topological order
 
                         let mut graph = DiGraph::new();
+                        println!("Initialized empty graph");
 
                         let mut new_nodes: Vec<GraphNodeInfo> = Vec::new();
 
+                        // let mut node_indices;
+                        let mut node_indices: HashMap<
+                            String,
+                            petgraph::graph::NodeIndex
+                        > = HashMap::new();
+
                         for node in &nodes {
                             let node_info = node.node_info.clone().unwrap();
+
+                            println!("Processing node: {:?}", node_info.id);
                             new_nodes.push(node_info);
                             let node_index = graph.add_node(node.clone());
-                            node_indices.insert(node.type_name, node_index);
+                            node_indices.insert(node.node_info.clone().unwrap().id, node_index);
                         }
+
+                        println!("All nodes added to graph");
 
                         // Add edges based on input_variables and output_variables
                         for node in &nodes {
-                            let node_index = node_indices[&node.type_name];
+                            let node_index = node_indices[&node.node_info.clone().unwrap().id];
+                            println!(
+                                "Adding edges for node: {:?}, Input Vars: {:?}",
+                                node.node_info.clone().unwrap().id,
+                                node.input_variables
+                            );
                             for input_var in &node.input_variables {
                                 // Find nodes that output this input_var
                                 // For demonstration, using the same list of nodes
+                                println!("Checking for input_var: {:?}", input_var);
                                 for other_node in &nodes {
+                                    println!(
+                                        "Other node: {:?}, Output Vars: {:?}",
+                                        other_node.node_info.clone().unwrap().id,
+                                        other_node.output_variables
+                                    );
                                     if other_node.output_variables.contains(input_var) {
-                                        let other_node_index = node_indices[&other_node.type_name];
+                                        let other_node_index =
+                                            node_indices[&node.node_info.clone().unwrap().id];
+                                        println!(
+                                            "Found matching output_var in node: {:?}",
+                                            other_node.node_info.clone().unwrap().id
+                                        );
                                         graph.add_edge(other_node_index, node_index, ());
                                     }
                                 }
                             }
                         }
+                        println!("All edges added");
 
                         let mut new_edges: Vec<Edge> = Vec::new();
+
+                        // Count and print the number of edges
+                        let edge_count = graph.raw_edges().len();
+                        println!("Total number of raw edges: {}", edge_count);
 
                         graph
                             .raw_edges()
                             .iter()
-                            .for_each(
-                                foreach(|edge| {
-                                    let source_node = graph.node_weight(edge.source()).unwrap();
-                                    let target_node = graph.node_weight(edge.target()).unwrap();
+                            .for_each(|edge| {
+                                let source_node = graph.node_weight(edge.source()).unwrap();
+                                let target_node = graph.node_weight(edge.target()).unwrap();
 
-                                    let new_edge: Edge = Edge {
-                                        source: source_node.node_info.clone(),
-                                        target: target_node.node_info.clone(),
-                                    };
+                                let new_edge: Edge = Edge {
+                                    source: source_node.node_info.clone(),
+                                    target: target_node.node_info.clone(),
+                                };
 
-                                    new_edges.push(new_edge);
-                                })
-                            );
+                                new_edges.push(new_edge);
+                            });
 
                         let new_graph = Graph {
                             nodes: new_nodes,
