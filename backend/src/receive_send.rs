@@ -300,7 +300,7 @@ pub async fn start_message_sending_loop(
                                     );
                                     if other_node.output_variables.contains(input_var) {
                                         let other_node_index =
-                                            node_indices[&node.node_info.clone().unwrap().id];
+                                            node_indices[&other_node.node_info.clone().unwrap().id];
                                         println!(
                                             "Found matching output_var in node: {:?}",
                                             other_node.node_info.clone().unwrap().id
