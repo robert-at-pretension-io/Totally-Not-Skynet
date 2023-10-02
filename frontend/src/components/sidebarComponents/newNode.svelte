@@ -21,7 +21,10 @@
   let conditional = new Conditional();
   let command = new Command();
 
-  let key_list = Object.keys(NodeTypeNames);
+  let key_list = Object.keys(NodeTypeNames).filter((key) => isNaN(Number(key)));
+
+  console.log("keylist is:", key_list);
+
   let num_array = Array.from({ length: key_list.length }, (_, i) => i);
 </script>
 
@@ -30,6 +33,8 @@
     <option value={array_index}>{key_list[array_index]}</option>
   {/each}
 </select>
+
+<p>Selected type: {key_list[typeName]}</p>
 
 {#if typeName === NodeTypeNames.PROMPT}
   <PromptComponent bind:prompt />

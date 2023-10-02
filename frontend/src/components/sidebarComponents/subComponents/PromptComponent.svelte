@@ -14,27 +14,44 @@
   let prompt_text = "";
   let description = "";
   let name = "";
+  let input_variables = [];
+  let output_variables = [];
+  let new_input_variable = "";
+  let new_output_variable = "";
 
   function submitPrompt() {
-    prompt.setPrompt(prompt_text);
-    prompt.setSystem(system_text);
+    prompt.prompt = prompt_text;
+    prompt.system = system_text;
 
     // create and send crud bundle:
 
     let crud_bundle = new CrudBundle();
 
-    let verb = VerbTypeNames.POST;
+    let verb = VerbTypeNames.Post;
 
     let node = new Node();
 
-    node.setPrompt(prompt);
+    node.prompt = prompt;
+
+    if (new_input_variable != "") {
+      input_variables = [...input_variables, new_input_variable];
+    }
+
+    if (new_output_variable != "") {
+      output_variables = [...output_variables, new_output_variable];
+    }
+
+    node.input_variables = input_variables;
+    node.output_variables = output_variables;
 
     let node_info = new GraphNodeInfo();
-    node_info.setName(name);
-    node.setDescription(description);
-    node.setNodeInfo(node_info);
-    crud_bundle.setNode(node);
-    crud_bundle.setVerb(verb);
+    node_info.name = name;
+    node_info.description = description;
+    node.node_info = node_info;
+    crud_bundle.node = node;
+    crud_bundle.verb = verb;
+
+    console.log("Crud bundle is: ", crud_bundle);
 
     let websocket = $websocketStore.websocket as WebSocket;
 
@@ -48,6 +65,10 @@
     prompt_text = "";
     description = "";
     name = "";
+    input_variables = [];
+    output_variables = [];
+    new_input_variable = "";
+    new_output_variable = "";
   }
 </script>
 
@@ -57,34 +78,54 @@
       <input bind:value={name} placeholder="Name" />
 
       <input bind:value={description} placeholder="Description" />
-      <!--   
+
       <div>
         <h4>Input Variables</h4>
-        {#each inputVariablesList as _inputVar, index}
-          <input
-            bind:value={inputVariablesList[index]}
-            placeholder={`Input variable ${index + 1}`}
-          />
-          <button on:click={() => inputVariablesList.splice(index, 1)}>x</button>
+        {#each input_variables as _inputVar, index}
+          <button
+            type="button"
+            on:click={() => {
+              input_variables.splice(index, 1);
+              input_variables = input_variables;
+            }}>`Remove input var: {input_variables[index]}`</button
+          >
         {/each}
-        <button on:click={() => inputVariablesList.push("")}
-          >Add Input Variable</button
+        <input
+          bind:value={new_input_variable}
+          placeholder="New Input Variable"
+        />
+        <button
+          type="button"
+          on:click={() => {
+            input_variables = [...input_variables, new_input_variable];
+            new_input_variable = "";
+          }}>Add</button
         >
       </div>
-  
+
       <div>
         <h4>Output Variables</h4>
-        {#each outputVariablesList as _outputVar, index}
-          <input
-            bind:value={outputVariablesList[index]}
-            placeholder={`Output variable ${index + 1}`}
-          />
-          <button on:click={() => outputVariablesList.splice(index, 1)}>x</button>
+        {#each output_variables as _outputVar, index}
+          <button
+            type="button"
+            on:click={() => {
+              output_variables.splice(index, 1);
+              output_variables = output_variables;
+            }}>`Remove output Var: {output_variables[index]}`</button
+          >
         {/each}
-        <button on:click={() => outputVariablesList.push("")}
-          >Add Output Variable</button
+        <input
+          bind:value={new_output_variable}
+          placeholder="New Output Variable"
+        />
+        <button
+          type="button"
+          on:click={() => {
+            output_variables = [...output_variables, new_output_variable];
+            new_output_variable = "";
+          }}>Add</button
         >
-      </div> -->
+      </div>
 
       <label for="prompt" class="required-label">Prompt</label>
       <input

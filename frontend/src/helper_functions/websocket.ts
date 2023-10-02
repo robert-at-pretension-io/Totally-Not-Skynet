@@ -9,7 +9,9 @@ import { Json } from "io-ts-types";
 export function setupWebsocketConnection(
 ): WebSocket {
   console.log("setting up websocket connection");
-  let websocket = new WebSocket("ws://138.197.70.163:8080");
+  // let websocket = new WebSocket("ws://138.197.70.163:8080");
+  alert("Change websocket to external environment");
+  let websocket = new WebSocket("ws://127.0.0.1:8080");
 
   // start the websocket connection
   websocket.addEventListener("open", () => {

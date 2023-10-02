@@ -1,7 +1,7 @@
 import * as graphlib from "graphlib";
 import * as proto from "../generated/system_types";
 
-import { NodeTypeNames } from "generated/system_types_pb";
+import { NodeTypeNames } from "../generated/system_types";
 
 // import { NodeTypeNames } from './path/to/your/enum';  // Import your NodeTypeNames enum
 
@@ -27,7 +27,7 @@ export const stylesMap: { [key: string]: { [styleKey: string]: string } } = {
 export const generateDynamicStyles = (): Array<any> => {
   return Object.keys(stylesMap).map((key) => {
     return {
-      selector: `.${key.toLowerCase()}`, 
+      selector: `.${key.toLowerCase()}`,
       style: stylesMap[key]
     };
   });

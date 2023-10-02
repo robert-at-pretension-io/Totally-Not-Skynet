@@ -12,8 +12,6 @@ use crate::generated_types::{
     Edge,
 };
 
-use crate::utils::to_u8_vec;
-
 use colored::*;
 use petgraph::prelude::DiGraph;
 
@@ -278,6 +276,8 @@ pub async fn start_message_sending_loop(
                             node_indices.insert(node.node_info.clone().unwrap().id, node_index);
                         }
 
+                        let mut mut_pruned_graph = graph.clone();
+
                         println!("All nodes added to graph");
 
                         // Add edges based on input_variables and output_variables
@@ -312,13 +312,42 @@ pub async fn start_message_sending_loop(
                         }
                         println!("All edges added");
 
+                        println!("{}", "Remove the excess edges here".red());
+
+                        let top_sort = petgraph::algo::toposort(&graph, None).unwrap();
+
+                        let adjacency_list =
+                            petgraph::algo::tred::dag_to_toposorted_adjacency_list::<
+                                _,
+                                petgraph::graph::DefaultIx
+                            >(&graph, &top_sort);
+
+                        // The output is the pair of the transitive reduction and the transitive closure.
+                        let (transative_reduct, _) =
+                            petgraph::algo::tred::dag_transitive_reduction_closure::<
+                                _,
+                                petgraph::graph::DefaultIx
+                            >(&adjacency_list.0);
+
+                        // The graph should have the same nodes but different edges.
+
+                        // for all of the edges in transivite_reduct, add that edge to the mut_pruned_graph
+
+                        transative_reduct.edge_indices().for_each(|edge| {
+                            // how to get the source and target nodes from the edge?
+                            let (sourceIndex, targetIndex) = transative_reduct
+                                .edge_endpoints(edge)
+                                .unwrap();
+                            mut_pruned_graph.add_edge(sourceIndex.into(), targetIndex.into(), ());
+                        });
+
                         let mut new_edges: Vec<Edge> = Vec::new();
 
                         // Count and print the number of edges
-                        let edge_count = graph.raw_edges().len();
-                        println!("Total number of raw edges: {}", edge_count);
+                        // let edge_count = rebuilt_graph.raw_edges().len();
+                        // println!("Total number of raw edges: {}", edge_count);
 
-                        graph
+                        mut_pruned_graph
                             .raw_edges()
                             .iter()
                             .for_each(|edge| {

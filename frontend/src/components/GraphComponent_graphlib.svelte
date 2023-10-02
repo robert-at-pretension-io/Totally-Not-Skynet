@@ -20,7 +20,7 @@
       current_graph = new proto.Graph();
     }
 
-    const dynamicStyles = generateDynamicStyles();  // Generate the dynamic styles
+    const dynamicStyles = generateDynamicStyles(); // Generate the dynamic styles
 
     cyInstance = cytoscape({
       container: refElement,
@@ -92,7 +92,7 @@
       const node = evt.target;
       console.log("deselected " + node.id());
 
-      let selected_list = $systemStateStore.getSelectedNodeList();
+      let selected_list = $systemStateStore.selected_node;
 
       // remove the node the graphNodeInfo from the selected_list where the id is the same as the node.id()
 
@@ -102,7 +102,7 @@
         }
       );
 
-      $systemStateStore.setSelectedNodeList(selected_list);
+      $systemStateStore.selected_node = selected_list;
     });
 
     // Listen to unselect event on any edge
