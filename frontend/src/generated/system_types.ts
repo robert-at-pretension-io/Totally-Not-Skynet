@@ -2427,15 +2427,19 @@ export class ValidateNodesResponse extends pb_1.Message {
   constructor(data?: any[] | {
         errors?: string[];
         graph?: Graph;
+        topological_order?: string[];
     }) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 3], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
       if ("errors" in data && data.errors != undefined) {
         this.errors = data.errors;
       }
       if ("graph" in data && data.graph != undefined) {
         this.graph = data.graph;
+      }
+      if ("topological_order" in data && data.topological_order != undefined) {
+        this.topological_order = data.topological_order;
       }
     }
   }
@@ -2454,9 +2458,16 @@ export class ValidateNodesResponse extends pb_1.Message {
   get has_graph() {
     return pb_1.Message.getField(this, 2) != null;
   }
+  get topological_order() {
+    return pb_1.Message.getFieldWithDefault(this, 3, []) as string[];
+  }
+  set topological_order(value: string[]) {
+    pb_1.Message.setField(this, 3, value);
+  }
   static fromObject(data: {
         errors?: string[];
         graph?: ReturnType<typeof Graph.prototype.toObject>;
+        topological_order?: string[];
     }): ValidateNodesResponse {
     const message = new ValidateNodesResponse({});
     if (data.errors != null) {
@@ -2465,18 +2476,25 @@ export class ValidateNodesResponse extends pb_1.Message {
     if (data.graph != null) {
       message.graph = Graph.fromObject(data.graph);
     }
+    if (data.topological_order != null) {
+      message.topological_order = data.topological_order;
+    }
     return message;
   }
   toObject() {
     const data: {
             errors?: string[];
             graph?: ReturnType<typeof Graph.prototype.toObject>;
+            topological_order?: string[];
         } = {};
     if (this.errors != null) {
       data.errors = this.errors;
     }
     if (this.graph != null) {
       data.graph = this.graph.toObject();
+    }
+    if (this.topological_order != null) {
+      data.topological_order = this.topological_order;
     }
     return data;
   }
@@ -2488,6 +2506,8 @@ export class ValidateNodesResponse extends pb_1.Message {
       writer.writeRepeatedString(1, this.errors);
     if (this.has_graph)
       writer.writeMessage(2, this.graph, () => this.graph.serialize(writer));
+    if (this.topological_order.length)
+      writer.writeRepeatedString(3, this.topological_order);
     if (!w)
       return writer.getResultBuffer();
   }
@@ -2502,6 +2522,9 @@ export class ValidateNodesResponse extends pb_1.Message {
         break;
       case 2:
         reader.readMessage(message.graph, () => message.graph = Graph.deserialize(reader));
+        break;
+      case 3:
+        pb_1.Message.addToRepeatedField(message, 3, reader.readString());
         break;
       default: reader.skipField();
       }

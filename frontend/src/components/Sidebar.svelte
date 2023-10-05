@@ -1,11 +1,9 @@
 <script>
-  import BackgroundInfo from "./sidebarComponents/BackgroundInfo.svelte";
-  import InteractWithActionsAndProcesses from "./sidebarComponents/InteractWithActionsAndProcesses.svelte";
+  import modifyNode from "./sidebarComponents/modifyNode.svelte";
   import NewNode from "./sidebarComponents/newNode.svelte";
 
   import { blur, fade } from "svelte/transition";
   import { onMount } from "svelte";
-  import CreateProcess from "./sidebarComponents/CreateProcess.svelte";
 
   // onmount
 
@@ -15,25 +13,13 @@
 
   let sections = [
     {
-      header: "Background Information",
-      component: BackgroundInfo,
-      open: false,
-    },
-
-    {
       header: "Create a New Node",
       component: NewNode,
       open: false,
     },
     {
-      header: "Create a process",
-      component: CreateProcess,
-      open: false,
-    },
-
-    {
-      header: "Edit Action or Process",
-      component: InteractWithActionsAndProcesses,
+      header: "Modify Node",
+      component: modifyNode,
       open: false,
     },
   ];
@@ -78,25 +64,16 @@
 </div>
 
 <style>
-  /* Sidebar container */
-  .sidebar {
-    grid-column: 1;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    background-color: #2ecc71;
-    /* Green */
+  /* 
     overflow-y: auto;
     box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.541);
     border-radius: 12px;
   }
 
-  /* Section styling */
   .section {
     margin-bottom: 20px;
   }
 
-  /* Section header */
   .section-header {
     font-size: 18px;
     padding: 10px;
@@ -107,17 +84,55 @@
     transition: background-color 0.3s ease;
   }
 
-  /* Hover effect on section header */
   .section-header:hover {
     background-color: #ddd;
   }
 
-  /* Section content */
   .section-content {
     margin-top: 10px;
     padding: 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    background-color: #fff;
+  } */
+
+  /* Sidebar */
+  .sidebar {
+    grid-column: 1;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    background-color: #ecf0f1;
+    overflow-y: auto;
+    box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .section {
+    margin-bottom: 25px;
+  }
+
+  .section-header {
+    font-size: 18px;
+    padding: 10px;
+    cursor: pointer;
+    background-color: #bdc3c7;
+    border: 1px solid #a5a9ab;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+
+  .section-header:hover {
+    background-color: #a5a9ab;
+    transform: scale(1.03);
+  }
+
+  .section-content {
+    margin-top: 15px;
+    padding: 15px;
+    border: 1px solid #a5a9ab;
+    border-radius: 8px;
     background-color: #fff;
   }
 </style>

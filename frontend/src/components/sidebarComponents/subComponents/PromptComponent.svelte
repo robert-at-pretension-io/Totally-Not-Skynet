@@ -1,6 +1,5 @@
 <script lang="ts">
   import { websocketStore } from "stores/websocketStore";
-  export let prompt: Prompt;
   import {
     CrudBundle,
     Prompt,
@@ -18,6 +17,7 @@
   let output_variables = [];
   let new_input_variable = "";
   let new_output_variable = "";
+  export let prompt: Prompt;
 
   function submitPrompt() {
     prompt.prompt = prompt_text;
