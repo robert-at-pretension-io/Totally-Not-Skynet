@@ -4,7 +4,7 @@
   import systemStateStore from "stores/systemStateStore.js";
   import * as helper_functions from "../helper_functions/graph";
   import * as proto from "../generated/system_types";
-
+  import dagre from "cytoscape-dagre";
   import { generateDynamicStyles } from "../helper_functions/graph";
 
   let current_graph: proto.Graph = new proto.Graph();
@@ -12,7 +12,7 @@
   onMount(() => {
     console.log("Graph Component Mounted");
 
-    // cytoscape.use(dagre);
+    cytoscape.use(dagre);
 
     if ($systemStateStore.graph != undefined) {
       current_graph = $systemStateStore.graph as proto.Graph;
@@ -157,7 +157,14 @@
         }
       });
 
-      cyInstance?.fit();
+      // cyInstance?.fit();
+
+      cyInstance
+        ?.layout({
+          name: "dagre",
+          fit: true,
+        })
+        .run();
     }
   }
 

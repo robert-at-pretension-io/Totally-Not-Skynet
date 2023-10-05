@@ -173,7 +173,9 @@ message ExecutionResponse {
 
 message ValidateNodesResponse {
   repeated string errors = 1;
+
   Graph graph = 2;
+  repeated string topological_order = 3;
 }
 
 // ResponseObject

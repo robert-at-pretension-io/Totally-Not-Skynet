@@ -13,6 +13,7 @@ use crate::generated_types::{
 };
 
 use colored::*;
+use petgraph::Direction;
 use petgraph::prelude::DiGraph;
 
 use std::sync::Arc;
@@ -58,8 +59,6 @@ impl Identity {
     }
 }
 
-// use std::env;
-
 pub async fn start_message_sending_loop(
     // docker: Docker,
     tx: UnboundedSender<(Identity, tokio_tungstenite::tungstenite::Message)>,
@@ -67,12 +66,7 @@ pub async fn start_message_sending_loop(
     pool: Arc<Pool<SqliteConnectionManager>>
 ) {
     let mut runtime_settings: HashMap<Identity, UserSettings> = HashMap::new();
-    // let mut messages_thus_far: HashMap<Identity, Vec<String>> = HashMap::new();
-    // let mut docker_containers: HashMap<Identity, String> = HashMap::new();
 
-    // startup the docker container here
-    // let docker = Docker::connect_with_local_defaults().unwrap();
-    //read messages from the client
     while let Some(msg) = client_rx.recv().await {
         println!("{} {:?}", "Received a message from the client:".yellow(), msg);
 
@@ -367,9 +361,19 @@ pub async fn start_message_sending_loop(
                             edges: new_edges,
                         };
 
+                        let mut starting_nodes = Vec::new();
+
+                        for node in graph.node_indices() {
+                            if graph.neighbors_directed(node, Direction::Incoming).count() == 0 {
+                                println!("Node with no incoming edges: {:?}", graph[node]);
+                                starting_nodes.push(graph[node].clone());
+                            }
+                        }
+
                         let validate_nodes_response = ValidateNodesResponse {
                             errors: Vec::new(),
                             graph: Some(new_graph),
+                            topological_order: Vec::new(),
                         };
 
                         let response_object = ResponseObject {
@@ -410,21 +414,4 @@ pub async fn send_message(
             println!("Error sending message to client: {:?}", e);
         }
     }
-
-    // match to_u8_vec(&message) {
-    //     Ok(u8_vec) => {
-    //         // //convert u8_vec to string
-    //         // let send_string = String::from_utf8(u8_vec).unwrap();
-
-    //         match tx.send((identity, Message::Binary(u8_vec))) {
-    //             Ok(_) => {}
-    //             Err(e) => {
-    //                 println!("Error sending message to client: {:?}", e);
-    //             }
-    //         }
-    //     }
-    //     Err(e) => {
-    //         println!("Error encoding message: {:?}", e);
-    //     }
-    // }
 }
