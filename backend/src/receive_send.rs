@@ -24,7 +24,6 @@ use crate::generated_types::response_object::Object::{
 };
 
 // use crate::utils::parse_message;
-
 use crate::sqlite_helper_functions::{ insert_node, update_node, fetch_all_nodes };
 
 use r2d2::Pool;
@@ -34,6 +33,9 @@ use tokio::sync::mpsc::UnboundedSender;
 use prost::Message;
 
 use prost::bytes::BytesMut;
+
+// use petgraph::prelude::Bfs;
+use petgraph::algo::toposort;
 
 // use bollard::container::Config;
 // use bollard::exec::{ CreateExecOptions, StartExecResults };
@@ -366,15 +368,59 @@ pub async fn start_message_sending_loop(
                         for node in graph.node_indices() {
                             if graph.neighbors_directed(node, Direction::Incoming).count() == 0 {
                                 println!("Node with no incoming edges: {:?}", graph[node]);
-                                starting_nodes.push(graph[node].clone());
+                                starting_nodes.push(node.clone());
                             }
+                        }
+
+                        let mut topological_order = Vec::new();
+
+                        // println!("Starting nodes: {:?}", starting_nodes);
+
+                        // if starting_nodes.len() == 0 {
+                        //     println!("{}", "No starting nodes found".red());
+                        //     continue;
+                        // } else {
+                        //     let start_node = starting_nodes[0].clone();
+                        //     let mut bfs = Bfs::new(&mut_pruned_graph, start_node);
+                        //     while let Some(nx) = bfs.next(&graph) {
+                        //         // we can access `graph` mutably here still
+
+                        //         //loop through the nodes vector and find the node with the same id as mut_pruned_graph[nx]
+
+                        //         let node = new_graph.nodes
+                        //             .iter()
+                        //             .find(
+                        //                 |node|
+                        //                     node.id ==
+                        //                     mut_pruned_graph[nx].node_info.as_mut().unwrap().id
+                        //             )
+                        //             .unwrap();
+
+                        //         topological_order.push(node.clone());
+                        //     }
+                        // }
+
+                        let index_vec = toposort(&mut_pruned_graph, None).unwrap();
+
+                        for index in index_vec {
+                            let node = new_graph.nodes
+                                .iter()
+                                .find(
+                                    |node|
+                                        node.id ==
+                                        mut_pruned_graph[index].node_info.as_mut().unwrap().id
+                                )
+                                .unwrap();
+                            topological_order.push(node.clone());
                         }
 
                         let validate_nodes_response = ValidateNodesResponse {
                             errors: Vec::new(),
                             graph: Some(new_graph),
-                            topological_order: Vec::new(),
+                            topological_order: topological_order,
                         };
+
+                        // As the process is valid, we save it to the db.
 
                         let response_object = ResponseObject {
                             object: Some(ValidateNodesResponseEnum(validate_nodes_response)),

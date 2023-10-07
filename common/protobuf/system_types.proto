@@ -51,7 +51,7 @@ message Graph {
 // Process
 message Process {
   Graph graph = 1;
-  repeated string initial_variables = 2;
+  repeated string topological_order = 2;
 }
 
 // Node
@@ -172,10 +172,8 @@ message ExecutionResponse {
 }
 
 message ValidateNodesResponse {
-  repeated string errors = 1;
-
-  Graph graph = 2;
-  repeated string topological_order = 3;
+  repeated SystemErrors errors = 1;
+  Node node = 2;
 }
 
 // ResponseObject

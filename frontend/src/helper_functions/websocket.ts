@@ -41,7 +41,7 @@ export function setupWebsocketMessageHandler(
 
       console.log("response_object: ", response_object);
       const res = response_object.object;
-      console.log("res: ", res);
+      console.log("res: ", response_object.toObject());
 
       switch (res) {
       case "node": {

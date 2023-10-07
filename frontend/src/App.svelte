@@ -70,6 +70,6 @@
 <style>
   .app-container {
     display: grid;
-    grid-template-columns: 40vw 1fr;
+    grid-template-columns: 25vw 1fr;
   }
 </style>

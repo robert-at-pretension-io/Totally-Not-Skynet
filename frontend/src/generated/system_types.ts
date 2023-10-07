@@ -2427,7 +2427,7 @@ export class ValidateNodesResponse extends pb_1.Message {
   constructor(data?: any[] | {
         errors?: string[];
         graph?: Graph;
-        topological_order?: string[];
+        topological_order?: GraphNodeInfo[];
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 3], this.#one_of_decls);
@@ -2459,15 +2459,15 @@ export class ValidateNodesResponse extends pb_1.Message {
     return pb_1.Message.getField(this, 2) != null;
   }
   get topological_order() {
-    return pb_1.Message.getFieldWithDefault(this, 3, []) as string[];
+    return pb_1.Message.getRepeatedWrapperField(this, GraphNodeInfo, 3) as GraphNodeInfo[];
   }
-  set topological_order(value: string[]) {
-    pb_1.Message.setField(this, 3, value);
+  set topological_order(value: GraphNodeInfo[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 3, value);
   }
   static fromObject(data: {
         errors?: string[];
         graph?: ReturnType<typeof Graph.prototype.toObject>;
-        topological_order?: string[];
+        topological_order?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
     }): ValidateNodesResponse {
     const message = new ValidateNodesResponse({});
     if (data.errors != null) {
@@ -2477,7 +2477,7 @@ export class ValidateNodesResponse extends pb_1.Message {
       message.graph = Graph.fromObject(data.graph);
     }
     if (data.topological_order != null) {
-      message.topological_order = data.topological_order;
+      message.topological_order = data.topological_order.map(item => GraphNodeInfo.fromObject(item));
     }
     return message;
   }
@@ -2485,7 +2485,7 @@ export class ValidateNodesResponse extends pb_1.Message {
     const data: {
             errors?: string[];
             graph?: ReturnType<typeof Graph.prototype.toObject>;
-            topological_order?: string[];
+            topological_order?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
         } = {};
     if (this.errors != null) {
       data.errors = this.errors;
@@ -2494,7 +2494,7 @@ export class ValidateNodesResponse extends pb_1.Message {
       data.graph = this.graph.toObject();
     }
     if (this.topological_order != null) {
-      data.topological_order = this.topological_order;
+      data.topological_order = this.topological_order.map((item: GraphNodeInfo) => item.toObject());
     }
     return data;
   }
@@ -2507,7 +2507,7 @@ export class ValidateNodesResponse extends pb_1.Message {
     if (this.has_graph)
       writer.writeMessage(2, this.graph, () => this.graph.serialize(writer));
     if (this.topological_order.length)
-      writer.writeRepeatedString(3, this.topological_order);
+      writer.writeRepeatedMessage(3, this.topological_order, (item: GraphNodeInfo) => item.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -2524,7 +2524,7 @@ export class ValidateNodesResponse extends pb_1.Message {
         reader.readMessage(message.graph, () => message.graph = Graph.deserialize(reader));
         break;
       case 3:
-        pb_1.Message.addToRepeatedField(message, 3, reader.readString());
+        reader.readMessage(message.topological_order, () => pb_1.Message.addToRepeatedWrapperField(message, 3, GraphNodeInfo.deserialize(reader), GraphNodeInfo));
         break;
       default: reader.skipField();
       }

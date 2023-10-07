@@ -63,10 +63,11 @@
 
       console.log("selectedNode: ", selectedNode);
 
-      $systemStateStore = helper_functions.selectNode(
-        selectedNode.id,
-        $systemStateStore
-      );
+      $systemStateStore.nodes.find((node) => {
+        if (node.node_info.id == selectedNode.id) {
+          $systemStateStore.selected_node.push(node.node_info);
+        }
+      });
     });
 
     cyInstance.on("select", "edge", (evt) => {

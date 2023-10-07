@@ -101,6 +101,7 @@
     grid-column: 1;
     position: sticky;
     top: 0;
+    max-width: 200px;
     height: 100vh;
     background-color: #ecf0f1;
     overflow-y: auto;
