@@ -6,7 +6,7 @@ use tokio::sync::{ mpsc, Mutex };
 use log;
 use env_logger;
 
-use log::{ info, debug, warn, error };
+// use log::{ info, debug, warn, error };
 
 // mod domain;
 mod check_installed_programs;

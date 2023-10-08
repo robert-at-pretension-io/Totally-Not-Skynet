@@ -71,10 +71,10 @@ export function setupWebsocketMessageHandler(
         break;
       case "validate_nodes_response": {
         const graph_container = response_object.validate_nodes_response as ValidateNodesResponse;
-        const graph = graph_container.graph as Graph;
+        const process = graph_container.process as Node;
         systemStateStore.update(
           (n: SystemState) => {
-            n.graph = graph;
+            n.selected_process = process;
             return n;
           }
         );

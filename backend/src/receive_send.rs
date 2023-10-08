@@ -10,7 +10,10 @@ use crate::generated_types::{
     response_object,
     ValidateNodesResponse,
     Edge,
+    NodeTypeNames,
 };
+
+use crate::generated_types::node::NodeContent;
 
 use colored::*;
 use petgraph::Direction;
@@ -22,6 +25,8 @@ use crate::generated_types::response_object::Object::{
     Node,
     ValidateNodesResponse as ValidateNodesResponseEnum,
 };
+
+use crate::generated_types::{ Process };
 
 // use crate::utils::parse_message;
 use crate::sqlite_helper_functions::{ insert_node, update_node, fetch_all_nodes };
@@ -248,6 +253,46 @@ pub async fn start_message_sending_loop(
                         let nodes = node_container.nodes;
                         println!("Number of nodes: {:?}", nodes.len());
 
+                        // this will go in the node_info of the response node
+                        let containing_node: GraphNodeInfo = GraphNodeInfo {
+                            id: uuid::Uuid::new_v4().to_string(),
+                            name: node_container.containing_node.clone().unwrap().name,
+                            description: node_container.containing_node
+                                .clone()
+                                .unwrap().description,
+                        };
+
+                        let mut input_vars = Vec::new();
+                        let mut output_vars = Vec::new();
+                        // loop through the vector of nodes and add input variables to the input_vars vector (if they are not already in the vector)
+                        for node in &nodes {
+                            for input_var in &node.input_variables {
+                                if !input_vars.contains(input_var) {
+                                    input_vars.push(input_var.clone());
+                                }
+                            }
+                            // loop through the output_variables and remove those from the input_vars vector
+                            for output_var in &node.output_variables {
+                                if !output_vars.contains(output_var) {
+                                    output_vars.push(output_var.clone());
+                                }
+                            }
+                        }
+
+                        //output of the process
+                        let output_minus_input = output_vars
+                            .clone()
+                            .into_iter()
+                            .filter(|output_var| !input_vars.contains(output_var))
+                            .collect::<Vec<String>>();
+
+                        //input of the process
+                        let input_minus_output = input_vars
+                            .clone()
+                            .into_iter()
+                            .filter(|input_var| !output_vars.contains(input_var))
+                            .collect::<Vec<String>>();
+
                         // From the nodes and their dependencies, we need to populate a petgraph graph so that we can run the transitive reduction algorithm on it
                         // This will give a "minimal" graph that has the same topological order as the larger graph
                         // This will allow the user to have a visualization of the graph that is not cluttered with unnecessary nodes and is easy to understand the topological order
@@ -414,10 +459,31 @@ pub async fn start_message_sending_loop(
                             topological_order.push(node.clone());
                         }
 
-                        let validate_nodes_response = ValidateNodesResponse {
-                            errors: Vec::new(),
+                        let process: Process = Process {
                             graph: Some(new_graph),
                             topological_order: topological_order,
+                        };
+
+                        let node: crate::generated_types::Node = crate::generated_types::Node {
+                            node_info: Some(containing_node),
+                            input_variables: input_minus_output,
+                            output_variables: output_minus_input,
+                            node_content: Some(NodeContent::Process(process)),
+                            type_name: NodeTypeNames::Process as i32,
+                        };
+
+                        match insert_node(pool.clone(), node.clone()) {
+                            Ok(_) => {
+                                println!("Node inserted successfully");
+                            }
+                            Err(err) => {
+                                println!("Error inserting node: {:?}", err);
+                            }
+                        }
+
+                        let validate_nodes_response = ValidateNodesResponse {
+                            errors: Vec::new(),
+                            process: Some(node),
                         };
 
                         // As the process is valid, we save it to the db.

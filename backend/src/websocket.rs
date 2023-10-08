@@ -77,7 +77,7 @@ pub async fn start_websocket_server(
 
             let (mut outgoing, mut incoming) = ws_stream.split();
 
-            let cloned_client = this_client.clone();
+            // let cloned_client = this_client.clone();
 
             tokio::spawn(async move {
                 while let Some(outgoing_msg) = local_rx.recv().await {

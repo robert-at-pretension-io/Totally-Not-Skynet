@@ -118,7 +118,7 @@
   $: {
     // Whenever the systemState.graph changes, we will change the cytoscape graph. It might be good to check if the graph has actually changed rather than always re-draw
 
-    let test_graph = $systemStateStore.graph;
+    let test_graph = $systemStateStore.selected_process?.process.graph;
 
     // check that the test_graph is different from the current_graph
     if (test_graph != current_graph && test_graph != undefined) {

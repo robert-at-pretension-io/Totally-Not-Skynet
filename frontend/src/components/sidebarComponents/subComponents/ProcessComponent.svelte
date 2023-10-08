@@ -8,9 +8,8 @@
     ValidateNodes,
     VerbTypeNames,
     Process,
+    GraphNodeInfo,
   } from "generated/system_types";
-
-  // proto from "../../generated/system_types";
 
   import systemStateStore from "stores/systemStateStore";
 
@@ -18,18 +17,12 @@
   import { websocketStore } from "stores/websocketStore";
   import { sendWebsocketMessage } from "helper_functions/websocket";
 
-  let selected_node_ids: string[] = [];
-
-  const selected_node_ids_store = writable(selected_node_ids);
-
   let name = "";
   let description = "";
   let node_list: Node[] = [];
+  let selected_node_list: Node[] = [];
+  let error = "";
 
-  export let process = new Process();
-  // let node_info_list : GraphNodeInfo[] = [];
-
-  // let key_list = Object.keys(NodeTypeNames);
   let key_list = Object.keys(NodeTypeNames).filter((key) => isNaN(Number(key)));
 
   // setup onmount:
@@ -42,29 +35,28 @@
   }
 
   function isSelected(node: Node): boolean {
-    let node_id = node.node_info.id as string;
-
-    return $selected_node_ids_store.includes(node_id);
+    return selected_node_list.includes(node);
   }
 
   function toggleNodeSelect(node: Node) {
-    let node_id = node.node_info.id as string;
-
     if (isSelected(node)) {
-      selected_node_ids_store.update((val) =>
-        val.filter((item) => item !== node_id)
+      selected_node_list = selected_node_list.filter(
+        (selected_node) => selected_node !== node
       );
     } else {
-      selected_node_ids_store.update((val) => [...val, node_id]);
+      selected_node_list = [...selected_node_list, node];
     }
   }
 
   function sendNodes() {
-    let filtered_nodes = node_list.filter((node: Node) => {
-      return $selected_node_ids_store.includes(node.node_info.id as string);
-    });
+    if (!name.trim() || !description.trim()) {
+      error = "Both name and description are required!";
+      return; // Return early to stop execution if validation fails
+    } else {
+      error = "";
+    }
 
-    console.log("sending filtered_nodes: ", filtered_nodes);
+    console.log("sending selected_node_list: ", selected_node_list);
 
     let crud_message = new CrudBundle();
 
@@ -72,16 +64,20 @@
 
     let validate_nodes = new ValidateNodes();
 
-    validate_nodes.description = description;
-    validate_nodes.name = name;
+    let graph_node_info = new GraphNodeInfo();
 
-    validate_nodes.nodes = filtered_nodes;
+    graph_node_info.name = name;
+    graph_node_info.description = description;
+
+    validate_nodes.containing_node = graph_node_info;
+
+    validate_nodes.nodes = selected_node_list;
 
     crud_message.validate_nodes = validate_nodes;
 
     sendWebsocketMessage(crud_message, $websocketStore.websocket as WebSocket);
 
-    $selected_node_ids_store = [];
+    selected_node_list = [];
     description = "";
     name = "";
   }
@@ -115,10 +111,20 @@
 
 <h3>Nodes to add:</h3>
 
-{#each $selected_node_ids_store as id}
-  <p>{id}</p>
+{#each selected_node_list as node}
+  <li>
+    <p>{key_list[node.type_name]} : {node.node_info.name}</p>
+  </li>
 {/each}
+
+{#if error}
+  <p class="error">{error}</p>
+{/if}
 
 <button class="add-button" on:click={sendNodes}>Save Process</button>
 
-<!-- <InteractWithActionsAndProcesses /> -->
+<style>
+  .error {
+    color: red;
+  }
+</style>

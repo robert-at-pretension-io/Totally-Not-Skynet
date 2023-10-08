@@ -618,7 +618,7 @@ export class Process extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
         graph?: Graph;
-        initial_variables?: string[];
+        topological_order?: GraphNodeInfo[];
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
@@ -626,8 +626,8 @@ export class Process extends pb_1.Message {
       if ("graph" in data && data.graph != undefined) {
         this.graph = data.graph;
       }
-      if ("initial_variables" in data && data.initial_variables != undefined) {
-        this.initial_variables = data.initial_variables;
+      if ("topological_order" in data && data.topological_order != undefined) {
+        this.topological_order = data.topological_order;
       }
     }
   }
@@ -640,35 +640,35 @@ export class Process extends pb_1.Message {
   get has_graph() {
     return pb_1.Message.getField(this, 1) != null;
   }
-  get initial_variables() {
-    return pb_1.Message.getFieldWithDefault(this, 2, []) as string[];
+  get topological_order() {
+    return pb_1.Message.getRepeatedWrapperField(this, GraphNodeInfo, 2) as GraphNodeInfo[];
   }
-  set initial_variables(value: string[]) {
-    pb_1.Message.setField(this, 2, value);
+  set topological_order(value: GraphNodeInfo[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 2, value);
   }
   static fromObject(data: {
         graph?: ReturnType<typeof Graph.prototype.toObject>;
-        initial_variables?: string[];
+        topological_order?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
     }): Process {
     const message = new Process({});
     if (data.graph != null) {
       message.graph = Graph.fromObject(data.graph);
     }
-    if (data.initial_variables != null) {
-      message.initial_variables = data.initial_variables;
+    if (data.topological_order != null) {
+      message.topological_order = data.topological_order.map(item => GraphNodeInfo.fromObject(item));
     }
     return message;
   }
   toObject() {
     const data: {
             graph?: ReturnType<typeof Graph.prototype.toObject>;
-            initial_variables?: string[];
+            topological_order?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
         } = {};
     if (this.graph != null) {
       data.graph = this.graph.toObject();
     }
-    if (this.initial_variables != null) {
-      data.initial_variables = this.initial_variables;
+    if (this.topological_order != null) {
+      data.topological_order = this.topological_order.map((item: GraphNodeInfo) => item.toObject());
     }
     return data;
   }
@@ -678,8 +678,8 @@ export class Process extends pb_1.Message {
     const writer = w || new pb_1.BinaryWriter();
     if (this.has_graph)
       writer.writeMessage(1, this.graph, () => this.graph.serialize(writer));
-    if (this.initial_variables.length)
-      writer.writeRepeatedString(2, this.initial_variables);
+    if (this.topological_order.length)
+      writer.writeRepeatedMessage(2, this.topological_order, (item: GraphNodeInfo) => item.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -693,7 +693,7 @@ export class Process extends pb_1.Message {
         reader.readMessage(message.graph, () => message.graph = Graph.deserialize(reader));
         break;
       case 2:
-        pb_1.Message.addToRepeatedField(message, 2, reader.readString());
+        reader.readMessage(message.topological_order, () => pb_1.Message.addToRepeatedWrapperField(message, 2, GraphNodeInfo.deserialize(reader), GraphNodeInfo));
         break;
       default: reader.skipField();
       }
@@ -1160,6 +1160,7 @@ export class SystemState extends pb_1.Message {
         selected_node?: GraphNodeInfo[];
         selected_edge?: Edge[];
         execution_context?: ExecutionContext;
+        selected_process?: Node;
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4, 5, 6], this.#one_of_decls);
@@ -1184,6 +1185,9 @@ export class SystemState extends pb_1.Message {
       }
       if ("execution_context" in data && data.execution_context != undefined) {
         this.execution_context = data.execution_context;
+      }
+      if ("selected_process" in data && data.selected_process != undefined) {
+        this.selected_process = data.selected_process;
       }
     }
   }
@@ -1235,6 +1239,15 @@ export class SystemState extends pb_1.Message {
   get has_execution_context() {
     return pb_1.Message.getField(this, 7) != null;
   }
+  get selected_process() {
+    return pb_1.Message.getWrapperField(this, Node, 8) as Node;
+  }
+  set selected_process(value: Node) {
+    pb_1.Message.setWrapperField(this, 8, value);
+  }
+  get has_selected_process() {
+    return pb_1.Message.getField(this, 8) != null;
+  }
   static fromObject(data: {
         authenticated?: boolean;
         websocket_ready?: boolean;
@@ -1243,6 +1256,7 @@ export class SystemState extends pb_1.Message {
         selected_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
         selected_edge?: ReturnType<typeof Edge.prototype.toObject>[];
         execution_context?: ReturnType<typeof ExecutionContext.prototype.toObject>;
+        selected_process?: ReturnType<typeof Node.prototype.toObject>;
     }): SystemState {
     const message = new SystemState({});
     if (data.authenticated != null) {
@@ -1266,6 +1280,9 @@ export class SystemState extends pb_1.Message {
     if (data.execution_context != null) {
       message.execution_context = ExecutionContext.fromObject(data.execution_context);
     }
+    if (data.selected_process != null) {
+      message.selected_process = Node.fromObject(data.selected_process);
+    }
     return message;
   }
   toObject() {
@@ -1277,6 +1294,7 @@ export class SystemState extends pb_1.Message {
             selected_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
             selected_edge?: ReturnType<typeof Edge.prototype.toObject>[];
             execution_context?: ReturnType<typeof ExecutionContext.prototype.toObject>;
+            selected_process?: ReturnType<typeof Node.prototype.toObject>;
         } = {};
     if (this.authenticated != null) {
       data.authenticated = this.authenticated;
@@ -1299,6 +1317,9 @@ export class SystemState extends pb_1.Message {
     if (this.execution_context != null) {
       data.execution_context = this.execution_context.toObject();
     }
+    if (this.selected_process != null) {
+      data.selected_process = this.selected_process.toObject();
+    }
     return data;
   }
   serialize(): Uint8Array;
@@ -1319,6 +1340,8 @@ export class SystemState extends pb_1.Message {
       writer.writeRepeatedMessage(6, this.selected_edge, (item: Edge) => item.serialize(writer));
     if (this.has_execution_context)
       writer.writeMessage(7, this.execution_context, () => this.execution_context.serialize(writer));
+    if (this.has_selected_process)
+      writer.writeMessage(8, this.selected_process, () => this.selected_process.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1348,6 +1371,9 @@ export class SystemState extends pb_1.Message {
         break;
       case 7:
         reader.readMessage(message.execution_context, () => message.execution_context = ExecutionContext.deserialize(reader));
+        break;
+      case 8:
+        reader.readMessage(message.selected_process, () => message.selected_process = Node.deserialize(reader));
         break;
       default: reader.skipField();
       }
@@ -1545,8 +1571,7 @@ export class ValidateNodes extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
         nodes?: Node[];
-        name?: string;
-        description?: string;
+        containing_node?: GraphNodeInfo;
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
@@ -1554,11 +1579,8 @@ export class ValidateNodes extends pb_1.Message {
       if ("nodes" in data && data.nodes != undefined) {
         this.nodes = data.nodes;
       }
-      if ("name" in data && data.name != undefined) {
-        this.name = data.name;
-      }
-      if ("description" in data && data.description != undefined) {
-        this.description = data.description;
+      if ("containing_node" in data && data.containing_node != undefined) {
+        this.containing_node = data.containing_node;
       }
     }
   }
@@ -1568,49 +1590,38 @@ export class ValidateNodes extends pb_1.Message {
   set nodes(value: Node[]) {
     pb_1.Message.setRepeatedWrapperField(this, 1, value);
   }
-  get name() {
-    return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+  get containing_node() {
+    return pb_1.Message.getWrapperField(this, GraphNodeInfo, 2) as GraphNodeInfo;
   }
-  set name(value: string) {
-    pb_1.Message.setField(this, 2, value);
+  set containing_node(value: GraphNodeInfo) {
+    pb_1.Message.setWrapperField(this, 2, value);
   }
-  get description() {
-    return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
-  }
-  set description(value: string) {
-    pb_1.Message.setField(this, 3, value);
+  get has_containing_node() {
+    return pb_1.Message.getField(this, 2) != null;
   }
   static fromObject(data: {
         nodes?: ReturnType<typeof Node.prototype.toObject>[];
-        name?: string;
-        description?: string;
+        containing_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
     }): ValidateNodes {
     const message = new ValidateNodes({});
     if (data.nodes != null) {
       message.nodes = data.nodes.map(item => Node.fromObject(item));
     }
-    if (data.name != null) {
-      message.name = data.name;
-    }
-    if (data.description != null) {
-      message.description = data.description;
+    if (data.containing_node != null) {
+      message.containing_node = GraphNodeInfo.fromObject(data.containing_node);
     }
     return message;
   }
   toObject() {
     const data: {
             nodes?: ReturnType<typeof Node.prototype.toObject>[];
-            name?: string;
-            description?: string;
+            containing_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
         } = {};
     if (this.nodes != null) {
       data.nodes = this.nodes.map((item: Node) => item.toObject());
     }
-    if (this.name != null) {
-      data.name = this.name;
-    }
-    if (this.description != null) {
-      data.description = this.description;
+    if (this.containing_node != null) {
+      data.containing_node = this.containing_node.toObject();
     }
     return data;
   }
@@ -1620,10 +1631,8 @@ export class ValidateNodes extends pb_1.Message {
     const writer = w || new pb_1.BinaryWriter();
     if (this.nodes.length)
       writer.writeRepeatedMessage(1, this.nodes, (item: Node) => item.serialize(writer));
-    if (this.name.length)
-      writer.writeString(2, this.name);
-    if (this.description.length)
-      writer.writeString(3, this.description);
+    if (this.has_containing_node)
+      writer.writeMessage(2, this.containing_node, () => this.containing_node.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1637,10 +1646,7 @@ export class ValidateNodes extends pb_1.Message {
         reader.readMessage(message.nodes, () => pb_1.Message.addToRepeatedWrapperField(message, 1, Node.deserialize(reader), Node));
         break;
       case 2:
-        message.name = reader.readString();
-        break;
-      case 3:
-        message.description = reader.readString();
+        reader.readMessage(message.containing_node, () => message.containing_node = GraphNodeInfo.deserialize(reader));
         break;
       default: reader.skipField();
       }
@@ -2425,76 +2431,58 @@ export class ExecutionResponse extends pb_1.Message {
 export class ValidateNodesResponse extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
-        errors?: string[];
-        graph?: Graph;
-        topological_order?: GraphNodeInfo[];
+        errors?: SystemErrors[];
+        process?: Node;
     }) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 3], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
       if ("errors" in data && data.errors != undefined) {
         this.errors = data.errors;
       }
-      if ("graph" in data && data.graph != undefined) {
-        this.graph = data.graph;
-      }
-      if ("topological_order" in data && data.topological_order != undefined) {
-        this.topological_order = data.topological_order;
+      if ("process" in data && data.process != undefined) {
+        this.process = data.process;
       }
     }
   }
   get errors() {
-    return pb_1.Message.getFieldWithDefault(this, 1, []) as string[];
+    return pb_1.Message.getFieldWithDefault(this, 1, []) as SystemErrors[];
   }
-  set errors(value: string[]) {
+  set errors(value: SystemErrors[]) {
     pb_1.Message.setField(this, 1, value);
   }
-  get graph() {
-    return pb_1.Message.getWrapperField(this, Graph, 2) as Graph;
+  get process() {
+    return pb_1.Message.getWrapperField(this, Node, 2) as Node;
   }
-  set graph(value: Graph) {
+  set process(value: Node) {
     pb_1.Message.setWrapperField(this, 2, value);
   }
-  get has_graph() {
+  get has_process() {
     return pb_1.Message.getField(this, 2) != null;
   }
-  get topological_order() {
-    return pb_1.Message.getRepeatedWrapperField(this, GraphNodeInfo, 3) as GraphNodeInfo[];
-  }
-  set topological_order(value: GraphNodeInfo[]) {
-    pb_1.Message.setRepeatedWrapperField(this, 3, value);
-  }
   static fromObject(data: {
-        errors?: string[];
-        graph?: ReturnType<typeof Graph.prototype.toObject>;
-        topological_order?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
+        errors?: SystemErrors[];
+        process?: ReturnType<typeof Node.prototype.toObject>;
     }): ValidateNodesResponse {
     const message = new ValidateNodesResponse({});
     if (data.errors != null) {
       message.errors = data.errors;
     }
-    if (data.graph != null) {
-      message.graph = Graph.fromObject(data.graph);
-    }
-    if (data.topological_order != null) {
-      message.topological_order = data.topological_order.map(item => GraphNodeInfo.fromObject(item));
+    if (data.process != null) {
+      message.process = Node.fromObject(data.process);
     }
     return message;
   }
   toObject() {
     const data: {
-            errors?: string[];
-            graph?: ReturnType<typeof Graph.prototype.toObject>;
-            topological_order?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
+            errors?: SystemErrors[];
+            process?: ReturnType<typeof Node.prototype.toObject>;
         } = {};
     if (this.errors != null) {
       data.errors = this.errors;
     }
-    if (this.graph != null) {
-      data.graph = this.graph.toObject();
-    }
-    if (this.topological_order != null) {
-      data.topological_order = this.topological_order.map((item: GraphNodeInfo) => item.toObject());
+    if (this.process != null) {
+      data.process = this.process.toObject();
     }
     return data;
   }
@@ -2503,11 +2491,9 @@ export class ValidateNodesResponse extends pb_1.Message {
   serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
     const writer = w || new pb_1.BinaryWriter();
     if (this.errors.length)
-      writer.writeRepeatedString(1, this.errors);
-    if (this.has_graph)
-      writer.writeMessage(2, this.graph, () => this.graph.serialize(writer));
-    if (this.topological_order.length)
-      writer.writeRepeatedMessage(3, this.topological_order, (item: GraphNodeInfo) => item.serialize(writer));
+      writer.writePackedEnum(1, this.errors);
+    if (this.has_process)
+      writer.writeMessage(2, this.process, () => this.process.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -2518,13 +2504,10 @@ export class ValidateNodesResponse extends pb_1.Message {
         break;
       switch (reader.getFieldNumber()) {
       case 1:
-        pb_1.Message.addToRepeatedField(message, 1, reader.readString());
+        message.errors = reader.readPackedEnum();
         break;
       case 2:
-        reader.readMessage(message.graph, () => message.graph = Graph.deserialize(reader));
-        break;
-      case 3:
-        reader.readMessage(message.topological_order, () => pb_1.Message.addToRepeatedWrapperField(message, 3, GraphNodeInfo.deserialize(reader), GraphNodeInfo));
+        reader.readMessage(message.process, () => message.process = Node.deserialize(reader));
         break;
       default: reader.skipField();
       }
