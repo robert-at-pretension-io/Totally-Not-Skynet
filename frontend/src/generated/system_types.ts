@@ -708,7 +708,7 @@ export class Process extends pb_1.Message {
   }
 }
 export class Node extends pb_1.Message {
-  #one_of_decls: number[][] = [[4, 5, 6, 7]];
+  #one_of_decls: number[][] = [[5, 6, 7, 8]];
   constructor(data?: any[] | ({
         node_info?: GraphNodeInfo;
         type_name?: NodeTypeNames;
@@ -736,13 +736,19 @@ export class Node extends pb_1.Message {
         command?: Command;
     })))) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [8, 9], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
       if ("node_info" in data && data.node_info != undefined) {
         this.node_info = data.node_info;
       }
       if ("type_name" in data && data.type_name != undefined) {
         this.type_name = data.type_name;
+      }
+      if ("input_variables" in data && data.input_variables != undefined) {
+        this.input_variables = data.input_variables;
+      }
+      if ("output_variables" in data && data.output_variables != undefined) {
+        this.output_variables = data.output_variables;
       }
       if ("prompt" in data && data.prompt != undefined) {
         this.prompt = data.prompt;
@@ -756,12 +762,6 @@ export class Node extends pb_1.Message {
       if ("command" in data && data.command != undefined) {
         this.command = data.command;
       }
-      if ("input_variables" in data && data.input_variables != undefined) {
-        this.input_variables = data.input_variables;
-      }
-      if ("output_variables" in data && data.output_variables != undefined) {
-        this.output_variables = data.output_variables;
-      }
     }
   }
   get node_info() {
@@ -774,80 +774,80 @@ export class Node extends pb_1.Message {
     return pb_1.Message.getField(this, 1) != null;
   }
   get type_name() {
-    return pb_1.Message.getFieldWithDefault(this, 3, NodeTypeNames.PROMPT) as NodeTypeNames;
+    return pb_1.Message.getFieldWithDefault(this, 2, NodeTypeNames.PROMPT) as NodeTypeNames;
   }
   set type_name(value: NodeTypeNames) {
-    pb_1.Message.setField(this, 3, value);
-  }
-  get prompt() {
-    return pb_1.Message.getWrapperField(this, Prompt, 4) as Prompt;
-  }
-  set prompt(value: Prompt) {
-    pb_1.Message.setOneofWrapperField(this, 4, this.#one_of_decls[0], value);
-  }
-  get has_prompt() {
-    return pb_1.Message.getField(this, 4) != null;
-  }
-  get process() {
-    return pb_1.Message.getWrapperField(this, Process, 5) as Process;
-  }
-  set process(value: Process) {
-    pb_1.Message.setOneofWrapperField(this, 5, this.#one_of_decls[0], value);
-  }
-  get has_process() {
-    return pb_1.Message.getField(this, 5) != null;
-  }
-  get conditional() {
-    return pb_1.Message.getWrapperField(this, Conditional, 6) as Conditional;
-  }
-  set conditional(value: Conditional) {
-    pb_1.Message.setOneofWrapperField(this, 6, this.#one_of_decls[0], value);
-  }
-  get has_conditional() {
-    return pb_1.Message.getField(this, 6) != null;
-  }
-  get command() {
-    return pb_1.Message.getWrapperField(this, Command, 7) as Command;
-  }
-  set command(value: Command) {
-    pb_1.Message.setOneofWrapperField(this, 7, this.#one_of_decls[0], value);
-  }
-  get has_command() {
-    return pb_1.Message.getField(this, 7) != null;
+    pb_1.Message.setField(this, 2, value);
   }
   get input_variables() {
-    return pb_1.Message.getFieldWithDefault(this, 8, []) as string[];
+    return pb_1.Message.getFieldWithDefault(this, 3, []) as string[];
   }
   set input_variables(value: string[]) {
-    pb_1.Message.setField(this, 8, value);
+    pb_1.Message.setField(this, 3, value);
   }
   get output_variables() {
-    return pb_1.Message.getFieldWithDefault(this, 9, []) as string[];
+    return pb_1.Message.getFieldWithDefault(this, 4, []) as string[];
   }
   set output_variables(value: string[]) {
-    pb_1.Message.setField(this, 9, value);
+    pb_1.Message.setField(this, 4, value);
+  }
+  get prompt() {
+    return pb_1.Message.getWrapperField(this, Prompt, 5) as Prompt;
+  }
+  set prompt(value: Prompt) {
+    pb_1.Message.setOneofWrapperField(this, 5, this.#one_of_decls[0], value);
+  }
+  get has_prompt() {
+    return pb_1.Message.getField(this, 5) != null;
+  }
+  get process() {
+    return pb_1.Message.getWrapperField(this, Process, 6) as Process;
+  }
+  set process(value: Process) {
+    pb_1.Message.setOneofWrapperField(this, 6, this.#one_of_decls[0], value);
+  }
+  get has_process() {
+    return pb_1.Message.getField(this, 6) != null;
+  }
+  get conditional() {
+    return pb_1.Message.getWrapperField(this, Conditional, 7) as Conditional;
+  }
+  set conditional(value: Conditional) {
+    pb_1.Message.setOneofWrapperField(this, 7, this.#one_of_decls[0], value);
+  }
+  get has_conditional() {
+    return pb_1.Message.getField(this, 7) != null;
+  }
+  get command() {
+    return pb_1.Message.getWrapperField(this, Command, 8) as Command;
+  }
+  set command(value: Command) {
+    pb_1.Message.setOneofWrapperField(this, 8, this.#one_of_decls[0], value);
+  }
+  get has_command() {
+    return pb_1.Message.getField(this, 8) != null;
   }
   get node_content() {
     const cases: {
             [index: number]: "none" | "prompt" | "process" | "conditional" | "command";
         } = {
           0: "none",
-          4: "prompt",
-          5: "process",
-          6: "conditional",
-          7: "command"
+          5: "prompt",
+          6: "process",
+          7: "conditional",
+          8: "command"
         };
-    return cases[pb_1.Message.computeOneofCase(this, [4, 5, 6, 7])];
+    return cases[pb_1.Message.computeOneofCase(this, [5, 6, 7, 8])];
   }
   static fromObject(data: {
         node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
         type_name?: NodeTypeNames;
+        input_variables?: string[];
+        output_variables?: string[];
         prompt?: ReturnType<typeof Prompt.prototype.toObject>;
         process?: ReturnType<typeof Process.prototype.toObject>;
         conditional?: ReturnType<typeof Conditional.prototype.toObject>;
         command?: ReturnType<typeof Command.prototype.toObject>;
-        input_variables?: string[];
-        output_variables?: string[];
     }): Node {
     const message = new Node({});
     if (data.node_info != null) {
@@ -855,6 +855,12 @@ export class Node extends pb_1.Message {
     }
     if (data.type_name != null) {
       message.type_name = data.type_name;
+    }
+    if (data.input_variables != null) {
+      message.input_variables = data.input_variables;
+    }
+    if (data.output_variables != null) {
+      message.output_variables = data.output_variables;
     }
     if (data.prompt != null) {
       message.prompt = Prompt.fromObject(data.prompt);
@@ -868,30 +874,30 @@ export class Node extends pb_1.Message {
     if (data.command != null) {
       message.command = Command.fromObject(data.command);
     }
-    if (data.input_variables != null) {
-      message.input_variables = data.input_variables;
-    }
-    if (data.output_variables != null) {
-      message.output_variables = data.output_variables;
-    }
     return message;
   }
   toObject() {
     const data: {
             node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
             type_name?: NodeTypeNames;
+            input_variables?: string[];
+            output_variables?: string[];
             prompt?: ReturnType<typeof Prompt.prototype.toObject>;
             process?: ReturnType<typeof Process.prototype.toObject>;
             conditional?: ReturnType<typeof Conditional.prototype.toObject>;
             command?: ReturnType<typeof Command.prototype.toObject>;
-            input_variables?: string[];
-            output_variables?: string[];
         } = {};
     if (this.node_info != null) {
       data.node_info = this.node_info.toObject();
     }
     if (this.type_name != null) {
       data.type_name = this.type_name;
+    }
+    if (this.input_variables != null) {
+      data.input_variables = this.input_variables;
+    }
+    if (this.output_variables != null) {
+      data.output_variables = this.output_variables;
     }
     if (this.prompt != null) {
       data.prompt = this.prompt.toObject();
@@ -905,12 +911,6 @@ export class Node extends pb_1.Message {
     if (this.command != null) {
       data.command = this.command.toObject();
     }
-    if (this.input_variables != null) {
-      data.input_variables = this.input_variables;
-    }
-    if (this.output_variables != null) {
-      data.output_variables = this.output_variables;
-    }
     return data;
   }
   serialize(): Uint8Array;
@@ -920,19 +920,19 @@ export class Node extends pb_1.Message {
     if (this.has_node_info)
       writer.writeMessage(1, this.node_info, () => this.node_info.serialize(writer));
     if (this.type_name != NodeTypeNames.PROMPT)
-      writer.writeEnum(3, this.type_name);
-    if (this.has_prompt)
-      writer.writeMessage(4, this.prompt, () => this.prompt.serialize(writer));
-    if (this.has_process)
-      writer.writeMessage(5, this.process, () => this.process.serialize(writer));
-    if (this.has_conditional)
-      writer.writeMessage(6, this.conditional, () => this.conditional.serialize(writer));
-    if (this.has_command)
-      writer.writeMessage(7, this.command, () => this.command.serialize(writer));
+      writer.writeEnum(2, this.type_name);
     if (this.input_variables.length)
-      writer.writeRepeatedString(8, this.input_variables);
+      writer.writeRepeatedString(3, this.input_variables);
     if (this.output_variables.length)
-      writer.writeRepeatedString(9, this.output_variables);
+      writer.writeRepeatedString(4, this.output_variables);
+    if (this.has_prompt)
+      writer.writeMessage(5, this.prompt, () => this.prompt.serialize(writer));
+    if (this.has_process)
+      writer.writeMessage(6, this.process, () => this.process.serialize(writer));
+    if (this.has_conditional)
+      writer.writeMessage(7, this.conditional, () => this.conditional.serialize(writer));
+    if (this.has_command)
+      writer.writeMessage(8, this.command, () => this.command.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -945,26 +945,26 @@ export class Node extends pb_1.Message {
       case 1:
         reader.readMessage(message.node_info, () => message.node_info = GraphNodeInfo.deserialize(reader));
         break;
-      case 3:
+      case 2:
         message.type_name = reader.readEnum();
         break;
+      case 3:
+        pb_1.Message.addToRepeatedField(message, 3, reader.readString());
+        break;
       case 4:
-        reader.readMessage(message.prompt, () => message.prompt = Prompt.deserialize(reader));
+        pb_1.Message.addToRepeatedField(message, 4, reader.readString());
         break;
       case 5:
-        reader.readMessage(message.process, () => message.process = Process.deserialize(reader));
+        reader.readMessage(message.prompt, () => message.prompt = Prompt.deserialize(reader));
         break;
       case 6:
-        reader.readMessage(message.conditional, () => message.conditional = Conditional.deserialize(reader));
+        reader.readMessage(message.process, () => message.process = Process.deserialize(reader));
         break;
       case 7:
-        reader.readMessage(message.command, () => message.command = Command.deserialize(reader));
+        reader.readMessage(message.conditional, () => message.conditional = Conditional.deserialize(reader));
         break;
       case 8:
-        pb_1.Message.addToRepeatedField(message, 8, reader.readString());
-        break;
-      case 9:
-        pb_1.Message.addToRepeatedField(message, 9, reader.readString());
+        reader.readMessage(message.command, () => message.command = Command.deserialize(reader));
         break;
       default: reader.skipField();
       }

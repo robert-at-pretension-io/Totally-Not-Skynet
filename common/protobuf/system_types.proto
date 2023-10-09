@@ -57,15 +57,15 @@ message Process {
 // Node
 message Node {
   GraphNodeInfo node_info = 1;
-  NodeTypeNames type_name = 3;
+  NodeTypeNames type_name = 2;
+  repeated string input_variables = 3;
+  repeated string output_variables = 4;
   oneof node_content {
-    Prompt prompt = 4;
-    Process process = 5;
-    Conditional conditional = 6;
-    Command command = 7;
+    Prompt prompt = 5;
+    Process process = 6;
+    Conditional conditional = 7;
+    Command command = 8;
   }
-  repeated string input_variables = 8;
-  repeated string output_variables = 9;
 }
 
 

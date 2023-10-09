@@ -1,8 +1,8 @@
 <script lang="ts">
-  import CommandComponent from "./subComponents/CommandComponent.svelte";
-  import ConditionalComponent from "./subComponents/ConditionalComponent.svelte";
-  import ProcessComponent from "./subComponents/ProcessComponent.svelte";
-  import PromptComponent from "./subComponents/PromptComponent.svelte";
+  import CommandComponent from "./newNodeSubComponents/CommandComponent.svelte";
+  import ConditionalComponent from "./newNodeSubComponents/ConditionalComponent.svelte";
+  import ProcessComponent from "./newNodeSubComponents/ProcessComponent.svelte";
+  import PromptComponent from "./newNodeSubComponents/PromptComponent.svelte";
   import {
     NodeTypeNames,
     Prompt,
