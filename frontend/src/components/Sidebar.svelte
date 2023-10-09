@@ -4,8 +4,8 @@
 
   import { blur, fade } from "svelte/transition";
   import { onMount } from "svelte";
-
-  // onmount
+  import ExecuteNode from "./sidebarComponents/executeNode.svelte";
+  import systemStateStore from "stores/systemStateStore";
 
   onMount(() => {
     console.log("Sidebar mounted");
@@ -20,6 +20,11 @@
     {
       header: "Modify Node",
       component: modifyNode,
+      open: false,
+    },
+    {
+      header: "Execute Process",
+      component: ExecuteNode,
       open: false,
     },
   ];
