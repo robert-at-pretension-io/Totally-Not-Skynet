@@ -23,8 +23,6 @@
 
   let key_list = Object.keys(NodeTypeNames).filter((key) => isNaN(Number(key)));
 
-  console.log("keylist is:", key_list);
-
   let num_array = Array.from({ length: key_list.length }, (_, i) => i);
 </script>
 
