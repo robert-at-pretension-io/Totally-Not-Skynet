@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package skynet.types;
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
 
 // GraphNodeInfo
 message GraphNodeInfo {
@@ -29,10 +30,10 @@ message Command {
 
 // NodeTypeNames
 enum NodeTypeNames {
-  PROMPT = 0;
-  PROCESS = 1;
-  CONDITIONAL = 2;
-  COMMAND = 3;
+  PROMPT = 1;
+  PROCESS = 2;
+  CONDITIONAL = 3;
+  COMMAND = 4;
 }
 
 // Conditional
@@ -71,28 +72,49 @@ message Node {
 
 // SystemErrors
 enum SystemErrors {
-  GRAPH_DOESNT_EXIST = 0;
-  GRAPH_STATE_DOESNT_EXIST = 1;
-  OTHER_ERROR = 2;
-  NODE_DOESNT_EXIST = 3;
+  GRAPH_DOESNT_EXIST = 1;
+  GRAPH_STATE_DOESNT_EXIST = 2;
+  OTHER_ERROR = 3;
+  NODE_DOESNT_EXIST = 4;
 }
 
 // VerbTypeNames
 enum VerbTypeNames {
-  Post = 0;
-  Put = 1;
-  Patch = 2;
-  Delete = 3;
-  Get = 4;
-  Execute = 5;
+  Create = 1;
+  Update = 2;
+  Replace = 3;
+  Delete = 4;
+  Get = 5;
+  Execute = 6;
+}
+
+enum SystemTypeNames {
+  Backend = 1;
+  Frontend = 2;
+}
+
+message Identity {
+  string id = 1;
+  SystemTypeNames system_type = 2;
 }
 
 // ExecutionStep
 message ExecutionStep {
-  repeated string topological_order = 1;
-  Node current_node = 2; // Use your actual Node type here
-  map<string, string> variable_definitions = 3;
+  repeated GraphNodeInfo topological_order = 1;
+  GraphNodeInfo current_node = 2; // Use your actual Node type here
+  Process process = 3;
+  repeated VariableDefinition current_variable_definitions = 4;
   string execution_id = 4;
+}
+
+message VariableDefinition {
+  string name = 1;
+  oneof value {
+    string string_value = 2;
+    int32 int_value = 3;
+    float float_value = 4;
+    bool bool_value = 5;
+  }
 }
 
 // SystemState
@@ -124,8 +146,8 @@ message ValidateNodes {
   GraphNodeInfo containing_node = 2;
 }
 
-// CrudBundle
-message CrudBundle {
+// MessageBundle
+message MessageBundle {
   VerbTypeNames verb = 1;
   oneof object {
     Node node = 2;

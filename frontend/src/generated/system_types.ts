@@ -978,14 +978,13 @@ export class Node extends pb_1.Message {
     return Node.deserialize(bytes);
   }
 }
-export class ExecutionContext extends pb_1.Message {
+export class ExecutionStep extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
         topological_order?: string[];
         current_node?: Node;
-        global_variables?: Map<string, string>;
+        variable_definitions?: Map<string, string>;
         execution_id?: string;
-        return_execution_id?: string;
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
@@ -996,18 +995,15 @@ export class ExecutionContext extends pb_1.Message {
       if ("current_node" in data && data.current_node != undefined) {
         this.current_node = data.current_node;
       }
-      if ("global_variables" in data && data.global_variables != undefined) {
-        this.global_variables = data.global_variables;
+      if ("variable_definitions" in data && data.variable_definitions != undefined) {
+        this.variable_definitions = data.variable_definitions;
       }
       if ("execution_id" in data && data.execution_id != undefined) {
         this.execution_id = data.execution_id;
       }
-      if ("return_execution_id" in data && data.return_execution_id != undefined) {
-        this.return_execution_id = data.return_execution_id;
-      }
     }
-    if (!this.global_variables)
-      this.global_variables = new Map();
+    if (!this.variable_definitions)
+      this.variable_definitions = new Map();
   }
   get topological_order() {
     return pb_1.Message.getFieldWithDefault(this, 1, []) as string[];
@@ -1024,10 +1020,10 @@ export class ExecutionContext extends pb_1.Message {
   get has_current_node() {
     return pb_1.Message.getField(this, 2) != null;
   }
-  get global_variables() {
+  get variable_definitions() {
     return pb_1.Message.getField(this, 3) as any as Map<string, string>;
   }
-  set global_variables(value: Map<string, string>) {
+  set variable_definitions(value: Map<string, string>) {
     pb_1.Message.setField(this, 3, value as any);
   }
   get execution_id() {
@@ -1036,36 +1032,26 @@ export class ExecutionContext extends pb_1.Message {
   set execution_id(value: string) {
     pb_1.Message.setField(this, 4, value);
   }
-  get return_execution_id() {
-    return pb_1.Message.getFieldWithDefault(this, 5, "") as string;
-  }
-  set return_execution_id(value: string) {
-    pb_1.Message.setField(this, 5, value);
-  }
   static fromObject(data: {
         topological_order?: string[];
         current_node?: ReturnType<typeof Node.prototype.toObject>;
-        global_variables?: {
+        variable_definitions?: {
             [key: string]: string;
         };
         execution_id?: string;
-        return_execution_id?: string;
-    }): ExecutionContext {
-    const message = new ExecutionContext({});
+    }): ExecutionStep {
+    const message = new ExecutionStep({});
     if (data.topological_order != null) {
       message.topological_order = data.topological_order;
     }
     if (data.current_node != null) {
       message.current_node = Node.fromObject(data.current_node);
     }
-    if (typeof data.global_variables == "object") {
-      message.global_variables = new Map(Object.entries(data.global_variables));
+    if (typeof data.variable_definitions == "object") {
+      message.variable_definitions = new Map(Object.entries(data.variable_definitions));
     }
     if (data.execution_id != null) {
       message.execution_id = data.execution_id;
-    }
-    if (data.return_execution_id != null) {
-      message.return_execution_id = data.return_execution_id;
     }
     return message;
   }
@@ -1073,11 +1059,10 @@ export class ExecutionContext extends pb_1.Message {
     const data: {
             topological_order?: string[];
             current_node?: ReturnType<typeof Node.prototype.toObject>;
-            global_variables?: {
+            variable_definitions?: {
                 [key: string]: string;
             };
             execution_id?: string;
-            return_execution_id?: string;
         } = {};
     if (this.topological_order != null) {
       data.topological_order = this.topological_order;
@@ -1085,14 +1070,11 @@ export class ExecutionContext extends pb_1.Message {
     if (this.current_node != null) {
       data.current_node = this.current_node.toObject();
     }
-    if (this.global_variables != null) {
-      data.global_variables = (Object.fromEntries)(this.global_variables);
+    if (this.variable_definitions != null) {
+      data.variable_definitions = (Object.fromEntries)(this.variable_definitions);
     }
     if (this.execution_id != null) {
       data.execution_id = this.execution_id;
-    }
-    if (this.return_execution_id != null) {
-      data.return_execution_id = this.return_execution_id;
     }
     return data;
   }
@@ -1104,21 +1086,19 @@ export class ExecutionContext extends pb_1.Message {
       writer.writeRepeatedString(1, this.topological_order);
     if (this.has_current_node)
       writer.writeMessage(2, this.current_node, () => this.current_node.serialize(writer));
-    for (const [key, value] of this.global_variables) {
-      writer.writeMessage(3, this.global_variables, () => {
+    for (const [key, value] of this.variable_definitions) {
+      writer.writeMessage(3, this.variable_definitions, () => {
         writer.writeString(1, key);
         writer.writeString(2, value);
       });
     }
     if (this.execution_id.length)
       writer.writeString(4, this.execution_id);
-    if (this.return_execution_id.length)
-      writer.writeString(5, this.return_execution_id);
     if (!w)
       return writer.getResultBuffer();
   }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ExecutionContext {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ExecutionContext();
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ExecutionStep {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ExecutionStep();
     while (reader.nextField()) {
       if (reader.isEndGroup())
         break;
@@ -1130,13 +1110,10 @@ export class ExecutionContext extends pb_1.Message {
         reader.readMessage(message.current_node, () => message.current_node = Node.deserialize(reader));
         break;
       case 3:
-        reader.readMessage(message, () => pb_1.Map.deserializeBinary(message.global_variables as any, reader, reader.readString, reader.readString));
+        reader.readMessage(message, () => pb_1.Map.deserializeBinary(message.variable_definitions as any, reader, reader.readString, reader.readString));
         break;
       case 4:
         message.execution_id = reader.readString();
-        break;
-      case 5:
-        message.return_execution_id = reader.readString();
         break;
       default: reader.skipField();
       }
@@ -1146,8 +1123,8 @@ export class ExecutionContext extends pb_1.Message {
   serializeBinary(): Uint8Array {
     return this.serialize();
   }
-  static deserializeBinary(bytes: Uint8Array): ExecutionContext {
-    return ExecutionContext.deserialize(bytes);
+  static deserializeBinary(bytes: Uint8Array): ExecutionStep {
+    return ExecutionStep.deserialize(bytes);
   }
 }
 export class SystemState extends pb_1.Message {
@@ -1159,7 +1136,7 @@ export class SystemState extends pb_1.Message {
         nodes?: Node[];
         selected_node?: GraphNodeInfo[];
         selected_edge?: Edge[];
-        execution_context?: ExecutionContext;
+        execution_step?: ExecutionStep;
         selected_process?: Node;
     }) {
     super();
@@ -1183,8 +1160,8 @@ export class SystemState extends pb_1.Message {
       if ("selected_edge" in data && data.selected_edge != undefined) {
         this.selected_edge = data.selected_edge;
       }
-      if ("execution_context" in data && data.execution_context != undefined) {
-        this.execution_context = data.execution_context;
+      if ("execution_step" in data && data.execution_step != undefined) {
+        this.execution_step = data.execution_step;
       }
       if ("selected_process" in data && data.selected_process != undefined) {
         this.selected_process = data.selected_process;
@@ -1230,13 +1207,13 @@ export class SystemState extends pb_1.Message {
   set selected_edge(value: Edge[]) {
     pb_1.Message.setRepeatedWrapperField(this, 6, value);
   }
-  get execution_context() {
-    return pb_1.Message.getWrapperField(this, ExecutionContext, 7) as ExecutionContext;
+  get execution_step() {
+    return pb_1.Message.getWrapperField(this, ExecutionStep, 7) as ExecutionStep;
   }
-  set execution_context(value: ExecutionContext) {
+  set execution_step(value: ExecutionStep) {
     pb_1.Message.setWrapperField(this, 7, value);
   }
-  get has_execution_context() {
+  get has_execution_step() {
     return pb_1.Message.getField(this, 7) != null;
   }
   get selected_process() {
@@ -1255,7 +1232,7 @@ export class SystemState extends pb_1.Message {
         nodes?: ReturnType<typeof Node.prototype.toObject>[];
         selected_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
         selected_edge?: ReturnType<typeof Edge.prototype.toObject>[];
-        execution_context?: ReturnType<typeof ExecutionContext.prototype.toObject>;
+        execution_step?: ReturnType<typeof ExecutionStep.prototype.toObject>;
         selected_process?: ReturnType<typeof Node.prototype.toObject>;
     }): SystemState {
     const message = new SystemState({});
@@ -1277,8 +1254,8 @@ export class SystemState extends pb_1.Message {
     if (data.selected_edge != null) {
       message.selected_edge = data.selected_edge.map(item => Edge.fromObject(item));
     }
-    if (data.execution_context != null) {
-      message.execution_context = ExecutionContext.fromObject(data.execution_context);
+    if (data.execution_step != null) {
+      message.execution_step = ExecutionStep.fromObject(data.execution_step);
     }
     if (data.selected_process != null) {
       message.selected_process = Node.fromObject(data.selected_process);
@@ -1293,7 +1270,7 @@ export class SystemState extends pb_1.Message {
             nodes?: ReturnType<typeof Node.prototype.toObject>[];
             selected_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
             selected_edge?: ReturnType<typeof Edge.prototype.toObject>[];
-            execution_context?: ReturnType<typeof ExecutionContext.prototype.toObject>;
+            execution_step?: ReturnType<typeof ExecutionStep.prototype.toObject>;
             selected_process?: ReturnType<typeof Node.prototype.toObject>;
         } = {};
     if (this.authenticated != null) {
@@ -1314,8 +1291,8 @@ export class SystemState extends pb_1.Message {
     if (this.selected_edge != null) {
       data.selected_edge = this.selected_edge.map((item: Edge) => item.toObject());
     }
-    if (this.execution_context != null) {
-      data.execution_context = this.execution_context.toObject();
+    if (this.execution_step != null) {
+      data.execution_step = this.execution_step.toObject();
     }
     if (this.selected_process != null) {
       data.selected_process = this.selected_process.toObject();
@@ -1338,8 +1315,8 @@ export class SystemState extends pb_1.Message {
       writer.writeRepeatedMessage(5, this.selected_node, (item: GraphNodeInfo) => item.serialize(writer));
     if (this.selected_edge.length)
       writer.writeRepeatedMessage(6, this.selected_edge, (item: Edge) => item.serialize(writer));
-    if (this.has_execution_context)
-      writer.writeMessage(7, this.execution_context, () => this.execution_context.serialize(writer));
+    if (this.has_execution_step)
+      writer.writeMessage(7, this.execution_step, () => this.execution_step.serialize(writer));
     if (this.has_selected_process)
       writer.writeMessage(8, this.selected_process, () => this.selected_process.serialize(writer));
     if (!w)
@@ -1370,7 +1347,7 @@ export class SystemState extends pb_1.Message {
         reader.readMessage(message.selected_edge, () => pb_1.Message.addToRepeatedWrapperField(message, 6, Edge.deserialize(reader), Edge));
         break;
       case 7:
-        reader.readMessage(message.execution_context, () => message.execution_context = ExecutionContext.deserialize(reader));
+        reader.readMessage(message.execution_step, () => message.execution_step = ExecutionStep.deserialize(reader));
         break;
       case 8:
         reader.readMessage(message.selected_process, () => message.selected_process = Node.deserialize(reader));
@@ -1686,7 +1663,7 @@ export class CrudBundle extends pb_1.Message {
         node?: never;
         authentication_message?: never;
         user_settings?: never;
-        execution_context?: ExecutionContext;
+        execution_context?: ExecutionStep;
         validate_nodes?: never;
     } | {
         node?: never;
@@ -1752,9 +1729,9 @@ export class CrudBundle extends pb_1.Message {
     return pb_1.Message.getField(this, 4) != null;
   }
   get execution_context() {
-    return pb_1.Message.getWrapperField(this, ExecutionContext, 5) as ExecutionContext;
+    return pb_1.Message.getWrapperField(this, ExecutionStep, 5) as ExecutionStep;
   }
-  set execution_context(value: ExecutionContext) {
+  set execution_context(value: ExecutionStep) {
     pb_1.Message.setOneofWrapperField(this, 5, this.#one_of_decls[0], value);
   }
   get has_execution_context() {
@@ -1787,7 +1764,7 @@ export class CrudBundle extends pb_1.Message {
         node?: ReturnType<typeof Node.prototype.toObject>;
         authentication_message?: ReturnType<typeof AuthenticationMessage.prototype.toObject>;
         user_settings?: ReturnType<typeof UserSettings.prototype.toObject>;
-        execution_context?: ReturnType<typeof ExecutionContext.prototype.toObject>;
+        execution_context?: ReturnType<typeof ExecutionStep.prototype.toObject>;
         validate_nodes?: ReturnType<typeof ValidateNodes.prototype.toObject>;
     }): CrudBundle {
     const message = new CrudBundle({});
@@ -1804,7 +1781,7 @@ export class CrudBundle extends pb_1.Message {
       message.user_settings = UserSettings.fromObject(data.user_settings);
     }
     if (data.execution_context != null) {
-      message.execution_context = ExecutionContext.fromObject(data.execution_context);
+      message.execution_context = ExecutionStep.fromObject(data.execution_context);
     }
     if (data.validate_nodes != null) {
       message.validate_nodes = ValidateNodes.fromObject(data.validate_nodes);
@@ -1817,7 +1794,7 @@ export class CrudBundle extends pb_1.Message {
             node?: ReturnType<typeof Node.prototype.toObject>;
             authentication_message?: ReturnType<typeof AuthenticationMessage.prototype.toObject>;
             user_settings?: ReturnType<typeof UserSettings.prototype.toObject>;
-            execution_context?: ReturnType<typeof ExecutionContext.prototype.toObject>;
+            execution_context?: ReturnType<typeof ExecutionStep.prototype.toObject>;
             validate_nodes?: ReturnType<typeof ValidateNodes.prototype.toObject>;
         } = {};
     if (this.verb != null) {
@@ -1878,7 +1855,7 @@ export class CrudBundle extends pb_1.Message {
         reader.readMessage(message.user_settings, () => message.user_settings = UserSettings.deserialize(reader));
         break;
       case 5:
-        reader.readMessage(message.execution_context, () => message.execution_context = ExecutionContext.deserialize(reader));
+        reader.readMessage(message.execution_context, () => message.execution_context = ExecutionStep.deserialize(reader));
         break;
       case 6:
         reader.readMessage(message.validate_nodes, () => message.validate_nodes = ValidateNodes.deserialize(reader));
@@ -1898,8 +1875,8 @@ export class CrudBundle extends pb_1.Message {
 export class CommandResponse extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
-        error?: dependency_1.StringValue;
-        output?: dependency_1.StringValue;
+        error?: string;
+        output?: string;
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -1913,46 +1890,40 @@ export class CommandResponse extends pb_1.Message {
     }
   }
   get error() {
-    return pb_1.Message.getWrapperField(this, dependency_1.StringValue, 1) as dependency_1.StringValue;
+    return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
   }
-  set error(value: dependency_1.StringValue) {
-    pb_1.Message.setWrapperField(this, 1, value);
-  }
-  get has_error() {
-    return pb_1.Message.getField(this, 1) != null;
+  set error(value: string) {
+    pb_1.Message.setField(this, 1, value);
   }
   get output() {
-    return pb_1.Message.getWrapperField(this, dependency_1.StringValue, 2) as dependency_1.StringValue;
+    return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
   }
-  set output(value: dependency_1.StringValue) {
-    pb_1.Message.setWrapperField(this, 2, value);
-  }
-  get has_output() {
-    return pb_1.Message.getField(this, 2) != null;
+  set output(value: string) {
+    pb_1.Message.setField(this, 2, value);
   }
   static fromObject(data: {
-        error?: ReturnType<typeof dependency_1.StringValue.prototype.toObject>;
-        output?: ReturnType<typeof dependency_1.StringValue.prototype.toObject>;
+        error?: string;
+        output?: string;
     }): CommandResponse {
     const message = new CommandResponse({});
     if (data.error != null) {
-      message.error = dependency_1.StringValue.fromObject(data.error);
+      message.error = data.error;
     }
     if (data.output != null) {
-      message.output = dependency_1.StringValue.fromObject(data.output);
+      message.output = data.output;
     }
     return message;
   }
   toObject() {
     const data: {
-            error?: ReturnType<typeof dependency_1.StringValue.prototype.toObject>;
-            output?: ReturnType<typeof dependency_1.StringValue.prototype.toObject>;
+            error?: string;
+            output?: string;
         } = {};
     if (this.error != null) {
-      data.error = this.error.toObject();
+      data.error = this.error;
     }
     if (this.output != null) {
-      data.output = this.output.toObject();
+      data.output = this.output;
     }
     return data;
   }
@@ -1960,10 +1931,10 @@ export class CommandResponse extends pb_1.Message {
   serialize(w: pb_1.BinaryWriter): void;
   serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
     const writer = w || new pb_1.BinaryWriter();
-    if (this.has_error)
-      writer.writeMessage(1, this.error, () => this.error.serialize(writer));
-    if (this.has_output)
-      writer.writeMessage(2, this.output, () => this.output.serialize(writer));
+    if (this.error.length)
+      writer.writeString(1, this.error);
+    if (this.output.length)
+      writer.writeString(2, this.output);
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1974,10 +1945,10 @@ export class CommandResponse extends pb_1.Message {
         break;
       switch (reader.getFieldNumber()) {
       case 1:
-        reader.readMessage(message.error, () => message.error = dependency_1.StringValue.deserialize(reader));
+        message.error = reader.readString();
         break;
       case 2:
-        reader.readMessage(message.output, () => message.output = dependency_1.StringValue.deserialize(reader));
+        message.output = reader.readString();
         break;
       default: reader.skipField();
       }
