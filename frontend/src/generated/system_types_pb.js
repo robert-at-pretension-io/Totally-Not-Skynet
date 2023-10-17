@@ -11,46 +11,52 @@
 /* eslint-disable */
 // @ts-nocheck
 
-var jspb = require('google-protobuf');
+var jspb = require("google-protobuf");
 var goog = jspb;
 var global =
-    (typeof globalThis !== 'undefined' && globalThis) ||
-    (typeof window !== 'undefined' && window) ||
-    (typeof global !== 'undefined' && global) ||
-    (typeof self !== 'undefined' && self) ||
-    (function () { return this; }).call(null) ||
-    Function('return this')();
+  (typeof globalThis !== "undefined" && globalThis) ||
+  (typeof window !== "undefined" && window) ||
+  (typeof global !== "undefined" && global) ||
+  (typeof self !== "undefined" && self) ||
+  function () {
+    return this;
+  }.call(null) ||
+  Function("return this")();
 
-var google_protobuf_wrappers_pb = require('google-protobuf/google/protobuf/wrappers_pb.js');
+var google_protobuf_wrappers_pb = require("google-protobuf/google/protobuf/wrappers_pb.js");
 goog.object.extend(proto, google_protobuf_wrappers_pb);
-goog.exportSymbol('proto.skynet.types.AuthenticationMessage', null, global);
-goog.exportSymbol('proto.skynet.types.Command', null, global);
-goog.exportSymbol('proto.skynet.types.CommandResponse', null, global);
-goog.exportSymbol('proto.skynet.types.Conditional', null, global);
-goog.exportSymbol('proto.skynet.types.ConditionalResponse', null, global);
-goog.exportSymbol('proto.skynet.types.CrudBundle', null, global);
-goog.exportSymbol('proto.skynet.types.CrudBundle.ObjectCase', null, global);
-goog.exportSymbol('proto.skynet.types.Edge', null, global);
-goog.exportSymbol('proto.skynet.types.ExecutionContext', null, global);
-goog.exportSymbol('proto.skynet.types.ExecutionResponse', null, global);
-goog.exportSymbol('proto.skynet.types.Graph', null, global);
-goog.exportSymbol('proto.skynet.types.GraphNodeInfo', null, global);
-goog.exportSymbol('proto.skynet.types.Node', null, global);
-goog.exportSymbol('proto.skynet.types.Node.NodeContentCase', null, global);
-goog.exportSymbol('proto.skynet.types.NodeExecutionResponse', null, global);
-goog.exportSymbol('proto.skynet.types.NodeExecutionResponse.ResponseCase', null, global);
-goog.exportSymbol('proto.skynet.types.NodeTypeNames', null, global);
-goog.exportSymbol('proto.skynet.types.Process', null, global);
-goog.exportSymbol('proto.skynet.types.Prompt', null, global);
-goog.exportSymbol('proto.skynet.types.PromptResponse', null, global);
-goog.exportSymbol('proto.skynet.types.ResponseObject', null, global);
-goog.exportSymbol('proto.skynet.types.ResponseObject.ObjectCase', null, global);
-goog.exportSymbol('proto.skynet.types.SystemErrors', null, global);
-goog.exportSymbol('proto.skynet.types.SystemState', null, global);
-goog.exportSymbol('proto.skynet.types.UserSettings', null, global);
-goog.exportSymbol('proto.skynet.types.ValidateNodes', null, global);
-goog.exportSymbol('proto.skynet.types.ValidateNodesResponse', null, global);
-goog.exportSymbol('proto.skynet.types.VerbTypeNames', null, global);
+goog.exportSymbol("proto.skynet.types.AuthenticationMessage", null, global);
+goog.exportSymbol("proto.skynet.types.Command", null, global);
+goog.exportSymbol("proto.skynet.types.CommandResponse", null, global);
+goog.exportSymbol("proto.skynet.types.Conditional", null, global);
+goog.exportSymbol("proto.skynet.types.ConditionalResponse", null, global);
+goog.exportSymbol("proto.skynet.types.CrudBundle", null, global);
+goog.exportSymbol("proto.skynet.types.CrudBundle.ObjectCase", null, global);
+goog.exportSymbol("proto.skynet.types.Edge", null, global);
+goog.exportSymbol("proto.skynet.types.ExecutionContext", null, global);
+goog.exportSymbol("proto.skynet.types.ExecutionResponse", null, global);
+goog.exportSymbol("proto.skynet.types.Graph", null, global);
+goog.exportSymbol("proto.skynet.types.GraphNodeInfo", null, global);
+goog.exportSymbol("proto.skynet.types.Node", null, global);
+goog.exportSymbol("proto.skynet.types.Node.NodeContentCase", null, global);
+goog.exportSymbol("proto.skynet.types.NodeExecutionResponse", null, global);
+goog.exportSymbol(
+  "proto.skynet.types.NodeExecutionResponse.ResponseCase",
+  null,
+  global
+);
+goog.exportSymbol("proto.skynet.types.NodeTypeNames", null, global);
+goog.exportSymbol("proto.skynet.types.Process", null, global);
+goog.exportSymbol("proto.skynet.types.Prompt", null, global);
+goog.exportSymbol("proto.skynet.types.PromptResponse", null, global);
+goog.exportSymbol("proto.skynet.types.ResponseObject", null, global);
+goog.exportSymbol("proto.skynet.types.ResponseObject.ObjectCase", null, global);
+goog.exportSymbol("proto.skynet.types.SystemErrors", null, global);
+goog.exportSymbol("proto.skynet.types.SystemState", null, global);
+goog.exportSymbol("proto.skynet.types.UserSettings", null, global);
+goog.exportSymbol("proto.skynet.types.ValidateNodes", null, global);
+goog.exportSymbol("proto.skynet.types.ValidateNodesResponse", null, global);
+goog.exportSymbol("proto.skynet.types.VerbTypeNames", null, global);
 /**
  * Generated by JsPbCodeGenerator.
  * @param {Array=} opt_data Optional initial data array, typically from a
@@ -61,7 +67,7 @@ goog.exportSymbol('proto.skynet.types.VerbTypeNames', null, global);
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.GraphNodeInfo = function(opt_data) {
+proto.skynet.types.GraphNodeInfo = function (opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.skynet.types.GraphNodeInfo, jspb.Message);
@@ -70,7 +76,8 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.GraphNodeInfo.displayName = 'proto.skynet.types.GraphNodeInfo';
+  proto.skynet.types.GraphNodeInfo.displayName =
+    "proto.skynet.types.GraphNodeInfo";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -82,7 +89,7 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.Edge = function(opt_data) {
+proto.skynet.types.Edge = function (opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.skynet.types.Edge, jspb.Message);
@@ -91,7 +98,7 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.Edge.displayName = 'proto.skynet.types.Edge';
+  proto.skynet.types.Edge.displayName = "proto.skynet.types.Edge";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -103,7 +110,7 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.Prompt = function(opt_data) {
+proto.skynet.types.Prompt = function (opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.skynet.types.Prompt, jspb.Message);
@@ -112,7 +119,7 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.Prompt.displayName = 'proto.skynet.types.Prompt';
+  proto.skynet.types.Prompt.displayName = "proto.skynet.types.Prompt";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -124,7 +131,7 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.Command = function(opt_data) {
+proto.skynet.types.Command = function (opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.skynet.types.Command, jspb.Message);
@@ -133,7 +140,7 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.Command.displayName = 'proto.skynet.types.Command';
+  proto.skynet.types.Command.displayName = "proto.skynet.types.Command";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -145,7 +152,7 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.Conditional = function(opt_data) {
+proto.skynet.types.Conditional = function (opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.skynet.types.Conditional, jspb.Message);
@@ -154,7 +161,7 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.Conditional.displayName = 'proto.skynet.types.Conditional';
+  proto.skynet.types.Conditional.displayName = "proto.skynet.types.Conditional";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -166,8 +173,15 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.Graph = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.skynet.types.Graph.repeatedFields_, null);
+proto.skynet.types.Graph = function (opt_data) {
+  jspb.Message.initialize(
+    this,
+    opt_data,
+    0,
+    -1,
+    proto.skynet.types.Graph.repeatedFields_,
+    null
+  );
 };
 goog.inherits(proto.skynet.types.Graph, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -175,7 +189,7 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.Graph.displayName = 'proto.skynet.types.Graph';
+  proto.skynet.types.Graph.displayName = "proto.skynet.types.Graph";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -187,8 +201,15 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.Process = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.skynet.types.Process.repeatedFields_, null);
+proto.skynet.types.Process = function (opt_data) {
+  jspb.Message.initialize(
+    this,
+    opt_data,
+    0,
+    -1,
+    proto.skynet.types.Process.repeatedFields_,
+    null
+  );
 };
 goog.inherits(proto.skynet.types.Process, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -196,7 +217,7 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.Process.displayName = 'proto.skynet.types.Process';
+  proto.skynet.types.Process.displayName = "proto.skynet.types.Process";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -208,8 +229,15 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.Node = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.skynet.types.Node.repeatedFields_, proto.skynet.types.Node.oneofGroups_);
+proto.skynet.types.Node = function (opt_data) {
+  jspb.Message.initialize(
+    this,
+    opt_data,
+    0,
+    -1,
+    proto.skynet.types.Node.repeatedFields_,
+    proto.skynet.types.Node.oneofGroups_
+  );
 };
 goog.inherits(proto.skynet.types.Node, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -217,7 +245,7 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.Node.displayName = 'proto.skynet.types.Node';
+  proto.skynet.types.Node.displayName = "proto.skynet.types.Node";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -229,8 +257,15 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.ExecutionContext = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.skynet.types.ExecutionContext.repeatedFields_, null);
+proto.skynet.types.ExecutionContext = function (opt_data) {
+  jspb.Message.initialize(
+    this,
+    opt_data,
+    0,
+    -1,
+    proto.skynet.types.ExecutionContext.repeatedFields_,
+    null
+  );
 };
 goog.inherits(proto.skynet.types.ExecutionContext, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -238,7 +273,8 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.ExecutionContext.displayName = 'proto.skynet.types.ExecutionContext';
+  proto.skynet.types.ExecutionContext.displayName =
+    "proto.skynet.types.ExecutionContext";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -250,8 +286,15 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.SystemState = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.skynet.types.SystemState.repeatedFields_, null);
+proto.skynet.types.SystemState = function (opt_data) {
+  jspb.Message.initialize(
+    this,
+    opt_data,
+    0,
+    -1,
+    proto.skynet.types.SystemState.repeatedFields_,
+    null
+  );
 };
 goog.inherits(proto.skynet.types.SystemState, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -259,7 +302,7 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.SystemState.displayName = 'proto.skynet.types.SystemState';
+  proto.skynet.types.SystemState.displayName = "proto.skynet.types.SystemState";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -271,7 +314,7 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.AuthenticationMessage = function(opt_data) {
+proto.skynet.types.AuthenticationMessage = function (opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.skynet.types.AuthenticationMessage, jspb.Message);
@@ -280,7 +323,8 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.AuthenticationMessage.displayName = 'proto.skynet.types.AuthenticationMessage';
+  proto.skynet.types.AuthenticationMessage.displayName =
+    "proto.skynet.types.AuthenticationMessage";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -292,7 +336,7 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.UserSettings = function(opt_data) {
+proto.skynet.types.UserSettings = function (opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.skynet.types.UserSettings, jspb.Message);
@@ -301,7 +345,8 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.UserSettings.displayName = 'proto.skynet.types.UserSettings';
+  proto.skynet.types.UserSettings.displayName =
+    "proto.skynet.types.UserSettings";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -313,8 +358,15 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.ValidateNodes = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.skynet.types.ValidateNodes.repeatedFields_, null);
+proto.skynet.types.ValidateNodes = function (opt_data) {
+  jspb.Message.initialize(
+    this,
+    opt_data,
+    0,
+    -1,
+    proto.skynet.types.ValidateNodes.repeatedFields_,
+    null
+  );
 };
 goog.inherits(proto.skynet.types.ValidateNodes, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -322,7 +374,8 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.ValidateNodes.displayName = 'proto.skynet.types.ValidateNodes';
+  proto.skynet.types.ValidateNodes.displayName =
+    "proto.skynet.types.ValidateNodes";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -334,8 +387,15 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.CrudBundle = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, proto.skynet.types.CrudBundle.oneofGroups_);
+proto.skynet.types.CrudBundle = function (opt_data) {
+  jspb.Message.initialize(
+    this,
+    opt_data,
+    0,
+    -1,
+    null,
+    proto.skynet.types.CrudBundle.oneofGroups_
+  );
 };
 goog.inherits(proto.skynet.types.CrudBundle, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -343,7 +403,7 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.CrudBundle.displayName = 'proto.skynet.types.CrudBundle';
+  proto.skynet.types.CrudBundle.displayName = "proto.skynet.types.CrudBundle";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -355,7 +415,7 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.CommandResponse = function(opt_data) {
+proto.skynet.types.CommandResponse = function (opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.skynet.types.CommandResponse, jspb.Message);
@@ -364,7 +424,8 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.CommandResponse.displayName = 'proto.skynet.types.CommandResponse';
+  proto.skynet.types.CommandResponse.displayName =
+    "proto.skynet.types.CommandResponse";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -376,7 +437,7 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.PromptResponse = function(opt_data) {
+proto.skynet.types.PromptResponse = function (opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.skynet.types.PromptResponse, jspb.Message);
@@ -385,7 +446,8 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.PromptResponse.displayName = 'proto.skynet.types.PromptResponse';
+  proto.skynet.types.PromptResponse.displayName =
+    "proto.skynet.types.PromptResponse";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -397,7 +459,7 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.ConditionalResponse = function(opt_data) {
+proto.skynet.types.ConditionalResponse = function (opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.skynet.types.ConditionalResponse, jspb.Message);
@@ -406,7 +468,8 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.ConditionalResponse.displayName = 'proto.skynet.types.ConditionalResponse';
+  proto.skynet.types.ConditionalResponse.displayName =
+    "proto.skynet.types.ConditionalResponse";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -418,8 +481,15 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.NodeExecutionResponse = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, proto.skynet.types.NodeExecutionResponse.oneofGroups_);
+proto.skynet.types.NodeExecutionResponse = function (opt_data) {
+  jspb.Message.initialize(
+    this,
+    opt_data,
+    0,
+    -1,
+    null,
+    proto.skynet.types.NodeExecutionResponse.oneofGroups_
+  );
 };
 goog.inherits(proto.skynet.types.NodeExecutionResponse, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -427,7 +497,8 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.NodeExecutionResponse.displayName = 'proto.skynet.types.NodeExecutionResponse';
+  proto.skynet.types.NodeExecutionResponse.displayName =
+    "proto.skynet.types.NodeExecutionResponse";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -439,7 +510,7 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.ExecutionResponse = function(opt_data) {
+proto.skynet.types.ExecutionResponse = function (opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.skynet.types.ExecutionResponse, jspb.Message);
@@ -448,7 +519,8 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.ExecutionResponse.displayName = 'proto.skynet.types.ExecutionResponse';
+  proto.skynet.types.ExecutionResponse.displayName =
+    "proto.skynet.types.ExecutionResponse";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -460,8 +532,15 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.ValidateNodesResponse = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.skynet.types.ValidateNodesResponse.repeatedFields_, null);
+proto.skynet.types.ValidateNodesResponse = function (opt_data) {
+  jspb.Message.initialize(
+    this,
+    opt_data,
+    0,
+    -1,
+    proto.skynet.types.ValidateNodesResponse.repeatedFields_,
+    null
+  );
 };
 goog.inherits(proto.skynet.types.ValidateNodesResponse, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -469,7 +548,8 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.ValidateNodesResponse.displayName = 'proto.skynet.types.ValidateNodesResponse';
+  proto.skynet.types.ValidateNodesResponse.displayName =
+    "proto.skynet.types.ValidateNodesResponse";
 }
 /**
  * Generated by JsPbCodeGenerator.
@@ -481,8 +561,15 @@ if (goog.DEBUG && !COMPILED) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.skynet.types.ResponseObject = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, proto.skynet.types.ResponseObject.oneofGroups_);
+proto.skynet.types.ResponseObject = function (opt_data) {
+  jspb.Message.initialize(
+    this,
+    opt_data,
+    0,
+    -1,
+    null,
+    proto.skynet.types.ResponseObject.oneofGroups_
+  );
 };
 goog.inherits(proto.skynet.types.ResponseObject, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -490,63 +577,65 @@ if (goog.DEBUG && !COMPILED) {
    * @public
    * @override
    */
-  proto.skynet.types.ResponseObject.displayName = 'proto.skynet.types.ResponseObject';
+  proto.skynet.types.ResponseObject.displayName =
+    "proto.skynet.types.ResponseObject";
 }
-
-
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.GraphNodeInfo.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.GraphNodeInfo.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.GraphNodeInfo} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.GraphNodeInfo.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    id: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    name: jspb.Message.getFieldWithDefault(msg, 2, "")
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.GraphNodeInfo.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.GraphNodeInfo.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.GraphNodeInfo} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.GraphNodeInfo.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        id: jspb.Message.getFieldWithDefault(msg, 1, ""),
+        name: jspb.Message.getFieldWithDefault(msg, 2, ""),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.GraphNodeInfo}
  */
-proto.skynet.types.GraphNodeInfo.deserializeBinary = function(bytes) {
+proto.skynet.types.GraphNodeInfo.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.GraphNodeInfo;
-  return proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.GraphNodeInfo();
+  return proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -555,40 +644,41 @@ proto.skynet.types.GraphNodeInfo.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.GraphNodeInfo}
  */
-proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setId(value);
-      break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setName(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setId(value);
+        break;
+      case 2:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setName(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.GraphNodeInfo.prototype.serializeBinary = function() {
+proto.skynet.types.GraphNodeInfo.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.GraphNodeInfo.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -597,116 +687,107 @@ proto.skynet.types.GraphNodeInfo.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.GraphNodeInfo.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.GraphNodeInfo.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getId();
   if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
+    writer.writeString(1, f);
   }
   f = message.getName();
   if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
+    writer.writeString(2, f);
   }
 };
-
 
 /**
  * optional string id = 1;
  * @return {string}
  */
-proto.skynet.types.GraphNodeInfo.prototype.getId = function() {
+proto.skynet.types.GraphNodeInfo.prototype.getId = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.GraphNodeInfo} returns this
  */
-proto.skynet.types.GraphNodeInfo.prototype.setId = function(value) {
+proto.skynet.types.GraphNodeInfo.prototype.setId = function (value) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
-
 
 /**
  * optional string name = 2;
  * @return {string}
  */
-proto.skynet.types.GraphNodeInfo.prototype.getName = function() {
+proto.skynet.types.GraphNodeInfo.prototype.getName = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.GraphNodeInfo} returns this
  */
-proto.skynet.types.GraphNodeInfo.prototype.setName = function(value) {
+proto.skynet.types.GraphNodeInfo.prototype.setName = function (value) {
   return jspb.Message.setProto3StringField(this, 2, value);
 };
 
-
-
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.Edge.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.Edge.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.Edge} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.Edge.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    source: (f = msg.getSource()) && proto.skynet.types.GraphNodeInfo.toObject(includeInstance, f),
-    target: (f = msg.getTarget()) && proto.skynet.types.GraphNodeInfo.toObject(includeInstance, f)
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.Edge.prototype.toObject = function (opt_includeInstance) {
+    return proto.skynet.types.Edge.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.Edge} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.Edge.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        source:
+          (f = msg.getSource()) &&
+          proto.skynet.types.GraphNodeInfo.toObject(includeInstance, f),
+        target:
+          (f = msg.getTarget()) &&
+          proto.skynet.types.GraphNodeInfo.toObject(includeInstance, f),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.Edge}
  */
-proto.skynet.types.Edge.deserializeBinary = function(bytes) {
+proto.skynet.types.Edge.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.Edge;
+  var msg = new proto.skynet.types.Edge();
   return proto.skynet.types.Edge.deserializeBinaryFromReader(msg, reader);
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -715,42 +796,46 @@ proto.skynet.types.Edge.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.Edge}
  */
-proto.skynet.types.Edge.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.Edge.deserializeBinaryFromReader = function (msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = new proto.skynet.types.GraphNodeInfo;
-      reader.readMessage(value,proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader);
-      msg.setSource(value);
-      break;
-    case 2:
-      var value = new proto.skynet.types.GraphNodeInfo;
-      reader.readMessage(value,proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader);
-      msg.setTarget(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = new proto.skynet.types.GraphNodeInfo();
+        reader.readMessage(
+          value,
+          proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader
+        );
+        msg.setSource(value);
+        break;
+      case 2:
+        var value = new proto.skynet.types.GraphNodeInfo();
+        reader.readMessage(
+          value,
+          proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader
+        );
+        msg.setTarget(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.Edge.prototype.serializeBinary = function() {
+proto.skynet.types.Edge.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.Edge.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -759,7 +844,7 @@ proto.skynet.types.Edge.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.Edge.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.Edge.serializeBinaryToWriter = function (message, writer) {
   var f = undefined;
   f = message.getSource();
   if (f != null) {
@@ -779,136 +864,126 @@ proto.skynet.types.Edge.serializeBinaryToWriter = function(message, writer) {
   }
 };
 
-
 /**
  * optional GraphNodeInfo source = 1;
  * @return {?proto.skynet.types.GraphNodeInfo}
  */
-proto.skynet.types.Edge.prototype.getSource = function() {
+proto.skynet.types.Edge.prototype.getSource = function () {
   return /** @type{?proto.skynet.types.GraphNodeInfo} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.GraphNodeInfo, 1));
+    jspb.Message.getWrapperField(this, proto.skynet.types.GraphNodeInfo, 1)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.GraphNodeInfo|undefined} value
  * @return {!proto.skynet.types.Edge} returns this
-*/
-proto.skynet.types.Edge.prototype.setSource = function(value) {
+ */
+proto.skynet.types.Edge.prototype.setSource = function (value) {
   return jspb.Message.setWrapperField(this, 1, value);
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.Edge} returns this
  */
-proto.skynet.types.Edge.prototype.clearSource = function() {
+proto.skynet.types.Edge.prototype.clearSource = function () {
   return this.setSource(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.Edge.prototype.hasSource = function() {
+proto.skynet.types.Edge.prototype.hasSource = function () {
   return jspb.Message.getField(this, 1) != null;
 };
-
 
 /**
  * optional GraphNodeInfo target = 2;
  * @return {?proto.skynet.types.GraphNodeInfo}
  */
-proto.skynet.types.Edge.prototype.getTarget = function() {
+proto.skynet.types.Edge.prototype.getTarget = function () {
   return /** @type{?proto.skynet.types.GraphNodeInfo} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.GraphNodeInfo, 2));
+    jspb.Message.getWrapperField(this, proto.skynet.types.GraphNodeInfo, 2)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.GraphNodeInfo|undefined} value
  * @return {!proto.skynet.types.Edge} returns this
-*/
-proto.skynet.types.Edge.prototype.setTarget = function(value) {
+ */
+proto.skynet.types.Edge.prototype.setTarget = function (value) {
   return jspb.Message.setWrapperField(this, 2, value);
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.Edge} returns this
  */
-proto.skynet.types.Edge.prototype.clearTarget = function() {
+proto.skynet.types.Edge.prototype.clearTarget = function () {
   return this.setTarget(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.Edge.prototype.hasTarget = function() {
+proto.skynet.types.Edge.prototype.hasTarget = function () {
   return jspb.Message.getField(this, 2) != null;
 };
 
-
-
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.Prompt.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.Prompt.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.Prompt} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.Prompt.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    prompt: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    system: jspb.Message.getFieldWithDefault(msg, 2, "")
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.Prompt.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.Prompt.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.Prompt} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.Prompt.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        prompt: jspb.Message.getFieldWithDefault(msg, 1, ""),
+        system: jspb.Message.getFieldWithDefault(msg, 2, ""),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.Prompt}
  */
-proto.skynet.types.Prompt.deserializeBinary = function(bytes) {
+proto.skynet.types.Prompt.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.Prompt;
+  var msg = new proto.skynet.types.Prompt();
   return proto.skynet.types.Prompt.deserializeBinaryFromReader(msg, reader);
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -917,40 +992,38 @@ proto.skynet.types.Prompt.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.Prompt}
  */
-proto.skynet.types.Prompt.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.Prompt.deserializeBinaryFromReader = function (msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setPrompt(value);
-      break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setSystem(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setPrompt(value);
+        break;
+      case 2:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setSystem(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.Prompt.prototype.serializeBinary = function() {
+proto.skynet.types.Prompt.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.Prompt.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -959,115 +1032,101 @@ proto.skynet.types.Prompt.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.Prompt.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.Prompt.serializeBinaryToWriter = function (message, writer) {
   var f = undefined;
   f = message.getPrompt();
   if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
+    writer.writeString(1, f);
   }
   f = message.getSystem();
   if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
+    writer.writeString(2, f);
   }
 };
-
 
 /**
  * optional string prompt = 1;
  * @return {string}
  */
-proto.skynet.types.Prompt.prototype.getPrompt = function() {
+proto.skynet.types.Prompt.prototype.getPrompt = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.Prompt} returns this
  */
-proto.skynet.types.Prompt.prototype.setPrompt = function(value) {
+proto.skynet.types.Prompt.prototype.setPrompt = function (value) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
-
 
 /**
  * optional string system = 2;
  * @return {string}
  */
-proto.skynet.types.Prompt.prototype.getSystem = function() {
+proto.skynet.types.Prompt.prototype.getSystem = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.Prompt} returns this
  */
-proto.skynet.types.Prompt.prototype.setSystem = function(value) {
+proto.skynet.types.Prompt.prototype.setSystem = function (value) {
   return jspb.Message.setProto3StringField(this, 2, value);
 };
 
-
-
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.Command.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.Command.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.Command} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.Command.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    command: jspb.Message.getFieldWithDefault(msg, 1, "")
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.Command.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.Command.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.Command} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.Command.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        command: jspb.Message.getFieldWithDefault(msg, 1, ""),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.Command}
  */
-proto.skynet.types.Command.deserializeBinary = function(bytes) {
+proto.skynet.types.Command.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.Command;
+  var msg = new proto.skynet.types.Command();
   return proto.skynet.types.Command.deserializeBinaryFromReader(msg, reader);
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -1076,36 +1135,37 @@ proto.skynet.types.Command.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.Command}
  */
-proto.skynet.types.Command.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.Command.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setCommand(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setCommand(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.Command.prototype.serializeBinary = function() {
+proto.skynet.types.Command.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.Command.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -1114,92 +1174,93 @@ proto.skynet.types.Command.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.Command.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.Command.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getCommand();
   if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
+    writer.writeString(1, f);
   }
 };
-
 
 /**
  * optional string command = 1;
  * @return {string}
  */
-proto.skynet.types.Command.prototype.getCommand = function() {
+proto.skynet.types.Command.prototype.getCommand = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.Command} returns this
  */
-proto.skynet.types.Command.prototype.setCommand = function(value) {
+proto.skynet.types.Command.prototype.setCommand = function (value) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
 
-
-
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.Conditional.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.Conditional.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.Conditional} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.Conditional.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    systemVariablesMap: (f = msg.getSystemVariablesMap()) ? f.toObject(includeInstance, undefined) : [],
-    statement: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    optionsMap: (f = msg.getOptionsMap()) ? f.toObject(includeInstance, undefined) : []
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.Conditional.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.Conditional.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.Conditional} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.Conditional.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        systemVariablesMap: (f = msg.getSystemVariablesMap())
+          ? f.toObject(includeInstance, undefined)
+          : [],
+        statement: jspb.Message.getFieldWithDefault(msg, 2, ""),
+        optionsMap: (f = msg.getOptionsMap())
+          ? f.toObject(includeInstance, undefined)
+          : [],
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.Conditional}
  */
-proto.skynet.types.Conditional.deserializeBinary = function(bytes) {
+proto.skynet.types.Conditional.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.Conditional;
-  return proto.skynet.types.Conditional.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.Conditional();
+  return proto.skynet.types.Conditional.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -1208,48 +1269,65 @@ proto.skynet.types.Conditional.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.Conditional}
  */
-proto.skynet.types.Conditional.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.Conditional.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = msg.getSystemVariablesMap();
-      reader.readMessage(value, function(message, reader) {
-        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
-         });
-      break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setStatement(value);
-      break;
-    case 3:
-      var value = msg.getOptionsMap();
-      reader.readMessage(value, function(message, reader) {
-        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
-         });
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = msg.getSystemVariablesMap();
+        reader.readMessage(value, function (message, reader) {
+          jspb.Map.deserializeBinary(
+            message,
+            reader,
+            jspb.BinaryReader.prototype.readString,
+            jspb.BinaryReader.prototype.readString,
+            null,
+            "",
+            ""
+          );
+        });
+        break;
+      case 2:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setStatement(value);
+        break;
+      case 3:
+        var value = msg.getOptionsMap();
+        reader.readMessage(value, function (message, reader) {
+          jspb.Map.deserializeBinary(
+            message,
+            reader,
+            jspb.BinaryReader.prototype.readString,
+            jspb.BinaryReader.prototype.readString,
+            null,
+            "",
+            ""
+          );
+        });
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.Conditional.prototype.serializeBinary = function() {
+proto.skynet.types.Conditional.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.Conditional.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -1258,25 +1336,34 @@ proto.skynet.types.Conditional.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.Conditional.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.Conditional.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getSystemVariablesMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(1, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+    f.serializeBinary(
+      1,
+      writer,
+      jspb.BinaryWriter.prototype.writeString,
+      jspb.BinaryWriter.prototype.writeString
+    );
   }
   f = message.getStatement();
   if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
+    writer.writeString(2, f);
   }
   f = message.getOptionsMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(3, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+    f.serializeBinary(
+      3,
+      writer,
+      jspb.BinaryWriter.prototype.writeString,
+      jspb.BinaryWriter.prototype.writeString
+    );
   }
 };
-
 
 /**
  * map<string, string> system_variables = 1;
@@ -1284,40 +1371,38 @@ proto.skynet.types.Conditional.serializeBinaryToWriter = function(message, write
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
-proto.skynet.types.Conditional.prototype.getSystemVariablesMap = function(opt_noLazyCreate) {
+proto.skynet.types.Conditional.prototype.getSystemVariablesMap = function (
+  opt_noLazyCreate
+) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 1, opt_noLazyCreate,
-      null));
+    jspb.Message.getMapField(this, 1, opt_noLazyCreate, null)
+  );
 };
-
 
 /**
  * Clears values from the map. The map will be non-null.
  * @return {!proto.skynet.types.Conditional} returns this
  */
-proto.skynet.types.Conditional.prototype.clearSystemVariablesMap = function() {
+proto.skynet.types.Conditional.prototype.clearSystemVariablesMap = function () {
   this.getSystemVariablesMap().clear();
   return this;
 };
-
 
 /**
  * optional string statement = 2;
  * @return {string}
  */
-proto.skynet.types.Conditional.prototype.getStatement = function() {
+proto.skynet.types.Conditional.prototype.getStatement = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.Conditional} returns this
  */
-proto.skynet.types.Conditional.prototype.setStatement = function(value) {
+proto.skynet.types.Conditional.prototype.setStatement = function (value) {
   return jspb.Message.setProto3StringField(this, 2, value);
 };
-
 
 /**
  * map<string, string> options = 3;
@@ -1325,87 +1410,88 @@ proto.skynet.types.Conditional.prototype.setStatement = function(value) {
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
-proto.skynet.types.Conditional.prototype.getOptionsMap = function(opt_noLazyCreate) {
+proto.skynet.types.Conditional.prototype.getOptionsMap = function (
+  opt_noLazyCreate
+) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 3, opt_noLazyCreate,
-      null));
+    jspb.Message.getMapField(this, 3, opt_noLazyCreate, null)
+  );
 };
-
 
 /**
  * Clears values from the map. The map will be non-null.
  * @return {!proto.skynet.types.Conditional} returns this
  */
-proto.skynet.types.Conditional.prototype.clearOptionsMap = function() {
+proto.skynet.types.Conditional.prototype.clearOptionsMap = function () {
   this.getOptionsMap().clear();
   return this;
 };
-
-
 
 /**
  * List of repeated fields within this message type.
  * @private {!Array<number>}
  * @const
  */
-proto.skynet.types.Graph.repeatedFields_ = [1,2];
-
-
+proto.skynet.types.Graph.repeatedFields_ = [1, 2];
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.Graph.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.Graph.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.Graph} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.Graph.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    nodesList: jspb.Message.toObjectList(msg.getNodesList(),
-    proto.skynet.types.GraphNodeInfo.toObject, includeInstance),
-    edgesList: jspb.Message.toObjectList(msg.getEdgesList(),
-    proto.skynet.types.Edge.toObject, includeInstance)
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.Graph.prototype.toObject = function (opt_includeInstance) {
+    return proto.skynet.types.Graph.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.Graph} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.Graph.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        nodesList: jspb.Message.toObjectList(
+          msg.getNodesList(),
+          proto.skynet.types.GraphNodeInfo.toObject,
+          includeInstance
+        ),
+        edgesList: jspb.Message.toObjectList(
+          msg.getEdgesList(),
+          proto.skynet.types.Edge.toObject,
+          includeInstance
+        ),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.Graph}
  */
-proto.skynet.types.Graph.deserializeBinary = function(bytes) {
+proto.skynet.types.Graph.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.Graph;
+  var msg = new proto.skynet.types.Graph();
   return proto.skynet.types.Graph.deserializeBinaryFromReader(msg, reader);
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -1414,42 +1500,46 @@ proto.skynet.types.Graph.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.Graph}
  */
-proto.skynet.types.Graph.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.Graph.deserializeBinaryFromReader = function (msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = new proto.skynet.types.GraphNodeInfo;
-      reader.readMessage(value,proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader);
-      msg.addNodes(value);
-      break;
-    case 2:
-      var value = new proto.skynet.types.Edge;
-      reader.readMessage(value,proto.skynet.types.Edge.deserializeBinaryFromReader);
-      msg.addEdges(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = new proto.skynet.types.GraphNodeInfo();
+        reader.readMessage(
+          value,
+          proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader
+        );
+        msg.addNodes(value);
+        break;
+      case 2:
+        var value = new proto.skynet.types.Edge();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Edge.deserializeBinaryFromReader
+        );
+        msg.addEdges(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.Graph.prototype.serializeBinary = function() {
+proto.skynet.types.Graph.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.Graph.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -1458,7 +1548,7 @@ proto.skynet.types.Graph.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.Graph.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.Graph.serializeBinaryToWriter = function (message, writer) {
   var f = undefined;
   f = message.getNodesList();
   if (f.length > 0) {
@@ -1478,83 +1568,91 @@ proto.skynet.types.Graph.serializeBinaryToWriter = function(message, writer) {
   }
 };
 
-
 /**
  * repeated GraphNodeInfo nodes = 1;
  * @return {!Array<!proto.skynet.types.GraphNodeInfo>}
  */
-proto.skynet.types.Graph.prototype.getNodesList = function() {
+proto.skynet.types.Graph.prototype.getNodesList = function () {
   return /** @type{!Array<!proto.skynet.types.GraphNodeInfo>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.skynet.types.GraphNodeInfo, 1));
+    jspb.Message.getRepeatedWrapperField(
+      this,
+      proto.skynet.types.GraphNodeInfo,
+      1
+    )
+  );
 };
-
 
 /**
  * @param {!Array<!proto.skynet.types.GraphNodeInfo>} value
  * @return {!proto.skynet.types.Graph} returns this
-*/
-proto.skynet.types.Graph.prototype.setNodesList = function(value) {
+ */
+proto.skynet.types.Graph.prototype.setNodesList = function (value) {
   return jspb.Message.setRepeatedWrapperField(this, 1, value);
 };
-
 
 /**
  * @param {!proto.skynet.types.GraphNodeInfo=} opt_value
  * @param {number=} opt_index
  * @return {!proto.skynet.types.GraphNodeInfo}
  */
-proto.skynet.types.Graph.prototype.addNodes = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.skynet.types.GraphNodeInfo, opt_index);
+proto.skynet.types.Graph.prototype.addNodes = function (opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(
+    this,
+    1,
+    opt_value,
+    proto.skynet.types.GraphNodeInfo,
+    opt_index
+  );
 };
-
 
 /**
  * Clears the list making it empty but non-null.
  * @return {!proto.skynet.types.Graph} returns this
  */
-proto.skynet.types.Graph.prototype.clearNodesList = function() {
+proto.skynet.types.Graph.prototype.clearNodesList = function () {
   return this.setNodesList([]);
 };
-
 
 /**
  * repeated Edge edges = 2;
  * @return {!Array<!proto.skynet.types.Edge>}
  */
-proto.skynet.types.Graph.prototype.getEdgesList = function() {
+proto.skynet.types.Graph.prototype.getEdgesList = function () {
   return /** @type{!Array<!proto.skynet.types.Edge>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.skynet.types.Edge, 2));
+    jspb.Message.getRepeatedWrapperField(this, proto.skynet.types.Edge, 2)
+  );
 };
-
 
 /**
  * @param {!Array<!proto.skynet.types.Edge>} value
  * @return {!proto.skynet.types.Graph} returns this
-*/
-proto.skynet.types.Graph.prototype.setEdgesList = function(value) {
+ */
+proto.skynet.types.Graph.prototype.setEdgesList = function (value) {
   return jspb.Message.setRepeatedWrapperField(this, 2, value);
 };
-
 
 /**
  * @param {!proto.skynet.types.Edge=} opt_value
  * @param {number=} opt_index
  * @return {!proto.skynet.types.Edge}
  */
-proto.skynet.types.Graph.prototype.addEdges = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 2, opt_value, proto.skynet.types.Edge, opt_index);
+proto.skynet.types.Graph.prototype.addEdges = function (opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(
+    this,
+    2,
+    opt_value,
+    proto.skynet.types.Edge,
+    opt_index
+  );
 };
-
 
 /**
  * Clears the list making it empty but non-null.
  * @return {!proto.skynet.types.Graph} returns this
  */
-proto.skynet.types.Graph.prototype.clearEdgesList = function() {
+proto.skynet.types.Graph.prototype.clearEdgesList = function () {
   return this.setEdgesList([]);
 };
-
-
 
 /**
  * List of repeated fields within this message type.
@@ -1563,60 +1661,61 @@ proto.skynet.types.Graph.prototype.clearEdgesList = function() {
  */
 proto.skynet.types.Process.repeatedFields_ = [2];
 
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.Process.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.Process.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.Process} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.Process.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    graph: (f = msg.getGraph()) && proto.skynet.types.Graph.toObject(includeInstance, f),
-    initialVariablesList: (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.Process.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.Process.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.Process} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.Process.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        graph:
+          (f = msg.getGraph()) &&
+          proto.skynet.types.Graph.toObject(includeInstance, f),
+        initialVariablesList:
+          (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f,
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.Process}
  */
-proto.skynet.types.Process.deserializeBinary = function(bytes) {
+proto.skynet.types.Process.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.Process;
+  var msg = new proto.skynet.types.Process();
   return proto.skynet.types.Process.deserializeBinaryFromReader(msg, reader);
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -1625,41 +1724,45 @@ proto.skynet.types.Process.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.Process}
  */
-proto.skynet.types.Process.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.Process.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = new proto.skynet.types.Graph;
-      reader.readMessage(value,proto.skynet.types.Graph.deserializeBinaryFromReader);
-      msg.setGraph(value);
-      break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.addInitialVariables(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = new proto.skynet.types.Graph();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Graph.deserializeBinaryFromReader
+        );
+        msg.setGraph(value);
+        break;
+      case 2:
+        var value = /** @type {string} */ (reader.readString());
+        msg.addInitialVariables(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.Process.prototype.serializeBinary = function() {
+proto.skynet.types.Process.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.Process.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -1668,107 +1771,99 @@ proto.skynet.types.Process.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.Process.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.Process.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getGraph();
   if (f != null) {
-    writer.writeMessage(
-      1,
-      f,
-      proto.skynet.types.Graph.serializeBinaryToWriter
-    );
+    writer.writeMessage(1, f, proto.skynet.types.Graph.serializeBinaryToWriter);
   }
   f = message.getInitialVariablesList();
   if (f.length > 0) {
-    writer.writeRepeatedString(
-      2,
-      f
-    );
+    writer.writeRepeatedString(2, f);
   }
 };
-
 
 /**
  * optional Graph graph = 1;
  * @return {?proto.skynet.types.Graph}
  */
-proto.skynet.types.Process.prototype.getGraph = function() {
+proto.skynet.types.Process.prototype.getGraph = function () {
   return /** @type{?proto.skynet.types.Graph} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.Graph, 1));
+    jspb.Message.getWrapperField(this, proto.skynet.types.Graph, 1)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.Graph|undefined} value
  * @return {!proto.skynet.types.Process} returns this
-*/
-proto.skynet.types.Process.prototype.setGraph = function(value) {
+ */
+proto.skynet.types.Process.prototype.setGraph = function (value) {
   return jspb.Message.setWrapperField(this, 1, value);
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.Process} returns this
  */
-proto.skynet.types.Process.prototype.clearGraph = function() {
+proto.skynet.types.Process.prototype.clearGraph = function () {
   return this.setGraph(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.Process.prototype.hasGraph = function() {
+proto.skynet.types.Process.prototype.hasGraph = function () {
   return jspb.Message.getField(this, 1) != null;
 };
-
 
 /**
  * repeated string initial_variables = 2;
  * @return {!Array<string>}
  */
-proto.skynet.types.Process.prototype.getInitialVariablesList = function() {
+proto.skynet.types.Process.prototype.getInitialVariablesList = function () {
   return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 2));
 };
-
 
 /**
  * @param {!Array<string>} value
  * @return {!proto.skynet.types.Process} returns this
  */
-proto.skynet.types.Process.prototype.setInitialVariablesList = function(value) {
+proto.skynet.types.Process.prototype.setInitialVariablesList = function (
+  value
+) {
   return jspb.Message.setField(this, 2, value || []);
 };
-
 
 /**
  * @param {string} value
  * @param {number=} opt_index
  * @return {!proto.skynet.types.Process} returns this
  */
-proto.skynet.types.Process.prototype.addInitialVariables = function(value, opt_index) {
+proto.skynet.types.Process.prototype.addInitialVariables = function (
+  value,
+  opt_index
+) {
   return jspb.Message.addToRepeatedField(this, 2, value, opt_index);
 };
-
 
 /**
  * Clears the list making it empty but non-null.
  * @return {!proto.skynet.types.Process} returns this
  */
-proto.skynet.types.Process.prototype.clearInitialVariablesList = function() {
+proto.skynet.types.Process.prototype.clearInitialVariablesList = function () {
   return this.setInitialVariablesList([]);
 };
-
-
 
 /**
  * List of repeated fields within this message type.
  * @private {!Array<number>}
  * @const
  */
-proto.skynet.types.Node.repeatedFields_ = [9,10];
+proto.skynet.types.Node.repeatedFields_ = [9, 10];
 
 /**
  * Oneof group definitions for this message. Each group defines the field
@@ -1778,7 +1873,7 @@ proto.skynet.types.Node.repeatedFields_ = [9,10];
  * @private {!Array<!Array<number>>}
  * @const
  */
-proto.skynet.types.Node.oneofGroups_ = [[4,5,6,7]];
+proto.skynet.types.Node.oneofGroups_ = [[4, 5, 6, 7]];
 
 /**
  * @enum {number}
@@ -1788,77 +1883,87 @@ proto.skynet.types.Node.NodeContentCase = {
   PROMPT: 4,
   PROCESS: 5,
   CONDITIONAL: 6,
-  COMMAND: 7
+  COMMAND: 7,
 };
 
 /**
  * @return {proto.skynet.types.Node.NodeContentCase}
  */
-proto.skynet.types.Node.prototype.getNodeContentCase = function() {
-  return /** @type {proto.skynet.types.Node.NodeContentCase} */(jspb.Message.computeOneofCase(this, proto.skynet.types.Node.oneofGroups_[0]));
+proto.skynet.types.Node.prototype.getNodeContentCase = function () {
+  return /** @type {proto.skynet.types.Node.NodeContentCase} */ (
+    jspb.Message.computeOneofCase(this, proto.skynet.types.Node.oneofGroups_[0])
+  );
 };
-
-
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.Node.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.Node.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.Node} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.Node.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    nodeInfo: (f = msg.getNodeInfo()) && proto.skynet.types.GraphNodeInfo.toObject(includeInstance, f),
-    typeName: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    prompt: (f = msg.getPrompt()) && proto.skynet.types.Prompt.toObject(includeInstance, f),
-    process: (f = msg.getProcess()) && proto.skynet.types.Process.toObject(includeInstance, f),
-    conditional: (f = msg.getConditional()) && proto.skynet.types.Conditional.toObject(includeInstance, f),
-    command: (f = msg.getCommand()) && proto.skynet.types.Command.toObject(includeInstance, f),
-    description: jspb.Message.getFieldWithDefault(msg, 8, ""),
-    inputVariablesList: (f = jspb.Message.getRepeatedField(msg, 9)) == null ? undefined : f,
-    outputVariablesList: (f = jspb.Message.getRepeatedField(msg, 10)) == null ? undefined : f
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.Node.prototype.toObject = function (opt_includeInstance) {
+    return proto.skynet.types.Node.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.Node} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.Node.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        nodeInfo:
+          (f = msg.getNodeInfo()) &&
+          proto.skynet.types.GraphNodeInfo.toObject(includeInstance, f),
+        typeName: jspb.Message.getFieldWithDefault(msg, 3, 0),
+        prompt:
+          (f = msg.getPrompt()) &&
+          proto.skynet.types.Prompt.toObject(includeInstance, f),
+        process:
+          (f = msg.getProcess()) &&
+          proto.skynet.types.Process.toObject(includeInstance, f),
+        conditional:
+          (f = msg.getConditional()) &&
+          proto.skynet.types.Conditional.toObject(includeInstance, f),
+        command:
+          (f = msg.getCommand()) &&
+          proto.skynet.types.Command.toObject(includeInstance, f),
+        description: jspb.Message.getFieldWithDefault(msg, 8, ""),
+        inputVariablesList:
+          (f = jspb.Message.getRepeatedField(msg, 9)) == null ? undefined : f,
+        outputVariablesList:
+          (f = jspb.Message.getRepeatedField(msg, 10)) == null ? undefined : f,
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.Node}
  */
-proto.skynet.types.Node.deserializeBinary = function(bytes) {
+proto.skynet.types.Node.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.Node;
+  var msg = new proto.skynet.types.Node();
   return proto.skynet.types.Node.deserializeBinaryFromReader(msg, reader);
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -1867,73 +1972,88 @@ proto.skynet.types.Node.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.Node}
  */
-proto.skynet.types.Node.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.Node.deserializeBinaryFromReader = function (msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = new proto.skynet.types.GraphNodeInfo;
-      reader.readMessage(value,proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader);
-      msg.setNodeInfo(value);
-      break;
-    case 3:
-      var value = /** @type {!proto.skynet.types.NodeTypeNames} */ (reader.readEnum());
-      msg.setTypeName(value);
-      break;
-    case 4:
-      var value = new proto.skynet.types.Prompt;
-      reader.readMessage(value,proto.skynet.types.Prompt.deserializeBinaryFromReader);
-      msg.setPrompt(value);
-      break;
-    case 5:
-      var value = new proto.skynet.types.Process;
-      reader.readMessage(value,proto.skynet.types.Process.deserializeBinaryFromReader);
-      msg.setProcess(value);
-      break;
-    case 6:
-      var value = new proto.skynet.types.Conditional;
-      reader.readMessage(value,proto.skynet.types.Conditional.deserializeBinaryFromReader);
-      msg.setConditional(value);
-      break;
-    case 7:
-      var value = new proto.skynet.types.Command;
-      reader.readMessage(value,proto.skynet.types.Command.deserializeBinaryFromReader);
-      msg.setCommand(value);
-      break;
-    case 8:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setDescription(value);
-      break;
-    case 9:
-      var value = /** @type {string} */ (reader.readString());
-      msg.addInputVariables(value);
-      break;
-    case 10:
-      var value = /** @type {string} */ (reader.readString());
-      msg.addOutputVariables(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = new proto.skynet.types.GraphNodeInfo();
+        reader.readMessage(
+          value,
+          proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader
+        );
+        msg.setNodeInfo(value);
+        break;
+      case 3:
+        var value = /** @type {!proto.skynet.types.NodeTypeNames} */ (
+          reader.readEnum()
+        );
+        msg.setTypeName(value);
+        break;
+      case 4:
+        var value = new proto.skynet.types.Prompt();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Prompt.deserializeBinaryFromReader
+        );
+        msg.setPrompt(value);
+        break;
+      case 5:
+        var value = new proto.skynet.types.Process();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Process.deserializeBinaryFromReader
+        );
+        msg.setProcess(value);
+        break;
+      case 6:
+        var value = new proto.skynet.types.Conditional();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Conditional.deserializeBinaryFromReader
+        );
+        msg.setConditional(value);
+        break;
+      case 7:
+        var value = new proto.skynet.types.Command();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Command.deserializeBinaryFromReader
+        );
+        msg.setCommand(value);
+        break;
+      case 8:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setDescription(value);
+        break;
+      case 9:
+        var value = /** @type {string} */ (reader.readString());
+        msg.addInputVariables(value);
+        break;
+      case 10:
+        var value = /** @type {string} */ (reader.readString());
+        msg.addOutputVariables(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.Node.prototype.serializeBinary = function() {
+proto.skynet.types.Node.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.Node.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -1942,7 +2062,7 @@ proto.skynet.types.Node.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.Node.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.Node.serializeBinaryToWriter = function (message, writer) {
   var f = undefined;
   f = message.getNodeInfo();
   if (f != null) {
@@ -1954,10 +2074,7 @@ proto.skynet.types.Node.serializeBinaryToWriter = function(message, writer) {
   }
   f = message.getTypeName();
   if (f !== 0.0) {
-    writer.writeEnum(
-      3,
-      f
-    );
+    writer.writeEnum(3, f);
   }
   f = message.getPrompt();
   if (f != null) {
@@ -1993,323 +2110,315 @@ proto.skynet.types.Node.serializeBinaryToWriter = function(message, writer) {
   }
   f = message.getDescription();
   if (f.length > 0) {
-    writer.writeString(
-      8,
-      f
-    );
+    writer.writeString(8, f);
   }
   f = message.getInputVariablesList();
   if (f.length > 0) {
-    writer.writeRepeatedString(
-      9,
-      f
-    );
+    writer.writeRepeatedString(9, f);
   }
   f = message.getOutputVariablesList();
   if (f.length > 0) {
-    writer.writeRepeatedString(
-      10,
-      f
-    );
+    writer.writeRepeatedString(10, f);
   }
 };
-
 
 /**
  * optional GraphNodeInfo node_info = 1;
  * @return {?proto.skynet.types.GraphNodeInfo}
  */
-proto.skynet.types.Node.prototype.getNodeInfo = function() {
+proto.skynet.types.Node.prototype.getNodeInfo = function () {
   return /** @type{?proto.skynet.types.GraphNodeInfo} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.GraphNodeInfo, 1));
+    jspb.Message.getWrapperField(this, proto.skynet.types.GraphNodeInfo, 1)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.GraphNodeInfo|undefined} value
  * @return {!proto.skynet.types.Node} returns this
-*/
-proto.skynet.types.Node.prototype.setNodeInfo = function(value) {
+ */
+proto.skynet.types.Node.prototype.setNodeInfo = function (value) {
   return jspb.Message.setWrapperField(this, 1, value);
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.clearNodeInfo = function() {
+proto.skynet.types.Node.prototype.clearNodeInfo = function () {
   return this.setNodeInfo(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.Node.prototype.hasNodeInfo = function() {
+proto.skynet.types.Node.prototype.hasNodeInfo = function () {
   return jspb.Message.getField(this, 1) != null;
 };
-
 
 /**
  * optional NodeTypeNames type_name = 3;
  * @return {!proto.skynet.types.NodeTypeNames}
  */
-proto.skynet.types.Node.prototype.getTypeName = function() {
-  return /** @type {!proto.skynet.types.NodeTypeNames} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+proto.skynet.types.Node.prototype.getTypeName = function () {
+  return /** @type {!proto.skynet.types.NodeTypeNames} */ (
+    jspb.Message.getFieldWithDefault(this, 3, 0)
+  );
 };
-
 
 /**
  * @param {!proto.skynet.types.NodeTypeNames} value
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.setTypeName = function(value) {
+proto.skynet.types.Node.prototype.setTypeName = function (value) {
   return jspb.Message.setProto3EnumField(this, 3, value);
 };
-
 
 /**
  * optional Prompt prompt = 4;
  * @return {?proto.skynet.types.Prompt}
  */
-proto.skynet.types.Node.prototype.getPrompt = function() {
+proto.skynet.types.Node.prototype.getPrompt = function () {
   return /** @type{?proto.skynet.types.Prompt} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.Prompt, 4));
+    jspb.Message.getWrapperField(this, proto.skynet.types.Prompt, 4)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.Prompt|undefined} value
  * @return {!proto.skynet.types.Node} returns this
-*/
-proto.skynet.types.Node.prototype.setPrompt = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 4, proto.skynet.types.Node.oneofGroups_[0], value);
+ */
+proto.skynet.types.Node.prototype.setPrompt = function (value) {
+  return jspb.Message.setOneofWrapperField(
+    this,
+    4,
+    proto.skynet.types.Node.oneofGroups_[0],
+    value
+  );
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.clearPrompt = function() {
+proto.skynet.types.Node.prototype.clearPrompt = function () {
   return this.setPrompt(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.Node.prototype.hasPrompt = function() {
+proto.skynet.types.Node.prototype.hasPrompt = function () {
   return jspb.Message.getField(this, 4) != null;
 };
-
 
 /**
  * optional Process process = 5;
  * @return {?proto.skynet.types.Process}
  */
-proto.skynet.types.Node.prototype.getProcess = function() {
+proto.skynet.types.Node.prototype.getProcess = function () {
   return /** @type{?proto.skynet.types.Process} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.Process, 5));
+    jspb.Message.getWrapperField(this, proto.skynet.types.Process, 5)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.Process|undefined} value
  * @return {!proto.skynet.types.Node} returns this
-*/
-proto.skynet.types.Node.prototype.setProcess = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 5, proto.skynet.types.Node.oneofGroups_[0], value);
+ */
+proto.skynet.types.Node.prototype.setProcess = function (value) {
+  return jspb.Message.setOneofWrapperField(
+    this,
+    5,
+    proto.skynet.types.Node.oneofGroups_[0],
+    value
+  );
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.clearProcess = function() {
+proto.skynet.types.Node.prototype.clearProcess = function () {
   return this.setProcess(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.Node.prototype.hasProcess = function() {
+proto.skynet.types.Node.prototype.hasProcess = function () {
   return jspb.Message.getField(this, 5) != null;
 };
-
 
 /**
  * optional Conditional conditional = 6;
  * @return {?proto.skynet.types.Conditional}
  */
-proto.skynet.types.Node.prototype.getConditional = function() {
+proto.skynet.types.Node.prototype.getConditional = function () {
   return /** @type{?proto.skynet.types.Conditional} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.Conditional, 6));
+    jspb.Message.getWrapperField(this, proto.skynet.types.Conditional, 6)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.Conditional|undefined} value
  * @return {!proto.skynet.types.Node} returns this
-*/
-proto.skynet.types.Node.prototype.setConditional = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 6, proto.skynet.types.Node.oneofGroups_[0], value);
+ */
+proto.skynet.types.Node.prototype.setConditional = function (value) {
+  return jspb.Message.setOneofWrapperField(
+    this,
+    6,
+    proto.skynet.types.Node.oneofGroups_[0],
+    value
+  );
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.clearConditional = function() {
+proto.skynet.types.Node.prototype.clearConditional = function () {
   return this.setConditional(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.Node.prototype.hasConditional = function() {
+proto.skynet.types.Node.prototype.hasConditional = function () {
   return jspb.Message.getField(this, 6) != null;
 };
-
 
 /**
  * optional Command command = 7;
  * @return {?proto.skynet.types.Command}
  */
-proto.skynet.types.Node.prototype.getCommand = function() {
+proto.skynet.types.Node.prototype.getCommand = function () {
   return /** @type{?proto.skynet.types.Command} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.Command, 7));
+    jspb.Message.getWrapperField(this, proto.skynet.types.Command, 7)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.Command|undefined} value
  * @return {!proto.skynet.types.Node} returns this
-*/
-proto.skynet.types.Node.prototype.setCommand = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 7, proto.skynet.types.Node.oneofGroups_[0], value);
+ */
+proto.skynet.types.Node.prototype.setCommand = function (value) {
+  return jspb.Message.setOneofWrapperField(
+    this,
+    7,
+    proto.skynet.types.Node.oneofGroups_[0],
+    value
+  );
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.clearCommand = function() {
+proto.skynet.types.Node.prototype.clearCommand = function () {
   return this.setCommand(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.Node.prototype.hasCommand = function() {
+proto.skynet.types.Node.prototype.hasCommand = function () {
   return jspb.Message.getField(this, 7) != null;
 };
-
 
 /**
  * optional string description = 8;
  * @return {string}
  */
-proto.skynet.types.Node.prototype.getDescription = function() {
+proto.skynet.types.Node.prototype.getDescription = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.setDescription = function(value) {
+proto.skynet.types.Node.prototype.setDescription = function (value) {
   return jspb.Message.setProto3StringField(this, 8, value);
 };
-
 
 /**
  * repeated string input_variables = 9;
  * @return {!Array<string>}
  */
-proto.skynet.types.Node.prototype.getInputVariablesList = function() {
+proto.skynet.types.Node.prototype.getInputVariablesList = function () {
   return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 9));
 };
-
 
 /**
  * @param {!Array<string>} value
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.setInputVariablesList = function(value) {
+proto.skynet.types.Node.prototype.setInputVariablesList = function (value) {
   return jspb.Message.setField(this, 9, value || []);
 };
-
 
 /**
  * @param {string} value
  * @param {number=} opt_index
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.addInputVariables = function(value, opt_index) {
+proto.skynet.types.Node.prototype.addInputVariables = function (
+  value,
+  opt_index
+) {
   return jspb.Message.addToRepeatedField(this, 9, value, opt_index);
 };
-
 
 /**
  * Clears the list making it empty but non-null.
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.clearInputVariablesList = function() {
+proto.skynet.types.Node.prototype.clearInputVariablesList = function () {
   return this.setInputVariablesList([]);
 };
-
 
 /**
  * repeated string output_variables = 10;
  * @return {!Array<string>}
  */
-proto.skynet.types.Node.prototype.getOutputVariablesList = function() {
-  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 10));
+proto.skynet.types.Node.prototype.getOutputVariablesList = function () {
+  return /** @type {!Array<string>} */ (
+    jspb.Message.getRepeatedField(this, 10)
+  );
 };
-
 
 /**
  * @param {!Array<string>} value
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.setOutputVariablesList = function(value) {
+proto.skynet.types.Node.prototype.setOutputVariablesList = function (value) {
   return jspb.Message.setField(this, 10, value || []);
 };
-
 
 /**
  * @param {string} value
  * @param {number=} opt_index
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.addOutputVariables = function(value, opt_index) {
+proto.skynet.types.Node.prototype.addOutputVariables = function (
+  value,
+  opt_index
+) {
   return jspb.Message.addToRepeatedField(this, 10, value, opt_index);
 };
-
 
 /**
  * Clears the list making it empty but non-null.
  * @return {!proto.skynet.types.Node} returns this
  */
-proto.skynet.types.Node.prototype.clearOutputVariablesList = function() {
+proto.skynet.types.Node.prototype.clearOutputVariablesList = function () {
   return this.setOutputVariablesList([]);
 };
-
-
 
 /**
  * List of repeated fields within this message type.
@@ -2318,63 +2427,75 @@ proto.skynet.types.Node.prototype.clearOutputVariablesList = function() {
  */
 proto.skynet.types.ExecutionContext.repeatedFields_ = [1];
 
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.ExecutionContext.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.ExecutionContext.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.ExecutionContext} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.ExecutionContext.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    topologicalOrderList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f,
-    currentNode: (f = msg.getCurrentNode()) && proto.skynet.types.Node.toObject(includeInstance, f),
-    globalVariablesMap: (f = msg.getGlobalVariablesMap()) ? f.toObject(includeInstance, undefined) : [],
-    executionId: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    returnExecutionId: jspb.Message.getFieldWithDefault(msg, 5, "")
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.ExecutionContext.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.ExecutionContext.toObject(
+      opt_includeInstance,
+      this
+    );
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.ExecutionContext} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.ExecutionContext.toObject = function (
+    includeInstance,
+    msg
+  ) {
+    var f,
+      obj = {
+        topologicalOrderList:
+          (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f,
+        currentNode:
+          (f = msg.getCurrentNode()) &&
+          proto.skynet.types.Node.toObject(includeInstance, f),
+        globalVariablesMap: (f = msg.getGlobalVariablesMap())
+          ? f.toObject(includeInstance, undefined)
+          : [],
+        executionId: jspb.Message.getFieldWithDefault(msg, 4, ""),
+        returnExecutionId: jspb.Message.getFieldWithDefault(msg, 5, ""),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.ExecutionContext}
  */
-proto.skynet.types.ExecutionContext.deserializeBinary = function(bytes) {
+proto.skynet.types.ExecutionContext.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.ExecutionContext;
-  return proto.skynet.types.ExecutionContext.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.ExecutionContext();
+  return proto.skynet.types.ExecutionContext.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -2383,55 +2504,67 @@ proto.skynet.types.ExecutionContext.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.ExecutionContext}
  */
-proto.skynet.types.ExecutionContext.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.ExecutionContext.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.addTopologicalOrder(value);
-      break;
-    case 2:
-      var value = new proto.skynet.types.Node;
-      reader.readMessage(value,proto.skynet.types.Node.deserializeBinaryFromReader);
-      msg.setCurrentNode(value);
-      break;
-    case 3:
-      var value = msg.getGlobalVariablesMap();
-      reader.readMessage(value, function(message, reader) {
-        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
-         });
-      break;
-    case 4:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setExecutionId(value);
-      break;
-    case 5:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setReturnExecutionId(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {string} */ (reader.readString());
+        msg.addTopologicalOrder(value);
+        break;
+      case 2:
+        var value = new proto.skynet.types.Node();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Node.deserializeBinaryFromReader
+        );
+        msg.setCurrentNode(value);
+        break;
+      case 3:
+        var value = msg.getGlobalVariablesMap();
+        reader.readMessage(value, function (message, reader) {
+          jspb.Map.deserializeBinary(
+            message,
+            reader,
+            jspb.BinaryReader.prototype.readString,
+            jspb.BinaryReader.prototype.readString,
+            null,
+            "",
+            ""
+          );
+        });
+        break;
+      case 4:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setExecutionId(value);
+        break;
+      case 5:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setReturnExecutionId(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.ExecutionContext.prototype.serializeBinary = function() {
+proto.skynet.types.ExecutionContext.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.ExecutionContext.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -2440,117 +2573,114 @@ proto.skynet.types.ExecutionContext.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.ExecutionContext.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.ExecutionContext.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getTopologicalOrderList();
   if (f.length > 0) {
-    writer.writeRepeatedString(
-      1,
-      f
-    );
+    writer.writeRepeatedString(1, f);
   }
   f = message.getCurrentNode();
   if (f != null) {
-    writer.writeMessage(
-      2,
-      f,
-      proto.skynet.types.Node.serializeBinaryToWriter
-    );
+    writer.writeMessage(2, f, proto.skynet.types.Node.serializeBinaryToWriter);
   }
   f = message.getGlobalVariablesMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(3, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+    f.serializeBinary(
+      3,
+      writer,
+      jspb.BinaryWriter.prototype.writeString,
+      jspb.BinaryWriter.prototype.writeString
+    );
   }
   f = message.getExecutionId();
   if (f.length > 0) {
-    writer.writeString(
-      4,
-      f
-    );
+    writer.writeString(4, f);
   }
   f = message.getReturnExecutionId();
   if (f.length > 0) {
-    writer.writeString(
-      5,
-      f
-    );
+    writer.writeString(5, f);
   }
 };
-
 
 /**
  * repeated string topological_order = 1;
  * @return {!Array<string>}
  */
-proto.skynet.types.ExecutionContext.prototype.getTopologicalOrderList = function() {
-  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 1));
-};
-
+proto.skynet.types.ExecutionContext.prototype.getTopologicalOrderList =
+  function () {
+    return /** @type {!Array<string>} */ (
+      jspb.Message.getRepeatedField(this, 1)
+    );
+  };
 
 /**
  * @param {!Array<string>} value
  * @return {!proto.skynet.types.ExecutionContext} returns this
  */
-proto.skynet.types.ExecutionContext.prototype.setTopologicalOrderList = function(value) {
-  return jspb.Message.setField(this, 1, value || []);
-};
-
+proto.skynet.types.ExecutionContext.prototype.setTopologicalOrderList =
+  function (value) {
+    return jspb.Message.setField(this, 1, value || []);
+  };
 
 /**
  * @param {string} value
  * @param {number=} opt_index
  * @return {!proto.skynet.types.ExecutionContext} returns this
  */
-proto.skynet.types.ExecutionContext.prototype.addTopologicalOrder = function(value, opt_index) {
+proto.skynet.types.ExecutionContext.prototype.addTopologicalOrder = function (
+  value,
+  opt_index
+) {
   return jspb.Message.addToRepeatedField(this, 1, value, opt_index);
 };
-
 
 /**
  * Clears the list making it empty but non-null.
  * @return {!proto.skynet.types.ExecutionContext} returns this
  */
-proto.skynet.types.ExecutionContext.prototype.clearTopologicalOrderList = function() {
-  return this.setTopologicalOrderList([]);
-};
-
+proto.skynet.types.ExecutionContext.prototype.clearTopologicalOrderList =
+  function () {
+    return this.setTopologicalOrderList([]);
+  };
 
 /**
  * optional Node current_node = 2;
  * @return {?proto.skynet.types.Node}
  */
-proto.skynet.types.ExecutionContext.prototype.getCurrentNode = function() {
+proto.skynet.types.ExecutionContext.prototype.getCurrentNode = function () {
   return /** @type{?proto.skynet.types.Node} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.Node, 2));
+    jspb.Message.getWrapperField(this, proto.skynet.types.Node, 2)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.Node|undefined} value
  * @return {!proto.skynet.types.ExecutionContext} returns this
-*/
-proto.skynet.types.ExecutionContext.prototype.setCurrentNode = function(value) {
+ */
+proto.skynet.types.ExecutionContext.prototype.setCurrentNode = function (
+  value
+) {
   return jspb.Message.setWrapperField(this, 2, value);
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.ExecutionContext} returns this
  */
-proto.skynet.types.ExecutionContext.prototype.clearCurrentNode = function() {
+proto.skynet.types.ExecutionContext.prototype.clearCurrentNode = function () {
   return this.setCurrentNode(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.ExecutionContext.prototype.hasCurrentNode = function() {
+proto.skynet.types.ExecutionContext.prototype.hasCurrentNode = function () {
   return jspb.Message.getField(this, 2) != null;
 };
-
 
 /**
  * map<string, string> global_variables = 3;
@@ -2558,129 +2688,146 @@ proto.skynet.types.ExecutionContext.prototype.hasCurrentNode = function() {
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
-proto.skynet.types.ExecutionContext.prototype.getGlobalVariablesMap = function(opt_noLazyCreate) {
+proto.skynet.types.ExecutionContext.prototype.getGlobalVariablesMap = function (
+  opt_noLazyCreate
+) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 3, opt_noLazyCreate,
-      null));
+    jspb.Message.getMapField(this, 3, opt_noLazyCreate, null)
+  );
 };
-
 
 /**
  * Clears values from the map. The map will be non-null.
  * @return {!proto.skynet.types.ExecutionContext} returns this
  */
-proto.skynet.types.ExecutionContext.prototype.clearGlobalVariablesMap = function() {
-  this.getGlobalVariablesMap().clear();
-  return this;
-};
-
+proto.skynet.types.ExecutionContext.prototype.clearGlobalVariablesMap =
+  function () {
+    this.getGlobalVariablesMap().clear();
+    return this;
+  };
 
 /**
  * optional string execution_id = 4;
  * @return {string}
  */
-proto.skynet.types.ExecutionContext.prototype.getExecutionId = function() {
+proto.skynet.types.ExecutionContext.prototype.getExecutionId = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.ExecutionContext} returns this
  */
-proto.skynet.types.ExecutionContext.prototype.setExecutionId = function(value) {
+proto.skynet.types.ExecutionContext.prototype.setExecutionId = function (
+  value
+) {
   return jspb.Message.setProto3StringField(this, 4, value);
 };
-
 
 /**
  * optional string return_execution_id = 5;
  * @return {string}
  */
-proto.skynet.types.ExecutionContext.prototype.getReturnExecutionId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
-};
-
+proto.skynet.types.ExecutionContext.prototype.getReturnExecutionId =
+  function () {
+    return /** @type {string} */ (
+      jspb.Message.getFieldWithDefault(this, 5, "")
+    );
+  };
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.ExecutionContext} returns this
  */
-proto.skynet.types.ExecutionContext.prototype.setReturnExecutionId = function(value) {
+proto.skynet.types.ExecutionContext.prototype.setReturnExecutionId = function (
+  value
+) {
   return jspb.Message.setProto3StringField(this, 5, value);
 };
-
-
 
 /**
  * List of repeated fields within this message type.
  * @private {!Array<number>}
  * @const
  */
-proto.skynet.types.SystemState.repeatedFields_ = [4,5,6];
-
-
+proto.skynet.types.SystemState.repeatedFields_ = [4, 5, 6];
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.SystemState.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.SystemState.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.SystemState} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.SystemState.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    authenticated: jspb.Message.getBooleanFieldWithDefault(msg, 1, false),
-    websocketReady: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
-    graph: (f = msg.getGraph()) && proto.skynet.types.Graph.toObject(includeInstance, f),
-    nodesList: jspb.Message.toObjectList(msg.getNodesList(),
-    proto.skynet.types.Node.toObject, includeInstance),
-    selectedNodeList: jspb.Message.toObjectList(msg.getSelectedNodeList(),
-    proto.skynet.types.GraphNodeInfo.toObject, includeInstance),
-    selectedEdgeList: jspb.Message.toObjectList(msg.getSelectedEdgeList(),
-    proto.skynet.types.Edge.toObject, includeInstance),
-    executionContext: (f = msg.getExecutionContext()) && proto.skynet.types.ExecutionContext.toObject(includeInstance, f)
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.SystemState.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.SystemState.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.SystemState} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.SystemState.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        authenticated: jspb.Message.getBooleanFieldWithDefault(msg, 1, false),
+        websocketReady: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
+        graph:
+          (f = msg.getGraph()) &&
+          proto.skynet.types.Graph.toObject(includeInstance, f),
+        nodesList: jspb.Message.toObjectList(
+          msg.getNodesList(),
+          proto.skynet.types.Node.toObject,
+          includeInstance
+        ),
+        selectedNodeList: jspb.Message.toObjectList(
+          msg.getSelectedNodeList(),
+          proto.skynet.types.GraphNodeInfo.toObject,
+          includeInstance
+        ),
+        selectedEdgeList: jspb.Message.toObjectList(
+          msg.getSelectedEdgeList(),
+          proto.skynet.types.Edge.toObject,
+          includeInstance
+        ),
+        executionContext:
+          (f = msg.getExecutionContext()) &&
+          proto.skynet.types.ExecutionContext.toObject(includeInstance, f),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.SystemState}
  */
-proto.skynet.types.SystemState.deserializeBinary = function(bytes) {
+proto.skynet.types.SystemState.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.SystemState;
-  return proto.skynet.types.SystemState.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.SystemState();
+  return proto.skynet.types.SystemState.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -2689,65 +2836,81 @@ proto.skynet.types.SystemState.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.SystemState}
  */
-proto.skynet.types.SystemState.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.SystemState.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {boolean} */ (reader.readBool());
-      msg.setAuthenticated(value);
-      break;
-    case 2:
-      var value = /** @type {boolean} */ (reader.readBool());
-      msg.setWebsocketReady(value);
-      break;
-    case 3:
-      var value = new proto.skynet.types.Graph;
-      reader.readMessage(value,proto.skynet.types.Graph.deserializeBinaryFromReader);
-      msg.setGraph(value);
-      break;
-    case 4:
-      var value = new proto.skynet.types.Node;
-      reader.readMessage(value,proto.skynet.types.Node.deserializeBinaryFromReader);
-      msg.addNodes(value);
-      break;
-    case 5:
-      var value = new proto.skynet.types.GraphNodeInfo;
-      reader.readMessage(value,proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader);
-      msg.addSelectedNode(value);
-      break;
-    case 6:
-      var value = new proto.skynet.types.Edge;
-      reader.readMessage(value,proto.skynet.types.Edge.deserializeBinaryFromReader);
-      msg.addSelectedEdge(value);
-      break;
-    case 7:
-      var value = new proto.skynet.types.ExecutionContext;
-      reader.readMessage(value,proto.skynet.types.ExecutionContext.deserializeBinaryFromReader);
-      msg.setExecutionContext(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {boolean} */ (reader.readBool());
+        msg.setAuthenticated(value);
+        break;
+      case 2:
+        var value = /** @type {boolean} */ (reader.readBool());
+        msg.setWebsocketReady(value);
+        break;
+      case 3:
+        var value = new proto.skynet.types.Graph();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Graph.deserializeBinaryFromReader
+        );
+        msg.setGraph(value);
+        break;
+      case 4:
+        var value = new proto.skynet.types.Node();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Node.deserializeBinaryFromReader
+        );
+        msg.addNodes(value);
+        break;
+      case 5:
+        var value = new proto.skynet.types.GraphNodeInfo();
+        reader.readMessage(
+          value,
+          proto.skynet.types.GraphNodeInfo.deserializeBinaryFromReader
+        );
+        msg.addSelectedNode(value);
+        break;
+      case 6:
+        var value = new proto.skynet.types.Edge();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Edge.deserializeBinaryFromReader
+        );
+        msg.addSelectedEdge(value);
+        break;
+      case 7:
+        var value = new proto.skynet.types.ExecutionContext();
+        reader.readMessage(
+          value,
+          proto.skynet.types.ExecutionContext.deserializeBinaryFromReader
+        );
+        msg.setExecutionContext(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.SystemState.prototype.serializeBinary = function() {
+proto.skynet.types.SystemState.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.SystemState.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -2756,29 +2919,22 @@ proto.skynet.types.SystemState.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.SystemState.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.SystemState.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getAuthenticated();
   if (f) {
-    writer.writeBool(
-      1,
-      f
-    );
+    writer.writeBool(1, f);
   }
   f = message.getWebsocketReady();
   if (f) {
-    writer.writeBool(
-      2,
-      f
-    );
+    writer.writeBool(2, f);
   }
   f = message.getGraph();
   if (f != null) {
-    writer.writeMessage(
-      3,
-      f,
-      proto.skynet.types.Graph.serializeBinaryToWriter
-    );
+    writer.writeMessage(3, f, proto.skynet.types.Graph.serializeBinaryToWriter);
   }
   f = message.getNodesList();
   if (f.length > 0) {
@@ -2814,286 +2970,313 @@ proto.skynet.types.SystemState.serializeBinaryToWriter = function(message, write
   }
 };
 
-
 /**
  * optional bool authenticated = 1;
  * @return {boolean}
  */
-proto.skynet.types.SystemState.prototype.getAuthenticated = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 1, false));
+proto.skynet.types.SystemState.prototype.getAuthenticated = function () {
+  return /** @type {boolean} */ (
+    jspb.Message.getBooleanFieldWithDefault(this, 1, false)
+  );
 };
-
 
 /**
  * @param {boolean} value
  * @return {!proto.skynet.types.SystemState} returns this
  */
-proto.skynet.types.SystemState.prototype.setAuthenticated = function(value) {
+proto.skynet.types.SystemState.prototype.setAuthenticated = function (value) {
   return jspb.Message.setProto3BooleanField(this, 1, value);
 };
-
 
 /**
  * optional bool websocket_ready = 2;
  * @return {boolean}
  */
-proto.skynet.types.SystemState.prototype.getWebsocketReady = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 2, false));
+proto.skynet.types.SystemState.prototype.getWebsocketReady = function () {
+  return /** @type {boolean} */ (
+    jspb.Message.getBooleanFieldWithDefault(this, 2, false)
+  );
 };
-
 
 /**
  * @param {boolean} value
  * @return {!proto.skynet.types.SystemState} returns this
  */
-proto.skynet.types.SystemState.prototype.setWebsocketReady = function(value) {
+proto.skynet.types.SystemState.prototype.setWebsocketReady = function (value) {
   return jspb.Message.setProto3BooleanField(this, 2, value);
 };
-
 
 /**
  * optional Graph graph = 3;
  * @return {?proto.skynet.types.Graph}
  */
-proto.skynet.types.SystemState.prototype.getGraph = function() {
+proto.skynet.types.SystemState.prototype.getGraph = function () {
   return /** @type{?proto.skynet.types.Graph} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.Graph, 3));
+    jspb.Message.getWrapperField(this, proto.skynet.types.Graph, 3)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.Graph|undefined} value
  * @return {!proto.skynet.types.SystemState} returns this
-*/
-proto.skynet.types.SystemState.prototype.setGraph = function(value) {
+ */
+proto.skynet.types.SystemState.prototype.setGraph = function (value) {
   return jspb.Message.setWrapperField(this, 3, value);
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.SystemState} returns this
  */
-proto.skynet.types.SystemState.prototype.clearGraph = function() {
+proto.skynet.types.SystemState.prototype.clearGraph = function () {
   return this.setGraph(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.SystemState.prototype.hasGraph = function() {
+proto.skynet.types.SystemState.prototype.hasGraph = function () {
   return jspb.Message.getField(this, 3) != null;
 };
-
 
 /**
  * repeated Node nodes = 4;
  * @return {!Array<!proto.skynet.types.Node>}
  */
-proto.skynet.types.SystemState.prototype.getNodesList = function() {
+proto.skynet.types.SystemState.prototype.getNodesList = function () {
   return /** @type{!Array<!proto.skynet.types.Node>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.skynet.types.Node, 4));
+    jspb.Message.getRepeatedWrapperField(this, proto.skynet.types.Node, 4)
+  );
 };
-
 
 /**
  * @param {!Array<!proto.skynet.types.Node>} value
  * @return {!proto.skynet.types.SystemState} returns this
-*/
-proto.skynet.types.SystemState.prototype.setNodesList = function(value) {
+ */
+proto.skynet.types.SystemState.prototype.setNodesList = function (value) {
   return jspb.Message.setRepeatedWrapperField(this, 4, value);
 };
-
 
 /**
  * @param {!proto.skynet.types.Node=} opt_value
  * @param {number=} opt_index
  * @return {!proto.skynet.types.Node}
  */
-proto.skynet.types.SystemState.prototype.addNodes = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 4, opt_value, proto.skynet.types.Node, opt_index);
+proto.skynet.types.SystemState.prototype.addNodes = function (
+  opt_value,
+  opt_index
+) {
+  return jspb.Message.addToRepeatedWrapperField(
+    this,
+    4,
+    opt_value,
+    proto.skynet.types.Node,
+    opt_index
+  );
 };
-
 
 /**
  * Clears the list making it empty but non-null.
  * @return {!proto.skynet.types.SystemState} returns this
  */
-proto.skynet.types.SystemState.prototype.clearNodesList = function() {
+proto.skynet.types.SystemState.prototype.clearNodesList = function () {
   return this.setNodesList([]);
 };
 
-
 /**
- * repeated GraphNodeInfo selected_node = 5;
+ * repeated GraphNodeInfo selected_nodes = 5;
  * @return {!Array<!proto.skynet.types.GraphNodeInfo>}
  */
-proto.skynet.types.SystemState.prototype.getSelectedNodeList = function() {
+proto.skynet.types.SystemState.prototype.getSelectedNodeList = function () {
   return /** @type{!Array<!proto.skynet.types.GraphNodeInfo>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.skynet.types.GraphNodeInfo, 5));
+    jspb.Message.getRepeatedWrapperField(
+      this,
+      proto.skynet.types.GraphNodeInfo,
+      5
+    )
+  );
 };
-
 
 /**
  * @param {!Array<!proto.skynet.types.GraphNodeInfo>} value
  * @return {!proto.skynet.types.SystemState} returns this
-*/
-proto.skynet.types.SystemState.prototype.setSelectedNodeList = function(value) {
+ */
+proto.skynet.types.SystemState.prototype.setSelectedNodeList = function (
+  value
+) {
   return jspb.Message.setRepeatedWrapperField(this, 5, value);
 };
-
 
 /**
  * @param {!proto.skynet.types.GraphNodeInfo=} opt_value
  * @param {number=} opt_index
  * @return {!proto.skynet.types.GraphNodeInfo}
  */
-proto.skynet.types.SystemState.prototype.addSelectedNode = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 5, opt_value, proto.skynet.types.GraphNodeInfo, opt_index);
+proto.skynet.types.SystemState.prototype.addSelectedNode = function (
+  opt_value,
+  opt_index
+) {
+  return jspb.Message.addToRepeatedWrapperField(
+    this,
+    5,
+    opt_value,
+    proto.skynet.types.GraphNodeInfo,
+    opt_index
+  );
 };
-
 
 /**
  * Clears the list making it empty but non-null.
  * @return {!proto.skynet.types.SystemState} returns this
  */
-proto.skynet.types.SystemState.prototype.clearSelectedNodeList = function() {
+proto.skynet.types.SystemState.prototype.clearSelectedNodeList = function () {
   return this.setSelectedNodeList([]);
 };
-
 
 /**
  * repeated Edge selected_edge = 6;
  * @return {!Array<!proto.skynet.types.Edge>}
  */
-proto.skynet.types.SystemState.prototype.getSelectedEdgeList = function() {
+proto.skynet.types.SystemState.prototype.getSelectedEdgeList = function () {
   return /** @type{!Array<!proto.skynet.types.Edge>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.skynet.types.Edge, 6));
+    jspb.Message.getRepeatedWrapperField(this, proto.skynet.types.Edge, 6)
+  );
 };
-
 
 /**
  * @param {!Array<!proto.skynet.types.Edge>} value
  * @return {!proto.skynet.types.SystemState} returns this
-*/
-proto.skynet.types.SystemState.prototype.setSelectedEdgeList = function(value) {
+ */
+proto.skynet.types.SystemState.prototype.setSelectedEdgeList = function (
+  value
+) {
   return jspb.Message.setRepeatedWrapperField(this, 6, value);
 };
-
 
 /**
  * @param {!proto.skynet.types.Edge=} opt_value
  * @param {number=} opt_index
  * @return {!proto.skynet.types.Edge}
  */
-proto.skynet.types.SystemState.prototype.addSelectedEdge = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 6, opt_value, proto.skynet.types.Edge, opt_index);
+proto.skynet.types.SystemState.prototype.addSelectedEdge = function (
+  opt_value,
+  opt_index
+) {
+  return jspb.Message.addToRepeatedWrapperField(
+    this,
+    6,
+    opt_value,
+    proto.skynet.types.Edge,
+    opt_index
+  );
 };
-
 
 /**
  * Clears the list making it empty but non-null.
  * @return {!proto.skynet.types.SystemState} returns this
  */
-proto.skynet.types.SystemState.prototype.clearSelectedEdgeList = function() {
+proto.skynet.types.SystemState.prototype.clearSelectedEdgeList = function () {
   return this.setSelectedEdgeList([]);
 };
-
 
 /**
  * optional ExecutionContext execution_context = 7;
  * @return {?proto.skynet.types.ExecutionContext}
  */
-proto.skynet.types.SystemState.prototype.getExecutionContext = function() {
+proto.skynet.types.SystemState.prototype.getExecutionContext = function () {
   return /** @type{?proto.skynet.types.ExecutionContext} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.ExecutionContext, 7));
+    jspb.Message.getWrapperField(this, proto.skynet.types.ExecutionContext, 7)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.ExecutionContext|undefined} value
  * @return {!proto.skynet.types.SystemState} returns this
-*/
-proto.skynet.types.SystemState.prototype.setExecutionContext = function(value) {
+ */
+proto.skynet.types.SystemState.prototype.setExecutionContext = function (
+  value
+) {
   return jspb.Message.setWrapperField(this, 7, value);
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.SystemState} returns this
  */
-proto.skynet.types.SystemState.prototype.clearExecutionContext = function() {
+proto.skynet.types.SystemState.prototype.clearExecutionContext = function () {
   return this.setExecutionContext(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.SystemState.prototype.hasExecutionContext = function() {
+proto.skynet.types.SystemState.prototype.hasExecutionContext = function () {
   return jspb.Message.getField(this, 7) != null;
 };
 
-
-
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.AuthenticationMessage.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.AuthenticationMessage.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.AuthenticationMessage} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.AuthenticationMessage.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    clientEmail: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    clientPassword: jspb.Message.getFieldWithDefault(msg, 2, "")
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.AuthenticationMessage.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.AuthenticationMessage.toObject(
+      opt_includeInstance,
+      this
+    );
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.AuthenticationMessage} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.AuthenticationMessage.toObject = function (
+    includeInstance,
+    msg
+  ) {
+    var f,
+      obj = {
+        clientEmail: jspb.Message.getFieldWithDefault(msg, 1, ""),
+        clientPassword: jspb.Message.getFieldWithDefault(msg, 2, ""),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.AuthenticationMessage}
  */
-proto.skynet.types.AuthenticationMessage.deserializeBinary = function(bytes) {
+proto.skynet.types.AuthenticationMessage.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.AuthenticationMessage;
-  return proto.skynet.types.AuthenticationMessage.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.AuthenticationMessage();
+  return proto.skynet.types.AuthenticationMessage.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -3102,40 +3285,43 @@ proto.skynet.types.AuthenticationMessage.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.AuthenticationMessage}
  */
-proto.skynet.types.AuthenticationMessage.deserializeBinaryFromReader = function(msg, reader) {
-  while (reader.nextField()) {
-    if (reader.isEndGroup()) {
-      break;
+proto.skynet.types.AuthenticationMessage.deserializeBinaryFromReader =
+  function (msg, reader) {
+    while (reader.nextField()) {
+      if (reader.isEndGroup()) {
+        break;
+      }
+      var field = reader.getFieldNumber();
+      switch (field) {
+        case 1:
+          var value = /** @type {string} */ (reader.readString());
+          msg.setClientEmail(value);
+          break;
+        case 2:
+          var value = /** @type {string} */ (reader.readString());
+          msg.setClientPassword(value);
+          break;
+        default:
+          reader.skipField();
+          break;
+      }
     }
-    var field = reader.getFieldNumber();
-    switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setClientEmail(value);
-      break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setClientPassword(value);
-      break;
-    default:
-      reader.skipField();
-      break;
-    }
-  }
-  return msg;
-};
-
+    return msg;
+  };
 
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.AuthenticationMessage.prototype.serializeBinary = function() {
-  var writer = new jspb.BinaryWriter();
-  proto.skynet.types.AuthenticationMessage.serializeBinaryToWriter(this, writer);
-  return writer.getResultBuffer();
-};
-
+proto.skynet.types.AuthenticationMessage.prototype.serializeBinary =
+  function () {
+    var writer = new jspb.BinaryWriter();
+    proto.skynet.types.AuthenticationMessage.serializeBinaryToWriter(
+      this,
+      writer
+    );
+    return writer.getResultBuffer();
+  };
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -3144,116 +3330,117 @@ proto.skynet.types.AuthenticationMessage.prototype.serializeBinary = function() 
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.AuthenticationMessage.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.AuthenticationMessage.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getClientEmail();
   if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
+    writer.writeString(1, f);
   }
   f = message.getClientPassword();
   if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
+    writer.writeString(2, f);
   }
 };
-
 
 /**
  * optional string client_email = 1;
  * @return {string}
  */
-proto.skynet.types.AuthenticationMessage.prototype.getClientEmail = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
-};
-
+proto.skynet.types.AuthenticationMessage.prototype.getClientEmail =
+  function () {
+    return /** @type {string} */ (
+      jspb.Message.getFieldWithDefault(this, 1, "")
+    );
+  };
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.AuthenticationMessage} returns this
  */
-proto.skynet.types.AuthenticationMessage.prototype.setClientEmail = function(value) {
+proto.skynet.types.AuthenticationMessage.prototype.setClientEmail = function (
+  value
+) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
-
 
 /**
  * optional string client_password = 2;
  * @return {string}
  */
-proto.skynet.types.AuthenticationMessage.prototype.getClientPassword = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
-};
-
+proto.skynet.types.AuthenticationMessage.prototype.getClientPassword =
+  function () {
+    return /** @type {string} */ (
+      jspb.Message.getFieldWithDefault(this, 2, "")
+    );
+  };
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.AuthenticationMessage} returns this
  */
-proto.skynet.types.AuthenticationMessage.prototype.setClientPassword = function(value) {
-  return jspb.Message.setProto3StringField(this, 2, value);
-};
-
-
-
-
-
-if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.UserSettings.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.UserSettings.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.UserSettings} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.UserSettings.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    openaiApiKey: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    mongoDbUri: jspb.Message.getFieldWithDefault(msg, 2, "")
+proto.skynet.types.AuthenticationMessage.prototype.setClientPassword =
+  function (value) {
+    return jspb.Message.setProto3StringField(this, 2, value);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+if (jspb.Message.GENERATE_TO_OBJECT) {
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.UserSettings.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.UserSettings.toObject(opt_includeInstance, this);
+  };
 
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.UserSettings} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.UserSettings.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        openaiApiKey: jspb.Message.getFieldWithDefault(msg, 1, ""),
+        mongoDbUri: jspb.Message.getFieldWithDefault(msg, 2, ""),
+      };
+
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.UserSettings}
  */
-proto.skynet.types.UserSettings.deserializeBinary = function(bytes) {
+proto.skynet.types.UserSettings.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.UserSettings;
-  return proto.skynet.types.UserSettings.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.UserSettings();
+  return proto.skynet.types.UserSettings.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -3262,40 +3449,41 @@ proto.skynet.types.UserSettings.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.UserSettings}
  */
-proto.skynet.types.UserSettings.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.UserSettings.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setOpenaiApiKey(value);
-      break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setMongoDbUri(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setOpenaiApiKey(value);
+        break;
+      case 2:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setMongoDbUri(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.UserSettings.prototype.serializeBinary = function() {
+proto.skynet.types.UserSettings.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.UserSettings.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -3304,61 +3492,52 @@ proto.skynet.types.UserSettings.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.UserSettings.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.UserSettings.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getOpenaiApiKey();
   if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
+    writer.writeString(1, f);
   }
   f = message.getMongoDbUri();
   if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
+    writer.writeString(2, f);
   }
 };
-
 
 /**
  * optional string openai_api_key = 1;
  * @return {string}
  */
-proto.skynet.types.UserSettings.prototype.getOpenaiApiKey = function() {
+proto.skynet.types.UserSettings.prototype.getOpenaiApiKey = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.UserSettings} returns this
  */
-proto.skynet.types.UserSettings.prototype.setOpenaiApiKey = function(value) {
+proto.skynet.types.UserSettings.prototype.setOpenaiApiKey = function (value) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
-
 
 /**
  * optional string mongo_db_uri = 2;
  * @return {string}
  */
-proto.skynet.types.UserSettings.prototype.getMongoDbUri = function() {
+proto.skynet.types.UserSettings.prototype.getMongoDbUri = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.UserSettings} returns this
  */
-proto.skynet.types.UserSettings.prototype.setMongoDbUri = function(value) {
+proto.skynet.types.UserSettings.prototype.setMongoDbUri = function (value) {
   return jspb.Message.setProto3StringField(this, 2, value);
 };
-
-
 
 /**
  * List of repeated fields within this message type.
@@ -3367,60 +3546,64 @@ proto.skynet.types.UserSettings.prototype.setMongoDbUri = function(value) {
  */
 proto.skynet.types.ValidateNodes.repeatedFields_ = [1];
 
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.ValidateNodes.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.ValidateNodes.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.ValidateNodes} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.ValidateNodes.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    nodesList: jspb.Message.toObjectList(msg.getNodesList(),
-    proto.skynet.types.Node.toObject, includeInstance)
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.ValidateNodes.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.ValidateNodes.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.ValidateNodes} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.ValidateNodes.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        nodesList: jspb.Message.toObjectList(
+          msg.getNodesList(),
+          proto.skynet.types.Node.toObject,
+          includeInstance
+        ),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.ValidateNodes}
  */
-proto.skynet.types.ValidateNodes.deserializeBinary = function(bytes) {
+proto.skynet.types.ValidateNodes.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.ValidateNodes;
-  return proto.skynet.types.ValidateNodes.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.ValidateNodes();
+  return proto.skynet.types.ValidateNodes.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -3429,37 +3612,41 @@ proto.skynet.types.ValidateNodes.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.ValidateNodes}
  */
-proto.skynet.types.ValidateNodes.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.ValidateNodes.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = new proto.skynet.types.Node;
-      reader.readMessage(value,proto.skynet.types.Node.deserializeBinaryFromReader);
-      msg.addNodes(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = new proto.skynet.types.Node();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Node.deserializeBinaryFromReader
+        );
+        msg.addNodes(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.ValidateNodes.prototype.serializeBinary = function() {
+proto.skynet.types.ValidateNodes.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.ValidateNodes.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -3468,7 +3655,10 @@ proto.skynet.types.ValidateNodes.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.ValidateNodes.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.ValidateNodes.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getNodesList();
   if (f.length > 0) {
@@ -3480,45 +3670,49 @@ proto.skynet.types.ValidateNodes.serializeBinaryToWriter = function(message, wri
   }
 };
 
-
 /**
  * repeated Node nodes = 1;
  * @return {!Array<!proto.skynet.types.Node>}
  */
-proto.skynet.types.ValidateNodes.prototype.getNodesList = function() {
+proto.skynet.types.ValidateNodes.prototype.getNodesList = function () {
   return /** @type{!Array<!proto.skynet.types.Node>} */ (
-    jspb.Message.getRepeatedWrapperField(this, proto.skynet.types.Node, 1));
+    jspb.Message.getRepeatedWrapperField(this, proto.skynet.types.Node, 1)
+  );
 };
-
 
 /**
  * @param {!Array<!proto.skynet.types.Node>} value
  * @return {!proto.skynet.types.ValidateNodes} returns this
-*/
-proto.skynet.types.ValidateNodes.prototype.setNodesList = function(value) {
+ */
+proto.skynet.types.ValidateNodes.prototype.setNodesList = function (value) {
   return jspb.Message.setRepeatedWrapperField(this, 1, value);
 };
-
 
 /**
  * @param {!proto.skynet.types.Node=} opt_value
  * @param {number=} opt_index
  * @return {!proto.skynet.types.Node}
  */
-proto.skynet.types.ValidateNodes.prototype.addNodes = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.skynet.types.Node, opt_index);
+proto.skynet.types.ValidateNodes.prototype.addNodes = function (
+  opt_value,
+  opt_index
+) {
+  return jspb.Message.addToRepeatedWrapperField(
+    this,
+    1,
+    opt_value,
+    proto.skynet.types.Node,
+    opt_index
+  );
 };
-
 
 /**
  * Clears the list making it empty but non-null.
  * @return {!proto.skynet.types.ValidateNodes} returns this
  */
-proto.skynet.types.ValidateNodes.prototype.clearNodesList = function() {
+proto.skynet.types.ValidateNodes.prototype.clearNodesList = function () {
   return this.setNodesList([]);
 };
-
-
 
 /**
  * Oneof group definitions for this message. Each group defines the field
@@ -3528,7 +3722,7 @@ proto.skynet.types.ValidateNodes.prototype.clearNodesList = function() {
  * @private {!Array<!Array<number>>}
  * @const
  */
-proto.skynet.types.CrudBundle.oneofGroups_ = [[2,3,4,5,6]];
+proto.skynet.types.CrudBundle.oneofGroups_ = [[2, 3, 4, 5, 6]];
 
 /**
  * @enum {number}
@@ -3539,74 +3733,87 @@ proto.skynet.types.CrudBundle.ObjectCase = {
   AUTHENTICATION_MESSAGE: 3,
   USER_SETTINGS: 4,
   EXECUTION_CONTEXT: 5,
-  VALIDATE_NODES: 6
+  VALIDATE_NODES: 6,
 };
 
 /**
  * @return {proto.skynet.types.CrudBundle.ObjectCase}
  */
-proto.skynet.types.CrudBundle.prototype.getObjectCase = function() {
-  return /** @type {proto.skynet.types.CrudBundle.ObjectCase} */(jspb.Message.computeOneofCase(this, proto.skynet.types.CrudBundle.oneofGroups_[0]));
+proto.skynet.types.CrudBundle.prototype.getObjectCase = function () {
+  return /** @type {proto.skynet.types.CrudBundle.ObjectCase} */ (
+    jspb.Message.computeOneofCase(
+      this,
+      proto.skynet.types.CrudBundle.oneofGroups_[0]
+    )
+  );
 };
-
-
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.CrudBundle.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.CrudBundle.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.CrudBundle} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.CrudBundle.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    verb: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    node: (f = msg.getNode()) && proto.skynet.types.Node.toObject(includeInstance, f),
-    authenticationMessage: (f = msg.getAuthenticationMessage()) && proto.skynet.types.AuthenticationMessage.toObject(includeInstance, f),
-    userSettings: (f = msg.getUserSettings()) && proto.skynet.types.UserSettings.toObject(includeInstance, f),
-    executionContext: (f = msg.getExecutionContext()) && proto.skynet.types.ExecutionContext.toObject(includeInstance, f),
-    validateNodes: (f = msg.getValidateNodes()) && proto.skynet.types.ValidateNodes.toObject(includeInstance, f)
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.CrudBundle.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.CrudBundle.toObject(opt_includeInstance, this);
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.CrudBundle} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.CrudBundle.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        verb: jspb.Message.getFieldWithDefault(msg, 1, 0),
+        node:
+          (f = msg.getNode()) &&
+          proto.skynet.types.Node.toObject(includeInstance, f),
+        authenticationMessage:
+          (f = msg.getAuthenticationMessage()) &&
+          proto.skynet.types.AuthenticationMessage.toObject(includeInstance, f),
+        userSettings:
+          (f = msg.getUserSettings()) &&
+          proto.skynet.types.UserSettings.toObject(includeInstance, f),
+        executionContext:
+          (f = msg.getExecutionContext()) &&
+          proto.skynet.types.ExecutionContext.toObject(includeInstance, f),
+        validateNodes:
+          (f = msg.getValidateNodes()) &&
+          proto.skynet.types.ValidateNodes.toObject(includeInstance, f),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.CrudBundle}
  */
-proto.skynet.types.CrudBundle.deserializeBinary = function(bytes) {
+proto.skynet.types.CrudBundle.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.CrudBundle;
+  var msg = new proto.skynet.types.CrudBundle();
   return proto.skynet.types.CrudBundle.deserializeBinaryFromReader(msg, reader);
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -3615,61 +3822,79 @@ proto.skynet.types.CrudBundle.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.CrudBundle}
  */
-proto.skynet.types.CrudBundle.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.CrudBundle.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {!proto.skynet.types.VerbTypeNames} */ (reader.readEnum());
-      msg.setVerb(value);
-      break;
-    case 2:
-      var value = new proto.skynet.types.Node;
-      reader.readMessage(value,proto.skynet.types.Node.deserializeBinaryFromReader);
-      msg.setNode(value);
-      break;
-    case 3:
-      var value = new proto.skynet.types.AuthenticationMessage;
-      reader.readMessage(value,proto.skynet.types.AuthenticationMessage.deserializeBinaryFromReader);
-      msg.setAuthenticationMessage(value);
-      break;
-    case 4:
-      var value = new proto.skynet.types.UserSettings;
-      reader.readMessage(value,proto.skynet.types.UserSettings.deserializeBinaryFromReader);
-      msg.setUserSettings(value);
-      break;
-    case 5:
-      var value = new proto.skynet.types.ExecutionContext;
-      reader.readMessage(value,proto.skynet.types.ExecutionContext.deserializeBinaryFromReader);
-      msg.setExecutionContext(value);
-      break;
-    case 6:
-      var value = new proto.skynet.types.ValidateNodes;
-      reader.readMessage(value,proto.skynet.types.ValidateNodes.deserializeBinaryFromReader);
-      msg.setValidateNodes(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {!proto.skynet.types.VerbTypeNames} */ (
+          reader.readEnum()
+        );
+        msg.setVerb(value);
+        break;
+      case 2:
+        var value = new proto.skynet.types.Node();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Node.deserializeBinaryFromReader
+        );
+        msg.setNode(value);
+        break;
+      case 3:
+        var value = new proto.skynet.types.AuthenticationMessage();
+        reader.readMessage(
+          value,
+          proto.skynet.types.AuthenticationMessage.deserializeBinaryFromReader
+        );
+        msg.setAuthenticationMessage(value);
+        break;
+      case 4:
+        var value = new proto.skynet.types.UserSettings();
+        reader.readMessage(
+          value,
+          proto.skynet.types.UserSettings.deserializeBinaryFromReader
+        );
+        msg.setUserSettings(value);
+        break;
+      case 5:
+        var value = new proto.skynet.types.ExecutionContext();
+        reader.readMessage(
+          value,
+          proto.skynet.types.ExecutionContext.deserializeBinaryFromReader
+        );
+        msg.setExecutionContext(value);
+        break;
+      case 6:
+        var value = new proto.skynet.types.ValidateNodes();
+        reader.readMessage(
+          value,
+          proto.skynet.types.ValidateNodes.deserializeBinaryFromReader
+        );
+        msg.setValidateNodes(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.CrudBundle.prototype.serializeBinary = function() {
+proto.skynet.types.CrudBundle.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.CrudBundle.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -3678,22 +3903,18 @@ proto.skynet.types.CrudBundle.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.CrudBundle.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.CrudBundle.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getVerb();
   if (f !== 0.0) {
-    writer.writeEnum(
-      1,
-      f
-    );
+    writer.writeEnum(1, f);
   }
   f = message.getNode();
   if (f != null) {
-    writer.writeMessage(
-      2,
-      f,
-      proto.skynet.types.Node.serializeBinaryToWriter
-    );
+    writer.writeMessage(2, f, proto.skynet.types.Node.serializeBinaryToWriter);
   }
   f = message.getAuthenticationMessage();
   if (f != null) {
@@ -3729,265 +3950,291 @@ proto.skynet.types.CrudBundle.serializeBinaryToWriter = function(message, writer
   }
 };
 
-
 /**
  * optional VerbTypeNames verb = 1;
  * @return {!proto.skynet.types.VerbTypeNames}
  */
-proto.skynet.types.CrudBundle.prototype.getVerb = function() {
-  return /** @type {!proto.skynet.types.VerbTypeNames} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+proto.skynet.types.CrudBundle.prototype.getVerb = function () {
+  return /** @type {!proto.skynet.types.VerbTypeNames} */ (
+    jspb.Message.getFieldWithDefault(this, 1, 0)
+  );
 };
-
 
 /**
  * @param {!proto.skynet.types.VerbTypeNames} value
  * @return {!proto.skynet.types.CrudBundle} returns this
  */
-proto.skynet.types.CrudBundle.prototype.setVerb = function(value) {
+proto.skynet.types.CrudBundle.prototype.setVerb = function (value) {
   return jspb.Message.setProto3EnumField(this, 1, value);
 };
-
 
 /**
  * optional Node node = 2;
  * @return {?proto.skynet.types.Node}
  */
-proto.skynet.types.CrudBundle.prototype.getNode = function() {
+proto.skynet.types.CrudBundle.prototype.getNode = function () {
   return /** @type{?proto.skynet.types.Node} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.Node, 2));
+    jspb.Message.getWrapperField(this, proto.skynet.types.Node, 2)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.Node|undefined} value
  * @return {!proto.skynet.types.CrudBundle} returns this
-*/
-proto.skynet.types.CrudBundle.prototype.setNode = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 2, proto.skynet.types.CrudBundle.oneofGroups_[0], value);
+ */
+proto.skynet.types.CrudBundle.prototype.setNode = function (value) {
+  return jspb.Message.setOneofWrapperField(
+    this,
+    2,
+    proto.skynet.types.CrudBundle.oneofGroups_[0],
+    value
+  );
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.CrudBundle} returns this
  */
-proto.skynet.types.CrudBundle.prototype.clearNode = function() {
+proto.skynet.types.CrudBundle.prototype.clearNode = function () {
   return this.setNode(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.CrudBundle.prototype.hasNode = function() {
+proto.skynet.types.CrudBundle.prototype.hasNode = function () {
   return jspb.Message.getField(this, 2) != null;
 };
-
 
 /**
  * optional AuthenticationMessage authentication_message = 3;
  * @return {?proto.skynet.types.AuthenticationMessage}
  */
-proto.skynet.types.CrudBundle.prototype.getAuthenticationMessage = function() {
+proto.skynet.types.CrudBundle.prototype.getAuthenticationMessage = function () {
   return /** @type{?proto.skynet.types.AuthenticationMessage} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.AuthenticationMessage, 3));
+    jspb.Message.getWrapperField(
+      this,
+      proto.skynet.types.AuthenticationMessage,
+      3
+    )
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.AuthenticationMessage|undefined} value
  * @return {!proto.skynet.types.CrudBundle} returns this
-*/
-proto.skynet.types.CrudBundle.prototype.setAuthenticationMessage = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 3, proto.skynet.types.CrudBundle.oneofGroups_[0], value);
+ */
+proto.skynet.types.CrudBundle.prototype.setAuthenticationMessage = function (
+  value
+) {
+  return jspb.Message.setOneofWrapperField(
+    this,
+    3,
+    proto.skynet.types.CrudBundle.oneofGroups_[0],
+    value
+  );
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.CrudBundle} returns this
  */
-proto.skynet.types.CrudBundle.prototype.clearAuthenticationMessage = function() {
-  return this.setAuthenticationMessage(undefined);
-};
-
+proto.skynet.types.CrudBundle.prototype.clearAuthenticationMessage =
+  function () {
+    return this.setAuthenticationMessage(undefined);
+  };
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.CrudBundle.prototype.hasAuthenticationMessage = function() {
+proto.skynet.types.CrudBundle.prototype.hasAuthenticationMessage = function () {
   return jspb.Message.getField(this, 3) != null;
 };
-
 
 /**
  * optional UserSettings user_settings = 4;
  * @return {?proto.skynet.types.UserSettings}
  */
-proto.skynet.types.CrudBundle.prototype.getUserSettings = function() {
+proto.skynet.types.CrudBundle.prototype.getUserSettings = function () {
   return /** @type{?proto.skynet.types.UserSettings} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.UserSettings, 4));
+    jspb.Message.getWrapperField(this, proto.skynet.types.UserSettings, 4)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.UserSettings|undefined} value
  * @return {!proto.skynet.types.CrudBundle} returns this
-*/
-proto.skynet.types.CrudBundle.prototype.setUserSettings = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 4, proto.skynet.types.CrudBundle.oneofGroups_[0], value);
+ */
+proto.skynet.types.CrudBundle.prototype.setUserSettings = function (value) {
+  return jspb.Message.setOneofWrapperField(
+    this,
+    4,
+    proto.skynet.types.CrudBundle.oneofGroups_[0],
+    value
+  );
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.CrudBundle} returns this
  */
-proto.skynet.types.CrudBundle.prototype.clearUserSettings = function() {
+proto.skynet.types.CrudBundle.prototype.clearUserSettings = function () {
   return this.setUserSettings(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.CrudBundle.prototype.hasUserSettings = function() {
+proto.skynet.types.CrudBundle.prototype.hasUserSettings = function () {
   return jspb.Message.getField(this, 4) != null;
 };
-
 
 /**
  * optional ExecutionContext execution_context = 5;
  * @return {?proto.skynet.types.ExecutionContext}
  */
-proto.skynet.types.CrudBundle.prototype.getExecutionContext = function() {
+proto.skynet.types.CrudBundle.prototype.getExecutionContext = function () {
   return /** @type{?proto.skynet.types.ExecutionContext} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.ExecutionContext, 5));
+    jspb.Message.getWrapperField(this, proto.skynet.types.ExecutionContext, 5)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.ExecutionContext|undefined} value
  * @return {!proto.skynet.types.CrudBundle} returns this
-*/
-proto.skynet.types.CrudBundle.prototype.setExecutionContext = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 5, proto.skynet.types.CrudBundle.oneofGroups_[0], value);
+ */
+proto.skynet.types.CrudBundle.prototype.setExecutionContext = function (value) {
+  return jspb.Message.setOneofWrapperField(
+    this,
+    5,
+    proto.skynet.types.CrudBundle.oneofGroups_[0],
+    value
+  );
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.CrudBundle} returns this
  */
-proto.skynet.types.CrudBundle.prototype.clearExecutionContext = function() {
+proto.skynet.types.CrudBundle.prototype.clearExecutionContext = function () {
   return this.setExecutionContext(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.CrudBundle.prototype.hasExecutionContext = function() {
+proto.skynet.types.CrudBundle.prototype.hasExecutionContext = function () {
   return jspb.Message.getField(this, 5) != null;
 };
-
 
 /**
  * optional ValidateNodes validate_nodes = 6;
  * @return {?proto.skynet.types.ValidateNodes}
  */
-proto.skynet.types.CrudBundle.prototype.getValidateNodes = function() {
+proto.skynet.types.CrudBundle.prototype.getValidateNodes = function () {
   return /** @type{?proto.skynet.types.ValidateNodes} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.ValidateNodes, 6));
+    jspb.Message.getWrapperField(this, proto.skynet.types.ValidateNodes, 6)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.ValidateNodes|undefined} value
  * @return {!proto.skynet.types.CrudBundle} returns this
-*/
-proto.skynet.types.CrudBundle.prototype.setValidateNodes = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 6, proto.skynet.types.CrudBundle.oneofGroups_[0], value);
+ */
+proto.skynet.types.CrudBundle.prototype.setValidateNodes = function (value) {
+  return jspb.Message.setOneofWrapperField(
+    this,
+    6,
+    proto.skynet.types.CrudBundle.oneofGroups_[0],
+    value
+  );
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.CrudBundle} returns this
  */
-proto.skynet.types.CrudBundle.prototype.clearValidateNodes = function() {
+proto.skynet.types.CrudBundle.prototype.clearValidateNodes = function () {
   return this.setValidateNodes(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.CrudBundle.prototype.hasValidateNodes = function() {
+proto.skynet.types.CrudBundle.prototype.hasValidateNodes = function () {
   return jspb.Message.getField(this, 6) != null;
 };
 
-
-
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.CommandResponse.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.CommandResponse.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.CommandResponse} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.CommandResponse.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    error: (f = msg.getError()) && google_protobuf_wrappers_pb.StringValue.toObject(includeInstance, f),
-    output: (f = msg.getOutput()) && google_protobuf_wrappers_pb.StringValue.toObject(includeInstance, f)
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.CommandResponse.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.CommandResponse.toObject(
+      opt_includeInstance,
+      this
+    );
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.CommandResponse} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.CommandResponse.toObject = function (
+    includeInstance,
+    msg
+  ) {
+    var f,
+      obj = {
+        error:
+          (f = msg.getError()) &&
+          google_protobuf_wrappers_pb.StringValue.toObject(includeInstance, f),
+        output:
+          (f = msg.getOutput()) &&
+          google_protobuf_wrappers_pb.StringValue.toObject(includeInstance, f),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.CommandResponse}
  */
-proto.skynet.types.CommandResponse.deserializeBinary = function(bytes) {
+proto.skynet.types.CommandResponse.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.CommandResponse;
-  return proto.skynet.types.CommandResponse.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.CommandResponse();
+  return proto.skynet.types.CommandResponse.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -3996,42 +4243,49 @@ proto.skynet.types.CommandResponse.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.CommandResponse}
  */
-proto.skynet.types.CommandResponse.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.CommandResponse.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = new google_protobuf_wrappers_pb.StringValue;
-      reader.readMessage(value,google_protobuf_wrappers_pb.StringValue.deserializeBinaryFromReader);
-      msg.setError(value);
-      break;
-    case 2:
-      var value = new google_protobuf_wrappers_pb.StringValue;
-      reader.readMessage(value,google_protobuf_wrappers_pb.StringValue.deserializeBinaryFromReader);
-      msg.setOutput(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = new google_protobuf_wrappers_pb.StringValue();
+        reader.readMessage(
+          value,
+          google_protobuf_wrappers_pb.StringValue.deserializeBinaryFromReader
+        );
+        msg.setError(value);
+        break;
+      case 2:
+        var value = new google_protobuf_wrappers_pb.StringValue();
+        reader.readMessage(
+          value,
+          google_protobuf_wrappers_pb.StringValue.deserializeBinaryFromReader
+        );
+        msg.setOutput(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.CommandResponse.prototype.serializeBinary = function() {
+proto.skynet.types.CommandResponse.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.CommandResponse.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -4040,7 +4294,10 @@ proto.skynet.types.CommandResponse.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.CommandResponse.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.CommandResponse.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getError();
   if (f != null) {
@@ -4060,135 +4317,139 @@ proto.skynet.types.CommandResponse.serializeBinaryToWriter = function(message, w
   }
 };
 
-
 /**
  * optional google.protobuf.StringValue error = 1;
  * @return {?proto.google.protobuf.StringValue}
  */
-proto.skynet.types.CommandResponse.prototype.getError = function() {
+proto.skynet.types.CommandResponse.prototype.getError = function () {
   return /** @type{?proto.google.protobuf.StringValue} */ (
-    jspb.Message.getWrapperField(this, google_protobuf_wrappers_pb.StringValue, 1));
+    jspb.Message.getWrapperField(
+      this,
+      google_protobuf_wrappers_pb.StringValue,
+      1
+    )
+  );
 };
-
 
 /**
  * @param {?proto.google.protobuf.StringValue|undefined} value
  * @return {!proto.skynet.types.CommandResponse} returns this
-*/
-proto.skynet.types.CommandResponse.prototype.setError = function(value) {
+ */
+proto.skynet.types.CommandResponse.prototype.setError = function (value) {
   return jspb.Message.setWrapperField(this, 1, value);
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.CommandResponse} returns this
  */
-proto.skynet.types.CommandResponse.prototype.clearError = function() {
+proto.skynet.types.CommandResponse.prototype.clearError = function () {
   return this.setError(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.CommandResponse.prototype.hasError = function() {
+proto.skynet.types.CommandResponse.prototype.hasError = function () {
   return jspb.Message.getField(this, 1) != null;
 };
-
 
 /**
  * optional google.protobuf.StringValue output = 2;
  * @return {?proto.google.protobuf.StringValue}
  */
-proto.skynet.types.CommandResponse.prototype.getOutput = function() {
+proto.skynet.types.CommandResponse.prototype.getOutput = function () {
   return /** @type{?proto.google.protobuf.StringValue} */ (
-    jspb.Message.getWrapperField(this, google_protobuf_wrappers_pb.StringValue, 2));
+    jspb.Message.getWrapperField(
+      this,
+      google_protobuf_wrappers_pb.StringValue,
+      2
+    )
+  );
 };
-
 
 /**
  * @param {?proto.google.protobuf.StringValue|undefined} value
  * @return {!proto.skynet.types.CommandResponse} returns this
-*/
-proto.skynet.types.CommandResponse.prototype.setOutput = function(value) {
+ */
+proto.skynet.types.CommandResponse.prototype.setOutput = function (value) {
   return jspb.Message.setWrapperField(this, 2, value);
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.CommandResponse} returns this
  */
-proto.skynet.types.CommandResponse.prototype.clearOutput = function() {
+proto.skynet.types.CommandResponse.prototype.clearOutput = function () {
   return this.setOutput(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.CommandResponse.prototype.hasOutput = function() {
+proto.skynet.types.CommandResponse.prototype.hasOutput = function () {
   return jspb.Message.getField(this, 2) != null;
 };
 
-
-
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.PromptResponse.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.PromptResponse.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.PromptResponse} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.PromptResponse.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    aiTextResponse: jspb.Message.getFieldWithDefault(msg, 1, "")
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.PromptResponse.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.PromptResponse.toObject(
+      opt_includeInstance,
+      this
+    );
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.PromptResponse} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.PromptResponse.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        aiTextResponse: jspb.Message.getFieldWithDefault(msg, 1, ""),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.PromptResponse}
  */
-proto.skynet.types.PromptResponse.deserializeBinary = function(bytes) {
+proto.skynet.types.PromptResponse.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.PromptResponse;
-  return proto.skynet.types.PromptResponse.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.PromptResponse();
+  return proto.skynet.types.PromptResponse.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -4197,36 +4458,37 @@ proto.skynet.types.PromptResponse.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.PromptResponse}
  */
-proto.skynet.types.PromptResponse.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.PromptResponse.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setAiTextResponse(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setAiTextResponse(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.PromptResponse.prototype.serializeBinary = function() {
+proto.skynet.types.PromptResponse.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.PromptResponse.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -4235,90 +4497,95 @@ proto.skynet.types.PromptResponse.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.PromptResponse.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.PromptResponse.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getAiTextResponse();
   if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
+    writer.writeString(1, f);
   }
 };
-
 
 /**
  * optional string ai_text_response = 1;
  * @return {string}
  */
-proto.skynet.types.PromptResponse.prototype.getAiTextResponse = function() {
+proto.skynet.types.PromptResponse.prototype.getAiTextResponse = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.PromptResponse} returns this
  */
-proto.skynet.types.PromptResponse.prototype.setAiTextResponse = function(value) {
+proto.skynet.types.PromptResponse.prototype.setAiTextResponse = function (
+  value
+) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
 
-
-
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.ConditionalResponse.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.ConditionalResponse.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.ConditionalResponse} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.ConditionalResponse.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    chosenOption: jspb.Message.getFieldWithDefault(msg, 1, "")
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.ConditionalResponse.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.ConditionalResponse.toObject(
+      opt_includeInstance,
+      this
+    );
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.ConditionalResponse} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.ConditionalResponse.toObject = function (
+    includeInstance,
+    msg
+  ) {
+    var f,
+      obj = {
+        chosenOption: jspb.Message.getFieldWithDefault(msg, 1, ""),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.ConditionalResponse}
  */
-proto.skynet.types.ConditionalResponse.deserializeBinary = function(bytes) {
+proto.skynet.types.ConditionalResponse.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.ConditionalResponse;
-  return proto.skynet.types.ConditionalResponse.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.ConditionalResponse();
+  return proto.skynet.types.ConditionalResponse.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -4327,36 +4594,37 @@ proto.skynet.types.ConditionalResponse.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.ConditionalResponse}
  */
-proto.skynet.types.ConditionalResponse.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.ConditionalResponse.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setChosenOption(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setChosenOption(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.ConditionalResponse.prototype.serializeBinary = function() {
+proto.skynet.types.ConditionalResponse.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.ConditionalResponse.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -4365,36 +4633,34 @@ proto.skynet.types.ConditionalResponse.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.ConditionalResponse.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.ConditionalResponse.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getChosenOption();
   if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
+    writer.writeString(1, f);
   }
 };
-
 
 /**
  * optional string chosen_option = 1;
  * @return {string}
  */
-proto.skynet.types.ConditionalResponse.prototype.getChosenOption = function() {
+proto.skynet.types.ConditionalResponse.prototype.getChosenOption = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.ConditionalResponse} returns this
  */
-proto.skynet.types.ConditionalResponse.prototype.setChosenOption = function(value) {
+proto.skynet.types.ConditionalResponse.prototype.setChosenOption = function (
+  value
+) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
-
-
 
 /**
  * Oneof group definitions for this message. Each group defines the field
@@ -4404,7 +4670,7 @@ proto.skynet.types.ConditionalResponse.prototype.setChosenOption = function(valu
  * @private {!Array<!Array<number>>}
  * @const
  */
-proto.skynet.types.NodeExecutionResponse.oneofGroups_ = [[1,2,3]];
+proto.skynet.types.NodeExecutionResponse.oneofGroups_ = [[1, 2, 3]];
 
 /**
  * @enum {number}
@@ -4413,71 +4679,90 @@ proto.skynet.types.NodeExecutionResponse.ResponseCase = {
   RESPONSE_NOT_SET: 0,
   PROMPT_RESPONSE: 1,
   COMMAND_RESPONSE: 2,
-  CONDITIONAL_RESPONSE: 3
+  CONDITIONAL_RESPONSE: 3,
 };
 
 /**
  * @return {proto.skynet.types.NodeExecutionResponse.ResponseCase}
  */
-proto.skynet.types.NodeExecutionResponse.prototype.getResponseCase = function() {
-  return /** @type {proto.skynet.types.NodeExecutionResponse.ResponseCase} */(jspb.Message.computeOneofCase(this, proto.skynet.types.NodeExecutionResponse.oneofGroups_[0]));
-};
-
-
-
-if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.NodeExecutionResponse.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.NodeExecutionResponse.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.NodeExecutionResponse} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.NodeExecutionResponse.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    promptResponse: (f = msg.getPromptResponse()) && proto.skynet.types.PromptResponse.toObject(includeInstance, f),
-    commandResponse: (f = msg.getCommandResponse()) && proto.skynet.types.CommandResponse.toObject(includeInstance, f),
-    conditionalResponse: (f = msg.getConditionalResponse()) && proto.skynet.types.ConditionalResponse.toObject(includeInstance, f)
+proto.skynet.types.NodeExecutionResponse.prototype.getResponseCase =
+  function () {
+    return /** @type {proto.skynet.types.NodeExecutionResponse.ResponseCase} */ (
+      jspb.Message.computeOneofCase(
+        this,
+        proto.skynet.types.NodeExecutionResponse.oneofGroups_[0]
+      )
+    );
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+if (jspb.Message.GENERATE_TO_OBJECT) {
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.NodeExecutionResponse.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.NodeExecutionResponse.toObject(
+      opt_includeInstance,
+      this
+    );
+  };
 
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.NodeExecutionResponse} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.NodeExecutionResponse.toObject = function (
+    includeInstance,
+    msg
+  ) {
+    var f,
+      obj = {
+        promptResponse:
+          (f = msg.getPromptResponse()) &&
+          proto.skynet.types.PromptResponse.toObject(includeInstance, f),
+        commandResponse:
+          (f = msg.getCommandResponse()) &&
+          proto.skynet.types.CommandResponse.toObject(includeInstance, f),
+        conditionalResponse:
+          (f = msg.getConditionalResponse()) &&
+          proto.skynet.types.ConditionalResponse.toObject(includeInstance, f),
+      };
+
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.NodeExecutionResponse}
  */
-proto.skynet.types.NodeExecutionResponse.deserializeBinary = function(bytes) {
+proto.skynet.types.NodeExecutionResponse.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.NodeExecutionResponse;
-  return proto.skynet.types.NodeExecutionResponse.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.NodeExecutionResponse();
+  return proto.skynet.types.NodeExecutionResponse.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -4486,47 +4771,59 @@ proto.skynet.types.NodeExecutionResponse.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.NodeExecutionResponse}
  */
-proto.skynet.types.NodeExecutionResponse.deserializeBinaryFromReader = function(msg, reader) {
-  while (reader.nextField()) {
-    if (reader.isEndGroup()) {
-      break;
+proto.skynet.types.NodeExecutionResponse.deserializeBinaryFromReader =
+  function (msg, reader) {
+    while (reader.nextField()) {
+      if (reader.isEndGroup()) {
+        break;
+      }
+      var field = reader.getFieldNumber();
+      switch (field) {
+        case 1:
+          var value = new proto.skynet.types.PromptResponse();
+          reader.readMessage(
+            value,
+            proto.skynet.types.PromptResponse.deserializeBinaryFromReader
+          );
+          msg.setPromptResponse(value);
+          break;
+        case 2:
+          var value = new proto.skynet.types.CommandResponse();
+          reader.readMessage(
+            value,
+            proto.skynet.types.CommandResponse.deserializeBinaryFromReader
+          );
+          msg.setCommandResponse(value);
+          break;
+        case 3:
+          var value = new proto.skynet.types.ConditionalResponse();
+          reader.readMessage(
+            value,
+            proto.skynet.types.ConditionalResponse.deserializeBinaryFromReader
+          );
+          msg.setConditionalResponse(value);
+          break;
+        default:
+          reader.skipField();
+          break;
+      }
     }
-    var field = reader.getFieldNumber();
-    switch (field) {
-    case 1:
-      var value = new proto.skynet.types.PromptResponse;
-      reader.readMessage(value,proto.skynet.types.PromptResponse.deserializeBinaryFromReader);
-      msg.setPromptResponse(value);
-      break;
-    case 2:
-      var value = new proto.skynet.types.CommandResponse;
-      reader.readMessage(value,proto.skynet.types.CommandResponse.deserializeBinaryFromReader);
-      msg.setCommandResponse(value);
-      break;
-    case 3:
-      var value = new proto.skynet.types.ConditionalResponse;
-      reader.readMessage(value,proto.skynet.types.ConditionalResponse.deserializeBinaryFromReader);
-      msg.setConditionalResponse(value);
-      break;
-    default:
-      reader.skipField();
-      break;
-    }
-  }
-  return msg;
-};
-
+    return msg;
+  };
 
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.NodeExecutionResponse.prototype.serializeBinary = function() {
-  var writer = new jspb.BinaryWriter();
-  proto.skynet.types.NodeExecutionResponse.serializeBinaryToWriter(this, writer);
-  return writer.getResultBuffer();
-};
-
+proto.skynet.types.NodeExecutionResponse.prototype.serializeBinary =
+  function () {
+    var writer = new jspb.BinaryWriter();
+    proto.skynet.types.NodeExecutionResponse.serializeBinaryToWriter(
+      this,
+      writer
+    );
+    return writer.getResultBuffer();
+  };
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -4535,7 +4832,10 @@ proto.skynet.types.NodeExecutionResponse.prototype.serializeBinary = function() 
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.NodeExecutionResponse.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.NodeExecutionResponse.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getPromptResponse();
   if (f != null) {
@@ -4563,176 +4863,205 @@ proto.skynet.types.NodeExecutionResponse.serializeBinaryToWriter = function(mess
   }
 };
 
-
 /**
  * optional PromptResponse prompt_response = 1;
  * @return {?proto.skynet.types.PromptResponse}
  */
-proto.skynet.types.NodeExecutionResponse.prototype.getPromptResponse = function() {
-  return /** @type{?proto.skynet.types.PromptResponse} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.PromptResponse, 1));
-};
-
+proto.skynet.types.NodeExecutionResponse.prototype.getPromptResponse =
+  function () {
+    return /** @type{?proto.skynet.types.PromptResponse} */ (
+      jspb.Message.getWrapperField(this, proto.skynet.types.PromptResponse, 1)
+    );
+  };
 
 /**
  * @param {?proto.skynet.types.PromptResponse|undefined} value
  * @return {!proto.skynet.types.NodeExecutionResponse} returns this
-*/
-proto.skynet.types.NodeExecutionResponse.prototype.setPromptResponse = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 1, proto.skynet.types.NodeExecutionResponse.oneofGroups_[0], value);
-};
-
+ */
+proto.skynet.types.NodeExecutionResponse.prototype.setPromptResponse =
+  function (value) {
+    return jspb.Message.setOneofWrapperField(
+      this,
+      1,
+      proto.skynet.types.NodeExecutionResponse.oneofGroups_[0],
+      value
+    );
+  };
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.NodeExecutionResponse} returns this
  */
-proto.skynet.types.NodeExecutionResponse.prototype.clearPromptResponse = function() {
-  return this.setPromptResponse(undefined);
-};
-
+proto.skynet.types.NodeExecutionResponse.prototype.clearPromptResponse =
+  function () {
+    return this.setPromptResponse(undefined);
+  };
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.NodeExecutionResponse.prototype.hasPromptResponse = function() {
-  return jspb.Message.getField(this, 1) != null;
-};
-
+proto.skynet.types.NodeExecutionResponse.prototype.hasPromptResponse =
+  function () {
+    return jspb.Message.getField(this, 1) != null;
+  };
 
 /**
  * optional CommandResponse command_response = 2;
  * @return {?proto.skynet.types.CommandResponse}
  */
-proto.skynet.types.NodeExecutionResponse.prototype.getCommandResponse = function() {
-  return /** @type{?proto.skynet.types.CommandResponse} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.CommandResponse, 2));
-};
-
+proto.skynet.types.NodeExecutionResponse.prototype.getCommandResponse =
+  function () {
+    return /** @type{?proto.skynet.types.CommandResponse} */ (
+      jspb.Message.getWrapperField(this, proto.skynet.types.CommandResponse, 2)
+    );
+  };
 
 /**
  * @param {?proto.skynet.types.CommandResponse|undefined} value
  * @return {!proto.skynet.types.NodeExecutionResponse} returns this
-*/
-proto.skynet.types.NodeExecutionResponse.prototype.setCommandResponse = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 2, proto.skynet.types.NodeExecutionResponse.oneofGroups_[0], value);
-};
-
+ */
+proto.skynet.types.NodeExecutionResponse.prototype.setCommandResponse =
+  function (value) {
+    return jspb.Message.setOneofWrapperField(
+      this,
+      2,
+      proto.skynet.types.NodeExecutionResponse.oneofGroups_[0],
+      value
+    );
+  };
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.NodeExecutionResponse} returns this
  */
-proto.skynet.types.NodeExecutionResponse.prototype.clearCommandResponse = function() {
-  return this.setCommandResponse(undefined);
-};
-
+proto.skynet.types.NodeExecutionResponse.prototype.clearCommandResponse =
+  function () {
+    return this.setCommandResponse(undefined);
+  };
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.NodeExecutionResponse.prototype.hasCommandResponse = function() {
-  return jspb.Message.getField(this, 2) != null;
-};
-
+proto.skynet.types.NodeExecutionResponse.prototype.hasCommandResponse =
+  function () {
+    return jspb.Message.getField(this, 2) != null;
+  };
 
 /**
  * optional ConditionalResponse conditional_response = 3;
  * @return {?proto.skynet.types.ConditionalResponse}
  */
-proto.skynet.types.NodeExecutionResponse.prototype.getConditionalResponse = function() {
-  return /** @type{?proto.skynet.types.ConditionalResponse} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.ConditionalResponse, 3));
-};
-
+proto.skynet.types.NodeExecutionResponse.prototype.getConditionalResponse =
+  function () {
+    return /** @type{?proto.skynet.types.ConditionalResponse} */ (
+      jspb.Message.getWrapperField(
+        this,
+        proto.skynet.types.ConditionalResponse,
+        3
+      )
+    );
+  };
 
 /**
  * @param {?proto.skynet.types.ConditionalResponse|undefined} value
  * @return {!proto.skynet.types.NodeExecutionResponse} returns this
-*/
-proto.skynet.types.NodeExecutionResponse.prototype.setConditionalResponse = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 3, proto.skynet.types.NodeExecutionResponse.oneofGroups_[0], value);
-};
-
+ */
+proto.skynet.types.NodeExecutionResponse.prototype.setConditionalResponse =
+  function (value) {
+    return jspb.Message.setOneofWrapperField(
+      this,
+      3,
+      proto.skynet.types.NodeExecutionResponse.oneofGroups_[0],
+      value
+    );
+  };
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.NodeExecutionResponse} returns this
  */
-proto.skynet.types.NodeExecutionResponse.prototype.clearConditionalResponse = function() {
-  return this.setConditionalResponse(undefined);
-};
-
+proto.skynet.types.NodeExecutionResponse.prototype.clearConditionalResponse =
+  function () {
+    return this.setConditionalResponse(undefined);
+  };
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.NodeExecutionResponse.prototype.hasConditionalResponse = function() {
-  return jspb.Message.getField(this, 3) != null;
-};
-
-
-
-
-
-if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.ExecutionResponse.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.ExecutionResponse.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.ExecutionResponse} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.ExecutionResponse.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    executionId: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    containerExecutionId: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    currentNodeId: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    currentNodeType: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    response: (f = msg.getResponse()) && proto.skynet.types.NodeExecutionResponse.toObject(includeInstance, f)
+proto.skynet.types.NodeExecutionResponse.prototype.hasConditionalResponse =
+  function () {
+    return jspb.Message.getField(this, 3) != null;
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+if (jspb.Message.GENERATE_TO_OBJECT) {
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.ExecutionResponse.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.ExecutionResponse.toObject(
+      opt_includeInstance,
+      this
+    );
+  };
 
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.ExecutionResponse} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.ExecutionResponse.toObject = function (
+    includeInstance,
+    msg
+  ) {
+    var f,
+      obj = {
+        executionId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+        containerExecutionId: jspb.Message.getFieldWithDefault(msg, 2, ""),
+        currentNodeId: jspb.Message.getFieldWithDefault(msg, 3, ""),
+        currentNodeType: jspb.Message.getFieldWithDefault(msg, 4, 0),
+        response:
+          (f = msg.getResponse()) &&
+          proto.skynet.types.NodeExecutionResponse.toObject(includeInstance, f),
+      };
+
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.ExecutionResponse}
  */
-proto.skynet.types.ExecutionResponse.deserializeBinary = function(bytes) {
+proto.skynet.types.ExecutionResponse.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.ExecutionResponse;
-  return proto.skynet.types.ExecutionResponse.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.ExecutionResponse();
+  return proto.skynet.types.ExecutionResponse.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -4741,53 +5070,59 @@ proto.skynet.types.ExecutionResponse.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.ExecutionResponse}
  */
-proto.skynet.types.ExecutionResponse.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.ExecutionResponse.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setExecutionId(value);
-      break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setContainerExecutionId(value);
-      break;
-    case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setCurrentNodeId(value);
-      break;
-    case 4:
-      var value = /** @type {!proto.skynet.types.NodeTypeNames} */ (reader.readEnum());
-      msg.setCurrentNodeType(value);
-      break;
-    case 5:
-      var value = new proto.skynet.types.NodeExecutionResponse;
-      reader.readMessage(value,proto.skynet.types.NodeExecutionResponse.deserializeBinaryFromReader);
-      msg.setResponse(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setExecutionId(value);
+        break;
+      case 2:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setContainerExecutionId(value);
+        break;
+      case 3:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setCurrentNodeId(value);
+        break;
+      case 4:
+        var value = /** @type {!proto.skynet.types.NodeTypeNames} */ (
+          reader.readEnum()
+        );
+        msg.setCurrentNodeType(value);
+        break;
+      case 5:
+        var value = new proto.skynet.types.NodeExecutionResponse();
+        reader.readMessage(
+          value,
+          proto.skynet.types.NodeExecutionResponse.deserializeBinaryFromReader
+        );
+        msg.setResponse(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.ExecutionResponse.prototype.serializeBinary = function() {
+proto.skynet.types.ExecutionResponse.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.ExecutionResponse.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -4796,35 +5131,26 @@ proto.skynet.types.ExecutionResponse.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.ExecutionResponse.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.ExecutionResponse.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getExecutionId();
   if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
+    writer.writeString(1, f);
   }
   f = message.getContainerExecutionId();
   if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
+    writer.writeString(2, f);
   }
   f = message.getCurrentNodeId();
   if (f.length > 0) {
-    writer.writeString(
-      3,
-      f
-    );
+    writer.writeString(3, f);
   }
   f = message.getCurrentNodeType();
   if (f !== 0.0) {
-    writer.writeEnum(
-      4,
-      f
-    );
+    writer.writeEnum(4, f);
   }
   f = message.getResponse();
   if (f != null) {
@@ -4836,116 +5162,120 @@ proto.skynet.types.ExecutionResponse.serializeBinaryToWriter = function(message,
   }
 };
 
-
 /**
  * optional string execution_id = 1;
  * @return {string}
  */
-proto.skynet.types.ExecutionResponse.prototype.getExecutionId = function() {
+proto.skynet.types.ExecutionResponse.prototype.getExecutionId = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.ExecutionResponse} returns this
  */
-proto.skynet.types.ExecutionResponse.prototype.setExecutionId = function(value) {
+proto.skynet.types.ExecutionResponse.prototype.setExecutionId = function (
+  value
+) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
-
 
 /**
  * optional string container_execution_id = 2;
  * @return {string}
  */
-proto.skynet.types.ExecutionResponse.prototype.getContainerExecutionId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
-};
-
+proto.skynet.types.ExecutionResponse.prototype.getContainerExecutionId =
+  function () {
+    return /** @type {string} */ (
+      jspb.Message.getFieldWithDefault(this, 2, "")
+    );
+  };
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.ExecutionResponse} returns this
  */
-proto.skynet.types.ExecutionResponse.prototype.setContainerExecutionId = function(value) {
-  return jspb.Message.setProto3StringField(this, 2, value);
-};
-
+proto.skynet.types.ExecutionResponse.prototype.setContainerExecutionId =
+  function (value) {
+    return jspb.Message.setProto3StringField(this, 2, value);
+  };
 
 /**
  * optional string current_node_id = 3;
  * @return {string}
  */
-proto.skynet.types.ExecutionResponse.prototype.getCurrentNodeId = function() {
+proto.skynet.types.ExecutionResponse.prototype.getCurrentNodeId = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.ExecutionResponse} returns this
  */
-proto.skynet.types.ExecutionResponse.prototype.setCurrentNodeId = function(value) {
+proto.skynet.types.ExecutionResponse.prototype.setCurrentNodeId = function (
+  value
+) {
   return jspb.Message.setProto3StringField(this, 3, value);
 };
-
 
 /**
  * optional NodeTypeNames current_node_type = 4;
  * @return {!proto.skynet.types.NodeTypeNames}
  */
-proto.skynet.types.ExecutionResponse.prototype.getCurrentNodeType = function() {
-  return /** @type {!proto.skynet.types.NodeTypeNames} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
-};
-
+proto.skynet.types.ExecutionResponse.prototype.getCurrentNodeType =
+  function () {
+    return /** @type {!proto.skynet.types.NodeTypeNames} */ (
+      jspb.Message.getFieldWithDefault(this, 4, 0)
+    );
+  };
 
 /**
  * @param {!proto.skynet.types.NodeTypeNames} value
  * @return {!proto.skynet.types.ExecutionResponse} returns this
  */
-proto.skynet.types.ExecutionResponse.prototype.setCurrentNodeType = function(value) {
+proto.skynet.types.ExecutionResponse.prototype.setCurrentNodeType = function (
+  value
+) {
   return jspb.Message.setProto3EnumField(this, 4, value);
 };
-
 
 /**
  * optional NodeExecutionResponse response = 5;
  * @return {?proto.skynet.types.NodeExecutionResponse}
  */
-proto.skynet.types.ExecutionResponse.prototype.getResponse = function() {
+proto.skynet.types.ExecutionResponse.prototype.getResponse = function () {
   return /** @type{?proto.skynet.types.NodeExecutionResponse} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.NodeExecutionResponse, 5));
+    jspb.Message.getWrapperField(
+      this,
+      proto.skynet.types.NodeExecutionResponse,
+      5
+    )
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.NodeExecutionResponse|undefined} value
  * @return {!proto.skynet.types.ExecutionResponse} returns this
-*/
-proto.skynet.types.ExecutionResponse.prototype.setResponse = function(value) {
+ */
+proto.skynet.types.ExecutionResponse.prototype.setResponse = function (value) {
   return jspb.Message.setWrapperField(this, 5, value);
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.ExecutionResponse} returns this
  */
-proto.skynet.types.ExecutionResponse.prototype.clearResponse = function() {
+proto.skynet.types.ExecutionResponse.prototype.clearResponse = function () {
   return this.setResponse(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.ExecutionResponse.prototype.hasResponse = function() {
+proto.skynet.types.ExecutionResponse.prototype.hasResponse = function () {
   return jspb.Message.getField(this, 5) != null;
 };
-
-
 
 /**
  * List of repeated fields within this message type.
@@ -4954,60 +5284,70 @@ proto.skynet.types.ExecutionResponse.prototype.hasResponse = function() {
  */
 proto.skynet.types.ValidateNodesResponse.repeatedFields_ = [1];
 
-
-
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.ValidateNodesResponse.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.ValidateNodesResponse.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.ValidateNodesResponse} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.ValidateNodesResponse.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    errorsList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f,
-    graph: (f = msg.getGraph()) && proto.skynet.types.Graph.toObject(includeInstance, f)
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.ValidateNodesResponse.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.ValidateNodesResponse.toObject(
+      opt_includeInstance,
+      this
+    );
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.ValidateNodesResponse} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.ValidateNodesResponse.toObject = function (
+    includeInstance,
+    msg
+  ) {
+    var f,
+      obj = {
+        errorsList:
+          (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f,
+        graph:
+          (f = msg.getGraph()) &&
+          proto.skynet.types.Graph.toObject(includeInstance, f),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.ValidateNodesResponse}
  */
-proto.skynet.types.ValidateNodesResponse.deserializeBinary = function(bytes) {
+proto.skynet.types.ValidateNodesResponse.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.ValidateNodesResponse;
-  return proto.skynet.types.ValidateNodesResponse.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.ValidateNodesResponse();
+  return proto.skynet.types.ValidateNodesResponse.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -5016,41 +5356,47 @@ proto.skynet.types.ValidateNodesResponse.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.ValidateNodesResponse}
  */
-proto.skynet.types.ValidateNodesResponse.deserializeBinaryFromReader = function(msg, reader) {
-  while (reader.nextField()) {
-    if (reader.isEndGroup()) {
-      break;
+proto.skynet.types.ValidateNodesResponse.deserializeBinaryFromReader =
+  function (msg, reader) {
+    while (reader.nextField()) {
+      if (reader.isEndGroup()) {
+        break;
+      }
+      var field = reader.getFieldNumber();
+      switch (field) {
+        case 1:
+          var value = /** @type {string} */ (reader.readString());
+          msg.addErrors(value);
+          break;
+        case 2:
+          var value = new proto.skynet.types.Graph();
+          reader.readMessage(
+            value,
+            proto.skynet.types.Graph.deserializeBinaryFromReader
+          );
+          msg.setGraph(value);
+          break;
+        default:
+          reader.skipField();
+          break;
+      }
     }
-    var field = reader.getFieldNumber();
-    switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.addErrors(value);
-      break;
-    case 2:
-      var value = new proto.skynet.types.Graph;
-      reader.readMessage(value,proto.skynet.types.Graph.deserializeBinaryFromReader);
-      msg.setGraph(value);
-      break;
-    default:
-      reader.skipField();
-      break;
-    }
-  }
-  return msg;
-};
-
+    return msg;
+  };
 
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.ValidateNodesResponse.prototype.serializeBinary = function() {
-  var writer = new jspb.BinaryWriter();
-  proto.skynet.types.ValidateNodesResponse.serializeBinaryToWriter(this, writer);
-  return writer.getResultBuffer();
-};
-
+proto.skynet.types.ValidateNodesResponse.prototype.serializeBinary =
+  function () {
+    var writer = new jspb.BinaryWriter();
+    proto.skynet.types.ValidateNodesResponse.serializeBinaryToWriter(
+      this,
+      writer
+    );
+    return writer.getResultBuffer();
+  };
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -5059,100 +5405,93 @@ proto.skynet.types.ValidateNodesResponse.prototype.serializeBinary = function() 
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.ValidateNodesResponse.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.ValidateNodesResponse.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getErrorsList();
   if (f.length > 0) {
-    writer.writeRepeatedString(
-      1,
-      f
-    );
+    writer.writeRepeatedString(1, f);
   }
   f = message.getGraph();
   if (f != null) {
-    writer.writeMessage(
-      2,
-      f,
-      proto.skynet.types.Graph.serializeBinaryToWriter
-    );
+    writer.writeMessage(2, f, proto.skynet.types.Graph.serializeBinaryToWriter);
   }
 };
-
 
 /**
  * repeated string errors = 1;
  * @return {!Array<string>}
  */
-proto.skynet.types.ValidateNodesResponse.prototype.getErrorsList = function() {
+proto.skynet.types.ValidateNodesResponse.prototype.getErrorsList = function () {
   return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 1));
 };
-
 
 /**
  * @param {!Array<string>} value
  * @return {!proto.skynet.types.ValidateNodesResponse} returns this
  */
-proto.skynet.types.ValidateNodesResponse.prototype.setErrorsList = function(value) {
+proto.skynet.types.ValidateNodesResponse.prototype.setErrorsList = function (
+  value
+) {
   return jspb.Message.setField(this, 1, value || []);
 };
-
 
 /**
  * @param {string} value
  * @param {number=} opt_index
  * @return {!proto.skynet.types.ValidateNodesResponse} returns this
  */
-proto.skynet.types.ValidateNodesResponse.prototype.addErrors = function(value, opt_index) {
+proto.skynet.types.ValidateNodesResponse.prototype.addErrors = function (
+  value,
+  opt_index
+) {
   return jspb.Message.addToRepeatedField(this, 1, value, opt_index);
 };
-
 
 /**
  * Clears the list making it empty but non-null.
  * @return {!proto.skynet.types.ValidateNodesResponse} returns this
  */
-proto.skynet.types.ValidateNodesResponse.prototype.clearErrorsList = function() {
-  return this.setErrorsList([]);
-};
-
+proto.skynet.types.ValidateNodesResponse.prototype.clearErrorsList =
+  function () {
+    return this.setErrorsList([]);
+  };
 
 /**
  * optional Graph graph = 2;
  * @return {?proto.skynet.types.Graph}
  */
-proto.skynet.types.ValidateNodesResponse.prototype.getGraph = function() {
+proto.skynet.types.ValidateNodesResponse.prototype.getGraph = function () {
   return /** @type{?proto.skynet.types.Graph} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.Graph, 2));
+    jspb.Message.getWrapperField(this, proto.skynet.types.Graph, 2)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.Graph|undefined} value
  * @return {!proto.skynet.types.ValidateNodesResponse} returns this
-*/
-proto.skynet.types.ValidateNodesResponse.prototype.setGraph = function(value) {
+ */
+proto.skynet.types.ValidateNodesResponse.prototype.setGraph = function (value) {
   return jspb.Message.setWrapperField(this, 2, value);
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.ValidateNodesResponse} returns this
  */
-proto.skynet.types.ValidateNodesResponse.prototype.clearGraph = function() {
+proto.skynet.types.ValidateNodesResponse.prototype.clearGraph = function () {
   return this.setGraph(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.ValidateNodesResponse.prototype.hasGraph = function() {
+proto.skynet.types.ValidateNodesResponse.prototype.hasGraph = function () {
   return jspb.Message.getField(this, 2) != null;
 };
-
-
 
 /**
  * Oneof group definitions for this message. Each group defines the field
@@ -5162,7 +5501,7 @@ proto.skynet.types.ValidateNodesResponse.prototype.hasGraph = function() {
  * @private {!Array<!Array<number>>}
  * @const
  */
-proto.skynet.types.ResponseObject.oneofGroups_ = [[1,2,3,4,5]];
+proto.skynet.types.ResponseObject.oneofGroups_ = [[1, 2, 3, 4, 5]];
 
 /**
  * @enum {number}
@@ -5173,73 +5512,88 @@ proto.skynet.types.ResponseObject.ObjectCase = {
   AUTHENTICATION_MESSAGE: 2,
   USER_SETTINGS: 3,
   EXECUTION_RESPONSE: 4,
-  VALIDATE_NODES_RESPONSE: 5
+  VALIDATE_NODES_RESPONSE: 5,
 };
 
 /**
  * @return {proto.skynet.types.ResponseObject.ObjectCase}
  */
-proto.skynet.types.ResponseObject.prototype.getObjectCase = function() {
-  return /** @type {proto.skynet.types.ResponseObject.ObjectCase} */(jspb.Message.computeOneofCase(this, proto.skynet.types.ResponseObject.oneofGroups_[0]));
+proto.skynet.types.ResponseObject.prototype.getObjectCase = function () {
+  return /** @type {proto.skynet.types.ResponseObject.ObjectCase} */ (
+    jspb.Message.computeOneofCase(
+      this,
+      proto.skynet.types.ResponseObject.oneofGroups_[0]
+    )
+  );
 };
-
-
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
-/**
- * Creates an object representation of this proto.
- * Field names that are reserved in JavaScript and will be renamed to pb_name.
- * Optional fields that are not set will be set to undefined.
- * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
- * For the list of reserved names please see:
- *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
-proto.skynet.types.ResponseObject.prototype.toObject = function(opt_includeInstance) {
-  return proto.skynet.types.ResponseObject.toObject(opt_includeInstance, this);
-};
-
-
-/**
- * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Deprecated. Whether to include
- *     the JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @param {!proto.skynet.types.ResponseObject} msg The msg instance to transform.
- * @return {!Object}
- * @suppress {unusedLocalVariables} f is only used for nested messages
- */
-proto.skynet.types.ResponseObject.toObject = function(includeInstance, msg) {
-  var f, obj = {
-    node: (f = msg.getNode()) && proto.skynet.types.Node.toObject(includeInstance, f),
-    authenticationMessage: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    userSettings: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    executionResponse: (f = msg.getExecutionResponse()) && proto.skynet.types.ExecutionResponse.toObject(includeInstance, f),
-    validateNodesResponse: (f = msg.getValidateNodesResponse()) && proto.skynet.types.ValidateNodesResponse.toObject(includeInstance, f)
+  /**
+   * Creates an object representation of this proto.
+   * Field names that are reserved in JavaScript and will be renamed to pb_name.
+   * Optional fields that are not set will be set to undefined.
+   * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+   * For the list of reserved names please see:
+   *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+   * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+   *     JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @return {!Object}
+   */
+  proto.skynet.types.ResponseObject.prototype.toObject = function (
+    opt_includeInstance
+  ) {
+    return proto.skynet.types.ResponseObject.toObject(
+      opt_includeInstance,
+      this
+    );
   };
 
-  if (includeInstance) {
-    obj.$jspbMessageInstance = msg;
-  }
-  return obj;
-};
-}
+  /**
+   * Static version of the {@see toObject} method.
+   * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+   *     the JSPB instance for transitional soy proto support:
+   *     http://goto/soy-param-migration
+   * @param {!proto.skynet.types.ResponseObject} msg The msg instance to transform.
+   * @return {!Object}
+   * @suppress {unusedLocalVariables} f is only used for nested messages
+   */
+  proto.skynet.types.ResponseObject.toObject = function (includeInstance, msg) {
+    var f,
+      obj = {
+        node:
+          (f = msg.getNode()) &&
+          proto.skynet.types.Node.toObject(includeInstance, f),
+        authenticationMessage: jspb.Message.getFieldWithDefault(msg, 2, ""),
+        userSettings: jspb.Message.getFieldWithDefault(msg, 3, ""),
+        executionResponse:
+          (f = msg.getExecutionResponse()) &&
+          proto.skynet.types.ExecutionResponse.toObject(includeInstance, f),
+        validateNodesResponse:
+          (f = msg.getValidateNodesResponse()) &&
+          proto.skynet.types.ValidateNodesResponse.toObject(includeInstance, f),
+      };
 
+    if (includeInstance) {
+      obj.$jspbMessageInstance = msg;
+    }
+    return obj;
+  };
+}
 
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
  * @return {!proto.skynet.types.ResponseObject}
  */
-proto.skynet.types.ResponseObject.deserializeBinary = function(bytes) {
+proto.skynet.types.ResponseObject.deserializeBinary = function (bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.skynet.types.ResponseObject;
-  return proto.skynet.types.ResponseObject.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.skynet.types.ResponseObject();
+  return proto.skynet.types.ResponseObject.deserializeBinaryFromReader(
+    msg,
+    reader
+  );
 };
-
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
@@ -5248,55 +5602,65 @@ proto.skynet.types.ResponseObject.deserializeBinary = function(bytes) {
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
  * @return {!proto.skynet.types.ResponseObject}
  */
-proto.skynet.types.ResponseObject.deserializeBinaryFromReader = function(msg, reader) {
+proto.skynet.types.ResponseObject.deserializeBinaryFromReader = function (
+  msg,
+  reader
+) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = new proto.skynet.types.Node;
-      reader.readMessage(value,proto.skynet.types.Node.deserializeBinaryFromReader);
-      msg.setNode(value);
-      break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setAuthenticationMessage(value);
-      break;
-    case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setUserSettings(value);
-      break;
-    case 4:
-      var value = new proto.skynet.types.ExecutionResponse;
-      reader.readMessage(value,proto.skynet.types.ExecutionResponse.deserializeBinaryFromReader);
-      msg.setExecutionResponse(value);
-      break;
-    case 5:
-      var value = new proto.skynet.types.ValidateNodesResponse;
-      reader.readMessage(value,proto.skynet.types.ValidateNodesResponse.deserializeBinaryFromReader);
-      msg.setValidateNodesResponse(value);
-      break;
-    default:
-      reader.skipField();
-      break;
+      case 1:
+        var value = new proto.skynet.types.Node();
+        reader.readMessage(
+          value,
+          proto.skynet.types.Node.deserializeBinaryFromReader
+        );
+        msg.setNode(value);
+        break;
+      case 2:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setAuthenticationMessage(value);
+        break;
+      case 3:
+        var value = /** @type {string} */ (reader.readString());
+        msg.setUserSettings(value);
+        break;
+      case 4:
+        var value = new proto.skynet.types.ExecutionResponse();
+        reader.readMessage(
+          value,
+          proto.skynet.types.ExecutionResponse.deserializeBinaryFromReader
+        );
+        msg.setExecutionResponse(value);
+        break;
+      case 5:
+        var value = new proto.skynet.types.ValidateNodesResponse();
+        reader.readMessage(
+          value,
+          proto.skynet.types.ValidateNodesResponse.deserializeBinaryFromReader
+        );
+        msg.setValidateNodesResponse(value);
+        break;
+      default:
+        reader.skipField();
+        break;
     }
   }
   return msg;
 };
 
-
 /**
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.skynet.types.ResponseObject.prototype.serializeBinary = function() {
+proto.skynet.types.ResponseObject.prototype.serializeBinary = function () {
   var writer = new jspb.BinaryWriter();
   proto.skynet.types.ResponseObject.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
-
 
 /**
  * Serializes the given message to binary data (in protobuf wire
@@ -5305,29 +5669,22 @@ proto.skynet.types.ResponseObject.prototype.serializeBinary = function() {
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.skynet.types.ResponseObject.serializeBinaryToWriter = function(message, writer) {
+proto.skynet.types.ResponseObject.serializeBinaryToWriter = function (
+  message,
+  writer
+) {
   var f = undefined;
   f = message.getNode();
   if (f != null) {
-    writer.writeMessage(
-      1,
-      f,
-      proto.skynet.types.Node.serializeBinaryToWriter
-    );
+    writer.writeMessage(1, f, proto.skynet.types.Node.serializeBinaryToWriter);
   }
   f = /** @type {string} */ (jspb.Message.getField(message, 2));
   if (f != null) {
-    writer.writeString(
-      2,
-      f
-    );
+    writer.writeString(2, f);
   }
   f = /** @type {string} */ (jspb.Message.getField(message, 3));
   if (f != null) {
-    writer.writeString(
-      3,
-      f
-    );
+    writer.writeString(3, f);
   }
   f = message.getExecutionResponse();
   if (f != null) {
@@ -5347,189 +5704,223 @@ proto.skynet.types.ResponseObject.serializeBinaryToWriter = function(message, wr
   }
 };
 
-
 /**
  * optional Node node = 1;
  * @return {?proto.skynet.types.Node}
  */
-proto.skynet.types.ResponseObject.prototype.getNode = function() {
+proto.skynet.types.ResponseObject.prototype.getNode = function () {
   return /** @type{?proto.skynet.types.Node} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.Node, 1));
+    jspb.Message.getWrapperField(this, proto.skynet.types.Node, 1)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.Node|undefined} value
  * @return {!proto.skynet.types.ResponseObject} returns this
-*/
-proto.skynet.types.ResponseObject.prototype.setNode = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 1, proto.skynet.types.ResponseObject.oneofGroups_[0], value);
+ */
+proto.skynet.types.ResponseObject.prototype.setNode = function (value) {
+  return jspb.Message.setOneofWrapperField(
+    this,
+    1,
+    proto.skynet.types.ResponseObject.oneofGroups_[0],
+    value
+  );
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.ResponseObject} returns this
  */
-proto.skynet.types.ResponseObject.prototype.clearNode = function() {
+proto.skynet.types.ResponseObject.prototype.clearNode = function () {
   return this.setNode(undefined);
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.ResponseObject.prototype.hasNode = function() {
+proto.skynet.types.ResponseObject.prototype.hasNode = function () {
   return jspb.Message.getField(this, 1) != null;
 };
-
 
 /**
  * optional string authentication_message = 2;
  * @return {string}
  */
-proto.skynet.types.ResponseObject.prototype.getAuthenticationMessage = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
-};
-
+proto.skynet.types.ResponseObject.prototype.getAuthenticationMessage =
+  function () {
+    return /** @type {string} */ (
+      jspb.Message.getFieldWithDefault(this, 2, "")
+    );
+  };
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.ResponseObject} returns this
  */
-proto.skynet.types.ResponseObject.prototype.setAuthenticationMessage = function(value) {
-  return jspb.Message.setOneofField(this, 2, proto.skynet.types.ResponseObject.oneofGroups_[0], value);
-};
-
+proto.skynet.types.ResponseObject.prototype.setAuthenticationMessage =
+  function (value) {
+    return jspb.Message.setOneofField(
+      this,
+      2,
+      proto.skynet.types.ResponseObject.oneofGroups_[0],
+      value
+    );
+  };
 
 /**
  * Clears the field making it undefined.
  * @return {!proto.skynet.types.ResponseObject} returns this
  */
-proto.skynet.types.ResponseObject.prototype.clearAuthenticationMessage = function() {
-  return jspb.Message.setOneofField(this, 2, proto.skynet.types.ResponseObject.oneofGroups_[0], undefined);
-};
-
+proto.skynet.types.ResponseObject.prototype.clearAuthenticationMessage =
+  function () {
+    return jspb.Message.setOneofField(
+      this,
+      2,
+      proto.skynet.types.ResponseObject.oneofGroups_[0],
+      undefined
+    );
+  };
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.ResponseObject.prototype.hasAuthenticationMessage = function() {
-  return jspb.Message.getField(this, 2) != null;
-};
-
+proto.skynet.types.ResponseObject.prototype.hasAuthenticationMessage =
+  function () {
+    return jspb.Message.getField(this, 2) != null;
+  };
 
 /**
  * optional string user_settings = 3;
  * @return {string}
  */
-proto.skynet.types.ResponseObject.prototype.getUserSettings = function() {
+proto.skynet.types.ResponseObject.prototype.getUserSettings = function () {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
-
 
 /**
  * @param {string} value
  * @return {!proto.skynet.types.ResponseObject} returns this
  */
-proto.skynet.types.ResponseObject.prototype.setUserSettings = function(value) {
-  return jspb.Message.setOneofField(this, 3, proto.skynet.types.ResponseObject.oneofGroups_[0], value);
+proto.skynet.types.ResponseObject.prototype.setUserSettings = function (value) {
+  return jspb.Message.setOneofField(
+    this,
+    3,
+    proto.skynet.types.ResponseObject.oneofGroups_[0],
+    value
+  );
 };
-
 
 /**
  * Clears the field making it undefined.
  * @return {!proto.skynet.types.ResponseObject} returns this
  */
-proto.skynet.types.ResponseObject.prototype.clearUserSettings = function() {
-  return jspb.Message.setOneofField(this, 3, proto.skynet.types.ResponseObject.oneofGroups_[0], undefined);
+proto.skynet.types.ResponseObject.prototype.clearUserSettings = function () {
+  return jspb.Message.setOneofField(
+    this,
+    3,
+    proto.skynet.types.ResponseObject.oneofGroups_[0],
+    undefined
+  );
 };
-
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.ResponseObject.prototype.hasUserSettings = function() {
+proto.skynet.types.ResponseObject.prototype.hasUserSettings = function () {
   return jspb.Message.getField(this, 3) != null;
 };
-
 
 /**
  * optional ExecutionResponse execution_response = 4;
  * @return {?proto.skynet.types.ExecutionResponse}
  */
-proto.skynet.types.ResponseObject.prototype.getExecutionResponse = function() {
+proto.skynet.types.ResponseObject.prototype.getExecutionResponse = function () {
   return /** @type{?proto.skynet.types.ExecutionResponse} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.ExecutionResponse, 4));
+    jspb.Message.getWrapperField(this, proto.skynet.types.ExecutionResponse, 4)
+  );
 };
-
 
 /**
  * @param {?proto.skynet.types.ExecutionResponse|undefined} value
  * @return {!proto.skynet.types.ResponseObject} returns this
-*/
-proto.skynet.types.ResponseObject.prototype.setExecutionResponse = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 4, proto.skynet.types.ResponseObject.oneofGroups_[0], value);
+ */
+proto.skynet.types.ResponseObject.prototype.setExecutionResponse = function (
+  value
+) {
+  return jspb.Message.setOneofWrapperField(
+    this,
+    4,
+    proto.skynet.types.ResponseObject.oneofGroups_[0],
+    value
+  );
 };
-
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.ResponseObject} returns this
  */
-proto.skynet.types.ResponseObject.prototype.clearExecutionResponse = function() {
-  return this.setExecutionResponse(undefined);
-};
-
+proto.skynet.types.ResponseObject.prototype.clearExecutionResponse =
+  function () {
+    return this.setExecutionResponse(undefined);
+  };
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.ResponseObject.prototype.hasExecutionResponse = function() {
+proto.skynet.types.ResponseObject.prototype.hasExecutionResponse = function () {
   return jspb.Message.getField(this, 4) != null;
 };
-
 
 /**
  * optional ValidateNodesResponse validate_nodes_response = 5;
  * @return {?proto.skynet.types.ValidateNodesResponse}
  */
-proto.skynet.types.ResponseObject.prototype.getValidateNodesResponse = function() {
-  return /** @type{?proto.skynet.types.ValidateNodesResponse} */ (
-    jspb.Message.getWrapperField(this, proto.skynet.types.ValidateNodesResponse, 5));
-};
-
+proto.skynet.types.ResponseObject.prototype.getValidateNodesResponse =
+  function () {
+    return /** @type{?proto.skynet.types.ValidateNodesResponse} */ (
+      jspb.Message.getWrapperField(
+        this,
+        proto.skynet.types.ValidateNodesResponse,
+        5
+      )
+    );
+  };
 
 /**
  * @param {?proto.skynet.types.ValidateNodesResponse|undefined} value
  * @return {!proto.skynet.types.ResponseObject} returns this
-*/
-proto.skynet.types.ResponseObject.prototype.setValidateNodesResponse = function(value) {
-  return jspb.Message.setOneofWrapperField(this, 5, proto.skynet.types.ResponseObject.oneofGroups_[0], value);
-};
-
+ */
+proto.skynet.types.ResponseObject.prototype.setValidateNodesResponse =
+  function (value) {
+    return jspb.Message.setOneofWrapperField(
+      this,
+      5,
+      proto.skynet.types.ResponseObject.oneofGroups_[0],
+      value
+    );
+  };
 
 /**
  * Clears the message field making it undefined.
  * @return {!proto.skynet.types.ResponseObject} returns this
  */
-proto.skynet.types.ResponseObject.prototype.clearValidateNodesResponse = function() {
-  return this.setValidateNodesResponse(undefined);
-};
-
+proto.skynet.types.ResponseObject.prototype.clearValidateNodesResponse =
+  function () {
+    return this.setValidateNodesResponse(undefined);
+  };
 
 /**
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.skynet.types.ResponseObject.prototype.hasValidateNodesResponse = function() {
-  return jspb.Message.getField(this, 5) != null;
-};
-
+proto.skynet.types.ResponseObject.prototype.hasValidateNodesResponse =
+  function () {
+    return jspb.Message.getField(this, 5) != null;
+  };
 
 /**
  * @enum {number}
@@ -5538,7 +5929,7 @@ proto.skynet.types.NodeTypeNames = {
   PROMPT: 0,
   PROCESS: 1,
   CONDITIONAL: 2,
-  COMMAND: 3
+  COMMAND: 3,
 };
 
 /**
@@ -5548,7 +5939,7 @@ proto.skynet.types.SystemErrors = {
   GRAPH_DOESNT_EXIST: 0,
   GRAPH_STATE_DOESNT_EXIST: 1,
   OTHER_ERROR: 2,
-  NODE_DOESNT_EXIST: 3
+  NODE_DOESNT_EXIST: 3,
 };
 
 /**
@@ -5560,7 +5951,7 @@ proto.skynet.types.VerbTypeNames = {
   PATCH: 2,
   DELETE: 3,
   GET: 4,
-  EXECUTE: 5
+  EXECUTE: 5,
 };
 
 goog.object.extend(exports, proto.skynet.types);

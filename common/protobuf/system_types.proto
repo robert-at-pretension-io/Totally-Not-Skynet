@@ -127,7 +127,7 @@ message UserSettings {
 }
 
 message MessageBundle {
-  VerbTypeNames verb = 1;
+  VerbTypes verb = 1;
   Contents container = 2; 
 }
 

@@ -192,22 +192,7 @@ export namespace Process {
   }
 }
 
-export class Node extends jspb.Message {
-  hasNodeInfo(): boolean;
-  clearNodeInfo(): void;
-  getNodeInfo(): GraphNodeInfo | undefined;
-  setNodeInfo(value?: GraphNodeInfo): void;
-
-  clearInputVariablesList(): void;
-  getInputVariablesList(): Array<VariableDefinition>;
-  setInputVariablesList(value: Array<VariableDefinition>): void;
-  addInputVariables(value?: VariableDefinition, index?: number): VariableDefinition;
-
-  clearOutputVariablesList(): void;
-  getOutputVariablesList(): Array<VariableDefinition>;
-  setOutputVariablesList(value: Array<VariableDefinition>): void;
-  addOutputVariables(value?: VariableDefinition, index?: number): VariableDefinition;
-
+export class NodeContent extends jspb.Message {
   hasPrompt(): boolean;
   clearPrompt(): void;
   getPrompt(): Prompt | undefined;
@@ -228,7 +213,58 @@ export class Node extends jspb.Message {
   getCommand(): Command | undefined;
   setCommand(value?: Command): void;
 
-  getNodeContentCase(): Node.NodeContentCase;
+  getNodeContentCase(): NodeContent.NodeContentCase;
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): NodeContent.AsObject;
+  static toObject(includeInstance: boolean, msg: NodeContent): NodeContent.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: NodeContent, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): NodeContent;
+  static deserializeBinaryFromReader(message: NodeContent, reader: jspb.BinaryReader): NodeContent;
+}
+
+export namespace NodeContent {
+  export type AsObject = {
+    prompt?: Prompt.AsObject,
+    process?: Process.AsObject,
+    conditional?: Conditional.AsObject,
+    command?: Command.AsObject,
+  }
+
+  export enum NodeContentCase {
+    NODE_CONTENT_NOT_SET = 0,
+    PROMPT = 1,
+    PROCESS = 2,
+    CONDITIONAL = 3,
+    COMMAND = 4,
+  }
+}
+
+export class Node extends jspb.Message {
+  hasNodeInfo(): boolean;
+  clearNodeInfo(): void;
+  getNodeInfo(): GraphNodeInfo | undefined;
+  setNodeInfo(value?: GraphNodeInfo): void;
+
+  clearInputVariablesList(): void;
+  getInputVariablesList(): Array<VariableDefinition>;
+  setInputVariablesList(value: Array<VariableDefinition>): void;
+  addInputVariables(value?: VariableDefinition, index?: number): VariableDefinition;
+
+  clearOutputVariablesList(): void;
+  getOutputVariablesList(): Array<VariableDefinition>;
+  setOutputVariablesList(value: Array<VariableDefinition>): void;
+  addOutputVariables(value?: VariableDefinition, index?: number): VariableDefinition;
+
+  getNodeType(): NodeTypesMap[keyof NodeTypesMap];
+  setNodeType(value: NodeTypesMap[keyof NodeTypesMap]): void;
+
+  hasNodeContent(): boolean;
+  clearNodeContent(): void;
+  getNodeContent(): NodeContent | undefined;
+  setNodeContent(value?: NodeContent): void;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Node.AsObject;
   static toObject(includeInstance: boolean, msg: Node): Node.AsObject;
@@ -244,18 +280,8 @@ export namespace Node {
     nodeInfo?: GraphNodeInfo.AsObject,
     inputVariablesList: Array<VariableDefinition.AsObject>,
     outputVariablesList: Array<VariableDefinition.AsObject>,
-    prompt?: Prompt.AsObject,
-    process?: Process.AsObject,
-    conditional?: Conditional.AsObject,
-    command?: Command.AsObject,
-  }
-
-  export enum NodeContentCase {
-    NODE_CONTENT_NOT_SET = 0,
-    PROMPT = 4,
-    PROCESS = 5,
-    CONDITIONAL = 6,
-    COMMAND = 7,
+    nodeType: NodeTypesMap[keyof NodeTypesMap],
+    nodeContent?: NodeContent.AsObject,
   }
 }
 
@@ -483,8 +509,8 @@ export namespace UserSettings {
 }
 
 export class MessageBundle extends jspb.Message {
-  getVerb(): VerbTypeNamesMap[keyof VerbTypeNamesMap];
-  setVerb(value: VerbTypeNamesMap[keyof VerbTypeNamesMap]): void;
+  getVerb(): VerbTypesMap[keyof VerbTypesMap];
+  setVerb(value: VerbTypesMap[keyof VerbTypesMap]): void;
 
   hasContainer(): boolean;
   clearContainer(): void;
@@ -503,7 +529,7 @@ export class MessageBundle extends jspb.Message {
 
 export namespace MessageBundle {
   export type AsObject = {
-    verb: VerbTypeNamesMap[keyof VerbTypeNamesMap],
+    verb: VerbTypesMap[keyof VerbTypesMap],
     container?: Contents.AsObject,
   }
 }
@@ -634,7 +660,16 @@ export namespace Envelope {
   }
 }
 
-export interface VerbTypeNamesMap {
+export interface NodeTypesMap {
+  PROMPT: 0;
+  PROCESS: 1;
+  CONDITIONAL: 2;
+  COMMAND: 3;
+}
+
+export const NodeTypes: NodeTypesMap;
+
+export interface VerbTypesMap {
   CREATE: 0;
   UPDATE: 1;
   REPLACE: 2;
@@ -645,5 +680,5 @@ export interface VerbTypeNamesMap {
   ACKNOWLEDGE: 7;
 }
 
-export const VerbTypeNames: VerbTypeNamesMap;
+export const VerbTypes: VerbTypesMap;
 

@@ -8,27 +8,27 @@ import { NodeTypeNames } from "../generated/system_types";
 export const stylesMap: { [key: string]: { [styleKey: string]: string } } = {
   [NodeTypeNames.PROMPT]: {
     "background-color": "#ff0000",
-    "border-color": "#00ff00"
+    "border-color": "#00ff00",
   },
   [NodeTypeNames.PROCESS]: {
     "background-color": "#0000ff",
-    "border-color": "#ffff00"
+    "border-color": "#ffff00",
   },
   [NodeTypeNames.CONDITIONAL]: {
     "background-color": "#ff00ff",
-    "border-color": "#ff8800"
+    "border-color": "#ff8800",
   },
   [NodeTypeNames.COMMAND]: {
     "background-color": "#00ffff",
-    "border-color": "#8800ff"
-  }
+    "border-color": "#8800ff",
+  },
 };
 
 export const generateDynamicStyles = (): Array<any> => {
   return Object.keys(stylesMap).map((key) => {
     return {
       selector: `.${key.toLowerCase()}`,
-      style: stylesMap[key]
+      style: stylesMap[key],
     };
   });
 };
@@ -237,16 +237,17 @@ export function returnSuccessorMap(
 //   return start_nodes;
 // }
 
-export function getNode(id: string, system_state: proto.SystemState): proto.Node {
-
+export function getNode(
+  id: string,
+  system_state: proto.SystemState
+): proto.Node {
   const nodes = system_state.nodes;
 
   const node = nodes.find((node: proto.Node) => {
     const test_id = node.node_info;
     if (test_id && id) {
       return test_id.id == id;
-    }
-    else {
+    } else {
       console.log("one of the nodes doesn't have an id");
     }
   });
@@ -254,7 +255,10 @@ export function getNode(id: string, system_state: proto.SystemState): proto.Node
   return node as proto.Node;
 }
 
-export function getNodeInfo(id: string, system_state: proto.SystemState): proto.GraphNodeInfo | undefined {
+export function getNodeInfo(
+  id: string,
+  system_state: proto.SystemState
+): proto.GraphNodeInfo | undefined {
   const node_info_list: proto.GraphNodeInfo[] = [];
 
   system_state.nodes?.forEach((node: proto.Node) => {
@@ -264,8 +268,7 @@ export function getNodeInfo(id: string, system_state: proto.SystemState): proto.
   // return the node where node_info.get_id() == id
   const node_info = node_info_list?.find((node_info: proto.GraphNodeInfo) => {
     return node_info.id == id;
-  }
-  );
+  });
   return node_info;
 }
 
@@ -572,21 +575,25 @@ export function addVariablesToPrompt(
 //   return system_state;
 // }
 
-export function selectNode(id: proto.GraphNodeInfo, system_state: proto.SystemState): proto.SystemState {
-
+export function selectNode(
+  id: proto.GraphNodeInfo,
+  system_state: proto.SystemState
+): proto.SystemState {
   console.log("Entering selectNode function with ID:", id);
 
   const selected_nodes = system_state.selected_node;
 
   selected_nodes.push(id);
 
-  system_state.selected_node = selected_nodes;
+  system_state.selected_nodes = selected_nodes;
 
   return system_state;
 }
 
-export function selectEdge(edge: proto.Edge, system_state: proto.SystemState): proto.SystemState {
-
+export function selectEdge(
+  edge: proto.Edge,
+  system_state: proto.SystemState
+): proto.SystemState {
   const graph = system_state.graph as proto.Graph;
 
   const edges = graph?.edges as proto.Edge[];
@@ -594,15 +601,18 @@ export function selectEdge(edge: proto.Edge, system_state: proto.SystemState): p
 
   const found_index = edges.find((edge_info) => {
     console.log("Checking edge:", edge_info);
-    return edge.source.id == edge_info.source.id && edge.target.id == edge_info.target.id;
+    return (
+      edge.source.id == edge_info.source.id &&
+      edge.target.id == edge_info.target.id
+    );
   }) as proto.Edge;
 
   if (found_index) {
-    const selected_edges = system_state.selected_edge;
+    const selected_edges = system_state.selected_edges;
 
     selected_edges.push(found_index);
 
-    system_state.selected_edge = [found_index];
+    system_state.selected_edges = [found_index];
   }
   return system_state;
 }

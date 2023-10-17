@@ -1,13 +1,11 @@
-
-import { ResponseObject, Node, SystemState, ValidateNodesResponse, Graph, CrudBundle } from "../../src/generated/system_types";
+import { Node, SystemState, Graph } from "../../src/generated/system_types";
 
 import systemStateStore from "stores/systemStateStore";
 
 import { BinaryWriter } from "google-protobuf";
 import { Json } from "io-ts-types";
 
-export function setupWebsocketConnection(
-): WebSocket {
+export function setupWebsocketConnection(): WebSocket {
   console.log("setting up websocket connection");
   // let websocket = new WebSocket("ws://138.197.70.163:8080");
   alert("Change websocket to external environment");
@@ -18,16 +16,12 @@ export function setupWebsocketConnection(
     console.log("websocket connection opened");
     // setup message processor
     websocket = setupWebsocketMessageHandler(websocket);
-
   });
 
   return websocket;
 }
 
-export function setupWebsocketMessageHandler(
-  websocket: WebSocket
-): WebSocket {
-
+export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
   console.log("setting up websocket message handler");
 
   websocket.addEventListener("message", (event) => {
@@ -37,7 +31,8 @@ export function setupWebsocketMessageHandler(
       console.log("buffer: ", buffer);
       const u8Array = new Uint8Array(buffer);
       console.log("u8Array: ", u8Array);
-      const response_object: ResponseObject = ResponseObject.deserializeBinary(u8Array);
+      const response_object: ResponseObject =
+        ResponseObject.deserializeBinary(u8Array);
 
       console.log("response_object: ", response_object);
       const res = response_object.object;
@@ -51,15 +46,11 @@ export function setupWebsocketMessageHandler(
         if (add_node && typeof add_node.toObject === "function") {
           console.log("add_node: ", add_node.toObject());
 
-          systemStateStore.update(
-            (n: SystemState) => {
+          systemStateStore.update((n: SystemState) => {
+            n.nodes.push(add_node);
 
-              n.nodes.push(add_node);
-
-              return n;
-            }
-          );
-
+            return n;
+          });
         }
         break;
       }
@@ -69,20 +60,20 @@ export function setupWebsocketMessageHandler(
       case "user_settings":
         console.log("USER_SETTINGS");
         break;
-      case "validate_nodes_response": {
-        const graph_container = response_object.validate_nodes_response as ValidateNodesResponse;
-        const process = graph_container.process as Node;
+      case "validate_nodes_response":
+        {
+          const graph_container =
+              response_object.validate_nodes_response as ValidateNodesResponse;
+          const process = graph_container.process as Node;
 
-        console.log("process: ", process.toObject());
+          console.log("process: ", process.toObject());
 
-        systemStateStore.update(
-          (n: SystemState) => {
+          systemStateStore.update((n: SystemState) => {
             n.selected_process = process;
             n.nodes.push(process);
             return n;
-          }
-        );
-      }
+          });
+        }
         break;
       case "execution_response":
         console.log("EXECUTION_RESPONSE");

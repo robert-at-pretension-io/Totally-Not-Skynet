@@ -16,10 +16,10 @@ export function stringToUint8Array(str: string): Uint8Array {
 export function initializeSystemState(system_state: SystemState): SystemState {
   const graph = new Graph();
   system_state.graph = graph;
-  system_state.authenticated = (false);
-  system_state.websocket_ready = (false);
+  system_state.authenticated = false;
+  system_state.websocket_ready = false;
   system_state.nodes = [];
-  system_state.selected_node = [];
+  system_state.selected_nodes = [];
 
   return system_state;
 }

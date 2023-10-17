@@ -2,10 +2,9 @@
   import { onMount } from "svelte";
 
   import {
-    NodeTypeNames,
+    NodeTypes,
     Node,
-    CrudBundle,
-    ValidateNodes,
+    MessageBundle,
     VerbTypeNames,
     Process,
     GraphNodeInfo,
@@ -23,7 +22,7 @@
   let selected_node_list: Node[] = [];
   let error = "";
 
-  let key_list = Object.keys(NodeTypeNames).filter((key) => isNaN(Number(key)));
+  let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
 
   // setup onmount:
   onMount(() => {
@@ -58,11 +57,11 @@
 
     console.log("sending selected_node_list: ", selected_node_list);
 
-    let crud_message = new CrudBundle();
+    let crud_message = new MessageBundle();
 
-    crud_message.verb = VerbTypeNames.Post;
+    crud_message.verb = VerbTypeNames.Validate;
 
-    let validate_nodes = new ValidateNodes();
+    // let validate_nodes = new ValidateNodes();
 
     let graph_node_info = new GraphNodeInfo();
 
@@ -73,7 +72,7 @@
 
     validate_nodes.nodes = selected_node_list;
 
-    crud_message.validate_nodes = validate_nodes;
+    // crud_message.validate_nodes = validate_nodes;
 
     sendWebsocketMessage(crud_message, $websocketStore.websocket as WebSocket);
 

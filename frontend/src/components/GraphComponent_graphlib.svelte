@@ -103,7 +103,7 @@
         }
       );
 
-      $systemStateStore.selected_node = selected_list;
+      $systemStateStore.selected_nodes = selected_list;
     });
 
     // Listen to unselect event on any edge

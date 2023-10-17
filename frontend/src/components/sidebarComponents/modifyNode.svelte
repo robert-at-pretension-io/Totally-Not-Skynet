@@ -1,19 +1,15 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
-  import {
-    GraphNodeInfo,
-    Node,
-    NodeTypeNames,
-  } from "../../generated/system_types";
+  import { GraphNodeInfo, Node, NodeTypes } from "../../generated/system_types";
 
   let selectedNode: Node | null;
 
   // Subscribe to the graphStore to get the latest values
   let nodes: Node[] = [];
 
-  let typeName: NodeTypeNames = NodeTypeNames.PROMPT;
+  let typeName: NodeTypes = NodeTypes.PROMPT;
 
-  let key_list = Object.keys(NodeTypeNames).filter((key) => isNaN(Number(key)));
+  let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
 
   console.log("keylist is:", key_list);
 
@@ -24,24 +20,24 @@
   $: {
     nodes = $systemStateStore.nodes;
     // set the node_options to the nodes with the nodetype of typeName
-    node_options = nodes.filter((node) => node.type_name === typeName);
+    node_options = nodes.filter((node) => node.node_type === typeName);
   }
 
   // Function to handle dropdown change events
   function onDropdownChange() {
     // match on the cases of selectedNode.type_name:
-    switch (selectedNode.type_name) {
-    case NodeTypeNames.PROMPT:
+    switch (selectedNode.node_type) {
+    case NodeTypes.PROMPT:
       console.log("Selected node is a prompt");
       break;
-    case NodeTypeNames.PROCESS:
+    case NodeTypes.PROCESS:
       $systemStateStore.selected_process = selectedNode;
       console.log("Selected node is a process");
       break;
-    case NodeTypeNames.CONDITIONAL:
+    case NodeTypes.CONDITIONAL:
       console.log("Selected node is a conditional");
       break;
-    case NodeTypeNames.COMMAND:
+    case NodeTypes.COMMAND:
       console.log("Selected node is a command");
       break;
     default:
@@ -64,7 +60,7 @@
   <option value="">Select a node</option>
   {#each node_options as node}
     <option value={node}
-      >{key_list[node.type_name]} : {node.node_info.name}</option
+      >{key_list[node.node_type]} : {node.node_info.name}</option
     >
   {/each}
 </select>
