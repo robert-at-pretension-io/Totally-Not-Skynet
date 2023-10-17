@@ -46,20 +46,32 @@ message Process {
   repeated Node nodes = 3;
 }
 
+enum NodeTypes {
+  PROMPT = 0;
+  PROCESS = 1;
+  CONDITIONAL = 2;
+  COMMAND = 3;
+}
+
+message NodeContent {
+  oneof node_content {
+    Prompt prompt = 1;
+    Process process = 2;
+    Conditional conditional = 3;
+    Command command = 4;
+  }
+}
+
 message Node {
   GraphNodeInfo node_info = 1;
   repeated VariableDefinition input_variables = 2;
   repeated VariableDefinition output_variables = 3;
-  oneof node_content {
-    Prompt prompt = 4;
-    Process process = 5;
-    Conditional conditional = 6;
-    Command command = 7;
-  }
+  NodeTypes node_type = 4;
+  NodeContent node_content = 5;
 }
 
 
-enum VerbTypeNames {
+enum VerbTypes {
   Create = 0;
   Update = 1;
   Replace = 2;

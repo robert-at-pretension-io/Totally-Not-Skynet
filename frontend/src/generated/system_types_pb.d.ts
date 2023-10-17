@@ -2,7 +2,7 @@
 // file: system_types.proto
 
 import * as jspb from "google-protobuf";
-import * as google_protobuf_wrappers_pb from "google-protobuf/google/protobuf/wrappers_pb";
+import * as google_protobuf_timestamp_pb from "google-protobuf/google/protobuf/timestamp_pb";
 
 export class GraphNodeInfo extends jspb.Message {
   getId(): string;
@@ -10,6 +10,9 @@ export class GraphNodeInfo extends jspb.Message {
 
   getName(): string;
   setName(value: string): void;
+
+  getDescription(): string;
+  setDescription(value: string): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GraphNodeInfo.AsObject;
@@ -25,6 +28,7 @@ export namespace GraphNodeInfo {
   export type AsObject = {
     id: string,
     name: string,
+    description: string,
   }
 }
 
@@ -101,13 +105,14 @@ export namespace Command {
 }
 
 export class Conditional extends jspb.Message {
-  getSystemVariablesMap(): jspb.Map<string, string>;
-  clearSystemVariablesMap(): void;
   getStatement(): string;
   setStatement(value: string): void;
 
-  getOptionsMap(): jspb.Map<string, string>;
-  clearOptionsMap(): void;
+  clearOptionsList(): void;
+  getOptionsList(): Array<Node>;
+  setOptionsList(value: Array<Node>): void;
+  addOptions(value?: Node, index?: number): Node;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Conditional.AsObject;
   static toObject(includeInstance: boolean, msg: Conditional): Conditional.AsObject;
@@ -120,9 +125,8 @@ export class Conditional extends jspb.Message {
 
 export namespace Conditional {
   export type AsObject = {
-    systemVariablesMap: Array<[string, string]>,
     statement: string,
-    optionsMap: Array<[string, string]>,
+    optionsList: Array<Node.AsObject>,
   }
 }
 
@@ -160,10 +164,15 @@ export class Process extends jspb.Message {
   getGraph(): Graph | undefined;
   setGraph(value?: Graph): void;
 
-  clearInitialVariablesList(): void;
-  getInitialVariablesList(): Array<string>;
-  setInitialVariablesList(value: Array<string>): void;
-  addInitialVariables(value: string, index?: number): string;
+  clearTopologicalOrderList(): void;
+  getTopologicalOrderList(): Array<GraphNodeInfo>;
+  setTopologicalOrderList(value: Array<GraphNodeInfo>): void;
+  addTopologicalOrder(value?: GraphNodeInfo, index?: number): GraphNodeInfo;
+
+  clearNodesList(): void;
+  getNodesList(): Array<Node>;
+  setNodesList(value: Array<Node>): void;
+  addNodes(value?: Node, index?: number): Node;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Process.AsObject;
@@ -178,7 +187,8 @@ export class Process extends jspb.Message {
 export namespace Process {
   export type AsObject = {
     graph?: Graph.AsObject,
-    initialVariablesList: Array<string>,
+    topologicalOrderList: Array<GraphNodeInfo.AsObject>,
+    nodesList: Array<Node.AsObject>,
   }
 }
 
@@ -188,8 +198,15 @@ export class Node extends jspb.Message {
   getNodeInfo(): GraphNodeInfo | undefined;
   setNodeInfo(value?: GraphNodeInfo): void;
 
-  getTypeName(): NodeTypeNamesMap[keyof NodeTypeNamesMap];
-  setTypeName(value: NodeTypeNamesMap[keyof NodeTypeNamesMap]): void;
+  clearInputVariablesList(): void;
+  getInputVariablesList(): Array<VariableDefinition>;
+  setInputVariablesList(value: Array<VariableDefinition>): void;
+  addInputVariables(value?: VariableDefinition, index?: number): VariableDefinition;
+
+  clearOutputVariablesList(): void;
+  getOutputVariablesList(): Array<VariableDefinition>;
+  setOutputVariablesList(value: Array<VariableDefinition>): void;
+  addOutputVariables(value?: VariableDefinition, index?: number): VariableDefinition;
 
   hasPrompt(): boolean;
   clearPrompt(): void;
@@ -211,19 +228,6 @@ export class Node extends jspb.Message {
   getCommand(): Command | undefined;
   setCommand(value?: Command): void;
 
-  getDescription(): string;
-  setDescription(value: string): void;
-
-  clearInputVariablesList(): void;
-  getInputVariablesList(): Array<string>;
-  setInputVariablesList(value: Array<string>): void;
-  addInputVariables(value: string, index?: number): string;
-
-  clearOutputVariablesList(): void;
-  getOutputVariablesList(): Array<string>;
-  setOutputVariablesList(value: Array<string>): void;
-  addOutputVariables(value: string, index?: number): string;
-
   getNodeContentCase(): Node.NodeContentCase;
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Node.AsObject;
@@ -238,14 +242,12 @@ export class Node extends jspb.Message {
 export namespace Node {
   export type AsObject = {
     nodeInfo?: GraphNodeInfo.AsObject,
-    typeName: NodeTypeNamesMap[keyof NodeTypeNamesMap],
+    inputVariablesList: Array<VariableDefinition.AsObject>,
+    outputVariablesList: Array<VariableDefinition.AsObject>,
     prompt?: Prompt.AsObject,
     process?: Process.AsObject,
     conditional?: Conditional.AsObject,
     command?: Command.AsObject,
-    description: string,
-    inputVariablesList: Array<string>,
-    outputVariablesList: Array<string>,
   }
 
   export enum NodeContentCase {
@@ -257,42 +259,118 @@ export namespace Node {
   }
 }
 
-export class ExecutionContext extends jspb.Message {
-  clearTopologicalOrderList(): void;
-  getTopologicalOrderList(): Array<string>;
-  setTopologicalOrderList(value: Array<string>): void;
-  addTopologicalOrder(value: string, index?: number): string;
+export class Identity extends jspb.Message {
+  getId(): string;
+  setId(value: string): void;
 
+  getGroupId(): string;
+  setGroupId(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Identity.AsObject;
+  static toObject(includeInstance: boolean, msg: Identity): Identity.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: Identity, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Identity;
+  static deserializeBinaryFromReader(message: Identity, reader: jspb.BinaryReader): Identity;
+}
+
+export namespace Identity {
+  export type AsObject = {
+    id: string,
+    groupId: string,
+  }
+}
+
+export class Execution extends jspb.Message {
   hasCurrentNode(): boolean;
   clearCurrentNode(): void;
-  getCurrentNode(): Node | undefined;
-  setCurrentNode(value?: Node): void;
+  getCurrentNode(): GraphNodeInfo | undefined;
+  setCurrentNode(value?: GraphNodeInfo): void;
 
-  getGlobalVariablesMap(): jspb.Map<string, string>;
-  clearGlobalVariablesMap(): void;
+  hasProcess(): boolean;
+  clearProcess(): void;
+  getProcess(): Process | undefined;
+  setProcess(value?: Process): void;
+
+  clearCurrentVariableDefinitionsList(): void;
+  getCurrentVariableDefinitionsList(): Array<VariableDefinition>;
+  setCurrentVariableDefinitionsList(value: Array<VariableDefinition>): void;
+  addCurrentVariableDefinitions(value?: VariableDefinition, index?: number): VariableDefinition;
+
   getExecutionId(): string;
   setExecutionId(value: string): void;
 
-  getReturnExecutionId(): string;
-  setReturnExecutionId(value: string): void;
-
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): ExecutionContext.AsObject;
-  static toObject(includeInstance: boolean, msg: ExecutionContext): ExecutionContext.AsObject;
+  toObject(includeInstance?: boolean): Execution.AsObject;
+  static toObject(includeInstance: boolean, msg: Execution): Execution.AsObject;
   static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
   static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: ExecutionContext, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): ExecutionContext;
-  static deserializeBinaryFromReader(message: ExecutionContext, reader: jspb.BinaryReader): ExecutionContext;
+  static serializeBinaryToWriter(message: Execution, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Execution;
+  static deserializeBinaryFromReader(message: Execution, reader: jspb.BinaryReader): Execution;
 }
 
-export namespace ExecutionContext {
+export namespace Execution {
   export type AsObject = {
-    topologicalOrderList: Array<string>,
-    currentNode?: Node.AsObject,
-    globalVariablesMap: Array<[string, string]>,
+    currentNode?: GraphNodeInfo.AsObject,
+    process?: Process.AsObject,
+    currentVariableDefinitionsList: Array<VariableDefinition.AsObject>,
     executionId: string,
-    returnExecutionId: string,
+  }
+}
+
+export class VariableDefinition extends jspb.Message {
+  getName(): string;
+  setName(value: string): void;
+
+  hasStringValue(): boolean;
+  clearStringValue(): void;
+  getStringValue(): string;
+  setStringValue(value: string): void;
+
+  hasIntValue(): boolean;
+  clearIntValue(): void;
+  getIntValue(): number;
+  setIntValue(value: number): void;
+
+  hasFloatValue(): boolean;
+  clearFloatValue(): void;
+  getFloatValue(): number;
+  setFloatValue(value: number): void;
+
+  hasBoolValue(): boolean;
+  clearBoolValue(): void;
+  getBoolValue(): boolean;
+  setBoolValue(value: boolean): void;
+
+  getValueCase(): VariableDefinition.ValueCase;
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VariableDefinition.AsObject;
+  static toObject(includeInstance: boolean, msg: VariableDefinition): VariableDefinition.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: VariableDefinition, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VariableDefinition;
+  static deserializeBinaryFromReader(message: VariableDefinition, reader: jspb.BinaryReader): VariableDefinition;
+}
+
+export namespace VariableDefinition {
+  export type AsObject = {
+    name: string,
+    stringValue: string,
+    intValue: number,
+    floatValue: number,
+    boolValue: boolean,
+  }
+
+  export enum ValueCase {
+    VALUE_NOT_SET = 0,
+    STRING_VALUE = 2,
+    INT_VALUE = 3,
+    FLOAT_VALUE = 4,
+    BOOL_VALUE = 5,
   }
 }
 
@@ -313,20 +391,25 @@ export class SystemState extends jspb.Message {
   setNodesList(value: Array<Node>): void;
   addNodes(value?: Node, index?: number): Node;
 
-  clearSelectedNodeList(): void;
-  getSelectedNodeList(): Array<GraphNodeInfo>;
-  setSelectedNodeList(value: Array<GraphNodeInfo>): void;
-  addSelectedNode(value?: GraphNodeInfo, index?: number): GraphNodeInfo;
+  clearSelectedNodesList(): void;
+  getSelectedNodesList(): Array<GraphNodeInfo>;
+  setSelectedNodesList(value: Array<GraphNodeInfo>): void;
+  addSelectedNodes(value?: GraphNodeInfo, index?: number): GraphNodeInfo;
 
-  clearSelectedEdgeList(): void;
-  getSelectedEdgeList(): Array<Edge>;
-  setSelectedEdgeList(value: Array<Edge>): void;
-  addSelectedEdge(value?: Edge, index?: number): Edge;
+  clearSelectedEdgesList(): void;
+  getSelectedEdgesList(): Array<Edge>;
+  setSelectedEdgesList(value: Array<Edge>): void;
+  addSelectedEdges(value?: Edge, index?: number): Edge;
 
-  hasExecutionContext(): boolean;
-  clearExecutionContext(): void;
-  getExecutionContext(): ExecutionContext | undefined;
-  setExecutionContext(value?: ExecutionContext): void;
+  hasExecutionStep(): boolean;
+  clearExecutionStep(): void;
+  getExecutionStep(): Execution | undefined;
+  setExecutionStep(value?: Execution): void;
+
+  hasSelectedProcess(): boolean;
+  clearSelectedProcess(): void;
+  getSelectedProcess(): Node | undefined;
+  setSelectedProcess(value?: Node): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SystemState.AsObject;
@@ -344,9 +427,10 @@ export namespace SystemState {
     websocketReady: boolean,
     graph?: Graph.AsObject,
     nodesList: Array<Node.AsObject>,
-    selectedNodeList: Array<GraphNodeInfo.AsObject>,
-    selectedEdgeList: Array<Edge.AsObject>,
-    executionContext?: ExecutionContext.AsObject,
+    selectedNodesList: Array<GraphNodeInfo.AsObject>,
+    selectedEdgesList: Array<Edge.AsObject>,
+    executionStep?: Execution.AsObject,
+    selectedProcess?: Node.AsObject,
   }
 }
 
@@ -398,32 +482,59 @@ export namespace UserSettings {
   }
 }
 
-export class ValidateNodes extends jspb.Message {
-  clearNodesList(): void;
-  getNodesList(): Array<Node>;
-  setNodesList(value: Array<Node>): void;
-  addNodes(value?: Node, index?: number): Node;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): ValidateNodes.AsObject;
-  static toObject(includeInstance: boolean, msg: ValidateNodes): ValidateNodes.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: ValidateNodes, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): ValidateNodes;
-  static deserializeBinaryFromReader(message: ValidateNodes, reader: jspb.BinaryReader): ValidateNodes;
-}
-
-export namespace ValidateNodes {
-  export type AsObject = {
-    nodesList: Array<Node.AsObject>,
-  }
-}
-
-export class CrudBundle extends jspb.Message {
+export class MessageBundle extends jspb.Message {
   getVerb(): VerbTypeNamesMap[keyof VerbTypeNamesMap];
   setVerb(value: VerbTypeNamesMap[keyof VerbTypeNamesMap]): void;
 
+  hasContainer(): boolean;
+  clearContainer(): void;
+  getContainer(): Contents | undefined;
+  setContainer(value?: Contents): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): MessageBundle.AsObject;
+  static toObject(includeInstance: boolean, msg: MessageBundle): MessageBundle.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: MessageBundle, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): MessageBundle;
+  static deserializeBinaryFromReader(message: MessageBundle, reader: jspb.BinaryReader): MessageBundle;
+}
+
+export namespace MessageBundle {
+  export type AsObject = {
+    verb: VerbTypeNamesMap[keyof VerbTypeNamesMap],
+    container?: Contents.AsObject,
+  }
+}
+
+export class SystemError extends jspb.Message {
+  getErrorMessage(): string;
+  setErrorMessage(value: string): void;
+
+  hasOriginator(): boolean;
+  clearOriginator(): void;
+  getOriginator(): Identity | undefined;
+  setOriginator(value?: Identity): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SystemError.AsObject;
+  static toObject(includeInstance: boolean, msg: SystemError): SystemError.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: SystemError, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SystemError;
+  static deserializeBinaryFromReader(message: SystemError, reader: jspb.BinaryReader): SystemError;
+}
+
+export namespace SystemError {
+  export type AsObject = {
+    errorMessage: string,
+    originator?: Identity.AsObject,
+  }
+}
+
+export class Contents extends jspb.Message {
   hasNode(): boolean;
   clearNode(): void;
   getNode(): Node | undefined;
@@ -439,304 +550,99 @@ export class CrudBundle extends jspb.Message {
   getUserSettings(): UserSettings | undefined;
   setUserSettings(value?: UserSettings): void;
 
-  hasExecutionContext(): boolean;
-  clearExecutionContext(): void;
-  getExecutionContext(): ExecutionContext | undefined;
-  setExecutionContext(value?: ExecutionContext): void;
+  hasExecutionDetails(): boolean;
+  clearExecutionDetails(): void;
+  getExecutionDetails(): Execution | undefined;
+  setExecutionDetails(value?: Execution): void;
 
-  hasValidateNodes(): boolean;
-  clearValidateNodes(): void;
-  getValidateNodes(): ValidateNodes | undefined;
-  setValidateNodes(value?: ValidateNodes): void;
+  hasErrors(): boolean;
+  clearErrors(): void;
+  getErrors(): SystemError | undefined;
+  setErrors(value?: SystemError): void;
 
-  getObjectCase(): CrudBundle.ObjectCase;
+  getContentsCase(): Contents.ContentsCase;
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): CrudBundle.AsObject;
-  static toObject(includeInstance: boolean, msg: CrudBundle): CrudBundle.AsObject;
+  toObject(includeInstance?: boolean): Contents.AsObject;
+  static toObject(includeInstance: boolean, msg: Contents): Contents.AsObject;
   static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
   static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: CrudBundle, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): CrudBundle;
-  static deserializeBinaryFromReader(message: CrudBundle, reader: jspb.BinaryReader): CrudBundle;
+  static serializeBinaryToWriter(message: Contents, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Contents;
+  static deserializeBinaryFromReader(message: Contents, reader: jspb.BinaryReader): Contents;
 }
 
-export namespace CrudBundle {
+export namespace Contents {
   export type AsObject = {
-    verb: VerbTypeNamesMap[keyof VerbTypeNamesMap],
     node?: Node.AsObject,
     authenticationMessage?: AuthenticationMessage.AsObject,
     userSettings?: UserSettings.AsObject,
-    executionContext?: ExecutionContext.AsObject,
-    validateNodes?: ValidateNodes.AsObject,
+    executionDetails?: Execution.AsObject,
+    errors?: SystemError.AsObject,
   }
 
-  export enum ObjectCase {
-    OBJECT_NOT_SET = 0,
-    NODE = 2,
-    AUTHENTICATION_MESSAGE = 3,
-    USER_SETTINGS = 4,
-    EXECUTION_CONTEXT = 5,
-    VALIDATE_NODES = 6,
-  }
-}
-
-export class CommandResponse extends jspb.Message {
-  hasError(): boolean;
-  clearError(): void;
-  getError(): google_protobuf_wrappers_pb.StringValue | undefined;
-  setError(value?: google_protobuf_wrappers_pb.StringValue): void;
-
-  hasOutput(): boolean;
-  clearOutput(): void;
-  getOutput(): google_protobuf_wrappers_pb.StringValue | undefined;
-  setOutput(value?: google_protobuf_wrappers_pb.StringValue): void;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): CommandResponse.AsObject;
-  static toObject(includeInstance: boolean, msg: CommandResponse): CommandResponse.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: CommandResponse, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): CommandResponse;
-  static deserializeBinaryFromReader(message: CommandResponse, reader: jspb.BinaryReader): CommandResponse;
-}
-
-export namespace CommandResponse {
-  export type AsObject = {
-    error?: google_protobuf_wrappers_pb.StringValue.AsObject,
-    output?: google_protobuf_wrappers_pb.StringValue.AsObject,
-  }
-}
-
-export class PromptResponse extends jspb.Message {
-  getAiTextResponse(): string;
-  setAiTextResponse(value: string): void;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): PromptResponse.AsObject;
-  static toObject(includeInstance: boolean, msg: PromptResponse): PromptResponse.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: PromptResponse, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): PromptResponse;
-  static deserializeBinaryFromReader(message: PromptResponse, reader: jspb.BinaryReader): PromptResponse;
-}
-
-export namespace PromptResponse {
-  export type AsObject = {
-    aiTextResponse: string,
-  }
-}
-
-export class ConditionalResponse extends jspb.Message {
-  getChosenOption(): string;
-  setChosenOption(value: string): void;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): ConditionalResponse.AsObject;
-  static toObject(includeInstance: boolean, msg: ConditionalResponse): ConditionalResponse.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: ConditionalResponse, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): ConditionalResponse;
-  static deserializeBinaryFromReader(message: ConditionalResponse, reader: jspb.BinaryReader): ConditionalResponse;
-}
-
-export namespace ConditionalResponse {
-  export type AsObject = {
-    chosenOption: string,
-  }
-}
-
-export class NodeExecutionResponse extends jspb.Message {
-  hasPromptResponse(): boolean;
-  clearPromptResponse(): void;
-  getPromptResponse(): PromptResponse | undefined;
-  setPromptResponse(value?: PromptResponse): void;
-
-  hasCommandResponse(): boolean;
-  clearCommandResponse(): void;
-  getCommandResponse(): CommandResponse | undefined;
-  setCommandResponse(value?: CommandResponse): void;
-
-  hasConditionalResponse(): boolean;
-  clearConditionalResponse(): void;
-  getConditionalResponse(): ConditionalResponse | undefined;
-  setConditionalResponse(value?: ConditionalResponse): void;
-
-  getResponseCase(): NodeExecutionResponse.ResponseCase;
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): NodeExecutionResponse.AsObject;
-  static toObject(includeInstance: boolean, msg: NodeExecutionResponse): NodeExecutionResponse.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: NodeExecutionResponse, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): NodeExecutionResponse;
-  static deserializeBinaryFromReader(message: NodeExecutionResponse, reader: jspb.BinaryReader): NodeExecutionResponse;
-}
-
-export namespace NodeExecutionResponse {
-  export type AsObject = {
-    promptResponse?: PromptResponse.AsObject,
-    commandResponse?: CommandResponse.AsObject,
-    conditionalResponse?: ConditionalResponse.AsObject,
-  }
-
-  export enum ResponseCase {
-    RESPONSE_NOT_SET = 0,
-    PROMPT_RESPONSE = 1,
-    COMMAND_RESPONSE = 2,
-    CONDITIONAL_RESPONSE = 3,
-  }
-}
-
-export class ExecutionResponse extends jspb.Message {
-  getExecutionId(): string;
-  setExecutionId(value: string): void;
-
-  getContainerExecutionId(): string;
-  setContainerExecutionId(value: string): void;
-
-  getCurrentNodeId(): string;
-  setCurrentNodeId(value: string): void;
-
-  getCurrentNodeType(): NodeTypeNamesMap[keyof NodeTypeNamesMap];
-  setCurrentNodeType(value: NodeTypeNamesMap[keyof NodeTypeNamesMap]): void;
-
-  hasResponse(): boolean;
-  clearResponse(): void;
-  getResponse(): NodeExecutionResponse | undefined;
-  setResponse(value?: NodeExecutionResponse): void;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): ExecutionResponse.AsObject;
-  static toObject(includeInstance: boolean, msg: ExecutionResponse): ExecutionResponse.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: ExecutionResponse, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): ExecutionResponse;
-  static deserializeBinaryFromReader(message: ExecutionResponse, reader: jspb.BinaryReader): ExecutionResponse;
-}
-
-export namespace ExecutionResponse {
-  export type AsObject = {
-    executionId: string,
-    containerExecutionId: string,
-    currentNodeId: string,
-    currentNodeType: NodeTypeNamesMap[keyof NodeTypeNamesMap],
-    response?: NodeExecutionResponse.AsObject,
-  }
-}
-
-export class ValidateNodesResponse extends jspb.Message {
-  clearErrorsList(): void;
-  getErrorsList(): Array<string>;
-  setErrorsList(value: Array<string>): void;
-  addErrors(value: string, index?: number): string;
-
-  hasGraph(): boolean;
-  clearGraph(): void;
-  getGraph(): Graph | undefined;
-  setGraph(value?: Graph): void;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): ValidateNodesResponse.AsObject;
-  static toObject(includeInstance: boolean, msg: ValidateNodesResponse): ValidateNodesResponse.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: ValidateNodesResponse, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): ValidateNodesResponse;
-  static deserializeBinaryFromReader(message: ValidateNodesResponse, reader: jspb.BinaryReader): ValidateNodesResponse;
-}
-
-export namespace ValidateNodesResponse {
-  export type AsObject = {
-    errorsList: Array<string>,
-    graph?: Graph.AsObject,
-  }
-}
-
-export class ResponseObject extends jspb.Message {
-  hasNode(): boolean;
-  clearNode(): void;
-  getNode(): Node | undefined;
-  setNode(value?: Node): void;
-
-  hasAuthenticationMessage(): boolean;
-  clearAuthenticationMessage(): void;
-  getAuthenticationMessage(): string;
-  setAuthenticationMessage(value: string): void;
-
-  hasUserSettings(): boolean;
-  clearUserSettings(): void;
-  getUserSettings(): string;
-  setUserSettings(value: string): void;
-
-  hasExecutionResponse(): boolean;
-  clearExecutionResponse(): void;
-  getExecutionResponse(): ExecutionResponse | undefined;
-  setExecutionResponse(value?: ExecutionResponse): void;
-
-  hasValidateNodesResponse(): boolean;
-  clearValidateNodesResponse(): void;
-  getValidateNodesResponse(): ValidateNodesResponse | undefined;
-  setValidateNodesResponse(value?: ValidateNodesResponse): void;
-
-  getObjectCase(): ResponseObject.ObjectCase;
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): ResponseObject.AsObject;
-  static toObject(includeInstance: boolean, msg: ResponseObject): ResponseObject.AsObject;
-  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: ResponseObject, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): ResponseObject;
-  static deserializeBinaryFromReader(message: ResponseObject, reader: jspb.BinaryReader): ResponseObject;
-}
-
-export namespace ResponseObject {
-  export type AsObject = {
-    node?: Node.AsObject,
-    authenticationMessage: string,
-    userSettings: string,
-    executionResponse?: ExecutionResponse.AsObject,
-    validateNodesResponse?: ValidateNodesResponse.AsObject,
-  }
-
-  export enum ObjectCase {
-    OBJECT_NOT_SET = 0,
+  export enum ContentsCase {
+    CONTENTS_NOT_SET = 0,
     NODE = 1,
     AUTHENTICATION_MESSAGE = 2,
     USER_SETTINGS = 3,
-    EXECUTION_RESPONSE = 4,
-    VALIDATE_NODES_RESPONSE = 5,
+    EXECUTION_DETAILS = 4,
+    ERRORS = 5,
   }
 }
 
-export interface NodeTypeNamesMap {
-  PROMPT: 0;
-  PROCESS: 1;
-  CONDITIONAL: 2;
-  COMMAND: 3;
+export class Envelope extends jspb.Message {
+  clearMessageBundleList(): void;
+  getMessageBundleList(): Array<MessageBundle>;
+  setMessageBundleList(value: Array<MessageBundle>): void;
+  addMessageBundle(value?: MessageBundle, index?: number): MessageBundle;
+
+  hasSender(): boolean;
+  clearSender(): void;
+  getSender(): Identity | undefined;
+  setSender(value?: Identity): void;
+
+  hasReceiver(): boolean;
+  clearReceiver(): void;
+  getReceiver(): Identity | undefined;
+  setReceiver(value?: Identity): void;
+
+  getVerificationId(): string;
+  setVerificationId(value: string): void;
+
+  hasSentTime(): boolean;
+  clearSentTime(): void;
+  getSentTime(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setSentTime(value?: google_protobuf_timestamp_pb.Timestamp): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Envelope.AsObject;
+  static toObject(includeInstance: boolean, msg: Envelope): Envelope.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: Envelope, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Envelope;
+  static deserializeBinaryFromReader(message: Envelope, reader: jspb.BinaryReader): Envelope;
 }
 
-export const NodeTypeNames: NodeTypeNamesMap;
-
-export interface SystemErrorsMap {
-  GRAPH_DOESNT_EXIST: 0;
-  GRAPH_STATE_DOESNT_EXIST: 1;
-  OTHER_ERROR: 2;
-  NODE_DOESNT_EXIST: 3;
+export namespace Envelope {
+  export type AsObject = {
+    messageBundleList: Array<MessageBundle.AsObject>,
+    sender?: Identity.AsObject,
+    receiver?: Identity.AsObject,
+    verificationId: string,
+    sentTime?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+  }
 }
-
-export const SystemErrors: SystemErrorsMap;
 
 export interface VerbTypeNamesMap {
-  POST: 0;
-  PUT: 1;
-  PATCH: 2;
+  CREATE: 0;
+  UPDATE: 1;
+  REPLACE: 2;
   DELETE: 3;
   GET: 4;
   EXECUTE: 5;
+  VALIDATE: 6;
+  ACKNOWLEDGE: 7;
 }
 
 export const VerbTypeNames: VerbTypeNamesMap;
