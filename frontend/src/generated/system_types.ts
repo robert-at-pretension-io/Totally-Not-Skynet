@@ -4,26 +4,17 @@
  * source: system_types.proto
  * git: https://github.com/thesayyn/protoc-gen-ts */
 import * as dependency_1 from "./google/protobuf/wrappers";
+import * as dependency_2 from "./google/protobuf/timestamp";
 import * as pb_1 from "google-protobuf";
-export enum NodeTypeNames {
-    PROMPT = 0,
-    PROCESS = 1,
-    CONDITIONAL = 2,
-    COMMAND = 3
-}
-export enum SystemErrors {
-    GRAPH_DOESNT_EXIST = 0,
-    GRAPH_STATE_DOESNT_EXIST = 1,
-    OTHER_ERROR = 2,
-    NODE_DOESNT_EXIST = 3
-}
 export enum VerbTypeNames {
-    Post = 0,
-    Put = 1,
-    Patch = 2,
+    Create = 0,
+    Update = 1,
+    Replace = 2,
     Delete = 3,
     Get = 4,
-    Execute = 5
+    Execute = 5,
+    Validate = 6,
+    Acknowledge = 7
 }
 export class GraphNodeInfo extends pb_1.Message {
   #one_of_decls: number[][] = [];
@@ -394,16 +385,12 @@ export class Command extends pb_1.Message {
 export class Conditional extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
-        system_variables?: Map<string, string>;
         statement?: string;
-        options?: Map<string, string>;
+        options?: Node[];
     }) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
-      if ("system_variables" in data && data.system_variables != undefined) {
-        this.system_variables = data.system_variables;
-      }
       if ("statement" in data && data.statement != undefined) {
         this.statement = data.statement;
       }
@@ -411,68 +398,42 @@ export class Conditional extends pb_1.Message {
         this.options = data.options;
       }
     }
-    if (!this.system_variables)
-      this.system_variables = new Map();
-    if (!this.options)
-      this.options = new Map();
-  }
-  get system_variables() {
-    return pb_1.Message.getField(this, 1) as any as Map<string, string>;
-  }
-  set system_variables(value: Map<string, string>) {
-    pb_1.Message.setField(this, 1, value as any);
   }
   get statement() {
-    return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+    return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
   }
   set statement(value: string) {
-    pb_1.Message.setField(this, 2, value);
+    pb_1.Message.setField(this, 1, value);
   }
   get options() {
-    return pb_1.Message.getField(this, 3) as any as Map<string, string>;
+    return pb_1.Message.getRepeatedWrapperField(this, Node, 2) as Node[];
   }
-  set options(value: Map<string, string>) {
-    pb_1.Message.setField(this, 3, value as any);
+  set options(value: Node[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 2, value);
   }
   static fromObject(data: {
-        system_variables?: {
-            [key: string]: string;
-        };
         statement?: string;
-        options?: {
-            [key: string]: string;
-        };
+        options?: ReturnType<typeof Node.prototype.toObject>[];
     }): Conditional {
     const message = new Conditional({});
-    if (typeof data.system_variables == "object") {
-      message.system_variables = new Map(Object.entries(data.system_variables));
-    }
     if (data.statement != null) {
       message.statement = data.statement;
     }
-    if (typeof data.options == "object") {
-      message.options = new Map(Object.entries(data.options));
+    if (data.options != null) {
+      message.options = data.options.map(item => Node.fromObject(item));
     }
     return message;
   }
   toObject() {
     const data: {
-            system_variables?: {
-                [key: string]: string;
-            };
             statement?: string;
-            options?: {
-                [key: string]: string;
-            };
+            options?: ReturnType<typeof Node.prototype.toObject>[];
         } = {};
-    if (this.system_variables != null) {
-      data.system_variables = (Object.fromEntries)(this.system_variables);
-    }
     if (this.statement != null) {
       data.statement = this.statement;
     }
     if (this.options != null) {
-      data.options = (Object.fromEntries)(this.options);
+      data.options = this.options.map((item: Node) => item.toObject());
     }
     return data;
   }
@@ -480,20 +441,10 @@ export class Conditional extends pb_1.Message {
   serialize(w: pb_1.BinaryWriter): void;
   serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
     const writer = w || new pb_1.BinaryWriter();
-    for (const [key, value] of this.system_variables) {
-      writer.writeMessage(1, this.system_variables, () => {
-        writer.writeString(1, key);
-        writer.writeString(2, value);
-      });
-    }
     if (this.statement.length)
-      writer.writeString(2, this.statement);
-    for (const [key, value] of this.options) {
-      writer.writeMessage(3, this.options, () => {
-        writer.writeString(1, key);
-        writer.writeString(2, value);
-      });
-    }
+      writer.writeString(1, this.statement);
+    if (this.options.length)
+      writer.writeRepeatedMessage(2, this.options, (item: Node) => item.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -504,13 +455,10 @@ export class Conditional extends pb_1.Message {
         break;
       switch (reader.getFieldNumber()) {
       case 1:
-        reader.readMessage(message, () => pb_1.Map.deserializeBinary(message.system_variables as any, reader, reader.readString, reader.readString));
-        break;
-      case 2:
         message.statement = reader.readString();
         break;
-      case 3:
-        reader.readMessage(message, () => pb_1.Map.deserializeBinary(message.options as any, reader, reader.readString, reader.readString));
+      case 2:
+        reader.readMessage(message.options, () => pb_1.Message.addToRepeatedWrapperField(message, 2, Node.deserialize(reader), Node));
         break;
       default: reader.skipField();
       }
@@ -619,15 +567,19 @@ export class Process extends pb_1.Message {
   constructor(data?: any[] | {
         graph?: Graph;
         topological_order?: GraphNodeInfo[];
+        nodes?: Node[];
     }) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2, 3], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
       if ("graph" in data && data.graph != undefined) {
         this.graph = data.graph;
       }
       if ("topological_order" in data && data.topological_order != undefined) {
         this.topological_order = data.topological_order;
+      }
+      if ("nodes" in data && data.nodes != undefined) {
+        this.nodes = data.nodes;
       }
     }
   }
@@ -646,9 +598,16 @@ export class Process extends pb_1.Message {
   set topological_order(value: GraphNodeInfo[]) {
     pb_1.Message.setRepeatedWrapperField(this, 2, value);
   }
+  get nodes() {
+    return pb_1.Message.getRepeatedWrapperField(this, Node, 3) as Node[];
+  }
+  set nodes(value: Node[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 3, value);
+  }
   static fromObject(data: {
         graph?: ReturnType<typeof Graph.prototype.toObject>;
         topological_order?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
+        nodes?: ReturnType<typeof Node.prototype.toObject>[];
     }): Process {
     const message = new Process({});
     if (data.graph != null) {
@@ -657,18 +616,25 @@ export class Process extends pb_1.Message {
     if (data.topological_order != null) {
       message.topological_order = data.topological_order.map(item => GraphNodeInfo.fromObject(item));
     }
+    if (data.nodes != null) {
+      message.nodes = data.nodes.map(item => Node.fromObject(item));
+    }
     return message;
   }
   toObject() {
     const data: {
             graph?: ReturnType<typeof Graph.prototype.toObject>;
             topological_order?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
+            nodes?: ReturnType<typeof Node.prototype.toObject>[];
         } = {};
     if (this.graph != null) {
       data.graph = this.graph.toObject();
     }
     if (this.topological_order != null) {
       data.topological_order = this.topological_order.map((item: GraphNodeInfo) => item.toObject());
+    }
+    if (this.nodes != null) {
+      data.nodes = this.nodes.map((item: Node) => item.toObject());
     }
     return data;
   }
@@ -680,6 +646,8 @@ export class Process extends pb_1.Message {
       writer.writeMessage(1, this.graph, () => this.graph.serialize(writer));
     if (this.topological_order.length)
       writer.writeRepeatedMessage(2, this.topological_order, (item: GraphNodeInfo) => item.serialize(writer));
+    if (this.nodes.length)
+      writer.writeRepeatedMessage(3, this.nodes, (item: Node) => item.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -695,6 +663,9 @@ export class Process extends pb_1.Message {
       case 2:
         reader.readMessage(message.topological_order, () => pb_1.Message.addToRepeatedWrapperField(message, 2, GraphNodeInfo.deserialize(reader), GraphNodeInfo));
         break;
+      case 3:
+        reader.readMessage(message.nodes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, Node.deserialize(reader), Node));
+        break;
       default: reader.skipField();
       }
     }
@@ -708,12 +679,11 @@ export class Process extends pb_1.Message {
   }
 }
 export class Node extends pb_1.Message {
-  #one_of_decls: number[][] = [[5, 6, 7, 8]];
+  #one_of_decls: number[][] = [[4, 5, 6, 7]];
   constructor(data?: any[] | ({
         node_info?: GraphNodeInfo;
-        type_name?: NodeTypeNames;
-        input_variables?: string[];
-        output_variables?: string[];
+        input_variables?: VariableDefinition[];
+        output_variables?: VariableDefinition[];
     } & (({
         prompt?: Prompt;
         process?: never;
@@ -736,13 +706,10 @@ export class Node extends pb_1.Message {
         command?: Command;
     })))) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2, 3], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
       if ("node_info" in data && data.node_info != undefined) {
         this.node_info = data.node_info;
-      }
-      if ("type_name" in data && data.type_name != undefined) {
-        this.type_name = data.type_name;
       }
       if ("input_variables" in data && data.input_variables != undefined) {
         this.input_variables = data.input_variables;
@@ -773,77 +740,70 @@ export class Node extends pb_1.Message {
   get has_node_info() {
     return pb_1.Message.getField(this, 1) != null;
   }
-  get type_name() {
-    return pb_1.Message.getFieldWithDefault(this, 2, NodeTypeNames.PROMPT) as NodeTypeNames;
-  }
-  set type_name(value: NodeTypeNames) {
-    pb_1.Message.setField(this, 2, value);
-  }
   get input_variables() {
-    return pb_1.Message.getFieldWithDefault(this, 3, []) as string[];
+    return pb_1.Message.getRepeatedWrapperField(this, VariableDefinition, 2) as VariableDefinition[];
   }
-  set input_variables(value: string[]) {
-    pb_1.Message.setField(this, 3, value);
+  set input_variables(value: VariableDefinition[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 2, value);
   }
   get output_variables() {
-    return pb_1.Message.getFieldWithDefault(this, 4, []) as string[];
+    return pb_1.Message.getRepeatedWrapperField(this, VariableDefinition, 3) as VariableDefinition[];
   }
-  set output_variables(value: string[]) {
-    pb_1.Message.setField(this, 4, value);
+  set output_variables(value: VariableDefinition[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 3, value);
   }
   get prompt() {
-    return pb_1.Message.getWrapperField(this, Prompt, 5) as Prompt;
+    return pb_1.Message.getWrapperField(this, Prompt, 4) as Prompt;
   }
   set prompt(value: Prompt) {
-    pb_1.Message.setOneofWrapperField(this, 5, this.#one_of_decls[0], value);
+    pb_1.Message.setOneofWrapperField(this, 4, this.#one_of_decls[0], value);
   }
   get has_prompt() {
-    return pb_1.Message.getField(this, 5) != null;
+    return pb_1.Message.getField(this, 4) != null;
   }
   get process() {
-    return pb_1.Message.getWrapperField(this, Process, 6) as Process;
+    return pb_1.Message.getWrapperField(this, Process, 5) as Process;
   }
   set process(value: Process) {
-    pb_1.Message.setOneofWrapperField(this, 6, this.#one_of_decls[0], value);
+    pb_1.Message.setOneofWrapperField(this, 5, this.#one_of_decls[0], value);
   }
   get has_process() {
-    return pb_1.Message.getField(this, 6) != null;
+    return pb_1.Message.getField(this, 5) != null;
   }
   get conditional() {
-    return pb_1.Message.getWrapperField(this, Conditional, 7) as Conditional;
+    return pb_1.Message.getWrapperField(this, Conditional, 6) as Conditional;
   }
   set conditional(value: Conditional) {
-    pb_1.Message.setOneofWrapperField(this, 7, this.#one_of_decls[0], value);
+    pb_1.Message.setOneofWrapperField(this, 6, this.#one_of_decls[0], value);
   }
   get has_conditional() {
-    return pb_1.Message.getField(this, 7) != null;
+    return pb_1.Message.getField(this, 6) != null;
   }
   get command() {
-    return pb_1.Message.getWrapperField(this, Command, 8) as Command;
+    return pb_1.Message.getWrapperField(this, Command, 7) as Command;
   }
   set command(value: Command) {
-    pb_1.Message.setOneofWrapperField(this, 8, this.#one_of_decls[0], value);
+    pb_1.Message.setOneofWrapperField(this, 7, this.#one_of_decls[0], value);
   }
   get has_command() {
-    return pb_1.Message.getField(this, 8) != null;
+    return pb_1.Message.getField(this, 7) != null;
   }
   get node_content() {
     const cases: {
             [index: number]: "none" | "prompt" | "process" | "conditional" | "command";
         } = {
           0: "none",
-          5: "prompt",
-          6: "process",
-          7: "conditional",
-          8: "command"
+          4: "prompt",
+          5: "process",
+          6: "conditional",
+          7: "command"
         };
-    return cases[pb_1.Message.computeOneofCase(this, [5, 6, 7, 8])];
+    return cases[pb_1.Message.computeOneofCase(this, [4, 5, 6, 7])];
   }
   static fromObject(data: {
         node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
-        type_name?: NodeTypeNames;
-        input_variables?: string[];
-        output_variables?: string[];
+        input_variables?: ReturnType<typeof VariableDefinition.prototype.toObject>[];
+        output_variables?: ReturnType<typeof VariableDefinition.prototype.toObject>[];
         prompt?: ReturnType<typeof Prompt.prototype.toObject>;
         process?: ReturnType<typeof Process.prototype.toObject>;
         conditional?: ReturnType<typeof Conditional.prototype.toObject>;
@@ -853,14 +813,11 @@ export class Node extends pb_1.Message {
     if (data.node_info != null) {
       message.node_info = GraphNodeInfo.fromObject(data.node_info);
     }
-    if (data.type_name != null) {
-      message.type_name = data.type_name;
-    }
     if (data.input_variables != null) {
-      message.input_variables = data.input_variables;
+      message.input_variables = data.input_variables.map(item => VariableDefinition.fromObject(item));
     }
     if (data.output_variables != null) {
-      message.output_variables = data.output_variables;
+      message.output_variables = data.output_variables.map(item => VariableDefinition.fromObject(item));
     }
     if (data.prompt != null) {
       message.prompt = Prompt.fromObject(data.prompt);
@@ -879,9 +836,8 @@ export class Node extends pb_1.Message {
   toObject() {
     const data: {
             node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
-            type_name?: NodeTypeNames;
-            input_variables?: string[];
-            output_variables?: string[];
+            input_variables?: ReturnType<typeof VariableDefinition.prototype.toObject>[];
+            output_variables?: ReturnType<typeof VariableDefinition.prototype.toObject>[];
             prompt?: ReturnType<typeof Prompt.prototype.toObject>;
             process?: ReturnType<typeof Process.prototype.toObject>;
             conditional?: ReturnType<typeof Conditional.prototype.toObject>;
@@ -890,14 +846,11 @@ export class Node extends pb_1.Message {
     if (this.node_info != null) {
       data.node_info = this.node_info.toObject();
     }
-    if (this.type_name != null) {
-      data.type_name = this.type_name;
-    }
     if (this.input_variables != null) {
-      data.input_variables = this.input_variables;
+      data.input_variables = this.input_variables.map((item: VariableDefinition) => item.toObject());
     }
     if (this.output_variables != null) {
-      data.output_variables = this.output_variables;
+      data.output_variables = this.output_variables.map((item: VariableDefinition) => item.toObject());
     }
     if (this.prompt != null) {
       data.prompt = this.prompt.toObject();
@@ -919,20 +872,18 @@ export class Node extends pb_1.Message {
     const writer = w || new pb_1.BinaryWriter();
     if (this.has_node_info)
       writer.writeMessage(1, this.node_info, () => this.node_info.serialize(writer));
-    if (this.type_name != NodeTypeNames.PROMPT)
-      writer.writeEnum(2, this.type_name);
     if (this.input_variables.length)
-      writer.writeRepeatedString(3, this.input_variables);
+      writer.writeRepeatedMessage(2, this.input_variables, (item: VariableDefinition) => item.serialize(writer));
     if (this.output_variables.length)
-      writer.writeRepeatedString(4, this.output_variables);
+      writer.writeRepeatedMessage(3, this.output_variables, (item: VariableDefinition) => item.serialize(writer));
     if (this.has_prompt)
-      writer.writeMessage(5, this.prompt, () => this.prompt.serialize(writer));
+      writer.writeMessage(4, this.prompt, () => this.prompt.serialize(writer));
     if (this.has_process)
-      writer.writeMessage(6, this.process, () => this.process.serialize(writer));
+      writer.writeMessage(5, this.process, () => this.process.serialize(writer));
     if (this.has_conditional)
-      writer.writeMessage(7, this.conditional, () => this.conditional.serialize(writer));
+      writer.writeMessage(6, this.conditional, () => this.conditional.serialize(writer));
     if (this.has_command)
-      writer.writeMessage(8, this.command, () => this.command.serialize(writer));
+      writer.writeMessage(7, this.command, () => this.command.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -946,24 +897,21 @@ export class Node extends pb_1.Message {
         reader.readMessage(message.node_info, () => message.node_info = GraphNodeInfo.deserialize(reader));
         break;
       case 2:
-        message.type_name = reader.readEnum();
+        reader.readMessage(message.input_variables, () => pb_1.Message.addToRepeatedWrapperField(message, 2, VariableDefinition.deserialize(reader), VariableDefinition));
         break;
       case 3:
-        pb_1.Message.addToRepeatedField(message, 3, reader.readString());
+        reader.readMessage(message.output_variables, () => pb_1.Message.addToRepeatedWrapperField(message, 3, VariableDefinition.deserialize(reader), VariableDefinition));
         break;
       case 4:
-        pb_1.Message.addToRepeatedField(message, 4, reader.readString());
-        break;
-      case 5:
         reader.readMessage(message.prompt, () => message.prompt = Prompt.deserialize(reader));
         break;
-      case 6:
+      case 5:
         reader.readMessage(message.process, () => message.process = Process.deserialize(reader));
         break;
-      case 7:
+      case 6:
         reader.readMessage(message.conditional, () => message.conditional = Conditional.deserialize(reader));
         break;
-      case 8:
+      case 7:
         reader.readMessage(message.command, () => message.command = Command.deserialize(reader));
         break;
       default: reader.skipField();
@@ -978,53 +926,144 @@ export class Node extends pb_1.Message {
     return Node.deserialize(bytes);
   }
 }
-export class ExecutionStep extends pb_1.Message {
+export class Identity extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
-        topological_order?: string[];
-        current_node?: Node;
-        variable_definitions?: Map<string, string>;
+        id?: string;
+        group_id?: string;
+    }) {
+    super();
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("id" in data && data.id != undefined) {
+        this.id = data.id;
+      }
+      if ("group_id" in data && data.group_id != undefined) {
+        this.group_id = data.group_id;
+      }
+    }
+  }
+  get id() {
+    return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+  }
+  set id(value: string) {
+    pb_1.Message.setField(this, 1, value);
+  }
+  get group_id() {
+    return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+  }
+  set group_id(value: string) {
+    pb_1.Message.setField(this, 2, value);
+  }
+  static fromObject(data: {
+        id?: string;
+        group_id?: string;
+    }): Identity {
+    const message = new Identity({});
+    if (data.id != null) {
+      message.id = data.id;
+    }
+    if (data.group_id != null) {
+      message.group_id = data.group_id;
+    }
+    return message;
+  }
+  toObject() {
+    const data: {
+            id?: string;
+            group_id?: string;
+        } = {};
+    if (this.id != null) {
+      data.id = this.id;
+    }
+    if (this.group_id != null) {
+      data.group_id = this.group_id;
+    }
+    return data;
+  }
+  serialize(): Uint8Array;
+  serialize(w: pb_1.BinaryWriter): void;
+  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.id.length)
+      writer.writeString(1, this.id);
+    if (this.group_id.length)
+      writer.writeString(2, this.group_id);
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Identity {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Identity();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+      case 1:
+        message.id = reader.readString();
+        break;
+      case 2:
+        message.group_id = reader.readString();
+        break;
+      default: reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary(): Uint8Array {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes: Uint8Array): Identity {
+    return Identity.deserialize(bytes);
+  }
+}
+export class Execution extends pb_1.Message {
+  #one_of_decls: number[][] = [];
+  constructor(data?: any[] | {
+        current_node?: GraphNodeInfo;
+        process?: Process;
+        current_variable_definitions?: VariableDefinition[];
         execution_id?: string;
     }) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
-      if ("topological_order" in data && data.topological_order != undefined) {
-        this.topological_order = data.topological_order;
-      }
       if ("current_node" in data && data.current_node != undefined) {
         this.current_node = data.current_node;
       }
-      if ("variable_definitions" in data && data.variable_definitions != undefined) {
-        this.variable_definitions = data.variable_definitions;
+      if ("process" in data && data.process != undefined) {
+        this.process = data.process;
+      }
+      if ("current_variable_definitions" in data && data.current_variable_definitions != undefined) {
+        this.current_variable_definitions = data.current_variable_definitions;
       }
       if ("execution_id" in data && data.execution_id != undefined) {
         this.execution_id = data.execution_id;
       }
     }
-    if (!this.variable_definitions)
-      this.variable_definitions = new Map();
-  }
-  get topological_order() {
-    return pb_1.Message.getFieldWithDefault(this, 1, []) as string[];
-  }
-  set topological_order(value: string[]) {
-    pb_1.Message.setField(this, 1, value);
   }
   get current_node() {
-    return pb_1.Message.getWrapperField(this, Node, 2) as Node;
+    return pb_1.Message.getWrapperField(this, GraphNodeInfo, 1) as GraphNodeInfo;
   }
-  set current_node(value: Node) {
-    pb_1.Message.setWrapperField(this, 2, value);
+  set current_node(value: GraphNodeInfo) {
+    pb_1.Message.setWrapperField(this, 1, value);
   }
   get has_current_node() {
+    return pb_1.Message.getField(this, 1) != null;
+  }
+  get process() {
+    return pb_1.Message.getWrapperField(this, Process, 2) as Process;
+  }
+  set process(value: Process) {
+    pb_1.Message.setWrapperField(this, 2, value);
+  }
+  get has_process() {
     return pb_1.Message.getField(this, 2) != null;
   }
-  get variable_definitions() {
-    return pb_1.Message.getField(this, 3) as any as Map<string, string>;
+  get current_variable_definitions() {
+    return pb_1.Message.getRepeatedWrapperField(this, VariableDefinition, 3) as VariableDefinition[];
   }
-  set variable_definitions(value: Map<string, string>) {
-    pb_1.Message.setField(this, 3, value as any);
+  set current_variable_definitions(value: VariableDefinition[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 3, value);
   }
   get execution_id() {
     return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
@@ -1033,22 +1072,20 @@ export class ExecutionStep extends pb_1.Message {
     pb_1.Message.setField(this, 4, value);
   }
   static fromObject(data: {
-        topological_order?: string[];
-        current_node?: ReturnType<typeof Node.prototype.toObject>;
-        variable_definitions?: {
-            [key: string]: string;
-        };
+        current_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
+        process?: ReturnType<typeof Process.prototype.toObject>;
+        current_variable_definitions?: ReturnType<typeof VariableDefinition.prototype.toObject>[];
         execution_id?: string;
-    }): ExecutionStep {
-    const message = new ExecutionStep({});
-    if (data.topological_order != null) {
-      message.topological_order = data.topological_order;
-    }
+    }): Execution {
+    const message = new Execution({});
     if (data.current_node != null) {
-      message.current_node = Node.fromObject(data.current_node);
+      message.current_node = GraphNodeInfo.fromObject(data.current_node);
     }
-    if (typeof data.variable_definitions == "object") {
-      message.variable_definitions = new Map(Object.entries(data.variable_definitions));
+    if (data.process != null) {
+      message.process = Process.fromObject(data.process);
+    }
+    if (data.current_variable_definitions != null) {
+      message.current_variable_definitions = data.current_variable_definitions.map(item => VariableDefinition.fromObject(item));
     }
     if (data.execution_id != null) {
       message.execution_id = data.execution_id;
@@ -1057,21 +1094,19 @@ export class ExecutionStep extends pb_1.Message {
   }
   toObject() {
     const data: {
-            topological_order?: string[];
-            current_node?: ReturnType<typeof Node.prototype.toObject>;
-            variable_definitions?: {
-                [key: string]: string;
-            };
+            current_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
+            process?: ReturnType<typeof Process.prototype.toObject>;
+            current_variable_definitions?: ReturnType<typeof VariableDefinition.prototype.toObject>[];
             execution_id?: string;
         } = {};
-    if (this.topological_order != null) {
-      data.topological_order = this.topological_order;
-    }
     if (this.current_node != null) {
       data.current_node = this.current_node.toObject();
     }
-    if (this.variable_definitions != null) {
-      data.variable_definitions = (Object.fromEntries)(this.variable_definitions);
+    if (this.process != null) {
+      data.process = this.process.toObject();
+    }
+    if (this.current_variable_definitions != null) {
+      data.current_variable_definitions = this.current_variable_definitions.map((item: VariableDefinition) => item.toObject());
     }
     if (this.execution_id != null) {
       data.execution_id = this.execution_id;
@@ -1082,35 +1117,31 @@ export class ExecutionStep extends pb_1.Message {
   serialize(w: pb_1.BinaryWriter): void;
   serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
     const writer = w || new pb_1.BinaryWriter();
-    if (this.topological_order.length)
-      writer.writeRepeatedString(1, this.topological_order);
     if (this.has_current_node)
-      writer.writeMessage(2, this.current_node, () => this.current_node.serialize(writer));
-    for (const [key, value] of this.variable_definitions) {
-      writer.writeMessage(3, this.variable_definitions, () => {
-        writer.writeString(1, key);
-        writer.writeString(2, value);
-      });
-    }
+      writer.writeMessage(1, this.current_node, () => this.current_node.serialize(writer));
+    if (this.has_process)
+      writer.writeMessage(2, this.process, () => this.process.serialize(writer));
+    if (this.current_variable_definitions.length)
+      writer.writeRepeatedMessage(3, this.current_variable_definitions, (item: VariableDefinition) => item.serialize(writer));
     if (this.execution_id.length)
       writer.writeString(4, this.execution_id);
     if (!w)
       return writer.getResultBuffer();
   }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ExecutionStep {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ExecutionStep();
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Execution {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Execution();
     while (reader.nextField()) {
       if (reader.isEndGroup())
         break;
       switch (reader.getFieldNumber()) {
       case 1:
-        pb_1.Message.addToRepeatedField(message, 1, reader.readString());
+        reader.readMessage(message.current_node, () => message.current_node = GraphNodeInfo.deserialize(reader));
         break;
       case 2:
-        reader.readMessage(message.current_node, () => message.current_node = Node.deserialize(reader));
+        reader.readMessage(message.process, () => message.process = Process.deserialize(reader));
         break;
       case 3:
-        reader.readMessage(message, () => pb_1.Map.deserializeBinary(message.variable_definitions as any, reader, reader.readString, reader.readString));
+        reader.readMessage(message.current_variable_definitions, () => pb_1.Message.addToRepeatedWrapperField(message, 3, VariableDefinition.deserialize(reader), VariableDefinition));
         break;
       case 4:
         message.execution_id = reader.readString();
@@ -1123,8 +1154,207 @@ export class ExecutionStep extends pb_1.Message {
   serializeBinary(): Uint8Array {
     return this.serialize();
   }
-  static deserializeBinary(bytes: Uint8Array): ExecutionStep {
-    return ExecutionStep.deserialize(bytes);
+  static deserializeBinary(bytes: Uint8Array): Execution {
+    return Execution.deserialize(bytes);
+  }
+}
+export class VariableDefinition extends pb_1.Message {
+  #one_of_decls: number[][] = [[2, 3, 4, 5]];
+  constructor(data?: any[] | ({
+        name?: string;
+    } & (({
+        string_value?: string;
+        int_value?: never;
+        float_value?: never;
+        bool_value?: never;
+    } | {
+        string_value?: never;
+        int_value?: number;
+        float_value?: never;
+        bool_value?: never;
+    } | {
+        string_value?: never;
+        int_value?: never;
+        float_value?: number;
+        bool_value?: never;
+    } | {
+        string_value?: never;
+        int_value?: never;
+        float_value?: never;
+        bool_value?: boolean;
+    })))) {
+    super();
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("name" in data && data.name != undefined) {
+        this.name = data.name;
+      }
+      if ("string_value" in data && data.string_value != undefined) {
+        this.string_value = data.string_value;
+      }
+      if ("int_value" in data && data.int_value != undefined) {
+        this.int_value = data.int_value;
+      }
+      if ("float_value" in data && data.float_value != undefined) {
+        this.float_value = data.float_value;
+      }
+      if ("bool_value" in data && data.bool_value != undefined) {
+        this.bool_value = data.bool_value;
+      }
+    }
+  }
+  get name() {
+    return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+  }
+  set name(value: string) {
+    pb_1.Message.setField(this, 1, value);
+  }
+  get string_value() {
+    return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+  }
+  set string_value(value: string) {
+    pb_1.Message.setOneofField(this, 2, this.#one_of_decls[0], value);
+  }
+  get has_string_value() {
+    return pb_1.Message.getField(this, 2) != null;
+  }
+  get int_value() {
+    return pb_1.Message.getFieldWithDefault(this, 3, 0) as number;
+  }
+  set int_value(value: number) {
+    pb_1.Message.setOneofField(this, 3, this.#one_of_decls[0], value);
+  }
+  get has_int_value() {
+    return pb_1.Message.getField(this, 3) != null;
+  }
+  get float_value() {
+    return pb_1.Message.getFieldWithDefault(this, 4, 0) as number;
+  }
+  set float_value(value: number) {
+    pb_1.Message.setOneofField(this, 4, this.#one_of_decls[0], value);
+  }
+  get has_float_value() {
+    return pb_1.Message.getField(this, 4) != null;
+  }
+  get bool_value() {
+    return pb_1.Message.getFieldWithDefault(this, 5, false) as boolean;
+  }
+  set bool_value(value: boolean) {
+    pb_1.Message.setOneofField(this, 5, this.#one_of_decls[0], value);
+  }
+  get has_bool_value() {
+    return pb_1.Message.getField(this, 5) != null;
+  }
+  get value() {
+    const cases: {
+            [index: number]: "none" | "string_value" | "int_value" | "float_value" | "bool_value";
+        } = {
+          0: "none",
+          2: "string_value",
+          3: "int_value",
+          4: "float_value",
+          5: "bool_value"
+        };
+    return cases[pb_1.Message.computeOneofCase(this, [2, 3, 4, 5])];
+  }
+  static fromObject(data: {
+        name?: string;
+        string_value?: string;
+        int_value?: number;
+        float_value?: number;
+        bool_value?: boolean;
+    }): VariableDefinition {
+    const message = new VariableDefinition({});
+    if (data.name != null) {
+      message.name = data.name;
+    }
+    if (data.string_value != null) {
+      message.string_value = data.string_value;
+    }
+    if (data.int_value != null) {
+      message.int_value = data.int_value;
+    }
+    if (data.float_value != null) {
+      message.float_value = data.float_value;
+    }
+    if (data.bool_value != null) {
+      message.bool_value = data.bool_value;
+    }
+    return message;
+  }
+  toObject() {
+    const data: {
+            name?: string;
+            string_value?: string;
+            int_value?: number;
+            float_value?: number;
+            bool_value?: boolean;
+        } = {};
+    if (this.name != null) {
+      data.name = this.name;
+    }
+    if (this.string_value != null) {
+      data.string_value = this.string_value;
+    }
+    if (this.int_value != null) {
+      data.int_value = this.int_value;
+    }
+    if (this.float_value != null) {
+      data.float_value = this.float_value;
+    }
+    if (this.bool_value != null) {
+      data.bool_value = this.bool_value;
+    }
+    return data;
+  }
+  serialize(): Uint8Array;
+  serialize(w: pb_1.BinaryWriter): void;
+  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.name.length)
+      writer.writeString(1, this.name);
+    if (this.has_string_value)
+      writer.writeString(2, this.string_value);
+    if (this.has_int_value)
+      writer.writeInt32(3, this.int_value);
+    if (this.has_float_value)
+      writer.writeFloat(4, this.float_value);
+    if (this.has_bool_value)
+      writer.writeBool(5, this.bool_value);
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): VariableDefinition {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new VariableDefinition();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+      case 1:
+        message.name = reader.readString();
+        break;
+      case 2:
+        message.string_value = reader.readString();
+        break;
+      case 3:
+        message.int_value = reader.readInt32();
+        break;
+      case 4:
+        message.float_value = reader.readFloat();
+        break;
+      case 5:
+        message.bool_value = reader.readBool();
+        break;
+      default: reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary(): Uint8Array {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes: Uint8Array): VariableDefinition {
+    return VariableDefinition.deserialize(bytes);
   }
 }
 export class SystemState extends pb_1.Message {
@@ -1134,9 +1364,9 @@ export class SystemState extends pb_1.Message {
         websocket_ready?: boolean;
         graph?: Graph;
         nodes?: Node[];
-        selected_node?: GraphNodeInfo[];
-        selected_edge?: Edge[];
-        execution_step?: ExecutionStep;
+        selected_nodes?: GraphNodeInfo[];
+        selected_edges?: Edge[];
+        execution_step?: Execution;
         selected_process?: Node;
     }) {
     super();
@@ -1154,11 +1384,11 @@ export class SystemState extends pb_1.Message {
       if ("nodes" in data && data.nodes != undefined) {
         this.nodes = data.nodes;
       }
-      if ("selected_node" in data && data.selected_node != undefined) {
-        this.selected_node = data.selected_node;
+      if ("selected_nodes" in data && data.selected_nodes != undefined) {
+        this.selected_nodes = data.selected_nodes;
       }
-      if ("selected_edge" in data && data.selected_edge != undefined) {
-        this.selected_edge = data.selected_edge;
+      if ("selected_edges" in data && data.selected_edges != undefined) {
+        this.selected_edges = data.selected_edges;
       }
       if ("execution_step" in data && data.execution_step != undefined) {
         this.execution_step = data.execution_step;
@@ -1195,22 +1425,22 @@ export class SystemState extends pb_1.Message {
   set nodes(value: Node[]) {
     pb_1.Message.setRepeatedWrapperField(this, 4, value);
   }
-  get selected_node() {
+  get selected_nodes() {
     return pb_1.Message.getRepeatedWrapperField(this, GraphNodeInfo, 5) as GraphNodeInfo[];
   }
-  set selected_node(value: GraphNodeInfo[]) {
+  set selected_nodes(value: GraphNodeInfo[]) {
     pb_1.Message.setRepeatedWrapperField(this, 5, value);
   }
-  get selected_edge() {
+  get selected_edges() {
     return pb_1.Message.getRepeatedWrapperField(this, Edge, 6) as Edge[];
   }
-  set selected_edge(value: Edge[]) {
+  set selected_edges(value: Edge[]) {
     pb_1.Message.setRepeatedWrapperField(this, 6, value);
   }
   get execution_step() {
-    return pb_1.Message.getWrapperField(this, ExecutionStep, 7) as ExecutionStep;
+    return pb_1.Message.getWrapperField(this, Execution, 7) as Execution;
   }
-  set execution_step(value: ExecutionStep) {
+  set execution_step(value: Execution) {
     pb_1.Message.setWrapperField(this, 7, value);
   }
   get has_execution_step() {
@@ -1230,9 +1460,9 @@ export class SystemState extends pb_1.Message {
         websocket_ready?: boolean;
         graph?: ReturnType<typeof Graph.prototype.toObject>;
         nodes?: ReturnType<typeof Node.prototype.toObject>[];
-        selected_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
-        selected_edge?: ReturnType<typeof Edge.prototype.toObject>[];
-        execution_step?: ReturnType<typeof ExecutionStep.prototype.toObject>;
+        selected_nodes?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
+        selected_edges?: ReturnType<typeof Edge.prototype.toObject>[];
+        execution_step?: ReturnType<typeof Execution.prototype.toObject>;
         selected_process?: ReturnType<typeof Node.prototype.toObject>;
     }): SystemState {
     const message = new SystemState({});
@@ -1248,14 +1478,14 @@ export class SystemState extends pb_1.Message {
     if (data.nodes != null) {
       message.nodes = data.nodes.map(item => Node.fromObject(item));
     }
-    if (data.selected_node != null) {
-      message.selected_node = data.selected_node.map(item => GraphNodeInfo.fromObject(item));
+    if (data.selected_nodes != null) {
+      message.selected_nodes = data.selected_nodes.map(item => GraphNodeInfo.fromObject(item));
     }
-    if (data.selected_edge != null) {
-      message.selected_edge = data.selected_edge.map(item => Edge.fromObject(item));
+    if (data.selected_edges != null) {
+      message.selected_edges = data.selected_edges.map(item => Edge.fromObject(item));
     }
     if (data.execution_step != null) {
-      message.execution_step = ExecutionStep.fromObject(data.execution_step);
+      message.execution_step = Execution.fromObject(data.execution_step);
     }
     if (data.selected_process != null) {
       message.selected_process = Node.fromObject(data.selected_process);
@@ -1268,9 +1498,9 @@ export class SystemState extends pb_1.Message {
             websocket_ready?: boolean;
             graph?: ReturnType<typeof Graph.prototype.toObject>;
             nodes?: ReturnType<typeof Node.prototype.toObject>[];
-            selected_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
-            selected_edge?: ReturnType<typeof Edge.prototype.toObject>[];
-            execution_step?: ReturnType<typeof ExecutionStep.prototype.toObject>;
+            selected_nodes?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
+            selected_edges?: ReturnType<typeof Edge.prototype.toObject>[];
+            execution_step?: ReturnType<typeof Execution.prototype.toObject>;
             selected_process?: ReturnType<typeof Node.prototype.toObject>;
         } = {};
     if (this.authenticated != null) {
@@ -1285,11 +1515,11 @@ export class SystemState extends pb_1.Message {
     if (this.nodes != null) {
       data.nodes = this.nodes.map((item: Node) => item.toObject());
     }
-    if (this.selected_node != null) {
-      data.selected_node = this.selected_node.map((item: GraphNodeInfo) => item.toObject());
+    if (this.selected_nodes != null) {
+      data.selected_nodes = this.selected_nodes.map((item: GraphNodeInfo) => item.toObject());
     }
-    if (this.selected_edge != null) {
-      data.selected_edge = this.selected_edge.map((item: Edge) => item.toObject());
+    if (this.selected_edges != null) {
+      data.selected_edges = this.selected_edges.map((item: Edge) => item.toObject());
     }
     if (this.execution_step != null) {
       data.execution_step = this.execution_step.toObject();
@@ -1311,10 +1541,10 @@ export class SystemState extends pb_1.Message {
       writer.writeMessage(3, this.graph, () => this.graph.serialize(writer));
     if (this.nodes.length)
       writer.writeRepeatedMessage(4, this.nodes, (item: Node) => item.serialize(writer));
-    if (this.selected_node.length)
-      writer.writeRepeatedMessage(5, this.selected_node, (item: GraphNodeInfo) => item.serialize(writer));
-    if (this.selected_edge.length)
-      writer.writeRepeatedMessage(6, this.selected_edge, (item: Edge) => item.serialize(writer));
+    if (this.selected_nodes.length)
+      writer.writeRepeatedMessage(5, this.selected_nodes, (item: GraphNodeInfo) => item.serialize(writer));
+    if (this.selected_edges.length)
+      writer.writeRepeatedMessage(6, this.selected_edges, (item: Edge) => item.serialize(writer));
     if (this.has_execution_step)
       writer.writeMessage(7, this.execution_step, () => this.execution_step.serialize(writer));
     if (this.has_selected_process)
@@ -1341,13 +1571,13 @@ export class SystemState extends pb_1.Message {
         reader.readMessage(message.nodes, () => pb_1.Message.addToRepeatedWrapperField(message, 4, Node.deserialize(reader), Node));
         break;
       case 5:
-        reader.readMessage(message.selected_node, () => pb_1.Message.addToRepeatedWrapperField(message, 5, GraphNodeInfo.deserialize(reader), GraphNodeInfo));
+        reader.readMessage(message.selected_nodes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, GraphNodeInfo.deserialize(reader), GraphNodeInfo));
         break;
       case 6:
-        reader.readMessage(message.selected_edge, () => pb_1.Message.addToRepeatedWrapperField(message, 6, Edge.deserialize(reader), Edge));
+        reader.readMessage(message.selected_edges, () => pb_1.Message.addToRepeatedWrapperField(message, 6, Edge.deserialize(reader), Edge));
         break;
       case 7:
-        reader.readMessage(message.execution_step, () => message.execution_step = ExecutionStep.deserialize(reader));
+        reader.readMessage(message.execution_step, () => message.execution_step = Execution.deserialize(reader));
         break;
       case 8:
         reader.readMessage(message.selected_process, () => message.selected_process = Node.deserialize(reader));
@@ -1544,276 +1774,61 @@ export class UserSettings extends pb_1.Message {
     return UserSettings.deserialize(bytes);
   }
 }
-export class ValidateNodes extends pb_1.Message {
+export class MessageBundle extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
-        nodes?: Node[];
-        containing_node?: GraphNodeInfo;
-    }) {
-    super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
-    if (!Array.isArray(data) && typeof data == "object") {
-      if ("nodes" in data && data.nodes != undefined) {
-        this.nodes = data.nodes;
-      }
-      if ("containing_node" in data && data.containing_node != undefined) {
-        this.containing_node = data.containing_node;
-      }
-    }
-  }
-  get nodes() {
-    return pb_1.Message.getRepeatedWrapperField(this, Node, 1) as Node[];
-  }
-  set nodes(value: Node[]) {
-    pb_1.Message.setRepeatedWrapperField(this, 1, value);
-  }
-  get containing_node() {
-    return pb_1.Message.getWrapperField(this, GraphNodeInfo, 2) as GraphNodeInfo;
-  }
-  set containing_node(value: GraphNodeInfo) {
-    pb_1.Message.setWrapperField(this, 2, value);
-  }
-  get has_containing_node() {
-    return pb_1.Message.getField(this, 2) != null;
-  }
-  static fromObject(data: {
-        nodes?: ReturnType<typeof Node.prototype.toObject>[];
-        containing_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
-    }): ValidateNodes {
-    const message = new ValidateNodes({});
-    if (data.nodes != null) {
-      message.nodes = data.nodes.map(item => Node.fromObject(item));
-    }
-    if (data.containing_node != null) {
-      message.containing_node = GraphNodeInfo.fromObject(data.containing_node);
-    }
-    return message;
-  }
-  toObject() {
-    const data: {
-            nodes?: ReturnType<typeof Node.prototype.toObject>[];
-            containing_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
-        } = {};
-    if (this.nodes != null) {
-      data.nodes = this.nodes.map((item: Node) => item.toObject());
-    }
-    if (this.containing_node != null) {
-      data.containing_node = this.containing_node.toObject();
-    }
-    return data;
-  }
-  serialize(): Uint8Array;
-  serialize(w: pb_1.BinaryWriter): void;
-  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-    const writer = w || new pb_1.BinaryWriter();
-    if (this.nodes.length)
-      writer.writeRepeatedMessage(1, this.nodes, (item: Node) => item.serialize(writer));
-    if (this.has_containing_node)
-      writer.writeMessage(2, this.containing_node, () => this.containing_node.serialize(writer));
-    if (!w)
-      return writer.getResultBuffer();
-  }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ValidateNodes {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ValidateNodes();
-    while (reader.nextField()) {
-      if (reader.isEndGroup())
-        break;
-      switch (reader.getFieldNumber()) {
-      case 1:
-        reader.readMessage(message.nodes, () => pb_1.Message.addToRepeatedWrapperField(message, 1, Node.deserialize(reader), Node));
-        break;
-      case 2:
-        reader.readMessage(message.containing_node, () => message.containing_node = GraphNodeInfo.deserialize(reader));
-        break;
-      default: reader.skipField();
-      }
-    }
-    return message;
-  }
-  serializeBinary(): Uint8Array {
-    return this.serialize();
-  }
-  static deserializeBinary(bytes: Uint8Array): ValidateNodes {
-    return ValidateNodes.deserialize(bytes);
-  }
-}
-export class CrudBundle extends pb_1.Message {
-  #one_of_decls: number[][] = [[2, 3, 4, 5, 6]];
-  constructor(data?: any[] | ({
         verb?: VerbTypeNames;
-    } & (({
-        node?: Node;
-        authentication_message?: never;
-        user_settings?: never;
-        execution_context?: never;
-        validate_nodes?: never;
-    } | {
-        node?: never;
-        authentication_message?: AuthenticationMessage;
-        user_settings?: never;
-        execution_context?: never;
-        validate_nodes?: never;
-    } | {
-        node?: never;
-        authentication_message?: never;
-        user_settings?: UserSettings;
-        execution_context?: never;
-        validate_nodes?: never;
-    } | {
-        node?: never;
-        authentication_message?: never;
-        user_settings?: never;
-        execution_context?: ExecutionStep;
-        validate_nodes?: never;
-    } | {
-        node?: never;
-        authentication_message?: never;
-        user_settings?: never;
-        execution_context?: never;
-        validate_nodes?: ValidateNodes;
-    })))) {
+        container?: Contents;
+    }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
       if ("verb" in data && data.verb != undefined) {
         this.verb = data.verb;
       }
-      if ("node" in data && data.node != undefined) {
-        this.node = data.node;
-      }
-      if ("authentication_message" in data && data.authentication_message != undefined) {
-        this.authentication_message = data.authentication_message;
-      }
-      if ("user_settings" in data && data.user_settings != undefined) {
-        this.user_settings = data.user_settings;
-      }
-      if ("execution_context" in data && data.execution_context != undefined) {
-        this.execution_context = data.execution_context;
-      }
-      if ("validate_nodes" in data && data.validate_nodes != undefined) {
-        this.validate_nodes = data.validate_nodes;
+      if ("container" in data && data.container != undefined) {
+        this.container = data.container;
       }
     }
   }
   get verb() {
-    return pb_1.Message.getFieldWithDefault(this, 1, VerbTypeNames.Post) as VerbTypeNames;
+    return pb_1.Message.getFieldWithDefault(this, 1, VerbTypeNames.Create) as VerbTypeNames;
   }
   set verb(value: VerbTypeNames) {
     pb_1.Message.setField(this, 1, value);
   }
-  get node() {
-    return pb_1.Message.getWrapperField(this, Node, 2) as Node;
+  get container() {
+    return pb_1.Message.getWrapperField(this, Contents, 2) as Contents;
   }
-  set node(value: Node) {
-    pb_1.Message.setOneofWrapperField(this, 2, this.#one_of_decls[0], value);
+  set container(value: Contents) {
+    pb_1.Message.setWrapperField(this, 2, value);
   }
-  get has_node() {
+  get has_container() {
     return pb_1.Message.getField(this, 2) != null;
-  }
-  get authentication_message() {
-    return pb_1.Message.getWrapperField(this, AuthenticationMessage, 3) as AuthenticationMessage;
-  }
-  set authentication_message(value: AuthenticationMessage) {
-    pb_1.Message.setOneofWrapperField(this, 3, this.#one_of_decls[0], value);
-  }
-  get has_authentication_message() {
-    return pb_1.Message.getField(this, 3) != null;
-  }
-  get user_settings() {
-    return pb_1.Message.getWrapperField(this, UserSettings, 4) as UserSettings;
-  }
-  set user_settings(value: UserSettings) {
-    pb_1.Message.setOneofWrapperField(this, 4, this.#one_of_decls[0], value);
-  }
-  get has_user_settings() {
-    return pb_1.Message.getField(this, 4) != null;
-  }
-  get execution_context() {
-    return pb_1.Message.getWrapperField(this, ExecutionStep, 5) as ExecutionStep;
-  }
-  set execution_context(value: ExecutionStep) {
-    pb_1.Message.setOneofWrapperField(this, 5, this.#one_of_decls[0], value);
-  }
-  get has_execution_context() {
-    return pb_1.Message.getField(this, 5) != null;
-  }
-  get validate_nodes() {
-    return pb_1.Message.getWrapperField(this, ValidateNodes, 6) as ValidateNodes;
-  }
-  set validate_nodes(value: ValidateNodes) {
-    pb_1.Message.setOneofWrapperField(this, 6, this.#one_of_decls[0], value);
-  }
-  get has_validate_nodes() {
-    return pb_1.Message.getField(this, 6) != null;
-  }
-  get object() {
-    const cases: {
-            [index: number]: "none" | "node" | "authentication_message" | "user_settings" | "execution_context" | "validate_nodes";
-        } = {
-          0: "none",
-          2: "node",
-          3: "authentication_message",
-          4: "user_settings",
-          5: "execution_context",
-          6: "validate_nodes"
-        };
-    return cases[pb_1.Message.computeOneofCase(this, [2, 3, 4, 5, 6])];
   }
   static fromObject(data: {
         verb?: VerbTypeNames;
-        node?: ReturnType<typeof Node.prototype.toObject>;
-        authentication_message?: ReturnType<typeof AuthenticationMessage.prototype.toObject>;
-        user_settings?: ReturnType<typeof UserSettings.prototype.toObject>;
-        execution_context?: ReturnType<typeof ExecutionStep.prototype.toObject>;
-        validate_nodes?: ReturnType<typeof ValidateNodes.prototype.toObject>;
-    }): CrudBundle {
-    const message = new CrudBundle({});
+        container?: ReturnType<typeof Contents.prototype.toObject>;
+    }): MessageBundle {
+    const message = new MessageBundle({});
     if (data.verb != null) {
       message.verb = data.verb;
     }
-    if (data.node != null) {
-      message.node = Node.fromObject(data.node);
-    }
-    if (data.authentication_message != null) {
-      message.authentication_message = AuthenticationMessage.fromObject(data.authentication_message);
-    }
-    if (data.user_settings != null) {
-      message.user_settings = UserSettings.fromObject(data.user_settings);
-    }
-    if (data.execution_context != null) {
-      message.execution_context = ExecutionStep.fromObject(data.execution_context);
-    }
-    if (data.validate_nodes != null) {
-      message.validate_nodes = ValidateNodes.fromObject(data.validate_nodes);
+    if (data.container != null) {
+      message.container = Contents.fromObject(data.container);
     }
     return message;
   }
   toObject() {
     const data: {
             verb?: VerbTypeNames;
-            node?: ReturnType<typeof Node.prototype.toObject>;
-            authentication_message?: ReturnType<typeof AuthenticationMessage.prototype.toObject>;
-            user_settings?: ReturnType<typeof UserSettings.prototype.toObject>;
-            execution_context?: ReturnType<typeof ExecutionStep.prototype.toObject>;
-            validate_nodes?: ReturnType<typeof ValidateNodes.prototype.toObject>;
+            container?: ReturnType<typeof Contents.prototype.toObject>;
         } = {};
     if (this.verb != null) {
       data.verb = this.verb;
     }
-    if (this.node != null) {
-      data.node = this.node.toObject();
-    }
-    if (this.authentication_message != null) {
-      data.authentication_message = this.authentication_message.toObject();
-    }
-    if (this.user_settings != null) {
-      data.user_settings = this.user_settings.toObject();
-    }
-    if (this.execution_context != null) {
-      data.execution_context = this.execution_context.toObject();
-    }
-    if (this.validate_nodes != null) {
-      data.validate_nodes = this.validate_nodes.toObject();
+    if (this.container != null) {
+      data.container = this.container.toObject();
     }
     return data;
   }
@@ -1821,23 +1836,15 @@ export class CrudBundle extends pb_1.Message {
   serialize(w: pb_1.BinaryWriter): void;
   serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
     const writer = w || new pb_1.BinaryWriter();
-    if (this.verb != VerbTypeNames.Post)
+    if (this.verb != VerbTypeNames.Create)
       writer.writeEnum(1, this.verb);
-    if (this.has_node)
-      writer.writeMessage(2, this.node, () => this.node.serialize(writer));
-    if (this.has_authentication_message)
-      writer.writeMessage(3, this.authentication_message, () => this.authentication_message.serialize(writer));
-    if (this.has_user_settings)
-      writer.writeMessage(4, this.user_settings, () => this.user_settings.serialize(writer));
-    if (this.has_execution_context)
-      writer.writeMessage(5, this.execution_context, () => this.execution_context.serialize(writer));
-    if (this.has_validate_nodes)
-      writer.writeMessage(6, this.validate_nodes, () => this.validate_nodes.serialize(writer));
+    if (this.has_container)
+      writer.writeMessage(2, this.container, () => this.container.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CrudBundle {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CrudBundle();
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): MessageBundle {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new MessageBundle();
     while (reader.nextField()) {
       if (reader.isEndGroup())
         break;
@@ -1846,19 +1853,7 @@ export class CrudBundle extends pb_1.Message {
         message.verb = reader.readEnum();
         break;
       case 2:
-        reader.readMessage(message.node, () => message.node = Node.deserialize(reader));
-        break;
-      case 3:
-        reader.readMessage(message.authentication_message, () => message.authentication_message = AuthenticationMessage.deserialize(reader));
-        break;
-      case 4:
-        reader.readMessage(message.user_settings, () => message.user_settings = UserSettings.deserialize(reader));
-        break;
-      case 5:
-        reader.readMessage(message.execution_context, () => message.execution_context = ExecutionStep.deserialize(reader));
-        break;
-      case 6:
-        reader.readMessage(message.validate_nodes, () => message.validate_nodes = ValidateNodes.deserialize(reader));
+        reader.readMessage(message.container, () => message.container = Contents.deserialize(reader));
         break;
       default: reader.skipField();
       }
@@ -1868,592 +1863,65 @@ export class CrudBundle extends pb_1.Message {
   serializeBinary(): Uint8Array {
     return this.serialize();
   }
-  static deserializeBinary(bytes: Uint8Array): CrudBundle {
-    return CrudBundle.deserialize(bytes);
+  static deserializeBinary(bytes: Uint8Array): MessageBundle {
+    return MessageBundle.deserialize(bytes);
   }
 }
-export class CommandResponse extends pb_1.Message {
+export class SystemError extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
-        error?: string;
-        output?: string;
+        error_message?: string;
+        originator?: Identity;
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
-      if ("error" in data && data.error != undefined) {
-        this.error = data.error;
+      if ("error_message" in data && data.error_message != undefined) {
+        this.error_message = data.error_message;
       }
-      if ("output" in data && data.output != undefined) {
-        this.output = data.output;
+      if ("originator" in data && data.originator != undefined) {
+        this.originator = data.originator;
       }
     }
   }
-  get error() {
+  get error_message() {
     return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
   }
-  set error(value: string) {
+  set error_message(value: string) {
     pb_1.Message.setField(this, 1, value);
   }
-  get output() {
-    return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+  get originator() {
+    return pb_1.Message.getWrapperField(this, Identity, 2) as Identity;
   }
-  set output(value: string) {
-    pb_1.Message.setField(this, 2, value);
-  }
-  static fromObject(data: {
-        error?: string;
-        output?: string;
-    }): CommandResponse {
-    const message = new CommandResponse({});
-    if (data.error != null) {
-      message.error = data.error;
-    }
-    if (data.output != null) {
-      message.output = data.output;
-    }
-    return message;
-  }
-  toObject() {
-    const data: {
-            error?: string;
-            output?: string;
-        } = {};
-    if (this.error != null) {
-      data.error = this.error;
-    }
-    if (this.output != null) {
-      data.output = this.output;
-    }
-    return data;
-  }
-  serialize(): Uint8Array;
-  serialize(w: pb_1.BinaryWriter): void;
-  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-    const writer = w || new pb_1.BinaryWriter();
-    if (this.error.length)
-      writer.writeString(1, this.error);
-    if (this.output.length)
-      writer.writeString(2, this.output);
-    if (!w)
-      return writer.getResultBuffer();
-  }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CommandResponse {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CommandResponse();
-    while (reader.nextField()) {
-      if (reader.isEndGroup())
-        break;
-      switch (reader.getFieldNumber()) {
-      case 1:
-        message.error = reader.readString();
-        break;
-      case 2:
-        message.output = reader.readString();
-        break;
-      default: reader.skipField();
-      }
-    }
-    return message;
-  }
-  serializeBinary(): Uint8Array {
-    return this.serialize();
-  }
-  static deserializeBinary(bytes: Uint8Array): CommandResponse {
-    return CommandResponse.deserialize(bytes);
-  }
-}
-export class PromptResponse extends pb_1.Message {
-  #one_of_decls: number[][] = [];
-  constructor(data?: any[] | {
-        ai_text_response?: string;
-    }) {
-    super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-    if (!Array.isArray(data) && typeof data == "object") {
-      if ("ai_text_response" in data && data.ai_text_response != undefined) {
-        this.ai_text_response = data.ai_text_response;
-      }
-    }
-  }
-  get ai_text_response() {
-    return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-  }
-  set ai_text_response(value: string) {
-    pb_1.Message.setField(this, 1, value);
-  }
-  static fromObject(data: {
-        ai_text_response?: string;
-    }): PromptResponse {
-    const message = new PromptResponse({});
-    if (data.ai_text_response != null) {
-      message.ai_text_response = data.ai_text_response;
-    }
-    return message;
-  }
-  toObject() {
-    const data: {
-            ai_text_response?: string;
-        } = {};
-    if (this.ai_text_response != null) {
-      data.ai_text_response = this.ai_text_response;
-    }
-    return data;
-  }
-  serialize(): Uint8Array;
-  serialize(w: pb_1.BinaryWriter): void;
-  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-    const writer = w || new pb_1.BinaryWriter();
-    if (this.ai_text_response.length)
-      writer.writeString(1, this.ai_text_response);
-    if (!w)
-      return writer.getResultBuffer();
-  }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): PromptResponse {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new PromptResponse();
-    while (reader.nextField()) {
-      if (reader.isEndGroup())
-        break;
-      switch (reader.getFieldNumber()) {
-      case 1:
-        message.ai_text_response = reader.readString();
-        break;
-      default: reader.skipField();
-      }
-    }
-    return message;
-  }
-  serializeBinary(): Uint8Array {
-    return this.serialize();
-  }
-  static deserializeBinary(bytes: Uint8Array): PromptResponse {
-    return PromptResponse.deserialize(bytes);
-  }
-}
-export class ConditionalResponse extends pb_1.Message {
-  #one_of_decls: number[][] = [];
-  constructor(data?: any[] | {
-        chosen_option?: string;
-    }) {
-    super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-    if (!Array.isArray(data) && typeof data == "object") {
-      if ("chosen_option" in data && data.chosen_option != undefined) {
-        this.chosen_option = data.chosen_option;
-      }
-    }
-  }
-  get chosen_option() {
-    return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-  }
-  set chosen_option(value: string) {
-    pb_1.Message.setField(this, 1, value);
-  }
-  static fromObject(data: {
-        chosen_option?: string;
-    }): ConditionalResponse {
-    const message = new ConditionalResponse({});
-    if (data.chosen_option != null) {
-      message.chosen_option = data.chosen_option;
-    }
-    return message;
-  }
-  toObject() {
-    const data: {
-            chosen_option?: string;
-        } = {};
-    if (this.chosen_option != null) {
-      data.chosen_option = this.chosen_option;
-    }
-    return data;
-  }
-  serialize(): Uint8Array;
-  serialize(w: pb_1.BinaryWriter): void;
-  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-    const writer = w || new pb_1.BinaryWriter();
-    if (this.chosen_option.length)
-      writer.writeString(1, this.chosen_option);
-    if (!w)
-      return writer.getResultBuffer();
-  }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ConditionalResponse {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ConditionalResponse();
-    while (reader.nextField()) {
-      if (reader.isEndGroup())
-        break;
-      switch (reader.getFieldNumber()) {
-      case 1:
-        message.chosen_option = reader.readString();
-        break;
-      default: reader.skipField();
-      }
-    }
-    return message;
-  }
-  serializeBinary(): Uint8Array {
-    return this.serialize();
-  }
-  static deserializeBinary(bytes: Uint8Array): ConditionalResponse {
-    return ConditionalResponse.deserialize(bytes);
-  }
-}
-export class NodeExecutionResponse extends pb_1.Message {
-  #one_of_decls: number[][] = [[1, 2, 3]];
-  constructor(data?: any[] | ({} & (({
-        prompt_response?: PromptResponse;
-        command_response?: never;
-        conditional_response?: never;
-    } | {
-        prompt_response?: never;
-        command_response?: CommandResponse;
-        conditional_response?: never;
-    } | {
-        prompt_response?: never;
-        command_response?: never;
-        conditional_response?: ConditionalResponse;
-    })))) {
-    super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-    if (!Array.isArray(data) && typeof data == "object") {
-      if ("prompt_response" in data && data.prompt_response != undefined) {
-        this.prompt_response = data.prompt_response;
-      }
-      if ("command_response" in data && data.command_response != undefined) {
-        this.command_response = data.command_response;
-      }
-      if ("conditional_response" in data && data.conditional_response != undefined) {
-        this.conditional_response = data.conditional_response;
-      }
-    }
-  }
-  get prompt_response() {
-    return pb_1.Message.getWrapperField(this, PromptResponse, 1) as PromptResponse;
-  }
-  set prompt_response(value: PromptResponse) {
-    pb_1.Message.setOneofWrapperField(this, 1, this.#one_of_decls[0], value);
-  }
-  get has_prompt_response() {
-    return pb_1.Message.getField(this, 1) != null;
-  }
-  get command_response() {
-    return pb_1.Message.getWrapperField(this, CommandResponse, 2) as CommandResponse;
-  }
-  set command_response(value: CommandResponse) {
-    pb_1.Message.setOneofWrapperField(this, 2, this.#one_of_decls[0], value);
-  }
-  get has_command_response() {
-    return pb_1.Message.getField(this, 2) != null;
-  }
-  get conditional_response() {
-    return pb_1.Message.getWrapperField(this, ConditionalResponse, 3) as ConditionalResponse;
-  }
-  set conditional_response(value: ConditionalResponse) {
-    pb_1.Message.setOneofWrapperField(this, 3, this.#one_of_decls[0], value);
-  }
-  get has_conditional_response() {
-    return pb_1.Message.getField(this, 3) != null;
-  }
-  get response() {
-    const cases: {
-            [index: number]: "none" | "prompt_response" | "command_response" | "conditional_response";
-        } = {
-          0: "none",
-          1: "prompt_response",
-          2: "command_response",
-          3: "conditional_response"
-        };
-    return cases[pb_1.Message.computeOneofCase(this, [1, 2, 3])];
-  }
-  static fromObject(data: {
-        prompt_response?: ReturnType<typeof PromptResponse.prototype.toObject>;
-        command_response?: ReturnType<typeof CommandResponse.prototype.toObject>;
-        conditional_response?: ReturnType<typeof ConditionalResponse.prototype.toObject>;
-    }): NodeExecutionResponse {
-    const message = new NodeExecutionResponse({});
-    if (data.prompt_response != null) {
-      message.prompt_response = PromptResponse.fromObject(data.prompt_response);
-    }
-    if (data.command_response != null) {
-      message.command_response = CommandResponse.fromObject(data.command_response);
-    }
-    if (data.conditional_response != null) {
-      message.conditional_response = ConditionalResponse.fromObject(data.conditional_response);
-    }
-    return message;
-  }
-  toObject() {
-    const data: {
-            prompt_response?: ReturnType<typeof PromptResponse.prototype.toObject>;
-            command_response?: ReturnType<typeof CommandResponse.prototype.toObject>;
-            conditional_response?: ReturnType<typeof ConditionalResponse.prototype.toObject>;
-        } = {};
-    if (this.prompt_response != null) {
-      data.prompt_response = this.prompt_response.toObject();
-    }
-    if (this.command_response != null) {
-      data.command_response = this.command_response.toObject();
-    }
-    if (this.conditional_response != null) {
-      data.conditional_response = this.conditional_response.toObject();
-    }
-    return data;
-  }
-  serialize(): Uint8Array;
-  serialize(w: pb_1.BinaryWriter): void;
-  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-    const writer = w || new pb_1.BinaryWriter();
-    if (this.has_prompt_response)
-      writer.writeMessage(1, this.prompt_response, () => this.prompt_response.serialize(writer));
-    if (this.has_command_response)
-      writer.writeMessage(2, this.command_response, () => this.command_response.serialize(writer));
-    if (this.has_conditional_response)
-      writer.writeMessage(3, this.conditional_response, () => this.conditional_response.serialize(writer));
-    if (!w)
-      return writer.getResultBuffer();
-  }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): NodeExecutionResponse {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new NodeExecutionResponse();
-    while (reader.nextField()) {
-      if (reader.isEndGroup())
-        break;
-      switch (reader.getFieldNumber()) {
-      case 1:
-        reader.readMessage(message.prompt_response, () => message.prompt_response = PromptResponse.deserialize(reader));
-        break;
-      case 2:
-        reader.readMessage(message.command_response, () => message.command_response = CommandResponse.deserialize(reader));
-        break;
-      case 3:
-        reader.readMessage(message.conditional_response, () => message.conditional_response = ConditionalResponse.deserialize(reader));
-        break;
-      default: reader.skipField();
-      }
-    }
-    return message;
-  }
-  serializeBinary(): Uint8Array {
-    return this.serialize();
-  }
-  static deserializeBinary(bytes: Uint8Array): NodeExecutionResponse {
-    return NodeExecutionResponse.deserialize(bytes);
-  }
-}
-export class ExecutionResponse extends pb_1.Message {
-  #one_of_decls: number[][] = [];
-  constructor(data?: any[] | {
-        execution_id?: string;
-        container_execution_id?: string;
-        current_node_id?: string;
-        current_node_type?: NodeTypeNames;
-        response?: NodeExecutionResponse;
-    }) {
-    super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-    if (!Array.isArray(data) && typeof data == "object") {
-      if ("execution_id" in data && data.execution_id != undefined) {
-        this.execution_id = data.execution_id;
-      }
-      if ("container_execution_id" in data && data.container_execution_id != undefined) {
-        this.container_execution_id = data.container_execution_id;
-      }
-      if ("current_node_id" in data && data.current_node_id != undefined) {
-        this.current_node_id = data.current_node_id;
-      }
-      if ("current_node_type" in data && data.current_node_type != undefined) {
-        this.current_node_type = data.current_node_type;
-      }
-      if ("response" in data && data.response != undefined) {
-        this.response = data.response;
-      }
-    }
-  }
-  get execution_id() {
-    return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-  }
-  set execution_id(value: string) {
-    pb_1.Message.setField(this, 1, value);
-  }
-  get container_execution_id() {
-    return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
-  }
-  set container_execution_id(value: string) {
-    pb_1.Message.setField(this, 2, value);
-  }
-  get current_node_id() {
-    return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
-  }
-  set current_node_id(value: string) {
-    pb_1.Message.setField(this, 3, value);
-  }
-  get current_node_type() {
-    return pb_1.Message.getFieldWithDefault(this, 4, NodeTypeNames.PROMPT) as NodeTypeNames;
-  }
-  set current_node_type(value: NodeTypeNames) {
-    pb_1.Message.setField(this, 4, value);
-  }
-  get response() {
-    return pb_1.Message.getWrapperField(this, NodeExecutionResponse, 5) as NodeExecutionResponse;
-  }
-  set response(value: NodeExecutionResponse) {
-    pb_1.Message.setWrapperField(this, 5, value);
-  }
-  get has_response() {
-    return pb_1.Message.getField(this, 5) != null;
-  }
-  static fromObject(data: {
-        execution_id?: string;
-        container_execution_id?: string;
-        current_node_id?: string;
-        current_node_type?: NodeTypeNames;
-        response?: ReturnType<typeof NodeExecutionResponse.prototype.toObject>;
-    }): ExecutionResponse {
-    const message = new ExecutionResponse({});
-    if (data.execution_id != null) {
-      message.execution_id = data.execution_id;
-    }
-    if (data.container_execution_id != null) {
-      message.container_execution_id = data.container_execution_id;
-    }
-    if (data.current_node_id != null) {
-      message.current_node_id = data.current_node_id;
-    }
-    if (data.current_node_type != null) {
-      message.current_node_type = data.current_node_type;
-    }
-    if (data.response != null) {
-      message.response = NodeExecutionResponse.fromObject(data.response);
-    }
-    return message;
-  }
-  toObject() {
-    const data: {
-            execution_id?: string;
-            container_execution_id?: string;
-            current_node_id?: string;
-            current_node_type?: NodeTypeNames;
-            response?: ReturnType<typeof NodeExecutionResponse.prototype.toObject>;
-        } = {};
-    if (this.execution_id != null) {
-      data.execution_id = this.execution_id;
-    }
-    if (this.container_execution_id != null) {
-      data.container_execution_id = this.container_execution_id;
-    }
-    if (this.current_node_id != null) {
-      data.current_node_id = this.current_node_id;
-    }
-    if (this.current_node_type != null) {
-      data.current_node_type = this.current_node_type;
-    }
-    if (this.response != null) {
-      data.response = this.response.toObject();
-    }
-    return data;
-  }
-  serialize(): Uint8Array;
-  serialize(w: pb_1.BinaryWriter): void;
-  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-    const writer = w || new pb_1.BinaryWriter();
-    if (this.execution_id.length)
-      writer.writeString(1, this.execution_id);
-    if (this.container_execution_id.length)
-      writer.writeString(2, this.container_execution_id);
-    if (this.current_node_id.length)
-      writer.writeString(3, this.current_node_id);
-    if (this.current_node_type != NodeTypeNames.PROMPT)
-      writer.writeEnum(4, this.current_node_type);
-    if (this.has_response)
-      writer.writeMessage(5, this.response, () => this.response.serialize(writer));
-    if (!w)
-      return writer.getResultBuffer();
-  }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ExecutionResponse {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ExecutionResponse();
-    while (reader.nextField()) {
-      if (reader.isEndGroup())
-        break;
-      switch (reader.getFieldNumber()) {
-      case 1:
-        message.execution_id = reader.readString();
-        break;
-      case 2:
-        message.container_execution_id = reader.readString();
-        break;
-      case 3:
-        message.current_node_id = reader.readString();
-        break;
-      case 4:
-        message.current_node_type = reader.readEnum();
-        break;
-      case 5:
-        reader.readMessage(message.response, () => message.response = NodeExecutionResponse.deserialize(reader));
-        break;
-      default: reader.skipField();
-      }
-    }
-    return message;
-  }
-  serializeBinary(): Uint8Array {
-    return this.serialize();
-  }
-  static deserializeBinary(bytes: Uint8Array): ExecutionResponse {
-    return ExecutionResponse.deserialize(bytes);
-  }
-}
-export class ValidateNodesResponse extends pb_1.Message {
-  #one_of_decls: number[][] = [];
-  constructor(data?: any[] | {
-        errors?: SystemErrors[];
-        process?: Node;
-    }) {
-    super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
-    if (!Array.isArray(data) && typeof data == "object") {
-      if ("errors" in data && data.errors != undefined) {
-        this.errors = data.errors;
-      }
-      if ("process" in data && data.process != undefined) {
-        this.process = data.process;
-      }
-    }
-  }
-  get errors() {
-    return pb_1.Message.getFieldWithDefault(this, 1, []) as SystemErrors[];
-  }
-  set errors(value: SystemErrors[]) {
-    pb_1.Message.setField(this, 1, value);
-  }
-  get process() {
-    return pb_1.Message.getWrapperField(this, Node, 2) as Node;
-  }
-  set process(value: Node) {
+  set originator(value: Identity) {
     pb_1.Message.setWrapperField(this, 2, value);
   }
-  get has_process() {
+  get has_originator() {
     return pb_1.Message.getField(this, 2) != null;
   }
   static fromObject(data: {
-        errors?: SystemErrors[];
-        process?: ReturnType<typeof Node.prototype.toObject>;
-    }): ValidateNodesResponse {
-    const message = new ValidateNodesResponse({});
-    if (data.errors != null) {
-      message.errors = data.errors;
+        error_message?: string;
+        originator?: ReturnType<typeof Identity.prototype.toObject>;
+    }): SystemError {
+    const message = new SystemError({});
+    if (data.error_message != null) {
+      message.error_message = data.error_message;
     }
-    if (data.process != null) {
-      message.process = Node.fromObject(data.process);
+    if (data.originator != null) {
+      message.originator = Identity.fromObject(data.originator);
     }
     return message;
   }
   toObject() {
     const data: {
-            errors?: SystemErrors[];
-            process?: ReturnType<typeof Node.prototype.toObject>;
+            error_message?: string;
+            originator?: ReturnType<typeof Identity.prototype.toObject>;
         } = {};
-    if (this.errors != null) {
-      data.errors = this.errors;
+    if (this.error_message != null) {
+      data.error_message = this.error_message;
     }
-    if (this.process != null) {
-      data.process = this.process.toObject();
+    if (this.originator != null) {
+      data.originator = this.originator.toObject();
     }
     return data;
   }
@@ -2461,24 +1929,24 @@ export class ValidateNodesResponse extends pb_1.Message {
   serialize(w: pb_1.BinaryWriter): void;
   serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
     const writer = w || new pb_1.BinaryWriter();
-    if (this.errors.length)
-      writer.writePackedEnum(1, this.errors);
-    if (this.has_process)
-      writer.writeMessage(2, this.process, () => this.process.serialize(writer));
+    if (this.error_message.length)
+      writer.writeString(1, this.error_message);
+    if (this.has_originator)
+      writer.writeMessage(2, this.originator, () => this.originator.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ValidateNodesResponse {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ValidateNodesResponse();
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): SystemError {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new SystemError();
     while (reader.nextField()) {
       if (reader.isEndGroup())
         break;
       switch (reader.getFieldNumber()) {
       case 1:
-        message.errors = reader.readPackedEnum();
+        message.error_message = reader.readString();
         break;
       case 2:
-        reader.readMessage(message.process, () => message.process = Node.deserialize(reader));
+        reader.readMessage(message.originator, () => message.originator = Identity.deserialize(reader));
         break;
       default: reader.skipField();
       }
@@ -2488,42 +1956,42 @@ export class ValidateNodesResponse extends pb_1.Message {
   serializeBinary(): Uint8Array {
     return this.serialize();
   }
-  static deserializeBinary(bytes: Uint8Array): ValidateNodesResponse {
-    return ValidateNodesResponse.deserialize(bytes);
+  static deserializeBinary(bytes: Uint8Array): SystemError {
+    return SystemError.deserialize(bytes);
   }
 }
-export class ResponseObject extends pb_1.Message {
+export class Contents extends pb_1.Message {
   #one_of_decls: number[][] = [[1, 2, 3, 4, 5]];
   constructor(data?: any[] | ({} & (({
         node?: Node;
         authentication_message?: never;
         user_settings?: never;
-        execution_response?: never;
-        validate_nodes_response?: never;
+        execution_details?: never;
+        errors?: never;
     } | {
         node?: never;
-        authentication_message?: string;
+        authentication_message?: AuthenticationMessage;
         user_settings?: never;
-        execution_response?: never;
-        validate_nodes_response?: never;
+        execution_details?: never;
+        errors?: never;
     } | {
         node?: never;
         authentication_message?: never;
-        user_settings?: string;
-        execution_response?: never;
-        validate_nodes_response?: never;
-    } | {
-        node?: never;
-        authentication_message?: never;
-        user_settings?: never;
-        execution_response?: ExecutionResponse;
-        validate_nodes_response?: never;
+        user_settings?: UserSettings;
+        execution_details?: never;
+        errors?: never;
     } | {
         node?: never;
         authentication_message?: never;
         user_settings?: never;
-        execution_response?: never;
-        validate_nodes_response?: ValidateNodesResponse;
+        execution_details?: Execution;
+        errors?: never;
+    } | {
+        node?: never;
+        authentication_message?: never;
+        user_settings?: never;
+        execution_details?: never;
+        errors?: SystemError;
     })))) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -2537,11 +2005,11 @@ export class ResponseObject extends pb_1.Message {
       if ("user_settings" in data && data.user_settings != undefined) {
         this.user_settings = data.user_settings;
       }
-      if ("execution_response" in data && data.execution_response != undefined) {
-        this.execution_response = data.execution_response;
+      if ("execution_details" in data && data.execution_details != undefined) {
+        this.execution_details = data.execution_details;
       }
-      if ("validate_nodes_response" in data && data.validate_nodes_response != undefined) {
-        this.validate_nodes_response = data.validate_nodes_response;
+      if ("errors" in data && data.errors != undefined) {
+        this.errors = data.errors;
       }
     }
   }
@@ -2555,101 +2023,101 @@ export class ResponseObject extends pb_1.Message {
     return pb_1.Message.getField(this, 1) != null;
   }
   get authentication_message() {
-    return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+    return pb_1.Message.getWrapperField(this, AuthenticationMessage, 2) as AuthenticationMessage;
   }
-  set authentication_message(value: string) {
-    pb_1.Message.setOneofField(this, 2, this.#one_of_decls[0], value);
+  set authentication_message(value: AuthenticationMessage) {
+    pb_1.Message.setOneofWrapperField(this, 2, this.#one_of_decls[0], value);
   }
   get has_authentication_message() {
     return pb_1.Message.getField(this, 2) != null;
   }
   get user_settings() {
-    return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
+    return pb_1.Message.getWrapperField(this, UserSettings, 3) as UserSettings;
   }
-  set user_settings(value: string) {
-    pb_1.Message.setOneofField(this, 3, this.#one_of_decls[0], value);
+  set user_settings(value: UserSettings) {
+    pb_1.Message.setOneofWrapperField(this, 3, this.#one_of_decls[0], value);
   }
   get has_user_settings() {
     return pb_1.Message.getField(this, 3) != null;
   }
-  get execution_response() {
-    return pb_1.Message.getWrapperField(this, ExecutionResponse, 4) as ExecutionResponse;
+  get execution_details() {
+    return pb_1.Message.getWrapperField(this, Execution, 4) as Execution;
   }
-  set execution_response(value: ExecutionResponse) {
+  set execution_details(value: Execution) {
     pb_1.Message.setOneofWrapperField(this, 4, this.#one_of_decls[0], value);
   }
-  get has_execution_response() {
+  get has_execution_details() {
     return pb_1.Message.getField(this, 4) != null;
   }
-  get validate_nodes_response() {
-    return pb_1.Message.getWrapperField(this, ValidateNodesResponse, 5) as ValidateNodesResponse;
+  get errors() {
+    return pb_1.Message.getWrapperField(this, SystemError, 5) as SystemError;
   }
-  set validate_nodes_response(value: ValidateNodesResponse) {
+  set errors(value: SystemError) {
     pb_1.Message.setOneofWrapperField(this, 5, this.#one_of_decls[0], value);
   }
-  get has_validate_nodes_response() {
+  get has_errors() {
     return pb_1.Message.getField(this, 5) != null;
   }
-  get object() {
+  get contents() {
     const cases: {
-            [index: number]: "none" | "node" | "authentication_message" | "user_settings" | "execution_response" | "validate_nodes_response";
+            [index: number]: "none" | "node" | "authentication_message" | "user_settings" | "execution_details" | "errors";
         } = {
           0: "none",
           1: "node",
           2: "authentication_message",
           3: "user_settings",
-          4: "execution_response",
-          5: "validate_nodes_response"
+          4: "execution_details",
+          5: "errors"
         };
     return cases[pb_1.Message.computeOneofCase(this, [1, 2, 3, 4, 5])];
   }
   static fromObject(data: {
         node?: ReturnType<typeof Node.prototype.toObject>;
-        authentication_message?: string;
-        user_settings?: string;
-        execution_response?: ReturnType<typeof ExecutionResponse.prototype.toObject>;
-        validate_nodes_response?: ReturnType<typeof ValidateNodesResponse.prototype.toObject>;
-    }): ResponseObject {
-    const message = new ResponseObject({});
+        authentication_message?: ReturnType<typeof AuthenticationMessage.prototype.toObject>;
+        user_settings?: ReturnType<typeof UserSettings.prototype.toObject>;
+        execution_details?: ReturnType<typeof Execution.prototype.toObject>;
+        errors?: ReturnType<typeof SystemError.prototype.toObject>;
+    }): Contents {
+    const message = new Contents({});
     if (data.node != null) {
       message.node = Node.fromObject(data.node);
     }
     if (data.authentication_message != null) {
-      message.authentication_message = data.authentication_message;
+      message.authentication_message = AuthenticationMessage.fromObject(data.authentication_message);
     }
     if (data.user_settings != null) {
-      message.user_settings = data.user_settings;
+      message.user_settings = UserSettings.fromObject(data.user_settings);
     }
-    if (data.execution_response != null) {
-      message.execution_response = ExecutionResponse.fromObject(data.execution_response);
+    if (data.execution_details != null) {
+      message.execution_details = Execution.fromObject(data.execution_details);
     }
-    if (data.validate_nodes_response != null) {
-      message.validate_nodes_response = ValidateNodesResponse.fromObject(data.validate_nodes_response);
+    if (data.errors != null) {
+      message.errors = SystemError.fromObject(data.errors);
     }
     return message;
   }
   toObject() {
     const data: {
             node?: ReturnType<typeof Node.prototype.toObject>;
-            authentication_message?: string;
-            user_settings?: string;
-            execution_response?: ReturnType<typeof ExecutionResponse.prototype.toObject>;
-            validate_nodes_response?: ReturnType<typeof ValidateNodesResponse.prototype.toObject>;
+            authentication_message?: ReturnType<typeof AuthenticationMessage.prototype.toObject>;
+            user_settings?: ReturnType<typeof UserSettings.prototype.toObject>;
+            execution_details?: ReturnType<typeof Execution.prototype.toObject>;
+            errors?: ReturnType<typeof SystemError.prototype.toObject>;
         } = {};
     if (this.node != null) {
       data.node = this.node.toObject();
     }
     if (this.authentication_message != null) {
-      data.authentication_message = this.authentication_message;
+      data.authentication_message = this.authentication_message.toObject();
     }
     if (this.user_settings != null) {
-      data.user_settings = this.user_settings;
+      data.user_settings = this.user_settings.toObject();
     }
-    if (this.execution_response != null) {
-      data.execution_response = this.execution_response.toObject();
+    if (this.execution_details != null) {
+      data.execution_details = this.execution_details.toObject();
     }
-    if (this.validate_nodes_response != null) {
-      data.validate_nodes_response = this.validate_nodes_response.toObject();
+    if (this.errors != null) {
+      data.errors = this.errors.toObject();
     }
     return data;
   }
@@ -2660,18 +2128,18 @@ export class ResponseObject extends pb_1.Message {
     if (this.has_node)
       writer.writeMessage(1, this.node, () => this.node.serialize(writer));
     if (this.has_authentication_message)
-      writer.writeString(2, this.authentication_message);
+      writer.writeMessage(2, this.authentication_message, () => this.authentication_message.serialize(writer));
     if (this.has_user_settings)
-      writer.writeString(3, this.user_settings);
-    if (this.has_execution_response)
-      writer.writeMessage(4, this.execution_response, () => this.execution_response.serialize(writer));
-    if (this.has_validate_nodes_response)
-      writer.writeMessage(5, this.validate_nodes_response, () => this.validate_nodes_response.serialize(writer));
+      writer.writeMessage(3, this.user_settings, () => this.user_settings.serialize(writer));
+    if (this.has_execution_details)
+      writer.writeMessage(4, this.execution_details, () => this.execution_details.serialize(writer));
+    if (this.has_errors)
+      writer.writeMessage(5, this.errors, () => this.errors.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ResponseObject {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ResponseObject();
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Contents {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Contents();
     while (reader.nextField()) {
       if (reader.isEndGroup())
         break;
@@ -2680,16 +2148,16 @@ export class ResponseObject extends pb_1.Message {
         reader.readMessage(message.node, () => message.node = Node.deserialize(reader));
         break;
       case 2:
-        message.authentication_message = reader.readString();
+        reader.readMessage(message.authentication_message, () => message.authentication_message = AuthenticationMessage.deserialize(reader));
         break;
       case 3:
-        message.user_settings = reader.readString();
+        reader.readMessage(message.user_settings, () => message.user_settings = UserSettings.deserialize(reader));
         break;
       case 4:
-        reader.readMessage(message.execution_response, () => message.execution_response = ExecutionResponse.deserialize(reader));
+        reader.readMessage(message.execution_details, () => message.execution_details = Execution.deserialize(reader));
         break;
       case 5:
-        reader.readMessage(message.validate_nodes_response, () => message.validate_nodes_response = ValidateNodesResponse.deserialize(reader));
+        reader.readMessage(message.errors, () => message.errors = SystemError.deserialize(reader));
         break;
       default: reader.skipField();
       }
@@ -2699,7 +2167,175 @@ export class ResponseObject extends pb_1.Message {
   serializeBinary(): Uint8Array {
     return this.serialize();
   }
-  static deserializeBinary(bytes: Uint8Array): ResponseObject {
-    return ResponseObject.deserialize(bytes);
+  static deserializeBinary(bytes: Uint8Array): Contents {
+    return Contents.deserialize(bytes);
+  }
+}
+export class Envelope extends pb_1.Message {
+  #one_of_decls: number[][] = [];
+  constructor(data?: any[] | {
+        message_bundle?: MessageBundle[];
+        sender?: Identity;
+        receiver?: Identity;
+        verification_id?: string;
+        sent_time?: dependency_2.Timestamp;
+    }) {
+    super();
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("message_bundle" in data && data.message_bundle != undefined) {
+        this.message_bundle = data.message_bundle;
+      }
+      if ("sender" in data && data.sender != undefined) {
+        this.sender = data.sender;
+      }
+      if ("receiver" in data && data.receiver != undefined) {
+        this.receiver = data.receiver;
+      }
+      if ("verification_id" in data && data.verification_id != undefined) {
+        this.verification_id = data.verification_id;
+      }
+      if ("sent_time" in data && data.sent_time != undefined) {
+        this.sent_time = data.sent_time;
+      }
+    }
+  }
+  get message_bundle() {
+    return pb_1.Message.getRepeatedWrapperField(this, MessageBundle, 1) as MessageBundle[];
+  }
+  set message_bundle(value: MessageBundle[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 1, value);
+  }
+  get sender() {
+    return pb_1.Message.getWrapperField(this, Identity, 2) as Identity;
+  }
+  set sender(value: Identity) {
+    pb_1.Message.setWrapperField(this, 2, value);
+  }
+  get has_sender() {
+    return pb_1.Message.getField(this, 2) != null;
+  }
+  get receiver() {
+    return pb_1.Message.getWrapperField(this, Identity, 3) as Identity;
+  }
+  set receiver(value: Identity) {
+    pb_1.Message.setWrapperField(this, 3, value);
+  }
+  get has_receiver() {
+    return pb_1.Message.getField(this, 3) != null;
+  }
+  get verification_id() {
+    return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
+  }
+  set verification_id(value: string) {
+    pb_1.Message.setField(this, 4, value);
+  }
+  get sent_time() {
+    return pb_1.Message.getWrapperField(this, dependency_2.Timestamp, 5) as dependency_2.Timestamp;
+  }
+  set sent_time(value: dependency_2.Timestamp) {
+    pb_1.Message.setWrapperField(this, 5, value);
+  }
+  get has_sent_time() {
+    return pb_1.Message.getField(this, 5) != null;
+  }
+  static fromObject(data: {
+        message_bundle?: ReturnType<typeof MessageBundle.prototype.toObject>[];
+        sender?: ReturnType<typeof Identity.prototype.toObject>;
+        receiver?: ReturnType<typeof Identity.prototype.toObject>;
+        verification_id?: string;
+        sent_time?: ReturnType<typeof dependency_2.Timestamp.prototype.toObject>;
+    }): Envelope {
+    const message = new Envelope({});
+    if (data.message_bundle != null) {
+      message.message_bundle = data.message_bundle.map(item => MessageBundle.fromObject(item));
+    }
+    if (data.sender != null) {
+      message.sender = Identity.fromObject(data.sender);
+    }
+    if (data.receiver != null) {
+      message.receiver = Identity.fromObject(data.receiver);
+    }
+    if (data.verification_id != null) {
+      message.verification_id = data.verification_id;
+    }
+    if (data.sent_time != null) {
+      message.sent_time = dependency_2.Timestamp.fromObject(data.sent_time);
+    }
+    return message;
+  }
+  toObject() {
+    const data: {
+            message_bundle?: ReturnType<typeof MessageBundle.prototype.toObject>[];
+            sender?: ReturnType<typeof Identity.prototype.toObject>;
+            receiver?: ReturnType<typeof Identity.prototype.toObject>;
+            verification_id?: string;
+            sent_time?: ReturnType<typeof dependency_2.Timestamp.prototype.toObject>;
+        } = {};
+    if (this.message_bundle != null) {
+      data.message_bundle = this.message_bundle.map((item: MessageBundle) => item.toObject());
+    }
+    if (this.sender != null) {
+      data.sender = this.sender.toObject();
+    }
+    if (this.receiver != null) {
+      data.receiver = this.receiver.toObject();
+    }
+    if (this.verification_id != null) {
+      data.verification_id = this.verification_id;
+    }
+    if (this.sent_time != null) {
+      data.sent_time = this.sent_time.toObject();
+    }
+    return data;
+  }
+  serialize(): Uint8Array;
+  serialize(w: pb_1.BinaryWriter): void;
+  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.message_bundle.length)
+      writer.writeRepeatedMessage(1, this.message_bundle, (item: MessageBundle) => item.serialize(writer));
+    if (this.has_sender)
+      writer.writeMessage(2, this.sender, () => this.sender.serialize(writer));
+    if (this.has_receiver)
+      writer.writeMessage(3, this.receiver, () => this.receiver.serialize(writer));
+    if (this.verification_id.length)
+      writer.writeString(4, this.verification_id);
+    if (this.has_sent_time)
+      writer.writeMessage(5, this.sent_time, () => this.sent_time.serialize(writer));
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Envelope {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Envelope();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+      case 1:
+        reader.readMessage(message.message_bundle, () => pb_1.Message.addToRepeatedWrapperField(message, 1, MessageBundle.deserialize(reader), MessageBundle));
+        break;
+      case 2:
+        reader.readMessage(message.sender, () => message.sender = Identity.deserialize(reader));
+        break;
+      case 3:
+        reader.readMessage(message.receiver, () => message.receiver = Identity.deserialize(reader));
+        break;
+      case 4:
+        message.verification_id = reader.readString();
+        break;
+      case 5:
+        reader.readMessage(message.sent_time, () => message.sent_time = dependency_2.Timestamp.deserialize(reader));
+        break;
+      default: reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary(): Uint8Array {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes: Uint8Array): Envelope {
+    return Envelope.deserialize(bytes);
   }
 }

@@ -1,84 +1,73 @@
 syntax = "proto3";
 
 package skynet.types;
-import "google/protobuf/wrappers.proto";
 import "google/protobuf/timestamp.proto";
 
+/* Ideally, this information will be used for providing context on the frontend when visualizing the graph. The id contained within is guaranteed to be unique. */
 message GraphNodeInfo {
   string id = 1;
   string name = 2;
   string description = 3;
 }
 
+/* This is a representation of an edge that will be easy to convert to system types -- it is especially easy to convert to a visualization of the graph. */
 message Edge {
   GraphNodeInfo source = 1;
   GraphNodeInfo target = 2;
 }
 
+// Node type that is fed into a large language model
 message Prompt {
   string prompt = 1;
   string system = 2;
 }
 
+/* Node type that will send a command line command to a linux distro contained in a docker container. */
 message Command {
   string command = 1;
 }
 
-enum NodeTypeNames {
-  PROMPT = 1;
-  PROCESS = 2;
-  CONDITIONAL = 3;
-  COMMAND = 4;
-}
-
+/* This node type is not yet implemented, the idea is that it will allow for choosing amongst a few different nodes for future execution. */
 message Conditional {
   string statement = 1;
   repeated Node options = 2; 
 }
 
+// This is a simple object used for passing between system entities that is easier to translate into the domain object within each system. (The purpose is to make it easier to implement future graph systems within future systems).
 message Graph {
   repeated GraphNodeInfo nodes = 1;
   repeated Edge edges = 2;
 }
 
+/* Node type that always contains enough information to be executed as is. Any process that is not able to be executed will never be saved to the database. Even in cases where the Nodes are updated, these Processes will contain a local version of the node. */
 message Process {
   Graph graph = 1;
   repeated GraphNodeInfo topological_order = 2;
   repeated Node nodes = 3;
 }
 
-// Node
 message Node {
   GraphNodeInfo node_info = 1;
-  NodeTypeNames type_name = 2;
-  repeated VariableDefinition input_variables = 3;
-  repeated VariableDefinition output_variables = 4;
+  repeated VariableDefinition input_variables = 2;
+  repeated VariableDefinition output_variables = 3;
   oneof node_content {
-    Prompt prompt = 5;
-    Process process = 6;
-    Conditional conditional = 7;
-    Command command = 8;
+    Prompt prompt = 4;
+    Process process = 5;
+    Conditional conditional = 6;
+    Command command = 7;
   }
 }
 
 
-enum SystemErrorTypes {
-  GRAPH_DOESNT_EXIST = 1;
-  GRAPH_STATE_DOESNT_EXIST = 2;
-  OTHER_ERROR = 3;
-  NODE_DOESNT_EXIST = 4;
-}
-
-// VerbTypeNames
 enum VerbTypeNames {
-  Create = 1;
-  Update = 2;
-  Replace = 3;
-  Delete = 4;
-  Get = 5;
-  Execute = 6;
-  Validate = 7;
-  Acknowledge = 8;
+  Create = 0;
+  Update = 1;
+  Replace = 2;
+  Delete = 3;
+  Get = 4;
+  Execute = 5;
+  Validate = 6;
+  Acknowledge = 7;
 }
 
 // This is given to every "entity" within the system. Each is self-declared. For instance, the backend will generate an Identity for itself and use it for any messages that it sends to any client.
@@ -101,14 +90,9 @@ message VariableDefinition {
     int32 int_value = 3;
     float float_value = 4;
     bool bool_value = 5;
-    repeated string string_value_array = 6;
-    repeated int32 int_value_array = 7;
-    repeated float float_value_array = 8;
-    repeated bool bool_value_array = 9;
   }
 }
 
-// SystemState
 message SystemState {
   bool authenticated = 1;
   bool websocket_ready = 2;
@@ -116,32 +100,28 @@ message SystemState {
   repeated Node nodes = 4;
   repeated GraphNodeInfo selected_nodes = 5; 
   repeated Edge selected_edges = 6; 
-  ExecutionStep execution_step = 7;
+  Execution execution_step = 7;
   Node selected_process = 8;
 }
 
-// AuthenticationMessage
 message AuthenticationMessage {
   string client_email = 1;
   string client_password = 2;
 }
 
-// UserSettings
 message UserSettings {
   string openai_api_key = 1;
   string mongo_db_uri = 2;
 }
 
-// MessageBundle
 message MessageBundle {
   VerbTypeNames verb = 1;
   Contents container = 2; 
 }
 
 message SystemError {
-  String error = 1;
+  string error_message = 1;
   Identity originator = 2;
-  SystemErrorTypes error_type = 3;
 }
 
 message Contents {
@@ -149,19 +129,19 @@ oneof contents {
     Node node = 1;
     AuthenticationMessage authentication_message = 2;
     UserSettings user_settings = 3;
-    ExecutionStep execution_context = 4;
-    SystemError errors = 6;
+    Execution execution_details = 4;
+    SystemError errors = 5;
   }
 }
 
 message Envelope {
   /* There could potentially be multipe messages for a particular client. Instead of sending them individually, they can be sent at once to save number of trips. */
-  repeated MessageBundle message_bundle 1;
+  repeated MessageBundle message_bundle = 1;
   Identity sender = 2;
   Identity receiver = 3;
   /* This will be set by the sender of a message and copied over to the response so that the sender knows which message to pair it with as a response. This allows us to get rid of the need for specifying if a message is either a request or a response. */
-  String verification_id = 4;
-  Timestamp sent_time = 5;
+  string verification_id = 4;
+  google.protobuf.Timestamp sent_time = 5;
 }
 
 
