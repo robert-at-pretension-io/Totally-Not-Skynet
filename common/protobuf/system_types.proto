@@ -38,9 +38,8 @@ enum NodeTypeNames {
 
 // Conditional
 message Conditional {
-  map<string, string> system_variables = 1;
-  string statement = 2;
-  map<string, string> options = 3; // assuming ObjectId is replaced with string
+  string statement = 1;
+  repeated Node options = 2; 
 }
 
 // Graph
@@ -99,13 +98,13 @@ message Identity {
 }
 
 // ExecutionStep
-message ExecutionStep {
-  repeated GraphNodeInfo topological_order = 1;
-  GraphNodeInfo current_node = 2; // Use your actual Node type here
-  Process process = 3;
-  repeated VariableDefinition current_variable_definitions = 4;
+message Execution {
+  GraphNodeInfo current_node = 1; // Use your actual Node type here
+  Process process = 2;
+  repeated VariableDefinition current_variable_definitions = 3;
   string execution_id = 4;
 }
+
 
 message VariableDefinition {
   string name = 1;
@@ -114,6 +113,10 @@ message VariableDefinition {
     int32 int_value = 3;
     float float_value = 4;
     bool bool_value = 5;
+    repeated string string_value_array = 6;
+    repeated int32 int_value_array = 7;
+    repeated float float_value_array = 8;
+    repeated bool bool_value_array = 9;
   }
 }
 
@@ -123,8 +126,8 @@ message SystemState {
   bool websocket_ready = 2;
   Graph graph = 3;
   repeated Node nodes = 4;
-  repeated GraphNodeInfo selected_node = 5; 
-  repeated Edge selected_edge = 6; 
+  repeated GraphNodeInfo selected_nodes = 5; 
+  repeated Edge selected_edges = 6; 
   ExecutionStep execution_step = 7;
   Node selected_process = 8;
 }
@@ -149,14 +152,26 @@ message ValidateNodes {
 // MessageBundle
 message MessageBundle {
   VerbTypeNames verb = 1;
-  oneof object {
-    Node node = 2;
-    AuthenticationMessage authentication_message = 3;
-    UserSettings user_settings = 4;
-    ExecutionStep execution_context = 5;
-    ValidateNodes validate_nodes = 6;
+  Contents container = 2; 
+  String verification_id = 3;
+}
+
+message Contents {
+oneof contents {
+    Node node = 1;
+    AuthenticationMessage authentication_message = 2;
+    UserSettings user_settings = 3;
+    ExecutionStep execution_context = 4;
+    ValidateNodes validate_nodes = 5;
   }
 }
+
+message Envelope {
+  MessageBundle message_bundle 1;
+  Identity sender = 2;
+  Identity receiver = 3;
+}
+
 
 // CommandResponse
 message CommandResponse {
