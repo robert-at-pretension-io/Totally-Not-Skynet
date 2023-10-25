@@ -3,8 +3,7 @@
  * compiler version: 4.24.2
  * source: system_types.proto
  * git: https://github.com/thesayyn/protoc-gen-ts */
-import * as dependency_1 from "./google/protobuf/wrappers";
-import * as dependency_2 from "./google/protobuf/timestamp";
+import * as dependency_1 from "./google/protobuf/timestamp";
 import * as pb_1 from "google-protobuf";
 export enum VerbTypeNames {
     Create = 0,
@@ -2178,7 +2177,7 @@ export class Envelope extends pb_1.Message {
         sender?: Identity;
         receiver?: Identity;
         verification_id?: string;
-        sent_time?: dependency_2.Timestamp;
+        sent_time?: dependency_1.Timestamp;
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
@@ -2231,9 +2230,9 @@ export class Envelope extends pb_1.Message {
     pb_1.Message.setField(this, 4, value);
   }
   get sent_time() {
-    return pb_1.Message.getWrapperField(this, dependency_2.Timestamp, 5) as dependency_2.Timestamp;
+    return pb_1.Message.getWrapperField(this, dependency_1.Timestamp, 5) as dependency_1.Timestamp;
   }
-  set sent_time(value: dependency_2.Timestamp) {
+  set sent_time(value: dependency_1.Timestamp) {
     pb_1.Message.setWrapperField(this, 5, value);
   }
   get has_sent_time() {
@@ -2244,7 +2243,7 @@ export class Envelope extends pb_1.Message {
         sender?: ReturnType<typeof Identity.prototype.toObject>;
         receiver?: ReturnType<typeof Identity.prototype.toObject>;
         verification_id?: string;
-        sent_time?: ReturnType<typeof dependency_2.Timestamp.prototype.toObject>;
+        sent_time?: ReturnType<typeof dependency_1.Timestamp.prototype.toObject>;
     }): Envelope {
     const message = new Envelope({});
     if (data.message_bundle != null) {
@@ -2260,7 +2259,7 @@ export class Envelope extends pb_1.Message {
       message.verification_id = data.verification_id;
     }
     if (data.sent_time != null) {
-      message.sent_time = dependency_2.Timestamp.fromObject(data.sent_time);
+      message.sent_time = dependency_1.Timestamp.fromObject(data.sent_time);
     }
     return message;
   }
@@ -2270,7 +2269,7 @@ export class Envelope extends pb_1.Message {
             sender?: ReturnType<typeof Identity.prototype.toObject>;
             receiver?: ReturnType<typeof Identity.prototype.toObject>;
             verification_id?: string;
-            sent_time?: ReturnType<typeof dependency_2.Timestamp.prototype.toObject>;
+            sent_time?: ReturnType<typeof dependency_1.Timestamp.prototype.toObject>;
         } = {};
     if (this.message_bundle != null) {
       data.message_bundle = this.message_bundle.map((item: MessageBundle) => item.toObject());
@@ -2325,7 +2324,7 @@ export class Envelope extends pb_1.Message {
         message.verification_id = reader.readString();
         break;
       case 5:
-        reader.readMessage(message.sent_time, () => message.sent_time = dependency_2.Timestamp.deserialize(reader));
+        reader.readMessage(message.sent_time, () => message.sent_time = dependency_1.Timestamp.deserialize(reader));
         break;
       default: reader.skipField();
       }

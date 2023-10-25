@@ -57,6 +57,7 @@
     "protoc-gen-js": "^3.21.2",
     "protoc-gen-ts": "^0.8.6",
     "svelte-select": "^5.6.0",
-    "svelte-split-pane": "^0.1.2"
+    "svelte-split-pane": "^0.1.2",
+    "uuid": "^9.0.1"
   }
 }

@@ -80,12 +80,14 @@ enum VerbTypes {
   Execute = 5;
   Validate = 6;
   Acknowledge = 7;
+  Initiate = 8;
 }
 
 // This is given to every "entity" within the system. Each is self-declared. For instance, the backend will generate an Identity for itself and use it for any messages that it sends to any client.
 message Identity {
   string id = 1;
-  string group_id =2;
+  string group_id = 2;
+  string ip_address = 3;
 }
 
 message Execution {
@@ -105,6 +107,7 @@ message VariableDefinition {
   }
 }
 
+/* This is the frontend state of the application, it will store all information needed for creating/modifiying and executing processes on the backend */
 message SystemState {
   bool authenticated = 1;
   bool websocket_ready = 2;
@@ -114,6 +117,8 @@ message SystemState {
   repeated Edge selected_edges = 6; 
   Execution execution_step = 7;
   Node selected_process = 8;
+  repeated Identity backend_identities = 9;
+  repeated Identity peer_identities = 10;
 }
 
 message AuthenticationMessage {
@@ -143,8 +148,12 @@ oneof contents {
     UserSettings user_settings = 3;
     Execution execution_details = 4;
     SystemError errors = 5;
+    Identity identity = 6;
   }
 }
+
+
+
 
 message Envelope {
   /* There could potentially be multipe messages for a particular client. Instead of sending them individually, they can be sent at once to save number of trips. */

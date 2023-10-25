@@ -1,4 +1,9 @@
+<<<<<<< Updated upstream
 import { Node, SystemState, Graph } from "../../src/generated/system_types";
+=======
+
+import { Node, SystemState, Envelope } from "../../src/generated/system_types";
+>>>>>>> Stashed changes
 
 import systemStateStore from "stores/systemStateStore";
 
@@ -13,6 +18,7 @@ export function setupWebsocketConnection(): WebSocket {
 
   // start the websocket connection
   websocket.addEventListener("open", () => {
+
     console.log("websocket connection opened");
     // setup message processor
     websocket = setupWebsocketMessageHandler(websocket);
@@ -31,21 +37,52 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
       console.log("buffer: ", buffer);
       const u8Array = new Uint8Array(buffer);
       console.log("u8Array: ", u8Array);
+<<<<<<< Updated upstream
       const response_object: ResponseObject =
         ResponseObject.deserializeBinary(u8Array);
+=======
+      const response_object: Envelope = Envelope.deserializeBinary(u8Array);
+>>>>>>> Stashed changes
 
       console.log("response_object: ", response_object);
-      const res = response_object.object;
+      const res = response_object;
       console.log("res: ", response_object.toObject());
 
-      switch (res) {
-      case "node": {
-        console.log("NODE");
-        const add_node = response_object.node as Node;
+      if (res.me)
 
-        if (add_node && typeof add_node.toObject === "function") {
-          console.log("add_node: ", add_node.toObject());
+        switch (res) {
+        case "node": {
+          console.log("NODE");
+          const add_node = response_object.node as Node;
 
+          if (add_node && typeof add_node.toObject === "function") {
+            console.log("add_node: ", add_node.toObject());
+
+            systemStateStore.update(
+              (n: SystemState) => {
+
+                n.nodes.push(add_node);
+
+                return n;
+              }
+            );
+
+          }
+          break;
+        }
+        case "authentication_message":
+          console.log("AUTHENTICATION_MESSAGE");
+          break;
+        case "user_settings":
+          console.log("USER_SETTINGS");
+          break;
+        case "validate_nodes_response": {
+          const graph_container = response_object.validate_nodes_response as ValidateNodesResponse;
+          const process = graph_container.process as Node;
+
+          console.log("process: ", process.toObject());
+
+<<<<<<< Updated upstream
           systemStateStore.update((n: SystemState) => {
             n.nodes.push(add_node);
 
@@ -88,6 +125,30 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
         );
         break;
       }
+=======
+          systemStateStore.update(
+            (n: SystemState) => {
+              n.selected_process = process;
+              n.nodes.push(process);
+              return n;
+            }
+          );
+        }
+          break;
+        case "execution_response":
+          console.log("EXECUTION_RESPONSE");
+          break;
+        case "none":
+          console.log("OBJECT_NOT_SET");
+          break;
+        default:
+          console.log("default");
+          alert(
+            "Fallen through response object switch statement... This is not good."
+          );
+          break;
+        }
+>>>>>>> Stashed changes
     });
   });
 
@@ -95,7 +156,7 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
 }
 
 export function sendWebsocketMessage(
-  message: CrudBundle,
+  message: Envelope,
   websocket: WebSocket
 ) {
   console.log("sending websocket message: ", message.toObject());
