@@ -5,7 +5,13 @@
  * git: https://github.com/thesayyn/protoc-gen-ts */
 import * as dependency_1 from "./google/protobuf/timestamp";
 import * as pb_1 from "google-protobuf";
-export enum VerbTypeNames {
+export enum NodeTypes {
+    PROMPT = 0,
+    PROCESS = 1,
+    CONDITIONAL = 2,
+    COMMAND = 3
+}
+export enum VerbTypes {
     Create = 0,
     Update = 1,
     Replace = 2,
@@ -13,7 +19,8 @@ export enum VerbTypeNames {
     Get = 4,
     Execute = 5,
     Validate = 6,
-    Acknowledge = 7
+    Acknowledge = 7,
+    Initiate = 8
 }
 export class GraphNodeInfo extends pb_1.Message {
   #one_of_decls: number[][] = [];
@@ -677,13 +684,9 @@ export class Process extends pb_1.Message {
     return Process.deserialize(bytes);
   }
 }
-export class Node extends pb_1.Message {
-  #one_of_decls: number[][] = [[4, 5, 6, 7]];
-  constructor(data?: any[] | ({
-        node_info?: GraphNodeInfo;
-        input_variables?: VariableDefinition[];
-        output_variables?: VariableDefinition[];
-    } & (({
+export class NodeContent extends pb_1.Message {
+  #one_of_decls: number[][] = [[1, 2, 3, 4]];
+  constructor(data?: any[] | ({} & (({
         prompt?: Prompt;
         process?: never;
         conditional?: never;
@@ -705,17 +708,8 @@ export class Node extends pb_1.Message {
         command?: Command;
     })))) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2, 3], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
-      if ("node_info" in data && data.node_info != undefined) {
-        this.node_info = data.node_info;
-      }
-      if ("input_variables" in data && data.input_variables != undefined) {
-        this.input_variables = data.input_variables;
-      }
-      if ("output_variables" in data && data.output_variables != undefined) {
-        this.output_variables = data.output_variables;
-      }
       if ("prompt" in data && data.prompt != undefined) {
         this.prompt = data.prompt;
       }
@@ -727,6 +721,170 @@ export class Node extends pb_1.Message {
       }
       if ("command" in data && data.command != undefined) {
         this.command = data.command;
+      }
+    }
+  }
+  get prompt() {
+    return pb_1.Message.getWrapperField(this, Prompt, 1) as Prompt;
+  }
+  set prompt(value: Prompt) {
+    pb_1.Message.setOneofWrapperField(this, 1, this.#one_of_decls[0], value);
+  }
+  get has_prompt() {
+    return pb_1.Message.getField(this, 1) != null;
+  }
+  get process() {
+    return pb_1.Message.getWrapperField(this, Process, 2) as Process;
+  }
+  set process(value: Process) {
+    pb_1.Message.setOneofWrapperField(this, 2, this.#one_of_decls[0], value);
+  }
+  get has_process() {
+    return pb_1.Message.getField(this, 2) != null;
+  }
+  get conditional() {
+    return pb_1.Message.getWrapperField(this, Conditional, 3) as Conditional;
+  }
+  set conditional(value: Conditional) {
+    pb_1.Message.setOneofWrapperField(this, 3, this.#one_of_decls[0], value);
+  }
+  get has_conditional() {
+    return pb_1.Message.getField(this, 3) != null;
+  }
+  get command() {
+    return pb_1.Message.getWrapperField(this, Command, 4) as Command;
+  }
+  set command(value: Command) {
+    pb_1.Message.setOneofWrapperField(this, 4, this.#one_of_decls[0], value);
+  }
+  get has_command() {
+    return pb_1.Message.getField(this, 4) != null;
+  }
+  get node_content() {
+    const cases: {
+            [index: number]: "none" | "prompt" | "process" | "conditional" | "command";
+        } = {
+          0: "none",
+          1: "prompt",
+          2: "process",
+          3: "conditional",
+          4: "command"
+        };
+    return cases[pb_1.Message.computeOneofCase(this, [1, 2, 3, 4])];
+  }
+  static fromObject(data: {
+        prompt?: ReturnType<typeof Prompt.prototype.toObject>;
+        process?: ReturnType<typeof Process.prototype.toObject>;
+        conditional?: ReturnType<typeof Conditional.prototype.toObject>;
+        command?: ReturnType<typeof Command.prototype.toObject>;
+    }): NodeContent {
+    const message = new NodeContent({});
+    if (data.prompt != null) {
+      message.prompt = Prompt.fromObject(data.prompt);
+    }
+    if (data.process != null) {
+      message.process = Process.fromObject(data.process);
+    }
+    if (data.conditional != null) {
+      message.conditional = Conditional.fromObject(data.conditional);
+    }
+    if (data.command != null) {
+      message.command = Command.fromObject(data.command);
+    }
+    return message;
+  }
+  toObject() {
+    const data: {
+            prompt?: ReturnType<typeof Prompt.prototype.toObject>;
+            process?: ReturnType<typeof Process.prototype.toObject>;
+            conditional?: ReturnType<typeof Conditional.prototype.toObject>;
+            command?: ReturnType<typeof Command.prototype.toObject>;
+        } = {};
+    if (this.prompt != null) {
+      data.prompt = this.prompt.toObject();
+    }
+    if (this.process != null) {
+      data.process = this.process.toObject();
+    }
+    if (this.conditional != null) {
+      data.conditional = this.conditional.toObject();
+    }
+    if (this.command != null) {
+      data.command = this.command.toObject();
+    }
+    return data;
+  }
+  serialize(): Uint8Array;
+  serialize(w: pb_1.BinaryWriter): void;
+  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.has_prompt)
+      writer.writeMessage(1, this.prompt, () => this.prompt.serialize(writer));
+    if (this.has_process)
+      writer.writeMessage(2, this.process, () => this.process.serialize(writer));
+    if (this.has_conditional)
+      writer.writeMessage(3, this.conditional, () => this.conditional.serialize(writer));
+    if (this.has_command)
+      writer.writeMessage(4, this.command, () => this.command.serialize(writer));
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): NodeContent {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new NodeContent();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+      case 1:
+        reader.readMessage(message.prompt, () => message.prompt = Prompt.deserialize(reader));
+        break;
+      case 2:
+        reader.readMessage(message.process, () => message.process = Process.deserialize(reader));
+        break;
+      case 3:
+        reader.readMessage(message.conditional, () => message.conditional = Conditional.deserialize(reader));
+        break;
+      case 4:
+        reader.readMessage(message.command, () => message.command = Command.deserialize(reader));
+        break;
+      default: reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary(): Uint8Array {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes: Uint8Array): NodeContent {
+    return NodeContent.deserialize(bytes);
+  }
+}
+export class Node extends pb_1.Message {
+  #one_of_decls: number[][] = [];
+  constructor(data?: any[] | {
+        node_info?: GraphNodeInfo;
+        input_variables?: VariableDefinition[];
+        output_variables?: VariableDefinition[];
+        node_type?: NodeTypes;
+        node_content?: NodeContent;
+    }) {
+    super();
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2, 3], this.#one_of_decls);
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("node_info" in data && data.node_info != undefined) {
+        this.node_info = data.node_info;
+      }
+      if ("input_variables" in data && data.input_variables != undefined) {
+        this.input_variables = data.input_variables;
+      }
+      if ("output_variables" in data && data.output_variables != undefined) {
+        this.output_variables = data.output_variables;
+      }
+      if ("node_type" in data && data.node_type != undefined) {
+        this.node_type = data.node_type;
+      }
+      if ("node_content" in data && data.node_content != undefined) {
+        this.node_content = data.node_content;
       }
     }
   }
@@ -751,62 +909,27 @@ export class Node extends pb_1.Message {
   set output_variables(value: VariableDefinition[]) {
     pb_1.Message.setRepeatedWrapperField(this, 3, value);
   }
-  get prompt() {
-    return pb_1.Message.getWrapperField(this, Prompt, 4) as Prompt;
+  get node_type() {
+    return pb_1.Message.getFieldWithDefault(this, 4, NodeTypes.PROMPT) as NodeTypes;
   }
-  set prompt(value: Prompt) {
-    pb_1.Message.setOneofWrapperField(this, 4, this.#one_of_decls[0], value);
-  }
-  get has_prompt() {
-    return pb_1.Message.getField(this, 4) != null;
-  }
-  get process() {
-    return pb_1.Message.getWrapperField(this, Process, 5) as Process;
-  }
-  set process(value: Process) {
-    pb_1.Message.setOneofWrapperField(this, 5, this.#one_of_decls[0], value);
-  }
-  get has_process() {
-    return pb_1.Message.getField(this, 5) != null;
-  }
-  get conditional() {
-    return pb_1.Message.getWrapperField(this, Conditional, 6) as Conditional;
-  }
-  set conditional(value: Conditional) {
-    pb_1.Message.setOneofWrapperField(this, 6, this.#one_of_decls[0], value);
-  }
-  get has_conditional() {
-    return pb_1.Message.getField(this, 6) != null;
-  }
-  get command() {
-    return pb_1.Message.getWrapperField(this, Command, 7) as Command;
-  }
-  set command(value: Command) {
-    pb_1.Message.setOneofWrapperField(this, 7, this.#one_of_decls[0], value);
-  }
-  get has_command() {
-    return pb_1.Message.getField(this, 7) != null;
+  set node_type(value: NodeTypes) {
+    pb_1.Message.setField(this, 4, value);
   }
   get node_content() {
-    const cases: {
-            [index: number]: "none" | "prompt" | "process" | "conditional" | "command";
-        } = {
-          0: "none",
-          4: "prompt",
-          5: "process",
-          6: "conditional",
-          7: "command"
-        };
-    return cases[pb_1.Message.computeOneofCase(this, [4, 5, 6, 7])];
+    return pb_1.Message.getWrapperField(this, NodeContent, 5) as NodeContent;
+  }
+  set node_content(value: NodeContent) {
+    pb_1.Message.setWrapperField(this, 5, value);
+  }
+  get has_node_content() {
+    return pb_1.Message.getField(this, 5) != null;
   }
   static fromObject(data: {
         node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
         input_variables?: ReturnType<typeof VariableDefinition.prototype.toObject>[];
         output_variables?: ReturnType<typeof VariableDefinition.prototype.toObject>[];
-        prompt?: ReturnType<typeof Prompt.prototype.toObject>;
-        process?: ReturnType<typeof Process.prototype.toObject>;
-        conditional?: ReturnType<typeof Conditional.prototype.toObject>;
-        command?: ReturnType<typeof Command.prototype.toObject>;
+        node_type?: NodeTypes;
+        node_content?: ReturnType<typeof NodeContent.prototype.toObject>;
     }): Node {
     const message = new Node({});
     if (data.node_info != null) {
@@ -818,17 +941,11 @@ export class Node extends pb_1.Message {
     if (data.output_variables != null) {
       message.output_variables = data.output_variables.map(item => VariableDefinition.fromObject(item));
     }
-    if (data.prompt != null) {
-      message.prompt = Prompt.fromObject(data.prompt);
+    if (data.node_type != null) {
+      message.node_type = data.node_type;
     }
-    if (data.process != null) {
-      message.process = Process.fromObject(data.process);
-    }
-    if (data.conditional != null) {
-      message.conditional = Conditional.fromObject(data.conditional);
-    }
-    if (data.command != null) {
-      message.command = Command.fromObject(data.command);
+    if (data.node_content != null) {
+      message.node_content = NodeContent.fromObject(data.node_content);
     }
     return message;
   }
@@ -837,10 +954,8 @@ export class Node extends pb_1.Message {
             node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
             input_variables?: ReturnType<typeof VariableDefinition.prototype.toObject>[];
             output_variables?: ReturnType<typeof VariableDefinition.prototype.toObject>[];
-            prompt?: ReturnType<typeof Prompt.prototype.toObject>;
-            process?: ReturnType<typeof Process.prototype.toObject>;
-            conditional?: ReturnType<typeof Conditional.prototype.toObject>;
-            command?: ReturnType<typeof Command.prototype.toObject>;
+            node_type?: NodeTypes;
+            node_content?: ReturnType<typeof NodeContent.prototype.toObject>;
         } = {};
     if (this.node_info != null) {
       data.node_info = this.node_info.toObject();
@@ -851,17 +966,11 @@ export class Node extends pb_1.Message {
     if (this.output_variables != null) {
       data.output_variables = this.output_variables.map((item: VariableDefinition) => item.toObject());
     }
-    if (this.prompt != null) {
-      data.prompt = this.prompt.toObject();
+    if (this.node_type != null) {
+      data.node_type = this.node_type;
     }
-    if (this.process != null) {
-      data.process = this.process.toObject();
-    }
-    if (this.conditional != null) {
-      data.conditional = this.conditional.toObject();
-    }
-    if (this.command != null) {
-      data.command = this.command.toObject();
+    if (this.node_content != null) {
+      data.node_content = this.node_content.toObject();
     }
     return data;
   }
@@ -875,14 +984,10 @@ export class Node extends pb_1.Message {
       writer.writeRepeatedMessage(2, this.input_variables, (item: VariableDefinition) => item.serialize(writer));
     if (this.output_variables.length)
       writer.writeRepeatedMessage(3, this.output_variables, (item: VariableDefinition) => item.serialize(writer));
-    if (this.has_prompt)
-      writer.writeMessage(4, this.prompt, () => this.prompt.serialize(writer));
-    if (this.has_process)
-      writer.writeMessage(5, this.process, () => this.process.serialize(writer));
-    if (this.has_conditional)
-      writer.writeMessage(6, this.conditional, () => this.conditional.serialize(writer));
-    if (this.has_command)
-      writer.writeMessage(7, this.command, () => this.command.serialize(writer));
+    if (this.node_type != NodeTypes.PROMPT)
+      writer.writeEnum(4, this.node_type);
+    if (this.has_node_content)
+      writer.writeMessage(5, this.node_content, () => this.node_content.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -902,16 +1007,10 @@ export class Node extends pb_1.Message {
         reader.readMessage(message.output_variables, () => pb_1.Message.addToRepeatedWrapperField(message, 3, VariableDefinition.deserialize(reader), VariableDefinition));
         break;
       case 4:
-        reader.readMessage(message.prompt, () => message.prompt = Prompt.deserialize(reader));
+        message.node_type = reader.readEnum();
         break;
       case 5:
-        reader.readMessage(message.process, () => message.process = Process.deserialize(reader));
-        break;
-      case 6:
-        reader.readMessage(message.conditional, () => message.conditional = Conditional.deserialize(reader));
-        break;
-      case 7:
-        reader.readMessage(message.command, () => message.command = Command.deserialize(reader));
+        reader.readMessage(message.node_content, () => message.node_content = NodeContent.deserialize(reader));
         break;
       default: reader.skipField();
       }
@@ -930,6 +1029,7 @@ export class Identity extends pb_1.Message {
   constructor(data?: any[] | {
         id?: string;
         group_id?: string;
+        ip_address?: string;
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -939,6 +1039,9 @@ export class Identity extends pb_1.Message {
       }
       if ("group_id" in data && data.group_id != undefined) {
         this.group_id = data.group_id;
+      }
+      if ("ip_address" in data && data.ip_address != undefined) {
+        this.ip_address = data.ip_address;
       }
     }
   }
@@ -954,9 +1057,16 @@ export class Identity extends pb_1.Message {
   set group_id(value: string) {
     pb_1.Message.setField(this, 2, value);
   }
+  get ip_address() {
+    return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
+  }
+  set ip_address(value: string) {
+    pb_1.Message.setField(this, 3, value);
+  }
   static fromObject(data: {
         id?: string;
         group_id?: string;
+        ip_address?: string;
     }): Identity {
     const message = new Identity({});
     if (data.id != null) {
@@ -965,18 +1075,25 @@ export class Identity extends pb_1.Message {
     if (data.group_id != null) {
       message.group_id = data.group_id;
     }
+    if (data.ip_address != null) {
+      message.ip_address = data.ip_address;
+    }
     return message;
   }
   toObject() {
     const data: {
             id?: string;
             group_id?: string;
+            ip_address?: string;
         } = {};
     if (this.id != null) {
       data.id = this.id;
     }
     if (this.group_id != null) {
       data.group_id = this.group_id;
+    }
+    if (this.ip_address != null) {
+      data.ip_address = this.ip_address;
     }
     return data;
   }
@@ -988,6 +1105,8 @@ export class Identity extends pb_1.Message {
       writer.writeString(1, this.id);
     if (this.group_id.length)
       writer.writeString(2, this.group_id);
+    if (this.ip_address.length)
+      writer.writeString(3, this.ip_address);
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1002,6 +1121,9 @@ export class Identity extends pb_1.Message {
         break;
       case 2:
         message.group_id = reader.readString();
+        break;
+      case 3:
+        message.ip_address = reader.readString();
         break;
       default: reader.skipField();
       }
@@ -1367,9 +1489,13 @@ export class SystemState extends pb_1.Message {
         selected_edges?: Edge[];
         execution_step?: Execution;
         selected_process?: Node;
+        backend_identities?: Identity[];
+        peer_identities?: Identity[];
+        primary_backend?: Identity;
+        client_identity?: Identity;
     }) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4, 5, 6], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4, 5, 6, 9, 10], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
       if ("authenticated" in data && data.authenticated != undefined) {
         this.authenticated = data.authenticated;
@@ -1394,6 +1520,18 @@ export class SystemState extends pb_1.Message {
       }
       if ("selected_process" in data && data.selected_process != undefined) {
         this.selected_process = data.selected_process;
+      }
+      if ("backend_identities" in data && data.backend_identities != undefined) {
+        this.backend_identities = data.backend_identities;
+      }
+      if ("peer_identities" in data && data.peer_identities != undefined) {
+        this.peer_identities = data.peer_identities;
+      }
+      if ("primary_backend" in data && data.primary_backend != undefined) {
+        this.primary_backend = data.primary_backend;
+      }
+      if ("client_identity" in data && data.client_identity != undefined) {
+        this.client_identity = data.client_identity;
       }
     }
   }
@@ -1454,6 +1592,36 @@ export class SystemState extends pb_1.Message {
   get has_selected_process() {
     return pb_1.Message.getField(this, 8) != null;
   }
+  get backend_identities() {
+    return pb_1.Message.getRepeatedWrapperField(this, Identity, 9) as Identity[];
+  }
+  set backend_identities(value: Identity[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 9, value);
+  }
+  get peer_identities() {
+    return pb_1.Message.getRepeatedWrapperField(this, Identity, 10) as Identity[];
+  }
+  set peer_identities(value: Identity[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 10, value);
+  }
+  get primary_backend() {
+    return pb_1.Message.getWrapperField(this, Identity, 11) as Identity;
+  }
+  set primary_backend(value: Identity) {
+    pb_1.Message.setWrapperField(this, 11, value);
+  }
+  get has_primary_backend() {
+    return pb_1.Message.getField(this, 11) != null;
+  }
+  get client_identity() {
+    return pb_1.Message.getWrapperField(this, Identity, 12) as Identity;
+  }
+  set client_identity(value: Identity) {
+    pb_1.Message.setWrapperField(this, 12, value);
+  }
+  get has_client_identity() {
+    return pb_1.Message.getField(this, 12) != null;
+  }
   static fromObject(data: {
         authenticated?: boolean;
         websocket_ready?: boolean;
@@ -1463,6 +1631,10 @@ export class SystemState extends pb_1.Message {
         selected_edges?: ReturnType<typeof Edge.prototype.toObject>[];
         execution_step?: ReturnType<typeof Execution.prototype.toObject>;
         selected_process?: ReturnType<typeof Node.prototype.toObject>;
+        backend_identities?: ReturnType<typeof Identity.prototype.toObject>[];
+        peer_identities?: ReturnType<typeof Identity.prototype.toObject>[];
+        primary_backend?: ReturnType<typeof Identity.prototype.toObject>;
+        client_identity?: ReturnType<typeof Identity.prototype.toObject>;
     }): SystemState {
     const message = new SystemState({});
     if (data.authenticated != null) {
@@ -1489,6 +1661,18 @@ export class SystemState extends pb_1.Message {
     if (data.selected_process != null) {
       message.selected_process = Node.fromObject(data.selected_process);
     }
+    if (data.backend_identities != null) {
+      message.backend_identities = data.backend_identities.map(item => Identity.fromObject(item));
+    }
+    if (data.peer_identities != null) {
+      message.peer_identities = data.peer_identities.map(item => Identity.fromObject(item));
+    }
+    if (data.primary_backend != null) {
+      message.primary_backend = Identity.fromObject(data.primary_backend);
+    }
+    if (data.client_identity != null) {
+      message.client_identity = Identity.fromObject(data.client_identity);
+    }
     return message;
   }
   toObject() {
@@ -1501,6 +1685,10 @@ export class SystemState extends pb_1.Message {
             selected_edges?: ReturnType<typeof Edge.prototype.toObject>[];
             execution_step?: ReturnType<typeof Execution.prototype.toObject>;
             selected_process?: ReturnType<typeof Node.prototype.toObject>;
+            backend_identities?: ReturnType<typeof Identity.prototype.toObject>[];
+            peer_identities?: ReturnType<typeof Identity.prototype.toObject>[];
+            primary_backend?: ReturnType<typeof Identity.prototype.toObject>;
+            client_identity?: ReturnType<typeof Identity.prototype.toObject>;
         } = {};
     if (this.authenticated != null) {
       data.authenticated = this.authenticated;
@@ -1526,6 +1714,18 @@ export class SystemState extends pb_1.Message {
     if (this.selected_process != null) {
       data.selected_process = this.selected_process.toObject();
     }
+    if (this.backend_identities != null) {
+      data.backend_identities = this.backend_identities.map((item: Identity) => item.toObject());
+    }
+    if (this.peer_identities != null) {
+      data.peer_identities = this.peer_identities.map((item: Identity) => item.toObject());
+    }
+    if (this.primary_backend != null) {
+      data.primary_backend = this.primary_backend.toObject();
+    }
+    if (this.client_identity != null) {
+      data.client_identity = this.client_identity.toObject();
+    }
     return data;
   }
   serialize(): Uint8Array;
@@ -1548,6 +1748,14 @@ export class SystemState extends pb_1.Message {
       writer.writeMessage(7, this.execution_step, () => this.execution_step.serialize(writer));
     if (this.has_selected_process)
       writer.writeMessage(8, this.selected_process, () => this.selected_process.serialize(writer));
+    if (this.backend_identities.length)
+      writer.writeRepeatedMessage(9, this.backend_identities, (item: Identity) => item.serialize(writer));
+    if (this.peer_identities.length)
+      writer.writeRepeatedMessage(10, this.peer_identities, (item: Identity) => item.serialize(writer));
+    if (this.has_primary_backend)
+      writer.writeMessage(11, this.primary_backend, () => this.primary_backend.serialize(writer));
+    if (this.has_client_identity)
+      writer.writeMessage(12, this.client_identity, () => this.client_identity.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1580,6 +1788,18 @@ export class SystemState extends pb_1.Message {
         break;
       case 8:
         reader.readMessage(message.selected_process, () => message.selected_process = Node.deserialize(reader));
+        break;
+      case 9:
+        reader.readMessage(message.backend_identities, () => pb_1.Message.addToRepeatedWrapperField(message, 9, Identity.deserialize(reader), Identity));
+        break;
+      case 10:
+        reader.readMessage(message.peer_identities, () => pb_1.Message.addToRepeatedWrapperField(message, 10, Identity.deserialize(reader), Identity));
+        break;
+      case 11:
+        reader.readMessage(message.primary_backend, () => message.primary_backend = Identity.deserialize(reader));
+        break;
+      case 12:
+        reader.readMessage(message.client_identity, () => message.client_identity = Identity.deserialize(reader));
         break;
       default: reader.skipField();
       }
@@ -1776,25 +1996,15 @@ export class UserSettings extends pb_1.Message {
 export class MessageBundle extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
-        verb?: VerbTypeNames;
         container?: Contents;
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
-      if ("verb" in data && data.verb != undefined) {
-        this.verb = data.verb;
-      }
       if ("container" in data && data.container != undefined) {
         this.container = data.container;
       }
     }
-  }
-  get verb() {
-    return pb_1.Message.getFieldWithDefault(this, 1, VerbTypeNames.Create) as VerbTypeNames;
-  }
-  set verb(value: VerbTypeNames) {
-    pb_1.Message.setField(this, 1, value);
   }
   get container() {
     return pb_1.Message.getWrapperField(this, Contents, 2) as Contents;
@@ -1806,13 +2016,9 @@ export class MessageBundle extends pb_1.Message {
     return pb_1.Message.getField(this, 2) != null;
   }
   static fromObject(data: {
-        verb?: VerbTypeNames;
         container?: ReturnType<typeof Contents.prototype.toObject>;
     }): MessageBundle {
     const message = new MessageBundle({});
-    if (data.verb != null) {
-      message.verb = data.verb;
-    }
     if (data.container != null) {
       message.container = Contents.fromObject(data.container);
     }
@@ -1820,12 +2026,8 @@ export class MessageBundle extends pb_1.Message {
   }
   toObject() {
     const data: {
-            verb?: VerbTypeNames;
             container?: ReturnType<typeof Contents.prototype.toObject>;
         } = {};
-    if (this.verb != null) {
-      data.verb = this.verb;
-    }
     if (this.container != null) {
       data.container = this.container.toObject();
     }
@@ -1835,8 +2037,6 @@ export class MessageBundle extends pb_1.Message {
   serialize(w: pb_1.BinaryWriter): void;
   serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
     const writer = w || new pb_1.BinaryWriter();
-    if (this.verb != VerbTypeNames.Create)
-      writer.writeEnum(1, this.verb);
     if (this.has_container)
       writer.writeMessage(2, this.container, () => this.container.serialize(writer));
     if (!w)
@@ -1848,9 +2048,6 @@ export class MessageBundle extends pb_1.Message {
       if (reader.isEndGroup())
         break;
       switch (reader.getFieldNumber()) {
-      case 1:
-        message.verb = reader.readEnum();
-        break;
       case 2:
         reader.readMessage(message.container, () => message.container = Contents.deserialize(reader));
         break;
@@ -1960,37 +2157,51 @@ export class SystemError extends pb_1.Message {
   }
 }
 export class Contents extends pb_1.Message {
-  #one_of_decls: number[][] = [[1, 2, 3, 4, 5]];
-  constructor(data?: any[] | ({} & (({
+  #one_of_decls: number[][] = [[1, 2, 3, 4, 5, 6]];
+  constructor(data?: any[] | ({
+        verb?: VerbTypes;
+    } & (({
         node?: Node;
         authentication_message?: never;
         user_settings?: never;
         execution_details?: never;
         errors?: never;
+        identity?: never;
     } | {
         node?: never;
         authentication_message?: AuthenticationMessage;
         user_settings?: never;
         execution_details?: never;
         errors?: never;
+        identity?: never;
     } | {
         node?: never;
         authentication_message?: never;
         user_settings?: UserSettings;
         execution_details?: never;
         errors?: never;
+        identity?: never;
     } | {
         node?: never;
         authentication_message?: never;
         user_settings?: never;
         execution_details?: Execution;
         errors?: never;
+        identity?: never;
     } | {
         node?: never;
         authentication_message?: never;
         user_settings?: never;
         execution_details?: never;
         errors?: SystemError;
+        identity?: never;
+    } | {
+        node?: never;
+        authentication_message?: never;
+        user_settings?: never;
+        execution_details?: never;
+        errors?: never;
+        identity?: Identity;
     })))) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -2009,6 +2220,12 @@ export class Contents extends pb_1.Message {
       }
       if ("errors" in data && data.errors != undefined) {
         this.errors = data.errors;
+      }
+      if ("identity" in data && data.identity != undefined) {
+        this.identity = data.identity;
+      }
+      if ("verb" in data && data.verb != undefined) {
+        this.verb = data.verb;
       }
     }
   }
@@ -2057,18 +2274,34 @@ export class Contents extends pb_1.Message {
   get has_errors() {
     return pb_1.Message.getField(this, 5) != null;
   }
+  get identity() {
+    return pb_1.Message.getWrapperField(this, Identity, 6) as Identity;
+  }
+  set identity(value: Identity) {
+    pb_1.Message.setOneofWrapperField(this, 6, this.#one_of_decls[0], value);
+  }
+  get has_identity() {
+    return pb_1.Message.getField(this, 6) != null;
+  }
+  get verb() {
+    return pb_1.Message.getFieldWithDefault(this, 7, VerbTypes.Create) as VerbTypes;
+  }
+  set verb(value: VerbTypes) {
+    pb_1.Message.setField(this, 7, value);
+  }
   get contents() {
     const cases: {
-            [index: number]: "none" | "node" | "authentication_message" | "user_settings" | "execution_details" | "errors";
+            [index: number]: "none" | "node" | "authentication_message" | "user_settings" | "execution_details" | "errors" | "identity";
         } = {
           0: "none",
           1: "node",
           2: "authentication_message",
           3: "user_settings",
           4: "execution_details",
-          5: "errors"
+          5: "errors",
+          6: "identity"
         };
-    return cases[pb_1.Message.computeOneofCase(this, [1, 2, 3, 4, 5])];
+    return cases[pb_1.Message.computeOneofCase(this, [1, 2, 3, 4, 5, 6])];
   }
   static fromObject(data: {
         node?: ReturnType<typeof Node.prototype.toObject>;
@@ -2076,6 +2309,8 @@ export class Contents extends pb_1.Message {
         user_settings?: ReturnType<typeof UserSettings.prototype.toObject>;
         execution_details?: ReturnType<typeof Execution.prototype.toObject>;
         errors?: ReturnType<typeof SystemError.prototype.toObject>;
+        identity?: ReturnType<typeof Identity.prototype.toObject>;
+        verb?: VerbTypes;
     }): Contents {
     const message = new Contents({});
     if (data.node != null) {
@@ -2093,6 +2328,12 @@ export class Contents extends pb_1.Message {
     if (data.errors != null) {
       message.errors = SystemError.fromObject(data.errors);
     }
+    if (data.identity != null) {
+      message.identity = Identity.fromObject(data.identity);
+    }
+    if (data.verb != null) {
+      message.verb = data.verb;
+    }
     return message;
   }
   toObject() {
@@ -2102,6 +2343,8 @@ export class Contents extends pb_1.Message {
             user_settings?: ReturnType<typeof UserSettings.prototype.toObject>;
             execution_details?: ReturnType<typeof Execution.prototype.toObject>;
             errors?: ReturnType<typeof SystemError.prototype.toObject>;
+            identity?: ReturnType<typeof Identity.prototype.toObject>;
+            verb?: VerbTypes;
         } = {};
     if (this.node != null) {
       data.node = this.node.toObject();
@@ -2117,6 +2360,12 @@ export class Contents extends pb_1.Message {
     }
     if (this.errors != null) {
       data.errors = this.errors.toObject();
+    }
+    if (this.identity != null) {
+      data.identity = this.identity.toObject();
+    }
+    if (this.verb != null) {
+      data.verb = this.verb;
     }
     return data;
   }
@@ -2134,6 +2383,10 @@ export class Contents extends pb_1.Message {
       writer.writeMessage(4, this.execution_details, () => this.execution_details.serialize(writer));
     if (this.has_errors)
       writer.writeMessage(5, this.errors, () => this.errors.serialize(writer));
+    if (this.has_identity)
+      writer.writeMessage(6, this.identity, () => this.identity.serialize(writer));
+    if (this.verb != VerbTypes.Create)
+      writer.writeEnum(7, this.verb);
     if (!w)
       return writer.getResultBuffer();
   }
@@ -2158,6 +2411,12 @@ export class Contents extends pb_1.Message {
       case 5:
         reader.readMessage(message.errors, () => message.errors = SystemError.deserialize(reader));
         break;
+      case 6:
+        reader.readMessage(message.identity, () => message.identity = Identity.deserialize(reader));
+        break;
+      case 7:
+        message.verb = reader.readEnum();
+        break;
       default: reader.skipField();
       }
     }
@@ -2173,17 +2432,16 @@ export class Contents extends pb_1.Message {
 export class Envelope extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
-        message_bundle?: MessageBundle[];
+        message_content?: Contents[];
         sender?: Identity;
         receiver?: Identity;
         verification_id?: string;
-        sent_time?: dependency_1.Timestamp;
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
-      if ("message_bundle" in data && data.message_bundle != undefined) {
-        this.message_bundle = data.message_bundle;
+      if ("message_content" in data && data.message_content != undefined) {
+        this.message_content = data.message_content;
       }
       if ("sender" in data && data.sender != undefined) {
         this.sender = data.sender;
@@ -2194,15 +2452,12 @@ export class Envelope extends pb_1.Message {
       if ("verification_id" in data && data.verification_id != undefined) {
         this.verification_id = data.verification_id;
       }
-      if ("sent_time" in data && data.sent_time != undefined) {
-        this.sent_time = data.sent_time;
-      }
     }
   }
-  get message_bundle() {
-    return pb_1.Message.getRepeatedWrapperField(this, MessageBundle, 1) as MessageBundle[];
+  get message_content() {
+    return pb_1.Message.getRepeatedWrapperField(this, Contents, 1) as Contents[];
   }
-  set message_bundle(value: MessageBundle[]) {
+  set message_content(value: Contents[]) {
     pb_1.Message.setRepeatedWrapperField(this, 1, value);
   }
   get sender() {
@@ -2229,25 +2484,15 @@ export class Envelope extends pb_1.Message {
   set verification_id(value: string) {
     pb_1.Message.setField(this, 4, value);
   }
-  get sent_time() {
-    return pb_1.Message.getWrapperField(this, dependency_1.Timestamp, 5) as dependency_1.Timestamp;
-  }
-  set sent_time(value: dependency_1.Timestamp) {
-    pb_1.Message.setWrapperField(this, 5, value);
-  }
-  get has_sent_time() {
-    return pb_1.Message.getField(this, 5) != null;
-  }
   static fromObject(data: {
-        message_bundle?: ReturnType<typeof MessageBundle.prototype.toObject>[];
+        message_content?: ReturnType<typeof Contents.prototype.toObject>[];
         sender?: ReturnType<typeof Identity.prototype.toObject>;
         receiver?: ReturnType<typeof Identity.prototype.toObject>;
         verification_id?: string;
-        sent_time?: ReturnType<typeof dependency_1.Timestamp.prototype.toObject>;
     }): Envelope {
     const message = new Envelope({});
-    if (data.message_bundle != null) {
-      message.message_bundle = data.message_bundle.map(item => MessageBundle.fromObject(item));
+    if (data.message_content != null) {
+      message.message_content = data.message_content.map(item => Contents.fromObject(item));
     }
     if (data.sender != null) {
       message.sender = Identity.fromObject(data.sender);
@@ -2258,21 +2503,17 @@ export class Envelope extends pb_1.Message {
     if (data.verification_id != null) {
       message.verification_id = data.verification_id;
     }
-    if (data.sent_time != null) {
-      message.sent_time = dependency_1.Timestamp.fromObject(data.sent_time);
-    }
     return message;
   }
   toObject() {
     const data: {
-            message_bundle?: ReturnType<typeof MessageBundle.prototype.toObject>[];
+            message_content?: ReturnType<typeof Contents.prototype.toObject>[];
             sender?: ReturnType<typeof Identity.prototype.toObject>;
             receiver?: ReturnType<typeof Identity.prototype.toObject>;
             verification_id?: string;
-            sent_time?: ReturnType<typeof dependency_1.Timestamp.prototype.toObject>;
         } = {};
-    if (this.message_bundle != null) {
-      data.message_bundle = this.message_bundle.map((item: MessageBundle) => item.toObject());
+    if (this.message_content != null) {
+      data.message_content = this.message_content.map((item: Contents) => item.toObject());
     }
     if (this.sender != null) {
       data.sender = this.sender.toObject();
@@ -2283,25 +2524,20 @@ export class Envelope extends pb_1.Message {
     if (this.verification_id != null) {
       data.verification_id = this.verification_id;
     }
-    if (this.sent_time != null) {
-      data.sent_time = this.sent_time.toObject();
-    }
     return data;
   }
   serialize(): Uint8Array;
   serialize(w: pb_1.BinaryWriter): void;
   serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
     const writer = w || new pb_1.BinaryWriter();
-    if (this.message_bundle.length)
-      writer.writeRepeatedMessage(1, this.message_bundle, (item: MessageBundle) => item.serialize(writer));
+    if (this.message_content.length)
+      writer.writeRepeatedMessage(1, this.message_content, (item: Contents) => item.serialize(writer));
     if (this.has_sender)
       writer.writeMessage(2, this.sender, () => this.sender.serialize(writer));
     if (this.has_receiver)
       writer.writeMessage(3, this.receiver, () => this.receiver.serialize(writer));
     if (this.verification_id.length)
       writer.writeString(4, this.verification_id);
-    if (this.has_sent_time)
-      writer.writeMessage(5, this.sent_time, () => this.sent_time.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -2312,7 +2548,7 @@ export class Envelope extends pb_1.Message {
         break;
       switch (reader.getFieldNumber()) {
       case 1:
-        reader.readMessage(message.message_bundle, () => pb_1.Message.addToRepeatedWrapperField(message, 1, MessageBundle.deserialize(reader), MessageBundle));
+        reader.readMessage(message.message_content, () => pb_1.Message.addToRepeatedWrapperField(message, 1, Contents.deserialize(reader), Contents));
         break;
       case 2:
         reader.readMessage(message.sender, () => message.sender = Identity.deserialize(reader));
@@ -2322,9 +2558,6 @@ export class Envelope extends pb_1.Message {
         break;
       case 4:
         message.verification_id = reader.readString();
-        break;
-      case 5:
-        reader.readMessage(message.sent_time, () => message.sent_time = dependency_1.Timestamp.deserialize(reader));
         break;
       default: reader.skipField();
       }
