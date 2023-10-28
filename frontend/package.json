@@ -35,7 +35,7 @@
     "build": "npm run build-protos && rollup -c ",
     "autobuild": "npm run build-protos && rollup -c -w",
     "dev": "npm run build-protos && run-p start:dev autobuild",
-    "start": "npm run build-protos && sirv public --host 0.0.0.0 --port 80",
+    "start": "npm run build-protos && sirv public --host 0.0.0.0 --port 4200",
     "start:dev": "npm run build-protos && sirv public --dev --host 0.0.0.0 --port 80"
   },
   "dependencies": {
