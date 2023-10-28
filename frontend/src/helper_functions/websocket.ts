@@ -45,7 +45,7 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
       });
 
       if (response_envelope.has_receiver && response_envelope.receiver.id !== self_identity.id) {
-        alert("Rerouting the message to the correct client. This message is not for me.")
+        alert("Rerouting the message to the correct client. This message is not for me.");
       }
 
       if (response_envelope.has_receiver && response_envelope.receiver.id === self_identity.id) {
@@ -85,8 +85,6 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
               });
             }
           }
-
-
 
         });
       }

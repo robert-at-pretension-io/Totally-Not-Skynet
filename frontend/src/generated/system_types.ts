@@ -1028,7 +1028,6 @@ export class Identity extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
         id?: string;
-        group_id?: string;
         ip_address?: string;
     }) {
     super();
@@ -1036,9 +1035,6 @@ export class Identity extends pb_1.Message {
     if (!Array.isArray(data) && typeof data == "object") {
       if ("id" in data && data.id != undefined) {
         this.id = data.id;
-      }
-      if ("group_id" in data && data.group_id != undefined) {
-        this.group_id = data.group_id;
       }
       if ("ip_address" in data && data.ip_address != undefined) {
         this.ip_address = data.ip_address;
@@ -1051,29 +1047,19 @@ export class Identity extends pb_1.Message {
   set id(value: string) {
     pb_1.Message.setField(this, 1, value);
   }
-  get group_id() {
+  get ip_address() {
     return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
   }
-  set group_id(value: string) {
-    pb_1.Message.setField(this, 2, value);
-  }
-  get ip_address() {
-    return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
-  }
   set ip_address(value: string) {
-    pb_1.Message.setField(this, 3, value);
+    pb_1.Message.setField(this, 2, value);
   }
   static fromObject(data: {
         id?: string;
-        group_id?: string;
         ip_address?: string;
     }): Identity {
     const message = new Identity({});
     if (data.id != null) {
       message.id = data.id;
-    }
-    if (data.group_id != null) {
-      message.group_id = data.group_id;
     }
     if (data.ip_address != null) {
       message.ip_address = data.ip_address;
@@ -1083,14 +1069,10 @@ export class Identity extends pb_1.Message {
   toObject() {
     const data: {
             id?: string;
-            group_id?: string;
             ip_address?: string;
         } = {};
     if (this.id != null) {
       data.id = this.id;
-    }
-    if (this.group_id != null) {
-      data.group_id = this.group_id;
     }
     if (this.ip_address != null) {
       data.ip_address = this.ip_address;
@@ -1103,10 +1085,8 @@ export class Identity extends pb_1.Message {
     const writer = w || new pb_1.BinaryWriter();
     if (this.id.length)
       writer.writeString(1, this.id);
-    if (this.group_id.length)
-      writer.writeString(2, this.group_id);
     if (this.ip_address.length)
-      writer.writeString(3, this.ip_address);
+      writer.writeString(2, this.ip_address);
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1120,9 +1100,6 @@ export class Identity extends pb_1.Message {
         message.id = reader.readString();
         break;
       case 2:
-        message.group_id = reader.readString();
-        break;
-      case 3:
         message.ip_address = reader.readString();
         break;
       default: reader.skipField();
@@ -1991,76 +1968,6 @@ export class UserSettings extends pb_1.Message {
   }
   static deserializeBinary(bytes: Uint8Array): UserSettings {
     return UserSettings.deserialize(bytes);
-  }
-}
-export class MessageBundle extends pb_1.Message {
-  #one_of_decls: number[][] = [];
-  constructor(data?: any[] | {
-        container?: Contents;
-    }) {
-    super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-    if (!Array.isArray(data) && typeof data == "object") {
-      if ("container" in data && data.container != undefined) {
-        this.container = data.container;
-      }
-    }
-  }
-  get container() {
-    return pb_1.Message.getWrapperField(this, Contents, 2) as Contents;
-  }
-  set container(value: Contents) {
-    pb_1.Message.setWrapperField(this, 2, value);
-  }
-  get has_container() {
-    return pb_1.Message.getField(this, 2) != null;
-  }
-  static fromObject(data: {
-        container?: ReturnType<typeof Contents.prototype.toObject>;
-    }): MessageBundle {
-    const message = new MessageBundle({});
-    if (data.container != null) {
-      message.container = Contents.fromObject(data.container);
-    }
-    return message;
-  }
-  toObject() {
-    const data: {
-            container?: ReturnType<typeof Contents.prototype.toObject>;
-        } = {};
-    if (this.container != null) {
-      data.container = this.container.toObject();
-    }
-    return data;
-  }
-  serialize(): Uint8Array;
-  serialize(w: pb_1.BinaryWriter): void;
-  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-    const writer = w || new pb_1.BinaryWriter();
-    if (this.has_container)
-      writer.writeMessage(2, this.container, () => this.container.serialize(writer));
-    if (!w)
-      return writer.getResultBuffer();
-  }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): MessageBundle {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new MessageBundle();
-    while (reader.nextField()) {
-      if (reader.isEndGroup())
-        break;
-      switch (reader.getFieldNumber()) {
-      case 2:
-        reader.readMessage(message.container, () => message.container = Contents.deserialize(reader));
-        break;
-      default: reader.skipField();
-      }
-    }
-    return message;
-  }
-  serializeBinary(): Uint8Array {
-    return this.serialize();
-  }
-  static deserializeBinary(bytes: Uint8Array): MessageBundle {
-    return MessageBundle.deserialize(bytes);
   }
 }
 export class SystemError extends pb_1.Message {

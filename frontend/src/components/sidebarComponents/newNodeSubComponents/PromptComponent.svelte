@@ -1,9 +1,9 @@
 <script lang="ts">
   import { websocketStore } from "stores/websocketStore";
   import {
-    CrudBundle,
+    // CrudBundle,
     Prompt,
-    VerbTypeNames,
+    VerbTypes,
     Node,
     GraphNodeInfo,
   } from "../../../generated/system_types";

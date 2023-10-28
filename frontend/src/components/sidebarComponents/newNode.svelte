@@ -4,14 +4,15 @@
   import ProcessComponent from "./newNodeSubComponents/ProcessComponent.svelte";
   import PromptComponent from "./newNodeSubComponents/PromptComponent.svelte";
   import {
-    NodeTypeNames,
+    // NodeTypes,
     Prompt,
     Process,
     Conditional,
     Command,
+    NodeTypes,
   } from "../../generated/system_types";
 
-  let typeName: number = NodeTypeNames.PROMPT;
+  let typeName: number = NodeTypes.PROMPT;
 
   // let inputVariablesList: string[] = [];
   // let outputVariablesList: string[] = [];
@@ -21,7 +22,7 @@
   let conditional = new Conditional();
   let command = new Command();
 
-  let key_list = Object.keys(NodeTypeNames).filter((key) => isNaN(Number(key)));
+  let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
 
   let num_array = Array.from({ length: key_list.length }, (_, i) => i);
 </script>
@@ -34,15 +35,15 @@
 
 <p>Selected type: {key_list[typeName]}</p>
 
-{#if typeName === NodeTypeNames.PROMPT}
+{#if typeName === NodeTypes.PROMPT}
   <PromptComponent bind:prompt />
 {/if}
-{#if typeName === NodeTypeNames.PROCESS}
+{#if typeName === NodeTypes.PROCESS}
   <ProcessComponent bind:process />
 {/if}
-{#if typeName === NodeTypeNames.CONDITIONAL}
+{#if typeName === NodeTypes.CONDITIONAL}
   <ConditionalComponent bind:conditional />
 {/if}
-{#if typeName === NodeTypeNames.COMMAND}
+{#if typeName === NodeTypes.COMMAND}
   <CommandComponent bind:command />
 {/if}

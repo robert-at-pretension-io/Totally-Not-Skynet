@@ -4,8 +4,8 @@
   import {
     NodeTypes,
     Node,
-    MessageBundle,
-    VerbTypeNames,
+    // MessageBundle,
+    // VerbTypeNames,
     Process,
     GraphNodeInfo,
   } from "generated/system_types";
@@ -54,31 +54,31 @@
     } else {
       error = "";
     }
-
+    alert("sendNodes feature is not yet implemented!");
     console.log("sending selected_node_list: ", selected_node_list);
 
-    let crud_message = new MessageBundle();
+    // let crud_message = new MessageBundle();
 
-    crud_message.verb = VerbTypeNames.Validate;
+    // crud_message.verb = VerbTypeNames.Validate;
 
-    // let validate_nodes = new ValidateNodes();
+    // // let validate_nodes = new ValidateNodes();
 
-    let graph_node_info = new GraphNodeInfo();
+    // let graph_node_info = new GraphNodeInfo();
 
-    graph_node_info.name = name;
-    graph_node_info.description = description;
+    // graph_node_info.name = name;
+    // graph_node_info.description = description;
 
-    validate_nodes.containing_node = graph_node_info;
+    // validate_nodes.containing_node = graph_node_info;
 
-    validate_nodes.nodes = selected_node_list;
+    // validate_nodes.nodes = selected_node_list;
 
-    // crud_message.validate_nodes = validate_nodes;
+    // // crud_message.validate_nodes = validate_nodes;
 
-    sendWebsocketMessage(crud_message, $websocketStore.websocket as WebSocket);
+    // sendWebsocketMessage(crud_message, $websocketStore.websocket as WebSocket);
 
-    selected_node_list = [];
-    description = "";
-    name = "";
+    // selected_node_list = [];
+    // description = "";
+    // name = "";
   }
 </script>
 

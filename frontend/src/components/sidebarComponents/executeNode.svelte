@@ -1,10 +1,6 @@
 <script lang="ts">
   import systemStateStore from "stores/systemStateStore";
-  import {
-    GraphNodeInfo,
-    Node,
-    NodeTypeNames,
-  } from "../../generated/system_types";
+  import { GraphNodeInfo, Node, NodeTypes } from "../../generated/system_types";
   import { onMount } from "svelte";
 
   let ordered_nodes: Node[] = [];
@@ -13,7 +9,7 @@
 
   let selected_process: Node | undefined = undefined;
 
-  let key_list = Object.keys(NodeTypeNames).filter((key) => isNaN(Number(key)));
+  let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
 
   onMount(() => {
     console.log("ExecuteNode mounted");

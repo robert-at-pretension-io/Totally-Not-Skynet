@@ -1,37 +1,37 @@
 import * as graphlib from "graphlib";
 import * as proto from "../generated/system_types";
 
-import { NodeTypeNames } from "../generated/system_types";
+import { NodeTypes } from "../generated/system_types";
 
-// import { NodeTypeNames } from './path/to/your/enum';  // Import your NodeTypeNames enum
+// import { NodeTypes } from './path/to/your/enum';  // Import your NodeTypes enum
 
-export const stylesMap: { [key: string]: { [styleKey: string]: string } } = {
-  [NodeTypeNames.PROMPT]: {
-    "background-color": "#ff0000",
-    "border-color": "#00ff00",
-  },
-  [NodeTypeNames.PROCESS]: {
-    "background-color": "#0000ff",
-    "border-color": "#ffff00",
-  },
-  [NodeTypeNames.CONDITIONAL]: {
-    "background-color": "#ff00ff",
-    "border-color": "#ff8800",
-  },
-  [NodeTypeNames.COMMAND]: {
-    "background-color": "#00ffff",
-    "border-color": "#8800ff",
-  },
-};
+// export const stylesMap: { [key: string]: { [styleKey: string]: string } } = {
+//   [NodeTypes.PROMPT]: {
+//     "background-color": "#ff0000",
+//     "border-color": "#00ff00",
+//   },
+//   [NodeTypes.PROCESS]: {
+//     "background-color": "#0000ff",
+//     "border-color": "#ffff00",
+//   },
+//   [NodeTypes.CONDITIONAL]: {
+//     "background-color": "#ff00ff",
+//     "border-color": "#ff8800",
+//   },
+//   [NodeTypes.COMMAND]: {
+//     "background-color": "#00ffff",
+//     "border-color": "#8800ff",
+//   },
+// };
 
-export const generateDynamicStyles = (): Array<any> => {
-  return Object.keys(stylesMap).map((key) => {
-    return {
-      selector: `.${key.toLowerCase()}`,
-      style: stylesMap[key],
-    };
-  });
-};
+// export const generateDynamicStyles = (): Array<any> => {
+//   return Object.keys(stylesMap).map((key) => {
+//     return {
+//       selector: `.${key.toLowerCase()}`,
+//       style: stylesMap[key],
+//     };
+//   });
+// };
 
 export function systemGraphToGraphLib(
   system_state: proto.SystemState
@@ -581,7 +581,7 @@ export function selectNode(
 ): proto.SystemState {
   console.log("Entering selectNode function with ID:", id);
 
-  const selected_nodes = system_state.selected_node;
+  const selected_nodes = system_state.selected_nodes;
 
   selected_nodes.push(id);
 
