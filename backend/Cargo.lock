@@ -1975,6 +1975,7 @@ dependencies = [
  "futures-util",
  "log",
  "mongodb",
+ "once_cell",
  "petgraph",
  "prost",
  "prost-build",

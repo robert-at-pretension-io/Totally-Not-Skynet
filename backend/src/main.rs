@@ -27,12 +27,30 @@ pub mod generated_types {
 use crate::receive_send::start_message_sending_loop;
 use crate::websocket::start_websocket_server;
 use colored::*;
+use reqwest;
+
+use once_cell::sync::OnceCell;
+
+use crate::generated_types::skynet::Identity;
+
+static SERVER_IDENTITY: OnceCell<Identity> = OnceCell::new();
 
 // use bollard::container::{CreateExecOptions, StartExecResults};
 
 #[tokio::main]
 async fn main() {
     env_logger::init();
+
+    let res = reqwest::get("http://api.ipify.org").await.text().await;
+    println!("My external IP address is: {}", res);
+
+    let server_identity: Identity = Identity {
+        id: Some(Uuid::new_v4().to_string()),
+        group_id: None,
+        ip_address: Some(res.to_owned()),
+    };
+
+    SERVER_IDENTITY.set(server_identity.clone()).unwrap();
 
     // Check that the environmental variables are set:
     let file_location = "./req_env_vars.txt";

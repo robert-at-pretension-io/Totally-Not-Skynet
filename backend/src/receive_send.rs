@@ -1,32 +1,18 @@
 use crate::generated_types::{
-    crud_bundle,
-    CrudBundle,
     GraphNodeInfo,
-    ResponseObject,
     UserSettings,
-    VerbTypeNames,
+    VerbTypes,
     Graph,
-    ValidateNodes,
-    response_object,
-    ValidateNodesResponse,
     Edge,
-    NodeTypeNames,
+    Process,
+    Envelope,
 };
-
-use crate::generated_types::node::NodeContent;
 
 use colored::*;
 use petgraph::Direction;
 use petgraph::prelude::DiGraph;
 
 use std::sync::Arc;
-
-use crate::generated_types::response_object::Object::{
-    Node,
-    ValidateNodesResponse as ValidateNodesResponseEnum,
-};
-
-use crate::generated_types::{ Process };
 
 // use crate::utils::parse_message;
 use crate::sqlite_helper_functions::{ insert_node, update_node, fetch_all_nodes };
@@ -82,16 +68,42 @@ pub async fn start_message_sending_loop(
         // println!("message data: {:?}",msg.1.into_data());
 
         let slice = msg.1.clone().into_data().as_slice().to_vec();
-        let message_contents: CrudBundle;
+        let envelope: Envelope;
 
-        match CrudBundle::decode(&*slice) {
+        match Envelope::decode(&*slice) {
             Ok(val) => {
-                message_contents = val;
+                envelope = val;
             }
             Err(err) => {
                 println!("Error decoding message: {:?}", err);
                 continue;
             }
+        }
+
+        if envelope.receiver.is_none() {
+            println!(
+                "{} {}",
+                "No receiver specified.".red(),
+                "Sending server identity to client".green()
+            );
+
+            let server_identity = SERVER_IDENTITY.get().unwrap();
+
+            let message_content = Content {
+                verb: VerbTypes::Acknowledge as i32,
+                contents: Some(Contents::Identity(server_identity.clone())),
+            };
+
+            let vectorized_message = vec![message_content];
+
+            let return_envelope = Envelope {
+                sender: Some(server_identity.clone()),
+                receiver: Some(envelope.clone().sender.clone()),
+                message_contents: vectorized_message,
+                verification_id: envelope.verification_id.clone(),
+            };
+
+            send_message(&tx, msg.0.clone(), return_envelope).await;
         }
 
         // if received_message.is_none() {
@@ -469,7 +481,6 @@ pub async fn start_message_sending_loop(
                             input_variables: input_minus_output,
                             output_variables: output_minus_input,
                             node_content: Some(NodeContent::Process(process)),
-                            type_name: NodeTypeNames::Process as i32,
                         };
 
                         match insert_node(pool.clone(), node.clone()) {
@@ -513,7 +524,7 @@ pub async fn start_message_sending_loop(
 pub async fn send_message(
     tx: &UnboundedSender<(Identity, tokio_tungstenite::tungstenite::Message)>,
     identity: Identity,
-    message: ResponseObject
+    envelope: Envelope
 ) {
     let mut buf = BytesMut::new();
     message.encode(&mut buf).unwrap();

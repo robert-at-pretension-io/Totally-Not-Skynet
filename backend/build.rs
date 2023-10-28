@@ -1,6 +1,7 @@
 extern crate prost_build;
 
 fn main() {
+    println!("cargo:rerun-if-changed=../common/protobuf/system_types.proto");
     println!("Change in build !!!!!!!!");
 
     prost_build
