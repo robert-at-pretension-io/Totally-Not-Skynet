@@ -5,7 +5,7 @@
   import * as helper_functions from "../helper_functions/graph";
   import * as proto from "../generated/system_types";
   import dagre from "cytoscape-dagre";
-  import { generateDynamicStyles } from "../helper_functions/graph";
+  // import { generateDynamicStyles } from "../helper_functions/graph";
 
   let current_graph: proto.Graph = new proto.Graph();
 
@@ -20,7 +20,7 @@
       current_graph = new proto.Graph();
     }
 
-    const dynamicStyles = generateDynamicStyles(); // Generate the dynamic styles
+    // const dynamicStyles = generateDynamicStyles(); // Generate the dynamic styles
 
     cyInstance = cytoscape({
       container: refElement,
@@ -52,7 +52,7 @@
             width: "2px",
           },
         },
-        ...dynamicStyles,
+        // ...dynamicStyles,
       ],
     });
 
@@ -65,7 +65,7 @@
 
       $systemStateStore.nodes.find((node) => {
         if (node.node_info.id == selectedNode.id) {
-          $systemStateStore.selected_node.push(node.node_info);
+          $systemStateStore.selected_nodes.push(node.node_info);
         }
       });
     });
@@ -93,7 +93,7 @@
       const node = evt.target;
       console.log("deselected " + node.id());
 
-      let selected_list = $systemStateStore.selected_node;
+      let selected_list = $systemStateStore.selected_nodes;
 
       // remove the node the graphNodeInfo from the selected_list where the id is the same as the node.id()
 
@@ -118,55 +118,55 @@
   $: {
     // Whenever the systemState.graph changes, we will change the cytoscape graph. It might be good to check if the graph has actually changed rather than always re-draw
 
-    let test_graph = $systemStateStore.selected_process?.process.graph;
+    // let test_graph =
+    // $systemStateStore.selected_process.node_content.process.graph;
 
-    // check that the test_graph is different from the current_graph
-    if (test_graph != current_graph && test_graph != undefined) {
-      current_graph = test_graph;
+    // // check that the test_graph is different from the current_graph
+    // if (test_graph != current_graph && test_graph != undefined) {
+    //   current_graph = test_graph;
 
-      // clear the cytoscape graph
-      cyInstance?.elements().remove();
+    // clear the cytoscape graph
+    cyInstance?.elements().remove();
 
-      // add the nodes to the cytoscape graph
-      let nodes = current_graph.nodes;
+    // add the nodes to the cytoscape graph
+    let nodes = current_graph.nodes;
 
-      nodes.forEach((node_info) => {
-        if (node_info) {
-          cyInstance?.add({
-            data: {
-              id: node_info.id,
-              label: node_info.name,
-            },
-          });
-        }
-      });
+    nodes.forEach((node_info) => {
+      if (node_info) {
+        cyInstance?.add({
+          data: {
+            id: node_info.id,
+            label: node_info.name,
+          },
+        });
+      }
+    });
 
-      // add the edges to the cytoscape graph
-      let edges = current_graph.edges;
+    // add the edges to the cytoscape graph
+    let edges = current_graph.edges;
 
-      edges.forEach((edge: proto.Edge) => {
-        let source = edge.source;
-        let target = edge.target;
+    edges.forEach((edge: proto.Edge) => {
+      let source = edge.source;
+      let target = edge.target;
 
-        if (source && target) {
-          cyInstance?.add({
-            data: {
-              source: source.id,
-              target: target.id,
-            },
-          });
-        }
-      });
+      if (source && target) {
+        cyInstance?.add({
+          data: {
+            source: source.id,
+            target: target.id,
+          },
+        });
+      }
+    });
 
-      // cyInstance?.fit();
+    // cyInstance?.fit();
 
-      cyInstance
-        ?.layout({
-          name: "dagre",
-          fit: true,
-        })
-        .run();
-    }
+    cyInstance
+      ?.layout({
+        name: "dagre",
+        fit: true,
+      })
+      .run();
   }
 
   setContext("graphSharedState", {

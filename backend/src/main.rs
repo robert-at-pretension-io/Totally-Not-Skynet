@@ -51,6 +51,8 @@ async fn main() {
         ip_address: res.clone(),
     };
 
+    println!("Server identity: {:?}", server_identity);
+
     SERVER_IDENTITY.set(server_identity.clone()).unwrap();
 
     // Check that the environmental variables are set:

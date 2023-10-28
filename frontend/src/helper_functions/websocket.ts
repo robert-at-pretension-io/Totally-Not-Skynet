@@ -1,12 +1,13 @@
 
-import { Node, SystemState, Envelope, VerbTypes } from "../../src/generated/system_types";
+import { Node, SystemState, Envelope, VerbTypes, Contents } from "../../src/generated/system_types";
 
 import systemStateStore from "stores/systemStateStore";
 
 import { BinaryWriter } from "google-protobuf";
 import { Json } from "io-ts-types";
-import { selfIdentify } from "./authentication";
 import { Identity } from "generated/system_types";
+
+import { v4 as uuidv4 } from "uuid";
 
 export function setupWebsocketConnection(): WebSocket {
   console.log("setting up websocket connection");
@@ -19,8 +20,9 @@ export function setupWebsocketConnection(): WebSocket {
     console.log("websocket connection opened");
     // need to prepare the handler of incoming messages before sending the first message (in case the rust server is TOO FAST 😎)
     websocket = setupWebsocketMessageHandler(websocket);
-    selfIdentify(websocket);
   });
+
+  console.log("Event listener setup:");
 
   return websocket;
 }
@@ -43,6 +45,8 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
       systemStateStore.subscribe((s: SystemState) => {
         self_identity = s.client_identity;
       });
+
+      console.log(self_identity.toObject());
 
       if (response_envelope.has_receiver && response_envelope.receiver.id !== self_identity.id) {
         alert("Rerouting the message to the correct client. This message is not for me.");
@@ -175,6 +179,9 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
     // });
 
   });
+
+  selfIdentify(websocket);
+
   return websocket;
 
 }
@@ -207,4 +214,47 @@ export function sendWebsocketMessage(
   // const string = JSON.stringify(message.toObject());
 
   websocket.send(message_string);
+}
+
+export function selfIdentify(websocket: WebSocket) {
+  const id = uuidv4();
+
+  const identity = new Identity();
+  identity.id = id;
+  getExternalIP().then((ip) => {
+    identity.ip_address = ip;
+  });
+
+  systemStateStore.update((s) => {
+    console.log("self-identify");
+    s.client_identity = identity;
+    return s;
+  });
+
+  const envelope = new Envelope();
+  envelope.sender = identity;
+
+  const contents = new Contents();
+
+  contents.verb = VerbTypes.Initiate;
+
+  contents.identity = identity;
+
+  envelope.message_content = [contents];
+
+  sendWebsocketMessage(envelope, websocket);
+
+}
+
+// import axios from "axios";
+
+async function getExternalIP() {
+  // try {
+  //   const response = await axios.get("http://api.ipify.org");
+  //   console.log(`My external IP address is: ${response.data}`);
+  //   return response.data;
+  // } catch (error) {
+  //   console.error(`Error fetching IP address: ${error}`);
+  // }
+  return "placeholder_frontend_ip";
 }

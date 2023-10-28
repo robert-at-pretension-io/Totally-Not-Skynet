@@ -1,7 +1,6 @@
 <script lang="ts">
   import { websocketStore } from "stores/websocketStore";
   import {
-    // CrudBundle,
     Prompt,
     VerbTypes,
     Node,
@@ -25,13 +24,9 @@
 
     // create and send crud bundle:
 
-    let crud_bundle = new CrudBundle();
-
-    let verb = VerbTypeNames.Post;
+    alert("submitPrompt not implemented");
 
     let node = new Node();
-
-    node.prompt = prompt;
 
     if (new_input_variable != "") {
       input_variables = [...input_variables, new_input_variable];
@@ -48,14 +43,8 @@
     node_info.name = name;
     node_info.description = description;
     node.node_info = node_info;
-    crud_bundle.node = node;
-    crud_bundle.verb = verb;
-
-    console.log("Crud bundle is: ", crud_bundle);
 
     let websocket = $websocketStore.websocket as WebSocket;
-
-    sendWebsocketMessage(crud_bundle, websocket);
 
     reset_component();
   }

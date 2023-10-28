@@ -46,30 +46,3 @@ export function authenticate(
   sendWebsocketMessage(envelope, websocket);
 
 }
-
-export function selfIdentify(websocket: WebSocket) {
-  const id = uuidv4();
-
-  const identity = new Identity();
-  identity.id = id;
-
-  systemStateStore.update((s) => {
-    console.log("self-identify");
-    s.client_identity = identity;
-    return s;
-  });
-
-  const envelope = new Envelope();
-  envelope.sender = identity;
-
-  const contents = new Contents();
-
-  contents.verb = VerbTypes.Initiate;
-
-  contents.identity = identity;
-
-  envelope.message_content = [contents];
-
-  sendWebsocketMessage(envelope, websocket);
-
-}

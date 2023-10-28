@@ -113,7 +113,7 @@ pub async fn start_message_sending_loop(
 
         // check to see if the envelope receiver is NOT the same as the server identity in which case the server will attempt to send the message to the correct receiver
         if envelope.clone().receiver.unwrap() != *SERVER_IDENTITY.get().unwrap() {
-            todo!("Forward the message to the correct receiver");
+            println!("{}", "Forward the message to the correct receiver".red());
         }
 
         // loop through the message_contents and handle each one
