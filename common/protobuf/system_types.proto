@@ -86,8 +86,7 @@ enum VerbTypes {
 // This is given to every "entity" within the system. Each is self-declared. For instance, the backend will generate an Identity for itself and use it for any messages that it sends to any client.
 message Identity {
   string id = 1;
-  string group_id = 2;
-  string ip_address = 3;
+  string ip_address = 2;
 }
 
 message Execution {

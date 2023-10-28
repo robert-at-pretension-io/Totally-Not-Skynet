@@ -31,23 +31,24 @@ use reqwest;
 
 use once_cell::sync::OnceCell;
 
-use crate::generated_types::skynet::Identity;
+use crate::generated_types::Identity;
 
 static SERVER_IDENTITY: OnceCell<Identity> = OnceCell::new();
 
 // use bollard::container::{CreateExecOptions, StartExecResults};
 
+use bson::Uuid;
+
 #[tokio::main]
 async fn main() {
     env_logger::init();
 
-    let res = reqwest::get("http://api.ipify.org").await.text().await;
+    let res = reqwest::get("http://api.ipify.org").await.unwrap().text().await.unwrap();
     println!("My external IP address is: {}", res);
 
     let server_identity: Identity = Identity {
-        id: Some(Uuid::new_v4().to_string()),
-        group_id: None,
-        ip_address: Some(res.to_owned()),
+        id: uuid::Uuid::new_v4().to_string(),
+        ip_address: res.clone(),
     };
 
     SERVER_IDENTITY.set(server_identity.clone()).unwrap();

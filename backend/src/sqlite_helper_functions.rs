@@ -42,7 +42,7 @@ pub fn insert_node(pool: Arc<Pool<SqliteConnectionManager>>, node: Node) -> Resu
             match
                 connection.execute(
                     "INSERT OR REPLACE INTO nodes (id, name, type_name, serialized_node) VALUES (?1, ?2, ?3, ?4)",
-                    params![id, name, node.type_name, serialized_node]
+                    params![id, name, serialized_node]
                 )
             {
                 Ok(_) => {
@@ -71,8 +71,8 @@ pub fn update_node(pool: Arc<Pool<SqliteConnectionManager>>, node: &Node) -> Res
             let name = node.node_info.clone().unwrap().name;
             match
                 connection.execute(
-                    "UPDATE nodes SET name = ?1, type_name = ?2, serialized_node = ?3 WHERE id = ?4",
-                    params![name, node.type_name, serialized_node, id]
+                    "UPDATE nodes SET name = ?1, serialized_node = ?2 WHERE id = ?3",
+                    params![name, serialized_node, id]
                 )
             {
                 Ok(count) => {

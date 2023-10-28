@@ -1,5 +1,5 @@
 
-import { Node, SystemState, Envelope } from "../../src/generated/system_types";
+import { Node, SystemState, Envelope, VerbTypes } from "../../src/generated/system_types";
 
 import systemStateStore from "stores/systemStateStore";
 
@@ -44,8 +44,51 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
         self_identity = s.client_identity;
       });
 
-      if (response_envelope.has_receiver && response_envelope.receiver.id === self_identity.id) {
+      if (response_envelope.has_receiver && response_envelope.receiver.id !== self_identity.id) {
+        alert("Rerouting the message to the correct client. This message is not for me.")
+      }
 
+      if (response_envelope.has_receiver && response_envelope.receiver.id === self_identity.id) {
+        // loop through the response_envelope.message_content array
+        response_envelope.message_content.forEach((message_content) => {
+          console.log("message_content: ", message_content);
+          // check the type of message_content
+
+          if (message_content.verb === VerbTypes.Initiate) {
+            if (message_content.has_node) {
+              // if it's a node, add it to the SystemState
+              const add_node = message_content.node as Node;
+
+              if (add_node && typeof add_node.toObject === "function") {
+                console.log("add_node: ", add_node.toObject());
+
+                systemStateStore.update(
+                  (n: SystemState) => {
+
+                    n.nodes.push(add_node);
+
+                    return n;
+                  }
+                );
+
+              }
+            }
+          }
+
+          if (message_content.verb === VerbTypes.Acknowledge) {
+            if (message_content.has_identity) {
+              const identity = message_content.identity as Identity;
+              console.log("server identity: ", identity);
+              systemStateStore.update((s: SystemState) => {
+                s.primary_backend = identity;
+                return s;
+              });
+            }
+          }
+
+
+
+        });
       }
 
     });
