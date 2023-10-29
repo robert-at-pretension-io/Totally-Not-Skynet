@@ -15,7 +15,7 @@ export function setupWebsocketConnection(): WebSocket {
 
   const environment: string = process.env.ENVIRONMENT;
 
-
+  console.log("The environment is: ", environment);
 
   let websocket_url = environment.toUpperCase() === "PRODUCTION" ?
     "wss://liminalnook.com/ws/" : "localhost:8080";

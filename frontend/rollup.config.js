@@ -21,8 +21,9 @@ export default {
   },
   plugins: [
     replace({
-      // Replace `process.env.YOUR_ENV_VAR` in your Svelte components
+      // Replace `process.env.ENVIRONMENT` in your Svelte components
       'process.env.ENVIRONMENT': JSON.stringify(process.env.ENVIRONMENT),
+      preventAssignment: true,
     }),
     svelte({
       // enable run-time checks when not in production
