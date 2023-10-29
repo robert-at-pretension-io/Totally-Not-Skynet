@@ -1,0 +1,36 @@
+input,
+textarea,
+select {
+    width: 100%;
+    /* Consistent width */
+    padding: 10px 15px;
+    /* Inner spacing */
+    border: 1px solid #ccc;
+    /* Border */
+    border-radius: 5px;
+    /* Rounded corners */
+    background-color: #f9f9f9;
+    /* Slight off-white background */
+    font-size: 16px;
+    /* Readable font size */
+    color: #333;
+    /* Text color */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    /* Smooth transition */
+    box-sizing: border-box;
+    /* This makes sure padding and border are included in the total width */
+}
+
+input:focus,
+textarea:focus {
+    border-color: #27ae60;
+    /* Highlight color on focus */
+    box-shadow: 0 0 5px rgba(39, 174, 96, 0.5);
+    /* Subtle glow on focus */
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #aaa;
+    /* Placeholder text color */
+}
