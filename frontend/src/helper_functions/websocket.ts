@@ -12,13 +12,12 @@ import { v4 as uuidv4 } from "uuid";
 export function setupWebsocketConnection(): WebSocket {
   console.log("setting up websocket connection");
 
-
   const environment: string = process.env.ENVIRONMENT;
 
   console.log("The environment is: ", environment);
 
-  let websocket_url = environment.toUpperCase() === "PRODUCTION" ?
-    "wss://liminalnook.com/ws/" : "localhost:8080";
+  const websocket_url = environment.toUpperCase() === "PRODUCTION" ?
+    "wss://liminalnook.com/ws/" : "ws://localhost:8080";
 
   alert("Change websocket to external environment");
   let websocket = new WebSocket(websocket_url);
