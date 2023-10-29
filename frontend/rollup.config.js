@@ -7,6 +7,7 @@ import autoPreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
 import eslint from "@rollup/plugin-eslint";
 import postcss from "rollup-plugin-postcss";
+import replace from '@rollup/plugin-replace';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -19,6 +20,10 @@ export default {
     file: "public/bundle.js",
   },
   plugins: [
+    replace({
+      // Replace `process.env.YOUR_ENV_VAR` in your Svelte components
+      'process.env.ENVIRONMENT': JSON.stringify(process.env.ENVIRONMENT),
+    }),
     svelte({
       // enable run-time checks when not in production
       dev: !production,
