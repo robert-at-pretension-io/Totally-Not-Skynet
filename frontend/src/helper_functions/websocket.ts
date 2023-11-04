@@ -223,6 +223,29 @@ export function sendWebsocketMessage(
   websocket.send(message_string);
 }
 
+export function sendEnvelope(websocket: WebSocket, sender: Identity, receiver: Identity, message_content: Contents[]) {
+
+  // raise an error and alert if the sender or receiver is not set
+  if (!sender || !receiver) {
+    alert("Error: sender or receiver is not set");
+    throw new Error("sender or receiver is not set");
+  }
+
+  const envelope = new Envelope();
+
+  envelope.sender = sender;
+  envelope.receiver = receiver;
+
+  // create uuid for the valididation id
+  const verification_id = uuidv4();
+
+  envelope.verification_id = verification_id;
+
+  envelope.message_content = message_content;
+
+  sendWebsocketMessage(envelope, websocket);
+}
+
 export function selfIdentify(websocket: WebSocket) {
   const id = uuidv4();
 

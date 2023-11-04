@@ -20,7 +20,8 @@ export enum VerbTypes {
     Execute = 5,
     Validate = 6,
     Acknowledge = 7,
-    Initiate = 8
+    Initiate = 8,
+    Authorized = 9
 }
 export class GraphNodeInfo extends pb_1.Message {
   #one_of_decls: number[][] = [];
@@ -481,24 +482,24 @@ export class Conditional extends pb_1.Message {
 export class Graph extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
-        nodes?: GraphNodeInfo[];
+        nodes_info?: GraphNodeInfo[];
         edges?: Edge[];
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
-      if ("nodes" in data && data.nodes != undefined) {
-        this.nodes = data.nodes;
+      if ("nodes_info" in data && data.nodes_info != undefined) {
+        this.nodes_info = data.nodes_info;
       }
       if ("edges" in data && data.edges != undefined) {
         this.edges = data.edges;
       }
     }
   }
-  get nodes() {
+  get nodes_info() {
     return pb_1.Message.getRepeatedWrapperField(this, GraphNodeInfo, 1) as GraphNodeInfo[];
   }
-  set nodes(value: GraphNodeInfo[]) {
+  set nodes_info(value: GraphNodeInfo[]) {
     pb_1.Message.setRepeatedWrapperField(this, 1, value);
   }
   get edges() {
@@ -508,12 +509,12 @@ export class Graph extends pb_1.Message {
     pb_1.Message.setRepeatedWrapperField(this, 2, value);
   }
   static fromObject(data: {
-        nodes?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
+        nodes_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
         edges?: ReturnType<typeof Edge.prototype.toObject>[];
     }): Graph {
     const message = new Graph({});
-    if (data.nodes != null) {
-      message.nodes = data.nodes.map(item => GraphNodeInfo.fromObject(item));
+    if (data.nodes_info != null) {
+      message.nodes_info = data.nodes_info.map(item => GraphNodeInfo.fromObject(item));
     }
     if (data.edges != null) {
       message.edges = data.edges.map(item => Edge.fromObject(item));
@@ -522,11 +523,11 @@ export class Graph extends pb_1.Message {
   }
   toObject() {
     const data: {
-            nodes?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
+            nodes_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
             edges?: ReturnType<typeof Edge.prototype.toObject>[];
         } = {};
-    if (this.nodes != null) {
-      data.nodes = this.nodes.map((item: GraphNodeInfo) => item.toObject());
+    if (this.nodes_info != null) {
+      data.nodes_info = this.nodes_info.map((item: GraphNodeInfo) => item.toObject());
     }
     if (this.edges != null) {
       data.edges = this.edges.map((item: Edge) => item.toObject());
@@ -537,8 +538,8 @@ export class Graph extends pb_1.Message {
   serialize(w: pb_1.BinaryWriter): void;
   serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
     const writer = w || new pb_1.BinaryWriter();
-    if (this.nodes.length)
-      writer.writeRepeatedMessage(1, this.nodes, (item: GraphNodeInfo) => item.serialize(writer));
+    if (this.nodes_info.length)
+      writer.writeRepeatedMessage(1, this.nodes_info, (item: GraphNodeInfo) => item.serialize(writer));
     if (this.edges.length)
       writer.writeRepeatedMessage(2, this.edges, (item: Edge) => item.serialize(writer));
     if (!w)
@@ -551,7 +552,7 @@ export class Graph extends pb_1.Message {
         break;
       switch (reader.getFieldNumber()) {
       case 1:
-        reader.readMessage(message.nodes, () => pb_1.Message.addToRepeatedWrapperField(message, 1, GraphNodeInfo.deserialize(reader), GraphNodeInfo));
+        reader.readMessage(message.nodes_info, () => pb_1.Message.addToRepeatedWrapperField(message, 1, GraphNodeInfo.deserialize(reader), GraphNodeInfo));
         break;
       case 2:
         reader.readMessage(message.edges, () => pb_1.Message.addToRepeatedWrapperField(message, 2, Edge.deserialize(reader), Edge));
@@ -1024,6 +1025,73 @@ export class Node extends pb_1.Message {
     return Node.deserialize(bytes);
   }
 }
+export class Nodes extends pb_1.Message {
+  #one_of_decls: number[][] = [];
+  constructor(data?: any[] | {
+        nodes?: Node[];
+    }) {
+    super();
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("nodes" in data && data.nodes != undefined) {
+        this.nodes = data.nodes;
+      }
+    }
+  }
+  get nodes() {
+    return pb_1.Message.getRepeatedWrapperField(this, Node, 1) as Node[];
+  }
+  set nodes(value: Node[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 1, value);
+  }
+  static fromObject(data: {
+        nodes?: ReturnType<typeof Node.prototype.toObject>[];
+    }): Nodes {
+    const message = new Nodes({});
+    if (data.nodes != null) {
+      message.nodes = data.nodes.map(item => Node.fromObject(item));
+    }
+    return message;
+  }
+  toObject() {
+    const data: {
+            nodes?: ReturnType<typeof Node.prototype.toObject>[];
+        } = {};
+    if (this.nodes != null) {
+      data.nodes = this.nodes.map((item: Node) => item.toObject());
+    }
+    return data;
+  }
+  serialize(): Uint8Array;
+  serialize(w: pb_1.BinaryWriter): void;
+  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.nodes.length)
+      writer.writeRepeatedMessage(1, this.nodes, (item: Node) => item.serialize(writer));
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Nodes {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Nodes();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+      case 1:
+        reader.readMessage(message.nodes, () => pb_1.Message.addToRepeatedWrapperField(message, 1, Node.deserialize(reader), Node));
+        break;
+      default: reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary(): Uint8Array {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes: Uint8Array): Nodes {
+    return Nodes.deserialize(bytes);
+  }
+}
 export class Identity extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
@@ -1461,7 +1529,7 @@ export class SystemState extends pb_1.Message {
         authenticated?: boolean;
         websocket_ready?: boolean;
         graph?: Graph;
-        nodes?: Node[];
+        local_nodes?: Node[];
         selected_nodes?: GraphNodeInfo[];
         selected_edges?: Edge[];
         execution_step?: Execution;
@@ -1470,9 +1538,10 @@ export class SystemState extends pb_1.Message {
         peer_identities?: Identity[];
         primary_backend?: Identity;
         client_identity?: Identity;
+        sent_messages?: Envelope[];
     }) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4, 5, 6, 9, 10], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4, 5, 6, 9, 10, 13], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
       if ("authenticated" in data && data.authenticated != undefined) {
         this.authenticated = data.authenticated;
@@ -1483,8 +1552,8 @@ export class SystemState extends pb_1.Message {
       if ("graph" in data && data.graph != undefined) {
         this.graph = data.graph;
       }
-      if ("nodes" in data && data.nodes != undefined) {
-        this.nodes = data.nodes;
+      if ("local_nodes" in data && data.local_nodes != undefined) {
+        this.local_nodes = data.local_nodes;
       }
       if ("selected_nodes" in data && data.selected_nodes != undefined) {
         this.selected_nodes = data.selected_nodes;
@@ -1510,6 +1579,9 @@ export class SystemState extends pb_1.Message {
       if ("client_identity" in data && data.client_identity != undefined) {
         this.client_identity = data.client_identity;
       }
+      if ("sent_messages" in data && data.sent_messages != undefined) {
+        this.sent_messages = data.sent_messages;
+      }
     }
   }
   get authenticated() {
@@ -1533,10 +1605,10 @@ export class SystemState extends pb_1.Message {
   get has_graph() {
     return pb_1.Message.getField(this, 3) != null;
   }
-  get nodes() {
+  get local_nodes() {
     return pb_1.Message.getRepeatedWrapperField(this, Node, 4) as Node[];
   }
-  set nodes(value: Node[]) {
+  set local_nodes(value: Node[]) {
     pb_1.Message.setRepeatedWrapperField(this, 4, value);
   }
   get selected_nodes() {
@@ -1599,11 +1671,17 @@ export class SystemState extends pb_1.Message {
   get has_client_identity() {
     return pb_1.Message.getField(this, 12) != null;
   }
+  get sent_messages() {
+    return pb_1.Message.getRepeatedWrapperField(this, Envelope, 13) as Envelope[];
+  }
+  set sent_messages(value: Envelope[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 13, value);
+  }
   static fromObject(data: {
         authenticated?: boolean;
         websocket_ready?: boolean;
         graph?: ReturnType<typeof Graph.prototype.toObject>;
-        nodes?: ReturnType<typeof Node.prototype.toObject>[];
+        local_nodes?: ReturnType<typeof Node.prototype.toObject>[];
         selected_nodes?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
         selected_edges?: ReturnType<typeof Edge.prototype.toObject>[];
         execution_step?: ReturnType<typeof Execution.prototype.toObject>;
@@ -1612,6 +1690,7 @@ export class SystemState extends pb_1.Message {
         peer_identities?: ReturnType<typeof Identity.prototype.toObject>[];
         primary_backend?: ReturnType<typeof Identity.prototype.toObject>;
         client_identity?: ReturnType<typeof Identity.prototype.toObject>;
+        sent_messages?: ReturnType<typeof Envelope.prototype.toObject>[];
     }): SystemState {
     const message = new SystemState({});
     if (data.authenticated != null) {
@@ -1623,8 +1702,8 @@ export class SystemState extends pb_1.Message {
     if (data.graph != null) {
       message.graph = Graph.fromObject(data.graph);
     }
-    if (data.nodes != null) {
-      message.nodes = data.nodes.map(item => Node.fromObject(item));
+    if (data.local_nodes != null) {
+      message.local_nodes = data.local_nodes.map(item => Node.fromObject(item));
     }
     if (data.selected_nodes != null) {
       message.selected_nodes = data.selected_nodes.map(item => GraphNodeInfo.fromObject(item));
@@ -1650,6 +1729,9 @@ export class SystemState extends pb_1.Message {
     if (data.client_identity != null) {
       message.client_identity = Identity.fromObject(data.client_identity);
     }
+    if (data.sent_messages != null) {
+      message.sent_messages = data.sent_messages.map(item => Envelope.fromObject(item));
+    }
     return message;
   }
   toObject() {
@@ -1657,7 +1739,7 @@ export class SystemState extends pb_1.Message {
             authenticated?: boolean;
             websocket_ready?: boolean;
             graph?: ReturnType<typeof Graph.prototype.toObject>;
-            nodes?: ReturnType<typeof Node.prototype.toObject>[];
+            local_nodes?: ReturnType<typeof Node.prototype.toObject>[];
             selected_nodes?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
             selected_edges?: ReturnType<typeof Edge.prototype.toObject>[];
             execution_step?: ReturnType<typeof Execution.prototype.toObject>;
@@ -1666,6 +1748,7 @@ export class SystemState extends pb_1.Message {
             peer_identities?: ReturnType<typeof Identity.prototype.toObject>[];
             primary_backend?: ReturnType<typeof Identity.prototype.toObject>;
             client_identity?: ReturnType<typeof Identity.prototype.toObject>;
+            sent_messages?: ReturnType<typeof Envelope.prototype.toObject>[];
         } = {};
     if (this.authenticated != null) {
       data.authenticated = this.authenticated;
@@ -1676,8 +1759,8 @@ export class SystemState extends pb_1.Message {
     if (this.graph != null) {
       data.graph = this.graph.toObject();
     }
-    if (this.nodes != null) {
-      data.nodes = this.nodes.map((item: Node) => item.toObject());
+    if (this.local_nodes != null) {
+      data.local_nodes = this.local_nodes.map((item: Node) => item.toObject());
     }
     if (this.selected_nodes != null) {
       data.selected_nodes = this.selected_nodes.map((item: GraphNodeInfo) => item.toObject());
@@ -1703,6 +1786,9 @@ export class SystemState extends pb_1.Message {
     if (this.client_identity != null) {
       data.client_identity = this.client_identity.toObject();
     }
+    if (this.sent_messages != null) {
+      data.sent_messages = this.sent_messages.map((item: Envelope) => item.toObject());
+    }
     return data;
   }
   serialize(): Uint8Array;
@@ -1715,8 +1801,8 @@ export class SystemState extends pb_1.Message {
       writer.writeBool(2, this.websocket_ready);
     if (this.has_graph)
       writer.writeMessage(3, this.graph, () => this.graph.serialize(writer));
-    if (this.nodes.length)
-      writer.writeRepeatedMessage(4, this.nodes, (item: Node) => item.serialize(writer));
+    if (this.local_nodes.length)
+      writer.writeRepeatedMessage(4, this.local_nodes, (item: Node) => item.serialize(writer));
     if (this.selected_nodes.length)
       writer.writeRepeatedMessage(5, this.selected_nodes, (item: GraphNodeInfo) => item.serialize(writer));
     if (this.selected_edges.length)
@@ -1733,6 +1819,8 @@ export class SystemState extends pb_1.Message {
       writer.writeMessage(11, this.primary_backend, () => this.primary_backend.serialize(writer));
     if (this.has_client_identity)
       writer.writeMessage(12, this.client_identity, () => this.client_identity.serialize(writer));
+    if (this.sent_messages.length)
+      writer.writeRepeatedMessage(13, this.sent_messages, (item: Envelope) => item.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1752,7 +1840,7 @@ export class SystemState extends pb_1.Message {
         reader.readMessage(message.graph, () => message.graph = Graph.deserialize(reader));
         break;
       case 4:
-        reader.readMessage(message.nodes, () => pb_1.Message.addToRepeatedWrapperField(message, 4, Node.deserialize(reader), Node));
+        reader.readMessage(message.local_nodes, () => pb_1.Message.addToRepeatedWrapperField(message, 4, Node.deserialize(reader), Node));
         break;
       case 5:
         reader.readMessage(message.selected_nodes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, GraphNodeInfo.deserialize(reader), GraphNodeInfo));
@@ -1777,6 +1865,9 @@ export class SystemState extends pb_1.Message {
         break;
       case 12:
         reader.readMessage(message.client_identity, () => message.client_identity = Identity.deserialize(reader));
+        break;
+      case 13:
+        reader.readMessage(message.sent_messages, () => pb_1.Message.addToRepeatedWrapperField(message, 13, Envelope.deserialize(reader), Envelope));
         break;
       default: reader.skipField();
       }
@@ -2064,7 +2155,7 @@ export class SystemError extends pb_1.Message {
   }
 }
 export class Contents extends pb_1.Message {
-  #one_of_decls: number[][] = [[1, 2, 3, 4, 5, 6]];
+  #one_of_decls: number[][] = [[1, 2, 3, 4, 5, 6, 7]];
   constructor(data?: any[] | ({
         verb?: VerbTypes;
     } & (({
@@ -2074,6 +2165,7 @@ export class Contents extends pb_1.Message {
         execution_details?: never;
         errors?: never;
         identity?: never;
+        nodes_to_process?: never;
     } | {
         node?: never;
         authentication_message?: AuthenticationMessage;
@@ -2081,6 +2173,7 @@ export class Contents extends pb_1.Message {
         execution_details?: never;
         errors?: never;
         identity?: never;
+        nodes_to_process?: never;
     } | {
         node?: never;
         authentication_message?: never;
@@ -2088,6 +2181,7 @@ export class Contents extends pb_1.Message {
         execution_details?: never;
         errors?: never;
         identity?: never;
+        nodes_to_process?: never;
     } | {
         node?: never;
         authentication_message?: never;
@@ -2095,6 +2189,7 @@ export class Contents extends pb_1.Message {
         execution_details?: Execution;
         errors?: never;
         identity?: never;
+        nodes_to_process?: never;
     } | {
         node?: never;
         authentication_message?: never;
@@ -2102,6 +2197,7 @@ export class Contents extends pb_1.Message {
         execution_details?: never;
         errors?: SystemError;
         identity?: never;
+        nodes_to_process?: never;
     } | {
         node?: never;
         authentication_message?: never;
@@ -2109,6 +2205,15 @@ export class Contents extends pb_1.Message {
         execution_details?: never;
         errors?: never;
         identity?: Identity;
+        nodes_to_process?: never;
+    } | {
+        node?: never;
+        authentication_message?: never;
+        user_settings?: never;
+        execution_details?: never;
+        errors?: never;
+        identity?: never;
+        nodes_to_process?: NodesToProcess;
     })))) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -2130,6 +2235,9 @@ export class Contents extends pb_1.Message {
       }
       if ("identity" in data && data.identity != undefined) {
         this.identity = data.identity;
+      }
+      if ("nodes_to_process" in data && data.nodes_to_process != undefined) {
+        this.nodes_to_process = data.nodes_to_process;
       }
       if ("verb" in data && data.verb != undefined) {
         this.verb = data.verb;
@@ -2190,15 +2298,24 @@ export class Contents extends pb_1.Message {
   get has_identity() {
     return pb_1.Message.getField(this, 6) != null;
   }
+  get nodes_to_process() {
+    return pb_1.Message.getWrapperField(this, NodesToProcess, 7) as NodesToProcess;
+  }
+  set nodes_to_process(value: NodesToProcess) {
+    pb_1.Message.setOneofWrapperField(this, 7, this.#one_of_decls[0], value);
+  }
+  get has_nodes_to_process() {
+    return pb_1.Message.getField(this, 7) != null;
+  }
   get verb() {
-    return pb_1.Message.getFieldWithDefault(this, 7, VerbTypes.Create) as VerbTypes;
+    return pb_1.Message.getFieldWithDefault(this, 8, VerbTypes.Create) as VerbTypes;
   }
   set verb(value: VerbTypes) {
-    pb_1.Message.setField(this, 7, value);
+    pb_1.Message.setField(this, 8, value);
   }
   get contents() {
     const cases: {
-            [index: number]: "none" | "node" | "authentication_message" | "user_settings" | "execution_details" | "errors" | "identity";
+            [index: number]: "none" | "node" | "authentication_message" | "user_settings" | "execution_details" | "errors" | "identity" | "nodes_to_process";
         } = {
           0: "none",
           1: "node",
@@ -2206,9 +2323,10 @@ export class Contents extends pb_1.Message {
           3: "user_settings",
           4: "execution_details",
           5: "errors",
-          6: "identity"
+          6: "identity",
+          7: "nodes_to_process"
         };
-    return cases[pb_1.Message.computeOneofCase(this, [1, 2, 3, 4, 5, 6])];
+    return cases[pb_1.Message.computeOneofCase(this, [1, 2, 3, 4, 5, 6, 7])];
   }
   static fromObject(data: {
         node?: ReturnType<typeof Node.prototype.toObject>;
@@ -2217,6 +2335,7 @@ export class Contents extends pb_1.Message {
         execution_details?: ReturnType<typeof Execution.prototype.toObject>;
         errors?: ReturnType<typeof SystemError.prototype.toObject>;
         identity?: ReturnType<typeof Identity.prototype.toObject>;
+        nodes_to_process?: ReturnType<typeof NodesToProcess.prototype.toObject>;
         verb?: VerbTypes;
     }): Contents {
     const message = new Contents({});
@@ -2238,6 +2357,9 @@ export class Contents extends pb_1.Message {
     if (data.identity != null) {
       message.identity = Identity.fromObject(data.identity);
     }
+    if (data.nodes_to_process != null) {
+      message.nodes_to_process = NodesToProcess.fromObject(data.nodes_to_process);
+    }
     if (data.verb != null) {
       message.verb = data.verb;
     }
@@ -2251,6 +2373,7 @@ export class Contents extends pb_1.Message {
             execution_details?: ReturnType<typeof Execution.prototype.toObject>;
             errors?: ReturnType<typeof SystemError.prototype.toObject>;
             identity?: ReturnType<typeof Identity.prototype.toObject>;
+            nodes_to_process?: ReturnType<typeof NodesToProcess.prototype.toObject>;
             verb?: VerbTypes;
         } = {};
     if (this.node != null) {
@@ -2270,6 +2393,9 @@ export class Contents extends pb_1.Message {
     }
     if (this.identity != null) {
       data.identity = this.identity.toObject();
+    }
+    if (this.nodes_to_process != null) {
+      data.nodes_to_process = this.nodes_to_process.toObject();
     }
     if (this.verb != null) {
       data.verb = this.verb;
@@ -2292,8 +2418,10 @@ export class Contents extends pb_1.Message {
       writer.writeMessage(5, this.errors, () => this.errors.serialize(writer));
     if (this.has_identity)
       writer.writeMessage(6, this.identity, () => this.identity.serialize(writer));
+    if (this.has_nodes_to_process)
+      writer.writeMessage(7, this.nodes_to_process, () => this.nodes_to_process.serialize(writer));
     if (this.verb != VerbTypes.Create)
-      writer.writeEnum(7, this.verb);
+      writer.writeEnum(8, this.verb);
     if (!w)
       return writer.getResultBuffer();
   }
@@ -2322,6 +2450,9 @@ export class Contents extends pb_1.Message {
         reader.readMessage(message.identity, () => message.identity = Identity.deserialize(reader));
         break;
       case 7:
+        reader.readMessage(message.nodes_to_process, () => message.nodes_to_process = NodesToProcess.deserialize(reader));
+        break;
+      case 8:
         message.verb = reader.readEnum();
         break;
       default: reader.skipField();
@@ -2334,6 +2465,99 @@ export class Contents extends pb_1.Message {
   }
   static deserializeBinary(bytes: Uint8Array): Contents {
     return Contents.deserialize(bytes);
+  }
+}
+export class NodesToProcess extends pb_1.Message {
+  #one_of_decls: number[][] = [];
+  constructor(data?: any[] | {
+        nodes?: Node[];
+        containing_node_info?: GraphNodeInfo;
+    }) {
+    super();
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("nodes" in data && data.nodes != undefined) {
+        this.nodes = data.nodes;
+      }
+      if ("containing_node_info" in data && data.containing_node_info != undefined) {
+        this.containing_node_info = data.containing_node_info;
+      }
+    }
+  }
+  get nodes() {
+    return pb_1.Message.getRepeatedWrapperField(this, Node, 1) as Node[];
+  }
+  set nodes(value: Node[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 1, value);
+  }
+  get containing_node_info() {
+    return pb_1.Message.getWrapperField(this, GraphNodeInfo, 2) as GraphNodeInfo;
+  }
+  set containing_node_info(value: GraphNodeInfo) {
+    pb_1.Message.setWrapperField(this, 2, value);
+  }
+  get has_containing_node_info() {
+    return pb_1.Message.getField(this, 2) != null;
+  }
+  static fromObject(data: {
+        nodes?: ReturnType<typeof Node.prototype.toObject>[];
+        containing_node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
+    }): NodesToProcess {
+    const message = new NodesToProcess({});
+    if (data.nodes != null) {
+      message.nodes = data.nodes.map(item => Node.fromObject(item));
+    }
+    if (data.containing_node_info != null) {
+      message.containing_node_info = GraphNodeInfo.fromObject(data.containing_node_info);
+    }
+    return message;
+  }
+  toObject() {
+    const data: {
+            nodes?: ReturnType<typeof Node.prototype.toObject>[];
+            containing_node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
+        } = {};
+    if (this.nodes != null) {
+      data.nodes = this.nodes.map((item: Node) => item.toObject());
+    }
+    if (this.containing_node_info != null) {
+      data.containing_node_info = this.containing_node_info.toObject();
+    }
+    return data;
+  }
+  serialize(): Uint8Array;
+  serialize(w: pb_1.BinaryWriter): void;
+  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.nodes.length)
+      writer.writeRepeatedMessage(1, this.nodes, (item: Node) => item.serialize(writer));
+    if (this.has_containing_node_info)
+      writer.writeMessage(2, this.containing_node_info, () => this.containing_node_info.serialize(writer));
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): NodesToProcess {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new NodesToProcess();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+      case 1:
+        reader.readMessage(message.nodes, () => pb_1.Message.addToRepeatedWrapperField(message, 1, Node.deserialize(reader), Node));
+        break;
+      case 2:
+        reader.readMessage(message.containing_node_info, () => message.containing_node_info = GraphNodeInfo.deserialize(reader));
+        break;
+      default: reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary(): Uint8Array {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes: Uint8Array): NodesToProcess {
+    return NodesToProcess.deserialize(bytes);
   }
 }
 export class Envelope extends pb_1.Message {

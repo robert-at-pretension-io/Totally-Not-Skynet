@@ -35,7 +35,7 @@ message Conditional {
 
 // This is a simple object used for passing between system entities that is easier to translate into the domain object within each system. (The purpose is to make it easier to implement future graph systems within future systems).
 message Graph {
-  repeated GraphNodeInfo nodes = 1;
+  repeated GraphNodeInfo nodes_info = 1;
   repeated Edge edges = 2;
 }
 
@@ -70,6 +70,9 @@ message Node {
   NodeContent node_content = 5;
 }
 
+message Nodes {
+  repeated Node nodes = 1;
+}
 
 enum VerbTypes {
   Create = 0;
@@ -81,6 +84,7 @@ enum VerbTypes {
   Validate = 6;
   Acknowledge = 7;
   Initiate = 8;
+  Authorized = 9;
 }
 
 // This is given to every "entity" within the system. Each is self-declared. For instance, the backend will generate an Identity for itself and use it for any messages that it sends to any client.
@@ -111,7 +115,8 @@ message SystemState {
   bool authenticated = 1;
   bool websocket_ready = 2;
   Graph graph = 3;
-  repeated Node nodes = 4;
+  // Might not be synced with the backend, but this is the best we have. To get the most up to date version, we will have to query the backend.
+  repeated Node local_nodes = 4;
   repeated GraphNodeInfo selected_nodes = 5; 
   repeated Edge selected_edges = 6; 
   Execution execution_step = 7;
@@ -120,6 +125,7 @@ message SystemState {
   repeated Identity peer_identities = 10;
   Identity primary_backend = 11;
   Identity client_identity = 12;
+  repeated Envelope sent_messages = 13;
 }
 
 message AuthenticationMessage {
@@ -146,8 +152,14 @@ oneof contents {
     Execution execution_details = 4;
     SystemError errors = 5;
     Identity identity = 6;
+    NodesToProcess nodes_to_process = 7;
   }
-  VerbTypes verb = 7;
+  VerbTypes verb = 8;
+}
+
+message NodesToProcess {
+  repeated Node nodes = 1;
+  GraphNodeInfo containing_node_info = 2;
 }
 
 

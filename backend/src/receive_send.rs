@@ -1,3 +1,4 @@
+use crate::generated_types::{ AuthenticationMessage, self, Identity };
 use crate::generated_types::{
     GraphNodeInfo,
     UserSettings,
@@ -8,6 +9,8 @@ use crate::generated_types::{
     Envelope,
     contents::Contents,
 };
+
+// use crate::graph::validate_nodes_from_process;
 
 use colored::*;
 use petgraph::Direction;
@@ -45,26 +48,26 @@ use tokio::sync::mpsc;
 // const DEFAULT_MODEL: &str = "gpt-4";
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
-pub struct Identity {
+pub struct LocalServerIdentity {
     pub name: String,
 }
 
-impl Identity {
-    pub fn new(name: String) -> Identity {
-        Identity { name }
+impl LocalServerIdentity {
+    pub fn new(name: String) -> LocalServerIdentity {
+        LocalServerIdentity { name }
     }
 }
 
 pub async fn start_message_sending_loop(
     // docker: Docker,
-    tx: UnboundedSender<(Identity, tokio_tungstenite::tungstenite::Message)>,
-    mut client_rx: mpsc::Receiver<(Identity, tokio_tungstenite::tungstenite::Message)>,
+    tx: UnboundedSender<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,
+    mut client_rx: mpsc::Receiver<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,
     pool: Arc<Pool<SqliteConnectionManager>>
 ) {
-    let mut runtime_settings: HashMap<Identity, UserSettings> = HashMap::new();
+    let mut runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
 
     while let Some(msg) = client_rx.recv().await {
-        println!("{} {:?}", "Received a message from the client:".yellow(), msg);
+        println!("{} {:?}", "Received a message from the client:".yellow(), msg.1.len());
 
         // let received_message: Option<CrudBundle> = parse_message(&msg.1);
 
@@ -116,10 +119,163 @@ pub async fn start_message_sending_loop(
             println!("{}", "Forward the message to the correct receiver".red());
         }
 
+        println!("{}", "TODO: Collection responses and send them in envelope batch.".red());
+
         // loop through the message_contents and handle each one
         for message_content in envelope.clone().message_content {
             println!("Message content: {:?}", message_content);
-            let verb: VerbTypes = VerbTypes::from_i32(message_content.verb).unwrap();
+            let verb: VerbTypes = VerbTypes::try_from(message_content.verb).unwrap();
+            let sender: Identity = envelope.clone().sender.unwrap();
+            let receiver: generated_types::Identity = envelope.clone().receiver.unwrap();
+            let wrapped_content = message_content.contents.clone();
+            let verification_id = envelope.clone().verification_id;
+
+            let mut content: Contents;
+
+            match wrapped_content {
+                None => {
+                    println!("{} {:?}", "No contents found:".red(), message_content);
+                    continue; // We should probably log this later... But we don't want to interrupt the message processing loop
+                }
+                Some(contents) => {
+                    content = contents;
+                }
+            }
+
+            match content {
+                Contents::Node(node) => {
+                    match verb {
+                        VerbTypes::Create => {
+                            let mut mutable_node = node.clone();
+
+                            println!("Creating node: {:?}", mutable_node);
+
+                            let new_node_info = GraphNodeInfo {
+                                id: uuid::Uuid::new_v4().to_string(),
+                                description: node.clone().node_info.unwrap().description.clone(),
+                                name: node.node_info.unwrap().name.clone(),
+                            };
+
+                            let mut contents: generated_types::Contents =
+                                generated_types::Contents {
+                                    verb: VerbTypes::Acknowledge as i32,
+                                    contents: Some(Contents::Node(mutable_node.clone())),
+                                };
+
+                            //insert the node into the db
+                            match insert_node(pool.clone(), mutable_node.clone()) {
+                                Ok(_) => {
+                                    println!("Node inserted successfully");
+
+                                    let response_object = Envelope {
+                                        sender: Some(receiver.clone()),
+                                        receiver: Some(sender.clone()),
+                                        message_content: vec![contents],
+                                        verification_id: verification_id.clone(),
+                                    };
+
+                                    send_message(&tx, msg.0.clone(), response_object).await;
+                                }
+                                Err(err) => {
+                                    println!("Error inserting node: {:?}", err);
+                                }
+                            }
+                        }
+                        VerbTypes::Update => {
+                            let mut updated_node = node.clone();
+
+                            let mut contents: generated_types::Contents =
+                                generated_types::Contents {
+                                    verb: VerbTypes::Acknowledge as i32,
+                                    contents: Some(Contents::Node(updated_node.clone())),
+                                };
+
+                            match update_node(pool.clone(), &updated_node) {
+                                Ok(_) => {
+                                    println!("Node updated successfully");
+
+                                    let updated_envelope = Envelope {
+                                        sender: Some(receiver.clone()),
+                                        receiver: Some(sender.clone()),
+                                        message_content: vec![contents],
+                                        verification_id: verification_id.clone(),
+                                    };
+
+                                    send_message(&tx, msg.0.clone(), updated_envelope).await;
+                                }
+                                Err(err) => {
+                                    println!("Error updating node: {:?}", err);
+                                }
+                            }
+                        }
+
+                        VerbTypes::Get => todo!(),
+                        VerbTypes::Execute => todo!(),
+                        _ => {
+                            println!("{} {:?}", "Verb not supported for node:".red(), verb);
+                        }
+                    }
+                }
+                Contents::AuthenticationMessage(auth) => {
+                    match verb {
+                        VerbTypes::Initiate => {
+                            println!("{}", "TODO: Handle authentication message validation".red());
+
+                            // Code to handle the initiation of authentication
+
+                            let mut response_envelope: Envelope = Envelope {
+                                sender: Some(receiver.clone()),
+                                receiver: Some(sender.clone()),
+                                message_content: Vec::new(),
+                                verification_id: verification_id.clone(),
+                            };
+
+                            match fetch_all_nodes(pool.clone()) {
+                                Ok(nodes) => {
+                                    for node in &nodes {
+                                        println!("Found node: {:?}", node);
+
+                                        let contents: generated_types::Contents =
+                                            generated_types::Contents {
+                                                verb: VerbTypes::Acknowledge as i32,
+                                                contents: Some(Contents::Node(node.clone())),
+                                            };
+
+                                        response_envelope.message_content.push(contents);
+                                    }
+
+                                    send_message(&tx, msg.0.clone(), response_envelope).await;
+                                }
+                                Err(err) => {
+                                    println!(
+                                        "Have the following errors when attempting to pull nodes from sqlite : {:?}",
+                                        err
+                                    );
+                                }
+                            } // Closing the match fetch_all_nodes
+                        } // Closing the VerbTypes::Initiate match arm
+                        _ => {
+                            println!("{}", "Authentication message not *yet* supported:".red());
+                        }
+                    } // Closing the match verb
+                } // Closing the Contents::AuthenticationMessage match arm
+
+                Contents::UserSettings(user_settings) => {}
+                Contents::ExecutionDetails(execution_context) => {}
+                // Contents::NodesToProcess(nodes_to_process) => {
+                //     match validate_nodes_in_process(nodes_to_process) {
+                //         Ok(_) => {
+                //             println!("Nodes validated successfully");
+                //         }
+                //         Err(err) => {
+                //             println!("Error validating nodes: {:?}", err);
+                //         }
+                //     }
+                // }
+                _ => {
+                    println!("{}", "Not yet implemented".red());
+                }
+            }
 
             // match message_content.contents {
             //     Some(Contents::CrudBundle(crud_bundle)) => {
@@ -154,46 +310,10 @@ pub async fn start_message_sending_loop(
     //     Some(crud_bundle::Object::Node(node)) => {
     //         match verb {
     //             VerbTypeNames::Post => {
-    //                 let mut mutable_node = node.clone();
-
-    //                 println!("Creating node: {:?}", mutable_node);
-
-    //                 let new_node_info = GraphNodeInfo {
-    //                     id: uuid::Uuid::new_v4().to_string(),
-    //                     description: node.clone().node_info.unwrap().description.clone(),
-    //                     name: node.node_info.unwrap().name.clone(),
-    //                 };
-
-    //                 // create a uuid for the node:
-    //                 mutable_node.node_info = Some(new_node_info);
-
-    //                 // get_sqlite_db is a function that returns a connection to the sqlite db
-
-    //                 //insert the node into the db
-    //                 match insert_node(pool.clone(), mutable_node.clone()) {
-    //                     Ok(_) => {
-    //                         println!("Node inserted successfully");
-    //                         let response_object = ResponseObject {
-    //                             object: Some(Node(mutable_node.clone())),
-    //                         };
-
-    //                         send_message(&tx, msg.0.clone(), response_object).await;
-    //                     }
-    //                     Err(err) => {
-    //                         println!("Error inserting node: {:?}", err);
-    //                     }
-    //                 }
+    //
     //             }
     //             VerbTypeNames::Put => {
-    //                 let updated_node = node.clone();
 
-    //                 update_node(pool.clone(), &updated_node).unwrap();
-
-    //                 let response_object: ResponseObject = ResponseObject {
-    //                     object: Some(Node(updated_node)),
-    //                 };
-
-    //                 send_message(&tx, msg.0.clone(), response_object).await;
     //             }
     //             _ => {
     //                 println!("Verb not supported for node: {:?}", verb);
@@ -289,260 +409,7 @@ pub async fn start_message_sending_loop(
     // Some(crud_bundle::Object::ValidateNodes(node_container)) => {
     //     match verb {
     //         VerbTypeNames::Post => {
-    //             // generate maximal graph from nodes (based on input_variables and output_variables)
-    //             println!("Validating nodes");
-    //             println!("Validating nodes for user: {:?}", msg.0);
-    //             println!("need to return a Graph object");
-
-    //             // create a petgraph digraph:
-
-    //             let nodes = node_container.nodes;
-    //             println!("Number of nodes: {:?}", nodes.len());
-
-    //             // this will go in the node_info of the response node
-    //             let containing_node: GraphNodeInfo = GraphNodeInfo {
-    //                 id: uuid::Uuid::new_v4().to_string(),
-    //                 name: node_container.containing_node.clone().unwrap().name,
-    //                 description: node_container.containing_node
-    //                     .clone()
-    //                     .unwrap().description,
-    //             };
-
-    //             let mut input_vars = Vec::new();
-    //             let mut output_vars = Vec::new();
-    //             // loop through the vector of nodes and add input variables to the input_vars vector (if they are not already in the vector)
-    //             for node in &nodes {
-    //                 for input_var in &node.input_variables {
-    //                     if !input_vars.contains(input_var) {
-    //                         input_vars.push(input_var.clone());
-    //                     }
-    //                 }
-    //                 // loop through the output_variables and remove those from the input_vars vector
-    //                 for output_var in &node.output_variables {
-    //                     if !output_vars.contains(output_var) {
-    //                         output_vars.push(output_var.clone());
-    //                     }
-    //                 }
-    //             }
-
-    //             //output of the process
-    //             let output_minus_input = output_vars
-    //                 .clone()
-    //                 .into_iter()
-    //                 .filter(|output_var| !input_vars.contains(output_var))
-    //                 .collect::<Vec<String>>();
-
-    //             //input of the process
-    //             let input_minus_output = input_vars
-    //                 .clone()
-    //                 .into_iter()
-    //                 .filter(|input_var| !output_vars.contains(input_var))
-    //                 .collect::<Vec<String>>();
-
-    //             // From the nodes and their dependencies, we need to populate a petgraph graph so that we can run the transitive reduction algorithm on it
-    //             // This will give a "minimal" graph that has the same topological order as the larger graph
-    //             // This will allow the user to have a visualization of the graph that is not cluttered with unnecessary nodes and is easy to understand the topological order
-
-    //             let mut graph = DiGraph::new();
-    //             println!("Initialized empty graph");
-
-    //             let mut new_nodes: Vec<GraphNodeInfo> = Vec::new();
-
-    //             // let mut node_indices;
-    //             let mut node_indices: HashMap<
-    //                 String,
-    //                 petgraph::graph::NodeIndex
-    //             > = HashMap::new();
-
-    //             for node in &nodes {
-    //                 let node_info = node.node_info.clone().unwrap();
-
-    //                 println!("Processing node: {:?}", node_info.id);
-    //                 new_nodes.push(node_info);
-    //                 let node_index = graph.add_node(node.clone());
-    //                 node_indices.insert(node.node_info.clone().unwrap().id, node_index);
-    //             }
-
-    //             let mut mut_pruned_graph = graph.clone();
-
-    //             println!("All nodes added to graph");
-
-    //             // Add edges based on input_variables and output_variables
-    //             for node in &nodes {
-    //                 let node_index = node_indices[&node.node_info.clone().unwrap().id];
-    //                 println!(
-    //                     "Adding edges for node: {:?}, Input Vars: {:?}",
-    //                     node.node_info.clone().unwrap().id,
-    //                     node.input_variables
-    //                 );
-    //                 for input_var in &node.input_variables {
-    //                     // Find nodes that output this input_var
-    //                     // For demonstration, using the same list of nodes
-    //                     println!("Checking for input_var: {:?}", input_var);
-    //                     for other_node in &nodes {
-    //                         println!(
-    //                             "Other node: {:?}, Output Vars: {:?}",
-    //                             other_node.node_info.clone().unwrap().id,
-    //                             other_node.output_variables
-    //                         );
-    //                         if other_node.output_variables.contains(input_var) {
-    //                             let other_node_index =
-    //                                 node_indices[&other_node.node_info.clone().unwrap().id];
-    //                             println!(
-    //                                 "Found matching output_var in node: {:?}",
-    //                                 other_node.node_info.clone().unwrap().id
-    //                             );
-    //                             graph.add_edge(other_node_index, node_index, ());
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //             println!("All edges added");
-
-    //             println!("{}", "Remove the excess edges here".red());
-
-    //             let top_sort = petgraph::algo::toposort(&graph, None).unwrap();
-
-    //             let adjacency_list =
-    //                 petgraph::algo::tred::dag_to_toposorted_adjacency_list::<
-    //                     _,
-    //                     petgraph::graph::DefaultIx
-    //                 >(&graph, &top_sort);
-
-    //             // The output is the pair of the transitive reduction and the transitive closure.
-    //             let (transative_reduct, _) =
-    //                 petgraph::algo::tred::dag_transitive_reduction_closure::<
-    //                     _,
-    //                     petgraph::graph::DefaultIx
-    //                 >(&adjacency_list.0);
-
-    //             // The graph should have the same nodes but different edges.
-
-    //             // for all of the edges in transivite_reduct, add that edge to the mut_pruned_graph
-
-    //             transative_reduct.edge_indices().for_each(|edge| {
-    //                 // how to get the source and target nodes from the edge?
-    //                 let (sourceIndex, targetIndex) = transative_reduct
-    //                     .edge_endpoints(edge)
-    //                     .unwrap();
-    //                 mut_pruned_graph.add_edge(sourceIndex.into(), targetIndex.into(), ());
-    //             });
-
-    //             let mut new_edges: Vec<Edge> = Vec::new();
-
-    //             // Count and print the number of edges
-    //             // let edge_count = rebuilt_graph.raw_edges().len();
-    //             // println!("Total number of raw edges: {}", edge_count);
-
-    //             mut_pruned_graph
-    //                 .raw_edges()
-    //                 .iter()
-    //                 .for_each(|edge| {
-    //                     let source_node = graph.node_weight(edge.source()).unwrap();
-    //                     let target_node = graph.node_weight(edge.target()).unwrap();
-
-    //                     let new_edge: Edge = Edge {
-    //                         source: source_node.node_info.clone(),
-    //                         target: target_node.node_info.clone(),
-    //                     };
-
-    //                     new_edges.push(new_edge);
-    //                 });
-
-    //             let new_graph = Graph {
-    //                 nodes: new_nodes,
-    //                 edges: new_edges,
-    //             };
-
-    //             let mut starting_nodes = Vec::new();
-
-    //             for node in graph.node_indices() {
-    //                 if graph.neighbors_directed(node, Direction::Incoming).count() == 0 {
-    //                     println!("Node with no incoming edges: {:?}", graph[node]);
-    //                     starting_nodes.push(node.clone());
-    //                 }
-    //             }
-
-    //             let mut topological_order = Vec::new();
-
-    //             // println!("Starting nodes: {:?}", starting_nodes);
-
-    //             // if starting_nodes.len() == 0 {
-    //             //     println!("{}", "No starting nodes found".red());
-    //             //     continue;
-    //             // } else {
-    //             //     let start_node = starting_nodes[0].clone();
-    //             //     let mut bfs = Bfs::new(&mut_pruned_graph, start_node);
-    //             //     while let Some(nx) = bfs.next(&graph) {
-    //             //         // we can access `graph` mutably here still
-
-    //             //         //loop through the nodes vector and find the node with the same id as mut_pruned_graph[nx]
-
-    //             //         let node = new_graph.nodes
-    //             //             .iter()
-    //             //             .find(
-    //             //                 |node|
-    //             //                     node.id ==
-    //             //                     mut_pruned_graph[nx].node_info.as_mut().unwrap().id
-    //             //             )
-    //             //             .unwrap();
-
-    //             //         topological_order.push(node.clone());
-    //             //     }
-    //             // }
-
-    //             let index_vec = toposort(&mut_pruned_graph, None).unwrap();
-
-    //             for index in index_vec {
-    //                 let node = new_graph.nodes
-    //                     .iter()
-    //                     .find(
-    //                         |node|
-    //                             node.id ==
-    //                             mut_pruned_graph[index].node_info.as_mut().unwrap().id
-    //                     )
-    //                     .unwrap();
-    //                 topological_order.push(node.clone());
-    //             }
-
-    //             let process: Process = Process {
-    //                 graph: Some(new_graph),
-    //                 topological_order: topological_order,
-    //             };
-
-    //             let node: crate::generated_types::Node = crate::generated_types::Node {
-    //                 node_info: Some(containing_node),
-    //                 input_variables: input_minus_output,
-    //                 output_variables: output_minus_input,
-    //                 node_content: Some(NodeContent::Process(process)),
-    //             };
-
-    //             match insert_node(pool.clone(), node.clone()) {
-    //                 Ok(_) => {
-    //                     println!("Node inserted successfully");
-    //                 }
-    //                 Err(err) => {
-    //                     println!("Error inserting node: {:?}", err);
-    //                 }
-    //             }
-
-    //             let validate_nodes_response = ValidateNodesResponse {
-    //                 errors: Vec::new(),
-    //                 process: Some(node),
-    //             };
-
-    //             // As the process is valid, we save it to the db.
-
-    //             let response_object = ResponseObject {
-    //                 object: Some(ValidateNodesResponseEnum(validate_nodes_response)),
-    //             };
-
-    //             send_message(&tx, msg.0.clone(), response_object).await;
-    //         }
-    //         _ => {
-    //             println!("Verb not supported for node validation: {:?}", verb);
-    //         }
-    //     }
+    //
     // }
 
     // None => {
@@ -555,8 +422,8 @@ pub async fn start_message_sending_loop(
 // }
 
 pub async fn send_message(
-    tx: &UnboundedSender<(Identity, tokio_tungstenite::tungstenite::Message)>,
-    identity: Identity,
+    tx: &UnboundedSender<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,
+    identity: LocalServerIdentity,
     envelope: Envelope
 ) {
     let mut buf = BytesMut::new();

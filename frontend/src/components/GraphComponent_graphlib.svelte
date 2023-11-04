@@ -63,7 +63,7 @@
 
       console.log("selectedNode: ", selectedNode);
 
-      $systemStateStore.nodes.find((node) => {
+      $systemStateStore.local_nodes.find((node) => {
         if (node.node_info.id == selectedNode.id) {
           $systemStateStore.selected_nodes.push(node.node_info);
         }
@@ -129,7 +129,7 @@
     cyInstance?.elements().remove();
 
     // add the nodes to the cytoscape graph
-    let nodes = current_graph.nodes;
+    let nodes = current_graph.nodes_info;
 
     nodes.forEach((node_info) => {
       if (node_info) {

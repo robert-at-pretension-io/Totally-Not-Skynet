@@ -3,7 +3,6 @@ use r2d2_sqlite::SqliteConnectionManager;
 use std::env;
 use std::sync::Arc;
 use tokio::sync::{ mpsc, Mutex };
-use log;
 use env_logger;
 
 // use log::{ info, debug, warn, error };
@@ -16,7 +15,7 @@ mod openai;
 mod receive_send;
 mod settings;
 mod sqlite_helper_functions;
-mod utils;
+// mod graph;
 mod websocket;
 
 #[allow(non_snake_case)]
@@ -36,8 +35,6 @@ use crate::generated_types::Identity;
 static SERVER_IDENTITY: OnceCell<Identity> = OnceCell::new();
 
 // use bollard::container::{CreateExecOptions, StartExecResults};
-
-use bson::Uuid;
 
 #[tokio::main]
 async fn main() {

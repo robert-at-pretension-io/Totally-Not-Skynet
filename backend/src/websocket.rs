@@ -1,4 +1,4 @@
-use crate::receive_send::Identity;
+use crate::receive_send::LocalServerIdentity;
 use bson::Uuid;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -14,12 +14,12 @@ use futures_util::SinkExt;
 use colored::*;
 
 pub async fn start_websocket_server(
-    rx: Arc<tokio::sync::Mutex<UnboundedReceiver<(Identity, Message)>>>,
-    client_tx: mpsc::Sender<(Identity, Message)>
+    rx: Arc<tokio::sync::Mutex<UnboundedReceiver<(LocalServerIdentity, Message)>>>,
+    client_tx: mpsc::Sender<(LocalServerIdentity, Message)>
 ) {
     let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
 
-    let request_dispatcher: HashMap<Identity, UnboundedSender<Message>> = HashMap::new();
+    let request_dispatcher: HashMap<LocalServerIdentity, UnboundedSender<Message>> = HashMap::new();
     let thread_safe_request_dispatcher = Arc::new(Mutex::new(request_dispatcher));
     //write two tasks:
     //
@@ -60,9 +60,9 @@ pub async fn start_websocket_server(
 
             thread_safe_request_dispatcher_clone_3
                 .lock().await
-                .insert(Identity::new(id.to_string()), local_tx);
+                .insert(LocalServerIdentity::new(id.to_string()), local_tx);
 
-            let this_client = Identity {
+            let this_client = LocalServerIdentity {
                 name: id.to_string(),
             };
 
