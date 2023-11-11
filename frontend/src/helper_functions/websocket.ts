@@ -1,5 +1,5 @@
 
-import { Node, SystemState, Envelope, VerbTypes, Contents, Body } from "../../src/generated/system_types";
+import { Node, SystemState, Envelope, VerbTypes, Letter, Body } from "../../src/generated/system_types";
 
 import systemStateStore from "stores/systemStateStore";
 
@@ -46,6 +46,8 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
       console.log("u8Array: ", u8Array);
       const response_envelope: Envelope = Envelope.deserializeBinary(u8Array);
 
+      console.log("received message: ", response_envelope.toObject());
+
       let self_identity = new Identity();
 
       // get the SystemState from the SystemStateStore
@@ -60,15 +62,15 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
       }
 
       if (response_envelope.has_receiver && response_envelope.receiver.id === self_identity.id) {
-        // loop through the response_envelope.message_content array
-        response_envelope.message_content.forEach((message_content) => {
-          console.log("message_content: ", message_content);
+        // loop through the response_envelope.letters array
+        response_envelope.letters.forEach((letter) => {
+          console.log("letter: ", letter);
           // check the type of message_content
 
-          if (message_content.verb === VerbTypes.Initiate) {
-            if (message_content.has_node) {
+          if (letter.verb === VerbTypes.Initiate) {
+            if (letter.body.has_node) {
               // if it's a node, add it to the SystemState
-              const add_node = message_content.node as Node;
+              const add_node = letter.body.node as Node;
 
               if (add_node && typeof add_node.toObject === "function") {
                 console.log("add_node: ", add_node.toObject());
@@ -76,7 +78,7 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
                 systemStateStore.update(
                   (n: SystemState) => {
 
-                    n.nodes.push(add_node);
+                    n.local_nodes.push(add_node);
 
                     return n;
                   }
@@ -87,7 +89,7 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
           }
 
           if (message_content.verb === VerbTypes.Acknowledge) {
-            if (message_content.has_identity) {
+            if (message_content.body.has_identity) {
               const identity = message_content.identity as Identity;
               console.log("server identity: ", identity);
               systemStateStore.update((s: SystemState) => {
@@ -205,7 +207,7 @@ function sendWebsocketMessage(
   websocket.send(message_string);
 }
 
-export function sendEnvelope(websocket: WebSocket, message_content: Contents[], sender: Identity = undefined, receiver: Identity = undefined) {
+export function sendEnvelope(websocket: WebSocket, letters: Letter[], sender: Identity = undefined, receiver: Identity = undefined) {
 
   // raise an error and alert if the sender or receiver is not set
   if (!sender) {
@@ -241,7 +243,7 @@ export function sendEnvelope(websocket: WebSocket, message_content: Contents[], 
 
   envelope.verification_id = verification_id;
 
-  envelope.message_content = message_content;
+  envelope.letters = letters;
 
   sendWebsocketMessage(envelope, websocket);
 }
@@ -262,15 +264,13 @@ export function selfIdentify(websocket: WebSocket) {
   });
 
   const envelope = new Envelope();
-  envelope.sender = identity;
 
-  const contents = new Contents();
+  const letter = new Letter();
 
-  contents.verb = VerbTypes.Initiate;
+  letter.verb = VerbTypes.Initiate;
 
-  contents.identity = identity;
 
-  envelope.message_content = [contents];
+  envelope.letters = [letter];
 
   sendWebsocketMessage(envelope, websocket);
 

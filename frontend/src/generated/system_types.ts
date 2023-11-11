@@ -1538,7 +1538,7 @@ export class SystemState extends pb_1.Message {
         peer_identities?: Identity[];
         primary_backend?: Identity;
         client_identity?: Identity;
-        sent_messages?: Envelope[];
+        message_log?: Envelope[];
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4, 5, 6, 9, 10, 13], this.#one_of_decls);
@@ -1579,8 +1579,8 @@ export class SystemState extends pb_1.Message {
       if ("client_identity" in data && data.client_identity != undefined) {
         this.client_identity = data.client_identity;
       }
-      if ("sent_messages" in data && data.sent_messages != undefined) {
-        this.sent_messages = data.sent_messages;
+      if ("message_log" in data && data.message_log != undefined) {
+        this.message_log = data.message_log;
       }
     }
   }
@@ -1671,10 +1671,10 @@ export class SystemState extends pb_1.Message {
   get has_client_identity() {
     return pb_1.Message.getField(this, 12) != null;
   }
-  get sent_messages() {
+  get message_log() {
     return pb_1.Message.getRepeatedWrapperField(this, Envelope, 13) as Envelope[];
   }
-  set sent_messages(value: Envelope[]) {
+  set message_log(value: Envelope[]) {
     pb_1.Message.setRepeatedWrapperField(this, 13, value);
   }
   static fromObject(data: {
@@ -1690,7 +1690,7 @@ export class SystemState extends pb_1.Message {
         peer_identities?: ReturnType<typeof Identity.prototype.toObject>[];
         primary_backend?: ReturnType<typeof Identity.prototype.toObject>;
         client_identity?: ReturnType<typeof Identity.prototype.toObject>;
-        sent_messages?: ReturnType<typeof Envelope.prototype.toObject>[];
+        message_log?: ReturnType<typeof Envelope.prototype.toObject>[];
     }): SystemState {
     const message = new SystemState({});
     if (data.authenticated != null) {
@@ -1729,8 +1729,8 @@ export class SystemState extends pb_1.Message {
     if (data.client_identity != null) {
       message.client_identity = Identity.fromObject(data.client_identity);
     }
-    if (data.sent_messages != null) {
-      message.sent_messages = data.sent_messages.map(item => Envelope.fromObject(item));
+    if (data.message_log != null) {
+      message.message_log = data.message_log.map(item => Envelope.fromObject(item));
     }
     return message;
   }
@@ -1748,7 +1748,7 @@ export class SystemState extends pb_1.Message {
             peer_identities?: ReturnType<typeof Identity.prototype.toObject>[];
             primary_backend?: ReturnType<typeof Identity.prototype.toObject>;
             client_identity?: ReturnType<typeof Identity.prototype.toObject>;
-            sent_messages?: ReturnType<typeof Envelope.prototype.toObject>[];
+            message_log?: ReturnType<typeof Envelope.prototype.toObject>[];
         } = {};
     if (this.authenticated != null) {
       data.authenticated = this.authenticated;
@@ -1786,8 +1786,8 @@ export class SystemState extends pb_1.Message {
     if (this.client_identity != null) {
       data.client_identity = this.client_identity.toObject();
     }
-    if (this.sent_messages != null) {
-      data.sent_messages = this.sent_messages.map((item: Envelope) => item.toObject());
+    if (this.message_log != null) {
+      data.message_log = this.message_log.map((item: Envelope) => item.toObject());
     }
     return data;
   }
@@ -1819,8 +1819,8 @@ export class SystemState extends pb_1.Message {
       writer.writeMessage(11, this.primary_backend, () => this.primary_backend.serialize(writer));
     if (this.has_client_identity)
       writer.writeMessage(12, this.client_identity, () => this.client_identity.serialize(writer));
-    if (this.sent_messages.length)
-      writer.writeRepeatedMessage(13, this.sent_messages, (item: Envelope) => item.serialize(writer));
+    if (this.message_log.length)
+      writer.writeRepeatedMessage(13, this.message_log, (item: Envelope) => item.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1867,7 +1867,7 @@ export class SystemState extends pb_1.Message {
         reader.readMessage(message.client_identity, () => message.client_identity = Identity.deserialize(reader));
         break;
       case 13:
-        reader.readMessage(message.sent_messages, () => pb_1.Message.addToRepeatedWrapperField(message, 13, Envelope.deserialize(reader), Envelope));
+        reader.readMessage(message.message_log, () => pb_1.Message.addToRepeatedWrapperField(message, 13, Envelope.deserialize(reader), Envelope));
         break;
       default: reader.skipField();
       }
@@ -2154,7 +2154,7 @@ export class SystemError extends pb_1.Message {
     return SystemError.deserialize(bytes);
   }
 }
-export class Contents extends pb_1.Message {
+export class Letter extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
         body?: Body;
@@ -2189,8 +2189,8 @@ export class Contents extends pb_1.Message {
   static fromObject(data: {
         body?: ReturnType<typeof Body.prototype.toObject>;
         verb?: VerbTypes;
-    }): Contents {
-    const message = new Contents({});
+    }): Letter {
+    const message = new Letter({});
     if (data.body != null) {
       message.body = Body.fromObject(data.body);
     }
@@ -2223,8 +2223,8 @@ export class Contents extends pb_1.Message {
     if (!w)
       return writer.getResultBuffer();
   }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Contents {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Contents();
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Letter {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Letter();
     while (reader.nextField()) {
       if (reader.isEndGroup())
         break;
@@ -2243,8 +2243,8 @@ export class Contents extends pb_1.Message {
   serializeBinary(): Uint8Array {
     return this.serialize();
   }
-  static deserializeBinary(bytes: Uint8Array): Contents {
-    return Contents.deserialize(bytes);
+  static deserializeBinary(bytes: Uint8Array): Letter {
+    return Letter.deserialize(bytes);
   }
 }
 export class Body extends pb_1.Message {
@@ -2632,7 +2632,7 @@ export class NodesToProcess extends pb_1.Message {
 export class Envelope extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
-        message_content?: Contents[];
+        letters?: Letter[];
         sender?: Identity;
         receiver?: Identity;
         verification_id?: string;
@@ -2640,8 +2640,8 @@ export class Envelope extends pb_1.Message {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
-      if ("message_content" in data && data.message_content != undefined) {
-        this.message_content = data.message_content;
+      if ("letters" in data && data.letters != undefined) {
+        this.letters = data.letters;
       }
       if ("sender" in data && data.sender != undefined) {
         this.sender = data.sender;
@@ -2654,10 +2654,10 @@ export class Envelope extends pb_1.Message {
       }
     }
   }
-  get message_content() {
-    return pb_1.Message.getRepeatedWrapperField(this, Contents, 1) as Contents[];
+  get letters() {
+    return pb_1.Message.getRepeatedWrapperField(this, Letter, 1) as Letter[];
   }
-  set message_content(value: Contents[]) {
+  set letters(value: Letter[]) {
     pb_1.Message.setRepeatedWrapperField(this, 1, value);
   }
   get sender() {
@@ -2685,14 +2685,14 @@ export class Envelope extends pb_1.Message {
     pb_1.Message.setField(this, 4, value);
   }
   static fromObject(data: {
-        message_content?: ReturnType<typeof Contents.prototype.toObject>[];
+        letters?: ReturnType<typeof Letter.prototype.toObject>[];
         sender?: ReturnType<typeof Identity.prototype.toObject>;
         receiver?: ReturnType<typeof Identity.prototype.toObject>;
         verification_id?: string;
     }): Envelope {
     const message = new Envelope({});
-    if (data.message_content != null) {
-      message.message_content = data.message_content.map(item => Contents.fromObject(item));
+    if (data.letters != null) {
+      message.letters = data.letters.map(item => Letter.fromObject(item));
     }
     if (data.sender != null) {
       message.sender = Identity.fromObject(data.sender);
@@ -2707,13 +2707,13 @@ export class Envelope extends pb_1.Message {
   }
   toObject() {
     const data: {
-            message_content?: ReturnType<typeof Contents.prototype.toObject>[];
+            letters?: ReturnType<typeof Letter.prototype.toObject>[];
             sender?: ReturnType<typeof Identity.prototype.toObject>;
             receiver?: ReturnType<typeof Identity.prototype.toObject>;
             verification_id?: string;
         } = {};
-    if (this.message_content != null) {
-      data.message_content = this.message_content.map((item: Contents) => item.toObject());
+    if (this.letters != null) {
+      data.letters = this.letters.map((item: Letter) => item.toObject());
     }
     if (this.sender != null) {
       data.sender = this.sender.toObject();
@@ -2730,8 +2730,8 @@ export class Envelope extends pb_1.Message {
   serialize(w: pb_1.BinaryWriter): void;
   serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
     const writer = w || new pb_1.BinaryWriter();
-    if (this.message_content.length)
-      writer.writeRepeatedMessage(1, this.message_content, (item: Contents) => item.serialize(writer));
+    if (this.letters.length)
+      writer.writeRepeatedMessage(1, this.letters, (item: Letter) => item.serialize(writer));
     if (this.has_sender)
       writer.writeMessage(2, this.sender, () => this.sender.serialize(writer));
     if (this.has_receiver)
@@ -2748,7 +2748,7 @@ export class Envelope extends pb_1.Message {
         break;
       switch (reader.getFieldNumber()) {
       case 1:
-        reader.readMessage(message.message_content, () => pb_1.Message.addToRepeatedWrapperField(message, 1, Contents.deserialize(reader), Contents));
+        reader.readMessage(message.letters, () => pb_1.Message.addToRepeatedWrapperField(message, 1, Letter.deserialize(reader), Letter));
         break;
       case 2:
         reader.readMessage(message.sender, () => message.sender = Identity.deserialize(reader));

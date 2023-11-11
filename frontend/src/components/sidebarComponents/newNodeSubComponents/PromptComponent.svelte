@@ -6,7 +6,7 @@
     Node,
     GraphNodeInfo,
     Envelope,
-    Contents,
+    Letter,
     Body,
     NodeTypes,
   } from "../../../generated/system_types";
@@ -59,7 +59,7 @@
     contents.body = body;
     contents.verb = VerbTypes.Create;
 
-    sendEnvelope(websocket);
+    sendEnvelope(websocket, [contents]);
 
     reset_component();
   }

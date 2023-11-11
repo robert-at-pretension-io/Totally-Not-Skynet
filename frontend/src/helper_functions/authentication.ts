@@ -18,7 +18,7 @@ export function authenticate(
 
   console.log("websocket is ready... sending auth");
 
-  const contents = new Contents();
+  const contents = new Letter();
 
   const auth_content = new AuthenticationMessage();
 
@@ -32,13 +32,7 @@ export function authenticate(
   let client_identity: Identity;
   let server_identity: Identity;
 
-  // Get the client and server identity from the systemStateStore
-  systemStateStore.subscribe((s) => {
-    client_identity = s.client_identity;
-    server_identity = s.primary_backend;
-  });
-
-  sendEnvelope(websocket, client_identity, server_identity, [contents]);
+  sendEnvelope(websocket, [contents]);
 
   systemStateStore.update((s) => {
     console.log("setting authenticated to true");
