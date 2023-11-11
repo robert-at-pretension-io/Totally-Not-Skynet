@@ -1,0 +1,121 @@
+totally_not_skynet
+├── .DS_Store [excluded]
+├── .git [excluded]
+├── .github
+│   └── workflows
+│       └── reset.yml
+├── .gitignore
+├── .vscode [excluded]
+├── backend
+│   ├── .DS_Store [excluded]
+│   ├── Cargo.lock
+│   ├── Cargo.toml
+│   ├── build.rs
+│   ├── db_file
+│   ├── nohup.out
+│   ├── old_db_file
+│   ├── req_env_vars.txt
+│   ├── src
+│   │   ├── check_installed_programs.rs
+│   │   ├── domain.rs
+│   │   ├── env_vars_checker.rs
+│   │   ├── graph.rs
+│   │   ├── main.rs
+│   │   ├── mongo.rs
+│   │   ├── openai.rs
+│   │   ├── receive_send.rs
+│   │   ├── send.rs
+│   │   ├── settings.rs
+│   │   ├── sqlite_helper_functions.rs
+│   │   ├── utils.rs
+│   │   └── websocket.rs
+│   └── target [excluded]
+├── common
+│   └── protobuf
+│       └── system_types.proto
+├── env [excluded]
+├── frontend
+│   ├── .eslintignore
+│   ├── .eslintrc.json
+│   ├── .svelte-kit
+│   │   ├── ambient.d.ts
+│   │   ├── generated
+│   │   │   ├── client-manifest.js
+│   │   │   ├── client-matchers.js
+│   │   │   ├── nodes
+│   │   │   │   ├── 0.js
+│   │   │   │   ├── 1.js
+│   │   │   │   └── 2.js
+│   │   │   ├── root.svelte
+│   │   │   └── server-internal.js
+│   │   ├── tsconfig.json
+│   │   └── types
+│   │       ├── route_meta_data.json
+│   │       └── src
+│   │           └── routes
+│   │               └── $types.d.ts
+│   ├── .vscode [excluded]
+│   ├── README.md
+│   ├── node_modules [excluded]
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── proto_build.sh
+│   ├── public
+│   │   ├── bundle.css
+│   │   ├── bundle.css.map
+│   │   ├── bundle.js
+│   │   ├── bundle.js.map
+│   │   └── index.html
+│   ├── rollup.config.js
+│   ├── src
+│   │   ├── .eslintrc.json
+│   │   ├── App.svelte
+│   │   ├── components
+│   │   │   ├── AuthPage.svelte
+│   │   │   ├── GraphComponent_graphlib.svelte
+│   │   │   ├── GraphStyles.ts
+│   │   │   ├── Loading.svelte
+│   │   │   ├── Sidebar.svelte
+│   │   │   └── sidebarComponents
+│   │   │       ├── BackgroundInfo.svelte
+│   │   │       ├── CreateProcess.svelte
+│   │   │       ├── InteractWithActionsAndProcesses.svelte
+│   │   │       ├── newNode.svelte
+│   │   │       └── subComponents
+│   │   │           ├── CommandComponent.svelte
+│   │   │           ├── ConditionalComponent.svelte
+│   │   │           ├── ProcessComponent.svelte
+│   │   │           └── PromptComponent.svelte
+│   │   ├── file.py
+│   │   ├── generated
+│   │   │   ├── google
+│   │   │   │   └── protobuf
+│   │   │   │       └── wrappers.ts
+│   │   │   └── system_types.ts
+│   │   ├── helper_functions
+│   │   │   ├── authentication.ts
+│   │   │   ├── graph.ts
+│   │   │   ├── misc.ts
+│   │   │   └── websocket.ts
+│   │   ├── main.js
+│   │   └── stores
+│   │       ├── systemStateStore.ts
+│   │       └── websocketStore.ts
+│   └── tsconfig.json
+├── mongodump
+│   └── admin
+│       ├── nodes.bson
+│       ├── nodes.metadata.json
+│       ├── system.users.bson
+│       ├── system.users.metadata.json
+│       ├── system.version.bson
+│       └── system.version.metadata.json
+├── nohup.out
+├── productivity_increasing_scripts
+│   ├── exclusion_folders.txt
+│   ├── file_tree.txt
+│   └── summarize_project.py
+├── readme.md
+├── send_reset.py
+├── server_reset.py
+└── update_db.py
