@@ -12,7 +12,7 @@
     // set authentication to true
 
     let websocket = $websocketStore.websocket;
-    authenticate(websocket, "", "");
+    authenticate(websocket, "test_user", "test_pass");
   }
 
   // Send POST with authentication Message

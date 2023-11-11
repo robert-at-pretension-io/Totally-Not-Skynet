@@ -41,7 +41,7 @@ export function systemGraphToGraphLib(
 
   const g = new graphlib.Graph();
 
-  graph.nodes.forEach((node: proto.GraphNodeInfo) => {
+  graph.nodes_info.forEach((node: proto.GraphNodeInfo) => {
     g.setNode(node.id, node.name);
   });
 
@@ -241,7 +241,7 @@ export function getNode(
   id: string,
   system_state: proto.SystemState
 ): proto.Node {
-  const nodes = system_state.nodes;
+  const nodes = system_state.local_nodes;
 
   const node = nodes.find((node: proto.Node) => {
     const test_id = node.node_info;
@@ -261,7 +261,7 @@ export function getNodeInfo(
 ): proto.GraphNodeInfo | undefined {
   const node_info_list: proto.GraphNodeInfo[] = [];
 
-  system_state.nodes?.forEach((node: proto.Node) => {
+  system_state.local_nodes?.forEach((node: proto.Node) => {
     node_info_list.push(node.node_info as proto.GraphNodeInfo);
   });
 

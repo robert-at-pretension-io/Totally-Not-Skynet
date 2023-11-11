@@ -65,7 +65,7 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
         // loop through the response_envelope.letters array
         response_envelope.letters.forEach((letter) => {
           console.log("letter: ", letter);
-          // check the type of message_content
+          // check the type of letter
 
           if (letter.verb === VerbTypes.Initiate) {
             if (letter.body.has_node) {
@@ -88,9 +88,9 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
             }
           }
 
-          if (message_content.verb === VerbTypes.Acknowledge) {
-            if (message_content.body.has_identity) {
-              const identity = message_content.identity as Identity;
+          if (letter.verb === VerbTypes.Acknowledge) {
+            if (letter.body.has_identity) {
+              const identity = letter.body.identity as Identity;
               console.log("server identity: ", identity);
               systemStateStore.update((s: SystemState) => {
                 s.primary_backend = identity;
@@ -268,7 +268,6 @@ export function selfIdentify(websocket: WebSocket) {
   const letter = new Letter();
 
   letter.verb = VerbTypes.Initiate;
-
 
   envelope.letters = [letter];
 

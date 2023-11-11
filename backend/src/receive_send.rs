@@ -7,7 +7,9 @@ use crate::generated_types::{
     Edge,
     Process,
     Envelope,
-    contents::Contents,
+    Body,
+    Letter,
+    body::Contents,
 };
 
 // use crate::graph::validate_nodes_from_process;
@@ -96,9 +98,13 @@ pub async fn start_message_sending_loop(
 
             let server_identity = SERVER_IDENTITY.get().unwrap();
 
-            let message_content = crate::generated_types::Contents {
-                verb: VerbTypes::Acknowledge as i32,
+            let body = Body {
                 contents: Some(Contents::Identity(server_identity.clone())),
+            };
+
+            let message_content = Letter {
+                verb: VerbTypes::Acknowledge as i32,
+                body: Some(body),
             };
 
             let vectorized_message = vec![message_content];
@@ -106,7 +112,7 @@ pub async fn start_message_sending_loop(
             let return_envelope = Envelope {
                 sender: Some(server_identity.clone()),
                 receiver: envelope.clone().sender.clone(),
-                message_content: vectorized_message,
+                letters: vectorized_message,
                 verification_id: envelope.verification_id.clone(),
             };
 
@@ -121,24 +127,24 @@ pub async fn start_message_sending_loop(
 
         println!("{}", "TODO: Collection responses and send them in envelope batch.".red());
 
-        // loop through the message_contents and handle each one
-        for message_content in envelope.clone().message_content {
-            println!("Message content: {:?}", message_content);
-            let verb: VerbTypes = VerbTypes::try_from(message_content.verb).unwrap();
+        // loop through the letters and handle each one
+        for letter in envelope.clone().letters {
+            println!("Message content: {:?}", letter);
+            let verb: VerbTypes = VerbTypes::try_from(letter.verb).unwrap();
             let sender: Identity = envelope.clone().sender.unwrap();
             let receiver: generated_types::Identity = envelope.clone().receiver.unwrap();
-            let wrapped_content = message_content.contents.clone();
+            let wrapped_content = letter.body.clone();
             let verification_id = envelope.clone().verification_id;
 
             let mut content: Contents;
 
             match wrapped_content {
                 None => {
-                    println!("{} {:?}", "No contents found:".red(), message_content);
+                    println!("{} {:?}", "No contents found:".red(), letter);
                     continue; // We should probably log this later... But we don't want to interrupt the message processing loop
                 }
-                Some(contents) => {
-                    content = contents;
+                Some(body) => {
+                    content = body.contents.unwrap();
                 }
             }
 
@@ -153,14 +159,19 @@ pub async fn start_message_sending_loop(
                             let new_node_info = GraphNodeInfo {
                                 id: uuid::Uuid::new_v4().to_string(),
                                 description: node.clone().node_info.unwrap().description.clone(),
-                                name: node.node_info.unwrap().name.clone(),
+                                name: node.node_info.clone().unwrap().name.clone(),
                             };
 
-                            let mut contents: generated_types::Contents =
-                                generated_types::Contents {
-                                    verb: VerbTypes::Acknowledge as i32,
-                                    contents: Some(Contents::Node(mutable_node.clone())),
-                                };
+                            mutable_node.node_info = Some(new_node_info.clone());
+
+                            let body = Body {
+                                contents: Some(Contents::Node(node.clone())),
+                            };
+
+                            let mut letter = generated_types::Letter {
+                                verb: VerbTypes::Acknowledge as i32,
+                                body: Some(body),
+                            };
 
                             //insert the node into the db
                             match insert_node(pool.clone(), mutable_node.clone()) {
@@ -170,7 +181,7 @@ pub async fn start_message_sending_loop(
                                     let response_object = Envelope {
                                         sender: Some(receiver.clone()),
                                         receiver: Some(sender.clone()),
-                                        message_content: vec![contents],
+                                        letters: vec![letter],
                                         verification_id: verification_id.clone(),
                                     };
 
@@ -184,11 +195,14 @@ pub async fn start_message_sending_loop(
                         VerbTypes::Update => {
                             let mut updated_node = node.clone();
 
-                            let mut contents: generated_types::Contents =
-                                generated_types::Contents {
-                                    verb: VerbTypes::Acknowledge as i32,
-                                    contents: Some(Contents::Node(updated_node.clone())),
-                                };
+                            let body = Body {
+                                contents: Some(Contents::Node(updated_node.clone())),
+                            };
+
+                            let mut letter = generated_types::Letter {
+                                verb: VerbTypes::Acknowledge as i32,
+                                body: Some(body),
+                            };
 
                             match update_node(pool.clone(), &updated_node) {
                                 Ok(_) => {
@@ -197,7 +211,7 @@ pub async fn start_message_sending_loop(
                                     let updated_envelope = Envelope {
                                         sender: Some(receiver.clone()),
                                         receiver: Some(sender.clone()),
-                                        message_content: vec![contents],
+                                        letters: vec![letter],
                                         verification_id: verification_id.clone(),
                                     };
 
@@ -226,7 +240,7 @@ pub async fn start_message_sending_loop(
                             let mut response_envelope: Envelope = Envelope {
                                 sender: Some(receiver.clone()),
                                 receiver: Some(sender.clone()),
-                                message_content: Vec::new(),
+                                letters: Vec::new(),
                                 verification_id: verification_id.clone(),
                             };
 
@@ -235,13 +249,17 @@ pub async fn start_message_sending_loop(
                                     for node in &nodes {
                                         println!("Found node: {:?}", node);
 
-                                        let contents: generated_types::Contents =
-                                            generated_types::Contents {
+                                        let body = Body {
+                                            contents: Some(Contents::Node(node.clone())),
+                                        };
+
+                                        let contents: generated_types::Letter =
+                                            generated_types::Letter {
                                                 verb: VerbTypes::Acknowledge as i32,
-                                                contents: Some(Contents::Node(node.clone())),
+                                                body: Some(body),
                                             };
 
-                                        response_envelope.message_content.push(contents);
+                                        response_envelope.letters.push(contents);
                                     }
 
                                     send_message(&tx, msg.0.clone(), response_envelope).await;

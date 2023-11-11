@@ -1,4 +1,4 @@
-import { sendEnvelope, sendWebsocketMessage } from "./websocket";
+import { sendEnvelope } from "./websocket";
 import systemStateStore from "stores/systemStateStore";
 import { v4 as uuidv4 } from "uuid";
 
@@ -7,7 +7,8 @@ import {
   Envelope,
   VerbTypes,
   Identity,
-  Contents
+  Letter,
+  Body
 } from "../generated/system_types";
 
 export function authenticate(
@@ -18,21 +19,22 @@ export function authenticate(
 
   console.log("websocket is ready... sending auth");
 
-  const contents = new Letter();
+  const letter = new Letter();
 
   const auth_content = new AuthenticationMessage();
 
-  contents.verb = VerbTypes.Initiate;
+  letter.verb = VerbTypes.Initiate;
 
   auth_content.client_email = email;
   auth_content.client_password = password;
 
-  contents.authentication_message = auth_content;
+  const body = new Body();
 
-  let client_identity: Identity;
-  let server_identity: Identity;
+  body.authentication_message = auth_content;
 
-  sendEnvelope(websocket, [contents]);
+  letter.body = body;
+
+  sendEnvelope(websocket, [letter]);
 
   systemStateStore.update((s) => {
     console.log("setting authenticated to true");

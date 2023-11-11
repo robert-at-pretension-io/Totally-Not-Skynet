@@ -18,7 +18,7 @@ export function initializeSystemState(system_state: SystemState): SystemState {
   system_state.graph = graph;
   system_state.authenticated = false;
   system_state.websocket_ready = false;
-  system_state.nodes = [];
+  system_state.local_nodes = [];
   system_state.selected_nodes = [];
 
   return system_state;
