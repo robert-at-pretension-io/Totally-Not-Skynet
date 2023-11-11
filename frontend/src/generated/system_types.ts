@@ -2155,10 +2155,101 @@ export class SystemError extends pb_1.Message {
   }
 }
 export class Contents extends pb_1.Message {
-  #one_of_decls: number[][] = [[1, 2, 3, 4, 5, 6, 7]];
-  constructor(data?: any[] | ({
+  #one_of_decls: number[][] = [];
+  constructor(data?: any[] | {
+        body?: Body;
         verb?: VerbTypes;
-    } & (({
+    }) {
+    super();
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("body" in data && data.body != undefined) {
+        this.body = data.body;
+      }
+      if ("verb" in data && data.verb != undefined) {
+        this.verb = data.verb;
+      }
+    }
+  }
+  get body() {
+    return pb_1.Message.getWrapperField(this, Body, 1) as Body;
+  }
+  set body(value: Body) {
+    pb_1.Message.setWrapperField(this, 1, value);
+  }
+  get has_body() {
+    return pb_1.Message.getField(this, 1) != null;
+  }
+  get verb() {
+    return pb_1.Message.getFieldWithDefault(this, 2, VerbTypes.Create) as VerbTypes;
+  }
+  set verb(value: VerbTypes) {
+    pb_1.Message.setField(this, 2, value);
+  }
+  static fromObject(data: {
+        body?: ReturnType<typeof Body.prototype.toObject>;
+        verb?: VerbTypes;
+    }): Contents {
+    const message = new Contents({});
+    if (data.body != null) {
+      message.body = Body.fromObject(data.body);
+    }
+    if (data.verb != null) {
+      message.verb = data.verb;
+    }
+    return message;
+  }
+  toObject() {
+    const data: {
+            body?: ReturnType<typeof Body.prototype.toObject>;
+            verb?: VerbTypes;
+        } = {};
+    if (this.body != null) {
+      data.body = this.body.toObject();
+    }
+    if (this.verb != null) {
+      data.verb = this.verb;
+    }
+    return data;
+  }
+  serialize(): Uint8Array;
+  serialize(w: pb_1.BinaryWriter): void;
+  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.has_body)
+      writer.writeMessage(1, this.body, () => this.body.serialize(writer));
+    if (this.verb != VerbTypes.Create)
+      writer.writeEnum(2, this.verb);
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Contents {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Contents();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+      case 1:
+        reader.readMessage(message.body, () => message.body = Body.deserialize(reader));
+        break;
+      case 2:
+        message.verb = reader.readEnum();
+        break;
+      default: reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary(): Uint8Array {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes: Uint8Array): Contents {
+    return Contents.deserialize(bytes);
+  }
+}
+export class Body extends pb_1.Message {
+  #one_of_decls: number[][] = [[1, 2, 3, 4, 5, 6, 7]];
+  constructor(data?: any[] | ({} & (({
         node?: Node;
         authentication_message?: never;
         user_settings?: never;
@@ -2239,9 +2330,6 @@ export class Contents extends pb_1.Message {
       if ("nodes_to_process" in data && data.nodes_to_process != undefined) {
         this.nodes_to_process = data.nodes_to_process;
       }
-      if ("verb" in data && data.verb != undefined) {
-        this.verb = data.verb;
-      }
     }
   }
   get node() {
@@ -2307,12 +2395,6 @@ export class Contents extends pb_1.Message {
   get has_nodes_to_process() {
     return pb_1.Message.getField(this, 7) != null;
   }
-  get verb() {
-    return pb_1.Message.getFieldWithDefault(this, 8, VerbTypes.Create) as VerbTypes;
-  }
-  set verb(value: VerbTypes) {
-    pb_1.Message.setField(this, 8, value);
-  }
   get contents() {
     const cases: {
             [index: number]: "none" | "node" | "authentication_message" | "user_settings" | "execution_details" | "errors" | "identity" | "nodes_to_process";
@@ -2336,9 +2418,8 @@ export class Contents extends pb_1.Message {
         errors?: ReturnType<typeof SystemError.prototype.toObject>;
         identity?: ReturnType<typeof Identity.prototype.toObject>;
         nodes_to_process?: ReturnType<typeof NodesToProcess.prototype.toObject>;
-        verb?: VerbTypes;
-    }): Contents {
-    const message = new Contents({});
+    }): Body {
+    const message = new Body({});
     if (data.node != null) {
       message.node = Node.fromObject(data.node);
     }
@@ -2360,9 +2441,6 @@ export class Contents extends pb_1.Message {
     if (data.nodes_to_process != null) {
       message.nodes_to_process = NodesToProcess.fromObject(data.nodes_to_process);
     }
-    if (data.verb != null) {
-      message.verb = data.verb;
-    }
     return message;
   }
   toObject() {
@@ -2374,7 +2452,6 @@ export class Contents extends pb_1.Message {
             errors?: ReturnType<typeof SystemError.prototype.toObject>;
             identity?: ReturnType<typeof Identity.prototype.toObject>;
             nodes_to_process?: ReturnType<typeof NodesToProcess.prototype.toObject>;
-            verb?: VerbTypes;
         } = {};
     if (this.node != null) {
       data.node = this.node.toObject();
@@ -2397,9 +2474,6 @@ export class Contents extends pb_1.Message {
     if (this.nodes_to_process != null) {
       data.nodes_to_process = this.nodes_to_process.toObject();
     }
-    if (this.verb != null) {
-      data.verb = this.verb;
-    }
     return data;
   }
   serialize(): Uint8Array;
@@ -2420,13 +2494,11 @@ export class Contents extends pb_1.Message {
       writer.writeMessage(6, this.identity, () => this.identity.serialize(writer));
     if (this.has_nodes_to_process)
       writer.writeMessage(7, this.nodes_to_process, () => this.nodes_to_process.serialize(writer));
-    if (this.verb != VerbTypes.Create)
-      writer.writeEnum(8, this.verb);
     if (!w)
       return writer.getResultBuffer();
   }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Contents {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Contents();
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Body {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Body();
     while (reader.nextField()) {
       if (reader.isEndGroup())
         break;
@@ -2452,9 +2524,6 @@ export class Contents extends pb_1.Message {
       case 7:
         reader.readMessage(message.nodes_to_process, () => message.nodes_to_process = NodesToProcess.deserialize(reader));
         break;
-      case 8:
-        message.verb = reader.readEnum();
-        break;
       default: reader.skipField();
       }
     }
@@ -2463,8 +2532,8 @@ export class Contents extends pb_1.Message {
   serializeBinary(): Uint8Array {
     return this.serialize();
   }
-  static deserializeBinary(bytes: Uint8Array): Contents {
-    return Contents.deserialize(bytes);
+  static deserializeBinary(bytes: Uint8Array): Body {
+    return Body.deserialize(bytes);
   }
 }
 export class NodesToProcess extends pb_1.Message {

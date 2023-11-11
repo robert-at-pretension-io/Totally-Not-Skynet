@@ -125,7 +125,8 @@ message SystemState {
   repeated Identity peer_identities = 10;
   Identity primary_backend = 11;
   Identity client_identity = 12;
-  repeated Envelope sent_messages = 13;
+  // This one contains both the sent and received messages. To find out which are paired,look at the verification_id field.
+  repeated Envelope message_log = 13;
 }
 
 message AuthenticationMessage {
@@ -145,6 +146,11 @@ message SystemError {
 }
 
 message Contents {
+  Body body = 1;
+  VerbTypes verb = 2;
+}
+
+message Body {
 oneof contents {
     Node node = 1;
     AuthenticationMessage authentication_message = 2;
@@ -154,7 +160,6 @@ oneof contents {
     Identity identity = 6;
     NodesToProcess nodes_to_process = 7;
   }
-  VerbTypes verb = 8;
 }
 
 message NodesToProcess {

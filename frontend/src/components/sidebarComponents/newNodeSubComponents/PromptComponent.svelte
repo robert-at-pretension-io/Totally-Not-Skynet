@@ -5,8 +5,13 @@
     VerbTypes,
     Node,
     GraphNodeInfo,
+    Envelope,
+    Contents,
+    Body,
+    NodeTypes,
   } from "../../../generated/system_types";
-  import { sendWebsocketMessage } from "helper_functions/websocket";
+  import { v4 as uuidv4 } from "uuid";
+  import { sendEnvelope } from "helper_functions/websocket";
 
   let system_text = "";
   let prompt_text = "";
@@ -21,10 +26,6 @@
   function submitPrompt() {
     prompt.prompt = prompt_text;
     prompt.system = system_text;
-
-    // create and send crud bundle:
-
-    alert("submitPrompt not implemented");
 
     let node = new Node();
 
@@ -41,10 +42,24 @@
 
     let node_info = new GraphNodeInfo();
     node_info.name = name;
+    node_info.id = new uuidv4();
     node_info.description = description;
     node.node_info = node_info;
+    node.node_content.prompt = prompt;
+    node.node_type = NodeTypes.PROMPT;
 
     let websocket = $websocketStore.websocket as WebSocket;
+
+    let body = new Body();
+
+    body.node = node;
+
+    let contents = new Contents();
+
+    contents.body = body;
+    contents.verb = VerbTypes.Create;
+
+    sendEnvelope(websocket);
 
     reset_component();
   }

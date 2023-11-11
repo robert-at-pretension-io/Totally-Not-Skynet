@@ -1,5 +1,5 @@
 
-import { Node, SystemState, Envelope, VerbTypes, Contents } from "../../src/generated/system_types";
+import { Node, SystemState, Envelope, VerbTypes, Contents, Body } from "../../src/generated/system_types";
 
 import systemStateStore from "stores/systemStateStore";
 
@@ -193,42 +193,42 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
 
 }
 
-export function sendWebsocketMessage(
+function sendWebsocketMessage(
   message: Envelope,
   websocket: WebSocket
 ) {
   console.log("sending websocket message: ", message.toObject());
   const message_string = message.serializeBinary();
 
-  // const writer = new BinaryWriter();
-
-  // message.serialize(writer);
-  // const result = writer.getResultBase64String();
-
-  // // message.serialize
-
-  // // const messageArray = Array.from(message_string);
-
   console.log("serialized message is: ", message_string);
-  // console.log("other serialize message", result);
-
-  // // message_string.buffer
-
-  // console.log("deserialized message is: ", CrudBundle.deserializeBinary(message_string).toObject());
-
-  // console.log("other deserialzed message:", CrudBundle.deser)
-
-  // const string = JSON.stringify(message.toObject());
 
   websocket.send(message_string);
 }
 
-export function sendEnvelope(websocket: WebSocket, sender: Identity, receiver: Identity, message_content: Contents[]) {
+export function sendEnvelope(websocket: WebSocket, message_content: Contents[], sender: Identity = undefined, receiver: Identity = undefined) {
 
   // raise an error and alert if the sender or receiver is not set
-  if (!sender || !receiver) {
-    alert("Error: sender or receiver is not set");
-    throw new Error("sender or receiver is not set");
+  if (!sender) {
+    alert("Sender not set. Defaulting to this client.");
+
+    let sender = new Identity();
+
+    systemStateStore.subscribe((s: SystemState) => {
+      sender = s.client_identity;
+    });
+
+  }
+
+  // same for the receiver:
+  if (!receiver) {
+    alert("Receiver not set. Defaulting to the primary backend.");
+
+    let receiver = new Identity();
+
+    systemStateStore.subscribe((s: SystemState) => {
+      receiver = s.primary_backend;
+    });
+
   }
 
   const envelope = new Envelope();
@@ -275,8 +275,6 @@ export function selfIdentify(websocket: WebSocket) {
   sendWebsocketMessage(envelope, websocket);
 
 }
-
-// import axios from "axios";
 
 async function getExternalIP() {
   // try {
