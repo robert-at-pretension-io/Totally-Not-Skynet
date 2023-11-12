@@ -285,16 +285,40 @@ pub async fn start_message_sending_loop(
 
                 Contents::UserSettings(user_settings) => {}
                 Contents::ExecutionDetails(execution_context) => {}
-                // Contents::NodesToProcess(nodes_to_process) => {
-                //     match validate_nodes_in_process(nodes_to_process) {
-                //         Ok(_) => {
-                //             println!("Nodes validated successfully");
-                //         }
-                //         Err(err) => {
-                //             println!("Error validating nodes: {:?}", err);
-                //         }
-                //     }
-                // }
+                Contents::NodesToProcess(nodes_to_process) => {
+                    let outer_node_info = nodes_to_process.containing_node_info.clone();
+                    let nodes = nodes_to_process.nodes.clone();
+                    match validate_nodes_in_process(nodes, outer_node_info) {
+                        Ok(mutable_node) => {
+                            println!("Nodes validated successfully");
+
+                            match insert_node(pool.clone(), mutable_node.clone()) {
+                                Ok(_) => {
+                                    println!("Node inserted successfully");
+
+                                    let response_object = Envelope {
+                                        sender: Some(receiver.clone()),
+                                        receiver: Some(sender.clone()),
+                                        letters: vec![letter],
+                                        verification_id: verification_id.clone(),
+                                    };
+
+                                    send_message(&tx, msg.0.clone(), response_object).await;
+                                }
+                                Err(err) => {
+                                    println!("Error inserting node: {:?}", err);
+                                }
+                            }
+
+                            // Add process node to the database
+
+                            // Send process back to the frontend
+                        }
+                        Err(err) => {
+                            println!("Error validating nodes: {:?}", err);
+                        }
+                    }
+                }
                 _ => {
                     println!("{}", "Not yet implemented".red());
                 }
