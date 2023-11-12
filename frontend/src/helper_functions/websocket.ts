@@ -14,6 +14,7 @@ import { Json } from "io-ts-types";
 import { Identity } from "generated/system_types";
 
 import { v4 as uuidv4 } from "uuid";
+import { getNodes } from "./misc";
 
 export function setupWebsocketConnection(): WebSocket {
   console.log("setting up websocket connection");
@@ -48,10 +49,10 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
   websocket.addEventListener("message", (event) => {
     // console.log("websocket message received: ", event.data);
 
+    console.log("\n------------------\n");
+
     event.data.arrayBuffer().then((buffer: any) => {
-      console.log("buffer: ", buffer);
       const u8Array = new Uint8Array(buffer);
-      console.log("u8Array: ", u8Array);
       const response_envelope: Envelope = Envelope.deserializeBinary(u8Array);
 
       console.log("received message: ", response_envelope.toObject());
@@ -63,7 +64,7 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
         self_identity = s.client_identity;
       });
 
-      console.log(self_identity.toObject());
+      // console.log(self_identity.toObject());
 
       if (!response_envelope.has_receiver) {
         alert("This message does not have a receiver. This is not good.");
@@ -107,9 +108,19 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
           if (letter.verb === VerbTypes.Acknowledge) {
             if (letter.body.has_identity) {
               const identity = letter.body.identity as Identity;
-              console.log("server identity: ", identity.toObject());
+              console.log("setting primary server identity: ", identity.toObject());
               systemStateStore.update((s: SystemState) => {
                 s.primary_backend = identity;
+                return s;
+              });
+
+              getNodes(websocket);
+            }
+            if (letter.body.has_node) {
+              //add it to the system state local_node list:
+              console.log("Added node to local system state");
+              systemStateStore.update((s) => {
+                s.local_nodes.push(letter.body.node);
                 return s;
               });
             }
@@ -241,8 +252,6 @@ export function sendEnvelope(
   // same for the receiver:
   if (!receiver) {
     console.log("Receiver not set. Defaulting to the primary backend.");
-
-    let receiver = new Identity();
 
     systemStateStore.subscribe((s: SystemState) => {
       receiver = s.primary_backend;

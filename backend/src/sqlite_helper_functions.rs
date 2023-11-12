@@ -4,21 +4,29 @@ use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::{ params, Connection, Result };
 use std::env;
 use std::sync::Arc;
+use prost::Message;
 
 pub fn setup_sqlite_db() -> Result<()> {
+    println!("Setting up SQLite database...");
+
     // Get the environmental variables required:
     let key = "SQLITE_FILE_LOCATION";
 
+    println!("Retrieving environmental variable for SQLite location...");
     let sqlite_location = env::var(key).unwrap();
 
+    println!("Opening connection to SQLite at location: {}", sqlite_location);
     let conn = Connection::open(sqlite_location)?;
 
+    println!("Creating nodes table...");
     create_nodes_table(&conn)?;
 
+    println!("SQLite DB setup complete.");
     return Ok(());
 }
 
 pub fn create_nodes_table(conn: &Connection) -> Result<()> {
+    println!("Executing statement to create nodes table if it does not exist...");
     conn.execute(
         "CREATE TABLE IF NOT EXISTS nodes (
             id TEXT PRIMARY KEY,
@@ -28,17 +36,23 @@ pub fn create_nodes_table(conn: &Connection) -> Result<()> {
         )",
         []
     )?;
+    println!("Nodes table created successfully.");
     Ok(())
 }
-use prost::Message;
-pub fn insert_node(pool: Arc<Pool<SqliteConnectionManager>>, node: Node) -> Result<()> {
-    let connection = pool.get().expect("Failed to get connection from pool");
 
+pub fn insert_node(pool: Arc<Pool<SqliteConnectionManager>>, node: Node) -> Result<()> {
+    println!("Inserting a node...");
+    let connection = pool.get().expect("Failed to get connection from pool");
+    println!("Connection obtained from pool successfully.");
+
+    println!("Serializing node...");
     let mut serialized_node = vec![];
     match node.clone().encode(&mut serialized_node) {
         Ok(_) => {
+            println!("Serialization successful.");
             let id = node.node_info.clone().unwrap().id;
             let name = node.node_info.unwrap().name;
+            println!("Inserting serialized node into the database...");
             match
                 connection.execute(
                     "INSERT OR REPLACE INTO nodes (id, name, type_name, serialized_node) VALUES (?1, ?2, ?3, ?4)",
@@ -46,6 +60,7 @@ pub fn insert_node(pool: Arc<Pool<SqliteConnectionManager>>, node: Node) -> Resu
                 )
             {
                 Ok(_) => {
+                    println!("Node insertion successful.");
                     return Ok(());
                 }
                 Err(err) => {
@@ -62,13 +77,18 @@ pub fn insert_node(pool: Arc<Pool<SqliteConnectionManager>>, node: Node) -> Resu
 }
 
 pub fn update_node(pool: Arc<Pool<SqliteConnectionManager>>, node: &Node) -> Result<()> {
+    println!("Updating a node...");
     let connection = pool.get().expect("Failed to get connection from pool");
+    println!("Connection obtained from pool successfully.");
 
+    println!("Serializing node for update...");
     let mut serialized_node = vec![];
     match node.clone().encode(&mut serialized_node) {
         Ok(_) => {
+            println!("Serialization successful.");
             let id = node.node_info.clone().unwrap().id;
             let name = node.node_info.clone().unwrap().name;
+            println!("Updating node in the database...");
             match
                 connection.execute(
                     "UPDATE nodes SET name = ?1, serialized_node = ?2 WHERE id = ?3",
@@ -98,9 +118,14 @@ pub fn update_node(pool: Arc<Pool<SqliteConnectionManager>>, node: &Node) -> Res
 }
 
 pub fn fetch_all_nodes(pool: Arc<Pool<SqliteConnectionManager>>) -> Result<Vec<Node>> {
+    println!("Attempting to retrieve all nodes...");
     let connection = pool.get().expect("Failed to get connection from pool");
+    println!("Connection retrieved from pool successfully.");
+    println!("Preparing SQL statement for fetching all nodes...");
     let mut stmt = connection.prepare("SELECT serialized_node FROM nodes")?;
+    println!("Statement prepared successfully.");
 
+    println!("Querying database and deserializing nodes...");
     let node_iter = stmt.query_map([], |row| {
         let blob_data: Vec<u8> = row.get(0)?;
         let node = Node::decode(blob_data.as_slice()).expect("Failed to deserialize node");
@@ -112,5 +137,6 @@ pub fn fetch_all_nodes(pool: Arc<Pool<SqliteConnectionManager>>) -> Result<Vec<N
         nodes.push(node?);
     }
 
+    println!("All nodes retrieved successfully.");
     Ok(nodes)
 }

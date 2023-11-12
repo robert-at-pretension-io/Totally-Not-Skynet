@@ -21,7 +21,8 @@ export enum VerbTypes {
     Validate = 6,
     Acknowledge = 7,
     Initiate = 8,
-    Authorized = 9
+    Authorized = 9,
+    RequestAll = 10
 }
 export class GraphNodeInfo extends pb_1.Message {
   #one_of_decls: number[][] = [];

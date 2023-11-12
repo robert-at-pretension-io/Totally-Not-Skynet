@@ -226,16 +226,7 @@ pub async fn start_message_sending_loop(
                             }
                         }
 
-                        VerbTypes::Get => todo!(),
-                        VerbTypes::Execute => todo!(),
-                        _ => {
-                            println!("{} {:?}", "Verb not supported for node:".red(), verb);
-                        }
-                    }
-                }
-                Contents::AuthenticationMessage(auth) => {
-                    match verb {
-                        VerbTypes::Initiate => {
+                        VerbTypes::Get => {
                             println!("{}", "TODO: Handle authentication message validation".red());
 
                             // Code to handle the initiation of authentication
@@ -273,7 +264,18 @@ pub async fn start_message_sending_loop(
                                         err
                                     );
                                 }
-                            } // Closing the match fetch_all_nodes
+                            }
+                        }
+                        VerbTypes::Execute => todo!(),
+                        _ => {
+                            println!("{} {:?}", "Verb not supported for node:".red(), verb);
+                        }
+                    }
+                }
+                Contents::AuthenticationMessage(auth) => {
+                    match verb {
+                        VerbTypes::Initiate => {
+                            // Closing the match fetch_all_nodes
                         } // Closing the VerbTypes::Initiate match arm
                         _ => {
                             println!("{}", "Authentication message not *yet* supported:".red());

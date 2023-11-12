@@ -85,6 +85,7 @@ enum VerbTypes {
   Acknowledge = 7;
   Initiate = 8;
   Authorized = 9;
+  RequestAll = 10;
 }
 
 // This is given to every "entity" within the system. Each is self-declared. For instance, the backend will generate an Identity for itself and use it for any messages that it sends to any client.
