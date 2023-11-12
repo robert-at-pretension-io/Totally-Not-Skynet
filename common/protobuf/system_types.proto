@@ -64,8 +64,8 @@ message NodeContent {
 
 message Node {
   GraphNodeInfo node_info = 1;
-  repeated VariableDefinition input_variables = 2;
-  repeated VariableDefinition output_variables = 3;
+  repeated string input_variables = 2;
+  repeated string output_variables = 3;
   NodeTypes node_type = 4;
   NodeContent node_content = 5;
 }

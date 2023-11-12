@@ -1,5 +1,11 @@
-
-import { Node, SystemState, Envelope, VerbTypes, Letter, Body } from "../../src/generated/system_types";
+import {
+  Node,
+  SystemState,
+  Envelope,
+  VerbTypes,
+  Letter,
+  Body,
+} from "../../src/generated/system_types";
 
 import systemStateStore from "stores/systemStateStore";
 
@@ -16,8 +22,10 @@ export function setupWebsocketConnection(): WebSocket {
 
   console.log("The environment is: ", environment);
 
-  const websocket_url = environment.toUpperCase() === "PRODUCTION" ?
-    "wss://liminalnook.com/ws/" : "ws://localhost:8080";
+  const websocket_url =
+    environment.toUpperCase() === "PRODUCTION"
+      ? "wss://liminalnook.com/ws/"
+      : "ws://localhost:8080";
 
   alert("Change websocket to external environment");
   let websocket = new WebSocket(websocket_url);
@@ -57,11 +65,23 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
 
       console.log(self_identity.toObject());
 
-      if (response_envelope.has_receiver && response_envelope.receiver.id !== self_identity.id) {
-        alert("Rerouting the message to the correct client. This message is not for me.");
+      if (!response_envelope.has_receiver) {
+        alert("This message does not have a receiver. This is not good.");
       }
 
-      if (response_envelope.has_receiver && response_envelope.receiver.id === self_identity.id) {
+      if (
+        response_envelope.has_receiver &&
+        response_envelope.receiver.id !== self_identity.id
+      ) {
+        alert(
+          "Rerouting the message to the correct client. This message is not for me."
+        );
+      }
+
+      if (
+        response_envelope.has_receiver &&
+        response_envelope.receiver.id === self_identity.id
+      ) {
         // loop through the response_envelope.letters array
         response_envelope.letters.forEach((letter) => {
           console.log("letter: ", letter);
@@ -75,15 +95,11 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
               if (add_node && typeof add_node.toObject === "function") {
                 console.log("add_node: ", add_node.toObject());
 
-                systemStateStore.update(
-                  (n: SystemState) => {
+                systemStateStore.update((n: SystemState) => {
+                  n.local_nodes.push(add_node);
 
-                    n.local_nodes.push(add_node);
-
-                    return n;
-                  }
-                );
-
+                  return n;
+                });
               }
             }
           }
@@ -98,10 +114,10 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
               });
             }
           }
-
         });
+      } else {
+        console.log("This message is not for me.");
       }
-
     });
 
     //       console.log("response_object: ", response_object);
@@ -186,20 +202,15 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
     //     }
     //     });
     // });
-
   });
 
   selfIdentify(websocket);
 
   return websocket;
-
 }
 
-function sendWebsocketMessage(
-  message: Envelope,
-  websocket: WebSocket
-) {
-  console.log("sending websocket message: ", message.toObject());
+function sendWebsocketMessage(message: Envelope, websocket: WebSocket) {
+  console.log("sending websocket letter: ", message.letters[0].toObject());
   const message_string = message.serializeBinary();
 
   console.log("serialized message is: ", message_string);
@@ -207,30 +218,32 @@ function sendWebsocketMessage(
   websocket.send(message_string);
 }
 
-export function sendEnvelope(websocket: WebSocket, letters: Letter[], sender: Identity = undefined, receiver: Identity = undefined) {
-
+export function sendEnvelope(
+  websocket: WebSocket,
+  letters: Letter[],
+  sender: Identity = undefined,
+  receiver: Identity = undefined
+) {
   // raise an error and alert if the sender or receiver is not set
   if (!sender) {
-    alert("Sender not set. Defaulting to this client.");
+    console.log("Sender not set. Defaulting to this client.");
 
     let sender = new Identity();
 
     systemStateStore.subscribe((s: SystemState) => {
       sender = s.client_identity;
     });
-
   }
 
   // same for the receiver:
   if (!receiver) {
-    alert("Receiver not set. Defaulting to the primary backend.");
+    console.log("Receiver not set. Defaulting to the primary backend.");
 
     let receiver = new Identity();
 
     systemStateStore.subscribe((s: SystemState) => {
       receiver = s.primary_backend;
     });
-
   }
 
   const envelope = new Envelope();
@@ -272,7 +285,6 @@ export function selfIdentify(websocket: WebSocket) {
   envelope.letters = [letter];
 
   sendWebsocketMessage(envelope, websocket);
-
 }
 
 async function getExternalIP() {

@@ -18,7 +18,7 @@
   let node_options = new Array<Node>();
 
   $: {
-    nodes = $systemStateStore.nodes;
+    nodes = $systemStateStore.local_nodes;
     // set the node_options to the nodes with the nodetype of typeName
     node_options = nodes.filter((node) => node.node_type === typeName);
   }

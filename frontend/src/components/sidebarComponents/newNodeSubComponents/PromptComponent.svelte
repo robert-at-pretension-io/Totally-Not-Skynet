@@ -10,6 +10,7 @@
     Body,
     NodeTypes,
     VariableDefinition,
+    NodeContent,
   } from "../../../generated/system_types";
   import { v4 as uuidv4 } from "uuid";
   import { sendEnvelope } from "helper_functions/websocket";
@@ -18,39 +19,43 @@
   let prompt_text = "";
   let description = "";
   let name = "";
-  let input_variables: VariableDefinition[] = [];
-  let output_variables: VariableDefinition[] = [];
-  let new_input_variable: VariableDefinition;
-  let new_output_variable: VariableDefinition;
-  export let prompt: Prompt;
+  let input_variables = [];
+  let output_variables = [];
+  let new_input_variable = "";
+  let new_output_variable = "";
 
   function submitPrompt() {
+    let prompt = new Prompt();
+
     prompt.prompt = prompt_text;
     prompt.system = system_text;
 
     let node = new Node();
 
-    if (new_input_variable != undefined) {
-      input_variables.push(new_input_variable);
+    if (new_input_variable != "") {
+      input_variables = [...input_variables, new_input_variable];
     }
 
     if (new_output_variable != "") {
       output_variables = [...output_variables, new_output_variable];
     }
 
-    let input_variables = new VariableDefinition();
-
     // input_variables.
 
     node.input_variables = input_variables;
     node.output_variables = output_variables;
 
+    let node_content = new NodeContent();
+
+    node_content.prompt = prompt;
+
     let node_info = new GraphNodeInfo();
     node_info.name = name;
     node_info.id = new uuidv4();
     node_info.description = description;
+
     node.node_info = node_info;
-    node.node_content.prompt = prompt;
+    node.node_content = node_content;
     node.node_type = NodeTypes.PROMPT;
 
     let websocket = $websocketStore.websocket as WebSocket;
