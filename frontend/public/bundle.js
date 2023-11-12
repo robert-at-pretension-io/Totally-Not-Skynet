@@ -4627,284 +4627,6 @@ var app = (function () {
     const websocket = { websocket: null };
     const websocketStore = writable(websocket);
 
-    // Unique ID creation requires a high quality random # generator. In the browser we therefore
-    // require the crypto API and do not support built-in fallback to lower quality random number
-    // generators (like Math.random()).
-    let getRandomValues;
-    const rnds8 = new Uint8Array(16);
-    function rng() {
-      // lazy load so that environments that need to polyfill have a chance to do so
-      if (!getRandomValues) {
-        // getRandomValues needs to be invoked in a context where "this" is a Crypto implementation.
-        getRandomValues = typeof crypto !== 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
-
-        if (!getRandomValues) {
-          throw new Error('crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported');
-        }
-      }
-
-      return getRandomValues(rnds8);
-    }
-
-    /**
-     * Convert array of 16 byte values to UUID string format of the form:
-     * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
-     */
-
-    const byteToHex = [];
-
-    for (let i = 0; i < 256; ++i) {
-      byteToHex.push((i + 0x100).toString(16).slice(1));
-    }
-
-    function unsafeStringify(arr, offset = 0) {
-      // Note: Be careful editing this code!  It's been tuned for performance
-      // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
-      return byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]];
-    }
-
-    const randomUUID = typeof crypto !== 'undefined' && crypto.randomUUID && crypto.randomUUID.bind(crypto);
-    var native = {
-      randomUUID
-    };
-
-    function v4(options, buf, offset) {
-      if (native.randomUUID && !buf && !options) {
-        return native.randomUUID();
-      }
-
-      options = options || {};
-      const rnds = options.random || (options.rng || rng)(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
-
-      rnds[6] = rnds[6] & 0x0f | 0x40;
-      rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
-
-      if (buf) {
-        offset = offset || 0;
-
-        for (let i = 0; i < 16; ++i) {
-          buf[offset + i] = rnds[i];
-        }
-
-        return buf;
-      }
-
-      return unsafeStringify(rnds);
-    }
-
-    function setupWebsocketConnection() {
-        console.log("setting up websocket connection");
-        const environment = "development";
-        console.log("The environment is: ", environment);
-        const websocket_url = environment.toUpperCase() === "PRODUCTION"
-            ? "wss://liminalnook.com/ws/"
-            : "ws://localhost:8080";
-        alert("Change websocket to external environment");
-        let websocket = new WebSocket(websocket_url);
-        // start the websocket connection
-        websocket.addEventListener("open", () => {
-            console.log("websocket connection opened");
-            // need to prepare the handler of incoming messages before sending the first message (in case the rust server is TOO FAST 😎)
-            websocket = setupWebsocketMessageHandler(websocket);
-        });
-        console.log("Event listener setup:");
-        return websocket;
-    }
-    function setupWebsocketMessageHandler(websocket) {
-        console.log("setting up websocket message handler");
-        websocket.addEventListener("message", (event) => {
-            // console.log("websocket message received: ", event.data);
-            event.data.arrayBuffer().then((buffer) => {
-                console.log("buffer: ", buffer);
-                const u8Array = new Uint8Array(buffer);
-                console.log("u8Array: ", u8Array);
-                const response_envelope = Envelope.deserializeBinary(u8Array);
-                console.log("received message: ", response_envelope.toObject());
-                let self_identity = new Identity();
-                // get the SystemState from the SystemStateStore
-                systemStateStore.subscribe((s) => {
-                    self_identity = s.client_identity;
-                });
-                console.log(self_identity.toObject());
-                if (!response_envelope.has_receiver) {
-                    alert("This message does not have a receiver. This is not good.");
-                }
-                if (response_envelope.has_receiver &&
-                    response_envelope.receiver.id !== self_identity.id) {
-                    alert("Rerouting the message to the correct client. This message is not for me.");
-                }
-                if (response_envelope.has_receiver &&
-                    response_envelope.receiver.id === self_identity.id) {
-                    // loop through the response_envelope.letters array
-                    response_envelope.letters.forEach((letter) => {
-                        console.log("letter: ", letter);
-                        // check the type of letter
-                        if (letter.verb === VerbTypes.Initiate) {
-                            if (letter.body.has_node) {
-                                // if it's a node, add it to the SystemState
-                                const add_node = letter.body.node;
-                                if (add_node && typeof add_node.toObject === "function") {
-                                    console.log("add_node: ", add_node.toObject());
-                                    systemStateStore.update((n) => {
-                                        n.local_nodes.push(add_node);
-                                        return n;
-                                    });
-                                }
-                            }
-                        }
-                        if (letter.verb === VerbTypes.Acknowledge) {
-                            if (letter.body.has_identity) {
-                                const identity = letter.body.identity;
-                                console.log("server identity: ", identity);
-                                systemStateStore.update((s) => {
-                                    s.primary_backend = identity;
-                                    return s;
-                                });
-                            }
-                        }
-                    });
-                }
-                else {
-                    console.log("This message is not for me.");
-                }
-            });
-            //       console.log("response_object: ", response_object);
-            //       const res = response_object;
-            //       console.log("res: ", response_object.toObject());
-            //       if (res.me)
-            //         switch (res) {
-            //           case "node": {
-            //             console.log("NODE");
-            //             const add_node = response_object.node as Node;
-            //             if (add_node && typeof add_node.toObject === "function") {
-            //               console.log("add_node: ", add_node.toObject());
-            //               systemStateStore.update(
-            //                 (n: SystemState) => {
-            //                   n.nodes.push(add_node);
-            //                   return n;
-            //                 }
-            //               );
-            //             }
-            //             break;
-            //           }
-            //           case "authentication_message":
-            //             console.log("AUTHENTICATION_MESSAGE");
-            //             break;
-            //           case "user_settings":
-            //             console.log("USER_SETTINGS");
-            //             break;
-            //           case "validate_nodes_response": {
-            //             const graph_container = response_object.validate_nodes_response as ValidateNodesResponse;
-            //             const process = graph_container.process as Node;
-            //             console.log("process: ", process.toObject());
-            //             systemStateStore.update((n: SystemState) => {
-            //               n.nodes.push(add_node);
-            //               return n;
-            //             });
-            //           }
-            //             break;
-            //         }
-            //       case "authentication_message":
-            //       console.log("AUTHENTICATION_MESSAGE");
-            //       break;
-            //       case "user_settings":
-            //       console.log("USER_SETTINGS");
-            //       break;
-            //       case "validate_nodes_response":
-            //       {
-            //         const graph_container =
-            //           response_object.validate_nodes_response as ValidateNodesResponse;
-            //         const process = graph_container.process as Node;
-            //         console.log("process: ", process.toObject());
-            //         systemStateStore.update((n: SystemState) => {
-            //           n.selected_process = process;
-            //           n.nodes.push(process);
-            //           return n;
-            //         });
-            //       }
-            //       break;
-            //       case "execution_response":
-            //       console.log("EXECUTION_RESPONSE");
-            //       break;
-            //       case "none":
-            //       console.log("OBJECT_NOT_SET");
-            //       break;
-            //       default:
-            //       console.log("default");
-            //       alert(
-            //         "Fallen through response object switch statement... This is not good."
-            //       );
-            //       break;
-            //     }
-            //     });
-            // });
-        });
-        selfIdentify(websocket);
-        return websocket;
-    }
-    function sendWebsocketMessage(message, websocket) {
-        console.log("sending websocket letter: ", message.letters[0].toObject());
-        const message_string = message.serializeBinary();
-        console.log("serialized message is: ", message_string);
-        websocket.send(message_string);
-    }
-    function sendEnvelope(websocket, letters, sender = undefined, receiver = undefined) {
-        // raise an error and alert if the sender or receiver is not set
-        if (!sender) {
-            console.log("Sender not set. Defaulting to this client.");
-            new Identity();
-            systemStateStore.subscribe((s) => {
-                s.client_identity;
-            });
-        }
-        // same for the receiver:
-        if (!receiver) {
-            console.log("Receiver not set. Defaulting to the primary backend.");
-            new Identity();
-            systemStateStore.subscribe((s) => {
-                s.primary_backend;
-            });
-        }
-        const envelope = new Envelope();
-        envelope.sender = sender;
-        envelope.receiver = receiver;
-        // create uuid for the valididation id
-        const verification_id = v4();
-        envelope.verification_id = verification_id;
-        envelope.letters = letters;
-        sendWebsocketMessage(envelope, websocket);
-    }
-    function selfIdentify(websocket) {
-        const id = v4();
-        const identity = new Identity();
-        identity.id = id;
-        getExternalIP().then((ip) => {
-            identity.ip_address = ip;
-        });
-        systemStateStore.update((s) => {
-            console.log("self-identify");
-            s.client_identity = identity;
-            return s;
-        });
-        const envelope = new Envelope();
-        const letter = new Letter();
-        letter.verb = VerbTypes.Initiate;
-        envelope.letters = [letter];
-        sendWebsocketMessage(envelope, websocket);
-    }
-    function getExternalIP() {
-        return __awaiter(this, void 0, void 0, function* () {
-            // try {
-            //   const response = await axios.get("http://api.ipify.org");
-            //   console.log(`My external IP address is: ${response.data}`);
-            //   return response.data;
-            // } catch (error) {
-            //   console.error(`Error fetching IP address: ${error}`);
-            // }
-            return "placeholder_frontend_ip";
-        });
-    }
-
     /* src/components/sidebarComponents/newNodeSubComponents/ProcessComponent.svelte generated by Svelte v3.59.1 */
 
     const { Object: Object_1$2, console: console_1$5 } = globals;
@@ -4922,11 +4644,11 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (71:2) {#each node_list as node}
+    // (70:2) {#each node_list as node}
     function create_each_block_1$1(ctx) {
     	let li;
     	let button;
-    	let t0_value = /*key_list*/ ctx[5][/*node*/ ctx[13].type_name] + "";
+    	let t0_value = /*key_list*/ ctx[5][/*node*/ ctx[13].node_type] + "";
     	let t0;
     	let t1;
     	let t2_value = /*node*/ ctx[13].node_info.name + "";
@@ -4949,8 +4671,8 @@ var app = (function () {
     			t3 = space();
     			attr_dev(button, "type", "button");
     			toggle_class(button, "selected", /*isSelected*/ ctx[6](/*node*/ ctx[13]));
-    			add_location(button, file$8, 72, 6, 2308);
-    			add_location(li, file$8, 71, 4, 2297);
+    			add_location(button, file$8, 71, 6, 2283);
+    			add_location(li, file$8, 70, 4, 2272);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, li, anchor);
@@ -4967,7 +4689,7 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*node_list*/ 4 && t0_value !== (t0_value = /*key_list*/ ctx[5][/*node*/ ctx[13].type_name] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*node_list*/ 4 && t0_value !== (t0_value = /*key_list*/ ctx[5][/*node*/ ctx[13].node_type] + "")) set_data_dev(t0, t0_value);
     			if (dirty & /*node_list*/ 4 && t2_value !== (t2_value = /*node*/ ctx[13].node_info.name + "")) set_data_dev(t2, t2_value);
 
     			if (dirty & /*isSelected, node_list*/ 68) {
@@ -4985,18 +4707,18 @@ var app = (function () {
     		block,
     		id: create_each_block_1$1.name,
     		type: "each",
-    		source: "(71:2) {#each node_list as node}",
+    		source: "(70:2) {#each node_list as node}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (85:0) {#each selected_node_list as node}
+    // (84:0) {#each selected_node_list as node}
     function create_each_block$4(ctx) {
     	let li;
     	let p;
-    	let t0_value = /*key_list*/ ctx[5][/*node*/ ctx[13].type_name] + "";
+    	let t0_value = /*key_list*/ ctx[5][/*node*/ ctx[13].node_type] + "";
     	let t0;
     	let t1;
     	let t2_value = /*node*/ ctx[13].node_info.name + "";
@@ -5009,8 +4731,8 @@ var app = (function () {
     			t0 = text(t0_value);
     			t1 = text(" : ");
     			t2 = text(t2_value);
-    			add_location(p, file$8, 86, 4, 2601);
-    			add_location(li, file$8, 85, 2, 2592);
+    			add_location(p, file$8, 85, 4, 2576);
+    			add_location(li, file$8, 84, 2, 2567);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, li, anchor);
@@ -5020,7 +4742,7 @@ var app = (function () {
     			append_dev(p, t2);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*selected_node_list*/ 8 && t0_value !== (t0_value = /*key_list*/ ctx[5][/*node*/ ctx[13].type_name] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*selected_node_list*/ 8 && t0_value !== (t0_value = /*key_list*/ ctx[5][/*node*/ ctx[13].node_type] + "")) set_data_dev(t0, t0_value);
     			if (dirty & /*selected_node_list*/ 8 && t2_value !== (t2_value = /*node*/ ctx[13].node_info.name + "")) set_data_dev(t2, t2_value);
     		},
     		d: function destroy(detaching) {
@@ -5032,14 +4754,14 @@ var app = (function () {
     		block,
     		id: create_each_block$4.name,
     		type: "each",
-    		source: "(85:0) {#each selected_node_list as node}",
+    		source: "(84:0) {#each selected_node_list as node}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (91:0) {#if error}
+    // (90:0) {#if error}
     function create_if_block$4(ctx) {
     	let p;
     	let t;
@@ -5049,7 +4771,7 @@ var app = (function () {
     			p = element$1("p");
     			t = text(/*error*/ ctx[4]);
     			attr_dev(p, "class", "error svelte-1fi3y4c");
-    			add_location(p, file$8, 91, 2, 2690);
+    			add_location(p, file$8, 90, 2, 2665);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -5067,7 +4789,7 @@ var app = (function () {
     		block,
     		id: create_if_block$4.name,
     		type: "if",
-    		source: "(91:0) {#if error}",
+    		source: "(90:0) {#if error}",
     		ctx
     	});
 
@@ -5147,17 +4869,17 @@ var app = (function () {
     			t12 = space();
     			button = element$1("button");
     			button.textContent = "Save Process";
-    			add_location(p0, file$8, 56, 0, 1890);
+    			add_location(p0, file$8, 55, 0, 1865);
     			attr_dev(input0, "type", "text");
-    			add_location(input0, file$8, 57, 0, 1945);
-    			add_location(p1, file$8, 58, 0, 1985);
+    			add_location(input0, file$8, 56, 0, 1920);
+    			add_location(p1, file$8, 57, 0, 1960);
     			attr_dev(input1, "type", "text");
-    			add_location(input1, file$8, 62, 0, 2083);
-    			add_location(p2, file$8, 64, 0, 2131);
-    			add_location(ul, file$8, 69, 0, 2260);
-    			add_location(h3, file$8, 82, 0, 2531);
+    			add_location(input1, file$8, 61, 0, 2058);
+    			add_location(p2, file$8, 63, 0, 2106);
+    			add_location(ul, file$8, 68, 0, 2235);
+    			add_location(h3, file$8, 81, 0, 2506);
     			attr_dev(button, "class", "add-button");
-    			add_location(button, file$8, 94, 0, 2726);
+    			add_location(button, file$8, 93, 0, 2701);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5332,7 +5054,7 @@ var app = (function () {
 
     	// setup onmount:
     	onMount(() => {
-    		$$invalidate(2, node_list = $systemStateStore.nodes);
+    		$$invalidate(2, node_list = $systemStateStore.local_nodes);
     	});
 
     	function isSelected(node) {
@@ -5411,7 +5133,7 @@ var app = (function () {
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*$systemStateStore*/ 512) {
     			{
-    				$$invalidate(2, node_list = $systemStateStore.nodes);
+    				$$invalidate(2, node_list = $systemStateStore.local_nodes);
     			}
     		}
     	};
@@ -5445,6 +5167,284 @@ var app = (function () {
     			id: create_fragment$8.name
     		});
     	}
+    }
+
+    // Unique ID creation requires a high quality random # generator. In the browser we therefore
+    // require the crypto API and do not support built-in fallback to lower quality random number
+    // generators (like Math.random()).
+    let getRandomValues;
+    const rnds8 = new Uint8Array(16);
+    function rng() {
+      // lazy load so that environments that need to polyfill have a chance to do so
+      if (!getRandomValues) {
+        // getRandomValues needs to be invoked in a context where "this" is a Crypto implementation.
+        getRandomValues = typeof crypto !== 'undefined' && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
+
+        if (!getRandomValues) {
+          throw new Error('crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported');
+        }
+      }
+
+      return getRandomValues(rnds8);
+    }
+
+    /**
+     * Convert array of 16 byte values to UUID string format of the form:
+     * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+     */
+
+    const byteToHex = [];
+
+    for (let i = 0; i < 256; ++i) {
+      byteToHex.push((i + 0x100).toString(16).slice(1));
+    }
+
+    function unsafeStringify(arr, offset = 0) {
+      // Note: Be careful editing this code!  It's been tuned for performance
+      // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
+      return byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]];
+    }
+
+    const randomUUID = typeof crypto !== 'undefined' && crypto.randomUUID && crypto.randomUUID.bind(crypto);
+    var native = {
+      randomUUID
+    };
+
+    function v4(options, buf, offset) {
+      if (native.randomUUID && !buf && !options) {
+        return native.randomUUID();
+      }
+
+      options = options || {};
+      const rnds = options.random || (options.rng || rng)(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+
+      rnds[6] = rnds[6] & 0x0f | 0x40;
+      rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
+
+      if (buf) {
+        offset = offset || 0;
+
+        for (let i = 0; i < 16; ++i) {
+          buf[offset + i] = rnds[i];
+        }
+
+        return buf;
+      }
+
+      return unsafeStringify(rnds);
+    }
+
+    function setupWebsocketConnection() {
+        console.log("setting up websocket connection");
+        const environment = "DEVELOPMENT";
+        console.log("The environment is: ", environment);
+        const websocket_url = environment.toUpperCase() === "PRODUCTION"
+            ? "wss://liminalnook.com/ws/"
+            : "ws://localhost:8080";
+        alert("Change websocket to external environment");
+        let websocket = new WebSocket(websocket_url);
+        // start the websocket connection
+        websocket.addEventListener("open", () => {
+            console.log("websocket connection opened");
+            // need to prepare the handler of incoming messages before sending the first message (in case the rust server is TOO FAST 😎)
+            websocket = setupWebsocketMessageHandler(websocket);
+        });
+        console.log("Event listener setup:");
+        return websocket;
+    }
+    function setupWebsocketMessageHandler(websocket) {
+        console.log("setting up websocket message handler");
+        websocket.addEventListener("message", (event) => {
+            // console.log("websocket message received: ", event.data);
+            event.data.arrayBuffer().then((buffer) => {
+                console.log("buffer: ", buffer);
+                const u8Array = new Uint8Array(buffer);
+                console.log("u8Array: ", u8Array);
+                const response_envelope = Envelope.deserializeBinary(u8Array);
+                console.log("received message: ", response_envelope.toObject());
+                let self_identity = new Identity();
+                // get the SystemState from the SystemStateStore
+                systemStateStore.subscribe((s) => {
+                    self_identity = s.client_identity;
+                });
+                console.log(self_identity.toObject());
+                if (!response_envelope.has_receiver) {
+                    alert("This message does not have a receiver. This is not good.");
+                }
+                if (response_envelope.has_receiver &&
+                    response_envelope.receiver.id !== self_identity.id) {
+                    alert("Rerouting the message to the correct client. This message is not for me.");
+                }
+                if (response_envelope.has_receiver &&
+                    response_envelope.receiver.id === self_identity.id) {
+                    // loop through the response_envelope.letters array
+                    response_envelope.letters.forEach((letter) => {
+                        console.log("letter: ", letter);
+                        // check the type of letter
+                        if (letter.verb === VerbTypes.Initiate) {
+                            if (letter.body.has_node) {
+                                // if it's a node, add it to the SystemState
+                                const add_node = letter.body.node;
+                                if (add_node && typeof add_node.toObject === "function") {
+                                    console.log("add_node: ", add_node.toObject());
+                                    systemStateStore.update((n) => {
+                                        n.local_nodes.push(add_node);
+                                        return n;
+                                    });
+                                }
+                            }
+                        }
+                        if (letter.verb === VerbTypes.Acknowledge) {
+                            if (letter.body.has_identity) {
+                                const identity = letter.body.identity;
+                                console.log("server identity: ", identity.toObject());
+                                systemStateStore.update((s) => {
+                                    s.primary_backend = identity;
+                                    return s;
+                                });
+                            }
+                        }
+                    });
+                }
+                else {
+                    console.log("This message is not for me.");
+                }
+            });
+            //       console.log("response_object: ", response_object);
+            //       const res = response_object;
+            //       console.log("res: ", response_object.toObject());
+            //       if (res.me)
+            //         switch (res) {
+            //           case "node": {
+            //             console.log("NODE");
+            //             const add_node = response_object.node as Node;
+            //             if (add_node && typeof add_node.toObject === "function") {
+            //               console.log("add_node: ", add_node.toObject());
+            //               systemStateStore.update(
+            //                 (n: SystemState) => {
+            //                   n.nodes.push(add_node);
+            //                   return n;
+            //                 }
+            //               );
+            //             }
+            //             break;
+            //           }
+            //           case "authentication_message":
+            //             console.log("AUTHENTICATION_MESSAGE");
+            //             break;
+            //           case "user_settings":
+            //             console.log("USER_SETTINGS");
+            //             break;
+            //           case "validate_nodes_response": {
+            //             const graph_container = response_object.validate_nodes_response as ValidateNodesResponse;
+            //             const process = graph_container.process as Node;
+            //             console.log("process: ", process.toObject());
+            //             systemStateStore.update((n: SystemState) => {
+            //               n.nodes.push(add_node);
+            //               return n;
+            //             });
+            //           }
+            //             break;
+            //         }
+            //       case "authentication_message":
+            //       console.log("AUTHENTICATION_MESSAGE");
+            //       break;
+            //       case "user_settings":
+            //       console.log("USER_SETTINGS");
+            //       break;
+            //       case "validate_nodes_response":
+            //       {
+            //         const graph_container =
+            //           response_object.validate_nodes_response as ValidateNodesResponse;
+            //         const process = graph_container.process as Node;
+            //         console.log("process: ", process.toObject());
+            //         systemStateStore.update((n: SystemState) => {
+            //           n.selected_process = process;
+            //           n.nodes.push(process);
+            //           return n;
+            //         });
+            //       }
+            //       break;
+            //       case "execution_response":
+            //       console.log("EXECUTION_RESPONSE");
+            //       break;
+            //       case "none":
+            //       console.log("OBJECT_NOT_SET");
+            //       break;
+            //       default:
+            //       console.log("default");
+            //       alert(
+            //         "Fallen through response object switch statement... This is not good."
+            //       );
+            //       break;
+            //     }
+            //     });
+            // });
+        });
+        return websocket;
+    }
+    function sendWebsocketMessage(message, websocket) {
+        console.log("sending message: ", message.toObject());
+        const message_string = message.serializeBinary();
+        websocket.send(message_string);
+    }
+    function sendEnvelope(websocket, letters, sender = undefined, receiver = undefined) {
+        // raise an error and alert if the sender or receiver is not set
+        if (!sender) {
+            console.log("Sender not set. Defaulting to this client.");
+            systemStateStore.subscribe((s) => {
+                sender = s.client_identity;
+            });
+            if (sender == undefined) {
+                alert("this client identity not defined");
+            }
+            else {
+                console.log("Setting client identity: ", sender.toObject());
+            }
+        }
+        // same for the receiver:
+        if (!receiver) {
+            console.log("Receiver not set. Defaulting to the primary backend.");
+            let receiver = new Identity();
+            systemStateStore.subscribe((s) => {
+                receiver = s.primary_backend;
+            });
+            if (receiver == undefined) {
+                console.log("primary backend not defined");
+            }
+            else {
+                console.log("Setting receiver identity: ", receiver.toObject());
+            }
+        }
+        const envelope = new Envelope();
+        envelope.sender = sender;
+        envelope.receiver = receiver;
+        // create uuid for the valididation id
+        const verification_id = v4();
+        envelope.verification_id = verification_id;
+        envelope.letters = letters;
+        sendWebsocketMessage(envelope, websocket);
+    }
+    function selfIdentify() {
+        const id = v4();
+        const identity = new Identity();
+        identity.id = id;
+        getExternalIP().then((ip) => {
+            identity.ip_address = ip;
+        });
+        return identity;
+    }
+    function getExternalIP() {
+        return __awaiter(this, void 0, void 0, function* () {
+            // try {
+            //   const response = await axios.get("http://api.ipify.org");
+            //   console.log(`My external IP address is: ${response.data}`);
+            //   return response.data;
+            // } catch (error) {
+            //   console.error(`Error fetching IP address: ${error}`);
+            // }
+            return "placeholder_frontend_ip";
+        });
     }
 
     /* src/components/sidebarComponents/newNodeSubComponents/PromptComponent.svelte generated by Svelte v3.59.1 */
@@ -54527,6 +54527,7 @@ var app = (function () {
         const body = new Body();
         body.authentication_message = auth_content;
         letter.body = body;
+        console.log("Sending authentication letter:", letter.toObject());
         sendEnvelope(websocket, [letter]);
         systemStateStore.update((s) => {
             console.log("setting authenticated to true");
@@ -54774,6 +54775,8 @@ var app = (function () {
         system_state.websocket_ready = false;
         system_state.local_nodes = [];
         system_state.selected_nodes = [];
+        const client_identity = selfIdentify();
+        system_state.client_identity = client_identity;
         return system_state;
     }
 

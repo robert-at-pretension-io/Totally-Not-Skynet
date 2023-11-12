@@ -107,7 +107,7 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
           if (letter.verb === VerbTypes.Acknowledge) {
             if (letter.body.has_identity) {
               const identity = letter.body.identity as Identity;
-              console.log("server identity: ", identity);
+              console.log("server identity: ", identity.toObject());
               systemStateStore.update((s: SystemState) => {
                 s.primary_backend = identity;
                 return s;
@@ -204,16 +204,12 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
     // });
   });
 
-  selfIdentify(websocket);
-
   return websocket;
 }
 
 function sendWebsocketMessage(message: Envelope, websocket: WebSocket) {
-  console.log("sending websocket letter: ", message.letters[0].toObject());
+  console.log("sending message: ", message.toObject());
   const message_string = message.serializeBinary();
-
-  console.log("serialized message is: ", message_string);
 
   websocket.send(message_string);
 }
@@ -224,15 +220,22 @@ export function sendEnvelope(
   sender: Identity = undefined,
   receiver: Identity = undefined
 ) {
+
   // raise an error and alert if the sender or receiver is not set
   if (!sender) {
     console.log("Sender not set. Defaulting to this client.");
 
-    let sender = new Identity();
-
     systemStateStore.subscribe((s: SystemState) => {
       sender = s.client_identity;
     });
+
+    if (sender == undefined) {
+      alert("this client identity not defined");
+    }
+    else {
+      console.log("Setting client identity: ", sender.toObject());
+    }
+
   }
 
   // same for the receiver:
@@ -244,6 +247,13 @@ export function sendEnvelope(
     systemStateStore.subscribe((s: SystemState) => {
       receiver = s.primary_backend;
     });
+
+    if (receiver == undefined) {
+      console.log("primary backend not defined");
+    }
+    else {
+      console.log("Setting receiver identity: ", receiver.toObject());
+    }
   }
 
   const envelope = new Envelope();
@@ -261,7 +271,7 @@ export function sendEnvelope(
   sendWebsocketMessage(envelope, websocket);
 }
 
-export function selfIdentify(websocket: WebSocket) {
+export function selfIdentify(): Identity {
   const id = uuidv4();
 
   const identity = new Identity();
@@ -270,21 +280,7 @@ export function selfIdentify(websocket: WebSocket) {
     identity.ip_address = ip;
   });
 
-  systemStateStore.update((s) => {
-    console.log("self-identify");
-    s.client_identity = identity;
-    return s;
-  });
-
-  const envelope = new Envelope();
-
-  const letter = new Letter();
-
-  letter.verb = VerbTypes.Initiate;
-
-  envelope.letters = [letter];
-
-  sendWebsocketMessage(envelope, websocket);
+  return identity;
 }
 
 async function getExternalIP() {

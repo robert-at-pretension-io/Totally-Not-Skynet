@@ -90,33 +90,36 @@ pub async fn start_message_sending_loop(
 
         // This is a special case where there is no receiver specified and therefore the message content can be ignored. It is assumed that the client is requesting the server identity
         if envelope.receiver.is_none() {
-            println!(
-                "{} {}",
-                "No receiver specified.".red(),
-                "Sending server identity to client".green()
-            );
+            println!("{}", "No receiver specified.".red());
 
-            let server_identity = SERVER_IDENTITY.get().unwrap();
+            if envelope.sender.is_some() {
+                println!("{}", "Sending server identity to client".green());
 
-            let body = Body {
-                contents: Some(Contents::Identity(server_identity.clone())),
-            };
+                let server_identity = SERVER_IDENTITY.get().unwrap();
 
-            let message_content = Letter {
-                verb: VerbTypes::Acknowledge as i32,
-                body: Some(body),
-            };
+                let body = Body {
+                    contents: Some(Contents::Identity(server_identity.clone())),
+                };
 
-            let vectorized_message = vec![message_content];
+                let message_content = Letter {
+                    verb: VerbTypes::Acknowledge as i32,
+                    body: Some(body),
+                };
 
-            let return_envelope = Envelope {
-                sender: Some(server_identity.clone()),
-                receiver: envelope.clone().sender.clone(),
-                letters: vectorized_message,
-                verification_id: envelope.verification_id.clone(),
-            };
+                let vectorized_message = vec![message_content];
 
-            send_message(&tx, msg.0.clone(), return_envelope).await;
+                let return_envelope = Envelope {
+                    sender: Some(server_identity.clone()),
+                    receiver: envelope.clone().sender.clone(),
+                    letters: vectorized_message,
+                    verification_id: envelope.verification_id.clone(),
+                };
+
+                send_message(&tx, msg.0.clone(), return_envelope).await;
+            } else {
+                println!("{}", "No sender, can't send message".red());
+            }
+
             continue;
         }
 

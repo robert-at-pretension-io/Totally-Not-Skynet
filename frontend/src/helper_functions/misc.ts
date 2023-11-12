@@ -1,4 +1,5 @@
 import { Graph, SystemState } from "../generated/system_types";
+import { selfIdentify } from "./websocket";
 
 export function areAllPropertiesUndefined<T extends object>(obj: T): boolean {
   return Object.values(obj).every((value) => value === undefined);
@@ -20,6 +21,10 @@ export function initializeSystemState(system_state: SystemState): SystemState {
   system_state.websocket_ready = false;
   system_state.local_nodes = [];
   system_state.selected_nodes = [];
+
+  const client_identity = selfIdentify();
+
+  system_state.client_identity = client_identity;
 
   return system_state;
 }

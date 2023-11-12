@@ -34,6 +34,8 @@ export function authenticate(
 
   letter.body = body;
 
+  console.log("Sending authentication letter:", letter.toObject());
+
   sendEnvelope(websocket, [letter]);
 
   systemStateStore.update((s) => {

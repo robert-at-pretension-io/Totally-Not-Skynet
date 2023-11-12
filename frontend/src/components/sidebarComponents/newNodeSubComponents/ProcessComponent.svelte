@@ -14,7 +14,6 @@
 
   import { writable } from "svelte/store";
   import { websocketStore } from "stores/websocketStore";
-  import { sendWebsocketMessage } from "helper_functions/websocket";
 
   let name = "";
   let description = "";
@@ -26,11 +25,11 @@
 
   // setup onmount:
   onMount(() => {
-    node_list = $systemStateStore.nodes;
+    node_list = $systemStateStore.local_nodes;
   });
 
   $: {
-    node_list = $systemStateStore.nodes;
+    node_list = $systemStateStore.local_nodes;
   }
 
   function isSelected(node: Node): boolean {
@@ -102,7 +101,7 @@
         class:selected={isSelected(node)}
         type="button"
         on:click={() => toggleNodeSelect(node)}
-        >{key_list[node.type_name]} : {node.node_info.name}</button
+        >{key_list[node.node_type]} : {node.node_info.name}</button
       >
     </li>
   {/each}
@@ -112,7 +111,7 @@
 
 {#each selected_node_list as node}
   <li>
-    <p>{key_list[node.type_name]} : {node.node_info.name}</p>
+    <p>{key_list[node.node_type]} : {node.node_info.name}</p>
   </li>
 {/each}
 
