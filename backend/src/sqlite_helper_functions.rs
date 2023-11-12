@@ -6,6 +6,10 @@ use std::env;
 use std::sync::Arc;
 use prost::Message;
 
+extern crate colored;
+
+use colored::*;
+
 pub fn setup_sqlite_db() -> Result<()> {
     println!("Setting up SQLite database...");
 
@@ -52,11 +56,12 @@ pub fn insert_node(pool: Arc<Pool<SqliteConnectionManager>>, node: Node) -> Resu
             println!("Serialization successful.");
             let id = node.node_info.clone().unwrap().id;
             let name = node.node_info.unwrap().name;
+            let node_type = node.node_type.clone();
             println!("Inserting serialized node into the database...");
             match
                 connection.execute(
                     "INSERT OR REPLACE INTO nodes (id, name, type_name, serialized_node) VALUES (?1, ?2, ?3, ?4)",
-                    params![id, name, serialized_node]
+                    params![id, name, node_type, serialized_node]
                 )
             {
                 Ok(_) => {
@@ -64,7 +69,7 @@ pub fn insert_node(pool: Arc<Pool<SqliteConnectionManager>>, node: Node) -> Resu
                     return Ok(());
                 }
                 Err(err) => {
-                    println!("Unable to insert node into db: {:?}", err);
+                    println!("{}: {:?}", "Unable to insert node into db:".red(), err);
                     return Ok(());
                 }
             }
@@ -137,6 +142,6 @@ pub fn fetch_all_nodes(pool: Arc<Pool<SqliteConnectionManager>>) -> Result<Vec<N
         nodes.push(node?);
     }
 
-    println!("All nodes retrieved successfully.");
+    println!("All {:?} node(s) retrieved successfully.", nodes.len());
     Ok(nodes)
 }
