@@ -1,28 +1,36 @@
-use generated_types::Node;
+use crate::generated_types::{ Node, NodeContent, Process, Graph, Edge, GraphNodeInfo };
+use colored::*;
 
-pub async fn validate_nodes_in_process(
+use petgraph::{ Direction, graph::DiGraph };
+
+use petgraph::algo::toposort;
+
+use std::collections::HashMap;
+
+use anyhow::Error;
+
+pub fn validate_nodes_in_process(
     nodes: Vec<Node>,
     graph_node_info: GraphNodeInfo
-) -> Error<Process, String> {
+) -> Result<Node, String> {
     //generate maximal graph from nodes (based on input_variables and output_variables)
     println!("Validating nodes");
-    println!("Validating nodes for user: {:?}", msg.0);
+    // println!("Validating nodes for user: {:?}", msg.0);
     println!("need to return a Graph object");
 
     // create a petgraph digraph:
 
-    let nodes = node_container.nodes;
     println!("Number of nodes: {:?}", nodes.len());
 
     // this will go in the node_info of the response node
     let containing_node: GraphNodeInfo = GraphNodeInfo {
         id: uuid::Uuid::new_v4().to_string(),
-        name: graph_node_info.clone().unwrap().name,
-        description: graph_node_info.clone().unwrap().description,
+        name: graph_node_info.clone().name,
+        description: graph_node_info.clone().description,
     };
 
-    let mut input_vars = Vec::new();
-    let mut output_vars = Vec::new();
+    let mut input_vars: Vec<String> = Vec::new();
+    let mut output_vars: Vec<String> = Vec::new();
     // loop through the vector of nodes and add input variables to the input_vars vector (if they are not already in the vector)
     for node in &nodes {
         for input_var in &node.input_variables {
@@ -155,7 +163,7 @@ pub async fn validate_nodes_in_process(
         });
 
     let new_graph = Graph {
-        nodes: new_nodes,
+        nodes_info: new_nodes,
         edges: new_edges,
     };
 
@@ -199,7 +207,7 @@ pub async fn validate_nodes_in_process(
     let index_vec = toposort(&mut_pruned_graph, None).unwrap();
 
     for index in index_vec {
-        let node = new_graph.nodes
+        let node = new_graph.nodes_info
             .iter()
             .find(|node| node.id == mut_pruned_graph[index].node_info.as_mut().unwrap().id)
             .unwrap();
@@ -207,36 +215,22 @@ pub async fn validate_nodes_in_process(
     }
 
     let process: Process = Process {
+        nodes: nodes,
         graph: Some(new_graph),
         topological_order: topological_order,
     };
 
+    let node_content: NodeContent = NodeContent {
+        node_content: Some(process),
+    };
+
     let node: crate::generated_types::Node = crate::generated_types::Node {
         node_info: Some(containing_node),
+        node_type: crate::generated_types::NodeTypes::Process.node,
         input_variables: input_minus_output,
         output_variables: output_minus_input,
-        node_content: Some(NodeContent::Process(process)),
+        node_content: node_content,
     };
 
-    match insert_node(pool.clone(), node.clone()) {
-        Ok(_) => {
-            println!("Node inserted successfully");
-        }
-        Err(err) => {
-            println!("Error inserting node: {:?}", err);
-        }
-    }
-
-    let validate_nodes_response = ValidateNodesResponse {
-        errors: Vec::new(),
-        process: Some(node),
-    };
-
-    // As the process is valid, we save it to the db.
-
-    let response_object = ResponseObject {
-        object: Some(ValidateNodesResponseEnum(validate_nodes_response)),
-    };
-
-    send_message(&tx, msg.0.clone(), response_object).await;
+    return Ok(node);
 }

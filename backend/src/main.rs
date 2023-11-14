@@ -15,7 +15,7 @@ mod openai;
 mod receive_send;
 mod settings;
 mod sqlite_helper_functions;
-// mod graph;
+mod graph;
 mod websocket;
 
 #[allow(non_snake_case)]
