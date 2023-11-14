@@ -49,6 +49,10 @@ pub fn insert_node(pool: Arc<Pool<SqliteConnectionManager>>, node: Node) -> Resu
     let connection = pool.get().expect("Failed to get connection from pool");
     println!("Connection obtained from pool successfully.");
 
+    //ensure that the node has id information:
+    // First check that it doesn't already have an id:
+    
+
     println!("Serializing node...");
     let mut serialized_node = vec![];
     match node.clone().encode(&mut serialized_node) {

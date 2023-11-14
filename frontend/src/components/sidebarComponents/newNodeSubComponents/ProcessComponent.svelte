@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
+  import { v4 as uuidv4 } from "uuid";
+
   import {
     NodeTypes,
     Node,
@@ -8,12 +10,17 @@
     // VerbTypeNames,
     Process,
     GraphNodeInfo,
+    NodesToProcess,
+    Letter,
+    Body,
+    VerbTypes,
   } from "generated/system_types";
 
   import systemStateStore from "stores/systemStateStore";
 
   import { writable } from "svelte/store";
   import { websocketStore } from "stores/websocketStore";
+  import { sendEnvelope } from "helper_functions/websocket";
 
   let name = "";
   let description = "";
@@ -56,28 +63,34 @@
     alert("sendNodes feature is not yet implemented!");
     console.log("sending selected_node_list: ", selected_node_list);
 
-    // let crud_message = new MessageBundle();
+    let graph_node_info = new GraphNodeInfo();
 
-    // crud_message.verb = VerbTypeNames.Validate;
+    graph_node_info.name = name;
+    graph_node_info.description = description;
+    graph_node_info.id = uuidv4();
 
-    // // let validate_nodes = new ValidateNodes();
+    let nodes_to_process = new NodesToProcess();
 
-    // let graph_node_info = new GraphNodeInfo();
+    nodes_to_process.containing_node_info = graph_node_info;
 
-    // graph_node_info.name = name;
-    // graph_node_info.description = description;
+    nodes_to_process.nodes = selected_node_list;
 
-    // validate_nodes.containing_node = graph_node_info;
+    let websocket = $websocketStore.websocket as WebSocket;
 
-    // validate_nodes.nodes = selected_node_list;
+    let letter = new Letter();
 
-    // // crud_message.validate_nodes = validate_nodes;
+    let body = new Body();
 
-    // sendWebsocketMessage(crud_message, $websocketStore.websocket as WebSocket);
+    body.nodes_to_process = nodes_to_process;
 
-    // selected_node_list = [];
-    // description = "";
-    // name = "";
+    letter.body = body;
+    letter.verb = VerbTypes.Validate;
+
+    sendEnvelope(websocket, [letter]);
+
+    selected_node_list = [];
+    description = "";
+    name = "";
   }
 </script>
 

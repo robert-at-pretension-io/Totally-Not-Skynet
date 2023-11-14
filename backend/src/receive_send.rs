@@ -140,7 +140,7 @@ pub async fn start_message_sending_loop(
             let wrapped_content = letter.body.clone();
             let verification_id = envelope.clone().verification_id;
 
-            let mut content: Contents;
+            let content: Contents;
 
             match wrapped_content {
                 None => {
@@ -172,7 +172,7 @@ pub async fn start_message_sending_loop(
                                 contents: Some(Contents::Node(node.clone())),
                             };
 
-                            let mut letter = generated_types::Letter {
+                            let letter = generated_types::Letter {
                                 verb: VerbTypes::Acknowledge as i32,
                                 body: Some(body),
                             };
@@ -203,7 +203,7 @@ pub async fn start_message_sending_loop(
                                 contents: Some(Contents::Node(updated_node.clone())),
                             };
 
-                            let mut letter = generated_types::Letter {
+                            let letter = generated_types::Letter {
                                 verb: VerbTypes::Acknowledge as i32,
                                 body: Some(body),
                             };
@@ -290,6 +290,7 @@ pub async fn start_message_sending_loop(
                     match verb {
                         VerbTypes::Validate => {
                             let outer_node_info = nodes_to_process.containing_node_info.clone();
+
                             let nodes = nodes_to_process.nodes.clone();
                             match validate_nodes_in_process(nodes, outer_node_info.unwrap()) {
                                 Ok(mutable_node) => {
@@ -298,6 +299,19 @@ pub async fn start_message_sending_loop(
                                     match insert_node(pool.clone(), mutable_node.clone()) {
                                         Ok(_) => {
                                             println!("Node inserted successfully");
+
+                                            // we construct a new letter with the new mutable_node:
+
+                                            let body = Body {
+                                                contents: Some(
+                                                    Contents::Node(mutable_node.clone())
+                                                ),
+                                            };
+
+                                            let letter = generated_types::Letter {
+                                                verb: VerbTypes::Acknowledge as i32,
+                                                body: Some(body),
+                                            };
 
                                             let response_object = Envelope {
                                                 sender: Some(receiver.clone()),

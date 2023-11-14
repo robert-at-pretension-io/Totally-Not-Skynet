@@ -1,4 +1,12 @@
-use crate::generated_types::{ Node, NodeContent, Process, Graph, Edge, GraphNodeInfo };
+use crate::generated_types::{
+    Node,
+    NodeContent,
+    Process,
+    Graph,
+    Edge,
+    GraphNodeInfo,
+    node_content::NodeContent as NodeContentEnum,
+};
 use colored::*;
 
 use petgraph::{ Direction, graph::DiGraph };
@@ -221,15 +229,15 @@ pub fn validate_nodes_in_process(
     };
 
     let node_content: NodeContent = NodeContent {
-        node_content: Some(process),
+        node_content: Some(NodeContentEnum::Process(process)),
     };
 
     let node: crate::generated_types::Node = crate::generated_types::Node {
         node_info: Some(containing_node),
-        node_type: crate::generated_types::NodeTypes::Process.node,
+        node_type: crate::generated_types::NodeTypes::Process as i32,
         input_variables: input_minus_output,
         output_variables: output_minus_input,
-        node_content: node_content,
+        node_content: Some(node_content),
     };
 
     return Ok(node);
