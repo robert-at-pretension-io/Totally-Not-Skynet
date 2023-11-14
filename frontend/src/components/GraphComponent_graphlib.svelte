@@ -14,11 +14,11 @@
 
     cytoscape.use(dagre);
 
-    if ($systemStateStore.graph != undefined) {
-      current_graph = $systemStateStore.graph as proto.Graph;
-    } else {
-      current_graph = new proto.Graph();
-    }
+    // if ($systemStateStore.graph != undefined) {
+    //   current_graph = $systemStateStore.graph as proto.Graph;
+    // } else {
+    //   current_graph = new proto.Graph();
+    // }
 
     // const dynamicStyles = generateDynamicStyles(); // Generate the dynamic styles
 
@@ -113,18 +113,32 @@
         "deselected " + edge.data().source + " -> " + edge.data().target
       );
     });
+    // if (current_graph !== undefined) {
+    //   draw_graph(cyInstance, current_graph);
+    // }
   });
 
   $: {
     // Whenever the systemState.graph changes, we will change the cytoscape graph. It might be good to check if the graph has actually changed rather than always re-draw
 
-    // let test_graph =
-    // $systemStateStore.selected_process.node_content.process.graph;
+    let test_graph =
+      $systemStateStore.selected_process?.node_content.process.graph;
 
-    // // check that the test_graph is different from the current_graph
-    // if (test_graph != current_graph && test_graph != undefined) {
-    //   current_graph = test_graph;
+    // check that the test_graph is different from the current_graph
+    if (test_graph != current_graph && test_graph != undefined) {
+      current_graph = test_graph;
+      draw_graph(cyInstance, current_graph);
+    }
+  }
 
+  setContext("graphSharedState", {
+    getCyInstance: () => cyInstance,
+  });
+
+  let refElement: HTMLElement | null = null;
+  let cyInstance: Core | null = null;
+
+  function draw_graph(cyInstance, current_graph) {
     // clear the cytoscape graph
     cyInstance?.elements().remove();
 
@@ -168,13 +182,6 @@
       })
       .run();
   }
-
-  setContext("graphSharedState", {
-    getCyInstance: () => cyInstance,
-  });
-
-  let refElement: HTMLElement | null = null;
-  let cyInstance: Core | null = null;
 </script>
 
 <div class="graph" bind:this={refElement}>

@@ -169,7 +169,7 @@ pub async fn start_message_sending_loop(
                             mutable_node.node_info = Some(new_node_info.clone());
 
                             let body = Body {
-                                contents: Some(Contents::Node(node.clone())),
+                                contents: Some(Contents::Node(mutable_node.clone())),
                             };
 
                             let letter = generated_types::Letter {

@@ -120,6 +120,7 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
               //add it to the system state local_node list:
               console.log("Added node to local system state");
               systemStateStore.update((s) => {
+                s.selected_process = letter.body.node;
                 s.local_nodes.push(letter.body.node);
                 return s;
               });
