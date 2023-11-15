@@ -22,11 +22,11 @@
       component: modifyNode,
       open: false,
     },
-    // {
-    //   header: "Execute Process",
-    //   component: ExecuteNode,
-    //   open: false,
-    // },
+    {
+      header: "Execute Process",
+      component: ExecuteNode,
+      open: false,
+    },
   ];
 
   function toggleSection(clickedSection) {

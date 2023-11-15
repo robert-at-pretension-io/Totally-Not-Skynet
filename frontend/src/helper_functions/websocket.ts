@@ -14,7 +14,6 @@ import { Json } from "io-ts-types";
 import { Identity } from "generated/system_types";
 
 import { v4 as uuidv4 } from "uuid";
-import { getNodes } from "./misc";
 
 export function setupWebsocketConnection(): WebSocket {
   console.log("setting up websocket connection");
@@ -114,7 +113,6 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
                 return s;
               });
 
-              getNodes(websocket);
             }
             if (letter.body.has_node) {
               //add it to the system state local_node list:

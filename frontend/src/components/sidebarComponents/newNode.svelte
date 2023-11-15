@@ -22,7 +22,11 @@
   let conditional = new Conditional();
   let command = new Command();
 
-  let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
+  // This is the dynamic key-list for the dropdown menu, use it when all of the types are implemented
+  // let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
+
+  // This is the static key-list for the dropdown menu
+  let key_list = ["PROMPT", "PROCESS"];
 
   let num_array = Array.from({ length: key_list.length }, (_, i) => i);
 </script>

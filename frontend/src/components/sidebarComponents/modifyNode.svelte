@@ -9,7 +9,8 @@
 
   let typeName: NodeTypes = NodeTypes.PROMPT;
 
-  let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
+  // let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
+  let key_list = ["PROMPT", "PROCESS"];
 
   console.log("keylist is:", key_list);
 
