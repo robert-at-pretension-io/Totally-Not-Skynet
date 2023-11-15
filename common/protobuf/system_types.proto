@@ -97,7 +97,8 @@ message Identity {
 message Execution {
   GraphNodeInfo current_node = 1;
   Process process = 2;
-  repeated VariableDefinition current_variable_definitions = 3;
+  map<string,string> current_variable_definitions = 3;
+  // The execution_id has is unique for each execution. It is different from a verification_id of a letter because it is not used for pairing messages, but rather for identifying the execution of a process. This way, we can have multiple messages regarding a single process execution.
   string execution_id = 4;
 }
 
@@ -120,7 +121,7 @@ message SystemState {
   repeated Node local_nodes = 4;
   repeated GraphNodeInfo selected_nodes = 5; 
   repeated Edge selected_edges = 6; 
-  Execution execution_step = 7;
+  repeated Execution execution_steps = 7;
   Node selected_process = 8;
   repeated Identity backend_identities = 9;
   repeated Identity peer_identities = 10;

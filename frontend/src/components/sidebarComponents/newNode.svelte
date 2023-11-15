@@ -41,9 +41,9 @@
 {#if typeName === NodeTypes.PROCESS}
   <ProcessComponent bind:process />
 {/if}
-{#if typeName === NodeTypes.CONDITIONAL}
+<!-- {#if typeName === NodeTypes.CONDITIONAL}
   <ConditionalComponent bind:conditional />
 {/if}
 {#if typeName === NodeTypes.COMMAND}
   <CommandComponent bind:command />
-{/if}
+{/if} -->
