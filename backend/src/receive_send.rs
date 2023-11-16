@@ -367,7 +367,10 @@ pub async fn start_message_sending_loop(
                         VerbTypes::Execute => {
                             // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
 
-                            let mut variable_definitions: HashMap<String, String> = HashMap::new();
+                            let mut variable_definitions: HashMap<
+                                String,
+                                String
+                            > = execution.clone().current_variable_definitions;
                             let local_nodes: Vec<Node> = execution.process
                                 .clone()
                                 .unwrap()
@@ -412,11 +415,24 @@ pub async fn start_message_sending_loop(
                                     Ok(NodeTypes::Prompt) => {
                                         let mut prompt_text: String;
 
+                                        let mut additional_instruction =
+                                            "When coming up with a response, please make the fields of the json response be the following: ".to_string();
+
+                                        // Concatenate the strings in the vector to make a comma separated string.
+
+                                        let variable_string: String =
+                                            current_node.output_variables.join(", ");
+
                                         match
                                             current_node.node_content.unwrap().node_content.unwrap()
                                         {
                                             NodeContentEnum::Prompt(prompt) => {
-                                                prompt_text = prompt.prompt;
+                                                prompt_text = format!(
+                                                    "{} {} {}",
+                                                    prompt.prompt,
+                                                    additional_instruction,
+                                                    variable_string
+                                                );
                                             }
                                             _ => {
                                                 println!("prompt not handled");
@@ -504,6 +520,35 @@ pub async fn start_message_sending_loop(
                                             current_node.output_variables;
 
                                         //loop through check_output_vars and see if the key exists in the variable_definitions hashmap:
+
+                                        for output_var in check_output_vars.iter() {
+                                            if !variable_definitions.contains_key(output_var) {
+                                                println!("Missing variable: {}", output_var.red());
+                                                // Handle the missing variable case here (e.g., error handling or logging)
+
+                                                // Send back the Execution to the frontend and let the user decide what to do.
+
+                                                let mut error_response = execution.clone();
+
+                                                error_response.current_node = Some(
+                                                    node_info.clone()
+                                                );
+                                                error_response.current_variable_definitions =
+                                                    variable_definitions.clone();
+
+                                                let letter = Letter {
+                                                    body: Some(Body {
+                                                        contents: Some(
+                                                            Contents::ExecutionDetails(
+                                                                error_response
+                                                            )
+                                                        ),
+                                                    }),
+
+                                                    verb: VerbTypes::Error as i32,
+                                                };
+                                            }
+                                        }
                                     }
 
                                     _ => {
