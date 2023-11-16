@@ -1,4 +1,4 @@
-use crate::generated_types::{ AuthenticationMessage, self, Identity, Node };
+use crate::generated_types::{ AuthenticationMessage, self, Identity, Node, NodeTypes, Prompt };
 use crate::generated_types::{
     GraphNodeInfo,
     UserSettings,
@@ -10,7 +10,24 @@ use crate::generated_types::{
     Body,
     Letter,
     body::Contents,
+    node_content::NodeContent as NodeContentEnum,
 };
+
+use core::iter::Map;
+
+use async_openai::types::{ ChatCompletionRequestUserMessage, ChatCompletionResponseFormat };
+use async_openai::{
+    Client,
+    types::{
+        ChatCompletionResponseFormatType,
+        CreateChatCompletionRequest,
+        ChatCompletionRequestMessage,
+        ChatCompletionRequestUserMessageContent,
+        Role,
+    },
+};
+
+use std::env;
 
 // use crate::graph::validate_nodes_from_process;
 
@@ -67,7 +84,7 @@ pub async fn start_message_sending_loop(
     mut client_rx: mpsc::Receiver<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,
     pool: Arc<Pool<SqliteConnectionManager>>
 ) {
-    let mut runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
+    let runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
 
     while let Some(msg) = client_rx.recv().await {
         println!("{} {:?}", "Received a message from the client:".yellow(), msg.1.len());
@@ -197,7 +214,7 @@ pub async fn start_message_sending_loop(
                             }
                         }
                         VerbTypes::Update => {
-                            let mut updated_node = node.clone();
+                            let updated_node = node.clone();
 
                             let body = Body {
                                 contents: Some(Contents::Node(updated_node.clone())),
@@ -350,25 +367,159 @@ pub async fn start_message_sending_loop(
                             // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
 
                             let mut variable_definitions: Map<String, String>;
-                            let local_nodes : Vec<Node> = execution.process.unwrap().nodes.unwrap();
+                            let local_nodes: Vec<Node> = execution.process
+                                .clone()
+                                .unwrap()
+                                .nodes.clone();
 
                             // Make a map out of the vec where the key is the id of the node:
                             let mut local_nodes_map: HashMap<String, Node> = HashMap::new();
-                            local_nodes.iter().for_each(|node : Node| {
-                                local_nodes_map.insert(node.node_info.unwrap().id , node.clone());
+                            local_nodes.iter().for_each(|node: &Node| {
+                                local_nodes_map.insert(
+                                    node.node_info.clone().unwrap().id,
+                                    node.clone()
+                                );
                             });
 
-                            let topological_order Vec<GraphNodeInfo> = execution.process.unwrap().topological_order.unwrap();
+                            let topological_order: Vec<GraphNodeInfo> = execution.process
+                                .clone()
+                                .unwrap()
+                                .topological_order.clone();
 
                             // Loop through the topological order list and execute each node in order
 
+                            let mut node_execution_response: HashMap<
+                                String,
+                                String
+                            > = HashMap::new();
+
                             for node_info in topological_order {
-                                let current_node = local_nodes.get(node_info.index).unwrap();
+                                let current_node = local_nodes_map
+                                    .get(&node_info.id)
+                                    .unwrap()
+                                    .clone();
+
+                                // Process the node, which ever type it is:
+
+                                // let process = NodeTypes::Process as i32;
+                                // let prompt = NodeTypes::Prompt as i32;
+
+                                match NodeTypes::try_from(current_node.node_type) {
+                                    Ok(NodeTypes::Process) => {
+                                        // Once we implement this functionality just for Prompts (and other node types), we can extract this function and call it recursively to handle this case (with a max depth?)
+                                    }
+                                    Ok(NodeTypes::Prompt) => {
+                                        let mut prompt_text: String;
+
+                                        match
+                                            current_node.node_content.unwrap().node_content.unwrap()
+                                        {
+                                            NodeContentEnum::Prompt(prompt) => {
+                                                prompt_text = prompt.prompt;
+                                            }
+                                            _ => {
+                                                println!("prompt not handled");
+                                                continue;
+                                            }
+                                        }
+
+                                        // For now use the system api key, in the future this will be gathered from the user settings
+
+                                        // let api_key = env::var("OPENAI_API_KEY").unwrap();
+
+                                        // Create client
+
+                                        // I believe this already pulls the key from the environmental variable.
+                                        let client = Client::new();
+
+                                        // .config().with_api_key(api_key);
+
+                                        // Create the message from the prompt:
+
+                                        let user_message = ChatCompletionRequestUserMessage {
+                                            content: Some(
+                                                ChatCompletionRequestUserMessageContent::Text(
+                                                    prompt_text
+                                                )
+                                            ),
+                                            role: Role::User,
+                                        };
+
+                                        let message: ChatCompletionRequestMessage =
+                                            ChatCompletionRequestMessage::User(user_message);
+
+                                        // Create request using builder pattern
+                                        // Every request struct has companion builder struct with same name + Args suffix
+                                        let mut request = CreateChatCompletionRequest::default();
+
+                                        request.messages = vec![message];
+                                        request.response_format = Some(
+                                            ChatCompletionResponseFormat {
+                                                r#type: ChatCompletionResponseFormatType::JsonObject,
+                                            }
+                                        );
+                                        request.model = "gpt-3.5-turbo-instruct".to_string();
+
+                                        // Call API
+                                        let response = client.chat().create(request).await.unwrap();
+
+                                        println!(
+                                            "{}",
+                                            response.choices
+                                                .first()
+                                                .unwrap()
+                                                .message.content.clone()
+                                                .unwrap()
+                                                .as_str()
+                                                .to_string()
+                                        );
+
+                                        let json_string = response.choices
+                                            .first()
+                                            .unwrap()
+                                            .message.content.clone()
+                                            .unwrap()
+                                            .as_str()
+                                            .to_string();
+
+                                        let value: Value = serde_json::from_str(
+                                            json_string.to_str()
+                                        );
+                                        if let Some(obj) = value.as_object() {
+                                            for (key, value) in obj {
+                                                println!("{}: {}", key, value);
+                                                variable_definitions.insert(
+                                                    key.clone(),
+                                                    value.clone()
+                                                );
+                                            }
+                                        } else {
+                                            println!("{}", "The JSON is not an object.".red());
+                                        }
+                                        // check to see if
+
+                                        // node_execution_response.insert(
+                                        //     current_node.node_info.clone().unwrap().id,
+                                        //     response.choices
+                                        //         .first()
+                                        //         .unwrap()
+                                        //         .message.content.clone()
+                                        //         .unwrap()
+                                        //         .as_str()
+                                        //         .to_string()
+                                        // );
+                                    }
+
+                                    _ => {
+                                        println!("Other types not implemented yet");
+                                        continue;
+                                    }
+                                }
                             }
                         }
                         _ => {
                             println!(
-                                "{} {}",
+                                "{} {:?}",
                                 "Execution details not *yet* supported for this verb:".red(),
                                 verb.clone()
                             );
