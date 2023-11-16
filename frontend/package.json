@@ -52,6 +52,7 @@
     "eslint-plugin-svelte": "^2.14.1",
     "fp-ts": "^2.16.0",
     "grpc-tools": "^1.12.4",
+    "handlebars": "^4.7.8",
     "http-server": "^14.1.1",
     "io-ts": "^2.2.20",
     "io-ts-types": "^0.5.19",

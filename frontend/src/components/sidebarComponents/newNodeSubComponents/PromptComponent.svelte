@@ -36,42 +36,95 @@
       input_variables = [...input_variables, new_input_variable];
     }
 
+    // Check if all of the variables in the template match the variables stated as the inputs:
+
+    let variable_names = extractVariableNames(prompt_text);
+    let allVariablesMatch = input_variables.every((inputVar) =>
+      variable_names.includes(inputVar)
+    );
+
+    let noExtraVariables = variable_names.every((templateVar) =>
+      input_variables.includes(templateVar)
+    );
+
+    // Combining both checks to ensure exact match:
+    let exactMatch = allVariablesMatch && noExtraVariables;
+
     if (new_output_variable != "") {
       output_variables = [...output_variables, new_output_variable];
     }
 
-    // input_variables.
+    if (exactMatch) {
+      node.input_variables = input_variables;
+      node.output_variables = output_variables;
 
-    node.input_variables = input_variables;
-    node.output_variables = output_variables;
+      let node_content = new NodeContent();
 
-    let node_content = new NodeContent();
+      node_content.prompt = prompt;
 
-    node_content.prompt = prompt;
+      let node_info = new GraphNodeInfo();
+      node_info.name = name;
+      node_info.id = new uuidv4();
+      node_info.description = description;
 
-    let node_info = new GraphNodeInfo();
-    node_info.name = name;
-    node_info.id = new uuidv4();
-    node_info.description = description;
+      node.node_info = node_info;
+      node.node_content = node_content;
+      node.node_type = NodeTypes.PROMPT;
 
-    node.node_info = node_info;
-    node.node_content = node_content;
-    node.node_type = NodeTypes.PROMPT;
+      let websocket = $websocketStore.websocket as WebSocket;
 
-    let websocket = $websocketStore.websocket as WebSocket;
+      let body = new Body();
 
-    let body = new Body();
+      body.node = node;
 
-    body.node = node;
+      let letter = new Letter();
 
-    let letter = new Letter();
+      letter.body = body;
+      letter.verb = VerbTypes.Create;
 
-    letter.body = body;
-    letter.verb = VerbTypes.Create;
+      sendEnvelope(websocket, [letter]);
 
-    sendEnvelope(websocket, [letter]);
+      reset_component();
+    } else {
+      alert(
+        "All of the input variables do not have a definition within the template"
+      );
+    }
+  }
 
-    reset_component();
+  import Handlebars from "handlebars";
+
+  function isValidHandlebarsTemplate(template) {
+    try {
+      // Attempt to compile the template
+      Handlebars.compile(template);
+      return true; // No error means the template is valid
+    } catch (e) {
+      return false; // An error indicates an invalid template
+    }
+  }
+
+  function extractVariableNames(template) {
+    const ast = Handlebars.parse(template);
+    const variables = new Set();
+
+    function traverse(node) {
+      if (node.type === "PathExpression") {
+        variables.add(node.original);
+      }
+      if (node.type === "BlockStatement") {
+        traverse(node.program);
+        if (node.inverse) {
+          traverse(node.inverse);
+        }
+      }
+      if (node.type === "Program") {
+        node.body.forEach(traverse);
+      }
+    }
+
+    traverse(ast);
+    return Array.from(variables);
   }
 
   function reset_component() {

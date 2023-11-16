@@ -59,6 +59,7 @@ use petgraph::algo::toposort;
 // use bollard::Docker;
 use bson::doc;
 use serde::{ Deserialize, Serialize };
+use serde_json::Value;
 use std::collections::HashMap;
 use tokio::sync::mpsc;
 // use tokio_tungstenite::tungstenite::Message;
@@ -366,7 +367,7 @@ pub async fn start_message_sending_loop(
                         VerbTypes::Execute => {
                             // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
 
-                            let mut variable_definitions: Map<String, String>;
+                            let mut variable_definitions: HashMap<String, String> = HashMap::new();
                             let local_nodes: Vec<Node> = execution.process
                                 .clone()
                                 .unwrap()
@@ -482,32 +483,27 @@ pub async fn start_message_sending_loop(
                                             .as_str()
                                             .to_string();
 
-                                        let value: Value = serde_json::from_str(
-                                            json_string.to_str()
-                                        );
+                                        let value: Value = serde_json
+                                            ::from_str(json_string.as_str())
+                                            .unwrap();
                                         if let Some(obj) = value.as_object() {
                                             for (key, value) in obj {
                                                 println!("{}: {}", key, value);
                                                 variable_definitions.insert(
                                                     key.clone(),
-                                                    value.clone()
+                                                    value.clone().to_string()
                                                 );
                                             }
                                         } else {
                                             println!("{}", "The JSON is not an object.".red());
                                         }
-                                        // check to see if
 
-                                        // node_execution_response.insert(
-                                        //     current_node.node_info.clone().unwrap().id,
-                                        //     response.choices
-                                        //         .first()
-                                        //         .unwrap()
-                                        //         .message.content.clone()
-                                        //         .unwrap()
-                                        //         .as_str()
-                                        //         .to_string()
-                                        // );
+                                        // see if all of the output_variables of the node are in the variable definition hashmap:
+
+                                        let check_output_vars: Vec<String> =
+                                            current_node.output_variables;
+
+                                        //loop through check_output_vars and see if the key exists in the variable_definitions hashmap:
                                     }
 
                                     _ => {

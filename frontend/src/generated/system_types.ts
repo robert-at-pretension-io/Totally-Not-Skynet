@@ -1190,6 +1190,7 @@ export class Execution extends pb_1.Message {
         process?: Process;
         current_variable_definitions?: Map<string, string>;
         execution_id?: string;
+        node_execution_response?: Map<string, string>;
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -1206,9 +1207,14 @@ export class Execution extends pb_1.Message {
       if ("execution_id" in data && data.execution_id != undefined) {
         this.execution_id = data.execution_id;
       }
+      if ("node_execution_response" in data && data.node_execution_response != undefined) {
+        this.node_execution_response = data.node_execution_response;
+      }
     }
     if (!this.current_variable_definitions)
       this.current_variable_definitions = new Map();
+    if (!this.node_execution_response)
+      this.node_execution_response = new Map();
   }
   get current_node() {
     return pb_1.Message.getWrapperField(this, GraphNodeInfo, 1) as GraphNodeInfo;
@@ -1240,6 +1246,12 @@ export class Execution extends pb_1.Message {
   set execution_id(value: string) {
     pb_1.Message.setField(this, 4, value);
   }
+  get node_execution_response() {
+    return pb_1.Message.getField(this, 5) as any as Map<string, string>;
+  }
+  set node_execution_response(value: Map<string, string>) {
+    pb_1.Message.setField(this, 5, value as any);
+  }
   static fromObject(data: {
         current_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
         process?: ReturnType<typeof Process.prototype.toObject>;
@@ -1247,6 +1259,9 @@ export class Execution extends pb_1.Message {
             [key: string]: string;
         };
         execution_id?: string;
+        node_execution_response?: {
+            [key: string]: string;
+        };
     }): Execution {
     const message = new Execution({});
     if (data.current_node != null) {
@@ -1261,6 +1276,9 @@ export class Execution extends pb_1.Message {
     if (data.execution_id != null) {
       message.execution_id = data.execution_id;
     }
+    if (typeof data.node_execution_response == "object") {
+      message.node_execution_response = new Map(Object.entries(data.node_execution_response));
+    }
     return message;
   }
   toObject() {
@@ -1271,6 +1289,9 @@ export class Execution extends pb_1.Message {
                 [key: string]: string;
             };
             execution_id?: string;
+            node_execution_response?: {
+                [key: string]: string;
+            };
         } = {};
     if (this.current_node != null) {
       data.current_node = this.current_node.toObject();
@@ -1283,6 +1304,9 @@ export class Execution extends pb_1.Message {
     }
     if (this.execution_id != null) {
       data.execution_id = this.execution_id;
+    }
+    if (this.node_execution_response != null) {
+      data.node_execution_response = (Object.fromEntries)(this.node_execution_response);
     }
     return data;
   }
@@ -1302,6 +1326,12 @@ export class Execution extends pb_1.Message {
     }
     if (this.execution_id.length)
       writer.writeString(4, this.execution_id);
+    for (const [key, value] of this.node_execution_response) {
+      writer.writeMessage(5, this.node_execution_response, () => {
+        writer.writeString(1, key);
+        writer.writeString(2, value);
+      });
+    }
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1322,6 +1352,9 @@ export class Execution extends pb_1.Message {
         break;
       case 4:
         message.execution_id = reader.readString();
+        break;
+      case 5:
+        reader.readMessage(message, () => pb_1.Map.deserializeBinary(message.node_execution_response as any, reader, reader.readString, reader.readString));
         break;
       default: reader.skipField();
       }

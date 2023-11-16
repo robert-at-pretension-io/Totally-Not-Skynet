@@ -22,6 +22,8 @@
   let conditional = new Conditional();
   let command = new Command();
 
+  
+
   // This is the dynamic key-list for the dropdown menu, use it when all of the types are implemented
   // let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
 
