@@ -100,6 +100,8 @@ message Execution {
   map<string,string> current_variable_definitions = 3;
   // The execution_id has is unique for each execution. It is different from a verification_id of a letter because it is not used for pairing messages, but rather for identifying the execution of a process. This way, we can have multiple messages regarding a single process execution.
   string execution_id = 4;
+  // This maps GraphNodeId to the execution results of that node.
+  map<string, string> node_execution_response = 5;
 }
 
 message VariableDefinition {

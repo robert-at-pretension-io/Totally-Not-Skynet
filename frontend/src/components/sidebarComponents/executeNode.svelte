@@ -22,8 +22,13 @@
   let input_variables = [];
 
   let allVariablesDefined = false;
+  let node_options = new Array<Node>();
+  let nodes = new Array<Node>();
 
   onMount(() => {
+    nodes = $systemStateStore.local_nodes;
+    node_options = nodes.filter((node) => node.node_type === NodeTypes.PROCESS);
+
     console.log("ExecuteNode mounted");
     if ($systemStateStore.selected_process !== undefined) {
       selected_process = $systemStateStore.selected_process;
@@ -35,7 +40,14 @@
     if ($systemStateStore.selected_process !== undefined) {
       selected_process = $systemStateStore.selected_process;
       input_variables = selected_process.input_variables;
+      // This should reset the variable map each time the process changes (regardless of if the process has been selected locally or not.)
+      initial_variables = new Map<string, string>();
     }
+  }
+
+  $: {
+    nodes = $systemStateStore.local_nodes;
+    node_options = nodes.filter((node) => node.node_type === NodeTypes.PROCESS);
   }
 
   $: allVariablesDefined = Array.from(initial_variables.values()).every(
@@ -69,7 +81,18 @@
 
     sendEnvelope(websocket, [letter]);
   }
+
+  function onDropdownChange() {
+    $systemStateStore.selected_process = selected_process;
+  }
 </script>
+
+<select bind:value={selected_process} on:change={() => onDropdownChange()}>
+  <option value="">Select a process</option>
+  {#each node_options as node}
+    <option value={node}>{node.node_info.name}</option>
+  {/each}
+</select>
 
 <form on:submit|preventDefault={handleSubmit}>
   {#each input_variables as variable}
