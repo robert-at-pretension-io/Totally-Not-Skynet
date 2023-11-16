@@ -1,4 +1,4 @@
-use crate::generated_types::{ AuthenticationMessage, self, Identity };
+use crate::generated_types::{ AuthenticationMessage, self, Identity, Node };
 use crate::generated_types::{
     GraphNodeInfo,
     UserSettings,
@@ -282,8 +282,7 @@ pub async fn start_message_sending_loop(
                             println!("{}", "Authentication message not *yet* supported:".red());
                         }
                     } // Closing the match verb
-                } // Closing the Contents::AuthenticationMessage match arm
-
+                }
                 Contents::UserSettings(user_settings) => {}
                 Contents::ExecutionDetails(execution_context) => {}
                 Contents::NodesToProcess(nodes_to_process) => {
@@ -341,6 +340,37 @@ pub async fn start_message_sending_loop(
                                 "{} {:?}",
                                 "Verb not supported for node:".red(),
                                 letter.clone()
+                            );
+                        }
+                    }
+                }
+                Contents::ExecutionDetails(execution) => {
+                    match verb {
+                        VerbTypes::Execute => {
+                            // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
+
+                            let mut variable_definitions: Map<String, String>;
+                            let local_nodes : Vec<Node> = execution.process.unwrap().nodes.unwrap();
+
+                            // Make a map out of the vec where the key is the id of the node:
+                            let mut local_nodes_map: HashMap<String, Node> = HashMap::new();
+                            local_nodes.iter().for_each(|node : Node| {
+                                local_nodes_map.insert(node.node_info.unwrap().id , node.clone());
+                            });
+
+                            let topological_order Vec<GraphNodeInfo> = execution.process.unwrap().topological_order.unwrap();
+
+                            // Loop through the topological order list and execute each node in order
+
+                            for node_info in topological_order {
+                                let current_node = local_nodes.get(node_info.index).unwrap();
+                            }
+                        }
+                        _ => {
+                            println!(
+                                "{} {}",
+                                "Execution details not *yet* supported for this verb:".red(),
+                                verb.clone()
                             );
                         }
                     }
