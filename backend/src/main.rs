@@ -1,21 +1,21 @@
+use env_logger;
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use std::env;
 use std::sync::Arc;
-use tokio::sync::{ mpsc, Mutex };
-use env_logger;
+use tokio::sync::{mpsc, Mutex};
 
 // use log::{ info, debug, warn, error };
 
 // mod domain;
-mod check_installed_programs;
+// mod check_installed_programs;
 mod env_vars_checker;
+mod graph;
 mod mongo;
 mod openai;
 mod receive_send;
 mod settings;
 mod sqlite_helper_functions;
-mod graph;
 mod websocket;
 
 #[allow(non_snake_case)]
@@ -40,7 +40,12 @@ static SERVER_IDENTITY: OnceCell<Identity> = OnceCell::new();
 async fn main() {
     env_logger::init();
 
-    let res = reqwest::get("http://api.ipify.org").await.unwrap().text().await.unwrap();
+    let res = reqwest::get("http://api.ipify.org")
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap();
     println!("My external IP address is: {}", res);
 
     let server_identity: Identity = Identity {
@@ -65,7 +70,10 @@ async fn main() {
     // assert check required installed programs
     // assert!(check_installed_programs::check_all_programs().is_ok());
 
-    println!("{}", "Need to re-enable check when changing environments back".red());
+    println!(
+        "{}",
+        "Need to re-enable check when changing environments back".red()
+    );
 
     // Setup the db:
     match sqlite_helper_functions::setup_sqlite_db() {

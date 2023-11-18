@@ -1,45 +1,31 @@
-use crate::generated_types::{ AuthenticationMessage, self, Identity, Node, NodeTypes, Prompt };
+use crate::generated_types::{self, AuthenticationMessage, Identity, Node, NodeTypes, Prompt};
 use crate::generated_types::{
-    GraphNodeInfo,
-    UserSettings,
-    VerbTypes,
-    Graph,
-    Edge,
-    Process,
-    Envelope,
-    Body,
-    Letter,
-    body::Contents,
-    node_content::NodeContent as NodeContentEnum,
+    body::Contents, node_content::NodeContent as NodeContentEnum, Body, Edge, Envelope, Graph,
+    GraphNodeInfo, Letter, Process, UserSettings, VerbTypes,
 };
 
-use core::iter::Map;
-
-use async_openai::types::{ ChatCompletionRequestUserMessage, ChatCompletionResponseFormat };
+use async_openai::types::{ChatCompletionRequestUserMessage, ChatCompletionResponseFormat};
 use async_openai::{
-    Client,
     types::{
-        ChatCompletionResponseFormatType,
-        CreateChatCompletionRequest,
-        ChatCompletionRequestMessage,
-        ChatCompletionRequestUserMessageContent,
-        Role,
+        ChatCompletionRequestMessage, ChatCompletionRequestUserMessageContent,
+        ChatCompletionResponseFormatType, CreateChatCompletionRequest, Role,
     },
+    Client,
 };
-
-use std::env;
+use handlebars::Handlebars;
+// use std::env;
 
 // use crate::graph::validate_nodes_from_process;
 
 use colored::*;
-use petgraph::Direction;
-use petgraph::prelude::DiGraph;
+// use petgraph::prelude::DiGraph;
+// use petgraph::Direction;
 
 use std::sync::Arc;
 
 // use crate::utils::parse_message;
-use crate::sqlite_helper_functions::{ insert_node, update_node, fetch_all_nodes };
 use crate::graph::validate_nodes_in_process;
+use crate::sqlite_helper_functions::{fetch_all_nodes, insert_node, update_node};
 
 use crate::SERVER_IDENTITY;
 
@@ -52,13 +38,13 @@ use prost::Message;
 use prost::bytes::BytesMut;
 
 // use petgraph::prelude::Bfs;
-use petgraph::algo::toposort;
+// use petgraph::algo::toposort;
 
 // use bollard::container::Config;
 // use bollard::exec::{ CreateExecOptions, StartExecResults };
 // use bollard::Docker;
 use bson::doc;
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 use tokio::sync::mpsc;
@@ -83,12 +69,16 @@ pub async fn start_message_sending_loop(
     // docker: Docker,
     tx: UnboundedSender<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,
     mut client_rx: mpsc::Receiver<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,
-    pool: Arc<Pool<SqliteConnectionManager>>
+    pool: Arc<Pool<SqliteConnectionManager>>,
 ) {
     let runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
 
     while let Some(msg) = client_rx.recv().await {
-        println!("{} {:?}", "Received a message from the client:".yellow(), msg.1.len());
+        println!(
+            "{} {:?}",
+            "Received a message from the client:".yellow(),
+            msg.1.len()
+        );
 
         // let received_message: Option<CrudBundle> = parse_message(&msg.1);
 
@@ -147,7 +137,10 @@ pub async fn start_message_sending_loop(
             println!("{}", "Forward the message to the correct receiver".red());
         }
 
-        println!("{}", "TODO: Collection responses and send them in envelope batch.".red());
+        println!(
+            "{}",
+            "TODO: Collection responses and send them in envelope batch.".red()
+        );
 
         // loop through the letters and handle each one
         for letter in envelope.clone().letters {
@@ -291,7 +284,7 @@ pub async fn start_message_sending_loop(
                         }
                     }
                 }
-                Contents::AuthenticationMessage(auth) => {
+                Contents::AuthenticationMessage(_auth) => {
                     match verb {
                         VerbTypes::Initiate => {
                             // Closing the match fetch_all_nodes
@@ -302,7 +295,6 @@ pub async fn start_message_sending_loop(
                     } // Closing the match verb
                 }
                 Contents::UserSettings(user_settings) => {}
-                Contents::ExecutionDetails(execution_context) => {}
                 Contents::NodesToProcess(nodes_to_process) => {
                     match verb {
                         VerbTypes::Validate => {
@@ -320,9 +312,9 @@ pub async fn start_message_sending_loop(
                                             // we construct a new letter with the new mutable_node:
 
                                             let body = Body {
-                                                contents: Some(
-                                                    Contents::Node(mutable_node.clone())
-                                                ),
+                                                contents: Some(Contents::Node(
+                                                    mutable_node.clone(),
+                                                )),
                                             };
 
                                             let letter = generated_types::Letter {
@@ -367,41 +359,30 @@ pub async fn start_message_sending_loop(
                         VerbTypes::Execute => {
                             // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
 
-                            let mut variable_definitions: HashMap<
-                                String,
-                                String
-                            > = execution.clone().current_variable_definitions;
-                            let local_nodes: Vec<Node> = execution.process
-                                .clone()
-                                .unwrap()
-                                .nodes.clone();
+                            let mut variable_definitions: HashMap<String, String> =
+                                execution.clone().current_variable_definitions;
+
+                            let local_nodes: Vec<Node> =
+                                execution.process.clone().unwrap().nodes.clone();
 
                             // Make a map out of the vec where the key is the id of the node:
                             let mut local_nodes_map: HashMap<String, Node> = HashMap::new();
                             local_nodes.iter().for_each(|node: &Node| {
-                                local_nodes_map.insert(
-                                    node.node_info.clone().unwrap().id,
-                                    node.clone()
-                                );
+                                local_nodes_map
+                                    .insert(node.node_info.clone().unwrap().id, node.clone());
                             });
 
-                            let topological_order: Vec<GraphNodeInfo> = execution.process
-                                .clone()
-                                .unwrap()
-                                .topological_order.clone();
+                            let topological_order: Vec<GraphNodeInfo> =
+                                execution.process.clone().unwrap().topological_order.clone();
 
                             // Loop through the topological order list and execute each node in order
 
-                            let mut node_execution_response: HashMap<
-                                String,
-                                String
-                            > = HashMap::new();
+                            let mut node_execution_response: HashMap<String, String> =
+                                HashMap::new();
 
                             for node_info in topological_order {
-                                let current_node = local_nodes_map
-                                    .get(&node_info.id)
-                                    .unwrap()
-                                    .clone();
+                                let current_node =
+                                    local_nodes_map.get(&node_info.id).unwrap().clone();
 
                                 // Process the node, which ever type it is:
 
@@ -413,9 +394,11 @@ pub async fn start_message_sending_loop(
                                         // Once we implement this functionality just for Prompts (and other node types), we can extract this function and call it recursively to handle this case (with a max depth?)
                                     }
                                     Ok(NodeTypes::Prompt) => {
-                                        let mut prompt_text: String;
+                                        // we need to replace the prompt text input_variables with their definitions
 
-                                        let mut additional_instruction =
+                                        let prompt_text: String;
+
+                                        let  additional_instruction =
                                             "When coming up with a response, please make the fields of the json response be the following: ".to_string();
 
                                         // Concatenate the strings in the vector to make a comma separated string.
@@ -423,16 +406,39 @@ pub async fn start_message_sending_loop(
                                         let variable_string: String =
                                             current_node.output_variables.join(", ");
 
-                                        match
-                                            current_node.node_content.unwrap().node_content.unwrap()
+                                        match current_node
+                                            .node_content
+                                            .unwrap()
+                                            .node_content
+                                            .unwrap()
                                         {
                                             NodeContentEnum::Prompt(prompt) => {
+                                                // hydrate the prompt text with the variable definitions
+
+                                                let mut handlebars = Handlebars::new();
+
+                                                let json_variable_definitions: Value =
+                                                    serde_json::json!(variable_definitions);
+
+                                                handlebars
+                                                    .register_template_string(
+                                                        "prompt",
+                                                        prompt.clone().prompt,
+                                                    )
+                                                    .unwrap();
+
+                                                let hydrated_prompt = handlebars
+                                                    .render("prompt", &json_variable_definitions)
+                                                    .unwrap();
+
                                                 prompt_text = format!(
                                                     "{} {} {}",
-                                                    prompt.prompt,
+                                                    hydrated_prompt.clone(),
                                                     additional_instruction,
                                                     variable_string
                                                 );
+
+                                                print!("Prompt text: {}", prompt_text.green())
                                             }
                                             _ => {
                                                 println!("prompt not handled");
@@ -456,8 +462,8 @@ pub async fn start_message_sending_loop(
                                         let user_message = ChatCompletionRequestUserMessage {
                                             content: Some(
                                                 ChatCompletionRequestUserMessageContent::Text(
-                                                    prompt_text
-                                                )
+                                                    prompt_text,
+                                                ),
                                             ),
                                             role: Role::User,
                                         };
@@ -470,11 +476,11 @@ pub async fn start_message_sending_loop(
                                         let mut request = CreateChatCompletionRequest::default();
 
                                         request.messages = vec![message];
-                                        request.response_format = Some(
-                                            ChatCompletionResponseFormat {
-                                                r#type: ChatCompletionResponseFormatType::JsonObject,
-                                            }
-                                        );
+                                        request.response_format =
+                                            Some(ChatCompletionResponseFormat {
+                                                r#type:
+                                                    ChatCompletionResponseFormatType::JsonObject,
+                                            });
                                         request.model = "gpt-3.5-turbo-instruct".to_string();
 
                                         // Call API
@@ -482,33 +488,39 @@ pub async fn start_message_sending_loop(
 
                                         println!(
                                             "{}",
-                                            response.choices
+                                            response
+                                                .choices
                                                 .first()
                                                 .unwrap()
-                                                .message.content.clone()
+                                                .message
+                                                .content
+                                                .clone()
                                                 .unwrap()
                                                 .as_str()
                                                 .to_string()
                                         );
 
-                                        let json_string = response.choices
+                                        let json_string = response
+                                            .choices
                                             .first()
                                             .unwrap()
-                                            .message.content.clone()
+                                            .message
+                                            .content
+                                            .clone()
                                             .unwrap()
                                             .as_str()
                                             .to_string();
 
-                                        let value: Value = serde_json
-                                            ::from_str(json_string.as_str())
-                                            .unwrap();
+                                        node_execution_response
+                                            .insert(node_info.clone().id, json_string.clone());
+
+                                        let value: Value =
+                                            serde_json::from_str(json_string.as_str()).unwrap();
                                         if let Some(obj) = value.as_object() {
                                             for (key, value) in obj {
                                                 println!("{}: {}", key, value);
-                                                variable_definitions.insert(
-                                                    key.clone(),
-                                                    value.clone().to_string()
-                                                );
+                                                variable_definitions
+                                                    .insert(key.clone(), value.clone().to_string());
                                             }
                                         } else {
                                             println!("{}", "The JSON is not an object.".red());
@@ -530,23 +542,29 @@ pub async fn start_message_sending_loop(
 
                                                 let mut error_response = execution.clone();
 
-                                                error_response.current_node = Some(
-                                                    node_info.clone()
-                                                );
+                                                error_response.current_node =
+                                                    Some(node_info.clone());
                                                 error_response.current_variable_definitions =
                                                     variable_definitions.clone();
 
                                                 let letter = Letter {
                                                     body: Some(Body {
-                                                        contents: Some(
-                                                            Contents::ExecutionDetails(
-                                                                error_response
-                                                            )
-                                                        ),
+                                                        contents: Some(Contents::ExecutionDetails(
+                                                            error_response,
+                                                        )),
                                                     }),
 
                                                     verb: VerbTypes::Error as i32,
                                                 };
+
+                                                let envelope = Envelope {
+                                                    letters: vec![letter],
+                                                    sender: Some(receiver.clone()),
+                                                    receiver: Some(sender.clone()),
+                                                    verification_id: verification_id.clone(),
+                                                };
+
+                                                send_message(&tx, msg.0.clone(), envelope).await;
                                             }
                                         }
                                     }
@@ -557,6 +575,27 @@ pub async fn start_message_sending_loop(
                                     }
                                 }
                             }
+
+                            let mut response = execution.clone();
+                            response.node_execution_response = node_execution_response;
+                            response.current_variable_definitions = variable_definitions.clone();
+
+                            let letter = Letter {
+                                body: Some(Body {
+                                    contents: Some(Contents::ExecutionDetails(response)),
+                                }),
+
+                                verb: VerbTypes::Acknowledge as i32,
+                            };
+
+                            let envelope = Envelope {
+                                letters: vec![letter],
+                                sender: Some(receiver.clone()),
+                                receiver: Some(sender.clone()),
+                                verification_id: verification_id.clone(),
+                            };
+
+                            send_message(&tx, msg.0.clone(), envelope).await;
                         }
                         _ => {
                             println!(
@@ -719,14 +758,17 @@ pub async fn start_message_sending_loop(
 pub async fn send_message(
     tx: &UnboundedSender<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,
     identity: LocalServerIdentity,
-    envelope: Envelope
+    envelope: Envelope,
 ) {
     let mut buf = BytesMut::new();
     envelope.encode(&mut buf).unwrap();
 
     println!("{}: {:?}", "Sending message to client".green(), envelope);
 
-    match tx.send((identity, tokio_tungstenite::tungstenite::Message::Binary(buf.to_vec()))) {
+    match tx.send((
+        identity,
+        tokio_tungstenite::tungstenite::Message::Binary(buf.to_vec()),
+    )) {
         Ok(_) => {}
         Err(e) => {
             println!("Error sending message to client: {:?}", e);

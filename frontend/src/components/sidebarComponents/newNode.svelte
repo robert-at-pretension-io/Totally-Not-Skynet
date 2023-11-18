@@ -22,8 +22,6 @@
   let conditional = new Conditional();
   let command = new Command();
 
-  
-
   // This is the dynamic key-list for the dropdown menu, use it when all of the types are implemented
   // let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
 
@@ -42,10 +40,10 @@
 <p>Selected type: {key_list[typeName]}</p>
 
 {#if typeName === NodeTypes.PROMPT}
-  <PromptComponent bind:prompt />
+  <PromptComponent />
 {/if}
 {#if typeName === NodeTypes.PROCESS}
-  <ProcessComponent bind:process />
+  <ProcessComponent />
 {/if}
 <!-- {#if typeName === NodeTypes.CONDITIONAL}
   <ConditionalComponent bind:conditional />

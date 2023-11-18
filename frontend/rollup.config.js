@@ -7,12 +7,13 @@ import autoPreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
 import eslint from "@rollup/plugin-eslint";
 import postcss from "rollup-plugin-postcss";
-import replace from '@rollup/plugin-replace';
+import replace from "@rollup/plugin-replace";
 
 const production = !process.env.ROLLUP_WATCH;
 
 export default {
   input: "src/main.js",
+  external: ["fs"],
   output: {
     sourcemap: true,
     format: "iife",
@@ -22,7 +23,7 @@ export default {
   plugins: [
     replace({
       // Replace `process.env.ENVIRONMENT` in your Svelte components
-      'process.env.ENVIRONMENT': JSON.stringify(process.env.ENVIRONMENT),
+      "process.env.ENVIRONMENT": JSON.stringify(process.env.ENVIRONMENT),
       preventAssignment: true,
     }),
     svelte({

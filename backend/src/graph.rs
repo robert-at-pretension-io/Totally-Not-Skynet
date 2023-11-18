@@ -1,25 +1,20 @@
 use crate::generated_types::{
-    Node,
-    NodeContent,
+    node_content::NodeContent as NodeContentEnum, Edge, Graph, GraphNodeInfo, Node, NodeContent,
     Process,
-    Graph,
-    Edge,
-    GraphNodeInfo,
-    node_content::NodeContent as NodeContentEnum,
 };
 use colored::*;
 
-use petgraph::{ Direction, graph::DiGraph };
+use petgraph::{graph::DiGraph, Direction};
 
 use petgraph::algo::toposort;
 
 use std::collections::HashMap;
 
-use anyhow::Error;
+// use anyhow::Error;
 
 pub fn validate_nodes_in_process(
     nodes: Vec<Node>,
-    graph_node_info: GraphNodeInfo
+    graph_node_info: GraphNodeInfo,
 ) -> Result<Node, String> {
     //generate maximal graph from nodes (based on input_variables and output_variables)
     println!("Validating nodes");
@@ -130,13 +125,13 @@ pub fn validate_nodes_in_process(
 
     let adjacency_list = petgraph::algo::tred::dag_to_toposorted_adjacency_list::<
         _,
-        petgraph::graph::DefaultIx
+        petgraph::graph::DefaultIx,
     >(&graph, &top_sort);
 
     // The output is the pair of the transitive reduction and the transitive closure.
     let (transative_reduct, _) = petgraph::algo::tred::dag_transitive_reduction_closure::<
         _,
-        petgraph::graph::DefaultIx
+        petgraph::graph::DefaultIx,
     >(&adjacency_list.0);
 
     // The graph should have the same nodes but different edges.
@@ -145,8 +140,8 @@ pub fn validate_nodes_in_process(
 
     transative_reduct.edge_indices().for_each(|edge| {
         // how to get the source and target nodes from the edge?
-        let (sourceIndex, targetIndex) = transative_reduct.edge_endpoints(edge).unwrap();
-        mut_pruned_graph.add_edge(sourceIndex.into(), targetIndex.into(), ());
+        let (source_index, target_index) = transative_reduct.edge_endpoints(edge).unwrap();
+        mut_pruned_graph.add_edge(source_index.into(), target_index.into(), ());
     });
 
     let mut new_edges: Vec<Edge> = Vec::new();
@@ -155,20 +150,17 @@ pub fn validate_nodes_in_process(
     // let edge_count = rebuilt_graph.raw_edges().len();
     // println!("Total number of raw edges: {}", edge_count);
 
-    mut_pruned_graph
-        .raw_edges()
-        .iter()
-        .for_each(|edge| {
-            let source_node = graph.node_weight(edge.source()).unwrap();
-            let target_node = graph.node_weight(edge.target()).unwrap();
+    mut_pruned_graph.raw_edges().iter().for_each(|edge| {
+        let source_node = graph.node_weight(edge.source()).unwrap();
+        let target_node = graph.node_weight(edge.target()).unwrap();
 
-            let new_edge: Edge = Edge {
-                source: source_node.node_info.clone(),
-                target: target_node.node_info.clone(),
-            };
+        let new_edge: Edge = Edge {
+            source: source_node.node_info.clone(),
+            target: target_node.node_info.clone(),
+        };
 
-            new_edges.push(new_edge);
-        });
+        new_edges.push(new_edge);
+    });
 
     let new_graph = Graph {
         nodes_info: new_nodes,
@@ -215,7 +207,8 @@ pub fn validate_nodes_in_process(
     let index_vec = toposort(&mut_pruned_graph, None).unwrap();
 
     for index in index_vec {
-        let node = new_graph.nodes_info
+        let node = new_graph
+            .nodes_info
             .iter()
             .find(|node| node.id == mut_pruned_graph[index].node_info.as_mut().unwrap().id)
             .unwrap();

@@ -15,6 +15,8 @@
   import { v4 as uuidv4 } from "uuid";
   import { sendEnvelope } from "helper_functions/websocket";
 
+  import Handlebars from "handlebars";
+
   let system_text = "";
   let prompt_text = "";
   let description = "";
@@ -25,8 +27,13 @@
   let new_output_variable = "";
 
   function submitPrompt() {
-    let prompt = new Prompt();
+    // First, validate the Handlebars template
+    if (!isValidHandlebarsTemplate(prompt_text)) {
+      alert("Invalid Handlebars template.");
+      return;
+    }
 
+    let prompt = new Prompt();
     prompt.prompt = prompt_text;
     prompt.system = system_text;
 
@@ -36,8 +43,7 @@
       input_variables = [...input_variables, new_input_variable];
     }
 
-    // Check if all of the variables in the template match the variables stated as the inputs:
-
+    // Extract and check variables from the template
     let variable_names = extractVariableNames(prompt_text);
     let allVariablesMatch = input_variables.every((inputVar) =>
       variable_names.includes(inputVar)
@@ -47,7 +53,7 @@
       input_variables.includes(templateVar)
     );
 
-    // Combining both checks to ensure exact match:
+    // Combining both checks to ensure exact match
     let exactMatch = allVariablesMatch && noExtraVariables;
 
     if (new_output_variable != "") {
@@ -59,7 +65,6 @@
       node.output_variables = output_variables;
 
       let node_content = new NodeContent();
-
       node_content.prompt = prompt;
 
       let node_info = new GraphNodeInfo();
@@ -74,11 +79,9 @@
       let websocket = $websocketStore.websocket as WebSocket;
 
       let body = new Body();
-
       body.node = node;
 
       let letter = new Letter();
-
       letter.body = body;
       letter.verb = VerbTypes.Create;
 
@@ -92,38 +95,22 @@
     }
   }
 
-  import Handlebars from "handlebars";
-
   function isValidHandlebarsTemplate(template) {
-    try {
-      // Attempt to compile the template
-      Handlebars.compile(template);
-      return true; // No error means the template is valid
-    } catch (e) {
-      return false; // An error indicates an invalid template
-    }
+    // A simple regex to check for basic Handlebars syntax
+    const handlebarsRegex = /\{\{([^}]+)\}\}/g;
+    return handlebarsRegex.test(template);
   }
 
   function extractVariableNames(template) {
-    const ast = Handlebars.parse(template);
+    const handlebarsRegex = /\{\{([^}]+)\}\}/g;
+    let match;
     const variables = new Set();
 
-    function traverse(node) {
-      if (node.type === "PathExpression") {
-        variables.add(node.original);
-      }
-      if (node.type === "BlockStatement") {
-        traverse(node.program);
-        if (node.inverse) {
-          traverse(node.inverse);
-        }
-      }
-      if (node.type === "Program") {
-        node.body.forEach(traverse);
-      }
+    while ((match = handlebarsRegex.exec(template)) !== null) {
+      // The variable is in match[1], trim it to handle spaces
+      variables.add(match[1].trim());
     }
 
-    traverse(ast);
     return Array.from(variables);
   }
 

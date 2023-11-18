@@ -10,7 +10,6 @@ import {
 import systemStateStore from "stores/systemStateStore";
 
 import { BinaryWriter } from "google-protobuf";
-import { Json } from "io-ts-types";
 import { Identity } from "generated/system_types";
 
 import { v4 as uuidv4 } from "uuid";
@@ -107,12 +106,14 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
           if (letter.verb === VerbTypes.Acknowledge) {
             if (letter.body.has_identity) {
               const identity = letter.body.identity as Identity;
-              console.log("setting primary server identity: ", identity.toObject());
+              console.log(
+                "setting primary server identity: ",
+                identity.toObject()
+              );
               systemStateStore.update((s: SystemState) => {
                 s.primary_backend = identity;
                 return s;
               });
-
             }
             if (letter.body.has_node) {
               //add it to the system state local_node list:
@@ -230,7 +231,6 @@ export function sendEnvelope(
   sender: Identity = undefined,
   receiver: Identity = undefined
 ) {
-
   // raise an error and alert if the sender or receiver is not set
   if (!sender) {
     console.log("Sender not set. Defaulting to this client.");
@@ -241,11 +241,9 @@ export function sendEnvelope(
 
     if (sender == undefined) {
       alert("this client identity not defined");
-    }
-    else {
+    } else {
       console.log("Setting client identity: ", sender.toObject());
     }
-
   }
 
   // same for the receiver:
@@ -258,8 +256,7 @@ export function sendEnvelope(
 
     if (receiver == undefined) {
       console.log("primary backend not defined");
-    }
-    else {
+    } else {
       console.log("Setting receiver identity: ", receiver.toObject());
     }
   }
