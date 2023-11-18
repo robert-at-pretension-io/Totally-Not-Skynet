@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package skynet.types;
-// import "google/protobuf/timestamp.proto";
+import "google/protobuf/timestamp.proto";
 
 /* Ideally, this information will be used for providing context on the frontend when visualizing the graph. The id contained within is guaranteed to be unique. */
 message GraphNodeInfo {
@@ -87,6 +87,18 @@ enum VerbTypes {
   Authorized = 9;
   RequestAll = 10;
   Error = 11;
+}
+
+enum LogMessageTypes {
+  LogInfo = 0;
+  LogWarning = 1;
+  LogError = 2;
+}
+
+message Log {
+  string message = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  LogMessageTypes log_type = 3;
 }
 
 // This is given to every "entity" within the system. Each is self-declared. For instance, the backend will generate an Identity for itself and use it for any messages that it sends to any client.

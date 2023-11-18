@@ -13,6 +13,7 @@ import { BinaryWriter } from "google-protobuf";
 import { Identity } from "generated/system_types";
 
 import { v4 as uuidv4 } from "uuid";
+import { getNodes } from "./misc";
 
 export function setupWebsocketConnection(): WebSocket {
   console.log("setting up websocket connection");
@@ -114,12 +115,17 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
                 s.primary_backend = identity;
                 return s;
               });
+
+              getNodes();
             }
             if (letter.body.has_node) {
               //add it to the system state local_node list:
               console.log("Added node to local system state");
               systemStateStore.update((s) => {
-                s.selected_process = letter.body.node;
+                if (letter.body.node.node_content.has_process) {
+                  s.selected_process = letter.body.node;
+
+                }
                 s.local_nodes.push(letter.body.node);
                 return s;
               });

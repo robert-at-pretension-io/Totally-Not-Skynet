@@ -1,6 +1,7 @@
 import { NodeTypes } from "generated/system_types_pb";
 import { Body, Graph, Letter, SystemState, VerbTypes, Node } from "../generated/system_types";
 import { selfIdentify, sendEnvelope } from "./websocket";
+import { websocketStore } from "stores/websocketStore";
 
 export function areAllPropertiesUndefined<T extends object>(obj: T): boolean {
   return Object.values(obj).every((value) => value === undefined);
@@ -30,7 +31,13 @@ export function initializeSystemState(system_state: SystemState): SystemState {
   return system_state;
 }
 
-export function getNodes(websocket: WebSocket) {
+export function getNodes() {
+
+  let websocket: WebSocket;
+
+  websocketStore.subscribe((s) => {
+    websocket = s.websocket;
+  });
 
   console.log("requesting nodes from server");
   const letter = new Letter();
