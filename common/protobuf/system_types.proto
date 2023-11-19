@@ -114,7 +114,13 @@ message Execution {
   // The execution_id has is unique for each execution. It is different from a verification_id of a letter because it is not used for pairing messages, but rather for identifying the execution of a process. This way, we can have multiple messages regarding a single process execution.
   string execution_id = 4;
   // This maps GraphNodeId to the execution results of that node.
-  map<string, string> node_execution_response = 5;
+  repeated PromptHistory prompt_history = 5;
+}
+
+message PromptHistory {
+  string prompt = 1;
+  string response = 2;
+  GraphNodeInfo node_info = 3;
 }
 
 message VariableDefinition {
@@ -136,7 +142,7 @@ message SystemState {
   repeated Node local_nodes = 4;
   repeated GraphNodeInfo selected_nodes = 5; 
   repeated Edge selected_edges = 6; 
-  repeated Execution execution_steps = 7;
+  repeated Execution execution_results = 7;
   Node selected_process = 8;
   repeated Identity backend_identities = 9;
   repeated Identity peer_identities = 10;

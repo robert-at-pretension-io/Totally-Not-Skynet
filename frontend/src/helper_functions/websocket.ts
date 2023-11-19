@@ -130,6 +130,14 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
                 return s;
               });
             }
+            if (letter.body.has_execution_details) {
+              console.log("EXECUTION_DETAILS");
+              console.log(letter.body.execution_details.toObject());
+              systemStateStore.update((s) => {
+                s.execution_results.push(letter.body.execution_details);
+                return s;
+              });
+            }
           }
         });
       } else {

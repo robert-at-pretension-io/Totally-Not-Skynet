@@ -8,6 +8,7 @@
     Node,
     NodeTypes,
     Process,
+    PromptHistory,
     VerbTypes,
   } from "../../generated/system_types";
   import { onMount } from "svelte";
@@ -24,6 +25,8 @@
   let allVariablesDefined = false;
   let node_options = new Array<Node>();
   let nodes = new Array<Node>();
+  let latest_execution = new Execution();
+  let ordered_prompt_history = new Array<PromptHistory>();
 
   onMount(() => {
     nodes = $systemStateStore.local_nodes;
@@ -34,6 +37,15 @@
       selected_process = $systemStateStore.selected_process;
       input_variables = selected_process.input_variables;
     }
+
+    if (
+      $systemStateStore.execution_results !== undefined &&
+      $systemStateStore.execution_results.length > 0
+    ) {
+      let last_index = $systemStateStore.execution_results.length - 1;
+      latest_execution = $systemStateStore.execution_results[last_index];
+      reorder_prompt_history();
+    }
   });
 
   $: {
@@ -42,6 +54,15 @@
       input_variables = selected_process.input_variables;
       // This should reset the variable map each time the process changes (regardless of if the process has been selected locally or not.)
       initial_variables = new Map<string, string>();
+    }
+
+    if (
+      $systemStateStore.execution_results !== undefined &&
+      $systemStateStore.execution_results.length > 0
+    ) {
+      let last_index = $systemStateStore.execution_results.length - 1;
+      latest_execution = $systemStateStore.execution_results[last_index];
+      reorder_prompt_history();
     }
   }
 
@@ -53,6 +74,31 @@
   $: allVariablesDefined = Array.from(initial_variables.values()).every(
     (value) => value.trim() !== ""
   );
+
+  function reorder_prompt_history() {
+    if (
+      selected_process.node_content?.has_process &&
+      latest_execution !== undefined
+    ) {
+      ordered_prompt_history = new Array<PromptHistory>();
+
+      let process = selected_process.node_content.process;
+      let topological_order = process.topological_order;
+      let prompt_history = latest_execution.prompt_history;
+      let new_prompt_history = new Array<PromptHistory>();
+
+      for (let i = 0; i < topological_order.length; i++) {
+        let node_id = topological_order[i];
+        let prompt_and_response = prompt_history.find(
+          (prompt_history) => prompt_history.node_info.id === node_id.id
+        );
+        if (prompt_and_response !== undefined) {
+          new_prompt_history.push(prompt_and_response);
+        }
+      }
+      ordered_prompt_history = new_prompt_history;
+    }
+  }
 
   function updateInitialVariables(key: string, value: string) {
     initial_variables.set(key, value);
@@ -108,20 +154,18 @@
     <button type="submit">Submit</button>
   {/if}
 </form>
-<!--
 
-  For each of the input variables in the selected process, create a text input box, have each of the values of the text boxes update the initial_variables map, and then have the submit button send the initial_variables map to the backend to be executed.
-
--->
-
-<!-- 
-{#each ordered_nodes as node (node.node_info.id)}
-  <h2><strong>{key_list[node.type_name]}</strong> : {node.node_info.name}</h2>
-  {node.node_info.description}
-  <br />
-  <p><strong>Input Variables:</strong> {node.input_variables.join(", ")}</p>
-  <p><strong>Output Variables:</strong> {node.output_variables.join(", ")}</p>
-  <p><strong>Node Content:</strong> {node.node_content}</p>
-
-  <hr />
-{/each} -->
+{#if latest_execution !== undefined}
+  {#each ordered_prompt_history as prompt_history}
+    <p>
+      <b>{prompt_history.node_info.name}</b>
+      <br />
+      prompt:
+      {prompt_history.prompt}
+      <br />
+      response:
+      {prompt_history.response}
+    </p>
+    <hr />
+  {/each}
+{/if}

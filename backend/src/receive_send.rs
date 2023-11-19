@@ -11,6 +11,7 @@ use crate::generated_types::{
     Process,
     UserSettings,
     VerbTypes,
+    PromptHistory,
 };
 
 use async_openai::types::{ ChatCompletionRequestUserMessage, ChatCompletionResponseFormat };
@@ -390,10 +391,12 @@ pub async fn start_message_sending_loop(
 
                             // Loop through the topological order list and execute each node in order
 
-                            let mut node_execution_response: HashMap<
-                                String,
-                                String
-                            > = HashMap::new();
+                            // let mut node_execution_response: HashMap<
+                            //     String,
+                            //     String
+                            // > = HashMap::new();
+
+                            let mut prompt_histories: Vec<PromptHistory> = Vec::new();
 
                             for node_info in topological_order {
                                 let current_node = local_nodes_map
@@ -414,6 +417,7 @@ pub async fn start_message_sending_loop(
                                         // we need to replace the prompt text input_variables with their definitions
 
                                         let prompt_text: String;
+                                        let hydrated_prompt_text: String;
 
                                         let additional_instruction =
                                             "When coming up with a response, please make the fields of the json response be the following: ".to_string();
@@ -447,13 +451,13 @@ pub async fn start_message_sending_loop(
                                                     )
                                                     .unwrap();
 
-                                                let hydrated_prompt = handlebars
+                                                hydrated_prompt_text = handlebars
                                                     .render("prompt", &json_variable_definitions)
                                                     .unwrap();
 
                                                 prompt_text = format!(
                                                     "{} {} {} {}",
-                                                    hydrated_prompt.clone(),
+                                                    hydrated_prompt_text.clone(),
                                                     additional_instruction,
                                                     variable_string,
                                                     more_additional_instruction
@@ -518,10 +522,18 @@ pub async fn start_message_sending_loop(
                                             .as_str()
                                             .to_string();
 
-                                        node_execution_response.insert(
-                                            node_info.clone().id,
-                                            json_string.clone()
-                                        );
+                                        let prompt_history = PromptHistory {
+                                            prompt: hydrated_prompt_text.clone(),
+                                            response: json_string.clone(),
+                                            node_info: Some(node_info.clone()),
+                                        };
+
+                                        prompt_histories.push(prompt_history.clone());
+
+                                        // node_execution_response.insert(
+                                        //     node_info.clone().id,
+                                        //     json_string.clone()
+                                        // );
 
                                         let value: Value = serde_json
                                             ::from_str(json_string.as_str())
@@ -592,8 +604,11 @@ pub async fn start_message_sending_loop(
                             }
 
                             let mut response = execution.clone();
-                            response.node_execution_response = node_execution_response;
+
+                            // Change this to use a prompt history
+                            // response.node_execution_response = node_execution_response;
                             response.current_variable_definitions = variable_definitions.clone();
+                            response.prompt_history = prompt_histories.clone();
 
                             let letter = Letter {
                                 body: Some(Body {

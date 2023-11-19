@@ -1312,10 +1312,10 @@ export class Execution extends pb_1.Message {
         process?: Process;
         current_variable_definitions?: Map<string, string>;
         execution_id?: string;
-        node_execution_response?: Map<string, string>;
+        prompt_history?: PromptHistory[];
     }) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [5], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
       if ("current_node" in data && data.current_node != undefined) {
         this.current_node = data.current_node;
@@ -1329,14 +1329,12 @@ export class Execution extends pb_1.Message {
       if ("execution_id" in data && data.execution_id != undefined) {
         this.execution_id = data.execution_id;
       }
-      if ("node_execution_response" in data && data.node_execution_response != undefined) {
-        this.node_execution_response = data.node_execution_response;
+      if ("prompt_history" in data && data.prompt_history != undefined) {
+        this.prompt_history = data.prompt_history;
       }
     }
     if (!this.current_variable_definitions)
       this.current_variable_definitions = new Map();
-    if (!this.node_execution_response)
-      this.node_execution_response = new Map();
   }
   get current_node() {
     return pb_1.Message.getWrapperField(this, GraphNodeInfo, 1) as GraphNodeInfo;
@@ -1368,11 +1366,11 @@ export class Execution extends pb_1.Message {
   set execution_id(value: string) {
     pb_1.Message.setField(this, 4, value);
   }
-  get node_execution_response() {
-    return pb_1.Message.getField(this, 5) as any as Map<string, string>;
+  get prompt_history() {
+    return pb_1.Message.getRepeatedWrapperField(this, PromptHistory, 5) as PromptHistory[];
   }
-  set node_execution_response(value: Map<string, string>) {
-    pb_1.Message.setField(this, 5, value as any);
+  set prompt_history(value: PromptHistory[]) {
+    pb_1.Message.setRepeatedWrapperField(this, 5, value);
   }
   static fromObject(data: {
         current_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
@@ -1381,9 +1379,7 @@ export class Execution extends pb_1.Message {
             [key: string]: string;
         };
         execution_id?: string;
-        node_execution_response?: {
-            [key: string]: string;
-        };
+        prompt_history?: ReturnType<typeof PromptHistory.prototype.toObject>[];
     }): Execution {
     const message = new Execution({});
     if (data.current_node != null) {
@@ -1398,8 +1394,8 @@ export class Execution extends pb_1.Message {
     if (data.execution_id != null) {
       message.execution_id = data.execution_id;
     }
-    if (typeof data.node_execution_response == "object") {
-      message.node_execution_response = new Map(Object.entries(data.node_execution_response));
+    if (data.prompt_history != null) {
+      message.prompt_history = data.prompt_history.map(item => PromptHistory.fromObject(item));
     }
     return message;
   }
@@ -1411,9 +1407,7 @@ export class Execution extends pb_1.Message {
                 [key: string]: string;
             };
             execution_id?: string;
-            node_execution_response?: {
-                [key: string]: string;
-            };
+            prompt_history?: ReturnType<typeof PromptHistory.prototype.toObject>[];
         } = {};
     if (this.current_node != null) {
       data.current_node = this.current_node.toObject();
@@ -1427,8 +1421,8 @@ export class Execution extends pb_1.Message {
     if (this.execution_id != null) {
       data.execution_id = this.execution_id;
     }
-    if (this.node_execution_response != null) {
-      data.node_execution_response = (Object.fromEntries)(this.node_execution_response);
+    if (this.prompt_history != null) {
+      data.prompt_history = this.prompt_history.map((item: PromptHistory) => item.toObject());
     }
     return data;
   }
@@ -1448,12 +1442,8 @@ export class Execution extends pb_1.Message {
     }
     if (this.execution_id.length)
       writer.writeString(4, this.execution_id);
-    for (const [key, value] of this.node_execution_response) {
-      writer.writeMessage(5, this.node_execution_response, () => {
-        writer.writeString(1, key);
-        writer.writeString(2, value);
-      });
-    }
+    if (this.prompt_history.length)
+      writer.writeRepeatedMessage(5, this.prompt_history, (item: PromptHistory) => item.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1476,7 +1466,7 @@ export class Execution extends pb_1.Message {
         message.execution_id = reader.readString();
         break;
       case 5:
-        reader.readMessage(message, () => pb_1.Map.deserializeBinary(message.node_execution_response as any, reader, reader.readString, reader.readString));
+        reader.readMessage(message.prompt_history, () => pb_1.Message.addToRepeatedWrapperField(message, 5, PromptHistory.deserialize(reader), PromptHistory));
         break;
       default: reader.skipField();
       }
@@ -1488,6 +1478,122 @@ export class Execution extends pb_1.Message {
   }
   static deserializeBinary(bytes: Uint8Array): Execution {
     return Execution.deserialize(bytes);
+  }
+}
+export class PromptHistory extends pb_1.Message {
+  #one_of_decls: number[][] = [];
+  constructor(data?: any[] | {
+        prompt?: string;
+        response?: string;
+        node_info?: GraphNodeInfo;
+    }) {
+    super();
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("prompt" in data && data.prompt != undefined) {
+        this.prompt = data.prompt;
+      }
+      if ("response" in data && data.response != undefined) {
+        this.response = data.response;
+      }
+      if ("node_info" in data && data.node_info != undefined) {
+        this.node_info = data.node_info;
+      }
+    }
+  }
+  get prompt() {
+    return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+  }
+  set prompt(value: string) {
+    pb_1.Message.setField(this, 1, value);
+  }
+  get response() {
+    return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+  }
+  set response(value: string) {
+    pb_1.Message.setField(this, 2, value);
+  }
+  get node_info() {
+    return pb_1.Message.getWrapperField(this, GraphNodeInfo, 3) as GraphNodeInfo;
+  }
+  set node_info(value: GraphNodeInfo) {
+    pb_1.Message.setWrapperField(this, 3, value);
+  }
+  get has_node_info() {
+    return pb_1.Message.getField(this, 3) != null;
+  }
+  static fromObject(data: {
+        prompt?: string;
+        response?: string;
+        node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
+    }): PromptHistory {
+    const message = new PromptHistory({});
+    if (data.prompt != null) {
+      message.prompt = data.prompt;
+    }
+    if (data.response != null) {
+      message.response = data.response;
+    }
+    if (data.node_info != null) {
+      message.node_info = GraphNodeInfo.fromObject(data.node_info);
+    }
+    return message;
+  }
+  toObject() {
+    const data: {
+            prompt?: string;
+            response?: string;
+            node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
+        } = {};
+    if (this.prompt != null) {
+      data.prompt = this.prompt;
+    }
+    if (this.response != null) {
+      data.response = this.response;
+    }
+    if (this.node_info != null) {
+      data.node_info = this.node_info.toObject();
+    }
+    return data;
+  }
+  serialize(): Uint8Array;
+  serialize(w: pb_1.BinaryWriter): void;
+  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.prompt.length)
+      writer.writeString(1, this.prompt);
+    if (this.response.length)
+      writer.writeString(2, this.response);
+    if (this.has_node_info)
+      writer.writeMessage(3, this.node_info, () => this.node_info.serialize(writer));
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): PromptHistory {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new PromptHistory();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+      case 1:
+        message.prompt = reader.readString();
+        break;
+      case 2:
+        message.response = reader.readString();
+        break;
+      case 3:
+        reader.readMessage(message.node_info, () => message.node_info = GraphNodeInfo.deserialize(reader));
+        break;
+      default: reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary(): Uint8Array {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes: Uint8Array): PromptHistory {
+    return PromptHistory.deserialize(bytes);
   }
 }
 export class VariableDefinition extends pb_1.Message {
@@ -1698,7 +1804,7 @@ export class SystemState extends pb_1.Message {
         local_nodes?: Node[];
         selected_nodes?: GraphNodeInfo[];
         selected_edges?: Edge[];
-        execution_steps?: Execution[];
+        execution_results?: Execution[];
         selected_process?: Node;
         backend_identities?: Identity[];
         peer_identities?: Identity[];
@@ -1727,8 +1833,8 @@ export class SystemState extends pb_1.Message {
       if ("selected_edges" in data && data.selected_edges != undefined) {
         this.selected_edges = data.selected_edges;
       }
-      if ("execution_steps" in data && data.execution_steps != undefined) {
-        this.execution_steps = data.execution_steps;
+      if ("execution_results" in data && data.execution_results != undefined) {
+        this.execution_results = data.execution_results;
       }
       if ("selected_process" in data && data.selected_process != undefined) {
         this.selected_process = data.selected_process;
@@ -1789,10 +1895,10 @@ export class SystemState extends pb_1.Message {
   set selected_edges(value: Edge[]) {
     pb_1.Message.setRepeatedWrapperField(this, 6, value);
   }
-  get execution_steps() {
+  get execution_results() {
     return pb_1.Message.getRepeatedWrapperField(this, Execution, 7) as Execution[];
   }
-  set execution_steps(value: Execution[]) {
+  set execution_results(value: Execution[]) {
     pb_1.Message.setRepeatedWrapperField(this, 7, value);
   }
   get selected_process() {
@@ -1847,7 +1953,7 @@ export class SystemState extends pb_1.Message {
         local_nodes?: ReturnType<typeof Node.prototype.toObject>[];
         selected_nodes?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
         selected_edges?: ReturnType<typeof Edge.prototype.toObject>[];
-        execution_steps?: ReturnType<typeof Execution.prototype.toObject>[];
+        execution_results?: ReturnType<typeof Execution.prototype.toObject>[];
         selected_process?: ReturnType<typeof Node.prototype.toObject>;
         backend_identities?: ReturnType<typeof Identity.prototype.toObject>[];
         peer_identities?: ReturnType<typeof Identity.prototype.toObject>[];
@@ -1874,8 +1980,8 @@ export class SystemState extends pb_1.Message {
     if (data.selected_edges != null) {
       message.selected_edges = data.selected_edges.map(item => Edge.fromObject(item));
     }
-    if (data.execution_steps != null) {
-      message.execution_steps = data.execution_steps.map(item => Execution.fromObject(item));
+    if (data.execution_results != null) {
+      message.execution_results = data.execution_results.map(item => Execution.fromObject(item));
     }
     if (data.selected_process != null) {
       message.selected_process = Node.fromObject(data.selected_process);
@@ -1905,7 +2011,7 @@ export class SystemState extends pb_1.Message {
             local_nodes?: ReturnType<typeof Node.prototype.toObject>[];
             selected_nodes?: ReturnType<typeof GraphNodeInfo.prototype.toObject>[];
             selected_edges?: ReturnType<typeof Edge.prototype.toObject>[];
-            execution_steps?: ReturnType<typeof Execution.prototype.toObject>[];
+            execution_results?: ReturnType<typeof Execution.prototype.toObject>[];
             selected_process?: ReturnType<typeof Node.prototype.toObject>;
             backend_identities?: ReturnType<typeof Identity.prototype.toObject>[];
             peer_identities?: ReturnType<typeof Identity.prototype.toObject>[];
@@ -1931,8 +2037,8 @@ export class SystemState extends pb_1.Message {
     if (this.selected_edges != null) {
       data.selected_edges = this.selected_edges.map((item: Edge) => item.toObject());
     }
-    if (this.execution_steps != null) {
-      data.execution_steps = this.execution_steps.map((item: Execution) => item.toObject());
+    if (this.execution_results != null) {
+      data.execution_results = this.execution_results.map((item: Execution) => item.toObject());
     }
     if (this.selected_process != null) {
       data.selected_process = this.selected_process.toObject();
@@ -1970,8 +2076,8 @@ export class SystemState extends pb_1.Message {
       writer.writeRepeatedMessage(5, this.selected_nodes, (item: GraphNodeInfo) => item.serialize(writer));
     if (this.selected_edges.length)
       writer.writeRepeatedMessage(6, this.selected_edges, (item: Edge) => item.serialize(writer));
-    if (this.execution_steps.length)
-      writer.writeRepeatedMessage(7, this.execution_steps, (item: Execution) => item.serialize(writer));
+    if (this.execution_results.length)
+      writer.writeRepeatedMessage(7, this.execution_results, (item: Execution) => item.serialize(writer));
     if (this.has_selected_process)
       writer.writeMessage(8, this.selected_process, () => this.selected_process.serialize(writer));
     if (this.backend_identities.length)
@@ -2012,7 +2118,7 @@ export class SystemState extends pb_1.Message {
         reader.readMessage(message.selected_edges, () => pb_1.Message.addToRepeatedWrapperField(message, 6, Edge.deserialize(reader), Edge));
         break;
       case 7:
-        reader.readMessage(message.execution_steps, () => pb_1.Message.addToRepeatedWrapperField(message, 7, Execution.deserialize(reader), Execution));
+        reader.readMessage(message.execution_results, () => pb_1.Message.addToRepeatedWrapperField(message, 7, Execution.deserialize(reader), Execution));
         break;
       case 8:
         reader.readMessage(message.selected_process, () => message.selected_process = Node.deserialize(reader));
