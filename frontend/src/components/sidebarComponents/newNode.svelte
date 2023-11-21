@@ -11,6 +11,7 @@
     Command,
     NodeTypes,
   } from "../../generated/system_types";
+  import CodeComponent from "./newNodeSubComponents/CodeComponent.svelte";
 
   let typeName: number = NodeTypes.PROMPT;
 
@@ -44,6 +45,9 @@
 {/if}
 {#if typeName === NodeTypes.PROCESS}
   <ProcessComponent />
+{/if}
+{#if typeName === NodeTypes.CODE}
+  <CodeComponent />
 {/if}
 <!-- {#if typeName === NodeTypes.CONDITIONAL}
   <ConditionalComponent bind:conditional />

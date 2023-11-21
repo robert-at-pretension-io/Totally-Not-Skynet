@@ -51,6 +51,7 @@ enum NodeTypes {
   PROCESS = 1;
   CONDITIONAL = 2;
   COMMAND = 3;
+  CODE = 4;
 }
 
 message NodeContent {
@@ -59,7 +60,13 @@ message NodeContent {
     Process process = 2;
     Conditional conditional = 3;
     Command command = 4;
+    Code code = 5;
   }
+}
+
+message Code {
+  string code = 1;
+  string language = 2;
 }
 
 message Node {

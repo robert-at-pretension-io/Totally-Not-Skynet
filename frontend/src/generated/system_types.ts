@@ -9,7 +9,8 @@ export enum NodeTypes {
     PROMPT = 0,
     PROCESS = 1,
     CONDITIONAL = 2,
-    COMMAND = 3
+    COMMAND = 3,
+    CODE = 4
 }
 export enum VerbTypes {
     Create = 0,
@@ -693,27 +694,37 @@ export class Process extends pb_1.Message {
   }
 }
 export class NodeContent extends pb_1.Message {
-  #one_of_decls: number[][] = [[1, 2, 3, 4]];
+  #one_of_decls: number[][] = [[1, 2, 3, 4, 5]];
   constructor(data?: any[] | ({} & (({
         prompt?: Prompt;
         process?: never;
         conditional?: never;
         command?: never;
+        code?: never;
     } | {
         prompt?: never;
         process?: Process;
         conditional?: never;
         command?: never;
+        code?: never;
     } | {
         prompt?: never;
         process?: never;
         conditional?: Conditional;
         command?: never;
+        code?: never;
     } | {
         prompt?: never;
         process?: never;
         conditional?: never;
         command?: Command;
+        code?: never;
+    } | {
+        prompt?: never;
+        process?: never;
+        conditional?: never;
+        command?: never;
+        code?: Code;
     })))) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -729,6 +740,9 @@ export class NodeContent extends pb_1.Message {
       }
       if ("command" in data && data.command != undefined) {
         this.command = data.command;
+      }
+      if ("code" in data && data.code != undefined) {
+        this.code = data.code;
       }
     }
   }
@@ -768,23 +782,34 @@ export class NodeContent extends pb_1.Message {
   get has_command() {
     return pb_1.Message.getField(this, 4) != null;
   }
+  get code() {
+    return pb_1.Message.getWrapperField(this, Code, 5) as Code;
+  }
+  set code(value: Code) {
+    pb_1.Message.setOneofWrapperField(this, 5, this.#one_of_decls[0], value);
+  }
+  get has_code() {
+    return pb_1.Message.getField(this, 5) != null;
+  }
   get node_content() {
     const cases: {
-            [index: number]: "none" | "prompt" | "process" | "conditional" | "command";
+            [index: number]: "none" | "prompt" | "process" | "conditional" | "command" | "code";
         } = {
           0: "none",
           1: "prompt",
           2: "process",
           3: "conditional",
-          4: "command"
+          4: "command",
+          5: "code"
         };
-    return cases[pb_1.Message.computeOneofCase(this, [1, 2, 3, 4])];
+    return cases[pb_1.Message.computeOneofCase(this, [1, 2, 3, 4, 5])];
   }
   static fromObject(data: {
         prompt?: ReturnType<typeof Prompt.prototype.toObject>;
         process?: ReturnType<typeof Process.prototype.toObject>;
         conditional?: ReturnType<typeof Conditional.prototype.toObject>;
         command?: ReturnType<typeof Command.prototype.toObject>;
+        code?: ReturnType<typeof Code.prototype.toObject>;
     }): NodeContent {
     const message = new NodeContent({});
     if (data.prompt != null) {
@@ -799,6 +824,9 @@ export class NodeContent extends pb_1.Message {
     if (data.command != null) {
       message.command = Command.fromObject(data.command);
     }
+    if (data.code != null) {
+      message.code = Code.fromObject(data.code);
+    }
     return message;
   }
   toObject() {
@@ -807,6 +835,7 @@ export class NodeContent extends pb_1.Message {
             process?: ReturnType<typeof Process.prototype.toObject>;
             conditional?: ReturnType<typeof Conditional.prototype.toObject>;
             command?: ReturnType<typeof Command.prototype.toObject>;
+            code?: ReturnType<typeof Code.prototype.toObject>;
         } = {};
     if (this.prompt != null) {
       data.prompt = this.prompt.toObject();
@@ -819,6 +848,9 @@ export class NodeContent extends pb_1.Message {
     }
     if (this.command != null) {
       data.command = this.command.toObject();
+    }
+    if (this.code != null) {
+      data.code = this.code.toObject();
     }
     return data;
   }
@@ -834,6 +866,8 @@ export class NodeContent extends pb_1.Message {
       writer.writeMessage(3, this.conditional, () => this.conditional.serialize(writer));
     if (this.has_command)
       writer.writeMessage(4, this.command, () => this.command.serialize(writer));
+    if (this.has_code)
+      writer.writeMessage(5, this.code, () => this.code.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -855,6 +889,9 @@ export class NodeContent extends pb_1.Message {
       case 4:
         reader.readMessage(message.command, () => message.command = Command.deserialize(reader));
         break;
+      case 5:
+        reader.readMessage(message.code, () => message.code = Code.deserialize(reader));
+        break;
       default: reader.skipField();
       }
     }
@@ -865,6 +902,96 @@ export class NodeContent extends pb_1.Message {
   }
   static deserializeBinary(bytes: Uint8Array): NodeContent {
     return NodeContent.deserialize(bytes);
+  }
+}
+export class Code extends pb_1.Message {
+  #one_of_decls: number[][] = [];
+  constructor(data?: any[] | {
+        code?: string;
+        language?: string;
+    }) {
+    super();
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("code" in data && data.code != undefined) {
+        this.code = data.code;
+      }
+      if ("language" in data && data.language != undefined) {
+        this.language = data.language;
+      }
+    }
+  }
+  get code() {
+    return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+  }
+  set code(value: string) {
+    pb_1.Message.setField(this, 1, value);
+  }
+  get language() {
+    return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+  }
+  set language(value: string) {
+    pb_1.Message.setField(this, 2, value);
+  }
+  static fromObject(data: {
+        code?: string;
+        language?: string;
+    }): Code {
+    const message = new Code({});
+    if (data.code != null) {
+      message.code = data.code;
+    }
+    if (data.language != null) {
+      message.language = data.language;
+    }
+    return message;
+  }
+  toObject() {
+    const data: {
+            code?: string;
+            language?: string;
+        } = {};
+    if (this.code != null) {
+      data.code = this.code;
+    }
+    if (this.language != null) {
+      data.language = this.language;
+    }
+    return data;
+  }
+  serialize(): Uint8Array;
+  serialize(w: pb_1.BinaryWriter): void;
+  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.code.length)
+      writer.writeString(1, this.code);
+    if (this.language.length)
+      writer.writeString(2, this.language);
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Code {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Code();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+      case 1:
+        message.code = reader.readString();
+        break;
+      case 2:
+        message.language = reader.readString();
+        break;
+      default: reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary(): Uint8Array {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes: Uint8Array): Code {
+    return Code.deserialize(bytes);
   }
 }
 export class Node extends pb_1.Message {
