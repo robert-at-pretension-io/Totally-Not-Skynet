@@ -5,9 +5,21 @@ use petgraph::algo::tarjan_scc;
 
 use std::fs::File;
 use std::io::Write;
-use std::collections::HashSet;
+use std::collections::{ HashSet, HashMap };
 
 use std::process::Command;
+
+use petgraph::visit::{ Dfs, IntoNodeReferences, Visitable };
+fn dfs_from_node<'a>(graph: &'a DiGraph<&'a str, &'a str>, start_node: NodeIndex) -> Vec<&'a str> {
+    let mut dfs = Dfs::new(graph, start_node);
+    let mut visit_order = Vec::new();
+
+    while let Some(nx) = dfs.next(graph) {
+        visit_order.push(graph[nx]);
+    }
+
+    visit_order
+}
 
 fn main() {
     // Create a new directed graph
@@ -60,6 +72,7 @@ fn main() {
         .into_iter()
         .find(|scc| scc.len() > 1)
         .unwrap_or_default();
+
     let mut node_set = HashSet::new();
     node_set.extend(first_scc.iter().cloned());
 
@@ -88,6 +101,18 @@ fn main() {
             }
         }
     }
+
+    // Choose a starting node for DFS in the subgraph
+    let start_node = if let Some(&first_node) = node_set.iter().next() {
+        subgraph_nodes[&first_node]
+    } else {
+        panic!("No starting node found in the subgraph");
+    };
+
+    // Perform DFS on the subgraph and get the visit order
+    let visit_order = dfs_from_node(&subgraph, start_node);
+
+    println!("Visit order in subgraph: {:?}", visit_order);
 
     // Print and save the subgraph's DOT
     save_dot_file(&subgraph, "subgraph.dot");
