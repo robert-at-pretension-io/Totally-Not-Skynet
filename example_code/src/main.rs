@@ -63,18 +63,37 @@ fn main() {
     let mut node_set = HashSet::new();
     node_set.extend(first_scc.iter().cloned());
 
-    // println!(
-    //     "First SCC to abstract: {:?}",
-    //     first_scc
-    //         .iter()
-    //         .map(|&node_index| graph[node_index])
-    //         .collect::<Vec<&str>>()
-    // );
-
-    // Convert first SCC to a set of node data instead of indices
-
     // Create a new node to represent the SCC
     let scc_node = graph.add_node("SCC");
+
+    let mut subgraph = DiGraph::<&str, &str>::new();
+    let mut subgraph_nodes = HashMap::new();
+
+    // Add nodes of the SCC to the subgraph
+    for &node_index in &node_set {
+        let node_data = graph[node_index];
+        let subgraph_node = subgraph.add_node(node_data);
+        subgraph_nodes.insert(node_index, subgraph_node);
+    }
+
+    // Add edges of the SCC to the subgraph
+    for &node_index in &node_set {
+        if let Some(&subgraph_source) = subgraph_nodes.get(&node_index) {
+            for edge in graph.edges(node_index) {
+                if node_set.contains(&edge.target()) {
+                    if let Some(&subgraph_target) = subgraph_nodes.get(&edge.target()) {
+                        subgraph.add_edge(subgraph_source, subgraph_target, *edge.weight());
+                    }
+                }
+            }
+        }
+    }
+
+    // Print and save the subgraph's DOT
+    save_dot_file(&subgraph, "subgraph.dot");
+
+    // Generate image for the subgraph
+    generate_image("subgraph.dot", "subgraph.png");
 
     let mut edges_to_add = Vec::new();
 
