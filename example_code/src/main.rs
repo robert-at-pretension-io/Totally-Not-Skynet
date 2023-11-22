@@ -24,18 +24,33 @@ fn dfs_from_node<'a>(graph: &'a DiGraph<&'a str, &'a str>, start_node: NodeIndex
 fn main() {
     // Create a new directed graph
     let mut graph = DiGraph::<&str, &str>::new();
+    let mut data_to_index = HashMap::new();
 
     // Add nodes
     let a = graph.add_node("A");
+    data_to_index.insert("A", a);
     let b = graph.add_node("B");
+    data_to_index.insert("B", b);
     let c = graph.add_node("C");
+    data_to_index.insert("C", c);
     let d = graph.add_node("D");
+    data_to_index.insert("D", d);
     let e = graph.add_node("E");
+    data_to_index.insert("E", e);
     let f = graph.add_node("F");
+    data_to_index.insert("F", f);
     let g = graph.add_node("G");
+    data_to_index.insert("G", g);
     let h = graph.add_node("H");
+    data_to_index.insert("H", h);
     let i = graph.add_node("I");
+    data_to_index.insert("I", i);
     let j = graph.add_node("J");
+    data_to_index.insert("J", j);
+    let k = graph.add_node("K");
+    data_to_index.insert("K", k);
+    let l = graph.add_node("L");
+    data_to_index.insert("L", l);
 
     // Add edges
     graph.add_edge(a, b, "to B");
@@ -49,7 +64,9 @@ fn main() {
     graph.add_edge(a, i, "to I");
     graph.add_edge(i, j, "to J");
     graph.add_edge(j, a, "to A");
-
+    graph.add_edge(e, k, "to K");
+    graph.add_edge(k, l, "to L");
+    graph.add_edge(l, e, "to E");
     // Print and save the original graph's DOT
     save_dot_file(&graph, "original_graph.dot");
 
@@ -60,100 +77,120 @@ fn main() {
     // Tarjan's algorithm to find SCCs
     let sccs = tarjan_scc(&graph);
 
-    for scc in &sccs {
-        let scc_names: Vec<&str> = scc
-            .iter()
-            .map(|node_index| graph[*node_index])
-            .collect();
-        println!("SCC: {:?}", scc_names);
-    }
-    // For simplicity, take the first SCC with more than one node and abstract it
-    let first_scc = sccs
-        .into_iter()
-        .find(|scc| scc.len() > 1)
-        .unwrap_or_default();
+    let mut all_node_set = HashSet::new();
 
-    let mut node_set = HashSet::new();
-    node_set.extend(first_scc.iter().cloned());
+    for (scc_index, scc) in sccs.iter().enumerate() {
+        // Skip SCCs with only one node
+        if scc.len() <= 1 {
+            continue;
+        }
 
-    // Create a new node to represent the SCC
-    let scc_node = graph.add_node("SCC");
+        let mut node_set = HashSet::new();
+        node_set.extend(scc.iter().cloned());
+        all_node_set.extend(scc.iter().cloned());
 
-    let mut subgraph = DiGraph::<&str, &str>::new();
-    let mut subgraph_nodes = HashMap::new();
+        let mut subgraph = DiGraph::<&str, &str>::new();
+        let mut subgraph_nodes = HashMap::new();
 
-    // Add nodes of the SCC to the subgraph
-    for &node_index in &node_set {
-        let node_data = graph[node_index];
-        let subgraph_node = subgraph.add_node(node_data);
-        subgraph_nodes.insert(node_index, subgraph_node);
-    }
+        // Add nodes of the SCC to the subgraph
+        for &node_index in &node_set {
+            let node_data = graph[node_index];
+            let subgraph_node = subgraph.add_node(node_data);
+            subgraph_nodes.insert(node_index, subgraph_node);
+        }
 
-    // Add edges of the SCC to the subgraph
-    for &node_index in &node_set {
-        if let Some(&subgraph_source) = subgraph_nodes.get(&node_index) {
-            for edge in graph.edges(node_index) {
-                if node_set.contains(&edge.target()) {
-                    if let Some(&subgraph_target) = subgraph_nodes.get(&edge.target()) {
-                        subgraph.add_edge(subgraph_source, subgraph_target, *edge.weight());
+        // Add edges of the SCC to the subgraph
+        for &node_index in &node_set {
+            if let Some(&subgraph_source) = subgraph_nodes.get(&node_index) {
+                for edge in graph.edges(node_index) {
+                    if node_set.contains(&edge.target()) {
+                        if let Some(&subgraph_target) = subgraph_nodes.get(&edge.target()) {
+                            subgraph.add_edge(subgraph_source, subgraph_target, *edge.weight());
+                        }
                     }
                 }
             }
         }
+        // Choose a starting node for DFS in the subgraph
+        let start_node = subgraph_nodes[&scc[0]];
+
+        // Perform DFS on the subgraph and get the visit order
+        let visit_order = dfs_from_node(&subgraph, start_node);
+
+        println!("Visit order in subgraph {}: {:?}", scc_index, visit_order);
+
+        // Print and save the subgraph's DOT
+        let subgraph_dot_filename = format!("subgraph_{}.dot", scc_index);
+        save_dot_file(&subgraph, &subgraph_dot_filename);
+
+        // Generate image for the subgraph
+        let subgraph_image_filename = format!("subgraph_{}.png", scc_index);
+        generate_image(&subgraph_dot_filename, &subgraph_image_filename);
     }
 
-    // Choose a starting node for DFS in the subgraph
-    let start_node = if let Some(&first_node) = node_set.iter().next() {
-        subgraph_nodes[&first_node]
-    } else {
-        panic!("No starting node found in the subgraph");
-    };
+    // let mut labels = Vec::new();
 
-    // Perform DFS on the subgraph and get the visit order
-    let visit_order = dfs_from_node(&subgraph, start_node);
+    // let mut indices = Vec::new();
+    // let mut index = -1;
 
-    println!("Visit order in subgraph: {:?}", visit_order);
+    // for scc in sccs {
+    //     index += 1;
 
-    // Print and save the subgraph's DOT
-    save_dot_file(&subgraph, "subgraph.dot");
+    //     if scc.len() <= 1 {
+    //         continue;
+    //     }
 
-    // Generate image for the subgraph
-    generate_image("subgraph.dot", "subgraph.png");
+    //     let scc_node_label = format!("SCC_{}", scc[0].index());
 
-    let mut edges_to_add = Vec::new();
+    //     labels.push(scc_node_label.clone()); // Push the label to the vector
 
-    for &node in &node_set {
-        for edge in graph.edges_directed(node, petgraph::Direction::Incoming) {
-            if !node_set.contains(&edge.source()) {
-                edges_to_add.push((edge.source(), scc_node, "to SCC"));
+    //     indices.push(index); // Push the index to the vector
+    // }
+
+    for scc in sccs {
+        if scc.len() <= 1 {
+            continue;
+        }
+        // Retrieve the reference to the label
+        // let label_ref = labels.last().unwrap();
+
+        // Add the node to the graph
+        let scc_node = graph.add_node("SCC");
+
+        let mut edges_to_add = Vec::new();
+
+        let node_set: HashSet<&str> = scc
+            .iter()
+            .map(|&node_index| graph[node_index])
+            .collect();
+
+        for node_data in &node_set {
+            let node_index = data_to_index[node_data];
+
+            for edge in graph.edges_directed(node_index, petgraph::Direction::Incoming) {
+                if !node_set.contains(&graph[edge.source()]) {
+                    edges_to_add.push((edge.source(), scc_node, "to SCC"));
+                }
+            }
+
+            for edge in graph.edges_directed(node_index, petgraph::Direction::Outgoing) {
+                if !node_set.contains(&graph[edge.target()]) {
+                    edges_to_add.push((scc_node, edge.target(), "from SCC"));
+                }
             }
         }
 
-        for edge in graph.edges_directed(node, petgraph::Direction::Outgoing) {
-            if !node_set.contains(&edge.target()) {
-                edges_to_add.push((scc_node, edge.target(), "from SCC"));
-            }
+        // Now, add the collected edges to the graph
+        for (source, target, label) in edges_to_add {
+            graph.add_edge(source, target, label);
         }
-    }
 
-    // Now, add the collected edges to the graph
-    for (source, target, label) in edges_to_add {
-        graph.add_edge(source, target, label);
-    }
-
-    println!("Graph before removing SCC nodes:");
-    println!("{:?}", Dot::with_config(&graph, &[Config::EdgeNoLabel]));
-
-    let node_set: HashSet<&str> = first_scc
-        .iter()
-        .map(|&node_index| graph[node_index])
-        .collect();
-
-    // Remove the nodes that are part of the SCC
-    for node_data in &node_set {
-        if let Some(node_index) = graph.node_indices().find(|&n| graph[n] == *node_data) {
-            println!("Removing node: {:?}", graph[node_index]); // Debug print for node removal
-            graph.remove_node(node_index);
+        // Remove the nodes that are part of the SCC
+        for node_data in &node_set {
+            if let Some(node_index) = graph.node_indices().find(|&n| graph[n] == *node_data) {
+                println!("Removing node: {:?}", graph[node_index]); // Debug print for node removal
+                graph.remove_node(node_index);
+            }
         }
     }
 
