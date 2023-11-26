@@ -14,18 +14,6 @@ use crate::generated_types::{
     PromptHistory,
 };
 
-use async_openai::types::{ ChatCompletionRequestUserMessage, ChatCompletionResponseFormat };
-use async_openai::{
-    types::{
-        ChatCompletionRequestMessage,
-        ChatCompletionRequestUserMessageContent,
-        ChatCompletionResponseFormatType,
-        CreateChatCompletionRequest,
-        Role,
-    },
-    Client,
-};
-use handlebars::Handlebars;
 // use std::env;
 
 // use crate::graph::validate_nodes_from_process;
@@ -37,7 +25,7 @@ use colored::*;
 use std::sync::Arc;
 
 // use crate::utils::parse_message;
-use crate::graph::validate_nodes_in_process;
+use crate::graph::{ validate_nodes_in_process, run_execution };
 use crate::sqlite_helper_functions::{ fetch_all_nodes, insert_node, update_node };
 
 use crate::SERVER_IDENTITY;
@@ -363,269 +351,46 @@ pub async fn start_message_sending_loop(
                 Contents::ExecutionDetails(execution) => {
                     match verb {
                         VerbTypes::Execute => {
-                            // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
+                            match run_execution(execution.clone()).await {
+                                Ok(response) => {
+                                    let letter = Letter {
+                                        body: Some(Body {
+                                            contents: Some(Contents::ExecutionDetails(response)),
+                                        }),
 
-                            let mut variable_definitions: HashMap<
-                                String,
-                                String
-                            > = execution.clone().current_variable_definitions;
+                                        verb: VerbTypes::Acknowledge as i32,
+                                    };
 
-                            let local_nodes: Vec<Node> = execution.process
-                                .clone()
-                                .unwrap()
-                                .nodes.clone();
+                                    let envelope = Envelope {
+                                        letters: vec![letter],
+                                        sender: Some(receiver.clone()),
+                                        receiver: Some(sender.clone()),
+                                        verification_id: verification_id.clone(),
+                                    };
 
-                            // Make a map out of the vec where the key is the id of the node:
-                            let mut local_nodes_map: HashMap<String, Node> = HashMap::new();
-                            local_nodes.iter().for_each(|node: &Node| {
-                                local_nodes_map.insert(
-                                    node.node_info.clone().unwrap().id,
-                                    node.clone()
-                                );
-                            });
-
-                            let topological_order: Vec<GraphNodeInfo> = execution.process
-                                .clone()
-                                .unwrap()
-                                .topological_order.clone();
-
-                            // Loop through the topological order list and execute each node in order
-
-                            // let mut node_execution_response: HashMap<
-                            //     String,
-                            //     String
-                            // > = HashMap::new();
-
-                            let mut prompt_histories: Vec<PromptHistory> = Vec::new();
-
-                            for node_info in topological_order {
-                                let current_node = local_nodes_map
-                                    .get(&node_info.id)
-                                    .unwrap()
-                                    .clone();
-
-                                // Process the node, which ever type it is:
-
-                                // let process = NodeTypes::Process as i32;
-                                // let prompt = NodeTypes::Prompt as i32;
-
-                                match NodeTypes::try_from(current_node.node_type) {
-                                    Ok(NodeTypes::Process) => {
-                                        // Once we implement this functionality just for Prompts (and other node types), we can extract this function and call it recursively to handle this case (with a max depth?)
-                                    }
-                                    Ok(NodeTypes::Prompt) => {
-                                        // we need to replace the prompt text input_variables with their definitions
-
-                                        let prompt_text: String;
-                                        let hydrated_prompt_text: String;
-
-                                        let additional_instruction =
-                                            "When coming up with a response, please make the fields of the json response be the following: ".to_string();
-
-                                        let more_additional_instruction =
-                                            "
-                                            
-                                            You can also use the error field to report any problems when trying to come up with a response.
-                                            ".to_string();
-
-                                        // Concatenate the strings in the vector to make a comma separated string.
-
-                                        let variable_string: String =
-                                            current_node.output_variables.join(", ");
-
-                                        match
-                                            current_node.node_content.unwrap().node_content.unwrap()
-                                        {
-                                            NodeContentEnum::Prompt(prompt) => {
-                                                // hydrate the prompt text with the variable definitions
-
-                                                let mut handlebars = Handlebars::new();
-
-                                                let json_variable_definitions: Value =
-                                                    serde_json::json!(variable_definitions);
-
-                                                handlebars
-                                                    .register_template_string(
-                                                        "prompt",
-                                                        prompt.clone().prompt
-                                                    )
-                                                    .unwrap();
-
-                                                hydrated_prompt_text = handlebars
-                                                    .render("prompt", &json_variable_definitions)
-                                                    .unwrap();
-
-                                                prompt_text = format!(
-                                                    "{} {} {} {}",
-                                                    hydrated_prompt_text.clone(),
-                                                    additional_instruction,
-                                                    variable_string,
-                                                    more_additional_instruction
-                                                );
-
-                                                print!("Prompt text: {}", prompt_text.green());
-                                            }
-                                            _ => {
-                                                println!("prompt not handled");
-                                                continue;
-                                            }
-                                        }
-
-                                        // I believe this already pulls the key from the environmental variable.
-                                        let client = Client::new();
-
-                                        let user_message = ChatCompletionRequestUserMessage {
-                                            content: Some(
-                                                ChatCompletionRequestUserMessageContent::Text(
-                                                    prompt_text
-                                                )
+                                    send_message(&tx, msg.0.clone(), envelope).await;
+                                }
+                                Err(error_response) => {
+                                    let letter = Letter {
+                                        body: Some(Body {
+                                            contents: Some(
+                                                Contents::ExecutionDetails(error_response)
                                             ),
-                                            role: Role::User,
-                                        };
+                                        }),
 
-                                        let message: ChatCompletionRequestMessage =
-                                            ChatCompletionRequestMessage::User(user_message);
+                                        verb: VerbTypes::Error as i32,
+                                    };
 
-                                        // Create request using builder pattern
-                                        // Every request struct has companion builder struct with same name + Args suffix
-                                        let mut request = CreateChatCompletionRequest::default();
+                                    let envelope = Envelope {
+                                        letters: vec![letter],
+                                        sender: Some(receiver.clone()),
+                                        receiver: Some(sender.clone()),
+                                        verification_id: verification_id.clone(),
+                                    };
 
-                                        request.messages = vec![message];
-                                        request.response_format = Some(
-                                            ChatCompletionResponseFormat {
-                                                r#type: ChatCompletionResponseFormatType::JsonObject,
-                                            }
-                                        );
-
-                                        // Any model can be used so long as it supports response_format
-                                        request.model = "gpt-4-1106-preview".to_string();
-
-                                        // Call API
-                                        let response = client.chat().create(request).await.unwrap();
-
-                                        println!(
-                                            "{}",
-                                            response.choices
-                                                .first()
-                                                .unwrap()
-                                                .message.content.clone()
-                                                .unwrap()
-                                                .as_str()
-                                                .to_string()
-                                        );
-
-                                        let json_string = response.choices
-                                            .first()
-                                            .unwrap()
-                                            .message.content.clone()
-                                            .unwrap()
-                                            .as_str()
-                                            .to_string();
-
-                                        let prompt_history = PromptHistory {
-                                            prompt: hydrated_prompt_text.clone(),
-                                            response: json_string.clone(),
-                                            node_info: Some(node_info.clone()),
-                                        };
-
-                                        prompt_histories.push(prompt_history.clone());
-
-                                        // node_execution_response.insert(
-                                        //     node_info.clone().id,
-                                        //     json_string.clone()
-                                        // );
-
-                                        let value: Value = serde_json
-                                            ::from_str(json_string.as_str())
-                                            .unwrap();
-                                        if let Some(obj) = value.as_object() {
-                                            for (key, value) in obj {
-                                                println!("{}: {}", key, value);
-                                                variable_definitions.insert(
-                                                    key.clone(),
-                                                    value.clone().to_string()
-                                                );
-                                            }
-                                        } else {
-                                            println!("{}", "The JSON is not an object.".red());
-                                        }
-
-                                        // see if all of the output_variables of the node are in the variable definition hashmap:
-
-                                        let check_output_vars: Vec<String> =
-                                            current_node.output_variables;
-
-                                        //loop through check_output_vars and see if the key exists in the variable_definitions hashmap:
-
-                                        for output_var in check_output_vars.iter() {
-                                            if !variable_definitions.contains_key(output_var) {
-                                                println!("Missing variable: {}", output_var.red());
-                                                // Handle the missing variable case here (e.g., error handling or logging)
-
-                                                // Send back the Execution to the frontend and let the user decide what to do.
-
-                                                let mut error_response = execution.clone();
-
-                                                error_response.current_node = Some(
-                                                    node_info.clone()
-                                                );
-                                                error_response.current_variable_definitions =
-                                                    variable_definitions.clone();
-
-                                                let letter = Letter {
-                                                    body: Some(Body {
-                                                        contents: Some(
-                                                            Contents::ExecutionDetails(
-                                                                error_response
-                                                            )
-                                                        ),
-                                                    }),
-
-                                                    verb: VerbTypes::Error as i32,
-                                                };
-
-                                                let envelope = Envelope {
-                                                    letters: vec![letter],
-                                                    sender: Some(receiver.clone()),
-                                                    receiver: Some(sender.clone()),
-                                                    verification_id: verification_id.clone(),
-                                                };
-
-                                                send_message(&tx, msg.0.clone(), envelope).await;
-                                            }
-                                        }
-                                    }
-
-                                    _ => {
-                                        println!("Other types not implemented yet");
-                                        continue;
-                                    }
+                                    send_message(&tx, msg.0.clone(), envelope).await;
                                 }
                             }
-
-                            let mut response = execution.clone();
-
-                            // Change this to use a prompt history
-                            // response.node_execution_response = node_execution_response;
-                            response.current_variable_definitions = variable_definitions.clone();
-                            response.prompt_history = prompt_histories.clone();
-
-                            let letter = Letter {
-                                body: Some(Body {
-                                    contents: Some(Contents::ExecutionDetails(response)),
-                                }),
-
-                                verb: VerbTypes::Acknowledge as i32,
-                            };
-
-                            let envelope = Envelope {
-                                letters: vec![letter],
-                                sender: Some(receiver.clone()),
-                                receiver: Some(sender.clone()),
-                                verification_id: verification_id.clone(),
-                            };
-
-                            send_message(&tx, msg.0.clone(), envelope).await;
                         }
                         _ => {
                             println!(

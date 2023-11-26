@@ -38,6 +38,7 @@ async-openai = "0.16.2"
 mustache = "0.9.0"
 handlebars = "4.5.0"
 warp = "0.3.6"
+async-recursion = "1.0.5"
 
 
 [build-dependencies]
