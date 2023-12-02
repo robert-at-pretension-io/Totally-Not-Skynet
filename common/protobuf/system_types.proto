@@ -29,8 +29,7 @@ message Command {
 
 /* This node type is not yet implemented, the idea is that it will allow for choosing amongst a few different nodes for future execution. */
 message Conditional {
-  string statement = 1;
-  repeated Node options = 2; 
+  Prompt prompt = 1;
 }
 
 // This is a simple object used for passing between system entities that is easier to translate into the domain object within each system. (The purpose is to make it easier to implement future graph systems within future systems).
@@ -46,12 +45,21 @@ message Process {
   repeated Node nodes = 3;
 }
 
+// I loop is a process that will loop through a set of nodes until a condition is met. The condition is specified by the user. It MUST contain exactly one conditional node.
+message Loop {
+  Process process = 1;
+  uint32 current_iteration = 2;
+  // This is the maximum number of iterations that the conditional will be allowed to run for. This is to prevent infinite loops. For example, if it is set to 4 then the conditional will only be allowed to run 4 -- not stop at 3 full executions.
+  uint32 max_iterations = 3;
+}
+
 enum NodeTypes {
   PROMPT = 0;
   PROCESS = 1;
   CONDITIONAL = 2;
   COMMAND = 3;
   CODE = 4;
+  LOOP = 5;
 }
 
 message NodeContent {
@@ -190,6 +198,7 @@ oneof contents {
     SystemError errors = 5;
     Identity identity = 6;
     NodesToProcess nodes_to_process = 7;
+    NodesToLoop nodes_to_loop = 8;
   }
 }
 
@@ -197,6 +206,12 @@ message NodesToProcess {
   repeated Node nodes = 1;
   GraphNodeInfo containing_node_info = 2;
 }
+
+message NodesToLoop {
+  repeated Node nodes = 1;
+  GraphNodeInfo containing_node_info = 2;
+}
+
 
 
 

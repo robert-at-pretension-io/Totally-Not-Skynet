@@ -4,16 +4,16 @@
     import { v4 as uuidv4 } from "uuid";
 
     import {
-        NodeTypes,
-        Node,
-        // MessageBundle,
-        // VerbTypeNames,
-        Process,
-        GraphNodeInfo,
-        NodesToProcess,
-        Letter,
-        Body,
-        VerbTypes,
+      NodeTypes,
+      Node,
+      // MessageBundle,
+      // VerbTypeNames,
+      Process,
+      GraphNodeInfo,
+      NodesToLoop,
+      Letter,
+      Body,
+      VerbTypes,
     } from "generated/system_types";
 
     import systemStateStore from "stores/systemStateStore";
@@ -27,76 +27,77 @@
     let selected_node_list: Node[] = [];
     let error = "";
 
+    let max_iterations: number;
+
     let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
 
     // setup onmount:
     onMount(() => {
-        node_list = $systemStateStore.local_nodes;
+      node_list = $systemStateStore.local_nodes;
     });
 
     $: {
-        node_list = $systemStateStore.local_nodes;
+      node_list = $systemStateStore.local_nodes;
     }
 
     function isSelected(node: Node): boolean {
-        return selected_node_list.includes(node);
+      return selected_node_list.includes(node);
     }
 
     function toggleNodeSelect(node: Node) {
-        if (isSelected(node)) {
-            selected_node_list = selected_node_list.filter(
-                (selected_node) => selected_node !== node,
-            );
-        } else {
-            selected_node_list = [...selected_node_list, node];
-        }
+      if (isSelected(node)) {
+        selected_node_list = selected_node_list.filter(
+          (selected_node) => selected_node !== node,
+        );
+      } else {
+        selected_node_list = [...selected_node_list, node];
+      }
     }
 
     function sendNodes() {
-        if (!name.trim() || !description.trim()) {
-            error = "Both name and description are required!";
-            return; // Return early to stop execution if validation fails
-        } else {
-            error = "";
-        }
-        alert("sendNodes feature is not yet implemented!");
-        console.log("sending selected_node_list: ", selected_node_list);
+      if (!name.trim() || !description.trim()) {
+        error = "Both name and description are required!";
+        return; // Return early to stop execution if validation fails
+      } else {
+        error = "";
+      }
+      console.log("sending selected_node_list: ", selected_node_list);
 
-        let graph_node_info = new GraphNodeInfo();
+      let graph_node_info = new GraphNodeInfo();
 
-        graph_node_info.name = name;
-        graph_node_info.description = description;
-        graph_node_info.id = uuidv4();
+      graph_node_info.name = name;
+      graph_node_info.description = description;
+      graph_node_info.id = uuidv4();
 
-        let nodes_to_process = new NodesToProcess();
+      let nodes_to_loop = new NodesToLoop();
 
-        nodes_to_process.containing_node_info = graph_node_info;
+      nodes_to_loop.containing_node_info = graph_node_info;
 
-        nodes_to_process.nodes = selected_node_list;
+      nodes_to_loop.nodes = selected_node_list;
 
-        let websocket = $websocketStore.websocket as WebSocket;
+      let websocket = $websocketStore.websocket as WebSocket;
 
-        let letter = new Letter();
+      let letter = new Letter();
 
-        let body = new Body();
+      let body = new Body();
 
-        body.nodes_to_process = nodes_to_process;
+      body.nodes_to_loop = nodes_to_loop;
 
-        letter.body = body;
-        letter.verb = VerbTypes.Validate;
+      letter.body = body;
+      letter.verb = VerbTypes.Validate;
 
-        sendEnvelope(websocket, [letter]);
+      sendEnvelope(websocket, [letter]);
 
-        selected_node_list = [];
-        description = "";
-        name = "";
+      selected_node_list = [];
+      description = "";
+      name = "";
     }
 </script>
 
-<p>Please set a descriptive name for your process:</p>
+<p>Please set a descriptive name for your loop:</p>
 <input type="text" bind:value={name} />
 <p>
-    Please set a description for your process, please talk about what purpose it
+    Please set a description for your loop, please talk about what purpose it
     serves:
 </p>
 <input type="text" bind:value={description} />
@@ -130,6 +131,15 @@
 {#if error}
     <p class="error">{error}</p>
 {/if}
+
+<label for="system" class="required-label">Max Iterations</label>
+<input
+    id="system"
+    bind:value={max_iterations}
+    type="text"
+    required
+    class="required-input"
+/>
 
 <button class="add-button" on:click={sendNodes}>Save Process</button>
 

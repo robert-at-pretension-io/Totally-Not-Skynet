@@ -1658,7 +1658,7 @@ var app = (function () {
     }
     _Timestamp_one_of_decls = new WeakMap();
 
-    var _GraphNodeInfo_one_of_decls, _Edge_one_of_decls, _Prompt_one_of_decls, _Command_one_of_decls, _Conditional_one_of_decls, _Graph_one_of_decls, _Process_one_of_decls, _NodeContent_one_of_decls, _Code_one_of_decls, _Node_one_of_decls, _Nodes_one_of_decls, _Log_one_of_decls, _Identity_one_of_decls, _Execution_one_of_decls, _PromptHistory_one_of_decls, _VariableDefinition_one_of_decls, _SystemState_one_of_decls, _AuthenticationMessage_one_of_decls, _UserSettings_one_of_decls, _SystemError_one_of_decls, _Letter_one_of_decls, _Body_one_of_decls, _NodesToProcess_one_of_decls, _Envelope_one_of_decls;
+    var _GraphNodeInfo_one_of_decls, _Edge_one_of_decls, _Prompt_one_of_decls, _Command_one_of_decls, _Conditional_one_of_decls, _Graph_one_of_decls, _Process_one_of_decls, _Loop_one_of_decls, _NodeContent_one_of_decls, _Code_one_of_decls, _Node_one_of_decls, _Nodes_one_of_decls, _Log_one_of_decls, _Identity_one_of_decls, _Execution_one_of_decls, _PromptHistory_one_of_decls, _VariableDefinition_one_of_decls, _SystemState_one_of_decls, _AuthenticationMessage_one_of_decls, _UserSettings_one_of_decls, _SystemError_one_of_decls, _Letter_one_of_decls, _Body_one_of_decls, _NodesToProcess_one_of_decls, _NodesToLoop_one_of_decls, _Envelope_one_of_decls;
     var NodeTypes;
     (function (NodeTypes) {
         NodeTypes[NodeTypes["PROMPT"] = 0] = "PROMPT";
@@ -1666,6 +1666,7 @@ var app = (function () {
         NodeTypes[NodeTypes["CONDITIONAL"] = 2] = "CONDITIONAL";
         NodeTypes[NodeTypes["COMMAND"] = 3] = "COMMAND";
         NodeTypes[NodeTypes["CODE"] = 4] = "CODE";
+        NodeTypes[NodeTypes["LOOP"] = 5] = "LOOP";
     })(NodeTypes || (NodeTypes = {}));
     var VerbTypes;
     (function (VerbTypes) {
@@ -2018,54 +2019,40 @@ var app = (function () {
         constructor(data) {
             super();
             _Conditional_one_of_decls.set(this, []);
-            googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], __classPrivateFieldGet(this, _Conditional_one_of_decls, "f"));
+            googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], __classPrivateFieldGet(this, _Conditional_one_of_decls, "f"));
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("statement" in data && data.statement != undefined) {
-                    this.statement = data.statement;
-                }
-                if ("options" in data && data.options != undefined) {
-                    this.options = data.options;
+                if ("prompt" in data && data.prompt != undefined) {
+                    this.prompt = data.prompt;
                 }
             }
         }
-        get statement() {
-            return googleProtobuf.Message.getFieldWithDefault(this, 1, "");
+        get prompt() {
+            return googleProtobuf.Message.getWrapperField(this, Prompt, 1);
         }
-        set statement(value) {
-            googleProtobuf.Message.setField(this, 1, value);
+        set prompt(value) {
+            googleProtobuf.Message.setWrapperField(this, 1, value);
         }
-        get options() {
-            return googleProtobuf.Message.getRepeatedWrapperField(this, Node, 2);
-        }
-        set options(value) {
-            googleProtobuf.Message.setRepeatedWrapperField(this, 2, value);
+        get has_prompt() {
+            return googleProtobuf.Message.getField(this, 1) != null;
         }
         static fromObject(data) {
             const message = new Conditional({});
-            if (data.statement != null) {
-                message.statement = data.statement;
-            }
-            if (data.options != null) {
-                message.options = data.options.map(item => Node.fromObject(item));
+            if (data.prompt != null) {
+                message.prompt = Prompt.fromObject(data.prompt);
             }
             return message;
         }
         toObject() {
             const data = {};
-            if (this.statement != null) {
-                data.statement = this.statement;
-            }
-            if (this.options != null) {
-                data.options = this.options.map((item) => item.toObject());
+            if (this.prompt != null) {
+                data.prompt = this.prompt.toObject();
             }
             return data;
         }
         serialize(w) {
             const writer = w || new googleProtobuf.BinaryWriter();
-            if (this.statement.length)
-                writer.writeString(1, this.statement);
-            if (this.options.length)
-                writer.writeRepeatedMessage(2, this.options, (item) => item.serialize(writer));
+            if (this.has_prompt)
+                writer.writeMessage(1, this.prompt, () => this.prompt.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -2076,10 +2063,7 @@ var app = (function () {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        message.statement = reader.readString();
-                        break;
-                    case 2:
-                        reader.readMessage(message.options, () => googleProtobuf.Message.addToRepeatedWrapperField(message, 2, Node.deserialize(reader), Node));
+                        reader.readMessage(message.prompt, () => message.prompt = Prompt.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -2277,6 +2261,109 @@ var app = (function () {
         }
     }
     _Process_one_of_decls = new WeakMap();
+    class Loop extends googleProtobuf.Message {
+        constructor(data) {
+            super();
+            _Loop_one_of_decls.set(this, []);
+            googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], __classPrivateFieldGet(this, _Loop_one_of_decls, "f"));
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("process" in data && data.process != undefined) {
+                    this.process = data.process;
+                }
+                if ("current_iteration" in data && data.current_iteration != undefined) {
+                    this.current_iteration = data.current_iteration;
+                }
+                if ("max_iterations" in data && data.max_iterations != undefined) {
+                    this.max_iterations = data.max_iterations;
+                }
+            }
+        }
+        get process() {
+            return googleProtobuf.Message.getWrapperField(this, Process, 1);
+        }
+        set process(value) {
+            googleProtobuf.Message.setWrapperField(this, 1, value);
+        }
+        get has_process() {
+            return googleProtobuf.Message.getField(this, 1) != null;
+        }
+        get current_iteration() {
+            return googleProtobuf.Message.getFieldWithDefault(this, 2, 0);
+        }
+        set current_iteration(value) {
+            googleProtobuf.Message.setField(this, 2, value);
+        }
+        get max_iterations() {
+            return googleProtobuf.Message.getFieldWithDefault(this, 3, 0);
+        }
+        set max_iterations(value) {
+            googleProtobuf.Message.setField(this, 3, value);
+        }
+        static fromObject(data) {
+            const message = new Loop({});
+            if (data.process != null) {
+                message.process = Process.fromObject(data.process);
+            }
+            if (data.current_iteration != null) {
+                message.current_iteration = data.current_iteration;
+            }
+            if (data.max_iterations != null) {
+                message.max_iterations = data.max_iterations;
+            }
+            return message;
+        }
+        toObject() {
+            const data = {};
+            if (this.process != null) {
+                data.process = this.process.toObject();
+            }
+            if (this.current_iteration != null) {
+                data.current_iteration = this.current_iteration;
+            }
+            if (this.max_iterations != null) {
+                data.max_iterations = this.max_iterations;
+            }
+            return data;
+        }
+        serialize(w) {
+            const writer = w || new googleProtobuf.BinaryWriter();
+            if (this.has_process)
+                writer.writeMessage(1, this.process, () => this.process.serialize(writer));
+            if (this.current_iteration != 0)
+                writer.writeUint32(2, this.current_iteration);
+            if (this.max_iterations != 0)
+                writer.writeUint32(3, this.max_iterations);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes) {
+            const reader = bytes instanceof googleProtobuf.BinaryReader ? bytes : new googleProtobuf.BinaryReader(bytes), message = new Loop();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.process, () => message.process = Process.deserialize(reader));
+                        break;
+                    case 2:
+                        message.current_iteration = reader.readUint32();
+                        break;
+                    case 3:
+                        message.max_iterations = reader.readUint32();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary() {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes) {
+            return Loop.deserialize(bytes);
+        }
+    }
+    _Loop_one_of_decls = new WeakMap();
     class NodeContent extends googleProtobuf.Message {
         constructor(data) {
             super();
@@ -3976,7 +4063,7 @@ var app = (function () {
     class Body extends googleProtobuf.Message {
         constructor(data) {
             super();
-            _Body_one_of_decls.set(this, [[1, 2, 3, 4, 5, 6, 7]]);
+            _Body_one_of_decls.set(this, [[1, 2, 3, 4, 5, 6, 7, 8]]);
             googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], __classPrivateFieldGet(this, _Body_one_of_decls, "f"));
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("node" in data && data.node != undefined) {
@@ -3999,6 +4086,9 @@ var app = (function () {
                 }
                 if ("nodes_to_process" in data && data.nodes_to_process != undefined) {
                     this.nodes_to_process = data.nodes_to_process;
+                }
+                if ("nodes_to_loop" in data && data.nodes_to_loop != undefined) {
+                    this.nodes_to_loop = data.nodes_to_loop;
                 }
             }
         }
@@ -4065,6 +4155,15 @@ var app = (function () {
         get has_nodes_to_process() {
             return googleProtobuf.Message.getField(this, 7) != null;
         }
+        get nodes_to_loop() {
+            return googleProtobuf.Message.getWrapperField(this, NodesToLoop, 8);
+        }
+        set nodes_to_loop(value) {
+            googleProtobuf.Message.setOneofWrapperField(this, 8, __classPrivateFieldGet(this, _Body_one_of_decls, "f")[0], value);
+        }
+        get has_nodes_to_loop() {
+            return googleProtobuf.Message.getField(this, 8) != null;
+        }
         get contents() {
             const cases = {
                 0: "none",
@@ -4074,9 +4173,10 @@ var app = (function () {
                 4: "execution_details",
                 5: "errors",
                 6: "identity",
-                7: "nodes_to_process"
+                7: "nodes_to_process",
+                8: "nodes_to_loop"
             };
-            return cases[googleProtobuf.Message.computeOneofCase(this, [1, 2, 3, 4, 5, 6, 7])];
+            return cases[googleProtobuf.Message.computeOneofCase(this, [1, 2, 3, 4, 5, 6, 7, 8])];
         }
         static fromObject(data) {
             const message = new Body({});
@@ -4100,6 +4200,9 @@ var app = (function () {
             }
             if (data.nodes_to_process != null) {
                 message.nodes_to_process = NodesToProcess.fromObject(data.nodes_to_process);
+            }
+            if (data.nodes_to_loop != null) {
+                message.nodes_to_loop = NodesToLoop.fromObject(data.nodes_to_loop);
             }
             return message;
         }
@@ -4126,6 +4229,9 @@ var app = (function () {
             if (this.nodes_to_process != null) {
                 data.nodes_to_process = this.nodes_to_process.toObject();
             }
+            if (this.nodes_to_loop != null) {
+                data.nodes_to_loop = this.nodes_to_loop.toObject();
+            }
             return data;
         }
         serialize(w) {
@@ -4144,6 +4250,8 @@ var app = (function () {
                 writer.writeMessage(6, this.identity, () => this.identity.serialize(writer));
             if (this.has_nodes_to_process)
                 writer.writeMessage(7, this.nodes_to_process, () => this.nodes_to_process.serialize(writer));
+            if (this.has_nodes_to_loop)
+                writer.writeMessage(8, this.nodes_to_loop, () => this.nodes_to_loop.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -4173,6 +4281,9 @@ var app = (function () {
                         break;
                     case 7:
                         reader.readMessage(message.nodes_to_process, () => message.nodes_to_process = NodesToProcess.deserialize(reader));
+                        break;
+                    case 8:
+                        reader.readMessage(message.nodes_to_loop, () => message.nodes_to_loop = NodesToLoop.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -4270,6 +4381,89 @@ var app = (function () {
         }
     }
     _NodesToProcess_one_of_decls = new WeakMap();
+    class NodesToLoop extends googleProtobuf.Message {
+        constructor(data) {
+            super();
+            _NodesToLoop_one_of_decls.set(this, []);
+            googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], __classPrivateFieldGet(this, _NodesToLoop_one_of_decls, "f"));
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("nodes" in data && data.nodes != undefined) {
+                    this.nodes = data.nodes;
+                }
+                if ("containing_node_info" in data && data.containing_node_info != undefined) {
+                    this.containing_node_info = data.containing_node_info;
+                }
+            }
+        }
+        get nodes() {
+            return googleProtobuf.Message.getRepeatedWrapperField(this, Node, 1);
+        }
+        set nodes(value) {
+            googleProtobuf.Message.setRepeatedWrapperField(this, 1, value);
+        }
+        get containing_node_info() {
+            return googleProtobuf.Message.getWrapperField(this, GraphNodeInfo, 2);
+        }
+        set containing_node_info(value) {
+            googleProtobuf.Message.setWrapperField(this, 2, value);
+        }
+        get has_containing_node_info() {
+            return googleProtobuf.Message.getField(this, 2) != null;
+        }
+        static fromObject(data) {
+            const message = new NodesToLoop({});
+            if (data.nodes != null) {
+                message.nodes = data.nodes.map(item => Node.fromObject(item));
+            }
+            if (data.containing_node_info != null) {
+                message.containing_node_info = GraphNodeInfo.fromObject(data.containing_node_info);
+            }
+            return message;
+        }
+        toObject() {
+            const data = {};
+            if (this.nodes != null) {
+                data.nodes = this.nodes.map((item) => item.toObject());
+            }
+            if (this.containing_node_info != null) {
+                data.containing_node_info = this.containing_node_info.toObject();
+            }
+            return data;
+        }
+        serialize(w) {
+            const writer = w || new googleProtobuf.BinaryWriter();
+            if (this.nodes.length)
+                writer.writeRepeatedMessage(1, this.nodes, (item) => item.serialize(writer));
+            if (this.has_containing_node_info)
+                writer.writeMessage(2, this.containing_node_info, () => this.containing_node_info.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes) {
+            const reader = bytes instanceof googleProtobuf.BinaryReader ? bytes : new googleProtobuf.BinaryReader(bytes), message = new NodesToLoop();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.nodes, () => googleProtobuf.Message.addToRepeatedWrapperField(message, 1, Node.deserialize(reader), Node));
+                        break;
+                    case 2:
+                        reader.readMessage(message.containing_node_info, () => message.containing_node_info = GraphNodeInfo.deserialize(reader));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary() {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes) {
+            return NodesToLoop.deserialize(bytes);
+        }
+    }
+    _NodesToLoop_one_of_decls = new WeakMap();
     class Envelope extends googleProtobuf.Message {
         constructor(data) {
             super();
@@ -4409,6 +4603,7 @@ var app = (function () {
         Conditional: Conditional,
         Graph: Graph$3,
         Process: Process,
+        Loop: Loop,
         NodeContent: NodeContent,
         Code: Code,
         Node: Node,
@@ -4425,6 +4620,7 @@ var app = (function () {
         Letter: Letter,
         Body: Body,
         NodesToProcess: NodesToProcess,
+        NodesToLoop: NodesToLoop,
         Envelope: Envelope
     });
 
@@ -4434,23 +4630,23 @@ var app = (function () {
 
     /* src/components/sidebarComponents/modifyNode.svelte generated by Svelte v3.59.1 */
 
-    const { console: console_1$7 } = globals;
-    const file$a = "src/components/sidebarComponents/modifyNode.svelte";
+    const { console: console_1$8 } = globals;
+    const file$b = "src/components/sidebarComponents/modifyNode.svelte";
 
-    function get_each_context$6(ctx, list, i) {
+    function get_each_context$8(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[11] = list[i];
     	return child_ctx;
     }
 
-    function get_each_context_1$3(ctx, list, i) {
+    function get_each_context_1$5(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[14] = list[i];
     	return child_ctx;
     }
 
     // (42:2) {#each num_array as array_index}
-    function create_each_block_1$3(ctx) {
+    function create_each_block_1$5(ctx) {
     	let option;
     	let t_value = /*key_list*/ ctx[3][/*array_index*/ ctx[14]] + "";
     	let t;
@@ -4461,7 +4657,7 @@ var app = (function () {
     			t = text(t_value);
     			option.__value = /*array_index*/ ctx[14];
     			option.value = option.__value;
-    			add_location(option, file$a, 42, 4, 1573);
+    			add_location(option, file$b, 42, 4, 1573);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -4475,7 +4671,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_1$3.name,
+    		id: create_each_block_1$5.name,
     		type: "each",
     		source: "(42:2) {#each num_array as array_index}",
     		ctx
@@ -4485,7 +4681,7 @@ var app = (function () {
     }
 
     // (52:2) {#each node_options as node}
-    function create_each_block$6(ctx) {
+    function create_each_block$8(ctx) {
     	let option;
     	let t0_value = /*key_list*/ ctx[3][/*node*/ ctx[11].node_type] + "";
     	let t0;
@@ -4502,7 +4698,7 @@ var app = (function () {
     			t2 = text(t2_value);
     			option.__value = option_value_value = /*node*/ ctx[11];
     			option.value = option.__value;
-    			add_location(option, file$a, 52, 4, 1883);
+    			add_location(option, file$b, 52, 4, 1883);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -4526,7 +4722,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$6.name,
+    		id: create_each_block$8.name,
     		type: "each",
     		source: "(52:2) {#each node_options as node}",
     		ctx
@@ -4535,7 +4731,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$b(ctx) {
+    function create_fragment$c(ctx) {
     	let p0;
     	let t1;
     	let select0;
@@ -4554,7 +4750,7 @@ var app = (function () {
     	let each_blocks_1 = [];
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks_1[i] = create_each_block_1$3(get_each_context_1$3(ctx, each_value_1, i));
+    		each_blocks_1[i] = create_each_block_1$5(get_each_context_1$5(ctx, each_value_1, i));
     	}
 
     	let each_value = /*node_options*/ ctx[2];
@@ -4562,7 +4758,7 @@ var app = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$6(get_each_context$6(ctx, each_value, i));
+    		each_blocks[i] = create_each_block$8(get_each_context$8(ctx, each_value, i));
     	}
 
     	const block = {
@@ -4589,15 +4785,15 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			add_location(p0, file$a, 39, 0, 1466);
+    			add_location(p0, file$b, 39, 0, 1466);
     			if (/*typeName*/ ctx[0] === void 0) add_render_callback(() => /*select0_change_handler*/ ctx[8].call(select0));
-    			add_location(select0, file$a, 40, 0, 1503);
-    			add_location(p1, file$a, 46, 0, 1655);
+    			add_location(select0, file$b, 40, 0, 1503);
+    			add_location(p1, file$b, 46, 0, 1655);
     			option.__value = "";
     			option.value = option.__value;
-    			add_location(option, file$a, 50, 2, 1808);
+    			add_location(option, file$b, 50, 2, 1808);
     			if (/*selectedNode*/ ctx[1] === void 0) add_render_callback(() => /*select1_change_handler*/ ctx[9].call(select1));
-    			add_location(select1, file$a, 49, 0, 1734);
+    			add_location(select1, file$b, 49, 0, 1734);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4647,12 +4843,12 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1$3(ctx, each_value_1, i);
+    					const child_ctx = get_each_context_1$5(ctx, each_value_1, i);
 
     					if (each_blocks_1[i]) {
     						each_blocks_1[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks_1[i] = create_each_block_1$3(child_ctx);
+    						each_blocks_1[i] = create_each_block_1$5(child_ctx);
     						each_blocks_1[i].c();
     						each_blocks_1[i].m(select0, null);
     					}
@@ -4677,12 +4873,12 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$6(ctx, each_value, i);
+    					const child_ctx = get_each_context$8(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block$6(child_ctx);
+    						each_blocks[i] = create_each_block$8(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(select1, null);
     					}
@@ -4718,7 +4914,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$b.name,
+    		id: create_fragment$c.name,
     		type: "component",
     		source: "",
     		ctx
@@ -4727,7 +4923,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$b($$self, $$props, $$invalidate) {
+    function instance$c($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
     	component_subscribe($$self, systemStateStore, $$value => $$invalidate(7, $systemStateStore = $$value));
@@ -4772,7 +4968,7 @@ var app = (function () {
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$7.warn(`<ModifyNode> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$8.warn(`<ModifyNode> was created with unknown prop '${key}'`);
     	});
 
     	function select0_change_handler() {
@@ -4844,16 +5040,19 @@ var app = (function () {
     class ModifyNode extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$b, create_fragment$b, safe_not_equal, {});
+    		init(this, options, instance$c, create_fragment$c, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ModifyNode",
     			options,
-    			id: create_fragment$b.name
+    			id: create_fragment$c.name
     		});
     	}
     }
+
+    const websocket = { websocket: null };
+    const websocketStore = writable(websocket);
 
     // Unique ID creation requires a high quality random # generator. In the browser we therefore
     // require the crypto API and do not support built-in fallback to lower quality random number
@@ -4919,9 +5118,6 @@ var app = (function () {
 
       return unsafeStringify(rnds);
     }
-
-    const websocket = { websocket: null };
-    const websocketStore = writable(websocket);
 
     function initializeSystemState(system_state) {
         const graph = new Graph$3();
@@ -5180,25 +5376,700 @@ var app = (function () {
         });
     }
 
+    /* src/components/sidebarComponents/newNodeSubComponents/ConditionalComponent.svelte generated by Svelte v3.59.1 */
+    const file$a = "src/components/sidebarComponents/newNodeSubComponents/ConditionalComponent.svelte";
+
+    function get_each_context$7(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[21] = list[i];
+    	child_ctx[23] = i;
+    	return child_ctx;
+    }
+
+    function get_each_context_1$4(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[24] = list[i];
+    	child_ctx[23] = i;
+    	return child_ctx;
+    }
+
+    // (98:8) {#each input_variables as _inputVar, index}
+    function create_each_block_1$4(ctx) {
+    	let button;
+    	let t0;
+    	let t1_value = /*input_variables*/ ctx[4][/*index*/ ctx[23]] + "";
+    	let t1;
+    	let t2;
+    	let mounted;
+    	let dispose;
+
+    	function click_handler() {
+    		return /*click_handler*/ ctx[11](/*index*/ ctx[23]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			button = element$1("button");
+    			t0 = text("`Remove input var: ");
+    			t1 = text(t1_value);
+    			t2 = text("`");
+    			attr_dev(button, "type", "button");
+    			add_location(button, file$a, 98, 10, 3530);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t0);
+    			append_dev(button, t1);
+    			append_dev(button, t2);
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", click_handler, false, false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			if (dirty & /*input_variables*/ 16 && t1_value !== (t1_value = /*input_variables*/ ctx[4][/*index*/ ctx[23]] + "")) set_data_dev(t1, t1_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1$4.name,
+    		type: "each",
+    		source: "(98:8) {#each input_variables as _inputVar, index}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (122:8) {#each output_variables as _outputVar, index}
+    function create_each_block$7(ctx) {
+    	let button;
+    	let t0;
+    	let t1_value = /*output_variables*/ ctx[5][/*index*/ ctx[23]] + "";
+    	let t1;
+    	let t2;
+    	let mounted;
+    	let dispose;
+
+    	function click_handler_2() {
+    		return /*click_handler_2*/ ctx[14](/*index*/ ctx[23]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			button = element$1("button");
+    			t0 = text("`Remove output Var: ");
+    			t1 = text(t1_value);
+    			t2 = text("`");
+    			attr_dev(button, "type", "button");
+    			add_location(button, file$a, 122, 10, 4234);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t0);
+    			append_dev(button, t1);
+    			append_dev(button, t2);
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", click_handler_2, false, false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			if (dirty & /*output_variables*/ 32 && t1_value !== (t1_value = /*output_variables*/ ctx[5][/*index*/ ctx[23]] + "")) set_data_dev(t1, t1_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block$7.name,
+    		type: "each",
+    		source: "(122:8) {#each output_variables as _outputVar, index}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$b(ctx) {
+    	let form;
+    	let div3;
+    	let div2;
+    	let input0;
+    	let t0;
+    	let input1;
+    	let t1;
+    	let div0;
+    	let h40;
+    	let t3;
+    	let t4;
+    	let input2;
+    	let t5;
+    	let button0;
+    	let t7;
+    	let div1;
+    	let h41;
+    	let t9;
+    	let t10;
+    	let input3;
+    	let t11;
+    	let button1;
+    	let t13;
+    	let label0;
+    	let t15;
+    	let input4;
+    	let t16;
+    	let label1;
+    	let t18;
+    	let input5;
+    	let t19;
+    	let button2;
+    	let mounted;
+    	let dispose;
+    	let each_value_1 = /*input_variables*/ ctx[4];
+    	validate_each_argument(each_value_1);
+    	let each_blocks_1 = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks_1[i] = create_each_block_1$4(get_each_context_1$4(ctx, each_value_1, i));
+    	}
+
+    	let each_value = /*output_variables*/ ctx[5];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block$7(get_each_context$7(ctx, each_value, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			form = element$1("form");
+    			div3 = element$1("div");
+    			div2 = element$1("div");
+    			input0 = element$1("input");
+    			t0 = space();
+    			input1 = element$1("input");
+    			t1 = space();
+    			div0 = element$1("div");
+    			h40 = element$1("h4");
+    			h40.textContent = "Input Variables";
+    			t3 = space();
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].c();
+    			}
+
+    			t4 = space();
+    			input2 = element$1("input");
+    			t5 = space();
+    			button0 = element$1("button");
+    			button0.textContent = "Add";
+    			t7 = space();
+    			div1 = element$1("div");
+    			h41 = element$1("h4");
+    			h41.textContent = "Output Variables";
+    			t9 = space();
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t10 = space();
+    			input3 = element$1("input");
+    			t11 = space();
+    			button1 = element$1("button");
+    			button1.textContent = "Add";
+    			t13 = space();
+    			label0 = element$1("label");
+    			label0.textContent = "Prompt";
+    			t15 = space();
+    			input4 = element$1("input");
+    			t16 = space();
+    			label1 = element$1("label");
+    			label1.textContent = "System";
+    			t18 = space();
+    			input5 = element$1("input");
+    			t19 = space();
+    			button2 = element$1("button");
+    			button2.textContent = "Submit";
+    			attr_dev(input0, "placeholder", "Name");
+    			add_location(input0, file$a, 91, 6, 3307);
+    			attr_dev(input1, "placeholder", "Description");
+    			add_location(input1, file$a, 93, 6, 3361);
+    			add_location(h40, file$a, 96, 8, 3443);
+    			attr_dev(input2, "placeholder", "New Input Variable");
+    			add_location(input2, file$a, 106, 8, 3795);
+    			attr_dev(button0, "type", "button");
+    			add_location(button0, file$a, 110, 8, 3906);
+    			add_location(div0, file$a, 95, 6, 3429);
+    			add_location(h41, file$a, 120, 8, 4144);
+    			attr_dev(input3, "placeholder", "New Output Variable");
+    			add_location(input3, file$a, 130, 8, 4504);
+    			attr_dev(button1, "type", "button");
+    			add_location(button1, file$a, 134, 8, 4617);
+    			add_location(div1, file$a, 119, 6, 4130);
+    			attr_dev(label0, "for", "prompt");
+    			attr_dev(label0, "class", "required-label svelte-wwcf2i");
+    			add_location(label0, file$a, 143, 6, 4845);
+    			attr_dev(input4, "id", "prompt");
+    			attr_dev(input4, "type", "text");
+    			input4.required = true;
+    			attr_dev(input4, "class", "required-input svelte-wwcf2i");
+    			add_location(input4, file$a, 144, 6, 4909);
+    			attr_dev(label1, "for", "system");
+    			attr_dev(label1, "class", "required-label svelte-wwcf2i");
+    			add_location(label1, file$a, 152, 6, 5053);
+    			attr_dev(input5, "id", "system");
+    			attr_dev(input5, "type", "text");
+    			input5.required = true;
+    			attr_dev(input5, "class", "required-input svelte-wwcf2i");
+    			add_location(input5, file$a, 153, 6, 5117);
+    			attr_dev(button2, "type", "submit");
+    			add_location(button2, file$a, 161, 6, 5261);
+    			add_location(div2, file$a, 90, 4, 3295);
+    			add_location(div3, file$a, 89, 2, 3285);
+    			add_location(form, file$a, 88, 0, 3231);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, form, anchor);
+    			append_dev(form, div3);
+    			append_dev(div3, div2);
+    			append_dev(div2, input0);
+    			set_input_value(input0, /*name*/ ctx[3]);
+    			append_dev(div2, t0);
+    			append_dev(div2, input1);
+    			set_input_value(input1, /*description*/ ctx[2]);
+    			append_dev(div2, t1);
+    			append_dev(div2, div0);
+    			append_dev(div0, h40);
+    			append_dev(div0, t3);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				if (each_blocks_1[i]) {
+    					each_blocks_1[i].m(div0, null);
+    				}
+    			}
+
+    			append_dev(div0, t4);
+    			append_dev(div0, input2);
+    			set_input_value(input2, /*new_input_variable*/ ctx[6]);
+    			append_dev(div0, t5);
+    			append_dev(div0, button0);
+    			append_dev(div2, t7);
+    			append_dev(div2, div1);
+    			append_dev(div1, h41);
+    			append_dev(div1, t9);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				if (each_blocks[i]) {
+    					each_blocks[i].m(div1, null);
+    				}
+    			}
+
+    			append_dev(div1, t10);
+    			append_dev(div1, input3);
+    			set_input_value(input3, /*new_output_variable*/ ctx[7]);
+    			append_dev(div1, t11);
+    			append_dev(div1, button1);
+    			append_dev(div2, t13);
+    			append_dev(div2, label0);
+    			append_dev(div2, t15);
+    			append_dev(div2, input4);
+    			set_input_value(input4, /*prompt_text*/ ctx[1]);
+    			append_dev(div2, t16);
+    			append_dev(div2, label1);
+    			append_dev(div2, t18);
+    			append_dev(div2, input5);
+    			set_input_value(input5, /*system_text*/ ctx[0]);
+    			append_dev(div2, t19);
+    			append_dev(div2, button2);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[9]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[10]),
+    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[12]),
+    					listen_dev(button0, "click", /*click_handler_1*/ ctx[13], false, false, false, false),
+    					listen_dev(input3, "input", /*input3_input_handler*/ ctx[15]),
+    					listen_dev(button1, "click", /*click_handler_3*/ ctx[16], false, false, false, false),
+    					listen_dev(input4, "input", /*input4_input_handler*/ ctx[17]),
+    					listen_dev(input5, "input", /*input5_input_handler*/ ctx[18]),
+    					listen_dev(form, "submit", prevent_default(/*submitConditional*/ ctx[8]), false, true, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*name*/ 8 && input0.value !== /*name*/ ctx[3]) {
+    				set_input_value(input0, /*name*/ ctx[3]);
+    			}
+
+    			if (dirty & /*description*/ 4 && input1.value !== /*description*/ ctx[2]) {
+    				set_input_value(input1, /*description*/ ctx[2]);
+    			}
+
+    			if (dirty & /*input_variables*/ 16) {
+    				each_value_1 = /*input_variables*/ ctx[4];
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1$4(ctx, each_value_1, i);
+
+    					if (each_blocks_1[i]) {
+    						each_blocks_1[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_1[i] = create_each_block_1$4(child_ctx);
+    						each_blocks_1[i].c();
+    						each_blocks_1[i].m(div0, t4);
+    					}
+    				}
+
+    				for (; i < each_blocks_1.length; i += 1) {
+    					each_blocks_1[i].d(1);
+    				}
+
+    				each_blocks_1.length = each_value_1.length;
+    			}
+
+    			if (dirty & /*new_input_variable*/ 64 && input2.value !== /*new_input_variable*/ ctx[6]) {
+    				set_input_value(input2, /*new_input_variable*/ ctx[6]);
+    			}
+
+    			if (dirty & /*output_variables*/ 32) {
+    				each_value = /*output_variables*/ ctx[5];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context$7(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block$7(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div1, t10);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+
+    			if (dirty & /*new_output_variable*/ 128 && input3.value !== /*new_output_variable*/ ctx[7]) {
+    				set_input_value(input3, /*new_output_variable*/ ctx[7]);
+    			}
+
+    			if (dirty & /*prompt_text*/ 2 && input4.value !== /*prompt_text*/ ctx[1]) {
+    				set_input_value(input4, /*prompt_text*/ ctx[1]);
+    			}
+
+    			if (dirty & /*system_text*/ 1 && input5.value !== /*system_text*/ ctx[0]) {
+    				set_input_value(input5, /*system_text*/ ctx[0]);
+    			}
+    		},
+    		i: noop$2,
+    		o: noop$2,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(form);
+    			destroy_each(each_blocks_1, detaching);
+    			destroy_each(each_blocks, detaching);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$b.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function isValidHandlebarsTemplate$1(template) {
+    	// A simple regex to check for basic Handlebars syntax
+    	const handlebarsRegex = /\{\{([^}]+)\}\}/g;
+
+    	return handlebarsRegex.test(template);
+    }
+
+    function extractVariableNames$1(template) {
+    	const handlebarsRegex = /\{\{([^}]+)\}\}/g;
+    	let match;
+    	const variables = new Set();
+
+    	while ((match = handlebarsRegex.exec(template)) !== null) {
+    		// The variable is in match[1], trim it to handle spaces
+    		variables.add(match[1].trim());
+    	}
+
+    	return Array.from(variables);
+    }
+
+    function instance$b($$self, $$props, $$invalidate) {
+    	let $websocketStore;
+    	validate_store(websocketStore, 'websocketStore');
+    	component_subscribe($$self, websocketStore, $$value => $$invalidate(19, $websocketStore = $$value));
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('ConditionalComponent', slots, []);
+    	let system_text = "";
+    	let prompt_text = "";
+    	let description = "";
+    	let name = "";
+    	let input_variables = [];
+    	let output_variables = [];
+    	let new_input_variable = "";
+    	let new_output_variable = "";
+
+    	function submitConditional() {
+    		// First, validate the Handlebars template
+    		if (!isValidHandlebarsTemplate$1(prompt_text)) {
+    			alert("Invalid Handlebars template.");
+    			return;
+    		}
+
+    		let conditional = new Conditional();
+    		let prompt = new Prompt();
+    		prompt.prompt = prompt_text;
+    		prompt.system = system_text;
+    		conditional.prompt = prompt;
+    		let node = new Node();
+
+    		if (new_input_variable != "") {
+    			$$invalidate(4, input_variables = [...input_variables, new_input_variable]);
+    		}
+
+    		// Extract and check variables from the template
+    		let variable_names = extractVariableNames$1(prompt_text);
+
+    		let allVariablesMatch = input_variables.every(inputVar => variable_names.includes(inputVar));
+    		let noExtraVariables = variable_names.every(templateVar => input_variables.includes(templateVar));
+
+    		// Combining both checks to ensure exact match
+    		let exactMatch = allVariablesMatch && noExtraVariables;
+
+    		if (new_output_variable != "") {
+    			$$invalidate(5, output_variables = [...output_variables, new_output_variable]);
+    		}
+
+    		if (exactMatch) {
+    			node.input_variables = input_variables;
+    			node.output_variables = output_variables;
+    			let node_content = new NodeContent();
+    			node_content.conditional = conditional;
+    			let node_info = new GraphNodeInfo();
+    			node_info.name = name;
+    			node_info.id = new v4();
+    			node_info.description = description;
+    			node.node_info = node_info;
+    			node.node_content = node_content;
+    			node.node_type = NodeTypes.CONDITIONAL;
+    			let websocket = $websocketStore.websocket;
+    			let body = new Body();
+    			body.node = node;
+    			let letter = new Letter();
+    			letter.body = body;
+    			letter.verb = VerbTypes.Create;
+    			sendEnvelope(websocket, [letter]);
+    			reset_component();
+    		} else {
+    			alert("All of the input variables do not have a definition within the template");
+    		}
+    	}
+
+    	function reset_component() {
+    		$$invalidate(0, system_text = "");
+    		$$invalidate(1, prompt_text = "");
+    		$$invalidate(2, description = "");
+    		$$invalidate(3, name = "");
+    		$$invalidate(4, input_variables = []);
+    		$$invalidate(5, output_variables = []);
+    		$$invalidate(6, new_input_variable = "");
+    		$$invalidate(7, new_output_variable = "");
+    	}
+
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<ConditionalComponent> was created with unknown prop '${key}'`);
+    	});
+
+    	function input0_input_handler() {
+    		name = this.value;
+    		$$invalidate(3, name);
+    	}
+
+    	function input1_input_handler() {
+    		description = this.value;
+    		$$invalidate(2, description);
+    	}
+
+    	const click_handler = index => {
+    		input_variables.splice(index, 1);
+    		$$invalidate(4, input_variables);
+    	};
+
+    	function input2_input_handler() {
+    		new_input_variable = this.value;
+    		$$invalidate(6, new_input_variable);
+    	}
+
+    	const click_handler_1 = () => {
+    		$$invalidate(4, input_variables = [...input_variables, new_input_variable]);
+    		$$invalidate(6, new_input_variable = "");
+    	};
+
+    	const click_handler_2 = index => {
+    		output_variables.splice(index, 1);
+    		$$invalidate(5, output_variables);
+    	};
+
+    	function input3_input_handler() {
+    		new_output_variable = this.value;
+    		$$invalidate(7, new_output_variable);
+    	}
+
+    	const click_handler_3 = () => {
+    		$$invalidate(5, output_variables = [...output_variables, new_output_variable]);
+    		$$invalidate(7, new_output_variable = "");
+    	};
+
+    	function input4_input_handler() {
+    		prompt_text = this.value;
+    		$$invalidate(1, prompt_text);
+    	}
+
+    	function input5_input_handler() {
+    		system_text = this.value;
+    		$$invalidate(0, system_text);
+    	}
+
+    	$$self.$capture_state = () => ({
+    		websocketStore,
+    		Prompt,
+    		VerbTypes,
+    		Node,
+    		GraphNodeInfo,
+    		Letter,
+    		Body,
+    		NodeTypes,
+    		NodeContent,
+    		Conditional,
+    		uuidv4: v4,
+    		sendEnvelope,
+    		system_text,
+    		prompt_text,
+    		description,
+    		name,
+    		input_variables,
+    		output_variables,
+    		new_input_variable,
+    		new_output_variable,
+    		submitConditional,
+    		isValidHandlebarsTemplate: isValidHandlebarsTemplate$1,
+    		extractVariableNames: extractVariableNames$1,
+    		reset_component,
+    		$websocketStore
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('system_text' in $$props) $$invalidate(0, system_text = $$props.system_text);
+    		if ('prompt_text' in $$props) $$invalidate(1, prompt_text = $$props.prompt_text);
+    		if ('description' in $$props) $$invalidate(2, description = $$props.description);
+    		if ('name' in $$props) $$invalidate(3, name = $$props.name);
+    		if ('input_variables' in $$props) $$invalidate(4, input_variables = $$props.input_variables);
+    		if ('output_variables' in $$props) $$invalidate(5, output_variables = $$props.output_variables);
+    		if ('new_input_variable' in $$props) $$invalidate(6, new_input_variable = $$props.new_input_variable);
+    		if ('new_output_variable' in $$props) $$invalidate(7, new_output_variable = $$props.new_output_variable);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [
+    		system_text,
+    		prompt_text,
+    		description,
+    		name,
+    		input_variables,
+    		output_variables,
+    		new_input_variable,
+    		new_output_variable,
+    		submitConditional,
+    		input0_input_handler,
+    		input1_input_handler,
+    		click_handler,
+    		input2_input_handler,
+    		click_handler_1,
+    		click_handler_2,
+    		input3_input_handler,
+    		click_handler_3,
+    		input4_input_handler,
+    		input5_input_handler
+    	];
+    }
+
+    class ConditionalComponent extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$b, create_fragment$b, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "ConditionalComponent",
+    			options,
+    			id: create_fragment$b.name
+    		});
+    	}
+    }
+
     /* src/components/sidebarComponents/newNodeSubComponents/ProcessComponent.svelte generated by Svelte v3.59.1 */
 
-    const { Object: Object_1$1, console: console_1$6 } = globals;
+    const { Object: Object_1$2, console: console_1$7 } = globals;
     const file$9 = "src/components/sidebarComponents/newNodeSubComponents/ProcessComponent.svelte";
 
-    function get_each_context$5(ctx, list, i) {
+    function get_each_context$6(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[14] = list[i];
     	return child_ctx;
     }
 
-    function get_each_context_1$2(ctx, list, i) {
+    function get_each_context_1$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[14] = list[i];
     	return child_ctx;
     }
 
     // (76:2) {#each node_list as node}
-    function create_each_block_1$2(ctx) {
+    function create_each_block_1$3(ctx) {
     	let li;
     	let button;
     	let t0_value = /*key_list*/ ctx[5][/*node*/ ctx[14].node_type] + "";
@@ -5258,7 +6129,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_1$2.name,
+    		id: create_each_block_1$3.name,
     		type: "each",
     		source: "(76:2) {#each node_list as node}",
     		ctx
@@ -5268,7 +6139,7 @@ var app = (function () {
     }
 
     // (90:0) {#each selected_node_list as node}
-    function create_each_block$5(ctx) {
+    function create_each_block$6(ctx) {
     	let li;
     	let p;
     	let t0_value = /*key_list*/ ctx[5][/*node*/ ctx[14].node_type] + "";
@@ -5305,7 +6176,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$5.name,
+    		id: create_each_block$6.name,
     		type: "each",
     		source: "(90:0) {#each selected_node_list as node}",
     		ctx
@@ -5315,7 +6186,7 @@ var app = (function () {
     }
 
     // (96:0) {#if error}
-    function create_if_block$5(ctx) {
+    function create_if_block$6(ctx) {
     	let p;
     	let t;
 
@@ -5340,7 +6211,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$5.name,
+    		id: create_if_block$6.name,
     		type: "if",
     		source: "(96:0) {#if error}",
     		ctx
@@ -5374,7 +6245,7 @@ var app = (function () {
     	let each_blocks_1 = [];
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks_1[i] = create_each_block_1$2(get_each_context_1$2(ctx, each_value_1, i));
+    		each_blocks_1[i] = create_each_block_1$3(get_each_context_1$3(ctx, each_value_1, i));
     	}
 
     	let each_value = /*selected_node_list*/ ctx[3];
@@ -5382,10 +6253,10 @@ var app = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$5(get_each_context$5(ctx, each_value, i));
+    		each_blocks[i] = create_each_block$6(get_each_context$6(ctx, each_value, i));
     	}
 
-    	let if_block = /*error*/ ctx[4] && create_if_block$5(ctx);
+    	let if_block = /*error*/ ctx[4] && create_if_block$6(ctx);
 
     	const block = {
     		c: function create() {
@@ -5498,12 +6369,12 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1$2(ctx, each_value_1, i);
+    					const child_ctx = get_each_context_1$3(ctx, each_value_1, i);
 
     					if (each_blocks_1[i]) {
     						each_blocks_1[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks_1[i] = create_each_block_1$2(child_ctx);
+    						each_blocks_1[i] = create_each_block_1$3(child_ctx);
     						each_blocks_1[i].c();
     						each_blocks_1[i].m(ul, null);
     					}
@@ -5522,12 +6393,12 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$5(ctx, each_value, i);
+    					const child_ctx = get_each_context$6(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block$5(child_ctx);
+    						each_blocks[i] = create_each_block$6(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(t11.parentNode, t11);
     					}
@@ -5544,7 +6415,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$5(ctx);
+    					if_block = create_if_block$6(ctx);
     					if_block.c();
     					if_block.m(t12.parentNode, t12);
     				}
@@ -5656,8 +6527,8 @@ var app = (function () {
 
     	const writable_props = [];
 
-    	Object_1$1.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$6.warn(`<ProcessComponent> was created with unknown prop '${key}'`);
+    	Object_1$2.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$7.warn(`<ProcessComponent> was created with unknown prop '${key}'`);
     	});
 
     	function input0_input_handler() {
@@ -5752,14 +6623,14 @@ var app = (function () {
     /* src/components/sidebarComponents/newNodeSubComponents/PromptComponent.svelte generated by Svelte v3.59.1 */
     const file$8 = "src/components/sidebarComponents/newNodeSubComponents/PromptComponent.svelte";
 
-    function get_each_context$4(ctx, list, i) {
+    function get_each_context$5(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[21] = list[i];
     	child_ctx[23] = i;
     	return child_ctx;
     }
 
-    function get_each_context_1$1(ctx, list, i) {
+    function get_each_context_1$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[24] = list[i];
     	child_ctx[23] = i;
@@ -5767,7 +6638,7 @@ var app = (function () {
     }
 
     // (97:8) {#each input_variables as _inputVar, index}
-    function create_each_block_1$1(ctx) {
+    function create_each_block_1$2(ctx) {
     	let button;
     	let t0;
     	let t1_value = /*input_variables*/ ctx[4][/*index*/ ctx[23]] + "";
@@ -5813,7 +6684,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_1$1.name,
+    		id: create_each_block_1$2.name,
     		type: "each",
     		source: "(97:8) {#each input_variables as _inputVar, index}",
     		ctx
@@ -5823,7 +6694,7 @@ var app = (function () {
     }
 
     // (121:8) {#each output_variables as _outputVar, index}
-    function create_each_block$4(ctx) {
+    function create_each_block$5(ctx) {
     	let button;
     	let t0;
     	let t1_value = /*output_variables*/ ctx[5][/*index*/ ctx[23]] + "";
@@ -5869,7 +6740,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$4.name,
+    		id: create_each_block$5.name,
     		type: "each",
     		source: "(121:8) {#each output_variables as _outputVar, index}",
     		ctx
@@ -5918,7 +6789,7 @@ var app = (function () {
     	let each_blocks_1 = [];
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks_1[i] = create_each_block_1$1(get_each_context_1$1(ctx, each_value_1, i));
+    		each_blocks_1[i] = create_each_block_1$2(get_each_context_1$2(ctx, each_value_1, i));
     	}
 
     	let each_value = /*output_variables*/ ctx[5];
@@ -5926,7 +6797,7 @@ var app = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$4(get_each_context$4(ctx, each_value, i));
+    		each_blocks[i] = create_each_block$5(get_each_context$5(ctx, each_value, i));
     	}
 
     	const block = {
@@ -6106,12 +6977,12 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1$1(ctx, each_value_1, i);
+    					const child_ctx = get_each_context_1$2(ctx, each_value_1, i);
 
     					if (each_blocks_1[i]) {
     						each_blocks_1[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks_1[i] = create_each_block_1$1(child_ctx);
+    						each_blocks_1[i] = create_each_block_1$2(child_ctx);
     						each_blocks_1[i].c();
     						each_blocks_1[i].m(div0, t4);
     					}
@@ -6134,12 +7005,12 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$4(ctx, each_value, i);
+    					const child_ctx = get_each_context$5(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block$4(child_ctx);
+    						each_blocks[i] = create_each_block$5(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(div1, t10);
     					}
@@ -6421,30 +7292,435 @@ var app = (function () {
     	}
     }
 
-    /* src/components/sidebarComponents/newNodeSubComponents/CodeComponent.svelte generated by Svelte v3.59.1 */
+    /* src/components/sidebarComponents/newNodeSubComponents/LoopComponent.svelte generated by Svelte v3.59.1 */
 
-    const file$7 = "src/components/sidebarComponents/newNodeSubComponents/CodeComponent.svelte";
+    const { Object: Object_1$1, console: console_1$6 } = globals;
+    const file$7 = "src/components/sidebarComponents/newNodeSubComponents/LoopComponent.svelte";
 
-    function create_fragment$8(ctx) {
+    function get_each_context$4(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[16] = list[i];
+    	return child_ctx;
+    }
+
+    function get_each_context_1$1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[16] = list[i];
+    	return child_ctx;
+    }
+
+    // (75:4) {#each node_list as node}
+    function create_each_block_1$1(ctx) {
+    	let li;
+    	let button;
+    	let t0_value = /*key_list*/ ctx[6][/*node*/ ctx[16].node_type] + "";
+    	let t0;
+    	let t1;
+    	let t2_value = /*node*/ ctx[16].node_info.name + "";
+    	let t2;
+    	let t3;
+    	let mounted;
+    	let dispose;
+
+    	function click_handler() {
+    		return /*click_handler*/ ctx[13](/*node*/ ctx[16]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			li = element$1("li");
+    			button = element$1("button");
+    			t0 = text(t0_value);
+    			t1 = text(" : ");
+    			t2 = text(t2_value);
+    			t3 = space();
+    			attr_dev(button, "type", "button");
+    			toggle_class(button, "selected", /*isSelected*/ ctx[7](/*node*/ ctx[16]));
+    			add_location(button, file$7, 76, 12, 2401);
+    			add_location(li, file$7, 75, 8, 2384);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, li, anchor);
+    			append_dev(li, button);
+    			append_dev(button, t0);
+    			append_dev(button, t1);
+    			append_dev(button, t2);
+    			append_dev(li, t3);
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", click_handler, false, false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			if (dirty & /*node_list*/ 4 && t0_value !== (t0_value = /*key_list*/ ctx[6][/*node*/ ctx[16].node_type] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*node_list*/ 4 && t2_value !== (t2_value = /*node*/ ctx[16].node_info.name + "")) set_data_dev(t2, t2_value);
+
+    			if (dirty & /*isSelected, node_list*/ 132) {
+    				toggle_class(button, "selected", /*isSelected*/ ctx[7](/*node*/ ctx[16]));
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(li);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1$1.name,
+    		type: "each",
+    		source: "(75:4) {#each node_list as node}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (89:0) {#each selected_node_list as node}
+    function create_each_block$4(ctx) {
+    	let li;
     	let p;
+    	let t0_value = /*key_list*/ ctx[6][/*node*/ ctx[16].node_type] + "";
+    	let t0;
+    	let t1;
+    	let t2_value = /*node*/ ctx[16].node_info.name + "";
+    	let t2;
+
+    	const block = {
+    		c: function create() {
+    			li = element$1("li");
+    			p = element$1("p");
+    			t0 = text(t0_value);
+    			t1 = text(" : ");
+    			t2 = text(t2_value);
+    			add_location(p, file$7, 90, 8, 2744);
+    			add_location(li, file$7, 89, 4, 2731);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, li, anchor);
+    			append_dev(li, p);
+    			append_dev(p, t0);
+    			append_dev(p, t1);
+    			append_dev(p, t2);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*selected_node_list*/ 8 && t0_value !== (t0_value = /*key_list*/ ctx[6][/*node*/ ctx[16].node_type] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*selected_node_list*/ 8 && t2_value !== (t2_value = /*node*/ ctx[16].node_info.name + "")) set_data_dev(t2, t2_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(li);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block$4.name,
+    		type: "each",
+    		source: "(89:0) {#each selected_node_list as node}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (95:0) {#if error}
+    function create_if_block$5(ctx) {
+    	let p;
+    	let t;
 
     	const block = {
     		c: function create() {
     			p = element$1("p");
-    			p.textContent = "Make a new code node";
-    			add_location(p, file$7, 0, 0, 0);
+    			t = text(/*error*/ ctx[4]);
+    			attr_dev(p, "class", "error svelte-114s1a4");
+    			add_location(p, file$7, 95, 4, 2837);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, p, anchor);
+    			append_dev(p, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*error*/ 16) set_data_dev(t, /*error*/ ctx[4]);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(p);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$5.name,
+    		type: "if",
+    		source: "(95:0) {#if error}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$8(ctx) {
+    	let p0;
+    	let t1;
+    	let input0;
+    	let t2;
+    	let p1;
+    	let t4;
+    	let input1;
+    	let t5;
+    	let p2;
+    	let t7;
+    	let ul;
+    	let t8;
+    	let h3;
+    	let t10;
+    	let t11;
+    	let t12;
+    	let label;
+    	let t14;
+    	let input2;
+    	let t15;
+    	let button;
+    	let mounted;
+    	let dispose;
+    	let each_value_1 = /*node_list*/ ctx[2];
+    	validate_each_argument(each_value_1);
+    	let each_blocks_1 = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks_1[i] = create_each_block_1$1(get_each_context_1$1(ctx, each_value_1, i));
+    	}
+
+    	let each_value = /*selected_node_list*/ ctx[3];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block$4(get_each_context$4(ctx, each_value, i));
+    	}
+
+    	let if_block = /*error*/ ctx[4] && create_if_block$5(ctx);
+
+    	const block = {
+    		c: function create() {
+    			p0 = element$1("p");
+    			p0.textContent = "Please set a descriptive name for your loop:";
+    			t1 = space();
+    			input0 = element$1("input");
+    			t2 = space();
+    			p1 = element$1("p");
+    			p1.textContent = "Please set a description for your loop, please talk about what purpose it\n    serves:";
+    			t4 = space();
+    			input1 = element$1("input");
+    			t5 = space();
+    			p2 = element$1("p");
+    			p2.textContent = "Click the node buttons below to add them to the graph. Then click \"Add\n    Node(s) to see them populate on the graph.\"";
+    			t7 = space();
+    			ul = element$1("ul");
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].c();
+    			}
+
+    			t8 = space();
+    			h3 = element$1("h3");
+    			h3.textContent = "Nodes to add:";
+    			t10 = space();
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t11 = space();
+    			if (if_block) if_block.c();
+    			t12 = space();
+    			label = element$1("label");
+    			label.textContent = "Max Iterations";
+    			t14 = space();
+    			input2 = element$1("input");
+    			t15 = space();
+    			button = element$1("button");
+    			button.textContent = "Save Process";
+    			add_location(p0, file$7, 60, 0, 1969);
+    			attr_dev(input0, "type", "text");
+    			add_location(input0, file$7, 61, 0, 2021);
+    			add_location(p1, file$7, 62, 0, 2061);
+    			attr_dev(input1, "type", "text");
+    			add_location(input1, file$7, 66, 0, 2160);
+    			add_location(p2, file$7, 68, 0, 2208);
+    			add_location(ul, file$7, 73, 0, 2341);
+    			add_location(h3, file$7, 86, 0, 2668);
+    			attr_dev(label, "for", "system");
+    			attr_dev(label, "class", "required-label");
+    			add_location(label, file$7, 98, 0, 2873);
+    			attr_dev(input2, "id", "system");
+    			attr_dev(input2, "type", "text");
+    			input2.required = true;
+    			attr_dev(input2, "class", "required-input");
+    			add_location(input2, file$7, 99, 0, 2939);
+    			attr_dev(button, "class", "add-button");
+    			add_location(button, file$7, 107, 0, 3054);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, p, anchor);
+    			insert_dev(target, p0, anchor);
+    			insert_dev(target, t1, anchor);
+    			insert_dev(target, input0, anchor);
+    			set_input_value(input0, /*name*/ ctx[0]);
+    			insert_dev(target, t2, anchor);
+    			insert_dev(target, p1, anchor);
+    			insert_dev(target, t4, anchor);
+    			insert_dev(target, input1, anchor);
+    			set_input_value(input1, /*description*/ ctx[1]);
+    			insert_dev(target, t5, anchor);
+    			insert_dev(target, p2, anchor);
+    			insert_dev(target, t7, anchor);
+    			insert_dev(target, ul, anchor);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				if (each_blocks_1[i]) {
+    					each_blocks_1[i].m(ul, null);
+    				}
+    			}
+
+    			insert_dev(target, t8, anchor);
+    			insert_dev(target, h3, anchor);
+    			insert_dev(target, t10, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				if (each_blocks[i]) {
+    					each_blocks[i].m(target, anchor);
+    				}
+    			}
+
+    			insert_dev(target, t11, anchor);
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, t12, anchor);
+    			insert_dev(target, label, anchor);
+    			insert_dev(target, t14, anchor);
+    			insert_dev(target, input2, anchor);
+    			set_input_value(input2, /*max_iterations*/ ctx[5]);
+    			insert_dev(target, t15, anchor);
+    			insert_dev(target, button, anchor);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[11]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[12]),
+    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[14]),
+    					listen_dev(button, "click", /*sendNodes*/ ctx[9], false, false, false, false)
+    				];
+
+    				mounted = true;
+    			}
     		},
-    		p: noop$2,
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*name*/ 1 && input0.value !== /*name*/ ctx[0]) {
+    				set_input_value(input0, /*name*/ ctx[0]);
+    			}
+
+    			if (dirty & /*description*/ 2 && input1.value !== /*description*/ ctx[1]) {
+    				set_input_value(input1, /*description*/ ctx[1]);
+    			}
+
+    			if (dirty & /*isSelected, node_list, toggleNodeSelect, key_list*/ 452) {
+    				each_value_1 = /*node_list*/ ctx[2];
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1$1(ctx, each_value_1, i);
+
+    					if (each_blocks_1[i]) {
+    						each_blocks_1[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_1[i] = create_each_block_1$1(child_ctx);
+    						each_blocks_1[i].c();
+    						each_blocks_1[i].m(ul, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_1.length; i += 1) {
+    					each_blocks_1[i].d(1);
+    				}
+
+    				each_blocks_1.length = each_value_1.length;
+    			}
+
+    			if (dirty & /*selected_node_list, key_list*/ 72) {
+    				each_value = /*selected_node_list*/ ctx[3];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context$4(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block$4(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(t11.parentNode, t11);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+
+    			if (/*error*/ ctx[4]) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+    				} else {
+    					if_block = create_if_block$5(ctx);
+    					if_block.c();
+    					if_block.m(t12.parentNode, t12);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+
+    			if (dirty & /*max_iterations*/ 32 && input2.value !== /*max_iterations*/ ctx[5]) {
+    				set_input_value(input2, /*max_iterations*/ ctx[5]);
+    			}
+    		},
     		i: noop$2,
     		o: noop$2,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(p);
+    			if (detaching) detach_dev(p0);
+    			if (detaching) detach_dev(t1);
+    			if (detaching) detach_dev(input0);
+    			if (detaching) detach_dev(t2);
+    			if (detaching) detach_dev(p1);
+    			if (detaching) detach_dev(t4);
+    			if (detaching) detach_dev(input1);
+    			if (detaching) detach_dev(t5);
+    			if (detaching) detach_dev(p2);
+    			if (detaching) detach_dev(t7);
+    			if (detaching) detach_dev(ul);
+    			destroy_each(each_blocks_1, detaching);
+    			if (detaching) detach_dev(t8);
+    			if (detaching) detach_dev(h3);
+    			if (detaching) detach_dev(t10);
+    			destroy_each(each_blocks, detaching);
+    			if (detaching) detach_dev(t11);
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(t12);
+    			if (detaching) detach_dev(label);
+    			if (detaching) detach_dev(t14);
+    			if (detaching) detach_dev(input2);
+    			if (detaching) detach_dev(t15);
+    			if (detaching) detach_dev(button);
+    			mounted = false;
+    			run_all(dispose);
     		}
     	};
 
@@ -6459,26 +7735,166 @@ var app = (function () {
     	return block;
     }
 
-    function instance$8($$self, $$props) {
+    function instance$8($$self, $$props, $$invalidate) {
+    	let $websocketStore;
+    	let $systemStateStore;
+    	validate_store(websocketStore, 'websocketStore');
+    	component_subscribe($$self, websocketStore, $$value => $$invalidate(15, $websocketStore = $$value));
+    	validate_store(systemStateStore, 'systemStateStore');
+    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(10, $systemStateStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('CodeComponent', slots, []);
-    	const writable_props = [];
+    	validate_slots('LoopComponent', slots, []);
+    	let name = "";
+    	let description = "";
+    	let node_list = [];
+    	let selected_node_list = [];
+    	let error = "";
+    	let max_iterations;
+    	let key_list = Object.keys(NodeTypes).filter(key => isNaN(Number(key)));
 
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<CodeComponent> was created with unknown prop '${key}'`);
+    	// setup onmount:
+    	onMount(() => {
+    		$$invalidate(2, node_list = $systemStateStore.local_nodes);
     	});
 
-    	return [];
+    	function isSelected(node) {
+    		return selected_node_list.includes(node);
+    	}
+
+    	function toggleNodeSelect(node) {
+    		if (isSelected(node)) {
+    			$$invalidate(3, selected_node_list = selected_node_list.filter(selected_node => selected_node !== node));
+    		} else {
+    			$$invalidate(3, selected_node_list = [...selected_node_list, node]);
+    		}
+    	}
+
+    	function sendNodes() {
+    		if (!name.trim() || !description.trim()) {
+    			$$invalidate(4, error = "Both name and description are required!");
+    			return; // Return early to stop execution if validation fails
+    		} else {
+    			$$invalidate(4, error = "");
+    		}
+
+    		console.log("sending selected_node_list: ", selected_node_list);
+    		let graph_node_info = new GraphNodeInfo();
+    		graph_node_info.name = name;
+    		graph_node_info.description = description;
+    		graph_node_info.id = v4();
+    		let nodes_to_loop = new NodesToLoop();
+    		nodes_to_loop.containing_node_info = graph_node_info;
+    		nodes_to_loop.nodes = selected_node_list;
+    		let websocket = $websocketStore.websocket;
+    		let letter = new Letter();
+    		let body = new Body();
+    		body.nodes_to_loop = nodes_to_loop;
+    		letter.body = body;
+    		letter.verb = VerbTypes.Validate;
+    		sendEnvelope(websocket, [letter]);
+    		$$invalidate(3, selected_node_list = []);
+    		$$invalidate(1, description = "");
+    		$$invalidate(0, name = "");
+    	}
+
+    	const writable_props = [];
+
+    	Object_1$1.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$6.warn(`<LoopComponent> was created with unknown prop '${key}'`);
+    	});
+
+    	function input0_input_handler() {
+    		name = this.value;
+    		$$invalidate(0, name);
+    	}
+
+    	function input1_input_handler() {
+    		description = this.value;
+    		$$invalidate(1, description);
+    	}
+
+    	const click_handler = node => toggleNodeSelect(node);
+
+    	function input2_input_handler() {
+    		max_iterations = this.value;
+    		$$invalidate(5, max_iterations);
+    	}
+
+    	$$self.$capture_state = () => ({
+    		onMount,
+    		uuidv4: v4,
+    		NodeTypes,
+    		GraphNodeInfo,
+    		NodesToLoop,
+    		Letter,
+    		Body,
+    		VerbTypes,
+    		systemStateStore,
+    		websocketStore,
+    		sendEnvelope,
+    		name,
+    		description,
+    		node_list,
+    		selected_node_list,
+    		error,
+    		max_iterations,
+    		key_list,
+    		isSelected,
+    		toggleNodeSelect,
+    		sendNodes,
+    		$websocketStore,
+    		$systemStateStore
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('name' in $$props) $$invalidate(0, name = $$props.name);
+    		if ('description' in $$props) $$invalidate(1, description = $$props.description);
+    		if ('node_list' in $$props) $$invalidate(2, node_list = $$props.node_list);
+    		if ('selected_node_list' in $$props) $$invalidate(3, selected_node_list = $$props.selected_node_list);
+    		if ('error' in $$props) $$invalidate(4, error = $$props.error);
+    		if ('max_iterations' in $$props) $$invalidate(5, max_iterations = $$props.max_iterations);
+    		if ('key_list' in $$props) $$invalidate(6, key_list = $$props.key_list);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$systemStateStore*/ 1024) {
+    			{
+    				$$invalidate(2, node_list = $systemStateStore.local_nodes);
+    			}
+    		}
+    	};
+
+    	return [
+    		name,
+    		description,
+    		node_list,
+    		selected_node_list,
+    		error,
+    		max_iterations,
+    		key_list,
+    		isSelected,
+    		toggleNodeSelect,
+    		sendNodes,
+    		$systemStateStore,
+    		input0_input_handler,
+    		input1_input_handler,
+    		click_handler,
+    		input2_input_handler
+    	];
     }
 
-    class CodeComponent extends SvelteComponentDev {
+    class LoopComponent extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
     		init(this, options, instance$8, create_fragment$8, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "CodeComponent",
+    			tagName: "LoopComponent",
     			options,
     			id: create_fragment$8.name
     		});
@@ -6494,7 +7910,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (24:2) {#each num_array as array_index}
+    // (25:2) {#each num_array as array_index}
     function create_each_block$3(ctx) {
     	let option;
     	let t_value = /*key_list*/ ctx[1][/*array_index*/ ctx[8]] + "";
@@ -6506,7 +7922,7 @@ var app = (function () {
     			t = text(t_value);
     			option.__value = /*array_index*/ ctx[8];
     			option.value = option.__value;
-    			add_location(option, file$6, 24, 4, 1138);
+    			add_location(option, file$6, 25, 4, 1241);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -6522,15 +7938,15 @@ var app = (function () {
     		block,
     		id: create_each_block$3.name,
     		type: "each",
-    		source: "(24:2) {#each num_array as array_index}",
+    		source: "(25:2) {#each num_array as array_index}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (31:0) {#if typeName === NodeTypes.PROMPT}
-    function create_if_block_2$1(ctx) {
+    // (32:0) {#if typeName === NodeTypes.PROMPT}
+    function create_if_block_3(ctx) {
     	let promptcomponent;
     	let current;
     	promptcomponent = new PromptComponent({ $$inline: true });
@@ -6559,17 +7975,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$1.name,
+    		id: create_if_block_3.name,
     		type: "if",
-    		source: "(31:0) {#if typeName === NodeTypes.PROMPT}",
+    		source: "(32:0) {#if typeName === NodeTypes.PROMPT}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (34:0) {#if typeName === NodeTypes.PROCESS}
-    function create_if_block_1$2(ctx) {
+    // (35:0) {#if typeName === NodeTypes.PROCESS}
+    function create_if_block_2$1(ctx) {
     	let processcomponent;
     	let current;
     	processcomponent = new ProcessComponent({ $$inline: true });
@@ -6598,40 +8014,79 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$2.name,
+    		id: create_if_block_2$1.name,
     		type: "if",
-    		source: "(34:0) {#if typeName === NodeTypes.PROCESS}",
+    		source: "(35:0) {#if typeName === NodeTypes.PROCESS}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (37:0) {#if typeName === NodeTypes.CODE}
-    function create_if_block$4(ctx) {
-    	let codecomponent;
+    // (38:0) {#if typeName === NodeTypes.LOOP}
+    function create_if_block_1$2(ctx) {
+    	let loopcomponent;
     	let current;
-    	codecomponent = new CodeComponent({ $$inline: true });
+    	loopcomponent = new LoopComponent({ $$inline: true });
 
     	const block = {
     		c: function create() {
-    			create_component(codecomponent.$$.fragment);
+    			create_component(loopcomponent.$$.fragment);
     		},
     		m: function mount(target, anchor) {
-    			mount_component(codecomponent, target, anchor);
+    			mount_component(loopcomponent, target, anchor);
     			current = true;
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(codecomponent.$$.fragment, local);
+    			transition_in(loopcomponent.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(codecomponent.$$.fragment, local);
+    			transition_out(loopcomponent.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_component(codecomponent, detaching);
+    			destroy_component(loopcomponent, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$2.name,
+    		type: "if",
+    		source: "(38:0) {#if typeName === NodeTypes.LOOP}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (44:0) {#if typeName === NodeTypes.CONDITIONAL}
+    function create_if_block$4(ctx) {
+    	let conditionalcomponent;
+    	let current;
+    	conditionalcomponent = new ConditionalComponent({ $$inline: true });
+
+    	const block = {
+    		c: function create() {
+    			create_component(conditionalcomponent.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(conditionalcomponent, target, anchor);
+    			current = true;
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(conditionalcomponent.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(conditionalcomponent.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(conditionalcomponent, detaching);
     		}
     	};
 
@@ -6639,7 +8094,7 @@ var app = (function () {
     		block,
     		id: create_if_block$4.name,
     		type: "if",
-    		source: "(37:0) {#if typeName === NodeTypes.CODE}",
+    		source: "(44:0) {#if typeName === NodeTypes.CONDITIONAL}",
     		ctx
     	});
 
@@ -6656,7 +8111,8 @@ var app = (function () {
     	let t3;
     	let t4;
     	let t5;
-    	let if_block2_anchor;
+    	let t6;
+    	let if_block3_anchor;
     	let current;
     	let mounted;
     	let dispose;
@@ -6668,9 +8124,10 @@ var app = (function () {
     		each_blocks[i] = create_each_block$3(get_each_context$3(ctx, each_value, i));
     	}
 
-    	let if_block0 = /*typeName*/ ctx[0] === NodeTypes.PROMPT && create_if_block_2$1(ctx);
-    	let if_block1 = /*typeName*/ ctx[0] === NodeTypes.PROCESS && create_if_block_1$2(ctx);
-    	let if_block2 = /*typeName*/ ctx[0] === NodeTypes.CODE && create_if_block$4(ctx);
+    	let if_block0 = /*typeName*/ ctx[0] === NodeTypes.PROMPT && create_if_block_3(ctx);
+    	let if_block1 = /*typeName*/ ctx[0] === NodeTypes.PROCESS && create_if_block_2$1(ctx);
+    	let if_block2 = /*typeName*/ ctx[0] === NodeTypes.LOOP && create_if_block_1$2(ctx);
+    	let if_block3 = /*typeName*/ ctx[0] === NodeTypes.CONDITIONAL && create_if_block$4(ctx);
 
     	const block = {
     		c: function create() {
@@ -6690,10 +8147,12 @@ var app = (function () {
     			if (if_block1) if_block1.c();
     			t5 = space();
     			if (if_block2) if_block2.c();
-    			if_block2_anchor = empty();
+    			t6 = space();
+    			if (if_block3) if_block3.c();
+    			if_block3_anchor = empty();
     			if (/*typeName*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[3].call(select));
-    			add_location(select, file$6, 22, 0, 1068);
-    			add_location(p, file$6, 28, 0, 1220);
+    			add_location(select, file$6, 23, 0, 1171);
+    			add_location(p, file$6, 29, 0, 1323);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -6718,7 +8177,9 @@ var app = (function () {
     			if (if_block1) if_block1.m(target, anchor);
     			insert_dev(target, t5, anchor);
     			if (if_block2) if_block2.m(target, anchor);
-    			insert_dev(target, if_block2_anchor, anchor);
+    			insert_dev(target, t6, anchor);
+    			if (if_block3) if_block3.m(target, anchor);
+    			insert_dev(target, if_block3_anchor, anchor);
     			current = true;
 
     			if (!mounted) {
@@ -6763,7 +8224,7 @@ var app = (function () {
     						transition_in(if_block0, 1);
     					}
     				} else {
-    					if_block0 = create_if_block_2$1(ctx);
+    					if_block0 = create_if_block_3(ctx);
     					if_block0.c();
     					transition_in(if_block0, 1);
     					if_block0.m(t4.parentNode, t4);
@@ -6784,7 +8245,7 @@ var app = (function () {
     						transition_in(if_block1, 1);
     					}
     				} else {
-    					if_block1 = create_if_block_1$2(ctx);
+    					if_block1 = create_if_block_2$1(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(t5.parentNode, t5);
@@ -6799,16 +8260,16 @@ var app = (function () {
     				check_outros();
     			}
 
-    			if (/*typeName*/ ctx[0] === NodeTypes.CODE) {
+    			if (/*typeName*/ ctx[0] === NodeTypes.LOOP) {
     				if (if_block2) {
     					if (dirty & /*typeName*/ 1) {
     						transition_in(if_block2, 1);
     					}
     				} else {
-    					if_block2 = create_if_block$4(ctx);
+    					if_block2 = create_if_block_1$2(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
-    					if_block2.m(if_block2_anchor.parentNode, if_block2_anchor);
+    					if_block2.m(t6.parentNode, t6);
     				}
     			} else if (if_block2) {
     				group_outros();
@@ -6819,18 +8280,41 @@ var app = (function () {
 
     				check_outros();
     			}
+
+    			if (/*typeName*/ ctx[0] === NodeTypes.CONDITIONAL) {
+    				if (if_block3) {
+    					if (dirty & /*typeName*/ 1) {
+    						transition_in(if_block3, 1);
+    					}
+    				} else {
+    					if_block3 = create_if_block$4(ctx);
+    					if_block3.c();
+    					transition_in(if_block3, 1);
+    					if_block3.m(if_block3_anchor.parentNode, if_block3_anchor);
+    				}
+    			} else if (if_block3) {
+    				group_outros();
+
+    				transition_out(if_block3, 1, 1, () => {
+    					if_block3 = null;
+    				});
+
+    				check_outros();
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(if_block0);
     			transition_in(if_block1);
     			transition_in(if_block2);
+    			transition_in(if_block3);
     			current = true;
     		},
     		o: function outro(local) {
     			transition_out(if_block0);
     			transition_out(if_block1);
     			transition_out(if_block2);
+    			transition_out(if_block3);
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -6844,7 +8328,9 @@ var app = (function () {
     			if (if_block1) if_block1.d(detaching);
     			if (detaching) detach_dev(t5);
     			if (if_block2) if_block2.d(detaching);
-    			if (detaching) detach_dev(if_block2_anchor);
+    			if (detaching) detach_dev(t6);
+    			if (if_block3) if_block3.d(detaching);
+    			if (detaching) detach_dev(if_block3_anchor);
     			mounted = false;
     			dispose();
     		}
@@ -6877,7 +8363,7 @@ var app = (function () {
     	// This is the dynamic key-list for the dropdown menu, use it when all of the types are implemented
     	// let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
     	// This is the static key-list for the dropdown menu
-    	let key_list = ["PROMPT", "PROCESS"];
+    	let key_list = ["PROMPT", "PROCESS", "LOOP", "CONDITIONAL"];
 
     	let num_array = Array.from({ length: key_list.length }, (_, i) => i);
     	const writable_props = [];
@@ -6893,14 +8379,15 @@ var app = (function () {
     	}
 
     	$$self.$capture_state = () => ({
+    		ConditionalComponent,
     		ProcessComponent,
     		PromptComponent,
+    		LoopComponent,
     		Prompt,
     		Process,
     		Conditional,
     		Command,
     		NodeTypes,
-    		CodeComponent,
     		typeName,
     		prompt,
     		process,
@@ -8355,11 +9842,11 @@ var app = (function () {
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$4 = freeGlobal || freeSelf || Function('return this')();
+    var root$3 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$4;
+    var _root = root$3;
 
-    var root$3 = _root;
+    var root$2 = _root;
 
     /**
      * Gets the timestamp of the number of milliseconds that have elapsed since
@@ -8378,7 +9865,7 @@ var app = (function () {
      * // => Logs the number of milliseconds it took for the deferred invocation.
      */
     var now$1 = function() {
-      return root$3.Date.now();
+      return root$2.Date.now();
     };
 
     var now_1 = now$1;
@@ -8424,10 +9911,10 @@ var app = (function () {
 
     var _baseTrim = baseTrim$1;
 
-    var root$2 = _root;
+    var root$1 = _root;
 
     /** Built-in value references. */
-    var Symbol$4 = root$2.Symbol;
+    var Symbol$4 = root$1.Symbol;
 
     var _Symbol = Symbol$4;
 
@@ -9335,10 +10822,10 @@ var app = (function () {
     	return isFunction_1;
     }
 
-    var root$1 = _root;
+    var root = _root;
 
     /** Used to detect overreaching core-js shims. */
-    var coreJsData$1 = root$1['__core-js_shared__'];
+    var coreJsData$1 = root['__core-js_shared__'];
 
     var _coreJsData = coreJsData$1;
 
@@ -9473,17 +10960,17 @@ var app = (function () {
      * @param {string} key The key of the method to get.
      * @returns {*} Returns the function if it's native, else `undefined`.
      */
-    function getNative$3(object, key) {
+    function getNative$2(object, key) {
       var value = getValue$1(object, key);
       return baseIsNative(value) ? value : undefined;
     }
 
-    var _getNative = getNative$3;
+    var _getNative = getNative$2;
 
-    var getNative$2 = _getNative;
+    var getNative$1 = _getNative;
 
     /* Built-in method references that are verified to be native. */
-    var nativeCreate$4 = getNative$2(Object, 'create');
+    var nativeCreate$4 = getNative$1(Object, 'create');
 
     var _nativeCreate = nativeCreate$4;
 
@@ -9899,17 +11386,25 @@ var app = (function () {
     	return _ListCache;
     }
 
-    var getNative$1 = _getNative,
-        root = _root;
+    var _Map;
+    var hasRequired_Map;
 
-    /* Built-in method references that are verified to be native. */
-    var Map$3 = getNative$1(root, 'Map');
+    function require_Map () {
+    	if (hasRequired_Map) return _Map;
+    	hasRequired_Map = 1;
+    	var getNative = _getNative,
+    	    root = _root;
 
-    var _Map = Map$3;
+    	/* Built-in method references that are verified to be native. */
+    	var Map = getNative(root, 'Map');
+
+    	_Map = Map;
+    	return _Map;
+    }
 
     var Hash = _Hash,
         ListCache = require_ListCache(),
-        Map$2 = _Map;
+        Map$2 = require_Map();
 
     /**
      * Removes all key-value entries from the map.
@@ -42707,7 +44202,7 @@ var app = (function () {
     	if (hasRequired_stackSet) return _stackSet;
     	hasRequired_stackSet = 1;
     	var ListCache = require_ListCache(),
-    	    Map = _Map,
+    	    Map = require_Map(),
     	    MapCache = _MapCache;
 
     	/** Used as the size to enable large array optimizations. */
@@ -44114,7 +45609,7 @@ var app = (function () {
     	if (hasRequired_getTag) return _getTag;
     	hasRequired_getTag = 1;
     	var DataView = require_DataView(),
-    	    Map = _Map,
+    	    Map = require_Map(),
     	    Promise = require_Promise(),
     	    Set = require_Set(),
     	    WeakMap = require_WeakMap(),
