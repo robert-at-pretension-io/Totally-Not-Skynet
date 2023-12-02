@@ -29,9 +29,15 @@
   // let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
 
   // This is the static key-list for the dropdown menu
-  let key_list = ["PROMPT", "PROCESS", "LOOP", "CONDITIONAL"];
+  // let key_list = ["PROMPT", "PROCESS", "LOOP", "CONDITIONAL"];
+  // the key_list will be the keys of the NodeTypes enum
+  let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
 
   let num_array = Array.from({ length: key_list.length }, (_, i) => i);
+
+  $: {
+    console.log("Typename is now: ", typeName);
+  }
 </script>
 
 <select bind:value={typeName}>

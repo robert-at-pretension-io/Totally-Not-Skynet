@@ -14,17 +14,12 @@ use crate::generated_types::{
     PromptHistory,
 };
 
-// use std::env;
-
-// use crate::graph::validate_nodes_from_process;
+use crate::graph::validate_nodes_in_loop;
 
 use colored::*;
-// use petgraph::prelude::DiGraph;
-// use petgraph::Direction;
 
 use std::sync::Arc;
 
-// use crate::utils::parse_message;
 use crate::graph::{ validate_nodes_in_process, run_execution };
 use crate::sqlite_helper_functions::{ fetch_all_nodes, insert_node, update_node };
 
@@ -296,6 +291,65 @@ pub async fn start_message_sending_loop(
 
                             let nodes = nodes_to_process.nodes.clone();
                             match validate_nodes_in_process(nodes, outer_node_info.unwrap()) {
+                                Ok(mutable_node) => {
+                                    println!("Nodes validated successfully");
+
+                                    match insert_node(pool.clone(), mutable_node.clone()) {
+                                        Ok(_) => {
+                                            println!("Node inserted successfully");
+
+                                            // we construct a new letter with the new mutable_node:
+
+                                            let body = Body {
+                                                contents: Some(
+                                                    Contents::Node(mutable_node.clone())
+                                                ),
+                                            };
+
+                                            let letter = generated_types::Letter {
+                                                verb: VerbTypes::Acknowledge as i32,
+                                                body: Some(body),
+                                            };
+
+                                            let response_object = Envelope {
+                                                sender: Some(receiver.clone()),
+                                                receiver: Some(sender.clone()),
+                                                letters: vec![letter],
+                                                verification_id: verification_id.clone(),
+                                            };
+
+                                            send_message(&tx, msg.0.clone(), response_object).await;
+                                        }
+                                        Err(err) => {
+                                            println!("Error inserting node: {:?}", err);
+                                        }
+                                    }
+
+                                    // Add process node to the database
+
+                                    // Send process back to the frontend
+                                }
+                                Err(err) => {
+                                    println!("Error validating nodes: {:?}", err);
+                                }
+                            }
+                        }
+                        _ => {
+                            println!(
+                                "{} {:?}",
+                                "Verb not supported for node:".red(),
+                                letter.clone()
+                            );
+                        }
+                    }
+                }
+                Contents::NodesToLoop(nodes_to_loop) => {
+                    match verb {
+                        VerbTypes::Validate => {
+                            let outer_node_info = nodes_to_loop.containing_node_info.clone();
+
+                            let nodes = nodes_to_loop.nodes.clone();
+                            match validate_nodes_in_loop(nodes, outer_node_info.unwrap()) {
                                 Ok(mutable_node) => {
                                     println!("Nodes validated successfully");
 

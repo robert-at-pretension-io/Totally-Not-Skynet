@@ -51,6 +51,9 @@ message Loop {
   uint32 current_iteration = 2;
   // This is the maximum number of iterations that the conditional will be allowed to run for. This is to prevent infinite loops. For example, if it is set to 4 then the conditional will only be allowed to run 4 -- not stop at 3 full executions.
   uint32 max_iterations = 3;
+  // The accumulated text will be pass through to future executions of the loop so that new directions can be explored
+  repeated string accumulated_text = 4;
+  string goal = 5;
 }
 
 enum NodeTypes {

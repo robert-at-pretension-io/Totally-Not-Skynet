@@ -32,8 +32,6 @@
 
     // systemStateStore.set(intialized_system);
 
-    alert("onMount triggered... auth: " + system_state.authenticated);
-
     // authenticated = true;
 
     if (!websocket_ready) {

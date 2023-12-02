@@ -323,14 +323,22 @@ pub fn validate_nodes_in_loop(
     }
 
     //output of the process
-    let output_minus_input = output_vars
+    let mut output_minus_input = output_vars
         .clone()
         .into_iter()
         .filter(|output_var| !input_vars.contains(output_var))
         .collect::<Vec<String>>();
 
+    // if output_minus_input is empty then return an error:
+
+    if output_minus_input.len() == 0 {
+        return Err(
+            "There must be at least one output variable that is not an input variable in a loop".to_string()
+        );
+    }
+
     //input of the process
-    let input_minus_output = input_vars
+    let mut input_minus_output = input_vars
         .clone()
         .into_iter()
         .filter(|input_var| !output_vars.contains(input_var))
@@ -407,10 +415,13 @@ pub fn validate_nodes_in_loop(
 
     println!("{}", "Remove the edges that go from the conditional back to the loop".red());
 
+    let conditional_output_variables: Vec<String> = Vec::new();
+
     // Find the conditional node
     let mut this_conditional_node_index: Option<NodeIndex> = None;
     for node in &nodes {
         if node.node_type == (NodeTypes::Conditional as i32) {
+            let conditional_output_variables = node.output_variables.clone();
             if let Some(node_info) = &node.node_info {
                 if let Some(&index) = node_indices.get(&node_info.id) {
                     this_conditional_node_index = Some(index.index().try_into().unwrap());
@@ -419,6 +430,28 @@ pub fn validate_nodes_in_loop(
             }
         }
     }
+
+    // for each of the strings contained in conditional_output_variables, check that these are not contained in output_minus_input. For each that is not contained, add it to input_mius_output. These will be the input variables to the process.
+
+    for conditional_output_variable in conditional_output_variables {
+        if !output_minus_input.contains(&conditional_output_variable) {
+        }
+    }
+
+    //
+    //output of the process
+    // let mut output_minus_input = output_vars
+    //     .clone()
+    //     .into_iter()
+    //     .filter(|output_var| !input_vars.contains(output_var))
+    //     .collect::<Vec<String>>();
+
+    // //input of the process
+    // let mut input_minus_output = input_vars
+    //     .clone()
+    //     .into_iter()
+    //     .filter(|input_var| !output_vars.contains(input_var))
+    //     .collect::<Vec<String>>();
 
     // Remove the back edges from the conditional node to any node in the loop
     if let Some(conditional_index) = this_conditional_node_index {

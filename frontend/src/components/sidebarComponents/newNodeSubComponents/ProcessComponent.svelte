@@ -60,7 +60,6 @@
     } else {
       error = "";
     }
-    alert("sendNodes feature is not yet implemented!");
     console.log("sending selected_node_list: ", selected_node_list);
 
     let graph_node_info = new GraphNodeInfo();
