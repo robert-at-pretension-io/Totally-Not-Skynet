@@ -466,22 +466,16 @@ pub async fn handle_prompt(
 
     let node_info = current_node.node_info.clone().unwrap();
 
-    let prompt_history = PromptHistory {
-        prompt: hydrated_prompt_text.clone(),
-        response: json_string.clone(),
-        node_info: Some(node_info.clone()),
-    };
+    let hydrated_and_cleaned_prompt_text = clean_response(&hydrated_prompt_text);
 
-    // node_execution_response.insert(
-    //     node_info.clone().id,
-    //     json_string.clone()
-    // );
+    let mut execution_response_hashmap = HashMap::new();
 
     let value: Value = serde_json::from_str(json_string.as_str()).unwrap();
     if let Some(obj) = value.as_object() {
         for (key, value) in obj {
             println!("{}: {}", key, value);
             variable_definitions.insert(key.clone(), value.clone().to_string());
+            execution_response_hashmap.insert(key.clone(), value.clone().to_string());
         }
     } else {
         println!("{}", "The JSON is not an object.".red());
@@ -504,5 +498,18 @@ pub async fn handle_prompt(
         }
     }
 
+    let prompt_history = PromptHistory {
+        prompt: hydrated_and_cleaned_prompt_text.clone(),
+        response: execution_response_hashmap.clone(),
+        node_info: Some(node_info.clone()),
+    };
+
     return Ok((prompt_history, variable_definitions));
+}
+
+fn clean_response(input: &str) -> String {
+    input
+        .replace("\\n", "") // Removes all newlines
+        .replace("\\\"", "\"") // Replaces escaped double quotes with regular double quotes
+        .replace("&quot;", "\"") // Replaces HTML entity &quot; with double quotes
 }

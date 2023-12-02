@@ -6,6 +6,7 @@
   import { onMount } from "svelte";
   import ExecuteNode from "./sidebarComponents/executeNode.svelte";
   import systemStateStore from "stores/systemStateStore";
+  import SelectedNodeInfo from "./sidebarComponents/selectedNodeInfo.svelte";
 
   onMount(() => {
     console.log("Sidebar mounted");
@@ -25,6 +26,11 @@
     {
       header: "Execute Process",
       component: ExecuteNode,
+      open: false,
+    },
+    {
+      header: "Show Selected Node Info",
+      component: SelectedNodeInfo,
       open: false,
     },
   ];
@@ -69,38 +75,6 @@
 </div>
 
 <style>
-  /* 
-    overflow-y: auto;
-    box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.541);
-    border-radius: 12px;
-  }
-
-  .section {
-    margin-bottom: 20px;
-  }
-
-  .section-header {
-    font-size: 18px;
-    padding: 10px;
-    cursor: pointer;
-    background-color: #e9e9e9;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-  }
-
-  .section-header:hover {
-    background-color: #ddd;
-  }
-
-  .section-content {
-    margin-top: 10px;
-    padding: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #fff;
-  } */
-
   /* Sidebar */
   .sidebar {
     grid-column: 1;
@@ -126,7 +100,9 @@
     background-color: #bdc3c7;
     border: 1px solid #a5a9ab;
     border-radius: 8px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition:
+      background-color 0.3s ease,
+      transform 0.2s ease;
   }
 
   .section-header:hover {

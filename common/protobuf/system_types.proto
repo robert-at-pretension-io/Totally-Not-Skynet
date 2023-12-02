@@ -122,11 +122,12 @@ message Execution {
   string execution_id = 4;
   // This maps GraphNodeId to the execution results of that node.
   repeated PromptHistory prompt_history = 5;
+
 }
 
 message PromptHistory {
   string prompt = 1;
-  string response = 2;
+  map<string,string> response = 2;
   GraphNodeInfo node_info = 3;
 }
 

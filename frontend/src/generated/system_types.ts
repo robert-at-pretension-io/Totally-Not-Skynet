@@ -1611,7 +1611,7 @@ export class PromptHistory extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
         prompt?: string;
-        response?: string;
+        response?: Map<string, string>;
         node_info?: GraphNodeInfo;
     }) {
     super();
@@ -1627,6 +1627,8 @@ export class PromptHistory extends pb_1.Message {
         this.node_info = data.node_info;
       }
     }
+    if (!this.response)
+      this.response = new Map();
   }
   get prompt() {
     return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
@@ -1635,10 +1637,10 @@ export class PromptHistory extends pb_1.Message {
     pb_1.Message.setField(this, 1, value);
   }
   get response() {
-    return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+    return pb_1.Message.getField(this, 2) as any as Map<string, string>;
   }
-  set response(value: string) {
-    pb_1.Message.setField(this, 2, value);
+  set response(value: Map<string, string>) {
+    pb_1.Message.setField(this, 2, value as any);
   }
   get node_info() {
     return pb_1.Message.getWrapperField(this, GraphNodeInfo, 3) as GraphNodeInfo;
@@ -1651,15 +1653,17 @@ export class PromptHistory extends pb_1.Message {
   }
   static fromObject(data: {
         prompt?: string;
-        response?: string;
+        response?: {
+            [key: string]: string;
+        };
         node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
     }): PromptHistory {
     const message = new PromptHistory({});
     if (data.prompt != null) {
       message.prompt = data.prompt;
     }
-    if (data.response != null) {
-      message.response = data.response;
+    if (typeof data.response == "object") {
+      message.response = new Map(Object.entries(data.response));
     }
     if (data.node_info != null) {
       message.node_info = GraphNodeInfo.fromObject(data.node_info);
@@ -1669,14 +1673,16 @@ export class PromptHistory extends pb_1.Message {
   toObject() {
     const data: {
             prompt?: string;
-            response?: string;
+            response?: {
+                [key: string]: string;
+            };
             node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
         } = {};
     if (this.prompt != null) {
       data.prompt = this.prompt;
     }
     if (this.response != null) {
-      data.response = this.response;
+      data.response = (Object.fromEntries)(this.response);
     }
     if (this.node_info != null) {
       data.node_info = this.node_info.toObject();
@@ -1689,8 +1695,12 @@ export class PromptHistory extends pb_1.Message {
     const writer = w || new pb_1.BinaryWriter();
     if (this.prompt.length)
       writer.writeString(1, this.prompt);
-    if (this.response.length)
-      writer.writeString(2, this.response);
+    for (const [key, value] of this.response) {
+      writer.writeMessage(2, this.response, () => {
+        writer.writeString(1, key);
+        writer.writeString(2, value);
+      });
+    }
     if (this.has_node_info)
       writer.writeMessage(3, this.node_info, () => this.node_info.serialize(writer));
     if (!w)
@@ -1706,7 +1716,7 @@ export class PromptHistory extends pb_1.Message {
         message.prompt = reader.readString();
         break;
       case 2:
-        message.response = reader.readString();
+        reader.readMessage(message, () => pb_1.Map.deserializeBinary(message.response as any, reader, reader.readString, reader.readString));
         break;
       case 3:
         reader.readMessage(message.node_info, () => message.node_info = GraphNodeInfo.deserialize(reader));
