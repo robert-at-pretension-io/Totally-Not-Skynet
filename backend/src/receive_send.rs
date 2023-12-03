@@ -72,10 +72,6 @@ pub async fn start_message_sending_loop(
     while let Some(msg) = client_rx.recv().await {
         println!("{} {:?}", "Received a message from the client:".yellow(), msg.1.len());
 
-        // let received_message: Option<CrudBundle> = parse_message(&msg.1);
-
-        // println!("message data: {:?}",msg.1.into_data());
-
         let slice = msg.1.clone().into_data().as_slice().to_vec();
         let envelope: Envelope;
 
@@ -381,6 +377,26 @@ pub async fn start_message_sending_loop(
                                         }
                                         Err(err) => {
                                             println!("Error inserting node: {:?}", err);
+
+                                            let body = Body {
+                                                contents: Some(
+                                                    Contents::NodesToLoop(nodes_to_loop.clone())
+                                                ),
+                                            };
+
+                                            let letter = generated_types::Letter {
+                                                verb: VerbTypes::Error as i32,
+                                                body: Some(body),
+                                            };
+
+                                            let response_object = Envelope {
+                                                sender: Some(receiver.clone()),
+                                                receiver: Some(sender.clone()),
+                                                letters: vec![letter],
+                                                verification_id: verification_id.clone(),
+                                            };
+
+                                            send_message(&tx, msg.0.clone(), response_object).await;
                                         }
                                     }
 
@@ -390,6 +406,25 @@ pub async fn start_message_sending_loop(
                                 }
                                 Err(err) => {
                                     println!("Error validating nodes: {:?}", err);
+                                    let body = Body {
+                                        contents: Some(
+                                            Contents::NodesToLoop(nodes_to_loop.clone())
+                                        ),
+                                    };
+
+                                    let letter = generated_types::Letter {
+                                        verb: VerbTypes::Error as i32,
+                                        body: Some(body),
+                                    };
+
+                                    let response_object = Envelope {
+                                        sender: Some(receiver.clone()),
+                                        receiver: Some(sender.clone()),
+                                        letters: vec![letter],
+                                        verification_id: verification_id.clone(),
+                                    };
+
+                                    send_message(&tx, msg.0.clone(), response_object).await;
                                 }
                             }
                         }
@@ -405,7 +440,7 @@ pub async fn start_message_sending_loop(
                 Contents::ExecutionDetails(execution) => {
                     match verb {
                         VerbTypes::Execute => {
-                            match run_execution(execution.clone()).await {
+                            match run_execution(execution.clone(), None).await {
                                 Ok(response) => {
                                     let letter = Letter {
                                         body: Some(Body {
@@ -459,150 +494,9 @@ pub async fn start_message_sending_loop(
                     println!("{}", "Not yet implemented".red());
                 }
             }
-
-            // match message_content.contents {
-            //     Some(Contents::CrudBundle(crud_bundle)) => {
-            //         handle_crud_bundle(
-            //             tx.clone(),
-            //             msg.clone(),
-            //             crud_bundle,
-            //             pool.clone(),
-            //             &mut runtime_settings
-            //         ).await;
-            //     }
-            //     Some(Contents::Identity(identity)) => {
-            //         println!("Identity: {:?}", identity);
-            //     }
-            //     Some(Contents::UserSettings(user_settings)) => {
-            //         println!("User Settings: {:?}", user_settings);
-            //     }
-            //     Some(Contents::ExecutionContext(execution_context)) => {
-            //         println!("Execution Context: {:?}", execution_context);
-            //     }
-            //     Some(Contents::ValidateNodesResponse(validate_nodes_response)) => {
-            //         println!("Validate Nodes Response: {:?}", validate_nodes_response);
-            //     }
-            //     None => {
-            //         println!("No contents found");
-            //     }
-            // }
         }
     }
-
-    // match message_contents.object {
-    //     Some(crud_bundle::Object::Node(node)) => {
-    //         match verb {
-    //             VerbTypeNames::Post => {
-    //
-    //             }
-    //             VerbTypeNames::Put => {
-
-    //             }
-    //             _ => {
-    //                 println!("Verb not supported for node: {:?}", verb);
-    //             }
-    //         }
-    // }
-    // Some(crud_bundle::Object::AuthenticationMessage(_authentication_message)) => {
-    //     match verb {
-    //         VerbTypeNames::Post => {
-    //             println!("Initializing project for {}", msg.0.name);
-    //             println!(
-    //                 "Found the following settings: {:?}",
-    //                 runtime_settings.get(&msg.0)
-    //             );
-
-    //             println!("Get nodes, settings, etc from db!");
-
-    //             match fetch_all_nodes(pool.clone()) {
-    //                 Ok(nodes) => {
-    //                     for node in &nodes {
-    //                         println!("Found node: {:?}", node);
-
-    //                         send_message(&tx, msg.0.clone(), ResponseObject {
-    //                             object: Some(Node(node.clone())),
-    //                         }).await;
-    //                     }
-    //                 }
-    //                 Err(err) => {
-    //                     println!(
-    //                         "Have the following errors when attempting to pull nodes from sqlite : {:?}",
-    //                         err
-    //                     );
-    //                 }
-    //             }
-    //         }
-    //         _ => {
-    //             println!("Verb not supported for initial message: {:?}", verb);
-    //         }
-    //     }
-    // }
-    // Some(crud_bundle::Object::UserSettings(_user_settings)) => {
-    //     match verb {
-    //         VerbTypeNames::Get => {
-    //             println!("Setting user settings for {}", msg.0.name);
-
-    //             // attempt to set them from environment variables
-    //             let system_settings = UserSettings::new();
-
-    //             match system_settings {
-    //                 Some(settings) => {
-    //                     println!("settings: {:?}", settings);
-
-    //                     // Check if runtime_settings already have settings for the user
-    //                     if runtime_settings.contains_key(&msg.0) {
-    //                         println!("Settings for user {} already exist", msg.0.name);
-    //                     } else {
-    //                         runtime_settings.insert(msg.0.clone(), UserSettings {
-    //                             openai_api_key: settings.openai_api_key,
-    //                             mongo_db_uri: settings.mongo_db_uri,
-    //                         });
-    //                         println!("Settings for user {} have been set", msg.0.name);
-    //                     }
-    //                 }
-    //                 None => {
-    //                     // runtime_settings.insert(msg.0.clone(), UserSettings {
-    //                     //     openai_api_key: user_settings.openai_api_key,
-    //                     //     mongo_db_uri: user_settings.mongo_db_uri,
-    //                     // });
-    //                     panic!("fug... the settings are not set.");
-    //                 }
-    //             }
-
-    //             // respond to the client
-    //             // send_message(&tx, msg.0.clone(), ResponseObject::UserSettings).await;
-
-    //             todo!("send some acknowledgement that user settings are in the system");
-    //         }
-    //         _ => {
-    //             println!(
-    //                 "\n-------------------\nVerb not supported for user settings: {:?}\n-------------------\n",
-    //                 verb
-    //             );
-    //         }
-    //     }
-    // }
-    // Some(crud_bundle::Object::ExecutionContext(_execution_context)) => {
-    //     match verb {
-    //         _ => {
-    //             todo!("Handle execution context");
-    //         }
-    //     }
-    // }
-    // Some(crud_bundle::Object::ValidateNodes(node_container)) => {
-    //     match verb {
-    //         VerbTypeNames::Post => {
-    //
-    // }
-
-    // None => {
-    //     println!("odd...");
-    //     println!(
-    //         "This probably means that the websocket connection has closed... Should remove it from the identity hash"
-    //     );
-    // }
 }
-// }
 
 pub async fn send_message(
     tx: &UnboundedSender<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,

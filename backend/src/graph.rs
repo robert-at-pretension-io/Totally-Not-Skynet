@@ -108,6 +108,8 @@ pub fn validate_nodes_in_process(
     // let mut node_indices;
     let mut node_indices: HashMap<String, petgraph::graph::NodeIndex> = HashMap::new();
 
+    let conditional_output_variables: Vec<String> = Vec::new();
+
     for node in &nodes {
         let node_info = node.node_info.clone().unwrap();
 
@@ -305,6 +307,8 @@ pub fn validate_nodes_in_loop(
         return Err("There must be exactly one conditional node in a loop".to_string());
     }
 
+    let mut conditional_output_variables: Vec<String> = Vec::new();
+
     let mut input_vars: Vec<String> = Vec::new();
     let mut output_vars: Vec<String> = Vec::new();
     // loop through the vector of nodes and add input variables to the input_vars vector (if they are not already in the vector)
@@ -316,6 +320,11 @@ pub fn validate_nodes_in_loop(
         }
         // loop through the output_variables and remove those from the input_vars vector
         for output_var in &node.output_variables {
+            if node.node_type == (NodeTypes::Conditional as i32) {
+                println!("{}", "Setting the conditional output variables".green());
+                conditional_output_variables = node.output_variables.clone();
+            }
+
             if !output_vars.contains(output_var) {
                 output_vars.push(output_var.clone());
             }
@@ -415,8 +424,6 @@ pub fn validate_nodes_in_loop(
 
     println!("{}", "Remove the edges that go from the conditional back to the loop".red());
 
-    let conditional_output_variables: Vec<String> = Vec::new();
-
     // Find the conditional node
     let mut this_conditional_node_index: Option<NodeIndex> = None;
     for node in &nodes {
@@ -433,8 +440,15 @@ pub fn validate_nodes_in_loop(
 
     // for each of the strings contained in conditional_output_variables, check that these are not contained in output_minus_input. For each that is not contained, add it to input_mius_output. These will be the input variables to the process.
 
+    println!(
+        "{}: {:?}",
+        "The conditional output variables are: ".green(),
+        conditional_output_variables
+    );
+
     for conditional_output_variable in conditional_output_variables {
         if !output_minus_input.contains(&conditional_output_variable) {
+            input_minus_output.push(conditional_output_variable.clone());
         }
     }
 
@@ -561,7 +575,10 @@ pub fn validate_nodes_in_loop(
 }
 
 #[async_recursion]
-pub async fn run_execution(mut execution: Execution) -> Result<Execution, Execution> {
+pub async fn run_execution(
+    mut execution: Execution,
+    accumulator: Option<String>
+) -> Result<Execution, Execution> {
     // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
 
     let mut variable_definitions: HashMap<
@@ -614,7 +631,7 @@ pub async fn run_execution(mut execution: Execution) -> Result<Execution, Execut
                     prompt_histories.clone()
                 );
 
-                match run_execution(local_execution).await {
+                match run_execution(local_execution, None).await {
                     Ok(progressed_execution) => {
                         println!("{}", "Process executed successfully".green());
                         // update the variable definitions and prompt histories
@@ -640,6 +657,30 @@ pub async fn run_execution(mut execution: Execution) -> Result<Execution, Execut
                         return Err(execution);
                     }
                 }
+            }
+            Ok(NodeTypes::Loop) => {
+                let mut contained_loop: Loop;
+
+                match current_node.node_content.unwrap().node_content.unwrap() {
+                    NodeContentEnum::Loop(l) => {
+                        contained_loop = l;
+                    }
+                    _ => {
+                        println!("Somehow the stored contents is not actually a loop");
+                        continue;
+                    }
+                }
+
+                // Run the process (marked as a loop so that the aggregator is injected into the promp)
+
+                let max_iterations = contained_loop.max_iterations;
+
+                // run the following loop up to and including max iterations
+                for i in 1..max_iterations {
+                }
+            }
+            Ok(NodeTypes::Conditional) => {
+                // In this case, the main this we need to do is determine if the loop should continue (by returning the accumulator and the process) OR if it should exit to one of the external branches
             }
             _ => {
                 println!("Other types not implemented yet");
