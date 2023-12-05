@@ -441,10 +441,10 @@ pub async fn start_message_sending_loop(
                     match verb {
                         VerbTypes::Execute => {
                             match run_execution(execution.clone(), None).await {
-                                Ok(response) => {
+                                Ok((execution, _accumulator)) => {
                                     let letter = Letter {
                                         body: Some(Body {
-                                            contents: Some(Contents::ExecutionDetails(response)),
+                                            contents: Some(Contents::ExecutionDetails(execution)),
                                         }),
 
                                         verb: VerbTypes::Acknowledge as i32,

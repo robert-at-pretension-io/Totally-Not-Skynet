@@ -72,6 +72,7 @@ message NodeContent {
     Conditional conditional = 3;
     Command command = 4;
     Code code = 5;
+    Loop loop = 6;
   }
 }
 

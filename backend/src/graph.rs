@@ -9,6 +9,7 @@ use crate::generated_types::{
     Process,
     Execution,
     NodeTypes,
+    Loop,
 };
 
 use petgraph::algo::tarjan_scc;
@@ -578,7 +579,7 @@ pub fn validate_nodes_in_loop(
 pub async fn run_execution(
     mut execution: Execution,
     accumulator: Option<String>
-) -> Result<Execution, Execution> {
+) -> Result<(Execution, Option<String>), Execution> {
     // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
 
     let mut variable_definitions: HashMap<
@@ -598,6 +599,8 @@ pub async fn run_execution(
         .clone()
         .unwrap()
         .topological_order.clone();
+
+    let mut local_accumulator = accumulator.clone();
 
     let mut prompt_histories: Vec<PromptHistory> = execution.clone().prompt_history;
 
@@ -631,14 +634,16 @@ pub async fn run_execution(
                     prompt_histories.clone()
                 );
 
-                match run_execution(local_execution, None).await {
-                    Ok(progressed_execution) => {
+                match run_execution(local_execution, local_accumulator.clone()).await {
+                    Ok((progressed_execution, returned_accumulator)) => {
                         println!("{}", "Process executed successfully".green());
                         // update the variable definitions and prompt histories
                         variable_definitions.extend(
                             progressed_execution.current_variable_definitions.clone()
                         );
                         prompt_histories = progressed_execution.prompt_history.clone();
+
+                        local_accumulator = returned_accumulator.clone();
                     }
                     Err(execution) => {
                         return Err(execution);
@@ -647,7 +652,14 @@ pub async fn run_execution(
             }
             Ok(NodeTypes::Prompt) => {
                 // we need to replace the prompt text input_variables with their definitions
-                match handle_prompt(current_node.clone(), variable_definitions.clone()).await {
+                match
+                    handle_prompt(
+                        current_node.clone(),
+                        variable_definitions.clone(),
+                        local_accumulator.clone(),
+                        "gpt-4-1106-preview".to_string()
+                    ).await
+                {
                     Ok((prompt_history, local_variable_definitions)) => {
                         prompt_histories.push(prompt_history);
                         // update the variable definitions
@@ -662,8 +674,8 @@ pub async fn run_execution(
                 let mut contained_loop: Loop;
 
                 match current_node.node_content.unwrap().node_content.unwrap() {
-                    NodeContentEnum::Loop(l) => {
-                        contained_loop = l;
+                    NodeContentEnum::Loop(looop) => {
+                        contained_loop = looop;
                     }
                     _ => {
                         println!("Somehow the stored contents is not actually a loop");
@@ -675,12 +687,66 @@ pub async fn run_execution(
 
                 let max_iterations = contained_loop.max_iterations;
 
-                // run the following loop up to and including max iterations
+                // run the following loop up to and including max iterations. This
                 for i in 1..max_iterations {
+                    // an execution may be returned that contains an external branch (with an empty accumulator) OR the accumulator containing text to feed into the next iteration of the loop
+
+                    let local_execution = process_to_execution(
+                        variable_definitions.clone(),
+                        contained_loop.clone().process.unwrap().clone(),
+                        prompt_histories.clone()
+                    );
+
+                    match run_execution(local_execution, local_accumulator.clone()).await {
+                        Ok((progressed_execution, returned_accumulator)) => {
+                            println!("{}", "Process executed successfully".green());
+                            // update the variable definitions and prompt histories
+                            variable_definitions.extend(
+                                progressed_execution.current_variable_definitions.clone()
+                            );
+                            prompt_histories = progressed_execution.prompt_history.clone();
+
+                            local_accumulator = returned_accumulator.clone();
+
+                            match local_accumulator {
+                                None => {
+                                    break;
+                                }
+                                Some(_) => {
+                                    continue;
+                                }
+                            }
+                        }
+                        Err(execution) => {
+                            return Err(execution);
+                        }
+                    }
                 }
             }
             Ok(NodeTypes::Conditional) => {
-                // In this case, the main this we need to do is determine if the loop should continue (by returning the accumulator and the process) OR if it should exit to one of the external branches
+                // In this case, the main thing we need to do is determine if the loop should continue (by returning the accumulator and the process) OR if it should exit to one of the external branches
+
+                // Check if any of the output_variables of the process containing this conditional are currently defined
+
+                match
+                    handle_conditional(
+                        current_node.clone(),
+                        variable_definitions.clone(),
+                        "gpt-4-1106-preview".to_string()
+                    ).await
+                {
+                    Ok((prompt_history, local_variable_definitions, accumulator)) => {
+                        prompt_histories.push(prompt_history);
+                        // update the variable definitions
+                        variable_definitions.extend(local_variable_definitions.clone());
+                        local_accumulator = accumulator.clone();
+                    }
+                    Err(_) => {
+                        return Err(execution);
+                    }
+                }
+
+                // For inspiration, a conditional should be handled VERY similarly to a prompt
             }
             _ => {
                 println!("Other types not implemented yet");
@@ -696,7 +762,7 @@ pub async fn run_execution(
     response.current_variable_definitions = variable_definitions.clone();
     response.prompt_history = prompt_histories.clone();
 
-    return Ok(response);
+    return Ok((response, local_accumulator.clone()));
 }
 
 pub fn process_to_execution(
@@ -717,7 +783,9 @@ pub fn process_to_execution(
 
 pub async fn handle_prompt(
     current_node: Node,
-    mut variable_definitions: HashMap<String, String>
+    mut variable_definitions: HashMap<String, String>,
+    accumulator: Option<String>,
+    language_model_version: String
 ) -> Result<(PromptHistory, HashMap<String, String>), ()> {
     let mut prompt_text: String = "".to_string();
     let mut hydrated_prompt_text: String = "".to_string();
@@ -729,6 +797,154 @@ pub async fn handle_prompt(
         "
     
     You can also use the error field to report any problems when trying to come up with a response.
+    ".to_string();
+
+    // Concatenate the strings in the vector to make a comma separated string.
+
+    let variable_string: String = current_node.output_variables.join(", ");
+
+    match current_node.node_content.unwrap().node_content.unwrap() {
+        NodeContentEnum::Prompt(prompt) => {
+            // hydrate the prompt text with the variable definitions
+
+            let mut handlebars = Handlebars::new();
+
+            let json_variable_definitions: Value = serde_json::json!(variable_definitions);
+
+            handlebars.register_template_string("prompt", prompt.clone().prompt).unwrap();
+
+            hydrated_prompt_text = handlebars.render("prompt", &json_variable_definitions).unwrap();
+
+            match accumulator {
+                Some(accumulator_text) => {
+                    prompt_text = format!(
+                        "{}\n{}\n {} {} {}",
+                        hydrated_prompt_text.clone(),
+                        accumulator_text.clone(),
+                        additional_instruction,
+                        variable_string,
+                        more_additional_instruction
+                    );
+                }
+                None => {
+                    prompt_text = format!(
+                        "{} {} {} {}",
+                        hydrated_prompt_text.clone(),
+                        additional_instruction,
+                        variable_string,
+                        more_additional_instruction
+                    );
+                }
+            }
+
+            print!("Prompt text: {}", prompt_text.green());
+        }
+        _ => {
+            println!("prompt not handled");
+        }
+    }
+
+    // I believe this already pulls the key from the environmental variable.
+    let client = Client::new();
+
+    let user_message = ChatCompletionRequestUserMessage {
+        content: Some(ChatCompletionRequestUserMessageContent::Text(prompt_text)),
+        role: Role::User,
+    };
+
+    let message: ChatCompletionRequestMessage = ChatCompletionRequestMessage::User(user_message);
+
+    // Create request using builder pattern
+    // Every request struct has companion builder struct with same name + Args suffix
+    let mut request = CreateChatCompletionRequest::default();
+
+    request.messages = vec![message];
+    request.response_format = Some(ChatCompletionResponseFormat {
+        r#type: ChatCompletionResponseFormatType::JsonObject,
+    });
+
+    // Any model can be used so long as it supports response_format
+    // request.model = "gpt-4-1106-preview".to_string();
+    request.model = language_model_version.clone();
+
+    // Call API
+    let response = client.chat().create(request).await.unwrap();
+
+    println!(
+        "{}",
+        response.choices.first().unwrap().message.content.clone().unwrap().as_str().to_string()
+    );
+
+    let json_string = response.choices
+        .first()
+        .unwrap()
+        .message.content.clone()
+        .unwrap()
+        .as_str()
+        .to_string();
+
+    let node_info = current_node.node_info.clone().unwrap();
+
+    let hydrated_and_cleaned_prompt_text = clean_response(&hydrated_prompt_text);
+
+    let mut execution_response_hashmap = HashMap::new();
+
+    let value: Value = serde_json::from_str(json_string.as_str()).unwrap();
+    if let Some(obj) = value.as_object() {
+        for (key, value) in obj {
+            println!("{}: {}", key, value);
+            variable_definitions.insert(key.clone(), value.clone().to_string());
+            execution_response_hashmap.insert(key.clone(), value.clone().to_string());
+        }
+    } else {
+        println!("{}", "The JSON is not an object.".red());
+    }
+
+    // see if all of the output_variables of the node are in the variable definition hashmap:
+
+    let check_output_vars: Vec<String> = current_node.output_variables;
+
+    //loop through check_output_vars and see if the key exists in the variable_definitions hashmap:
+
+    for output_var in check_output_vars.iter() {
+        if !variable_definitions.contains_key(output_var) {
+            println!("Missing variable: {}", output_var.red());
+            // Handle the missing variable case here (e.g., error handling or logging)
+
+            // Send back the Execution to the frontend and let the user decide what to do.
+
+            return Err(());
+        }
+    }
+
+    let prompt_history = PromptHistory {
+        prompt: hydrated_and_cleaned_prompt_text.clone(),
+        response: execution_response_hashmap.clone(),
+        node_info: Some(node_info.clone()),
+    };
+
+    return Ok((prompt_history, variable_definitions));
+}
+
+pub async fn handle_conditional(
+    current_node: Node,
+    mut variable_definitions: HashMap<String, String>,
+    language_model_version: String
+) -> Result<(PromptHistory, HashMap<String, String>, Option<String>), ()> {
+    let mut prompt_text: String = "".to_string();
+    let mut hydrated_prompt_text: String = "".to_string();
+
+    let additional_instruction =
+        "
+
+        When coming up with a response, please make the fields be any number of the following: ".to_string();
+
+    let more_additional_instruction =
+        "
+    
+    If there is not enough information, you should put an explanation of what information is needed in the \"accumulator\" field. If you respond with the accumulator field, do NOT respond with any other field.
+    
+    If there is absolutely no way You can also use the \"error\" field to report any problems when trying to come up with a response.
     ".to_string();
 
     // Concatenate the strings in the vector to make a comma separated string.
@@ -834,13 +1050,17 @@ pub async fn handle_prompt(
         }
     }
 
+    // check to see if the execution_response contains "accumulator"
+
+    let accumulator = execution_response_hashmap.get("accumulator").unwrap().clone();
+
     let prompt_history = PromptHistory {
         prompt: hydrated_and_cleaned_prompt_text.clone(),
         response: execution_response_hashmap.clone(),
         node_info: Some(node_info.clone()),
     };
 
-    return Ok((prompt_history, variable_definitions));
+    return Ok((prompt_history, variable_definitions, Some(accumulator.clone())));
 }
 
 fn clean_response(input: &str) -> String {
