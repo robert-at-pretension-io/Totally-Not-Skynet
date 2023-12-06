@@ -73,7 +73,8 @@ pub async fn start_message_sending_loop(
     pool: Arc<Pool<SqliteConnectionManager>>
 ) {
     let runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
-    let mut docker_containers: HashMap<Identity, String> = HashMap::new();
+    let mut docker_containers: HashMap<String, String> = HashMap::new();
+    let docker = Docker::connect_with_local_defaults().unwrap();
 
     while let Some(msg) = client_rx.recv().await {
         println!("{} {:?}", "Received a message from the client:".yellow(), msg.1.len());
@@ -82,7 +83,7 @@ pub async fn start_message_sending_loop(
 
         let mut docker_id: String;
 
-        match docker_containers.get(&msg.0) {
+        match docker_containers.get(&msg.0.name) {
             Some(id) => {
                 docker_id = id.clone();
                 continue;
@@ -478,8 +479,15 @@ pub async fn start_message_sending_loop(
                 }
                 Contents::ExecutionDetails(execution) => {
                     match verb {
-                        VerbTypes::Execute => {
-                            match run_execution(execution.clone(), None).await {
+                        Verbcontainer_idTypes::Execute => {
+                            match
+                                run_execution(
+                                    execution.clone(),
+                                    None,
+                                    Some(docker_id),
+                                    &docker
+                                ).await
+                            {
                                 Ok((execution, _accumulator)) => {
                                     let letter = Letter {
                                         body: Some(Body {

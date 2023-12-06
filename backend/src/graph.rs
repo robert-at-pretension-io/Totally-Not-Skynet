@@ -10,7 +10,11 @@ use crate::generated_types::{
     Execution,
     NodeTypes,
     Loop,
+    PromptHistory,
 };
+
+use bollard::Docker;
+use bollard::exec::{ StartExecResults, CreateExecOptions };
 
 use petgraph::algo::tarjan_scc;
 
@@ -579,7 +583,8 @@ pub fn validate_nodes_in_loop(
 pub async fn run_execution(
     mut execution: Execution,
     accumulator: Option<String>,
-    docker_id: Option<String>
+    docker_id: Option<String>,
+    docker_instance: &Docker
 ) -> Result<(Execution, Option<String>), Execution> {
     // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
 
@@ -608,11 +613,6 @@ pub async fn run_execution(
     for node_info in topological_order {
         let current_node = local_nodes_map.get(&node_info.id).unwrap().clone();
 
-        // Process the node, which ever type it is:
-
-        // let process = NodeTypes::Process as i32;
-        // let prompt = NodeTypes::Prompt as i32;
-
         match NodeTypes::try_from(current_node.node_type) {
             Ok(NodeTypes::Process) => {
                 // Once we implement this functionality just for Prompts (and other node types), we can extract this function and call it recursively to handle this case (with a max depth?)
@@ -635,7 +635,14 @@ pub async fn run_execution(
                     prompt_histories.clone()
                 );
 
-                match run_execution(local_execution, local_accumulator.clone()).await {
+                match
+                    run_execution(
+                        local_execution,
+                        local_accumulator.clone(),
+                        docker_id.clone(),
+                        docker_instance
+                    ).await
+                {
                     Ok((progressed_execution, returned_accumulator)) => {
                         println!("{}", "Process executed successfully".green());
                         // update the variable definitions and prompt histories
@@ -698,7 +705,14 @@ pub async fn run_execution(
                         prompt_histories.clone()
                     );
 
-                    match run_execution(local_execution, local_accumulator.clone()).await {
+                    match
+                        run_execution(
+                            local_execution,
+                            local_accumulator.clone(),
+                            docker_id.clone(),
+                            docker_instance
+                        ).await
+                    {
                         Ok((progressed_execution, returned_accumulator)) => {
                             println!("{}", "Process executed successfully".green());
                             // update the variable definitions and prompt histories
@@ -749,21 +763,36 @@ pub async fn run_execution(
 
                 // For inspiration, a conditional should be handled VERY similarly to a prompt
             }
+            Ok(NodeTypes::Command) => {
+                let mut command: Command;
+
+                match current_node.node_content.unwrap().node_content.unwrap() {
+                    NodeContentEnum::Command(c) => {
+                        command = c;
+                    }
+                    _ => {
+                        println!("Command not handled");
+                        continue;
+                    }
+                }
+
+                // There will be a loop here that looks at the goal, the current output and determines if either: 1) a new command must be run OR 2) the goal has been reached.
+            }
             _ => {
                 println!("Other types not implemented yet");
                 continue;
             }
         }
+
+        let mut response = execution.clone();
+
+        // Change this to use a prompt history
+        // response.node_execution_response = node_execution_response;
+        response.current_variable_definitions = variable_definitions.clone();
+        response.prompt_history = prompt_histories.clone();
+
+        return Ok((response, local_accumulator.clone()));
     }
-
-    let mut response = execution.clone();
-
-    // Change this to use a prompt history
-    // response.node_execution_response = node_execution_response;
-    response.current_variable_definitions = variable_definitions.clone();
-    response.prompt_history = prompt_histories.clone();
-
-    return Ok((response, local_accumulator.clone()));
 }
 
 pub fn process_to_execution(
@@ -783,6 +812,151 @@ pub fn process_to_execution(
 }
 
 pub async fn handle_prompt(
+    current_node: Node,
+    mut variable_definitions: HashMap<String, String>,
+    accumulator: Option<String>,
+    language_model_version: String
+) -> Result<(PromptHistory, HashMap<String, String>), ()> {
+    let mut prompt_text: String = "".to_string();
+    let mut hydrated_prompt_text: String = "".to_string();
+
+    let additional_instruction =
+        "When coming up with a response, please make the fields of the json response be the following: ".to_string();
+
+    let more_additional_instruction =
+        "
+    
+    You can also use the error field to report any problems when trying to come up with a response.
+    ".to_string();
+
+    // Concatenate the strings in the vector to make a comma separated string.
+
+    let variable_string: String = current_node.output_variables.join(", ");
+
+    match current_node.node_content.unwrap().node_content.unwrap() {
+        NodeContentEnum::Prompt(prompt) => {
+            // hydrate the prompt text with the variable definitions
+
+            let mut handlebars = Handlebars::new();
+
+            let json_variable_definitions: Value = serde_json::json!(variable_definitions);
+
+            handlebars.register_template_string("prompt", prompt.clone().prompt).unwrap();
+
+            hydrated_prompt_text = handlebars.render("prompt", &json_variable_definitions).unwrap();
+
+            match accumulator {
+                Some(accumulator_text) => {
+                    prompt_text = format!(
+                        "{}\n{}\n {} {} {}",
+                        hydrated_prompt_text.clone(),
+                        accumulator_text.clone(),
+                        additional_instruction,
+                        variable_string,
+                        more_additional_instruction
+                    );
+                }
+                None => {
+                    prompt_text = format!(
+                        "{} {} {} {}",
+                        hydrated_prompt_text.clone(),
+                        additional_instruction,
+                        variable_string,
+                        more_additional_instruction
+                    );
+                }
+            }
+
+            print!("Prompt text: {}", prompt_text.green());
+        }
+        _ => {
+            println!("prompt not handled");
+        }
+    }
+
+    // I believe this already pulls the key from the environmental variable.
+    let client = Client::new();
+
+    let user_message = ChatCompletionRequestUserMessage {
+        content: Some(ChatCompletionRequestUserMessageContent::Text(prompt_text)),
+        role: Role::User,
+    };
+
+    let message: ChatCompletionRequestMessage = ChatCompletionRequestMessage::User(user_message);
+
+    // Create request using builder pattern
+    // Every request struct has companion builder struct with same name + Args suffix
+    let mut request = CreateChatCompletionRequest::default();
+
+    request.messages = vec![message];
+    request.response_format = Some(ChatCompletionResponseFormat {
+        r#type: ChatCompletionResponseFormatType::JsonObject,
+    });
+
+    // Any model can be used so long as it supports response_format
+    // request.model = "gpt-4-1106-preview".to_string();
+    request.model = language_model_version.clone();
+
+    // Call API
+    let response = client.chat().create(request).await.unwrap();
+
+    println!(
+        "{}",
+        response.choices.first().unwrap().message.content.clone().unwrap().as_str().to_string()
+    );
+
+    let json_string = response.choices
+        .first()
+        .unwrap()
+        .message.content.clone()
+        .unwrap()
+        .as_str()
+        .to_string();
+
+    let node_info = current_node.node_info.clone().unwrap();
+
+    let hydrated_and_cleaned_prompt_text = clean_response(&hydrated_prompt_text);
+
+    let mut execution_response_hashmap = HashMap::new();
+
+    let value: Value = serde_json::from_str(json_string.as_str()).unwrap();
+    if let Some(obj) = value.as_object() {
+        for (key, value) in obj {
+            println!("{}: {}", key, value);
+            variable_definitions.insert(key.clone(), value.clone().to_string());
+            execution_response_hashmap.insert(key.clone(), value.clone().to_string());
+        }
+    } else {
+        println!("{}", "The JSON is not an object.".red());
+    }
+
+    // see if all of the output_variables of the node are in the variable definition hashmap:
+
+    let check_output_vars: Vec<String> = current_node.output_variables;
+
+    //loop through check_output_vars and see if the key exists in the variable_definitions hashmap:
+
+    for output_var in check_output_vars.iter() {
+        if !variable_definitions.contains_key(output_var) {
+            println!("Missing variable: {}", output_var.red());
+            // Handle the missing variable case here (e.g., error handling or logging)
+
+            // Send back the Execution to the frontend and let the user decide what to do.
+
+            return Err(());
+        }
+    }
+
+    let prompt_history = PromptHistory {
+        prompt: hydrated_and_cleaned_prompt_text.clone(),
+        response: execution_response_hashmap.clone(),
+        node_info: Some(node_info.clone()),
+    };
+
+    return Ok((prompt_history, variable_definitions));
+}
+
+pub async fn handle_command(
     current_node: Node,
     mut variable_definitions: HashMap<String, String>,
     accumulator: Option<String>,
@@ -1069,4 +1243,44 @@ fn clean_response(input: &str) -> String {
         .replace("\\n", "") // Removes all newlines
         .replace("\\\"", "\"") // Replaces escaped double quotes with regular double quotes
         .replace("&quot;", "\"") // Replaces HTML entity &quot; with double quotes
+}
+
+async fn run_command(
+    command: String,
+    docker_id: String,
+    docker_instance: &Docker
+) -> Result<String, String> {
+    let exec_options = CreateExecOptions {
+        attach_stdout: Some(true),
+        cmd: Some(vec!["sh", "-c", &command.command]),
+        ..Default::default()
+    };
+
+    let exec_created = docker.create_exec(docker_id, exec_options).await.unwrap();
+
+    // Start the exec instance
+    let exec_started = docker_instance.start_exec(&exec_created.id, None).await.unwrap();
+
+    match exec_started {
+        StartExecResults::Attached { mut output, .. } => {
+            let mut full_output = String::new(); // used to accumulate the output
+
+            while let Some(item) = output.next().await {
+                match item {
+                    Ok(log) => {
+                        println!("{:?}", log);
+                        let log_str = log.to_string();
+                        full_output.push_str(&log_str);
+                        full_output.push('\n'); // add a newline between each piece of output
+                    }
+                    Err(e) => eprintln!("Error: {:?}", e),
+                }
+            }
+            return Ok(full_output);
+        }
+        StartExecResults::Detached => {
+            println!("The exec instance completed execution and detached");
+            return Err("The exec instance completed execution and detached".to_string());
+        }
+    }
 }
