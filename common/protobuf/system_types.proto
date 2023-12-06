@@ -24,7 +24,10 @@ message Prompt {
 
 /* Node type that will send a command line command to a linux distro contained in a docker container. */
 message Command {
-  string command = 1;
+  string goal = 1;
+  string command = 2;
+  string output = 3;
+  string error = 4;
 }
 
 /* This node type is not yet implemented, the idea is that it will allow for choosing amongst a few different nodes for future execution. */
@@ -63,6 +66,7 @@ enum NodeTypes {
   COMMAND = 3;
   CODE = 4;
   LOOP = 5;
+  COMMAND_
 }
 
 message NodeContent {
@@ -79,6 +83,7 @@ message NodeContent {
 message Code {
   string code = 1;
   string language = 2;
+  string goal = 3;
 }
 
 message Node {

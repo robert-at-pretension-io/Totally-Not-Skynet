@@ -33,6 +33,11 @@ use prost::Message;
 
 use prost::bytes::BytesMut;
 
+use bollard::container::Config;
+use bollard::exec::{ CreateExecOptions, StartExecResults };
+
+use bollard::Docker;
+
 // use petgraph::prelude::Bfs;
 // use petgraph::algo::toposort;
 
@@ -68,9 +73,43 @@ pub async fn start_message_sending_loop(
     pool: Arc<Pool<SqliteConnectionManager>>
 ) {
     let runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
+    let mut docker_containers: HashMap<Identity, String> = HashMap::new();
 
     while let Some(msg) = client_rx.recv().await {
         println!("{} {:?}", "Received a message from the client:".yellow(), msg.1.len());
+
+        // if docker_containers doesn't contain the message identity (msg.0) then create it and add it to the hashmap:
+
+        let mut docker_id: String;
+
+        match docker_containers.get(&msg.0) {
+            Some(id) => {
+                docker_id = id.clone();
+                continue;
+            }
+            None => {
+                const IMAGE: &str = "alpine:3";
+
+                let alpine_config = Config {
+                    image: Some(IMAGE),
+                    tty: Some(true),
+                    attach_stdin: Some(true),
+                    attach_stdout: Some(true),
+                    attach_stderr: Some(true),
+                    open_stdin: Some(true),
+                    ..Default::default()
+                };
+
+                let id = docker
+                    .create_container::<&str, &str>(None, alpine_config.clone()).await
+                    .unwrap().id;
+
+                docker_id = id.clone();
+
+                println!("Created container with id: {}", id);
+                docker_containers.insert(msg.0.clone(), id);
+            }
+        }
 
         let slice = msg.1.clone().into_data().as_slice().to_vec();
         let envelope: Envelope;

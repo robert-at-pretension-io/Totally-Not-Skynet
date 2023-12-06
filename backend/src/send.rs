@@ -7,9 +7,11 @@ use crate::settings::UserSettings;
 
 use bollard::container::Config;
 use bollard::exec::{ CreateExecOptions, StartExecResults };
+
+use bollard::Docker;
+
 use tokio::sync::mpsc::UnboundedSender;
 use std::collections::HashMap;
-use bollard::Docker;
 use serde::{ Deserialize, Serialize };
 use tokio_tungstenite::tungstenite::Message;
 use futures_util::StreamExt;

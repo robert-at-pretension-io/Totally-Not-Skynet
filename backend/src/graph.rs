@@ -578,7 +578,8 @@ pub fn validate_nodes_in_loop(
 #[async_recursion]
 pub async fn run_execution(
     mut execution: Execution,
-    accumulator: Option<String>
+    accumulator: Option<String>,
+    docker_id: Option<String>
 ) -> Result<(Execution, Option<String>), Execution> {
     // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
 
