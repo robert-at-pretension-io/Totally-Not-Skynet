@@ -1658,7 +1658,7 @@ var app = (function () {
     }
     _Timestamp_one_of_decls = new WeakMap();
 
-    var _GraphNodeInfo_one_of_decls, _Edge_one_of_decls, _Prompt_one_of_decls, _Command_one_of_decls, _Conditional_one_of_decls, _Graph_one_of_decls, _Process_one_of_decls, _Loop_one_of_decls, _NodeContent_one_of_decls, _Code_one_of_decls, _Node_one_of_decls, _Nodes_one_of_decls, _Log_one_of_decls, _Identity_one_of_decls, _Execution_one_of_decls, _PromptHistory_one_of_decls, _VariableDefinition_one_of_decls, _SystemState_one_of_decls, _AuthenticationMessage_one_of_decls, _UserSettings_one_of_decls, _SystemError_one_of_decls, _Letter_one_of_decls, _Body_one_of_decls, _NodesToProcess_one_of_decls, _NodesToLoop_one_of_decls, _Envelope_one_of_decls;
+    var _GraphNodeInfo_one_of_decls, _Edge_one_of_decls, _Prompt_one_of_decls, _Command_one_of_decls, _Conditional_one_of_decls, _Graph_one_of_decls, _Process_one_of_decls, _Loop_one_of_decls, _NodeContent_one_of_decls, _Code_one_of_decls, _Node_one_of_decls, _Nodes_one_of_decls, _Log_one_of_decls, _Identity_one_of_decls, _Execution_one_of_decls, _AtomicExecutionLog_one_of_decls, _VariableDefinition_one_of_decls, _SystemState_one_of_decls, _AuthenticationMessage_one_of_decls, _UserSettings_one_of_decls, _SystemError_one_of_decls, _Letter_one_of_decls, _Body_one_of_decls, _NodesToProcess_one_of_decls, _NodesToLoop_one_of_decls, _Envelope_one_of_decls;
     var NodeTypes;
     (function (NodeTypes) {
         NodeTypes[NodeTypes["PROMPT"] = 0] = "PROMPT";
@@ -3055,7 +3055,7 @@ var app = (function () {
             googleProtobuf.Message.setField(this, 4, value);
         }
         get prompt_history() {
-            return googleProtobuf.Message.getRepeatedWrapperField(this, PromptHistory, 5);
+            return googleProtobuf.Message.getRepeatedWrapperField(this, AtomicExecutionLog, 5);
         }
         set prompt_history(value) {
             googleProtobuf.Message.setRepeatedWrapperField(this, 5, value);
@@ -3075,7 +3075,7 @@ var app = (function () {
                 message.execution_id = data.execution_id;
             }
             if (data.prompt_history != null) {
-                message.prompt_history = data.prompt_history.map(item => PromptHistory.fromObject(item));
+                message.prompt_history = data.prompt_history.map(item => AtomicExecutionLog.fromObject(item));
             }
             return message;
         }
@@ -3136,7 +3136,7 @@ var app = (function () {
                         message.execution_id = reader.readString();
                         break;
                     case 5:
-                        reader.readMessage(message.prompt_history, () => googleProtobuf.Message.addToRepeatedWrapperField(message, 5, PromptHistory.deserialize(reader), PromptHistory));
+                        reader.readMessage(message.prompt_history, () => googleProtobuf.Message.addToRepeatedWrapperField(message, 5, AtomicExecutionLog.deserialize(reader), AtomicExecutionLog));
                         break;
                     default: reader.skipField();
                 }
@@ -3151,11 +3151,11 @@ var app = (function () {
         }
     }
     _Execution_one_of_decls = new WeakMap();
-    class PromptHistory extends googleProtobuf.Message {
+    class AtomicExecutionLog extends googleProtobuf.Message {
         constructor(data) {
             super();
-            _PromptHistory_one_of_decls.set(this, []);
-            googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], __classPrivateFieldGet(this, _PromptHistory_one_of_decls, "f"));
+            _AtomicExecutionLog_one_of_decls.set(this, []);
+            googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], __classPrivateFieldGet(this, _AtomicExecutionLog_one_of_decls, "f"));
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("prompt" in data && data.prompt != undefined) {
                     this.prompt = data.prompt;
@@ -3192,7 +3192,7 @@ var app = (function () {
             return googleProtobuf.Message.getField(this, 3) != null;
         }
         static fromObject(data) {
-            const message = new PromptHistory({});
+            const message = new AtomicExecutionLog({});
             if (data.prompt != null) {
                 message.prompt = data.prompt;
             }
@@ -3233,7 +3233,7 @@ var app = (function () {
                 return writer.getResultBuffer();
         }
         static deserialize(bytes) {
-            const reader = bytes instanceof googleProtobuf.BinaryReader ? bytes : new googleProtobuf.BinaryReader(bytes), message = new PromptHistory();
+            const reader = bytes instanceof googleProtobuf.BinaryReader ? bytes : new googleProtobuf.BinaryReader(bytes), message = new AtomicExecutionLog();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
@@ -3256,10 +3256,10 @@ var app = (function () {
             return this.serialize();
         }
         static deserializeBinary(bytes) {
-            return PromptHistory.deserialize(bytes);
+            return AtomicExecutionLog.deserialize(bytes);
         }
     }
-    _PromptHistory_one_of_decls = new WeakMap();
+    _AtomicExecutionLog_one_of_decls = new WeakMap();
     class VariableDefinition extends googleProtobuf.Message {
         constructor(data) {
             super();
@@ -4611,7 +4611,7 @@ var app = (function () {
         Log: Log,
         Identity: Identity,
         Execution: Execution,
-        PromptHistory: PromptHistory,
+        AtomicExecutionLog: AtomicExecutionLog,
         VariableDefinition: VariableDefinition,
         SystemState: SystemState,
         AuthenticationMessage: AuthenticationMessage,
@@ -8987,11 +8987,11 @@ var app = (function () {
     	//     selected_process.node_content?.has_process &&
     	//     latest_execution !== undefined
     	//   ) {
-    	//     ordered_prompt_history = new Array<PromptHistory>();
+    	//     ordered_prompt_history = new Array<AtomicExecutionLog>();
     	//     let process = selected_process.node_content.process;
     	//     let topological_order = process.topological_order;
     	//     let prompt_history = latest_execution.prompt_history;
-    	//     let new_prompt_history = new Array<PromptHistory>();
+    	//     let new_prompt_history = new Array<AtomicExecutionLog>();
     	//     for (let i = 0; i < topological_order.length; i++) {
     	//       let node_id = topological_order[i];
     	//       let prompt_and_response = prompt_history.find(

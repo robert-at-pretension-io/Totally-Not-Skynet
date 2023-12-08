@@ -26,7 +26,7 @@ message Prompt {
 message Command {
   string goal = 1;
   string command = 2;
-  string output = 3;
+  repeated string output = 3;
   string error = 4;
 }
 
@@ -66,7 +66,11 @@ enum NodeTypes {
   COMMAND = 3;
   CODE = 4;
   LOOP = 5;
-  COMMAND_
+}
+
+message AtomicNodeTypes{
+  NodeTypes node_type = 1;
+  bool is_atomic = 2;
 }
 
 message NodeContent {
@@ -137,12 +141,11 @@ message Execution {
   map<string,string> current_variable_definitions = 3;
   // The execution_id has is unique for each execution. It is different from a verification_id of a letter because it is not used for pairing messages, but rather for identifying the execution of a process. This way, we can have multiple messages regarding a single process execution.
   string execution_id = 4;
-  // This maps GraphNodeId to the execution results of that node.
-  repeated PromptHistory prompt_history = 5;
-
+  repeated AtomicExecutionLog atomic_history = 5;
 }
 
-message PromptHistory {
+// The atomic execution refers to the execution of a node that is NOT a flow control node. For instance, a prompt, command, or code node.
+message AtomicExecutionLog {
   string prompt = 1;
   map<string,string> response = 2;
   GraphNodeInfo node_info = 3;

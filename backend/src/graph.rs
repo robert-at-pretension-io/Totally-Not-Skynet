@@ -1,4 +1,4 @@
-use crate::generated_types::{ variable_definition, PromptHistory };
+use crate::generated_types::{ variable_definition, AtomicExecutionLog };
 use crate::generated_types::{
     node_content::NodeContent as NodeContentEnum,
     Edge,
@@ -10,8 +10,10 @@ use crate::generated_types::{
     Execution,
     NodeTypes,
     Loop,
-    PromptHistory,
+    Command,
 };
+
+use futures_util::StreamExt;
 
 use bollard::Docker;
 use bollard::exec::{ StartExecResults, CreateExecOptions };
@@ -608,7 +610,7 @@ pub async fn run_execution(
 
     let mut local_accumulator = accumulator.clone();
 
-    let mut prompt_histories: Vec<PromptHistory> = execution.clone().prompt_history;
+    let mut prompt_histories: Vec<AtomicExecutionLog> = execution.clone().atomic_history.clone();
 
     for node_info in topological_order {
         let current_node = local_nodes_map.get(&node_info.id).unwrap().clone();
@@ -649,12 +651,15 @@ pub async fn run_execution(
                         variable_definitions.extend(
                             progressed_execution.current_variable_definitions.clone()
                         );
-                        prompt_histories = progressed_execution.prompt_history.clone();
+                        prompt_histories = progressed_execution.atomic_history.clone();
 
                         local_accumulator = returned_accumulator.clone();
                     }
-                    Err(execution) => {
-                        return Err(execution);
+                    // Err(execution) => {
+                    //     return Err(execution);
+                    // }
+                    _ => {
+                        println!("Error at process execution");
                     }
                 }
             }
@@ -719,7 +724,7 @@ pub async fn run_execution(
                             variable_definitions.extend(
                                 progressed_execution.current_variable_definitions.clone()
                             );
-                            prompt_histories = progressed_execution.prompt_history.clone();
+                            prompt_histories = progressed_execution.atomic_history.clone();
 
                             local_accumulator = returned_accumulator.clone();
 
@@ -766,13 +771,33 @@ pub async fn run_execution(
             Ok(NodeTypes::Command) => {
                 let mut command: Command;
 
-                match current_node.node_content.unwrap().node_content.unwrap() {
+                match current_node.clone().node_content.unwrap().node_content.unwrap() {
                     NodeContentEnum::Command(c) => {
                         command = c;
                     }
                     _ => {
                         println!("Command not handled");
                         continue;
+                    }
+                }
+
+                match
+                    handle_command(
+                        current_node.clone(),
+                        variable_definitions.clone(),
+                        local_accumulator.clone(),
+                        "gpt-4-1106-preview".to_string(),
+                        command.clone(),
+                        docker_instance,
+                        docker_id.clone().unwrap()
+                    ).await
+                {
+                    Ok(atomic_log) => {
+                        prompt_histories.push(atomic_log);
+                    }
+                    Err(err) => {
+                        // return Err(execution);
+                        println!("Error with running command");
                     }
                 }
 
@@ -783,28 +808,27 @@ pub async fn run_execution(
                 continue;
             }
         }
-
-        let mut response = execution.clone();
-
-        // Change this to use a prompt history
-        // response.node_execution_response = node_execution_response;
-        response.current_variable_definitions = variable_definitions.clone();
-        response.prompt_history = prompt_histories.clone();
-
-        return Ok((response, local_accumulator.clone()));
     }
+    let mut response = execution.clone();
+
+    // Change this to use a prompt history
+    // response.node_execution_response = node_execution_response;
+    response.current_variable_definitions = variable_definitions.clone();
+    response.atomic_history = prompt_histories.clone();
+
+    return Ok((response, local_accumulator.clone()));
 }
 
 pub fn process_to_execution(
     current_variables: HashMap<String, String>,
     process: Process,
-    prompt_histories: Vec<PromptHistory>
+    prompt_histories: Vec<AtomicExecutionLog>
 ) -> Execution {
     let execution: Execution = Execution {
         current_variable_definitions: current_variables,
         process: Some(process.clone()),
         current_node: Some(process.clone().topological_order.first().unwrap().clone()),
-        prompt_history: prompt_histories,
+        atomic_history: prompt_histories,
         execution_id: uuid::Uuid::new_v4().to_string(),
     };
 
@@ -816,7 +840,7 @@ pub async fn handle_prompt(
     mut variable_definitions: HashMap<String, String>,
     accumulator: Option<String>,
     language_model_version: String
-) -> Result<(PromptHistory, HashMap<String, String>), ()> {
+) -> Result<(AtomicExecutionLog, HashMap<String, String>), ()> {
     let mut prompt_text: String = "".to_string();
     let mut hydrated_prompt_text: String = "".to_string();
 
@@ -947,7 +971,7 @@ pub async fn handle_prompt(
         }
     }
 
-    let prompt_history = PromptHistory {
+    let prompt_history = AtomicExecutionLog {
         prompt: hydrated_and_cleaned_prompt_text.clone(),
         response: execution_response_hashmap.clone(),
         node_info: Some(node_info.clone()),
@@ -960,70 +984,32 @@ pub async fn handle_command(
     current_node: Node,
     mut variable_definitions: HashMap<String, String>,
     accumulator: Option<String>,
-    language_model_version: String
-) -> Result<(PromptHistory, HashMap<String, String>), ()> {
+    language_model_version: String,
+    command: Command,
+    docker_instance: &Docker,
+    docker_id: String
+) -> Result<AtomicExecutionLog, ()> {
     let mut prompt_text: String = "".to_string();
-    let mut hydrated_prompt_text: String = "".to_string();
 
-    let additional_instruction =
-        "When coming up with a response, please make the fields of the json response be the following: ".to_string();
+    let goal = command.goal.clone();
 
-    let more_additional_instruction =
-        "
-    
-    You can also use the error field to report any problems when trying to come up with a response.
-    ".to_string();
+    // let the command_line_history string be empty OR the contents of the accumulator:
+    let command_line_history: String = match accumulator {
+        Some(accumulator_text) => { accumulator_text.clone() }
+        None => { "".to_string() }
+    };
 
-    // Concatenate the strings in the vector to make a comma separated string.
-
-    let variable_string: String = current_node.output_variables.join(", ");
-
-    match current_node.node_content.unwrap().node_content.unwrap() {
-        NodeContentEnum::Prompt(prompt) => {
-            // hydrate the prompt text with the variable definitions
-
-            let mut handlebars = Handlebars::new();
-
-            let json_variable_definitions: Value = serde_json::json!(variable_definitions);
-
-            handlebars.register_template_string("prompt", prompt.clone().prompt).unwrap();
-
-            hydrated_prompt_text = handlebars.render("prompt", &json_variable_definitions).unwrap();
-
-            match accumulator {
-                Some(accumulator_text) => {
-                    prompt_text = format!(
-                        "{}\n{}\n {} {} {}",
-                        hydrated_prompt_text.clone(),
-                        accumulator_text.clone(),
-                        additional_instruction,
-                        variable_string,
-                        more_additional_instruction
-                    );
-                }
-                None => {
-                    prompt_text = format!(
-                        "{} {} {} {}",
-                        hydrated_prompt_text.clone(),
-                        additional_instruction,
-                        variable_string,
-                        more_additional_instruction
-                    );
-                }
-            }
-
-            print!("Prompt text: {}", prompt_text.green());
-        }
-        _ => {
-            println!("prompt not handled");
-        }
-    }
+    prompt_text = format!(
+        "Please write a command line command (assuming a recent debian based operating system) that fulfills the following goal given the current command line log.\n Goal: {}\nCommand Line Log: {}\n (If the command line log is empty then just give a command that tries to achieve the goal.\n When coming up with a response, please make the fields of the json response be the following:\n command",
+        goal,
+        command_line_history
+    );
 
     // I believe this already pulls the key from the environmental variable.
     let client = Client::new();
 
     let user_message = ChatCompletionRequestUserMessage {
-        content: Some(ChatCompletionRequestUserMessageContent::Text(prompt_text)),
+        content: Some(ChatCompletionRequestUserMessageContent::Text(prompt_text.clone())),
         role: Role::User,
     };
 
@@ -1060,7 +1046,7 @@ pub async fn handle_command(
 
     let node_info = current_node.node_info.clone().unwrap();
 
-    let hydrated_and_cleaned_prompt_text = clean_response(&hydrated_prompt_text);
+    // let hydrated_and_cleaned_prompt_text = clean_response(&hydrated_prompt_text);
 
     let mut execution_response_hashmap = HashMap::new();
 
@@ -1073,39 +1059,47 @@ pub async fn handle_command(
         }
     } else {
         println!("{}", "The JSON is not an object.".red());
+        return Err(());
     }
 
-    // see if all of the output_variables of the node are in the variable definition hashmap:
+    // extract the command from the variable_definitions hashmap:
+    let mut run_this_command: String = "".to_string();
 
-    let check_output_vars: Vec<String> = current_node.output_variables;
-
-    //loop through check_output_vars and see if the key exists in the variable_definitions hashmap:
-
-    for output_var in check_output_vars.iter() {
-        if !variable_definitions.contains_key(output_var) {
-            println!("Missing variable: {}", output_var.red());
-            // Handle the missing variable case here (e.g., error handling or logging)
-
-            // Send back the Execution to the frontend and let the user decide what to do.
-
+    match variable_definitions.get("command") {
+        Some(command) => {
+            run_this_command = command.clone();
+        }
+        None => {
+            println!("{}", "The command field was not found in the response.".red());
             return Err(());
         }
     }
 
-    let prompt_history = PromptHistory {
-        prompt: hydrated_and_cleaned_prompt_text.clone(),
+    match run_command(run_this_command.clone(), docker_id, docker_instance).await {
+        Ok(res) => {
+            println!("{}\nResult: {:?}", "The command was run successfully".green(), res);
+        }
+        Err(err) => {
+            println!("{}", "The command was not run successfully".red());
+        }
+    }
+
+    // if successful, we should re
+
+    let prompt_history = AtomicExecutionLog {
+        prompt: prompt_text.clone(),
         response: execution_response_hashmap.clone(),
         node_info: Some(node_info.clone()),
     };
 
-    return Ok((prompt_history, variable_definitions));
+    return Ok(prompt_history);
 }
 
 pub async fn handle_conditional(
     current_node: Node,
     mut variable_definitions: HashMap<String, String>,
     language_model_version: String
-) -> Result<(PromptHistory, HashMap<String, String>, Option<String>), ()> {
+) -> Result<(AtomicExecutionLog, HashMap<String, String>, Option<String>), ()> {
     let mut prompt_text: String = "".to_string();
     let mut hydrated_prompt_text: String = "".to_string();
 
@@ -1229,7 +1223,7 @@ pub async fn handle_conditional(
 
     let accumulator = execution_response_hashmap.get("accumulator").unwrap().clone();
 
-    let prompt_history = PromptHistory {
+    let prompt_history = AtomicExecutionLog {
         prompt: hydrated_and_cleaned_prompt_text.clone(),
         response: execution_response_hashmap.clone(),
         node_info: Some(node_info.clone()),
@@ -1252,11 +1246,11 @@ async fn run_command(
 ) -> Result<String, String> {
     let exec_options = CreateExecOptions {
         attach_stdout: Some(true),
-        cmd: Some(vec!["sh", "-c", &command.command]),
+        cmd: Some(vec!["sh", "-c", &command]),
         ..Default::default()
     };
 
-    let exec_created = docker.create_exec(docker_id, exec_options).await.unwrap();
+    let exec_created = docker_instance.create_exec(&docker_id, exec_options).await.unwrap();
 
     // Start the exec instance
     let exec_started = docker_instance.start_exec(&exec_created.id, None).await.unwrap();
@@ -1273,7 +1267,7 @@ async fn run_command(
                         full_output.push_str(&log_str);
                         full_output.push('\n'); // add a newline between each piece of output
                     }
-                    Err(e) => eprintln!("Error: {:?}", e),
+                    Err(e) => println!("Error: {:?}", e.to_string().red()),
                 }
             }
             return Ok(full_output);

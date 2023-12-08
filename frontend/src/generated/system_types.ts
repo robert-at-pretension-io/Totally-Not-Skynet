@@ -1536,7 +1536,7 @@ export class Execution extends pb_1.Message {
         process?: Process;
         current_variable_definitions?: Map<string, string>;
         execution_id?: string;
-        prompt_history?: PromptHistory[];
+        prompt_history?: AtomicExecutionLog[];
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [5], this.#one_of_decls);
@@ -1591,9 +1591,9 @@ export class Execution extends pb_1.Message {
     pb_1.Message.setField(this, 4, value);
   }
   get prompt_history() {
-    return pb_1.Message.getRepeatedWrapperField(this, PromptHistory, 5) as PromptHistory[];
+    return pb_1.Message.getRepeatedWrapperField(this, AtomicExecutionLog, 5) as AtomicExecutionLog[];
   }
-  set prompt_history(value: PromptHistory[]) {
+  set prompt_history(value: AtomicExecutionLog[]) {
     pb_1.Message.setRepeatedWrapperField(this, 5, value);
   }
   static fromObject(data: {
@@ -1603,7 +1603,7 @@ export class Execution extends pb_1.Message {
             [key: string]: string;
         };
         execution_id?: string;
-        prompt_history?: ReturnType<typeof PromptHistory.prototype.toObject>[];
+        prompt_history?: ReturnType<typeof AtomicExecutionLog.prototype.toObject>[];
     }): Execution {
     const message = new Execution({});
     if (data.current_node != null) {
@@ -1619,7 +1619,7 @@ export class Execution extends pb_1.Message {
       message.execution_id = data.execution_id;
     }
     if (data.prompt_history != null) {
-      message.prompt_history = data.prompt_history.map(item => PromptHistory.fromObject(item));
+      message.prompt_history = data.prompt_history.map(item => AtomicExecutionLog.fromObject(item));
     }
     return message;
   }
@@ -1631,7 +1631,7 @@ export class Execution extends pb_1.Message {
                 [key: string]: string;
             };
             execution_id?: string;
-            prompt_history?: ReturnType<typeof PromptHistory.prototype.toObject>[];
+            prompt_history?: ReturnType<typeof AtomicExecutionLog.prototype.toObject>[];
         } = {};
     if (this.current_node != null) {
       data.current_node = this.current_node.toObject();
@@ -1646,7 +1646,7 @@ export class Execution extends pb_1.Message {
       data.execution_id = this.execution_id;
     }
     if (this.prompt_history != null) {
-      data.prompt_history = this.prompt_history.map((item: PromptHistory) => item.toObject());
+      data.prompt_history = this.prompt_history.map((item: AtomicExecutionLog) => item.toObject());
     }
     return data;
   }
@@ -1667,7 +1667,7 @@ export class Execution extends pb_1.Message {
     if (this.execution_id.length)
       writer.writeString(4, this.execution_id);
     if (this.prompt_history.length)
-      writer.writeRepeatedMessage(5, this.prompt_history, (item: PromptHistory) => item.serialize(writer));
+      writer.writeRepeatedMessage(5, this.prompt_history, (item: AtomicExecutionLog) => item.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1690,7 +1690,7 @@ export class Execution extends pb_1.Message {
         message.execution_id = reader.readString();
         break;
       case 5:
-        reader.readMessage(message.prompt_history, () => pb_1.Message.addToRepeatedWrapperField(message, 5, PromptHistory.deserialize(reader), PromptHistory));
+        reader.readMessage(message.prompt_history, () => pb_1.Message.addToRepeatedWrapperField(message, 5, AtomicExecutionLog.deserialize(reader), AtomicExecutionLog));
         break;
       default: reader.skipField();
       }
@@ -1704,7 +1704,7 @@ export class Execution extends pb_1.Message {
     return Execution.deserialize(bytes);
   }
 }
-export class PromptHistory extends pb_1.Message {
+export class AtomicExecutionLog extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
         prompt?: string;
@@ -1754,8 +1754,8 @@ export class PromptHistory extends pb_1.Message {
             [key: string]: string;
         };
         node_info?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
-    }): PromptHistory {
-    const message = new PromptHistory({});
+    }): AtomicExecutionLog {
+    const message = new AtomicExecutionLog({});
     if (data.prompt != null) {
       message.prompt = data.prompt;
     }
@@ -1803,8 +1803,8 @@ export class PromptHistory extends pb_1.Message {
     if (!w)
       return writer.getResultBuffer();
   }
-  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): PromptHistory {
-    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new PromptHistory();
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): AtomicExecutionLog {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new AtomicExecutionLog();
     while (reader.nextField()) {
       if (reader.isEndGroup())
         break;
@@ -1826,8 +1826,8 @@ export class PromptHistory extends pb_1.Message {
   serializeBinary(): Uint8Array {
     return this.serialize();
   }
-  static deserializeBinary(bytes: Uint8Array): PromptHistory {
-    return PromptHistory.deserialize(bytes);
+  static deserializeBinary(bytes: Uint8Array): AtomicExecutionLog {
+    return AtomicExecutionLog.deserialize(bytes);
   }
 }
 export class VariableDefinition extends pb_1.Message {

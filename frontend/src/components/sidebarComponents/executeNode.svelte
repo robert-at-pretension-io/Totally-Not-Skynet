@@ -8,7 +8,7 @@
     Node,
     NodeTypes,
     Process,
-    PromptHistory,
+    AtomicExecutionLog,
     VerbTypes,
   } from "../../generated/system_types";
   import { onMount } from "svelte";
@@ -26,7 +26,7 @@
   let node_options = new Array<Node>();
   let nodes = new Array<Node>();
   let latest_execution = new Execution();
-  let prompt_history = new Array<PromptHistory>();
+  let prompt_history = new Array<AtomicExecutionLog>();
 
   onMount(() => {
     nodes = $systemStateStore.local_nodes;
@@ -83,12 +83,12 @@
   //     selected_process.node_content?.has_process &&
   //     latest_execution !== undefined
   //   ) {
-  //     ordered_prompt_history = new Array<PromptHistory>();
+  //     ordered_prompt_history = new Array<AtomicExecutionLog>();
 
   //     let process = selected_process.node_content.process;
   //     let topological_order = process.topological_order;
   //     let prompt_history = latest_execution.prompt_history;
-  //     let new_prompt_history = new Array<PromptHistory>();
+  //     let new_prompt_history = new Array<AtomicExecutionLog>();
 
   //     for (let i = 0; i < topological_order.length; i++) {
   //       let node_id = topological_order[i];

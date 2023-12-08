@@ -11,7 +11,7 @@ use crate::generated_types::{
     Process,
     UserSettings,
     VerbTypes,
-    PromptHistory,
+    AtomicExecutionLog,
 };
 
 use crate::graph::validate_nodes_in_loop;
@@ -108,7 +108,7 @@ pub async fn start_message_sending_loop(
                 docker_id = id.clone();
 
                 println!("Created container with id: {}", id);
-                docker_containers.insert(msg.0.clone(), id);
+                docker_containers.insert(msg.0.clone().name.to_string(), id);
             }
         }
 
@@ -479,12 +479,12 @@ pub async fn start_message_sending_loop(
                 }
                 Contents::ExecutionDetails(execution) => {
                     match verb {
-                        Verbcontainer_idTypes::Execute => {
+                        VerbTypes::Execute => {
                             match
                                 run_execution(
                                     execution.clone(),
                                     None,
-                                    Some(docker_id),
+                                    Some(docker_id.clone()),
                                     &docker
                                 ).await
                             {
