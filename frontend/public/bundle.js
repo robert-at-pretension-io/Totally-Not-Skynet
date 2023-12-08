@@ -1658,7 +1658,7 @@ var app = (function () {
     }
     _Timestamp_one_of_decls = new WeakMap();
 
-    var _GraphNodeInfo_one_of_decls, _Edge_one_of_decls, _Prompt_one_of_decls, _Command_one_of_decls, _Conditional_one_of_decls, _Graph_one_of_decls, _Process_one_of_decls, _Loop_one_of_decls, _NodeContent_one_of_decls, _Code_one_of_decls, _Node_one_of_decls, _Nodes_one_of_decls, _Log_one_of_decls, _Identity_one_of_decls, _Execution_one_of_decls, _AtomicExecutionLog_one_of_decls, _VariableDefinition_one_of_decls, _SystemState_one_of_decls, _AuthenticationMessage_one_of_decls, _UserSettings_one_of_decls, _SystemError_one_of_decls, _Letter_one_of_decls, _Body_one_of_decls, _NodesToProcess_one_of_decls, _NodesToLoop_one_of_decls, _Envelope_one_of_decls;
+    var _GraphNodeInfo_one_of_decls, _Edge_one_of_decls, _Prompt_one_of_decls, _Command_one_of_decls, _Conditional_one_of_decls, _Graph_one_of_decls, _Process_one_of_decls, _Loop_one_of_decls, _AtomicNodeTypes_one_of_decls, _NodeContent_one_of_decls, _Code_one_of_decls, _Node_one_of_decls, _Nodes_one_of_decls, _Log_one_of_decls, _Identity_one_of_decls, _Execution_one_of_decls, _AtomicExecutionLog_one_of_decls, _VariableDefinition_one_of_decls, _SystemState_one_of_decls, _AuthenticationMessage_one_of_decls, _UserSettings_one_of_decls, _SystemError_one_of_decls, _Letter_one_of_decls, _Body_one_of_decls, _NodesToProcess_one_of_decls, _NodesToLoop_one_of_decls, _Envelope_one_of_decls;
     var NodeTypes;
     (function (NodeTypes) {
         NodeTypes[NodeTypes["PROMPT"] = 0] = "PROMPT";
@@ -1959,37 +1959,88 @@ var app = (function () {
         constructor(data) {
             super();
             _Command_one_of_decls.set(this, []);
-            googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], __classPrivateFieldGet(this, _Command_one_of_decls, "f"));
+            googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3], __classPrivateFieldGet(this, _Command_one_of_decls, "f"));
             if (!Array.isArray(data) && typeof data == "object") {
+                if ("goal" in data && data.goal != undefined) {
+                    this.goal = data.goal;
+                }
                 if ("command" in data && data.command != undefined) {
                     this.command = data.command;
                 }
+                if ("output" in data && data.output != undefined) {
+                    this.output = data.output;
+                }
+                if ("error" in data && data.error != undefined) {
+                    this.error = data.error;
+                }
             }
         }
-        get command() {
+        get goal() {
             return googleProtobuf.Message.getFieldWithDefault(this, 1, "");
         }
-        set command(value) {
+        set goal(value) {
             googleProtobuf.Message.setField(this, 1, value);
+        }
+        get command() {
+            return googleProtobuf.Message.getFieldWithDefault(this, 2, "");
+        }
+        set command(value) {
+            googleProtobuf.Message.setField(this, 2, value);
+        }
+        get output() {
+            return googleProtobuf.Message.getFieldWithDefault(this, 3, []);
+        }
+        set output(value) {
+            googleProtobuf.Message.setField(this, 3, value);
+        }
+        get error() {
+            return googleProtobuf.Message.getFieldWithDefault(this, 4, "");
+        }
+        set error(value) {
+            googleProtobuf.Message.setField(this, 4, value);
         }
         static fromObject(data) {
             const message = new Command({});
+            if (data.goal != null) {
+                message.goal = data.goal;
+            }
             if (data.command != null) {
                 message.command = data.command;
+            }
+            if (data.output != null) {
+                message.output = data.output;
+            }
+            if (data.error != null) {
+                message.error = data.error;
             }
             return message;
         }
         toObject() {
             const data = {};
+            if (this.goal != null) {
+                data.goal = this.goal;
+            }
             if (this.command != null) {
                 data.command = this.command;
+            }
+            if (this.output != null) {
+                data.output = this.output;
+            }
+            if (this.error != null) {
+                data.error = this.error;
             }
             return data;
         }
         serialize(w) {
             const writer = w || new googleProtobuf.BinaryWriter();
+            if (this.goal.length)
+                writer.writeString(1, this.goal);
             if (this.command.length)
-                writer.writeString(1, this.command);
+                writer.writeString(2, this.command);
+            if (this.output.length)
+                writer.writeRepeatedString(3, this.output);
+            if (this.error.length)
+                writer.writeString(4, this.error);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -2000,7 +2051,16 @@ var app = (function () {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
+                        message.goal = reader.readString();
+                        break;
+                    case 2:
                         message.command = reader.readString();
+                        break;
+                    case 3:
+                        googleProtobuf.Message.addToRepeatedField(message, 3, reader.readString());
+                        break;
+                    case 4:
+                        message.error = reader.readString();
                         break;
                     default: reader.skipField();
                 }
@@ -2078,7 +2138,7 @@ var app = (function () {
         }
     }
     _Conditional_one_of_decls = new WeakMap();
-    class Graph extends googleProtobuf.Message {
+    class Graph$3 extends googleProtobuf.Message {
         constructor(data) {
             super();
             _Graph_one_of_decls.set(this, []);
@@ -2105,7 +2165,7 @@ var app = (function () {
             googleProtobuf.Message.setRepeatedWrapperField(this, 2, value);
         }
         static fromObject(data) {
-            const message = new Graph({});
+            const message = new Graph$3({});
             if (data.nodes_info != null) {
                 message.nodes_info = data.nodes_info.map(item => GraphNodeInfo.fromObject(item));
             }
@@ -2134,7 +2194,7 @@ var app = (function () {
                 return writer.getResultBuffer();
         }
         static deserialize(bytes) {
-            const reader = bytes instanceof googleProtobuf.BinaryReader ? bytes : new googleProtobuf.BinaryReader(bytes), message = new Graph();
+            const reader = bytes instanceof googleProtobuf.BinaryReader ? bytes : new googleProtobuf.BinaryReader(bytes), message = new Graph$3();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
@@ -2154,7 +2214,7 @@ var app = (function () {
             return this.serialize();
         }
         static deserializeBinary(bytes) {
-            return Graph.deserialize(bytes);
+            return Graph$3.deserialize(bytes);
         }
     }
     _Graph_one_of_decls = new WeakMap();
@@ -2176,7 +2236,7 @@ var app = (function () {
             }
         }
         get graph() {
-            return googleProtobuf.Message.getWrapperField(this, Graph, 1);
+            return googleProtobuf.Message.getWrapperField(this, Graph$3, 1);
         }
         set graph(value) {
             googleProtobuf.Message.setWrapperField(this, 1, value);
@@ -2199,7 +2259,7 @@ var app = (function () {
         static fromObject(data) {
             const message = new Process({});
             if (data.graph != null) {
-                message.graph = Graph.fromObject(data.graph);
+                message.graph = Graph$3.fromObject(data.graph);
             }
             if (data.topological_order != null) {
                 message.topological_order = data.topological_order.map(item => GraphNodeInfo.fromObject(item));
@@ -2240,7 +2300,7 @@ var app = (function () {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.graph, () => message.graph = Graph.deserialize(reader));
+                        reader.readMessage(message.graph, () => message.graph = Graph$3.deserialize(reader));
                         break;
                     case 2:
                         reader.readMessage(message.topological_order, () => googleProtobuf.Message.addToRepeatedWrapperField(message, 2, GraphNodeInfo.deserialize(reader), GraphNodeInfo));
@@ -2265,7 +2325,7 @@ var app = (function () {
         constructor(data) {
             super();
             _Loop_one_of_decls.set(this, []);
-            googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], __classPrivateFieldGet(this, _Loop_one_of_decls, "f"));
+            googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4], __classPrivateFieldGet(this, _Loop_one_of_decls, "f"));
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("process" in data && data.process != undefined) {
                     this.process = data.process;
@@ -2275,6 +2335,12 @@ var app = (function () {
                 }
                 if ("max_iterations" in data && data.max_iterations != undefined) {
                     this.max_iterations = data.max_iterations;
+                }
+                if ("accumulated_text" in data && data.accumulated_text != undefined) {
+                    this.accumulated_text = data.accumulated_text;
+                }
+                if ("goal" in data && data.goal != undefined) {
+                    this.goal = data.goal;
                 }
             }
         }
@@ -2299,6 +2365,18 @@ var app = (function () {
         set max_iterations(value) {
             googleProtobuf.Message.setField(this, 3, value);
         }
+        get accumulated_text() {
+            return googleProtobuf.Message.getFieldWithDefault(this, 4, []);
+        }
+        set accumulated_text(value) {
+            googleProtobuf.Message.setField(this, 4, value);
+        }
+        get goal() {
+            return googleProtobuf.Message.getFieldWithDefault(this, 5, "");
+        }
+        set goal(value) {
+            googleProtobuf.Message.setField(this, 5, value);
+        }
         static fromObject(data) {
             const message = new Loop({});
             if (data.process != null) {
@@ -2309,6 +2387,12 @@ var app = (function () {
             }
             if (data.max_iterations != null) {
                 message.max_iterations = data.max_iterations;
+            }
+            if (data.accumulated_text != null) {
+                message.accumulated_text = data.accumulated_text;
+            }
+            if (data.goal != null) {
+                message.goal = data.goal;
             }
             return message;
         }
@@ -2323,6 +2407,12 @@ var app = (function () {
             if (this.max_iterations != null) {
                 data.max_iterations = this.max_iterations;
             }
+            if (this.accumulated_text != null) {
+                data.accumulated_text = this.accumulated_text;
+            }
+            if (this.goal != null) {
+                data.goal = this.goal;
+            }
             return data;
         }
         serialize(w) {
@@ -2333,6 +2423,10 @@ var app = (function () {
                 writer.writeUint32(2, this.current_iteration);
             if (this.max_iterations != 0)
                 writer.writeUint32(3, this.max_iterations);
+            if (this.accumulated_text.length)
+                writer.writeRepeatedString(4, this.accumulated_text);
+            if (this.goal.length)
+                writer.writeString(5, this.goal);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -2351,6 +2445,12 @@ var app = (function () {
                     case 3:
                         message.max_iterations = reader.readUint32();
                         break;
+                    case 4:
+                        googleProtobuf.Message.addToRepeatedField(message, 4, reader.readString());
+                        break;
+                    case 5:
+                        message.goal = reader.readString();
+                        break;
                     default: reader.skipField();
                 }
             }
@@ -2364,10 +2464,90 @@ var app = (function () {
         }
     }
     _Loop_one_of_decls = new WeakMap();
+    class AtomicNodeTypes extends googleProtobuf.Message {
+        constructor(data) {
+            super();
+            _AtomicNodeTypes_one_of_decls.set(this, []);
+            googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], __classPrivateFieldGet(this, _AtomicNodeTypes_one_of_decls, "f"));
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("node_type" in data && data.node_type != undefined) {
+                    this.node_type = data.node_type;
+                }
+                if ("is_atomic" in data && data.is_atomic != undefined) {
+                    this.is_atomic = data.is_atomic;
+                }
+            }
+        }
+        get node_type() {
+            return googleProtobuf.Message.getFieldWithDefault(this, 1, NodeTypes.PROMPT);
+        }
+        set node_type(value) {
+            googleProtobuf.Message.setField(this, 1, value);
+        }
+        get is_atomic() {
+            return googleProtobuf.Message.getFieldWithDefault(this, 2, false);
+        }
+        set is_atomic(value) {
+            googleProtobuf.Message.setField(this, 2, value);
+        }
+        static fromObject(data) {
+            const message = new AtomicNodeTypes({});
+            if (data.node_type != null) {
+                message.node_type = data.node_type;
+            }
+            if (data.is_atomic != null) {
+                message.is_atomic = data.is_atomic;
+            }
+            return message;
+        }
+        toObject() {
+            const data = {};
+            if (this.node_type != null) {
+                data.node_type = this.node_type;
+            }
+            if (this.is_atomic != null) {
+                data.is_atomic = this.is_atomic;
+            }
+            return data;
+        }
+        serialize(w) {
+            const writer = w || new googleProtobuf.BinaryWriter();
+            if (this.node_type != NodeTypes.PROMPT)
+                writer.writeEnum(1, this.node_type);
+            if (this.is_atomic != false)
+                writer.writeBool(2, this.is_atomic);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes) {
+            const reader = bytes instanceof googleProtobuf.BinaryReader ? bytes : new googleProtobuf.BinaryReader(bytes), message = new AtomicNodeTypes();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.node_type = reader.readEnum();
+                        break;
+                    case 2:
+                        message.is_atomic = reader.readBool();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary() {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes) {
+            return AtomicNodeTypes.deserialize(bytes);
+        }
+    }
+    _AtomicNodeTypes_one_of_decls = new WeakMap();
     class NodeContent extends googleProtobuf.Message {
         constructor(data) {
             super();
-            _NodeContent_one_of_decls.set(this, [[1, 2, 3, 4, 5]]);
+            _NodeContent_one_of_decls.set(this, [[1, 2, 3, 4, 5, 6]]);
             googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], __classPrivateFieldGet(this, _NodeContent_one_of_decls, "f"));
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("prompt" in data && data.prompt != undefined) {
@@ -2384,6 +2564,9 @@ var app = (function () {
                 }
                 if ("code" in data && data.code != undefined) {
                     this.code = data.code;
+                }
+                if ("loop" in data && data.loop != undefined) {
+                    this.loop = data.loop;
                 }
             }
         }
@@ -2432,6 +2615,15 @@ var app = (function () {
         get has_code() {
             return googleProtobuf.Message.getField(this, 5) != null;
         }
+        get loop() {
+            return googleProtobuf.Message.getWrapperField(this, Loop, 6);
+        }
+        set loop(value) {
+            googleProtobuf.Message.setOneofWrapperField(this, 6, __classPrivateFieldGet(this, _NodeContent_one_of_decls, "f")[0], value);
+        }
+        get has_loop() {
+            return googleProtobuf.Message.getField(this, 6) != null;
+        }
         get node_content() {
             const cases = {
                 0: "none",
@@ -2439,9 +2631,10 @@ var app = (function () {
                 2: "process",
                 3: "conditional",
                 4: "command",
-                5: "code"
+                5: "code",
+                6: "loop"
             };
-            return cases[googleProtobuf.Message.computeOneofCase(this, [1, 2, 3, 4, 5])];
+            return cases[googleProtobuf.Message.computeOneofCase(this, [1, 2, 3, 4, 5, 6])];
         }
         static fromObject(data) {
             const message = new NodeContent({});
@@ -2459,6 +2652,9 @@ var app = (function () {
             }
             if (data.code != null) {
                 message.code = Code.fromObject(data.code);
+            }
+            if (data.loop != null) {
+                message.loop = Loop.fromObject(data.loop);
             }
             return message;
         }
@@ -2479,6 +2675,9 @@ var app = (function () {
             if (this.code != null) {
                 data.code = this.code.toObject();
             }
+            if (this.loop != null) {
+                data.loop = this.loop.toObject();
+            }
             return data;
         }
         serialize(w) {
@@ -2493,6 +2692,8 @@ var app = (function () {
                 writer.writeMessage(4, this.command, () => this.command.serialize(writer));
             if (this.has_code)
                 writer.writeMessage(5, this.code, () => this.code.serialize(writer));
+            if (this.has_loop)
+                writer.writeMessage(6, this.loop, () => this.loop.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -2516,6 +2717,9 @@ var app = (function () {
                         break;
                     case 5:
                         reader.readMessage(message.code, () => message.code = Code.deserialize(reader));
+                        break;
+                    case 6:
+                        reader.readMessage(message.loop, () => message.loop = Loop.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -2542,6 +2746,9 @@ var app = (function () {
                 if ("language" in data && data.language != undefined) {
                     this.language = data.language;
                 }
+                if ("goal" in data && data.goal != undefined) {
+                    this.goal = data.goal;
+                }
             }
         }
         get code() {
@@ -2556,6 +2763,12 @@ var app = (function () {
         set language(value) {
             googleProtobuf.Message.setField(this, 2, value);
         }
+        get goal() {
+            return googleProtobuf.Message.getFieldWithDefault(this, 3, "");
+        }
+        set goal(value) {
+            googleProtobuf.Message.setField(this, 3, value);
+        }
         static fromObject(data) {
             const message = new Code({});
             if (data.code != null) {
@@ -2563,6 +2776,9 @@ var app = (function () {
             }
             if (data.language != null) {
                 message.language = data.language;
+            }
+            if (data.goal != null) {
+                message.goal = data.goal;
             }
             return message;
         }
@@ -2574,6 +2790,9 @@ var app = (function () {
             if (this.language != null) {
                 data.language = this.language;
             }
+            if (this.goal != null) {
+                data.goal = this.goal;
+            }
             return data;
         }
         serialize(w) {
@@ -2582,6 +2801,8 @@ var app = (function () {
                 writer.writeString(1, this.code);
             if (this.language.length)
                 writer.writeString(2, this.language);
+            if (this.goal.length)
+                writer.writeString(3, this.goal);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -2596,6 +2817,9 @@ var app = (function () {
                         break;
                     case 2:
                         message.language = reader.readString();
+                        break;
+                    case 3:
+                        message.goal = reader.readString();
                         break;
                     default: reader.skipField();
                 }
@@ -3017,8 +3241,8 @@ var app = (function () {
                 if ("execution_id" in data && data.execution_id != undefined) {
                     this.execution_id = data.execution_id;
                 }
-                if ("prompt_history" in data && data.prompt_history != undefined) {
-                    this.prompt_history = data.prompt_history;
+                if ("atomic_history" in data && data.atomic_history != undefined) {
+                    this.atomic_history = data.atomic_history;
                 }
             }
             if (!this.current_variable_definitions)
@@ -3054,10 +3278,10 @@ var app = (function () {
         set execution_id(value) {
             googleProtobuf.Message.setField(this, 4, value);
         }
-        get prompt_history() {
+        get atomic_history() {
             return googleProtobuf.Message.getRepeatedWrapperField(this, AtomicExecutionLog, 5);
         }
-        set prompt_history(value) {
+        set atomic_history(value) {
             googleProtobuf.Message.setRepeatedWrapperField(this, 5, value);
         }
         static fromObject(data) {
@@ -3074,8 +3298,8 @@ var app = (function () {
             if (data.execution_id != null) {
                 message.execution_id = data.execution_id;
             }
-            if (data.prompt_history != null) {
-                message.prompt_history = data.prompt_history.map(item => AtomicExecutionLog.fromObject(item));
+            if (data.atomic_history != null) {
+                message.atomic_history = data.atomic_history.map(item => AtomicExecutionLog.fromObject(item));
             }
             return message;
         }
@@ -3093,8 +3317,8 @@ var app = (function () {
             if (this.execution_id != null) {
                 data.execution_id = this.execution_id;
             }
-            if (this.prompt_history != null) {
-                data.prompt_history = this.prompt_history.map((item) => item.toObject());
+            if (this.atomic_history != null) {
+                data.atomic_history = this.atomic_history.map((item) => item.toObject());
             }
             return data;
         }
@@ -3112,8 +3336,8 @@ var app = (function () {
             }
             if (this.execution_id.length)
                 writer.writeString(4, this.execution_id);
-            if (this.prompt_history.length)
-                writer.writeRepeatedMessage(5, this.prompt_history, (item) => item.serialize(writer));
+            if (this.atomic_history.length)
+                writer.writeRepeatedMessage(5, this.atomic_history, (item) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -3136,7 +3360,7 @@ var app = (function () {
                         message.execution_id = reader.readString();
                         break;
                     case 5:
-                        reader.readMessage(message.prompt_history, () => googleProtobuf.Message.addToRepeatedWrapperField(message, 5, AtomicExecutionLog.deserialize(reader), AtomicExecutionLog));
+                        reader.readMessage(message.atomic_history, () => googleProtobuf.Message.addToRepeatedWrapperField(message, 5, AtomicExecutionLog.deserialize(reader), AtomicExecutionLog));
                         break;
                     default: reader.skipField();
                 }
@@ -3482,7 +3706,7 @@ var app = (function () {
             googleProtobuf.Message.setField(this, 2, value);
         }
         get graph() {
-            return googleProtobuf.Message.getWrapperField(this, Graph, 3);
+            return googleProtobuf.Message.getWrapperField(this, Graph$3, 3);
         }
         set graph(value) {
             googleProtobuf.Message.setWrapperField(this, 3, value);
@@ -3568,7 +3792,7 @@ var app = (function () {
                 message.websocket_ready = data.websocket_ready;
             }
             if (data.graph != null) {
-                message.graph = Graph.fromObject(data.graph);
+                message.graph = Graph$3.fromObject(data.graph);
             }
             if (data.local_nodes != null) {
                 message.local_nodes = data.local_nodes.map(item => Node.fromObject(item));
@@ -3689,7 +3913,7 @@ var app = (function () {
                         message.websocket_ready = reader.readBool();
                         break;
                     case 3:
-                        reader.readMessage(message.graph, () => message.graph = Graph.deserialize(reader));
+                        reader.readMessage(message.graph, () => message.graph = Graph$3.deserialize(reader));
                         break;
                     case 4:
                         reader.readMessage(message.local_nodes, () => googleProtobuf.Message.addToRepeatedWrapperField(message, 4, Node.deserialize(reader), Node));
@@ -4601,9 +4825,10 @@ var app = (function () {
         Prompt: Prompt,
         Command: Command,
         Conditional: Conditional,
-        Graph: Graph,
+        Graph: Graph$3,
         Process: Process,
         Loop: Loop,
+        AtomicNodeTypes: AtomicNodeTypes,
         NodeContent: NodeContent,
         Code: Code,
         Node: Node,
@@ -4631,22 +4856,22 @@ var app = (function () {
     /* src/components/sidebarComponents/modifyNode.svelte generated by Svelte v3.59.1 */
 
     const { console: console_1$9 } = globals;
-    const file$b = "src/components/sidebarComponents/modifyNode.svelte";
+    const file$c = "src/components/sidebarComponents/modifyNode.svelte";
 
-    function get_each_context$8(ctx, list, i) {
+    function get_each_context$9(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[11] = list[i];
     	return child_ctx;
     }
 
-    function get_each_context_1$5(ctx, list, i) {
+    function get_each_context_1$6(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[14] = list[i];
     	return child_ctx;
     }
 
     // (42:2) {#each num_array as array_index}
-    function create_each_block_1$5(ctx) {
+    function create_each_block_1$6(ctx) {
     	let option;
     	let t_value = /*key_list*/ ctx[3][/*array_index*/ ctx[14]] + "";
     	let t;
@@ -4657,7 +4882,7 @@ var app = (function () {
     			t = text(t_value);
     			option.__value = /*array_index*/ ctx[14];
     			option.value = option.__value;
-    			add_location(option, file$b, 42, 4, 1573);
+    			add_location(option, file$c, 42, 4, 1573);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -4671,7 +4896,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block_1$5.name,
+    		id: create_each_block_1$6.name,
     		type: "each",
     		source: "(42:2) {#each num_array as array_index}",
     		ctx
@@ -4681,7 +4906,7 @@ var app = (function () {
     }
 
     // (52:2) {#each node_options as node}
-    function create_each_block$8(ctx) {
+    function create_each_block$9(ctx) {
     	let option;
     	let t0_value = /*key_list*/ ctx[3][/*node*/ ctx[11].node_type] + "";
     	let t0;
@@ -4698,7 +4923,7 @@ var app = (function () {
     			t2 = text(t2_value);
     			option.__value = option_value_value = /*node*/ ctx[11];
     			option.value = option.__value;
-    			add_location(option, file$b, 52, 4, 1883);
+    			add_location(option, file$c, 52, 4, 1883);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -4722,7 +4947,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$8.name,
+    		id: create_each_block$9.name,
     		type: "each",
     		source: "(52:2) {#each node_options as node}",
     		ctx
@@ -4731,7 +4956,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$c(ctx) {
+    function create_fragment$d(ctx) {
     	let p0;
     	let t1;
     	let select0;
@@ -4750,7 +4975,7 @@ var app = (function () {
     	let each_blocks_1 = [];
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
-    		each_blocks_1[i] = create_each_block_1$5(get_each_context_1$5(ctx, each_value_1, i));
+    		each_blocks_1[i] = create_each_block_1$6(get_each_context_1$6(ctx, each_value_1, i));
     	}
 
     	let each_value = /*node_options*/ ctx[2];
@@ -4758,7 +4983,7 @@ var app = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$8(get_each_context$8(ctx, each_value, i));
+    		each_blocks[i] = create_each_block$9(get_each_context$9(ctx, each_value, i));
     	}
 
     	const block = {
@@ -4785,15 +5010,15 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			add_location(p0, file$b, 39, 0, 1466);
+    			add_location(p0, file$c, 39, 0, 1466);
     			if (/*typeName*/ ctx[0] === void 0) add_render_callback(() => /*select0_change_handler*/ ctx[8].call(select0));
-    			add_location(select0, file$b, 40, 0, 1503);
-    			add_location(p1, file$b, 46, 0, 1655);
+    			add_location(select0, file$c, 40, 0, 1503);
+    			add_location(p1, file$c, 46, 0, 1655);
     			option.__value = "";
     			option.value = option.__value;
-    			add_location(option, file$b, 50, 2, 1808);
+    			add_location(option, file$c, 50, 2, 1808);
     			if (/*selectedNode*/ ctx[1] === void 0) add_render_callback(() => /*select1_change_handler*/ ctx[9].call(select1));
-    			add_location(select1, file$b, 49, 0, 1734);
+    			add_location(select1, file$c, 49, 0, 1734);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4843,12 +5068,12 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value_1.length; i += 1) {
-    					const child_ctx = get_each_context_1$5(ctx, each_value_1, i);
+    					const child_ctx = get_each_context_1$6(ctx, each_value_1, i);
 
     					if (each_blocks_1[i]) {
     						each_blocks_1[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks_1[i] = create_each_block_1$5(child_ctx);
+    						each_blocks_1[i] = create_each_block_1$6(child_ctx);
     						each_blocks_1[i].c();
     						each_blocks_1[i].m(select0, null);
     					}
@@ -4873,12 +5098,12 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$8(ctx, each_value, i);
+    					const child_ctx = get_each_context$9(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block$8(child_ctx);
+    						each_blocks[i] = create_each_block$9(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(select1, null);
     					}
@@ -4914,7 +5139,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$c.name,
+    		id: create_fragment$d.name,
     		type: "component",
     		source: "",
     		ctx
@@ -4923,7 +5148,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$c($$self, $$props, $$invalidate) {
+    function instance$d($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
     	component_subscribe($$self, systemStateStore, $$value => $$invalidate(7, $systemStateStore = $$value));
@@ -5040,13 +5265,13 @@ var app = (function () {
     class ModifyNode extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$c, create_fragment$c, safe_not_equal, {});
+    		init(this, options, instance$d, create_fragment$d, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "ModifyNode",
     			options,
-    			id: create_fragment$c.name
+    			id: create_fragment$d.name
     		});
     	}
     }
@@ -5120,7 +5345,7 @@ var app = (function () {
     }
 
     function initializeSystemState(system_state) {
-        const graph = new Graph();
+        const graph = new Graph$3();
         system_state.graph = graph;
         system_state.authenticated = false;
         system_state.websocket_ready = false;
@@ -5307,6 +5532,570 @@ var app = (function () {
             // }
             return "placeholder_frontend_ip";
         });
+    }
+
+    /* src/components/sidebarComponents/newNodeSubComponents/CommandComponent.svelte generated by Svelte v3.59.1 */
+    const file$b = "src/components/sidebarComponents/newNodeSubComponents/CommandComponent.svelte";
+
+    function get_each_context$8(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[17] = list[i];
+    	child_ctx[19] = i;
+    	return child_ctx;
+    }
+
+    function get_each_context_1$5(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[20] = list[i];
+    	child_ctx[19] = i;
+    	return child_ctx;
+    }
+
+    // (68:8) {#each input_variables as _inputVar, index}
+    function create_each_block_1$5(ctx) {
+    	let button;
+    	let t0;
+    	let t1_value = /*input_variables*/ ctx[2][/*index*/ ctx[19]] + "";
+    	let t1;
+    	let t2;
+    	let mounted;
+    	let dispose;
+
+    	function click_handler() {
+    		return /*click_handler*/ ctx[9](/*index*/ ctx[19]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			button = element$1("button");
+    			t0 = text("`Remove input var: ");
+    			t1 = text(t1_value);
+    			t2 = text("`");
+    			attr_dev(button, "type", "button");
+    			add_location(button, file$b, 68, 10, 2230);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t0);
+    			append_dev(button, t1);
+    			append_dev(button, t2);
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", click_handler, false, false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			if (dirty & /*input_variables*/ 4 && t1_value !== (t1_value = /*input_variables*/ ctx[2][/*index*/ ctx[19]] + "")) set_data_dev(t1, t1_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1$5.name,
+    		type: "each",
+    		source: "(68:8) {#each input_variables as _inputVar, index}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (92:8) {#each output_variables as _outputVar, index}
+    function create_each_block$8(ctx) {
+    	let button;
+    	let t0;
+    	let t1_value = /*output_variables*/ ctx[3][/*index*/ ctx[19]] + "";
+    	let t1;
+    	let t2;
+    	let mounted;
+    	let dispose;
+
+    	function click_handler_2() {
+    		return /*click_handler_2*/ ctx[12](/*index*/ ctx[19]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			button = element$1("button");
+    			t0 = text("`Remove output Var: ");
+    			t1 = text(t1_value);
+    			t2 = text("`");
+    			attr_dev(button, "type", "button");
+    			add_location(button, file$b, 92, 10, 2934);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t0);
+    			append_dev(button, t1);
+    			append_dev(button, t2);
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", click_handler_2, false, false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			if (dirty & /*output_variables*/ 8 && t1_value !== (t1_value = /*output_variables*/ ctx[3][/*index*/ ctx[19]] + "")) set_data_dev(t1, t1_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block$8.name,
+    		type: "each",
+    		source: "(92:8) {#each output_variables as _outputVar, index}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$c(ctx) {
+    	let form;
+    	let div3;
+    	let div2;
+    	let input0;
+    	let t0;
+    	let input1;
+    	let t1;
+    	let div0;
+    	let h40;
+    	let t3;
+    	let t4;
+    	let input2;
+    	let t5;
+    	let button0;
+    	let t7;
+    	let div1;
+    	let h41;
+    	let t9;
+    	let t10;
+    	let input3;
+    	let t11;
+    	let button1;
+    	let t13;
+    	let button2;
+    	let mounted;
+    	let dispose;
+    	let each_value_1 = /*input_variables*/ ctx[2];
+    	validate_each_argument(each_value_1);
+    	let each_blocks_1 = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks_1[i] = create_each_block_1$5(get_each_context_1$5(ctx, each_value_1, i));
+    	}
+
+    	let each_value = /*output_variables*/ ctx[3];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block$8(get_each_context$8(ctx, each_value, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			form = element$1("form");
+    			div3 = element$1("div");
+    			div2 = element$1("div");
+    			input0 = element$1("input");
+    			t0 = space();
+    			input1 = element$1("input");
+    			t1 = space();
+    			div0 = element$1("div");
+    			h40 = element$1("h4");
+    			h40.textContent = "Input Variables";
+    			t3 = space();
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].c();
+    			}
+
+    			t4 = space();
+    			input2 = element$1("input");
+    			t5 = space();
+    			button0 = element$1("button");
+    			button0.textContent = "Add";
+    			t7 = space();
+    			div1 = element$1("div");
+    			h41 = element$1("h4");
+    			h41.textContent = "Output Variables";
+    			t9 = space();
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t10 = space();
+    			input3 = element$1("input");
+    			t11 = space();
+    			button1 = element$1("button");
+    			button1.textContent = "Add";
+    			t13 = space();
+    			button2 = element$1("button");
+    			button2.textContent = "Submit";
+    			attr_dev(input0, "placeholder", "Name");
+    			add_location(input0, file$b, 61, 6, 2007);
+    			attr_dev(input1, "placeholder", "Description");
+    			add_location(input1, file$b, 63, 6, 2061);
+    			add_location(h40, file$b, 66, 8, 2143);
+    			attr_dev(input2, "placeholder", "New Input Variable");
+    			add_location(input2, file$b, 76, 8, 2495);
+    			attr_dev(button0, "type", "button");
+    			add_location(button0, file$b, 80, 8, 2606);
+    			add_location(div0, file$b, 65, 6, 2129);
+    			add_location(h41, file$b, 90, 8, 2844);
+    			attr_dev(input3, "placeholder", "New Output Variable");
+    			add_location(input3, file$b, 100, 8, 3204);
+    			attr_dev(button1, "type", "button");
+    			add_location(button1, file$b, 104, 8, 3317);
+    			add_location(div1, file$b, 89, 6, 2830);
+    			attr_dev(button2, "type", "submit");
+    			add_location(button2, file$b, 113, 6, 3545);
+    			add_location(div2, file$b, 60, 4, 1995);
+    			add_location(div3, file$b, 59, 2, 1985);
+    			add_location(form, file$b, 58, 0, 1936);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, form, anchor);
+    			append_dev(form, div3);
+    			append_dev(div3, div2);
+    			append_dev(div2, input0);
+    			set_input_value(input0, /*name*/ ctx[1]);
+    			append_dev(div2, t0);
+    			append_dev(div2, input1);
+    			set_input_value(input1, /*description*/ ctx[0]);
+    			append_dev(div2, t1);
+    			append_dev(div2, div0);
+    			append_dev(div0, h40);
+    			append_dev(div0, t3);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				if (each_blocks_1[i]) {
+    					each_blocks_1[i].m(div0, null);
+    				}
+    			}
+
+    			append_dev(div0, t4);
+    			append_dev(div0, input2);
+    			set_input_value(input2, /*new_input_variable*/ ctx[4]);
+    			append_dev(div0, t5);
+    			append_dev(div0, button0);
+    			append_dev(div2, t7);
+    			append_dev(div2, div1);
+    			append_dev(div1, h41);
+    			append_dev(div1, t9);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				if (each_blocks[i]) {
+    					each_blocks[i].m(div1, null);
+    				}
+    			}
+
+    			append_dev(div1, t10);
+    			append_dev(div1, input3);
+    			set_input_value(input3, /*new_output_variable*/ ctx[5]);
+    			append_dev(div1, t11);
+    			append_dev(div1, button1);
+    			append_dev(div2, t13);
+    			append_dev(div2, button2);
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[7]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[8]),
+    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[10]),
+    					listen_dev(button0, "click", /*click_handler_1*/ ctx[11], false, false, false, false),
+    					listen_dev(input3, "input", /*input3_input_handler*/ ctx[13]),
+    					listen_dev(button1, "click", /*click_handler_3*/ ctx[14], false, false, false, false),
+    					listen_dev(form, "submit", prevent_default(/*submitPrompt*/ ctx[6]), false, true, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*name*/ 2 && input0.value !== /*name*/ ctx[1]) {
+    				set_input_value(input0, /*name*/ ctx[1]);
+    			}
+
+    			if (dirty & /*description*/ 1 && input1.value !== /*description*/ ctx[0]) {
+    				set_input_value(input1, /*description*/ ctx[0]);
+    			}
+
+    			if (dirty & /*input_variables*/ 4) {
+    				each_value_1 = /*input_variables*/ ctx[2];
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1$5(ctx, each_value_1, i);
+
+    					if (each_blocks_1[i]) {
+    						each_blocks_1[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_1[i] = create_each_block_1$5(child_ctx);
+    						each_blocks_1[i].c();
+    						each_blocks_1[i].m(div0, t4);
+    					}
+    				}
+
+    				for (; i < each_blocks_1.length; i += 1) {
+    					each_blocks_1[i].d(1);
+    				}
+
+    				each_blocks_1.length = each_value_1.length;
+    			}
+
+    			if (dirty & /*new_input_variable*/ 16 && input2.value !== /*new_input_variable*/ ctx[4]) {
+    				set_input_value(input2, /*new_input_variable*/ ctx[4]);
+    			}
+
+    			if (dirty & /*output_variables*/ 8) {
+    				each_value = /*output_variables*/ ctx[3];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context$8(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block$8(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div1, t10);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+
+    			if (dirty & /*new_output_variable*/ 32 && input3.value !== /*new_output_variable*/ ctx[5]) {
+    				set_input_value(input3, /*new_output_variable*/ ctx[5]);
+    			}
+    		},
+    		i: noop$2,
+    		o: noop$2,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(form);
+    			destroy_each(each_blocks_1, detaching);
+    			destroy_each(each_blocks, detaching);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$c.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$c($$self, $$props, $$invalidate) {
+    	let $websocketStore;
+    	validate_store(websocketStore, 'websocketStore');
+    	component_subscribe($$self, websocketStore, $$value => $$invalidate(15, $websocketStore = $$value));
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('CommandComponent', slots, []);
+    	let description = "";
+    	let name = "";
+    	let input_variables = [];
+    	let output_variables = [];
+    	let new_input_variable = "";
+    	let new_output_variable = "";
+
+    	function submitPrompt() {
+    		let node = new Node();
+
+    		if (new_input_variable != "") {
+    			$$invalidate(2, input_variables = [...input_variables, new_input_variable]);
+    		}
+
+    		if (new_output_variable != "") {
+    			$$invalidate(3, output_variables = [...output_variables, new_output_variable]);
+    		}
+
+    		if (input_variables.length != 1) {
+    			alert("Command nodes must have exactly one input variable");
+    			return;
+    		}
+
+    		if (output_variables.length != 1) {
+    			alert("Command nodes must have exactly one output variable");
+    			return;
+    		}
+
+    		let command = new Command();
+    		command.goal = "{{" + input_variables[0] + "}}";
+    		node.input_variables = input_variables;
+    		node.output_variables = output_variables;
+    		let node_content = new NodeContent();
+    		node_content.command = command;
+    		let node_info = new GraphNodeInfo();
+    		node_info.name = name;
+    		node_info.id = new v4();
+    		node_info.description = description;
+    		node.node_info = node_info;
+    		node.node_content = node_content;
+    		node.node_type = NodeTypes.COMMAND;
+    		let websocket = $websocketStore.websocket;
+    		let body = new Body();
+    		body.node = node;
+    		let letter = new Letter();
+    		letter.body = body;
+    		letter.verb = VerbTypes.Create;
+    		sendEnvelope(websocket, [letter]);
+    		reset_component();
+    	}
+
+    	function reset_component() {
+    		$$invalidate(0, description = "");
+    		$$invalidate(1, name = "");
+    		$$invalidate(2, input_variables = []);
+    		$$invalidate(3, output_variables = []);
+    		$$invalidate(4, new_input_variable = "");
+    		$$invalidate(5, new_output_variable = "");
+    	}
+
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<CommandComponent> was created with unknown prop '${key}'`);
+    	});
+
+    	function input0_input_handler() {
+    		name = this.value;
+    		$$invalidate(1, name);
+    	}
+
+    	function input1_input_handler() {
+    		description = this.value;
+    		$$invalidate(0, description);
+    	}
+
+    	const click_handler = index => {
+    		input_variables.splice(index, 1);
+    		$$invalidate(2, input_variables);
+    	};
+
+    	function input2_input_handler() {
+    		new_input_variable = this.value;
+    		$$invalidate(4, new_input_variable);
+    	}
+
+    	const click_handler_1 = () => {
+    		$$invalidate(2, input_variables = [...input_variables, new_input_variable]);
+    		$$invalidate(4, new_input_variable = "");
+    	};
+
+    	const click_handler_2 = index => {
+    		output_variables.splice(index, 1);
+    		$$invalidate(3, output_variables);
+    	};
+
+    	function input3_input_handler() {
+    		new_output_variable = this.value;
+    		$$invalidate(5, new_output_variable);
+    	}
+
+    	const click_handler_3 = () => {
+    		$$invalidate(3, output_variables = [...output_variables, new_output_variable]);
+    		$$invalidate(5, new_output_variable = "");
+    	};
+
+    	$$self.$capture_state = () => ({
+    		websocketStore,
+    		VerbTypes,
+    		Node,
+    		GraphNodeInfo,
+    		Letter,
+    		Body,
+    		NodeTypes,
+    		NodeContent,
+    		Command,
+    		uuidv4: v4,
+    		sendEnvelope,
+    		description,
+    		name,
+    		input_variables,
+    		output_variables,
+    		new_input_variable,
+    		new_output_variable,
+    		submitPrompt,
+    		reset_component,
+    		$websocketStore
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('description' in $$props) $$invalidate(0, description = $$props.description);
+    		if ('name' in $$props) $$invalidate(1, name = $$props.name);
+    		if ('input_variables' in $$props) $$invalidate(2, input_variables = $$props.input_variables);
+    		if ('output_variables' in $$props) $$invalidate(3, output_variables = $$props.output_variables);
+    		if ('new_input_variable' in $$props) $$invalidate(4, new_input_variable = $$props.new_input_variable);
+    		if ('new_output_variable' in $$props) $$invalidate(5, new_output_variable = $$props.new_output_variable);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [
+    		description,
+    		name,
+    		input_variables,
+    		output_variables,
+    		new_input_variable,
+    		new_output_variable,
+    		submitPrompt,
+    		input0_input_handler,
+    		input1_input_handler,
+    		click_handler,
+    		input2_input_handler,
+    		click_handler_1,
+    		click_handler_2,
+    		input3_input_handler,
+    		click_handler_3
+    	];
+    }
+
+    class CommandComponent extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$c, create_fragment$c, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "CommandComponent",
+    			options,
+    			id: create_fragment$c.name
+    		});
+    	}
     }
 
     /* src/components/sidebarComponents/newNodeSubComponents/ConditionalComponent.svelte generated by Svelte v3.59.1 */
@@ -7856,7 +8645,7 @@ var app = (function () {
     			t = text(t_value);
     			option.__value = /*array_index*/ ctx[8];
     			option.value = option.__value;
-    			add_location(option, file$6, 30, 4, 1429);
+    			add_location(option, file$6, 30, 4, 1451);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -7880,7 +8669,7 @@ var app = (function () {
     }
 
     // (37:0) {#if typeName === NodeTypes.PROMPT}
-    function create_if_block_3(ctx) {
+    function create_if_block_4(ctx) {
     	let promptcomponent;
     	let current;
     	promptcomponent = new PromptComponent({ $$inline: true });
@@ -7909,7 +8698,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3.name,
+    		id: create_if_block_4.name,
     		type: "if",
     		source: "(37:0) {#if typeName === NodeTypes.PROMPT}",
     		ctx
@@ -7919,7 +8708,7 @@ var app = (function () {
     }
 
     // (40:0) {#if typeName === NodeTypes.PROCESS}
-    function create_if_block_2$1(ctx) {
+    function create_if_block_3(ctx) {
     	let processcomponent;
     	let current;
     	processcomponent = new ProcessComponent({ $$inline: true });
@@ -7948,7 +8737,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$1.name,
+    		id: create_if_block_3.name,
     		type: "if",
     		source: "(40:0) {#if typeName === NodeTypes.PROCESS}",
     		ctx
@@ -7958,7 +8747,7 @@ var app = (function () {
     }
 
     // (43:0) {#if typeName === NodeTypes.LOOP}
-    function create_if_block_1$2(ctx) {
+    function create_if_block_2$1(ctx) {
     	let loopcomponent;
     	let current;
     	loopcomponent = new LoopComponent({ $$inline: true });
@@ -7987,7 +8776,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$2.name,
+    		id: create_if_block_2$1.name,
     		type: "if",
     		source: "(43:0) {#if typeName === NodeTypes.LOOP}",
     		ctx
@@ -7997,7 +8786,7 @@ var app = (function () {
     }
 
     // (49:0) {#if typeName === NodeTypes.CONDITIONAL}
-    function create_if_block$4(ctx) {
+    function create_if_block_1$2(ctx) {
     	let conditionalcomponent;
     	let current;
     	conditionalcomponent = new ConditionalComponent({ $$inline: true });
@@ -8026,9 +8815,48 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$4.name,
+    		id: create_if_block_1$2.name,
     		type: "if",
     		source: "(49:0) {#if typeName === NodeTypes.CONDITIONAL}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (53:0) {#if typeName === NodeTypes.COMMAND}
+    function create_if_block$4(ctx) {
+    	let commandcomponent;
+    	let current;
+    	commandcomponent = new CommandComponent({ $$inline: true });
+
+    	const block = {
+    		c: function create() {
+    			create_component(commandcomponent.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(commandcomponent, target, anchor);
+    			current = true;
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(commandcomponent.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(commandcomponent.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(commandcomponent, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$4.name,
+    		type: "if",
+    		source: "(53:0) {#if typeName === NodeTypes.COMMAND}",
     		ctx
     	});
 
@@ -8046,7 +8874,8 @@ var app = (function () {
     	let t4;
     	let t5;
     	let t6;
-    	let if_block3_anchor;
+    	let t7;
+    	let if_block4_anchor;
     	let current;
     	let mounted;
     	let dispose;
@@ -8058,10 +8887,11 @@ var app = (function () {
     		each_blocks[i] = create_each_block$3(get_each_context$3(ctx, each_value, i));
     	}
 
-    	let if_block0 = /*typeName*/ ctx[0] === NodeTypes.PROMPT && create_if_block_3(ctx);
-    	let if_block1 = /*typeName*/ ctx[0] === NodeTypes.PROCESS && create_if_block_2$1(ctx);
-    	let if_block2 = /*typeName*/ ctx[0] === NodeTypes.LOOP && create_if_block_1$2(ctx);
-    	let if_block3 = /*typeName*/ ctx[0] === NodeTypes.CONDITIONAL && create_if_block$4(ctx);
+    	let if_block0 = /*typeName*/ ctx[0] === NodeTypes.PROMPT && create_if_block_4(ctx);
+    	let if_block1 = /*typeName*/ ctx[0] === NodeTypes.PROCESS && create_if_block_3(ctx);
+    	let if_block2 = /*typeName*/ ctx[0] === NodeTypes.LOOP && create_if_block_2$1(ctx);
+    	let if_block3 = /*typeName*/ ctx[0] === NodeTypes.CONDITIONAL && create_if_block_1$2(ctx);
+    	let if_block4 = /*typeName*/ ctx[0] === NodeTypes.COMMAND && create_if_block$4(ctx);
 
     	const block = {
     		c: function create() {
@@ -8083,10 +8913,12 @@ var app = (function () {
     			if (if_block2) if_block2.c();
     			t6 = space();
     			if (if_block3) if_block3.c();
-    			if_block3_anchor = empty();
+    			t7 = space();
+    			if (if_block4) if_block4.c();
+    			if_block4_anchor = empty();
     			if (/*typeName*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[3].call(select));
-    			add_location(select, file$6, 28, 0, 1359);
-    			add_location(p, file$6, 34, 0, 1511);
+    			add_location(select, file$6, 28, 0, 1381);
+    			add_location(p, file$6, 34, 0, 1533);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -8113,7 +8945,9 @@ var app = (function () {
     			if (if_block2) if_block2.m(target, anchor);
     			insert_dev(target, t6, anchor);
     			if (if_block3) if_block3.m(target, anchor);
-    			insert_dev(target, if_block3_anchor, anchor);
+    			insert_dev(target, t7, anchor);
+    			if (if_block4) if_block4.m(target, anchor);
+    			insert_dev(target, if_block4_anchor, anchor);
     			current = true;
 
     			if (!mounted) {
@@ -8158,7 +8992,7 @@ var app = (function () {
     						transition_in(if_block0, 1);
     					}
     				} else {
-    					if_block0 = create_if_block_3(ctx);
+    					if_block0 = create_if_block_4(ctx);
     					if_block0.c();
     					transition_in(if_block0, 1);
     					if_block0.m(t4.parentNode, t4);
@@ -8179,7 +9013,7 @@ var app = (function () {
     						transition_in(if_block1, 1);
     					}
     				} else {
-    					if_block1 = create_if_block_2$1(ctx);
+    					if_block1 = create_if_block_3(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(t5.parentNode, t5);
@@ -8200,7 +9034,7 @@ var app = (function () {
     						transition_in(if_block2, 1);
     					}
     				} else {
-    					if_block2 = create_if_block_1$2(ctx);
+    					if_block2 = create_if_block_2$1(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
     					if_block2.m(t6.parentNode, t6);
@@ -8221,16 +9055,37 @@ var app = (function () {
     						transition_in(if_block3, 1);
     					}
     				} else {
-    					if_block3 = create_if_block$4(ctx);
+    					if_block3 = create_if_block_1$2(ctx);
     					if_block3.c();
     					transition_in(if_block3, 1);
-    					if_block3.m(if_block3_anchor.parentNode, if_block3_anchor);
+    					if_block3.m(t7.parentNode, t7);
     				}
     			} else if (if_block3) {
     				group_outros();
 
     				transition_out(if_block3, 1, 1, () => {
     					if_block3 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (/*typeName*/ ctx[0] === NodeTypes.COMMAND) {
+    				if (if_block4) {
+    					if (dirty & /*typeName*/ 1) {
+    						transition_in(if_block4, 1);
+    					}
+    				} else {
+    					if_block4 = create_if_block$4(ctx);
+    					if_block4.c();
+    					transition_in(if_block4, 1);
+    					if_block4.m(if_block4_anchor.parentNode, if_block4_anchor);
+    				}
+    			} else if (if_block4) {
+    				group_outros();
+
+    				transition_out(if_block4, 1, 1, () => {
+    					if_block4 = null;
     				});
 
     				check_outros();
@@ -8242,6 +9097,7 @@ var app = (function () {
     			transition_in(if_block1);
     			transition_in(if_block2);
     			transition_in(if_block3);
+    			transition_in(if_block4);
     			current = true;
     		},
     		o: function outro(local) {
@@ -8249,6 +9105,7 @@ var app = (function () {
     			transition_out(if_block1);
     			transition_out(if_block2);
     			transition_out(if_block3);
+    			transition_out(if_block4);
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -8264,7 +9121,9 @@ var app = (function () {
     			if (if_block2) if_block2.d(detaching);
     			if (detaching) detach_dev(t6);
     			if (if_block3) if_block3.d(detaching);
-    			if (detaching) detach_dev(if_block3_anchor);
+    			if (detaching) detach_dev(t7);
+    			if (if_block4) if_block4.d(detaching);
+    			if (detaching) detach_dev(if_block4_anchor);
     			mounted = false;
     			dispose();
     		}
@@ -8315,6 +9174,7 @@ var app = (function () {
     	}
 
     	$$self.$capture_state = () => ({
+    		CommandComponent,
     		ConditionalComponent,
     		ProcessComponent,
     		PromptComponent,
@@ -8435,7 +9295,7 @@ var app = (function () {
     			t = text(t_value);
     			option.__value = option_value_value = /*node*/ ctx[23];
     			option.value = option.__value;
-    			add_location(option, file$5, 115, 4, 5143);
+    			add_location(option, file$5, 115, 4, 5153);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -8486,8 +9346,8 @@ var app = (function () {
     			t1 = text(":\n      ");
     			input = element$1("input");
     			attr_dev(input, "type", "text");
-    			add_location(input, file$5, 123, 6, 5337);
-    			add_location(label, file$5, 121, 4, 5305);
+    			add_location(input, file$5, 123, 6, 5347);
+    			add_location(label, file$5, 121, 4, 5315);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, label, anchor);
@@ -8531,7 +9391,7 @@ var app = (function () {
     			button = element$1("button");
     			button.textContent = "Submit";
     			attr_dev(button, "type", "submit");
-    			add_location(button, file$5, 130, 4, 5503);
+    			add_location(button, file$5, 130, 4, 5513);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -8572,7 +9432,7 @@ var app = (function () {
     			}
 
     			attr_dev(div, "class", "prompt-history svelte-1xv5fd8");
-    			add_location(div, file$5, 135, 2, 5597);
+    			add_location(div, file$5, 135, 2, 5607);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -8659,12 +9519,12 @@ var app = (function () {
     			t6 = text(t6_value);
     			t7 = space();
     			hr = element$1("hr");
-    			add_location(b, file$5, 138, 8, 5682);
-    			add_location(br0, file$5, 139, 8, 5722);
-    			add_location(br1, file$5, 142, 8, 5778);
+    			add_location(b, file$5, 138, 8, 5692);
+    			add_location(br0, file$5, 139, 8, 5732);
+    			add_location(br1, file$5, 142, 8, 5788);
     			attr_dev(p, "class", "svelte-1xv5fd8");
-    			add_location(p, file$5, 137, 6, 5670);
-    			add_location(hr, file$5, 146, 6, 5862);
+    			add_location(p, file$5, 137, 6, 5680);
+    			add_location(hr, file$5, 146, 6, 5872);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -8757,10 +9617,10 @@ var app = (function () {
     			if_block1_anchor = empty();
     			option.__value = "";
     			option.value = option.__value;
-    			add_location(option, file$5, 113, 2, 5065);
+    			add_location(option, file$5, 113, 2, 5075);
     			if (/*selected_process*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[12].call(select));
-    			add_location(select, file$5, 112, 0, 4987);
-    			add_location(form, file$5, 119, 0, 5216);
+    			add_location(select, file$5, 112, 0, 4997);
+    			add_location(form, file$5, 119, 0, 5226);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -9786,11 +10646,11 @@ var app = (function () {
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$4 = freeGlobal || freeSelf || Function('return this')();
+    var root$3 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$4;
+    var _root = root$3;
 
-    var root$3 = _root;
+    var root$2 = _root;
 
     /**
      * Gets the timestamp of the number of milliseconds that have elapsed since
@@ -9809,7 +10669,7 @@ var app = (function () {
      * // => Logs the number of milliseconds it took for the deferred invocation.
      */
     var now$1 = function() {
-      return root$3.Date.now();
+      return root$2.Date.now();
     };
 
     var now_1 = now$1;
@@ -9855,10 +10715,10 @@ var app = (function () {
 
     var _baseTrim = baseTrim$1;
 
-    var root$2 = _root;
+    var root$1 = _root;
 
     /** Built-in value references. */
-    var Symbol$4 = root$2.Symbol;
+    var Symbol$4 = root$1.Symbol;
 
     var _Symbol = Symbol$4;
 
@@ -10766,10 +11626,10 @@ var app = (function () {
     	return isFunction_1;
     }
 
-    var root$1 = _root;
+    var root = _root;
 
     /** Used to detect overreaching core-js shims. */
-    var coreJsData$1 = root$1['__core-js_shared__'];
+    var coreJsData$1 = root['__core-js_shared__'];
 
     var _coreJsData = coreJsData$1;
 
@@ -10904,17 +11764,17 @@ var app = (function () {
      * @param {string} key The key of the method to get.
      * @returns {*} Returns the function if it's native, else `undefined`.
      */
-    function getNative$3(object, key) {
+    function getNative$2(object, key) {
       var value = getValue$1(object, key);
       return baseIsNative(value) ? value : undefined;
     }
 
-    var _getNative = getNative$3;
+    var _getNative = getNative$2;
 
-    var getNative$2 = _getNative;
+    var getNative$1 = _getNative;
 
     /* Built-in method references that are verified to be native. */
-    var nativeCreate$4 = getNative$2(Object, 'create');
+    var nativeCreate$4 = getNative$1(Object, 'create');
 
     var _nativeCreate = nativeCreate$4;
 
@@ -11073,12 +11933,20 @@ var app = (function () {
      * @memberOf ListCache
      */
 
-    function listCacheClear$1() {
-      this.__data__ = [];
-      this.size = 0;
-    }
+    var _listCacheClear;
+    var hasRequired_listCacheClear;
 
-    var _listCacheClear = listCacheClear$1;
+    function require_listCacheClear () {
+    	if (hasRequired_listCacheClear) return _listCacheClear;
+    	hasRequired_listCacheClear = 1;
+    	function listCacheClear() {
+    	  this.__data__ = [];
+    	  this.size = 0;
+    	}
+
+    	_listCacheClear = listCacheClear;
+    	return _listCacheClear;
+    }
 
     /**
      * Performs a
@@ -11113,178 +11981,234 @@ var app = (function () {
      * // => true
      */
 
-    function eq$2(value, other) {
+    function eq$1(value, other) {
       return value === other || (value !== value && other !== other);
     }
 
-    var eq_1 = eq$2;
+    var eq_1 = eq$1;
 
-    var eq$1 = eq_1;
+    var _assocIndexOf;
+    var hasRequired_assocIndexOf;
 
-    /**
-     * Gets the index at which the `key` is found in `array` of key-value pairs.
-     *
-     * @private
-     * @param {Array} array The array to inspect.
-     * @param {*} key The key to search for.
-     * @returns {number} Returns the index of the matched value, else `-1`.
-     */
-    function assocIndexOf$4(array, key) {
-      var length = array.length;
-      while (length--) {
-        if (eq$1(array[length][0], key)) {
-          return length;
-        }
-      }
-      return -1;
+    function require_assocIndexOf () {
+    	if (hasRequired_assocIndexOf) return _assocIndexOf;
+    	hasRequired_assocIndexOf = 1;
+    	var eq = eq_1;
+
+    	/**
+    	 * Gets the index at which the `key` is found in `array` of key-value pairs.
+    	 *
+    	 * @private
+    	 * @param {Array} array The array to inspect.
+    	 * @param {*} key The key to search for.
+    	 * @returns {number} Returns the index of the matched value, else `-1`.
+    	 */
+    	function assocIndexOf(array, key) {
+    	  var length = array.length;
+    	  while (length--) {
+    	    if (eq(array[length][0], key)) {
+    	      return length;
+    	    }
+    	  }
+    	  return -1;
+    	}
+
+    	_assocIndexOf = assocIndexOf;
+    	return _assocIndexOf;
     }
 
-    var _assocIndexOf = assocIndexOf$4;
+    var _listCacheDelete;
+    var hasRequired_listCacheDelete;
 
-    var assocIndexOf$3 = _assocIndexOf;
+    function require_listCacheDelete () {
+    	if (hasRequired_listCacheDelete) return _listCacheDelete;
+    	hasRequired_listCacheDelete = 1;
+    	var assocIndexOf = require_assocIndexOf();
 
-    /** Used for built-in method references. */
-    var arrayProto = Array.prototype;
+    	/** Used for built-in method references. */
+    	var arrayProto = Array.prototype;
 
-    /** Built-in value references. */
-    var splice = arrayProto.splice;
+    	/** Built-in value references. */
+    	var splice = arrayProto.splice;
 
-    /**
-     * Removes `key` and its value from the list cache.
-     *
-     * @private
-     * @name delete
-     * @memberOf ListCache
-     * @param {string} key The key of the value to remove.
-     * @returns {boolean} Returns `true` if the entry was removed, else `false`.
-     */
-    function listCacheDelete$1(key) {
-      var data = this.__data__,
-          index = assocIndexOf$3(data, key);
+    	/**
+    	 * Removes `key` and its value from the list cache.
+    	 *
+    	 * @private
+    	 * @name delete
+    	 * @memberOf ListCache
+    	 * @param {string} key The key of the value to remove.
+    	 * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+    	 */
+    	function listCacheDelete(key) {
+    	  var data = this.__data__,
+    	      index = assocIndexOf(data, key);
 
-      if (index < 0) {
-        return false;
-      }
-      var lastIndex = data.length - 1;
-      if (index == lastIndex) {
-        data.pop();
-      } else {
-        splice.call(data, index, 1);
-      }
-      --this.size;
-      return true;
+    	  if (index < 0) {
+    	    return false;
+    	  }
+    	  var lastIndex = data.length - 1;
+    	  if (index == lastIndex) {
+    	    data.pop();
+    	  } else {
+    	    splice.call(data, index, 1);
+    	  }
+    	  --this.size;
+    	  return true;
+    	}
+
+    	_listCacheDelete = listCacheDelete;
+    	return _listCacheDelete;
     }
 
-    var _listCacheDelete = listCacheDelete$1;
+    var _listCacheGet;
+    var hasRequired_listCacheGet;
 
-    var assocIndexOf$2 = _assocIndexOf;
+    function require_listCacheGet () {
+    	if (hasRequired_listCacheGet) return _listCacheGet;
+    	hasRequired_listCacheGet = 1;
+    	var assocIndexOf = require_assocIndexOf();
 
-    /**
-     * Gets the list cache value for `key`.
-     *
-     * @private
-     * @name get
-     * @memberOf ListCache
-     * @param {string} key The key of the value to get.
-     * @returns {*} Returns the entry value.
-     */
-    function listCacheGet$1(key) {
-      var data = this.__data__,
-          index = assocIndexOf$2(data, key);
+    	/**
+    	 * Gets the list cache value for `key`.
+    	 *
+    	 * @private
+    	 * @name get
+    	 * @memberOf ListCache
+    	 * @param {string} key The key of the value to get.
+    	 * @returns {*} Returns the entry value.
+    	 */
+    	function listCacheGet(key) {
+    	  var data = this.__data__,
+    	      index = assocIndexOf(data, key);
 
-      return index < 0 ? undefined : data[index][1];
+    	  return index < 0 ? undefined : data[index][1];
+    	}
+
+    	_listCacheGet = listCacheGet;
+    	return _listCacheGet;
     }
 
-    var _listCacheGet = listCacheGet$1;
+    var _listCacheHas;
+    var hasRequired_listCacheHas;
 
-    var assocIndexOf$1 = _assocIndexOf;
+    function require_listCacheHas () {
+    	if (hasRequired_listCacheHas) return _listCacheHas;
+    	hasRequired_listCacheHas = 1;
+    	var assocIndexOf = require_assocIndexOf();
 
-    /**
-     * Checks if a list cache value for `key` exists.
-     *
-     * @private
-     * @name has
-     * @memberOf ListCache
-     * @param {string} key The key of the entry to check.
-     * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
-     */
-    function listCacheHas$1(key) {
-      return assocIndexOf$1(this.__data__, key) > -1;
+    	/**
+    	 * Checks if a list cache value for `key` exists.
+    	 *
+    	 * @private
+    	 * @name has
+    	 * @memberOf ListCache
+    	 * @param {string} key The key of the entry to check.
+    	 * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+    	 */
+    	function listCacheHas(key) {
+    	  return assocIndexOf(this.__data__, key) > -1;
+    	}
+
+    	_listCacheHas = listCacheHas;
+    	return _listCacheHas;
     }
 
-    var _listCacheHas = listCacheHas$1;
+    var _listCacheSet;
+    var hasRequired_listCacheSet;
 
-    var assocIndexOf = _assocIndexOf;
+    function require_listCacheSet () {
+    	if (hasRequired_listCacheSet) return _listCacheSet;
+    	hasRequired_listCacheSet = 1;
+    	var assocIndexOf = require_assocIndexOf();
 
-    /**
-     * Sets the list cache `key` to `value`.
-     *
-     * @private
-     * @name set
-     * @memberOf ListCache
-     * @param {string} key The key of the value to set.
-     * @param {*} value The value to set.
-     * @returns {Object} Returns the list cache instance.
-     */
-    function listCacheSet$1(key, value) {
-      var data = this.__data__,
-          index = assocIndexOf(data, key);
+    	/**
+    	 * Sets the list cache `key` to `value`.
+    	 *
+    	 * @private
+    	 * @name set
+    	 * @memberOf ListCache
+    	 * @param {string} key The key of the value to set.
+    	 * @param {*} value The value to set.
+    	 * @returns {Object} Returns the list cache instance.
+    	 */
+    	function listCacheSet(key, value) {
+    	  var data = this.__data__,
+    	      index = assocIndexOf(data, key);
 
-      if (index < 0) {
-        ++this.size;
-        data.push([key, value]);
-      } else {
-        data[index][1] = value;
-      }
-      return this;
+    	  if (index < 0) {
+    	    ++this.size;
+    	    data.push([key, value]);
+    	  } else {
+    	    data[index][1] = value;
+    	  }
+    	  return this;
+    	}
+
+    	_listCacheSet = listCacheSet;
+    	return _listCacheSet;
     }
 
-    var _listCacheSet = listCacheSet$1;
+    var _ListCache;
+    var hasRequired_ListCache;
 
-    var listCacheClear = _listCacheClear,
-        listCacheDelete = _listCacheDelete,
-        listCacheGet = _listCacheGet,
-        listCacheHas = _listCacheHas,
-        listCacheSet = _listCacheSet;
+    function require_ListCache () {
+    	if (hasRequired_ListCache) return _ListCache;
+    	hasRequired_ListCache = 1;
+    	var listCacheClear = require_listCacheClear(),
+    	    listCacheDelete = require_listCacheDelete(),
+    	    listCacheGet = require_listCacheGet(),
+    	    listCacheHas = require_listCacheHas(),
+    	    listCacheSet = require_listCacheSet();
 
-    /**
-     * Creates an list cache object.
-     *
-     * @private
-     * @constructor
-     * @param {Array} [entries] The key-value pairs to cache.
-     */
-    function ListCache$1(entries) {
-      var index = -1,
-          length = entries == null ? 0 : entries.length;
+    	/**
+    	 * Creates an list cache object.
+    	 *
+    	 * @private
+    	 * @constructor
+    	 * @param {Array} [entries] The key-value pairs to cache.
+    	 */
+    	function ListCache(entries) {
+    	  var index = -1,
+    	      length = entries == null ? 0 : entries.length;
 
-      this.clear();
-      while (++index < length) {
-        var entry = entries[index];
-        this.set(entry[0], entry[1]);
-      }
+    	  this.clear();
+    	  while (++index < length) {
+    	    var entry = entries[index];
+    	    this.set(entry[0], entry[1]);
+    	  }
+    	}
+
+    	// Add methods to `ListCache`.
+    	ListCache.prototype.clear = listCacheClear;
+    	ListCache.prototype['delete'] = listCacheDelete;
+    	ListCache.prototype.get = listCacheGet;
+    	ListCache.prototype.has = listCacheHas;
+    	ListCache.prototype.set = listCacheSet;
+
+    	_ListCache = ListCache;
+    	return _ListCache;
     }
 
-    // Add methods to `ListCache`.
-    ListCache$1.prototype.clear = listCacheClear;
-    ListCache$1.prototype['delete'] = listCacheDelete;
-    ListCache$1.prototype.get = listCacheGet;
-    ListCache$1.prototype.has = listCacheHas;
-    ListCache$1.prototype.set = listCacheSet;
+    var _Map;
+    var hasRequired_Map;
 
-    var _ListCache = ListCache$1;
+    function require_Map () {
+    	if (hasRequired_Map) return _Map;
+    	hasRequired_Map = 1;
+    	var getNative = _getNative,
+    	    root = _root;
 
-    var getNative$1 = _getNative,
-        root = _root;
+    	/* Built-in method references that are verified to be native. */
+    	var Map = getNative(root, 'Map');
 
-    /* Built-in method references that are verified to be native. */
-    var Map$3 = getNative$1(root, 'Map');
-
-    var _Map = Map$3;
+    	_Map = Map;
+    	return _Map;
+    }
 
     var Hash = _Hash,
-        ListCache = _ListCache,
-        Map$2 = _Map;
+        ListCache = require_ListCache(),
+        Map$2 = require_Map();
 
     /**
      * Removes all key-value entries from the map.
@@ -43981,7 +44905,7 @@ var app = (function () {
     function require_stackClear () {
     	if (hasRequired_stackClear) return _stackClear;
     	hasRequired_stackClear = 1;
-    	var ListCache = _ListCache;
+    	var ListCache = require_ListCache();
 
     	/**
     	 * Removes all key-value entries from the stack.
@@ -44081,8 +45005,8 @@ var app = (function () {
     function require_stackSet () {
     	if (hasRequired_stackSet) return _stackSet;
     	hasRequired_stackSet = 1;
-    	var ListCache = _ListCache,
-    	    Map = _Map,
+    	var ListCache = require_ListCache(),
+    	    Map = require_Map(),
     	    MapCache = _MapCache;
 
     	/** Used as the size to enable large array optimizations. */
@@ -44124,7 +45048,7 @@ var app = (function () {
     function require_Stack () {
     	if (hasRequired_Stack) return _Stack;
     	hasRequired_Stack = 1;
-    	var ListCache = _ListCache,
+    	var ListCache = require_ListCache(),
     	    stackClear = require_stackClear(),
     	    stackDelete = require_stackDelete(),
     	    stackGet = require_stackGet(),
@@ -45489,7 +46413,7 @@ var app = (function () {
     	if (hasRequired_getTag) return _getTag;
     	hasRequired_getTag = 1;
     	var DataView = require_DataView(),
-    	    Map = _Map,
+    	    Map = require_Map(),
     	    Promise = require_Promise(),
     	    Set = require_Set(),
     	    WeakMap = require_WeakMap(),
@@ -49195,1332 +50119,1179 @@ var app = (function () {
 
     /* global window */
 
-    var lodash_1$1;
-    var hasRequiredLodash$1;
+    var lodash;
 
-    function requireLodash$1 () {
-    	if (hasRequiredLodash$1) return lodash_1$1;
-    	hasRequiredLodash$1 = 1;
-    	var lodash;
-
-    	if (typeof commonjsRequire === "function") {
-    	  try {
-    	    lodash = {
-    	      clone: requireClone(),
-    	      constant: requireConstant(),
-    	      each: requireEach(),
-    	      filter: requireFilter(),
-    	      has:  requireHas(),
-    	      isArray: isArray_1,
-    	      isEmpty: requireIsEmpty(),
-    	      isFunction: requireIsFunction(),
-    	      isUndefined: requireIsUndefined(),
-    	      keys: requireKeys(),
-    	      map: requireMap(),
-    	      reduce: requireReduce(),
-    	      size: requireSize(),
-    	      transform: requireTransform(),
-    	      union: requireUnion(),
-    	      values: requireValues()
-    	    };
-    	  } catch (e) {
-    	    // continue regardless of error
-    	  }
-    	}
-
-    	if (!lodash) {
-    	  lodash = window._;
-    	}
-
-    	lodash_1$1 = lodash;
-    	return lodash_1$1;
+    if (typeof commonjsRequire === "function") {
+      try {
+        lodash = {
+          clone: requireClone(),
+          constant: requireConstant(),
+          each: requireEach(),
+          filter: requireFilter(),
+          has:  requireHas(),
+          isArray: isArray_1,
+          isEmpty: requireIsEmpty(),
+          isFunction: requireIsFunction(),
+          isUndefined: requireIsUndefined(),
+          keys: requireKeys(),
+          map: requireMap(),
+          reduce: requireReduce(),
+          size: requireSize(),
+          transform: requireTransform(),
+          union: requireUnion(),
+          values: requireValues()
+        };
+      } catch (e) {
+        // continue regardless of error
+      }
     }
 
-    var graph;
-    var hasRequiredGraph;
-
-    function requireGraph () {
-    	if (hasRequiredGraph) return graph;
-    	hasRequiredGraph = 1;
-
-    	var _ = requireLodash$1();
-
-    	graph = Graph;
-
-    	var DEFAULT_EDGE_NAME = "\x00";
-    	var GRAPH_NODE = "\x00";
-    	var EDGE_KEY_DELIM = "\x01";
-
-    	// Implementation notes:
-    	//
-    	//  * Node id query functions should return string ids for the nodes
-    	//  * Edge id query functions should return an "edgeObj", edge object, that is
-    	//    composed of enough information to uniquely identify an edge: {v, w, name}.
-    	//  * Internally we use an "edgeId", a stringified form of the edgeObj, to
-    	//    reference edges. This is because we need a performant way to look these
-    	//    edges up and, object properties, which have string keys, are the closest
-    	//    we're going to get to a performant hashtable in JavaScript.
-
-    	function Graph(opts) {
-    	  this._isDirected = _.has(opts, "directed") ? opts.directed : true;
-    	  this._isMultigraph = _.has(opts, "multigraph") ? opts.multigraph : false;
-    	  this._isCompound = _.has(opts, "compound") ? opts.compound : false;
-
-    	  // Label for the graph itself
-    	  this._label = undefined;
-
-    	  // Defaults to be set when creating a new node
-    	  this._defaultNodeLabelFn = _.constant(undefined);
-
-    	  // Defaults to be set when creating a new edge
-    	  this._defaultEdgeLabelFn = _.constant(undefined);
-
-    	  // v -> label
-    	  this._nodes = {};
-
-    	  if (this._isCompound) {
-    	    // v -> parent
-    	    this._parent = {};
-
-    	    // v -> children
-    	    this._children = {};
-    	    this._children[GRAPH_NODE] = {};
-    	  }
-
-    	  // v -> edgeObj
-    	  this._in = {};
-
-    	  // u -> v -> Number
-    	  this._preds = {};
-
-    	  // v -> edgeObj
-    	  this._out = {};
-
-    	  // v -> w -> Number
-    	  this._sucs = {};
-
-    	  // e -> edgeObj
-    	  this._edgeObjs = {};
-
-    	  // e -> label
-    	  this._edgeLabels = {};
-    	}
-
-    	/* Number of nodes in the graph. Should only be changed by the implementation. */
-    	Graph.prototype._nodeCount = 0;
-
-    	/* Number of edges in the graph. Should only be changed by the implementation. */
-    	Graph.prototype._edgeCount = 0;
-
-
-    	/* === Graph functions ========= */
-
-    	Graph.prototype.isDirected = function() {
-    	  return this._isDirected;
-    	};
-
-    	Graph.prototype.isMultigraph = function() {
-    	  return this._isMultigraph;
-    	};
-
-    	Graph.prototype.isCompound = function() {
-    	  return this._isCompound;
-    	};
-
-    	Graph.prototype.setGraph = function(label) {
-    	  this._label = label;
-    	  return this;
-    	};
-
-    	Graph.prototype.graph = function() {
-    	  return this._label;
-    	};
-
-
-    	/* === Node functions ========== */
-
-    	Graph.prototype.setDefaultNodeLabel = function(newDefault) {
-    	  if (!_.isFunction(newDefault)) {
-    	    newDefault = _.constant(newDefault);
-    	  }
-    	  this._defaultNodeLabelFn = newDefault;
-    	  return this;
-    	};
-
-    	Graph.prototype.nodeCount = function() {
-    	  return this._nodeCount;
-    	};
-
-    	Graph.prototype.nodes = function() {
-    	  return _.keys(this._nodes);
-    	};
-
-    	Graph.prototype.sources = function() {
-    	  var self = this;
-    	  return _.filter(this.nodes(), function(v) {
-    	    return _.isEmpty(self._in[v]);
-    	  });
-    	};
-
-    	Graph.prototype.sinks = function() {
-    	  var self = this;
-    	  return _.filter(this.nodes(), function(v) {
-    	    return _.isEmpty(self._out[v]);
-    	  });
-    	};
-
-    	Graph.prototype.setNodes = function(vs, value) {
-    	  var args = arguments;
-    	  var self = this;
-    	  _.each(vs, function(v) {
-    	    if (args.length > 1) {
-    	      self.setNode(v, value);
-    	    } else {
-    	      self.setNode(v);
-    	    }
-    	  });
-    	  return this;
-    	};
-
-    	Graph.prototype.setNode = function(v, value) {
-    	  if (_.has(this._nodes, v)) {
-    	    if (arguments.length > 1) {
-    	      this._nodes[v] = value;
-    	    }
-    	    return this;
-    	  }
-
-    	  this._nodes[v] = arguments.length > 1 ? value : this._defaultNodeLabelFn(v);
-    	  if (this._isCompound) {
-    	    this._parent[v] = GRAPH_NODE;
-    	    this._children[v] = {};
-    	    this._children[GRAPH_NODE][v] = true;
-    	  }
-    	  this._in[v] = {};
-    	  this._preds[v] = {};
-    	  this._out[v] = {};
-    	  this._sucs[v] = {};
-    	  ++this._nodeCount;
-    	  return this;
-    	};
-
-    	Graph.prototype.node = function(v) {
-    	  return this._nodes[v];
-    	};
-
-    	Graph.prototype.hasNode = function(v) {
-    	  return _.has(this._nodes, v);
-    	};
-
-    	Graph.prototype.removeNode =  function(v) {
-    	  var self = this;
-    	  if (_.has(this._nodes, v)) {
-    	    var removeEdge = function(e) { self.removeEdge(self._edgeObjs[e]); };
-    	    delete this._nodes[v];
-    	    if (this._isCompound) {
-    	      this._removeFromParentsChildList(v);
-    	      delete this._parent[v];
-    	      _.each(this.children(v), function(child) {
-    	        self.setParent(child);
-    	      });
-    	      delete this._children[v];
-    	    }
-    	    _.each(_.keys(this._in[v]), removeEdge);
-    	    delete this._in[v];
-    	    delete this._preds[v];
-    	    _.each(_.keys(this._out[v]), removeEdge);
-    	    delete this._out[v];
-    	    delete this._sucs[v];
-    	    --this._nodeCount;
-    	  }
-    	  return this;
-    	};
-
-    	Graph.prototype.setParent = function(v, parent) {
-    	  if (!this._isCompound) {
-    	    throw new Error("Cannot set parent in a non-compound graph");
-    	  }
-
-    	  if (_.isUndefined(parent)) {
-    	    parent = GRAPH_NODE;
-    	  } else {
-    	    // Coerce parent to string
-    	    parent += "";
-    	    for (var ancestor = parent;
-    	      !_.isUndefined(ancestor);
-    	      ancestor = this.parent(ancestor)) {
-    	      if (ancestor === v) {
-    	        throw new Error("Setting " + parent+ " as parent of " + v +
-    	                        " would create a cycle");
-    	      }
-    	    }
-
-    	    this.setNode(parent);
-    	  }
-
-    	  this.setNode(v);
-    	  this._removeFromParentsChildList(v);
-    	  this._parent[v] = parent;
-    	  this._children[parent][v] = true;
-    	  return this;
-    	};
-
-    	Graph.prototype._removeFromParentsChildList = function(v) {
-    	  delete this._children[this._parent[v]][v];
-    	};
-
-    	Graph.prototype.parent = function(v) {
-    	  if (this._isCompound) {
-    	    var parent = this._parent[v];
-    	    if (parent !== GRAPH_NODE) {
-    	      return parent;
-    	    }
-    	  }
-    	};
-
-    	Graph.prototype.children = function(v) {
-    	  if (_.isUndefined(v)) {
-    	    v = GRAPH_NODE;
-    	  }
-
-    	  if (this._isCompound) {
-    	    var children = this._children[v];
-    	    if (children) {
-    	      return _.keys(children);
-    	    }
-    	  } else if (v === GRAPH_NODE) {
-    	    return this.nodes();
-    	  } else if (this.hasNode(v)) {
-    	    return [];
-    	  }
-    	};
-
-    	Graph.prototype.predecessors = function(v) {
-    	  var predsV = this._preds[v];
-    	  if (predsV) {
-    	    return _.keys(predsV);
-    	  }
-    	};
-
-    	Graph.prototype.successors = function(v) {
-    	  var sucsV = this._sucs[v];
-    	  if (sucsV) {
-    	    return _.keys(sucsV);
-    	  }
-    	};
-
-    	Graph.prototype.neighbors = function(v) {
-    	  var preds = this.predecessors(v);
-    	  if (preds) {
-    	    return _.union(preds, this.successors(v));
-    	  }
-    	};
-
-    	Graph.prototype.isLeaf = function (v) {
-    	  var neighbors;
-    	  if (this.isDirected()) {
-    	    neighbors = this.successors(v);
-    	  } else {
-    	    neighbors = this.neighbors(v);
-    	  }
-    	  return neighbors.length === 0;
-    	};
-
-    	Graph.prototype.filterNodes = function(filter) {
-    	  var copy = new this.constructor({
-    	    directed: this._isDirected,
-    	    multigraph: this._isMultigraph,
-    	    compound: this._isCompound
-    	  });
-
-    	  copy.setGraph(this.graph());
-
-    	  var self = this;
-    	  _.each(this._nodes, function(value, v) {
-    	    if (filter(v)) {
-    	      copy.setNode(v, value);
-    	    }
-    	  });
-
-    	  _.each(this._edgeObjs, function(e) {
-    	    if (copy.hasNode(e.v) && copy.hasNode(e.w)) {
-    	      copy.setEdge(e, self.edge(e));
-    	    }
-    	  });
-
-    	  var parents = {};
-    	  function findParent(v) {
-    	    var parent = self.parent(v);
-    	    if (parent === undefined || copy.hasNode(parent)) {
-    	      parents[v] = parent;
-    	      return parent;
-    	    } else if (parent in parents) {
-    	      return parents[parent];
-    	    } else {
-    	      return findParent(parent);
-    	    }
-    	  }
-
-    	  if (this._isCompound) {
-    	    _.each(copy.nodes(), function(v) {
-    	      copy.setParent(v, findParent(v));
-    	    });
-    	  }
-
-    	  return copy;
-    	};
-
-    	/* === Edge functions ========== */
-
-    	Graph.prototype.setDefaultEdgeLabel = function(newDefault) {
-    	  if (!_.isFunction(newDefault)) {
-    	    newDefault = _.constant(newDefault);
-    	  }
-    	  this._defaultEdgeLabelFn = newDefault;
-    	  return this;
-    	};
-
-    	Graph.prototype.edgeCount = function() {
-    	  return this._edgeCount;
-    	};
-
-    	Graph.prototype.edges = function() {
-    	  return _.values(this._edgeObjs);
-    	};
-
-    	Graph.prototype.setPath = function(vs, value) {
-    	  var self = this;
-    	  var args = arguments;
-    	  _.reduce(vs, function(v, w) {
-    	    if (args.length > 1) {
-    	      self.setEdge(v, w, value);
-    	    } else {
-    	      self.setEdge(v, w);
-    	    }
-    	    return w;
-    	  });
-    	  return this;
-    	};
-
-    	/*
-    	 * setEdge(v, w, [value, [name]])
-    	 * setEdge({ v, w, [name] }, [value])
-    	 */
-    	Graph.prototype.setEdge = function() {
-    	  var v, w, name, value;
-    	  var valueSpecified = false;
-    	  var arg0 = arguments[0];
-
-    	  if (typeof arg0 === "object" && arg0 !== null && "v" in arg0) {
-    	    v = arg0.v;
-    	    w = arg0.w;
-    	    name = arg0.name;
-    	    if (arguments.length === 2) {
-    	      value = arguments[1];
-    	      valueSpecified = true;
-    	    }
-    	  } else {
-    	    v = arg0;
-    	    w = arguments[1];
-    	    name = arguments[3];
-    	    if (arguments.length > 2) {
-    	      value = arguments[2];
-    	      valueSpecified = true;
-    	    }
-    	  }
-
-    	  v = "" + v;
-    	  w = "" + w;
-    	  if (!_.isUndefined(name)) {
-    	    name = "" + name;
-    	  }
-
-    	  var e = edgeArgsToId(this._isDirected, v, w, name);
-    	  if (_.has(this._edgeLabels, e)) {
-    	    if (valueSpecified) {
-    	      this._edgeLabels[e] = value;
-    	    }
-    	    return this;
-    	  }
-
-    	  if (!_.isUndefined(name) && !this._isMultigraph) {
-    	    throw new Error("Cannot set a named edge when isMultigraph = false");
-    	  }
-
-    	  // It didn't exist, so we need to create it.
-    	  // First ensure the nodes exist.
-    	  this.setNode(v);
-    	  this.setNode(w);
-
-    	  this._edgeLabels[e] = valueSpecified ? value : this._defaultEdgeLabelFn(v, w, name);
-
-    	  var edgeObj = edgeArgsToObj(this._isDirected, v, w, name);
-    	  // Ensure we add undirected edges in a consistent way.
-    	  v = edgeObj.v;
-    	  w = edgeObj.w;
-
-    	  Object.freeze(edgeObj);
-    	  this._edgeObjs[e] = edgeObj;
-    	  incrementOrInitEntry(this._preds[w], v);
-    	  incrementOrInitEntry(this._sucs[v], w);
-    	  this._in[w][e] = edgeObj;
-    	  this._out[v][e] = edgeObj;
-    	  this._edgeCount++;
-    	  return this;
-    	};
-
-    	Graph.prototype.edge = function(v, w, name) {
-    	  var e = (arguments.length === 1
-    	    ? edgeObjToId(this._isDirected, arguments[0])
-    	    : edgeArgsToId(this._isDirected, v, w, name));
-    	  return this._edgeLabels[e];
-    	};
-
-    	Graph.prototype.hasEdge = function(v, w, name) {
-    	  var e = (arguments.length === 1
-    	    ? edgeObjToId(this._isDirected, arguments[0])
-    	    : edgeArgsToId(this._isDirected, v, w, name));
-    	  return _.has(this._edgeLabels, e);
-    	};
-
-    	Graph.prototype.removeEdge = function(v, w, name) {
-    	  var e = (arguments.length === 1
-    	    ? edgeObjToId(this._isDirected, arguments[0])
-    	    : edgeArgsToId(this._isDirected, v, w, name));
-    	  var edge = this._edgeObjs[e];
-    	  if (edge) {
-    	    v = edge.v;
-    	    w = edge.w;
-    	    delete this._edgeLabels[e];
-    	    delete this._edgeObjs[e];
-    	    decrementOrRemoveEntry(this._preds[w], v);
-    	    decrementOrRemoveEntry(this._sucs[v], w);
-    	    delete this._in[w][e];
-    	    delete this._out[v][e];
-    	    this._edgeCount--;
-    	  }
-    	  return this;
-    	};
-
-    	Graph.prototype.inEdges = function(v, u) {
-    	  var inV = this._in[v];
-    	  if (inV) {
-    	    var edges = _.values(inV);
-    	    if (!u) {
-    	      return edges;
-    	    }
-    	    return _.filter(edges, function(edge) { return edge.v === u; });
-    	  }
-    	};
-
-    	Graph.prototype.outEdges = function(v, w) {
-    	  var outV = this._out[v];
-    	  if (outV) {
-    	    var edges = _.values(outV);
-    	    if (!w) {
-    	      return edges;
-    	    }
-    	    return _.filter(edges, function(edge) { return edge.w === w; });
-    	  }
-    	};
-
-    	Graph.prototype.nodeEdges = function(v, w) {
-    	  var inEdges = this.inEdges(v, w);
-    	  if (inEdges) {
-    	    return inEdges.concat(this.outEdges(v, w));
-    	  }
-    	};
-
-    	function incrementOrInitEntry(map, k) {
-    	  if (map[k]) {
-    	    map[k]++;
-    	  } else {
-    	    map[k] = 1;
-    	  }
-    	}
-
-    	function decrementOrRemoveEntry(map, k) {
-    	  if (!--map[k]) { delete map[k]; }
-    	}
-
-    	function edgeArgsToId(isDirected, v_, w_, name) {
-    	  var v = "" + v_;
-    	  var w = "" + w_;
-    	  if (!isDirected && v > w) {
-    	    var tmp = v;
-    	    v = w;
-    	    w = tmp;
-    	  }
-    	  return v + EDGE_KEY_DELIM + w + EDGE_KEY_DELIM +
-    	             (_.isUndefined(name) ? DEFAULT_EDGE_NAME : name);
-    	}
-
-    	function edgeArgsToObj(isDirected, v_, w_, name) {
-    	  var v = "" + v_;
-    	  var w = "" + w_;
-    	  if (!isDirected && v > w) {
-    	    var tmp = v;
-    	    v = w;
-    	    w = tmp;
-    	  }
-    	  var edgeObj =  { v: v, w: w };
-    	  if (name) {
-    	    edgeObj.name = name;
-    	  }
-    	  return edgeObj;
-    	}
-
-    	function edgeObjToId(isDirected, edgeObj) {
-    	  return edgeArgsToId(isDirected, edgeObj.v, edgeObj.w, edgeObj.name);
-    	}
-    	return graph;
+    if (!lodash) {
+      lodash = window._;
     }
 
-    var version$1;
-    var hasRequiredVersion$1;
+    var lodash_1$1 = lodash;
 
-    function requireVersion$1 () {
-    	if (hasRequiredVersion$1) return version$1;
-    	hasRequiredVersion$1 = 1;
-    	version$1 = '2.1.8';
-    	return version$1;
+    var _$b = lodash_1$1;
+
+    var graph = Graph$2;
+
+    var DEFAULT_EDGE_NAME = "\x00";
+    var GRAPH_NODE = "\x00";
+    var EDGE_KEY_DELIM = "\x01";
+
+    // Implementation notes:
+    //
+    //  * Node id query functions should return string ids for the nodes
+    //  * Edge id query functions should return an "edgeObj", edge object, that is
+    //    composed of enough information to uniquely identify an edge: {v, w, name}.
+    //  * Internally we use an "edgeId", a stringified form of the edgeObj, to
+    //    reference edges. This is because we need a performant way to look these
+    //    edges up and, object properties, which have string keys, are the closest
+    //    we're going to get to a performant hashtable in JavaScript.
+
+    function Graph$2(opts) {
+      this._isDirected = _$b.has(opts, "directed") ? opts.directed : true;
+      this._isMultigraph = _$b.has(opts, "multigraph") ? opts.multigraph : false;
+      this._isCompound = _$b.has(opts, "compound") ? opts.compound : false;
+
+      // Label for the graph itself
+      this._label = undefined;
+
+      // Defaults to be set when creating a new node
+      this._defaultNodeLabelFn = _$b.constant(undefined);
+
+      // Defaults to be set when creating a new edge
+      this._defaultEdgeLabelFn = _$b.constant(undefined);
+
+      // v -> label
+      this._nodes = {};
+
+      if (this._isCompound) {
+        // v -> parent
+        this._parent = {};
+
+        // v -> children
+        this._children = {};
+        this._children[GRAPH_NODE] = {};
+      }
+
+      // v -> edgeObj
+      this._in = {};
+
+      // u -> v -> Number
+      this._preds = {};
+
+      // v -> edgeObj
+      this._out = {};
+
+      // v -> w -> Number
+      this._sucs = {};
+
+      // e -> edgeObj
+      this._edgeObjs = {};
+
+      // e -> label
+      this._edgeLabels = {};
     }
 
-    var lib;
-    var hasRequiredLib;
+    /* Number of nodes in the graph. Should only be changed by the implementation. */
+    Graph$2.prototype._nodeCount = 0;
 
-    function requireLib () {
-    	if (hasRequiredLib) return lib;
-    	hasRequiredLib = 1;
-    	// Includes only the "core" of graphlib
-    	lib = {
-    	  Graph: requireGraph(),
-    	  version: requireVersion$1()
-    	};
-    	return lib;
+    /* Number of edges in the graph. Should only be changed by the implementation. */
+    Graph$2.prototype._edgeCount = 0;
+
+
+    /* === Graph functions ========= */
+
+    Graph$2.prototype.isDirected = function() {
+      return this._isDirected;
+    };
+
+    Graph$2.prototype.isMultigraph = function() {
+      return this._isMultigraph;
+    };
+
+    Graph$2.prototype.isCompound = function() {
+      return this._isCompound;
+    };
+
+    Graph$2.prototype.setGraph = function(label) {
+      this._label = label;
+      return this;
+    };
+
+    Graph$2.prototype.graph = function() {
+      return this._label;
+    };
+
+
+    /* === Node functions ========== */
+
+    Graph$2.prototype.setDefaultNodeLabel = function(newDefault) {
+      if (!_$b.isFunction(newDefault)) {
+        newDefault = _$b.constant(newDefault);
+      }
+      this._defaultNodeLabelFn = newDefault;
+      return this;
+    };
+
+    Graph$2.prototype.nodeCount = function() {
+      return this._nodeCount;
+    };
+
+    Graph$2.prototype.nodes = function() {
+      return _$b.keys(this._nodes);
+    };
+
+    Graph$2.prototype.sources = function() {
+      var self = this;
+      return _$b.filter(this.nodes(), function(v) {
+        return _$b.isEmpty(self._in[v]);
+      });
+    };
+
+    Graph$2.prototype.sinks = function() {
+      var self = this;
+      return _$b.filter(this.nodes(), function(v) {
+        return _$b.isEmpty(self._out[v]);
+      });
+    };
+
+    Graph$2.prototype.setNodes = function(vs, value) {
+      var args = arguments;
+      var self = this;
+      _$b.each(vs, function(v) {
+        if (args.length > 1) {
+          self.setNode(v, value);
+        } else {
+          self.setNode(v);
+        }
+      });
+      return this;
+    };
+
+    Graph$2.prototype.setNode = function(v, value) {
+      if (_$b.has(this._nodes, v)) {
+        if (arguments.length > 1) {
+          this._nodes[v] = value;
+        }
+        return this;
+      }
+
+      this._nodes[v] = arguments.length > 1 ? value : this._defaultNodeLabelFn(v);
+      if (this._isCompound) {
+        this._parent[v] = GRAPH_NODE;
+        this._children[v] = {};
+        this._children[GRAPH_NODE][v] = true;
+      }
+      this._in[v] = {};
+      this._preds[v] = {};
+      this._out[v] = {};
+      this._sucs[v] = {};
+      ++this._nodeCount;
+      return this;
+    };
+
+    Graph$2.prototype.node = function(v) {
+      return this._nodes[v];
+    };
+
+    Graph$2.prototype.hasNode = function(v) {
+      return _$b.has(this._nodes, v);
+    };
+
+    Graph$2.prototype.removeNode =  function(v) {
+      var self = this;
+      if (_$b.has(this._nodes, v)) {
+        var removeEdge = function(e) { self.removeEdge(self._edgeObjs[e]); };
+        delete this._nodes[v];
+        if (this._isCompound) {
+          this._removeFromParentsChildList(v);
+          delete this._parent[v];
+          _$b.each(this.children(v), function(child) {
+            self.setParent(child);
+          });
+          delete this._children[v];
+        }
+        _$b.each(_$b.keys(this._in[v]), removeEdge);
+        delete this._in[v];
+        delete this._preds[v];
+        _$b.each(_$b.keys(this._out[v]), removeEdge);
+        delete this._out[v];
+        delete this._sucs[v];
+        --this._nodeCount;
+      }
+      return this;
+    };
+
+    Graph$2.prototype.setParent = function(v, parent) {
+      if (!this._isCompound) {
+        throw new Error("Cannot set parent in a non-compound graph");
+      }
+
+      if (_$b.isUndefined(parent)) {
+        parent = GRAPH_NODE;
+      } else {
+        // Coerce parent to string
+        parent += "";
+        for (var ancestor = parent;
+          !_$b.isUndefined(ancestor);
+          ancestor = this.parent(ancestor)) {
+          if (ancestor === v) {
+            throw new Error("Setting " + parent+ " as parent of " + v +
+                            " would create a cycle");
+          }
+        }
+
+        this.setNode(parent);
+      }
+
+      this.setNode(v);
+      this._removeFromParentsChildList(v);
+      this._parent[v] = parent;
+      this._children[parent][v] = true;
+      return this;
+    };
+
+    Graph$2.prototype._removeFromParentsChildList = function(v) {
+      delete this._children[this._parent[v]][v];
+    };
+
+    Graph$2.prototype.parent = function(v) {
+      if (this._isCompound) {
+        var parent = this._parent[v];
+        if (parent !== GRAPH_NODE) {
+          return parent;
+        }
+      }
+    };
+
+    Graph$2.prototype.children = function(v) {
+      if (_$b.isUndefined(v)) {
+        v = GRAPH_NODE;
+      }
+
+      if (this._isCompound) {
+        var children = this._children[v];
+        if (children) {
+          return _$b.keys(children);
+        }
+      } else if (v === GRAPH_NODE) {
+        return this.nodes();
+      } else if (this.hasNode(v)) {
+        return [];
+      }
+    };
+
+    Graph$2.prototype.predecessors = function(v) {
+      var predsV = this._preds[v];
+      if (predsV) {
+        return _$b.keys(predsV);
+      }
+    };
+
+    Graph$2.prototype.successors = function(v) {
+      var sucsV = this._sucs[v];
+      if (sucsV) {
+        return _$b.keys(sucsV);
+      }
+    };
+
+    Graph$2.prototype.neighbors = function(v) {
+      var preds = this.predecessors(v);
+      if (preds) {
+        return _$b.union(preds, this.successors(v));
+      }
+    };
+
+    Graph$2.prototype.isLeaf = function (v) {
+      var neighbors;
+      if (this.isDirected()) {
+        neighbors = this.successors(v);
+      } else {
+        neighbors = this.neighbors(v);
+      }
+      return neighbors.length === 0;
+    };
+
+    Graph$2.prototype.filterNodes = function(filter) {
+      var copy = new this.constructor({
+        directed: this._isDirected,
+        multigraph: this._isMultigraph,
+        compound: this._isCompound
+      });
+
+      copy.setGraph(this.graph());
+
+      var self = this;
+      _$b.each(this._nodes, function(value, v) {
+        if (filter(v)) {
+          copy.setNode(v, value);
+        }
+      });
+
+      _$b.each(this._edgeObjs, function(e) {
+        if (copy.hasNode(e.v) && copy.hasNode(e.w)) {
+          copy.setEdge(e, self.edge(e));
+        }
+      });
+
+      var parents = {};
+      function findParent(v) {
+        var parent = self.parent(v);
+        if (parent === undefined || copy.hasNode(parent)) {
+          parents[v] = parent;
+          return parent;
+        } else if (parent in parents) {
+          return parents[parent];
+        } else {
+          return findParent(parent);
+        }
+      }
+
+      if (this._isCompound) {
+        _$b.each(copy.nodes(), function(v) {
+          copy.setParent(v, findParent(v));
+        });
+      }
+
+      return copy;
+    };
+
+    /* === Edge functions ========== */
+
+    Graph$2.prototype.setDefaultEdgeLabel = function(newDefault) {
+      if (!_$b.isFunction(newDefault)) {
+        newDefault = _$b.constant(newDefault);
+      }
+      this._defaultEdgeLabelFn = newDefault;
+      return this;
+    };
+
+    Graph$2.prototype.edgeCount = function() {
+      return this._edgeCount;
+    };
+
+    Graph$2.prototype.edges = function() {
+      return _$b.values(this._edgeObjs);
+    };
+
+    Graph$2.prototype.setPath = function(vs, value) {
+      var self = this;
+      var args = arguments;
+      _$b.reduce(vs, function(v, w) {
+        if (args.length > 1) {
+          self.setEdge(v, w, value);
+        } else {
+          self.setEdge(v, w);
+        }
+        return w;
+      });
+      return this;
+    };
+
+    /*
+     * setEdge(v, w, [value, [name]])
+     * setEdge({ v, w, [name] }, [value])
+     */
+    Graph$2.prototype.setEdge = function() {
+      var v, w, name, value;
+      var valueSpecified = false;
+      var arg0 = arguments[0];
+
+      if (typeof arg0 === "object" && arg0 !== null && "v" in arg0) {
+        v = arg0.v;
+        w = arg0.w;
+        name = arg0.name;
+        if (arguments.length === 2) {
+          value = arguments[1];
+          valueSpecified = true;
+        }
+      } else {
+        v = arg0;
+        w = arguments[1];
+        name = arguments[3];
+        if (arguments.length > 2) {
+          value = arguments[2];
+          valueSpecified = true;
+        }
+      }
+
+      v = "" + v;
+      w = "" + w;
+      if (!_$b.isUndefined(name)) {
+        name = "" + name;
+      }
+
+      var e = edgeArgsToId(this._isDirected, v, w, name);
+      if (_$b.has(this._edgeLabels, e)) {
+        if (valueSpecified) {
+          this._edgeLabels[e] = value;
+        }
+        return this;
+      }
+
+      if (!_$b.isUndefined(name) && !this._isMultigraph) {
+        throw new Error("Cannot set a named edge when isMultigraph = false");
+      }
+
+      // It didn't exist, so we need to create it.
+      // First ensure the nodes exist.
+      this.setNode(v);
+      this.setNode(w);
+
+      this._edgeLabels[e] = valueSpecified ? value : this._defaultEdgeLabelFn(v, w, name);
+
+      var edgeObj = edgeArgsToObj(this._isDirected, v, w, name);
+      // Ensure we add undirected edges in a consistent way.
+      v = edgeObj.v;
+      w = edgeObj.w;
+
+      Object.freeze(edgeObj);
+      this._edgeObjs[e] = edgeObj;
+      incrementOrInitEntry(this._preds[w], v);
+      incrementOrInitEntry(this._sucs[v], w);
+      this._in[w][e] = edgeObj;
+      this._out[v][e] = edgeObj;
+      this._edgeCount++;
+      return this;
+    };
+
+    Graph$2.prototype.edge = function(v, w, name) {
+      var e = (arguments.length === 1
+        ? edgeObjToId(this._isDirected, arguments[0])
+        : edgeArgsToId(this._isDirected, v, w, name));
+      return this._edgeLabels[e];
+    };
+
+    Graph$2.prototype.hasEdge = function(v, w, name) {
+      var e = (arguments.length === 1
+        ? edgeObjToId(this._isDirected, arguments[0])
+        : edgeArgsToId(this._isDirected, v, w, name));
+      return _$b.has(this._edgeLabels, e);
+    };
+
+    Graph$2.prototype.removeEdge = function(v, w, name) {
+      var e = (arguments.length === 1
+        ? edgeObjToId(this._isDirected, arguments[0])
+        : edgeArgsToId(this._isDirected, v, w, name));
+      var edge = this._edgeObjs[e];
+      if (edge) {
+        v = edge.v;
+        w = edge.w;
+        delete this._edgeLabels[e];
+        delete this._edgeObjs[e];
+        decrementOrRemoveEntry(this._preds[w], v);
+        decrementOrRemoveEntry(this._sucs[v], w);
+        delete this._in[w][e];
+        delete this._out[v][e];
+        this._edgeCount--;
+      }
+      return this;
+    };
+
+    Graph$2.prototype.inEdges = function(v, u) {
+      var inV = this._in[v];
+      if (inV) {
+        var edges = _$b.values(inV);
+        if (!u) {
+          return edges;
+        }
+        return _$b.filter(edges, function(edge) { return edge.v === u; });
+      }
+    };
+
+    Graph$2.prototype.outEdges = function(v, w) {
+      var outV = this._out[v];
+      if (outV) {
+        var edges = _$b.values(outV);
+        if (!w) {
+          return edges;
+        }
+        return _$b.filter(edges, function(edge) { return edge.w === w; });
+      }
+    };
+
+    Graph$2.prototype.nodeEdges = function(v, w) {
+      var inEdges = this.inEdges(v, w);
+      if (inEdges) {
+        return inEdges.concat(this.outEdges(v, w));
+      }
+    };
+
+    function incrementOrInitEntry(map, k) {
+      if (map[k]) {
+        map[k]++;
+      } else {
+        map[k] = 1;
+      }
     }
 
-    var json;
-    var hasRequiredJson;
-
-    function requireJson () {
-    	if (hasRequiredJson) return json;
-    	hasRequiredJson = 1;
-    	var _ = requireLodash$1();
-    	var Graph = requireGraph();
-
-    	json = {
-    	  write: write,
-    	  read: read
-    	};
-
-    	function write(g) {
-    	  var json = {
-    	    options: {
-    	      directed: g.isDirected(),
-    	      multigraph: g.isMultigraph(),
-    	      compound: g.isCompound()
-    	    },
-    	    nodes: writeNodes(g),
-    	    edges: writeEdges(g)
-    	  };
-    	  if (!_.isUndefined(g.graph())) {
-    	    json.value = _.clone(g.graph());
-    	  }
-    	  return json;
-    	}
-
-    	function writeNodes(g) {
-    	  return _.map(g.nodes(), function(v) {
-    	    var nodeValue = g.node(v);
-    	    var parent = g.parent(v);
-    	    var node = { v: v };
-    	    if (!_.isUndefined(nodeValue)) {
-    	      node.value = nodeValue;
-    	    }
-    	    if (!_.isUndefined(parent)) {
-    	      node.parent = parent;
-    	    }
-    	    return node;
-    	  });
-    	}
-
-    	function writeEdges(g) {
-    	  return _.map(g.edges(), function(e) {
-    	    var edgeValue = g.edge(e);
-    	    var edge = { v: e.v, w: e.w };
-    	    if (!_.isUndefined(e.name)) {
-    	      edge.name = e.name;
-    	    }
-    	    if (!_.isUndefined(edgeValue)) {
-    	      edge.value = edgeValue;
-    	    }
-    	    return edge;
-    	  });
-    	}
-
-    	function read(json) {
-    	  var g = new Graph(json.options).setGraph(json.value);
-    	  _.each(json.nodes, function(entry) {
-    	    g.setNode(entry.v, entry.value);
-    	    if (entry.parent) {
-    	      g.setParent(entry.v, entry.parent);
-    	    }
-    	  });
-    	  _.each(json.edges, function(entry) {
-    	    g.setEdge({ v: entry.v, w: entry.w, name: entry.name }, entry.value);
-    	  });
-    	  return g;
-    	}
-    	return json;
+    function decrementOrRemoveEntry(map, k) {
+      if (!--map[k]) { delete map[k]; }
     }
 
-    var components_1;
-    var hasRequiredComponents;
-
-    function requireComponents () {
-    	if (hasRequiredComponents) return components_1;
-    	hasRequiredComponents = 1;
-    	var _ = requireLodash$1();
-
-    	components_1 = components;
-
-    	function components(g) {
-    	  var visited = {};
-    	  var cmpts = [];
-    	  var cmpt;
-
-    	  function dfs(v) {
-    	    if (_.has(visited, v)) return;
-    	    visited[v] = true;
-    	    cmpt.push(v);
-    	    _.each(g.successors(v), dfs);
-    	    _.each(g.predecessors(v), dfs);
-    	  }
-
-    	  _.each(g.nodes(), function(v) {
-    	    cmpt = [];
-    	    dfs(v);
-    	    if (cmpt.length) {
-    	      cmpts.push(cmpt);
-    	    }
-    	  });
-
-    	  return cmpts;
-    	}
-    	return components_1;
+    function edgeArgsToId(isDirected, v_, w_, name) {
+      var v = "" + v_;
+      var w = "" + w_;
+      if (!isDirected && v > w) {
+        var tmp = v;
+        v = w;
+        w = tmp;
+      }
+      return v + EDGE_KEY_DELIM + w + EDGE_KEY_DELIM +
+                 (_$b.isUndefined(name) ? DEFAULT_EDGE_NAME : name);
     }
 
-    var priorityQueue;
-    var hasRequiredPriorityQueue;
-
-    function requirePriorityQueue () {
-    	if (hasRequiredPriorityQueue) return priorityQueue;
-    	hasRequiredPriorityQueue = 1;
-    	var _ = requireLodash$1();
-
-    	priorityQueue = PriorityQueue;
-
-    	/**
-    	 * A min-priority queue data structure. This algorithm is derived from Cormen,
-    	 * et al., "Introduction to Algorithms". The basic idea of a min-priority
-    	 * queue is that you can efficiently (in O(1) time) get the smallest key in
-    	 * the queue. Adding and removing elements takes O(log n) time. A key can
-    	 * have its priority decreased in O(log n) time.
-    	 */
-    	function PriorityQueue() {
-    	  this._arr = [];
-    	  this._keyIndices = {};
-    	}
-
-    	/**
-    	 * Returns the number of elements in the queue. Takes `O(1)` time.
-    	 */
-    	PriorityQueue.prototype.size = function() {
-    	  return this._arr.length;
-    	};
-
-    	/**
-    	 * Returns the keys that are in the queue. Takes `O(n)` time.
-    	 */
-    	PriorityQueue.prototype.keys = function() {
-    	  return this._arr.map(function(x) { return x.key; });
-    	};
-
-    	/**
-    	 * Returns `true` if **key** is in the queue and `false` if not.
-    	 */
-    	PriorityQueue.prototype.has = function(key) {
-    	  return _.has(this._keyIndices, key);
-    	};
-
-    	/**
-    	 * Returns the priority for **key**. If **key** is not present in the queue
-    	 * then this function returns `undefined`. Takes `O(1)` time.
-    	 *
-    	 * @param {Object} key
-    	 */
-    	PriorityQueue.prototype.priority = function(key) {
-    	  var index = this._keyIndices[key];
-    	  if (index !== undefined) {
-    	    return this._arr[index].priority;
-    	  }
-    	};
-
-    	/**
-    	 * Returns the key for the minimum element in this queue. If the queue is
-    	 * empty this function throws an Error. Takes `O(1)` time.
-    	 */
-    	PriorityQueue.prototype.min = function() {
-    	  if (this.size() === 0) {
-    	    throw new Error("Queue underflow");
-    	  }
-    	  return this._arr[0].key;
-    	};
-
-    	/**
-    	 * Inserts a new key into the priority queue. If the key already exists in
-    	 * the queue this function returns `false`; otherwise it will return `true`.
-    	 * Takes `O(n)` time.
-    	 *
-    	 * @param {Object} key the key to add
-    	 * @param {Number} priority the initial priority for the key
-    	 */
-    	PriorityQueue.prototype.add = function(key, priority) {
-    	  var keyIndices = this._keyIndices;
-    	  key = String(key);
-    	  if (!_.has(keyIndices, key)) {
-    	    var arr = this._arr;
-    	    var index = arr.length;
-    	    keyIndices[key] = index;
-    	    arr.push({key: key, priority: priority});
-    	    this._decrease(index);
-    	    return true;
-    	  }
-    	  return false;
-    	};
-
-    	/**
-    	 * Removes and returns the smallest key in the queue. Takes `O(log n)` time.
-    	 */
-    	PriorityQueue.prototype.removeMin = function() {
-    	  this._swap(0, this._arr.length - 1);
-    	  var min = this._arr.pop();
-    	  delete this._keyIndices[min.key];
-    	  this._heapify(0);
-    	  return min.key;
-    	};
-
-    	/**
-    	 * Decreases the priority for **key** to **priority**. If the new priority is
-    	 * greater than the previous priority, this function will throw an Error.
-    	 *
-    	 * @param {Object} key the key for which to raise priority
-    	 * @param {Number} priority the new priority for the key
-    	 */
-    	PriorityQueue.prototype.decrease = function(key, priority) {
-    	  var index = this._keyIndices[key];
-    	  if (priority > this._arr[index].priority) {
-    	    throw new Error("New priority is greater than current priority. " +
-    	        "Key: " + key + " Old: " + this._arr[index].priority + " New: " + priority);
-    	  }
-    	  this._arr[index].priority = priority;
-    	  this._decrease(index);
-    	};
-
-    	PriorityQueue.prototype._heapify = function(i) {
-    	  var arr = this._arr;
-    	  var l = 2 * i;
-    	  var r = l + 1;
-    	  var largest = i;
-    	  if (l < arr.length) {
-    	    largest = arr[l].priority < arr[largest].priority ? l : largest;
-    	    if (r < arr.length) {
-    	      largest = arr[r].priority < arr[largest].priority ? r : largest;
-    	    }
-    	    if (largest !== i) {
-    	      this._swap(i, largest);
-    	      this._heapify(largest);
-    	    }
-    	  }
-    	};
-
-    	PriorityQueue.prototype._decrease = function(index) {
-    	  var arr = this._arr;
-    	  var priority = arr[index].priority;
-    	  var parent;
-    	  while (index !== 0) {
-    	    parent = index >> 1;
-    	    if (arr[parent].priority < priority) {
-    	      break;
-    	    }
-    	    this._swap(index, parent);
-    	    index = parent;
-    	  }
-    	};
-
-    	PriorityQueue.prototype._swap = function(i, j) {
-    	  var arr = this._arr;
-    	  var keyIndices = this._keyIndices;
-    	  var origArrI = arr[i];
-    	  var origArrJ = arr[j];
-    	  arr[i] = origArrJ;
-    	  arr[j] = origArrI;
-    	  keyIndices[origArrJ.key] = i;
-    	  keyIndices[origArrI.key] = j;
-    	};
-    	return priorityQueue;
+    function edgeArgsToObj(isDirected, v_, w_, name) {
+      var v = "" + v_;
+      var w = "" + w_;
+      if (!isDirected && v > w) {
+        var tmp = v;
+        v = w;
+        w = tmp;
+      }
+      var edgeObj =  { v: v, w: w };
+      if (name) {
+        edgeObj.name = name;
+      }
+      return edgeObj;
     }
 
-    var dijkstra_1;
-    var hasRequiredDijkstra;
-
-    function requireDijkstra () {
-    	if (hasRequiredDijkstra) return dijkstra_1;
-    	hasRequiredDijkstra = 1;
-    	var _ = requireLodash$1();
-    	var PriorityQueue = requirePriorityQueue();
-
-    	dijkstra_1 = dijkstra;
-
-    	var DEFAULT_WEIGHT_FUNC = _.constant(1);
-
-    	function dijkstra(g, source, weightFn, edgeFn) {
-    	  return runDijkstra(g, String(source),
-    	    weightFn || DEFAULT_WEIGHT_FUNC,
-    	    edgeFn || function(v) { return g.outEdges(v); });
-    	}
-
-    	function runDijkstra(g, source, weightFn, edgeFn) {
-    	  var results = {};
-    	  var pq = new PriorityQueue();
-    	  var v, vEntry;
-
-    	  var updateNeighbors = function(edge) {
-    	    var w = edge.v !== v ? edge.v : edge.w;
-    	    var wEntry = results[w];
-    	    var weight = weightFn(edge);
-    	    var distance = vEntry.distance + weight;
-
-    	    if (weight < 0) {
-    	      throw new Error("dijkstra does not allow negative edge weights. " +
-    	                      "Bad edge: " + edge + " Weight: " + weight);
-    	    }
-
-    	    if (distance < wEntry.distance) {
-    	      wEntry.distance = distance;
-    	      wEntry.predecessor = v;
-    	      pq.decrease(w, distance);
-    	    }
-    	  };
-
-    	  g.nodes().forEach(function(v) {
-    	    var distance = v === source ? 0 : Number.POSITIVE_INFINITY;
-    	    results[v] = { distance: distance };
-    	    pq.add(v, distance);
-    	  });
-
-    	  while (pq.size() > 0) {
-    	    v = pq.removeMin();
-    	    vEntry = results[v];
-    	    if (vEntry.distance === Number.POSITIVE_INFINITY) {
-    	      break;
-    	    }
-
-    	    edgeFn(v).forEach(updateNeighbors);
-    	  }
-
-    	  return results;
-    	}
-    	return dijkstra_1;
+    function edgeObjToId(isDirected, edgeObj) {
+      return edgeArgsToId(isDirected, edgeObj.v, edgeObj.w, edgeObj.name);
     }
 
-    var dijkstraAll_1;
-    var hasRequiredDijkstraAll;
+    var version$1 = '2.1.8';
 
-    function requireDijkstraAll () {
-    	if (hasRequiredDijkstraAll) return dijkstraAll_1;
-    	hasRequiredDijkstraAll = 1;
-    	var dijkstra = requireDijkstra();
-    	var _ = requireLodash$1();
+    // Includes only the "core" of graphlib
+    var lib$1 = {
+      Graph: graph,
+      version: version$1
+    };
 
-    	dijkstraAll_1 = dijkstraAll;
+    var _$a = lodash_1$1;
+    var Graph$1 = graph;
 
-    	function dijkstraAll(g, weightFunc, edgeFunc) {
-    	  return _.transform(g.nodes(), function(acc, v) {
-    	    acc[v] = dijkstra(g, v, weightFunc, edgeFunc);
-    	  }, {});
-    	}
-    	return dijkstraAll_1;
+    var json = {
+      write: write,
+      read: read
+    };
+
+    function write(g) {
+      var json = {
+        options: {
+          directed: g.isDirected(),
+          multigraph: g.isMultigraph(),
+          compound: g.isCompound()
+        },
+        nodes: writeNodes(g),
+        edges: writeEdges(g)
+      };
+      if (!_$a.isUndefined(g.graph())) {
+        json.value = _$a.clone(g.graph());
+      }
+      return json;
     }
 
-    var tarjan_1;
-    var hasRequiredTarjan;
-
-    function requireTarjan () {
-    	if (hasRequiredTarjan) return tarjan_1;
-    	hasRequiredTarjan = 1;
-    	var _ = requireLodash$1();
-
-    	tarjan_1 = tarjan;
-
-    	function tarjan(g) {
-    	  var index = 0;
-    	  var stack = [];
-    	  var visited = {}; // node id -> { onStack, lowlink, index }
-    	  var results = [];
-
-    	  function dfs(v) {
-    	    var entry = visited[v] = {
-    	      onStack: true,
-    	      lowlink: index,
-    	      index: index++
-    	    };
-    	    stack.push(v);
-
-    	    g.successors(v).forEach(function(w) {
-    	      if (!_.has(visited, w)) {
-    	        dfs(w);
-    	        entry.lowlink = Math.min(entry.lowlink, visited[w].lowlink);
-    	      } else if (visited[w].onStack) {
-    	        entry.lowlink = Math.min(entry.lowlink, visited[w].index);
-    	      }
-    	    });
-
-    	    if (entry.lowlink === entry.index) {
-    	      var cmpt = [];
-    	      var w;
-    	      do {
-    	        w = stack.pop();
-    	        visited[w].onStack = false;
-    	        cmpt.push(w);
-    	      } while (v !== w);
-    	      results.push(cmpt);
-    	    }
-    	  }
-
-    	  g.nodes().forEach(function(v) {
-    	    if (!_.has(visited, v)) {
-    	      dfs(v);
-    	    }
-    	  });
-
-    	  return results;
-    	}
-    	return tarjan_1;
+    function writeNodes(g) {
+      return _$a.map(g.nodes(), function(v) {
+        var nodeValue = g.node(v);
+        var parent = g.parent(v);
+        var node = { v: v };
+        if (!_$a.isUndefined(nodeValue)) {
+          node.value = nodeValue;
+        }
+        if (!_$a.isUndefined(parent)) {
+          node.parent = parent;
+        }
+        return node;
+      });
     }
 
-    var findCycles_1;
-    var hasRequiredFindCycles;
-
-    function requireFindCycles () {
-    	if (hasRequiredFindCycles) return findCycles_1;
-    	hasRequiredFindCycles = 1;
-    	var _ = requireLodash$1();
-    	var tarjan = requireTarjan();
-
-    	findCycles_1 = findCycles;
-
-    	function findCycles(g) {
-    	  return _.filter(tarjan(g), function(cmpt) {
-    	    return cmpt.length > 1 || (cmpt.length === 1 && g.hasEdge(cmpt[0], cmpt[0]));
-    	  });
-    	}
-    	return findCycles_1;
+    function writeEdges(g) {
+      return _$a.map(g.edges(), function(e) {
+        var edgeValue = g.edge(e);
+        var edge = { v: e.v, w: e.w };
+        if (!_$a.isUndefined(e.name)) {
+          edge.name = e.name;
+        }
+        if (!_$a.isUndefined(edgeValue)) {
+          edge.value = edgeValue;
+        }
+        return edge;
+      });
     }
 
-    var floydWarshall_1;
-    var hasRequiredFloydWarshall;
-
-    function requireFloydWarshall () {
-    	if (hasRequiredFloydWarshall) return floydWarshall_1;
-    	hasRequiredFloydWarshall = 1;
-    	var _ = requireLodash$1();
-
-    	floydWarshall_1 = floydWarshall;
-
-    	var DEFAULT_WEIGHT_FUNC = _.constant(1);
-
-    	function floydWarshall(g, weightFn, edgeFn) {
-    	  return runFloydWarshall(g,
-    	    weightFn || DEFAULT_WEIGHT_FUNC,
-    	    edgeFn || function(v) { return g.outEdges(v); });
-    	}
-
-    	function runFloydWarshall(g, weightFn, edgeFn) {
-    	  var results = {};
-    	  var nodes = g.nodes();
-
-    	  nodes.forEach(function(v) {
-    	    results[v] = {};
-    	    results[v][v] = { distance: 0 };
-    	    nodes.forEach(function(w) {
-    	      if (v !== w) {
-    	        results[v][w] = { distance: Number.POSITIVE_INFINITY };
-    	      }
-    	    });
-    	    edgeFn(v).forEach(function(edge) {
-    	      var w = edge.v === v ? edge.w : edge.v;
-    	      var d = weightFn(edge);
-    	      results[v][w] = { distance: d, predecessor: v };
-    	    });
-    	  });
-
-    	  nodes.forEach(function(k) {
-    	    var rowK = results[k];
-    	    nodes.forEach(function(i) {
-    	      var rowI = results[i];
-    	      nodes.forEach(function(j) {
-    	        var ik = rowI[k];
-    	        var kj = rowK[j];
-    	        var ij = rowI[j];
-    	        var altDistance = ik.distance + kj.distance;
-    	        if (altDistance < ij.distance) {
-    	          ij.distance = altDistance;
-    	          ij.predecessor = kj.predecessor;
-    	        }
-    	      });
-    	    });
-    	  });
-
-    	  return results;
-    	}
-    	return floydWarshall_1;
+    function read(json) {
+      var g = new Graph$1(json.options).setGraph(json.value);
+      _$a.each(json.nodes, function(entry) {
+        g.setNode(entry.v, entry.value);
+        if (entry.parent) {
+          g.setParent(entry.v, entry.parent);
+        }
+      });
+      _$a.each(json.edges, function(entry) {
+        g.setEdge({ v: entry.v, w: entry.w, name: entry.name }, entry.value);
+      });
+      return g;
     }
 
-    var topsort_1;
-    var hasRequiredTopsort;
+    var _$9 = lodash_1$1;
 
-    function requireTopsort () {
-    	if (hasRequiredTopsort) return topsort_1;
-    	hasRequiredTopsort = 1;
-    	var _ = requireLodash$1();
+    var components_1 = components;
 
-    	topsort_1 = topsort;
-    	topsort.CycleException = CycleException;
+    function components(g) {
+      var visited = {};
+      var cmpts = [];
+      var cmpt;
 
-    	function topsort(g) {
-    	  var visited = {};
-    	  var stack = {};
-    	  var results = [];
+      function dfs(v) {
+        if (_$9.has(visited, v)) return;
+        visited[v] = true;
+        cmpt.push(v);
+        _$9.each(g.successors(v), dfs);
+        _$9.each(g.predecessors(v), dfs);
+      }
 
-    	  function visit(node) {
-    	    if (_.has(stack, node)) {
-    	      throw new CycleException();
-    	    }
+      _$9.each(g.nodes(), function(v) {
+        cmpt = [];
+        dfs(v);
+        if (cmpt.length) {
+          cmpts.push(cmpt);
+        }
+      });
 
-    	    if (!_.has(visited, node)) {
-    	      stack[node] = true;
-    	      visited[node] = true;
-    	      _.each(g.predecessors(node), visit);
-    	      delete stack[node];
-    	      results.push(node);
-    	    }
-    	  }
-
-    	  _.each(g.sinks(), visit);
-
-    	  if (_.size(visited) !== g.nodeCount()) {
-    	    throw new CycleException();
-    	  }
-
-    	  return results;
-    	}
-
-    	function CycleException() {}
-    	CycleException.prototype = new Error(); // must be an instance of Error to pass testing
-    	return topsort_1;
+      return cmpts;
     }
 
-    var isAcyclic_1;
-    var hasRequiredIsAcyclic;
+    var _$8 = lodash_1$1;
 
-    function requireIsAcyclic () {
-    	if (hasRequiredIsAcyclic) return isAcyclic_1;
-    	hasRequiredIsAcyclic = 1;
-    	var topsort = requireTopsort();
+    var priorityQueue = PriorityQueue$2;
 
-    	isAcyclic_1 = isAcyclic;
-
-    	function isAcyclic(g) {
-    	  try {
-    	    topsort(g);
-    	  } catch (e) {
-    	    if (e instanceof topsort.CycleException) {
-    	      return false;
-    	    }
-    	    throw e;
-    	  }
-    	  return true;
-    	}
-    	return isAcyclic_1;
+    /**
+     * A min-priority queue data structure. This algorithm is derived from Cormen,
+     * et al., "Introduction to Algorithms". The basic idea of a min-priority
+     * queue is that you can efficiently (in O(1) time) get the smallest key in
+     * the queue. Adding and removing elements takes O(log n) time. A key can
+     * have its priority decreased in O(log n) time.
+     */
+    function PriorityQueue$2() {
+      this._arr = [];
+      this._keyIndices = {};
     }
 
-    var dfs_1;
-    var hasRequiredDfs;
+    /**
+     * Returns the number of elements in the queue. Takes `O(1)` time.
+     */
+    PriorityQueue$2.prototype.size = function() {
+      return this._arr.length;
+    };
 
-    function requireDfs () {
-    	if (hasRequiredDfs) return dfs_1;
-    	hasRequiredDfs = 1;
-    	var _ = requireLodash$1();
+    /**
+     * Returns the keys that are in the queue. Takes `O(n)` time.
+     */
+    PriorityQueue$2.prototype.keys = function() {
+      return this._arr.map(function(x) { return x.key; });
+    };
 
-    	dfs_1 = dfs;
+    /**
+     * Returns `true` if **key** is in the queue and `false` if not.
+     */
+    PriorityQueue$2.prototype.has = function(key) {
+      return _$8.has(this._keyIndices, key);
+    };
 
-    	/*
-    	 * A helper that preforms a pre- or post-order traversal on the input graph
-    	 * and returns the nodes in the order they were visited. If the graph is
-    	 * undirected then this algorithm will navigate using neighbors. If the graph
-    	 * is directed then this algorithm will navigate using successors.
-    	 *
-    	 * Order must be one of "pre" or "post".
-    	 */
-    	function dfs(g, vs, order) {
-    	  if (!_.isArray(vs)) {
-    	    vs = [vs];
-    	  }
+    /**
+     * Returns the priority for **key**. If **key** is not present in the queue
+     * then this function returns `undefined`. Takes `O(1)` time.
+     *
+     * @param {Object} key
+     */
+    PriorityQueue$2.prototype.priority = function(key) {
+      var index = this._keyIndices[key];
+      if (index !== undefined) {
+        return this._arr[index].priority;
+      }
+    };
 
-    	  var navigation = (g.isDirected() ? g.successors : g.neighbors).bind(g);
+    /**
+     * Returns the key for the minimum element in this queue. If the queue is
+     * empty this function throws an Error. Takes `O(1)` time.
+     */
+    PriorityQueue$2.prototype.min = function() {
+      if (this.size() === 0) {
+        throw new Error("Queue underflow");
+      }
+      return this._arr[0].key;
+    };
 
-    	  var acc = [];
-    	  var visited = {};
-    	  _.each(vs, function(v) {
-    	    if (!g.hasNode(v)) {
-    	      throw new Error("Graph does not have node: " + v);
-    	    }
+    /**
+     * Inserts a new key into the priority queue. If the key already exists in
+     * the queue this function returns `false`; otherwise it will return `true`.
+     * Takes `O(n)` time.
+     *
+     * @param {Object} key the key to add
+     * @param {Number} priority the initial priority for the key
+     */
+    PriorityQueue$2.prototype.add = function(key, priority) {
+      var keyIndices = this._keyIndices;
+      key = String(key);
+      if (!_$8.has(keyIndices, key)) {
+        var arr = this._arr;
+        var index = arr.length;
+        keyIndices[key] = index;
+        arr.push({key: key, priority: priority});
+        this._decrease(index);
+        return true;
+      }
+      return false;
+    };
 
-    	    doDfs(g, v, order === "post", visited, navigation, acc);
-    	  });
-    	  return acc;
-    	}
+    /**
+     * Removes and returns the smallest key in the queue. Takes `O(log n)` time.
+     */
+    PriorityQueue$2.prototype.removeMin = function() {
+      this._swap(0, this._arr.length - 1);
+      var min = this._arr.pop();
+      delete this._keyIndices[min.key];
+      this._heapify(0);
+      return min.key;
+    };
 
-    	function doDfs(g, v, postorder, visited, navigation, acc) {
-    	  if (!_.has(visited, v)) {
-    	    visited[v] = true;
+    /**
+     * Decreases the priority for **key** to **priority**. If the new priority is
+     * greater than the previous priority, this function will throw an Error.
+     *
+     * @param {Object} key the key for which to raise priority
+     * @param {Number} priority the new priority for the key
+     */
+    PriorityQueue$2.prototype.decrease = function(key, priority) {
+      var index = this._keyIndices[key];
+      if (priority > this._arr[index].priority) {
+        throw new Error("New priority is greater than current priority. " +
+            "Key: " + key + " Old: " + this._arr[index].priority + " New: " + priority);
+      }
+      this._arr[index].priority = priority;
+      this._decrease(index);
+    };
 
-    	    if (!postorder) { acc.push(v); }
-    	    _.each(navigation(v), function(w) {
-    	      doDfs(g, w, postorder, visited, navigation, acc);
-    	    });
-    	    if (postorder) { acc.push(v); }
-    	  }
-    	}
-    	return dfs_1;
+    PriorityQueue$2.prototype._heapify = function(i) {
+      var arr = this._arr;
+      var l = 2 * i;
+      var r = l + 1;
+      var largest = i;
+      if (l < arr.length) {
+        largest = arr[l].priority < arr[largest].priority ? l : largest;
+        if (r < arr.length) {
+          largest = arr[r].priority < arr[largest].priority ? r : largest;
+        }
+        if (largest !== i) {
+          this._swap(i, largest);
+          this._heapify(largest);
+        }
+      }
+    };
+
+    PriorityQueue$2.prototype._decrease = function(index) {
+      var arr = this._arr;
+      var priority = arr[index].priority;
+      var parent;
+      while (index !== 0) {
+        parent = index >> 1;
+        if (arr[parent].priority < priority) {
+          break;
+        }
+        this._swap(index, parent);
+        index = parent;
+      }
+    };
+
+    PriorityQueue$2.prototype._swap = function(i, j) {
+      var arr = this._arr;
+      var keyIndices = this._keyIndices;
+      var origArrI = arr[i];
+      var origArrJ = arr[j];
+      arr[i] = origArrJ;
+      arr[j] = origArrI;
+      keyIndices[origArrJ.key] = i;
+      keyIndices[origArrI.key] = j;
+    };
+
+    var _$7 = lodash_1$1;
+    var PriorityQueue$1 = priorityQueue;
+
+    var dijkstra_1 = dijkstra$1;
+
+    var DEFAULT_WEIGHT_FUNC$1 = _$7.constant(1);
+
+    function dijkstra$1(g, source, weightFn, edgeFn) {
+      return runDijkstra(g, String(source),
+        weightFn || DEFAULT_WEIGHT_FUNC$1,
+        edgeFn || function(v) { return g.outEdges(v); });
     }
 
-    var postorder_1;
-    var hasRequiredPostorder;
+    function runDijkstra(g, source, weightFn, edgeFn) {
+      var results = {};
+      var pq = new PriorityQueue$1();
+      var v, vEntry;
 
-    function requirePostorder () {
-    	if (hasRequiredPostorder) return postorder_1;
-    	hasRequiredPostorder = 1;
-    	var dfs = requireDfs();
+      var updateNeighbors = function(edge) {
+        var w = edge.v !== v ? edge.v : edge.w;
+        var wEntry = results[w];
+        var weight = weightFn(edge);
+        var distance = vEntry.distance + weight;
 
-    	postorder_1 = postorder;
+        if (weight < 0) {
+          throw new Error("dijkstra does not allow negative edge weights. " +
+                          "Bad edge: " + edge + " Weight: " + weight);
+        }
 
-    	function postorder(g, vs) {
-    	  return dfs(g, vs, "post");
-    	}
-    	return postorder_1;
+        if (distance < wEntry.distance) {
+          wEntry.distance = distance;
+          wEntry.predecessor = v;
+          pq.decrease(w, distance);
+        }
+      };
+
+      g.nodes().forEach(function(v) {
+        var distance = v === source ? 0 : Number.POSITIVE_INFINITY;
+        results[v] = { distance: distance };
+        pq.add(v, distance);
+      });
+
+      while (pq.size() > 0) {
+        v = pq.removeMin();
+        vEntry = results[v];
+        if (vEntry.distance === Number.POSITIVE_INFINITY) {
+          break;
+        }
+
+        edgeFn(v).forEach(updateNeighbors);
+      }
+
+      return results;
     }
 
-    var preorder_1;
-    var hasRequiredPreorder;
+    var dijkstra = dijkstra_1;
+    var _$6 = lodash_1$1;
 
-    function requirePreorder () {
-    	if (hasRequiredPreorder) return preorder_1;
-    	hasRequiredPreorder = 1;
-    	var dfs = requireDfs();
+    var dijkstraAll_1 = dijkstraAll;
 
-    	preorder_1 = preorder;
-
-    	function preorder(g, vs) {
-    	  return dfs(g, vs, "pre");
-    	}
-    	return preorder_1;
+    function dijkstraAll(g, weightFunc, edgeFunc) {
+      return _$6.transform(g.nodes(), function(acc, v) {
+        acc[v] = dijkstra(g, v, weightFunc, edgeFunc);
+      }, {});
     }
 
-    var prim_1;
-    var hasRequiredPrim;
+    var _$5 = lodash_1$1;
 
-    function requirePrim () {
-    	if (hasRequiredPrim) return prim_1;
-    	hasRequiredPrim = 1;
-    	var _ = requireLodash$1();
-    	var Graph = requireGraph();
-    	var PriorityQueue = requirePriorityQueue();
+    var tarjan_1 = tarjan$1;
 
-    	prim_1 = prim;
+    function tarjan$1(g) {
+      var index = 0;
+      var stack = [];
+      var visited = {}; // node id -> { onStack, lowlink, index }
+      var results = [];
 
-    	function prim(g, weightFunc) {
-    	  var result = new Graph();
-    	  var parents = {};
-    	  var pq = new PriorityQueue();
-    	  var v;
+      function dfs(v) {
+        var entry = visited[v] = {
+          onStack: true,
+          lowlink: index,
+          index: index++
+        };
+        stack.push(v);
 
-    	  function updateNeighbors(edge) {
-    	    var w = edge.v === v ? edge.w : edge.v;
-    	    var pri = pq.priority(w);
-    	    if (pri !== undefined) {
-    	      var edgeWeight = weightFunc(edge);
-    	      if (edgeWeight < pri) {
-    	        parents[w] = v;
-    	        pq.decrease(w, edgeWeight);
-    	      }
-    	    }
-    	  }
+        g.successors(v).forEach(function(w) {
+          if (!_$5.has(visited, w)) {
+            dfs(w);
+            entry.lowlink = Math.min(entry.lowlink, visited[w].lowlink);
+          } else if (visited[w].onStack) {
+            entry.lowlink = Math.min(entry.lowlink, visited[w].index);
+          }
+        });
 
-    	  if (g.nodeCount() === 0) {
-    	    return result;
-    	  }
+        if (entry.lowlink === entry.index) {
+          var cmpt = [];
+          var w;
+          do {
+            w = stack.pop();
+            visited[w].onStack = false;
+            cmpt.push(w);
+          } while (v !== w);
+          results.push(cmpt);
+        }
+      }
 
-    	  _.each(g.nodes(), function(v) {
-    	    pq.add(v, Number.POSITIVE_INFINITY);
-    	    result.setNode(v);
-    	  });
+      g.nodes().forEach(function(v) {
+        if (!_$5.has(visited, v)) {
+          dfs(v);
+        }
+      });
 
-    	  // Start from an arbitrary node
-    	  pq.decrease(g.nodes()[0], 0);
-
-    	  var init = false;
-    	  while (pq.size() > 0) {
-    	    v = pq.removeMin();
-    	    if (_.has(parents, v)) {
-    	      result.setEdge(v, parents[v]);
-    	    } else if (init) {
-    	      throw new Error("Input graph is not connected: " + g);
-    	    } else {
-    	      init = true;
-    	    }
-
-    	    g.nodeEdges(v).forEach(updateNeighbors);
-    	  }
-
-    	  return result;
-    	}
-    	return prim_1;
+      return results;
     }
 
-    var alg;
-    var hasRequiredAlg;
+    var _$4 = lodash_1$1;
+    var tarjan = tarjan_1;
 
-    function requireAlg () {
-    	if (hasRequiredAlg) return alg;
-    	hasRequiredAlg = 1;
-    	alg = {
-    	  components: requireComponents(),
-    	  dijkstra: requireDijkstra(),
-    	  dijkstraAll: requireDijkstraAll(),
-    	  findCycles: requireFindCycles(),
-    	  floydWarshall: requireFloydWarshall(),
-    	  isAcyclic: requireIsAcyclic(),
-    	  postorder: requirePostorder(),
-    	  preorder: requirePreorder(),
-    	  prim: requirePrim(),
-    	  tarjan: requireTarjan(),
-    	  topsort: requireTopsort()
-    	};
-    	return alg;
+    var findCycles_1 = findCycles;
+
+    function findCycles(g) {
+      return _$4.filter(tarjan(g), function(cmpt) {
+        return cmpt.length > 1 || (cmpt.length === 1 && g.hasEdge(cmpt[0], cmpt[0]));
+      });
     }
+
+    var _$3 = lodash_1$1;
+
+    var floydWarshall_1 = floydWarshall;
+
+    var DEFAULT_WEIGHT_FUNC = _$3.constant(1);
+
+    function floydWarshall(g, weightFn, edgeFn) {
+      return runFloydWarshall(g,
+        weightFn || DEFAULT_WEIGHT_FUNC,
+        edgeFn || function(v) { return g.outEdges(v); });
+    }
+
+    function runFloydWarshall(g, weightFn, edgeFn) {
+      var results = {};
+      var nodes = g.nodes();
+
+      nodes.forEach(function(v) {
+        results[v] = {};
+        results[v][v] = { distance: 0 };
+        nodes.forEach(function(w) {
+          if (v !== w) {
+            results[v][w] = { distance: Number.POSITIVE_INFINITY };
+          }
+        });
+        edgeFn(v).forEach(function(edge) {
+          var w = edge.v === v ? edge.w : edge.v;
+          var d = weightFn(edge);
+          results[v][w] = { distance: d, predecessor: v };
+        });
+      });
+
+      nodes.forEach(function(k) {
+        var rowK = results[k];
+        nodes.forEach(function(i) {
+          var rowI = results[i];
+          nodes.forEach(function(j) {
+            var ik = rowI[k];
+            var kj = rowK[j];
+            var ij = rowI[j];
+            var altDistance = ik.distance + kj.distance;
+            if (altDistance < ij.distance) {
+              ij.distance = altDistance;
+              ij.predecessor = kj.predecessor;
+            }
+          });
+        });
+      });
+
+      return results;
+    }
+
+    var _$2 = lodash_1$1;
+
+    var topsort_1 = topsort$1;
+    topsort$1.CycleException = CycleException;
+
+    function topsort$1(g) {
+      var visited = {};
+      var stack = {};
+      var results = [];
+
+      function visit(node) {
+        if (_$2.has(stack, node)) {
+          throw new CycleException();
+        }
+
+        if (!_$2.has(visited, node)) {
+          stack[node] = true;
+          visited[node] = true;
+          _$2.each(g.predecessors(node), visit);
+          delete stack[node];
+          results.push(node);
+        }
+      }
+
+      _$2.each(g.sinks(), visit);
+
+      if (_$2.size(visited) !== g.nodeCount()) {
+        throw new CycleException();
+      }
+
+      return results;
+    }
+
+    function CycleException() {}
+    CycleException.prototype = new Error(); // must be an instance of Error to pass testing
+
+    var topsort = topsort_1;
+
+    var isAcyclic_1 = isAcyclic;
+
+    function isAcyclic(g) {
+      try {
+        topsort(g);
+      } catch (e) {
+        if (e instanceof topsort.CycleException) {
+          return false;
+        }
+        throw e;
+      }
+      return true;
+    }
+
+    var _$1 = lodash_1$1;
+
+    var dfs_1 = dfs$2;
+
+    /*
+     * A helper that preforms a pre- or post-order traversal on the input graph
+     * and returns the nodes in the order they were visited. If the graph is
+     * undirected then this algorithm will navigate using neighbors. If the graph
+     * is directed then this algorithm will navigate using successors.
+     *
+     * Order must be one of "pre" or "post".
+     */
+    function dfs$2(g, vs, order) {
+      if (!_$1.isArray(vs)) {
+        vs = [vs];
+      }
+
+      var navigation = (g.isDirected() ? g.successors : g.neighbors).bind(g);
+
+      var acc = [];
+      var visited = {};
+      _$1.each(vs, function(v) {
+        if (!g.hasNode(v)) {
+          throw new Error("Graph does not have node: " + v);
+        }
+
+        doDfs(g, v, order === "post", visited, navigation, acc);
+      });
+      return acc;
+    }
+
+    function doDfs(g, v, postorder, visited, navigation, acc) {
+      if (!_$1.has(visited, v)) {
+        visited[v] = true;
+
+        if (!postorder) { acc.push(v); }
+        _$1.each(navigation(v), function(w) {
+          doDfs(g, w, postorder, visited, navigation, acc);
+        });
+        if (postorder) { acc.push(v); }
+      }
+    }
+
+    var dfs$1 = dfs_1;
+
+    var postorder_1 = postorder;
+
+    function postorder(g, vs) {
+      return dfs$1(g, vs, "post");
+    }
+
+    var dfs = dfs_1;
+
+    var preorder_1 = preorder;
+
+    function preorder(g, vs) {
+      return dfs(g, vs, "pre");
+    }
+
+    var _ = lodash_1$1;
+    var Graph = graph;
+    var PriorityQueue = priorityQueue;
+
+    var prim_1 = prim;
+
+    function prim(g, weightFunc) {
+      var result = new Graph();
+      var parents = {};
+      var pq = new PriorityQueue();
+      var v;
+
+      function updateNeighbors(edge) {
+        var w = edge.v === v ? edge.w : edge.v;
+        var pri = pq.priority(w);
+        if (pri !== undefined) {
+          var edgeWeight = weightFunc(edge);
+          if (edgeWeight < pri) {
+            parents[w] = v;
+            pq.decrease(w, edgeWeight);
+          }
+        }
+      }
+
+      if (g.nodeCount() === 0) {
+        return result;
+      }
+
+      _.each(g.nodes(), function(v) {
+        pq.add(v, Number.POSITIVE_INFINITY);
+        result.setNode(v);
+      });
+
+      // Start from an arbitrary node
+      pq.decrease(g.nodes()[0], 0);
+
+      var init = false;
+      while (pq.size() > 0) {
+        v = pq.removeMin();
+        if (_.has(parents, v)) {
+          result.setEdge(v, parents[v]);
+        } else if (init) {
+          throw new Error("Input graph is not connected: " + g);
+        } else {
+          init = true;
+        }
+
+        g.nodeEdges(v).forEach(updateNeighbors);
+      }
+
+      return result;
+    }
+
+    var alg = {
+      components: components_1,
+      dijkstra: dijkstra_1,
+      dijkstraAll: dijkstraAll_1,
+      findCycles: findCycles_1,
+      floydWarshall: floydWarshall_1,
+      isAcyclic: isAcyclic_1,
+      postorder: postorder_1,
+      preorder: preorder_1,
+      prim: prim_1,
+      tarjan: tarjan_1,
+      topsort: topsort_1
+    };
 
     /**
      * Copyright (c) 2014, Chris Pettitt
@@ -50552,24 +51323,14 @@ var app = (function () {
      * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      */
 
-    var graphlib;
-    var hasRequiredGraphlib$1;
+    var lib = lib$1;
 
-    function requireGraphlib$1 () {
-    	if (hasRequiredGraphlib$1) return graphlib;
-    	hasRequiredGraphlib$1 = 1;
-    	var lib = requireLib();
-
-    	graphlib = {
-    	  Graph: lib.Graph,
-    	  json: requireJson(),
-    	  alg: requireAlg(),
-    	  version: lib.version
-    	};
-    	return graphlib;
-    }
-
-    var graphlibExports = requireGraphlib$1();
+    var graphlib = {
+      Graph: lib.Graph,
+      json: json,
+      alg: alg,
+      version: lib.version
+    };
 
     // import { NodeTypes } from './path/to/your/enum';  // Import your NodeTypes enum
     // export const stylesMap: { [key: string]: { [styleKey: string]: string } } = {
@@ -50601,7 +51362,7 @@ var app = (function () {
     function systemGraphToGraphLib(system_state) {
         const graph = system_state.graph;
         // const graph = graph_state.graph as proto.Graph;
-        const g = new graphlibExports.Graph();
+        const g = new graphlib.Graph();
         graph.nodes_info.forEach((node) => {
             g.setNode(node.id, node.name);
         });
@@ -50722,21 +51483,21 @@ var app = (function () {
     function requireGraphlib () {
     	if (hasRequiredGraphlib) return graphlib_1;
     	hasRequiredGraphlib = 1;
-    	var graphlib;
+    	var graphlib$1;
 
     	if (typeof commonjsRequire === "function") {
     	  try {
-    	    graphlib = requireGraphlib$1();
+    	    graphlib$1 = graphlib;
     	  } catch (e) {
     	    // continue regardless of error
     	  }
     	}
 
-    	if (!graphlib) {
-    	  graphlib = window.graphlib;
+    	if (!graphlib$1) {
+    	  graphlib$1 = window.graphlib;
     	}
 
-    	graphlib_1 = graphlib;
+    	graphlib_1 = graphlib$1;
     	return graphlib_1;
     }
 
@@ -56237,7 +56998,7 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('GraphComponent_graphlib', slots, ['default']);
     	var _a;
-    	let current_graph = new Graph();
+    	let current_graph = new Graph$3();
 
     	onMount(() => {
     		console.log("Graph Component Mounted");

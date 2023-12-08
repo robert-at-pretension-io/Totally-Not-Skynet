@@ -64,6 +64,6 @@
   <ConditionalComponent />
 {/if}
 
-<!-- {#if typeName === NodeTypes.COMMAND}
-  <CommandComponent bind:command />
-{/if} -->
+{#if typeName === NodeTypes.COMMAND}
+  <CommandComponent />
+{/if}

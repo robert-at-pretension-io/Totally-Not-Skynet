@@ -1,4 +1,4 @@
-use crate::generated_types::{ variable_definition, AtomicExecutionLog };
+use crate::generated_types::{ AtomicExecutionLog };
 use crate::generated_types::{
     node_content::NodeContent as NodeContentEnum,
     Edge,
@@ -25,7 +25,6 @@ use petgraph::adj::NodeIndex;
 use async_recursion::async_recursion;
 
 use async_openai::types::{
-    Prompt,
     ChatCompletionRequestUserMessage,
     CreateChatCompletionRequest,
     ChatCompletionRequestUserMessageContent,
@@ -115,7 +114,7 @@ pub fn validate_nodes_in_process(
     // let mut node_indices;
     let mut node_indices: HashMap<String, petgraph::graph::NodeIndex> = HashMap::new();
 
-    let conditional_output_variables: Vec<String> = Vec::new();
+    let _conditional_output_variables: Vec<String> = Vec::new();
 
     for node in &nodes {
         let node_info = node.node_info.clone().unwrap();
@@ -339,7 +338,7 @@ pub fn validate_nodes_in_loop(
     }
 
     //output of the process
-    let mut output_minus_input = output_vars
+    let output_minus_input = output_vars
         .clone()
         .into_iter()
         .filter(|output_var| !input_vars.contains(output_var))
@@ -435,7 +434,7 @@ pub fn validate_nodes_in_loop(
     let mut this_conditional_node_index: Option<NodeIndex> = None;
     for node in &nodes {
         if node.node_type == (NodeTypes::Conditional as i32) {
-            let conditional_output_variables = node.output_variables.clone();
+            let _conditional_output_variables = node.output_variables.clone();
             if let Some(node_info) = &node.node_info {
                 if let Some(&index) = node_indices.get(&node_info.id) {
                     this_conditional_node_index = Some(index.index().try_into().unwrap());
@@ -583,7 +582,7 @@ pub fn validate_nodes_in_loop(
 
 #[async_recursion]
 pub async fn run_execution(
-    mut execution: Execution,
+    execution: Execution,
     accumulator: Option<String>,
     docker_id: Option<String>,
     docker_instance: &Docker
@@ -619,7 +618,7 @@ pub async fn run_execution(
             Ok(NodeTypes::Process) => {
                 // Once we implement this functionality just for Prompts (and other node types), we can extract this function and call it recursively to handle this case (with a max depth?)
 
-                let mut process: Process;
+                let process: Process;
 
                 match current_node.node_content.unwrap().node_content.unwrap() {
                     NodeContentEnum::Process(p) => {
@@ -684,7 +683,7 @@ pub async fn run_execution(
                 }
             }
             Ok(NodeTypes::Loop) => {
-                let mut contained_loop: Loop;
+                let contained_loop: Loop;
 
                 match current_node.node_content.unwrap().node_content.unwrap() {
                     NodeContentEnum::Loop(looop) => {
@@ -701,7 +700,7 @@ pub async fn run_execution(
                 let max_iterations = contained_loop.max_iterations;
 
                 // run the following loop up to and including max iterations. This
-                for i in 1..max_iterations {
+                for _i in 1..max_iterations {
                     // an execution may be returned that contains an external branch (with an empty accumulator) OR the accumulator containing text to feed into the next iteration of the loop
 
                     let local_execution = process_to_execution(
@@ -769,7 +768,7 @@ pub async fn run_execution(
                 // For inspiration, a conditional should be handled VERY similarly to a prompt
             }
             Ok(NodeTypes::Command) => {
-                let mut command: Command;
+                let command: Command;
 
                 match current_node.clone().node_content.unwrap().node_content.unwrap() {
                     NodeContentEnum::Command(c) => {
@@ -795,7 +794,7 @@ pub async fn run_execution(
                     Ok(atomic_log) => {
                         prompt_histories.push(atomic_log);
                     }
-                    Err(err) => {
+                    Err(_err) => {
                         // return Err(execution);
                         println!("Error with running command");
                     }
@@ -1087,7 +1086,7 @@ pub async fn handle_command(
         Ok(res) => {
             println!("{}\nResult: {:?}", "The command was run successfully".green(), res);
         }
-        Err(err) => {
+        Err(_err) => {
             println!("{}", "The command was not run successfully".red());
         }
     }
@@ -1106,7 +1105,7 @@ pub async fn handle_command(
 pub async fn handle_conditional(
     current_node: Node,
     mut variable_definitions: HashMap<String, String>,
-    language_model_version: String
+    _language_model_version: String
 ) -> Result<(AtomicExecutionLog, HashMap<String, String>, Option<String>), ()> {
     let mut prompt_text: String = "".to_string();
     let mut hydrated_prompt_text: String = "".to_string();

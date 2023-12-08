@@ -1,17 +1,12 @@
-use crate::generated_types::{ self, AuthenticationMessage, Identity, Node, NodeTypes, Prompt };
+use crate::generated_types::{ self, Identity };
 use crate::generated_types::{
     body::Contents,
-    node_content::NodeContent as NodeContentEnum,
     Body,
-    Edge,
     Envelope,
-    Graph,
     GraphNodeInfo,
     Letter,
-    Process,
     UserSettings,
     VerbTypes,
-    AtomicExecutionLog,
 };
 
 use crate::graph::validate_nodes_in_loop;
@@ -25,6 +20,9 @@ use crate::sqlite_helper_functions::{ fetch_all_nodes, insert_node, update_node 
 
 use crate::SERVER_IDENTITY;
 
+use futures_util::StreamExt;
+use bollard::image::CreateImageOptions;
+
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use tokio::sync::mpsc::UnboundedSender;
@@ -34,7 +32,6 @@ use prost::Message;
 use prost::bytes::BytesMut;
 
 use bollard::container::Config;
-use bollard::exec::{ CreateExecOptions, StartExecResults };
 
 use bollard::Docker;
 
@@ -46,7 +43,7 @@ use bollard::Docker;
 // use bollard::Docker;
 use bson::doc;
 use serde::{ Deserialize, Serialize };
-use serde_json::Value;
+
 use std::collections::HashMap;
 use tokio::sync::mpsc;
 // use tokio_tungstenite::tungstenite::Message;
@@ -72,7 +69,7 @@ pub async fn start_message_sending_loop(
     mut client_rx: mpsc::Receiver<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,
     pool: Arc<Pool<SqliteConnectionManager>>
 ) {
-    let runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
+    let _runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
     let mut docker_containers: HashMap<String, String> = HashMap::new();
     let docker = Docker::connect_with_http_defaults().unwrap();
 
@@ -81,7 +78,7 @@ pub async fn start_message_sending_loop(
 
         // if docker_containers doesn't contain the message identity (msg.0) then create it and add it to the hashmap:
 
-        let mut docker_id: String;
+        let mut docker_id: String = "".to_string();
 
         match docker_containers.get(&msg.0.name) {
             Some(id) => {
@@ -101,14 +98,31 @@ pub async fn start_message_sending_loop(
                     ..Default::default()
                 };
 
-                let id = docker
-                    .create_container::<&str, &str>(None, alpine_config.clone()).await
-                    .unwrap().id;
+                match docker.create_container::<&str, &str>(None, alpine_config.clone()).await {
+                    Ok(container) => {
+                        println!("Created container with id: {:?}", container.id);
+                    }
+                    Err(err) => {
+                        println!(
+                            "Error creating container: {:?}. Let's try pulling the image:",
+                            err
+                        );
+                        let options = CreateImageOptions {
+                            from_image: "alpine",
+                            ..Default::default()
+                        };
 
-                docker_id = id.clone();
+                        let mut stream = docker.create_image(Some(options), None, None);
+                        while let Some(output) = stream.next().await {
+                            println!("{:?}", output);
+                        }
+                    }
+                }
 
-                println!("Created container with id: {}", id);
-                docker_containers.insert(msg.0.clone().name.to_string(), id);
+                // docker_id = id.clone();
+
+                // println!("Created container with id: {}", id);
+                // docker_containers.insert(msg.0.clone().name.to_string(), id);
             }
         }
 
@@ -319,7 +333,7 @@ pub async fn start_message_sending_loop(
                         }
                     } // Closing the match verb
                 }
-                Contents::UserSettings(user_settings) => {}
+                Contents::UserSettings(_user_settings) => {}
                 Contents::NodesToProcess(nodes_to_process) => {
                     match verb {
                         VerbTypes::Validate => {

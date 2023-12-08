@@ -334,37 +334,91 @@ export class Prompt extends pb_1.Message {
 export class Command extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
+        goal?: string;
         command?: string;
+        output?: string[];
+        error?: string;
     }) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
+      if ("goal" in data && data.goal != undefined) {
+        this.goal = data.goal;
+      }
       if ("command" in data && data.command != undefined) {
         this.command = data.command;
       }
+      if ("output" in data && data.output != undefined) {
+        this.output = data.output;
+      }
+      if ("error" in data && data.error != undefined) {
+        this.error = data.error;
+      }
     }
   }
-  get command() {
+  get goal() {
     return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
   }
-  set command(value: string) {
+  set goal(value: string) {
     pb_1.Message.setField(this, 1, value);
   }
+  get command() {
+    return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+  }
+  set command(value: string) {
+    pb_1.Message.setField(this, 2, value);
+  }
+  get output() {
+    return pb_1.Message.getFieldWithDefault(this, 3, []) as string[];
+  }
+  set output(value: string[]) {
+    pb_1.Message.setField(this, 3, value);
+  }
+  get error() {
+    return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
+  }
+  set error(value: string) {
+    pb_1.Message.setField(this, 4, value);
+  }
   static fromObject(data: {
+        goal?: string;
         command?: string;
+        output?: string[];
+        error?: string;
     }): Command {
     const message = new Command({});
+    if (data.goal != null) {
+      message.goal = data.goal;
+    }
     if (data.command != null) {
       message.command = data.command;
+    }
+    if (data.output != null) {
+      message.output = data.output;
+    }
+    if (data.error != null) {
+      message.error = data.error;
     }
     return message;
   }
   toObject() {
     const data: {
+            goal?: string;
             command?: string;
+            output?: string[];
+            error?: string;
         } = {};
+    if (this.goal != null) {
+      data.goal = this.goal;
+    }
     if (this.command != null) {
       data.command = this.command;
+    }
+    if (this.output != null) {
+      data.output = this.output;
+    }
+    if (this.error != null) {
+      data.error = this.error;
     }
     return data;
   }
@@ -372,8 +426,14 @@ export class Command extends pb_1.Message {
   serialize(w: pb_1.BinaryWriter): void;
   serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
     const writer = w || new pb_1.BinaryWriter();
+    if (this.goal.length)
+      writer.writeString(1, this.goal);
     if (this.command.length)
-      writer.writeString(1, this.command);
+      writer.writeString(2, this.command);
+    if (this.output.length)
+      writer.writeRepeatedString(3, this.output);
+    if (this.error.length)
+      writer.writeString(4, this.error);
     if (!w)
       return writer.getResultBuffer();
   }
@@ -384,7 +444,16 @@ export class Command extends pb_1.Message {
         break;
       switch (reader.getFieldNumber()) {
       case 1:
+        message.goal = reader.readString();
+        break;
+      case 2:
         message.command = reader.readString();
+        break;
+      case 3:
+        pb_1.Message.addToRepeatedField(message, 3, reader.readString());
+        break;
+      case 4:
+        message.error = reader.readString();
         break;
       default: reader.skipField();
       }
@@ -680,9 +749,11 @@ export class Loop extends pb_1.Message {
         process?: Process;
         current_iteration?: number;
         max_iterations?: number;
+        accumulated_text?: string[];
+        goal?: string;
     }) {
     super();
-    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4], this.#one_of_decls);
     if (!Array.isArray(data) && typeof data == "object") {
       if ("process" in data && data.process != undefined) {
         this.process = data.process;
@@ -692,6 +763,12 @@ export class Loop extends pb_1.Message {
       }
       if ("max_iterations" in data && data.max_iterations != undefined) {
         this.max_iterations = data.max_iterations;
+      }
+      if ("accumulated_text" in data && data.accumulated_text != undefined) {
+        this.accumulated_text = data.accumulated_text;
+      }
+      if ("goal" in data && data.goal != undefined) {
+        this.goal = data.goal;
       }
     }
   }
@@ -716,10 +793,24 @@ export class Loop extends pb_1.Message {
   set max_iterations(value: number) {
     pb_1.Message.setField(this, 3, value);
   }
+  get accumulated_text() {
+    return pb_1.Message.getFieldWithDefault(this, 4, []) as string[];
+  }
+  set accumulated_text(value: string[]) {
+    pb_1.Message.setField(this, 4, value);
+  }
+  get goal() {
+    return pb_1.Message.getFieldWithDefault(this, 5, "") as string;
+  }
+  set goal(value: string) {
+    pb_1.Message.setField(this, 5, value);
+  }
   static fromObject(data: {
         process?: ReturnType<typeof Process.prototype.toObject>;
         current_iteration?: number;
         max_iterations?: number;
+        accumulated_text?: string[];
+        goal?: string;
     }): Loop {
     const message = new Loop({});
     if (data.process != null) {
@@ -731,6 +822,12 @@ export class Loop extends pb_1.Message {
     if (data.max_iterations != null) {
       message.max_iterations = data.max_iterations;
     }
+    if (data.accumulated_text != null) {
+      message.accumulated_text = data.accumulated_text;
+    }
+    if (data.goal != null) {
+      message.goal = data.goal;
+    }
     return message;
   }
   toObject() {
@@ -738,6 +835,8 @@ export class Loop extends pb_1.Message {
             process?: ReturnType<typeof Process.prototype.toObject>;
             current_iteration?: number;
             max_iterations?: number;
+            accumulated_text?: string[];
+            goal?: string;
         } = {};
     if (this.process != null) {
       data.process = this.process.toObject();
@@ -747,6 +846,12 @@ export class Loop extends pb_1.Message {
     }
     if (this.max_iterations != null) {
       data.max_iterations = this.max_iterations;
+    }
+    if (this.accumulated_text != null) {
+      data.accumulated_text = this.accumulated_text;
+    }
+    if (this.goal != null) {
+      data.goal = this.goal;
     }
     return data;
   }
@@ -760,6 +865,10 @@ export class Loop extends pb_1.Message {
       writer.writeUint32(2, this.current_iteration);
     if (this.max_iterations != 0)
       writer.writeUint32(3, this.max_iterations);
+    if (this.accumulated_text.length)
+      writer.writeRepeatedString(4, this.accumulated_text);
+    if (this.goal.length)
+      writer.writeString(5, this.goal);
     if (!w)
       return writer.getResultBuffer();
   }
@@ -778,6 +887,12 @@ export class Loop extends pb_1.Message {
       case 3:
         message.max_iterations = reader.readUint32();
         break;
+      case 4:
+        pb_1.Message.addToRepeatedField(message, 4, reader.readString());
+        break;
+      case 5:
+        message.goal = reader.readString();
+        break;
       default: reader.skipField();
       }
     }
@@ -790,38 +905,140 @@ export class Loop extends pb_1.Message {
     return Loop.deserialize(bytes);
   }
 }
+export class AtomicNodeTypes extends pb_1.Message {
+  #one_of_decls: number[][] = [];
+  constructor(data?: any[] | {
+        node_type?: NodeTypes;
+        is_atomic?: boolean;
+    }) {
+    super();
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("node_type" in data && data.node_type != undefined) {
+        this.node_type = data.node_type;
+      }
+      if ("is_atomic" in data && data.is_atomic != undefined) {
+        this.is_atomic = data.is_atomic;
+      }
+    }
+  }
+  get node_type() {
+    return pb_1.Message.getFieldWithDefault(this, 1, NodeTypes.PROMPT) as NodeTypes;
+  }
+  set node_type(value: NodeTypes) {
+    pb_1.Message.setField(this, 1, value);
+  }
+  get is_atomic() {
+    return pb_1.Message.getFieldWithDefault(this, 2, false) as boolean;
+  }
+  set is_atomic(value: boolean) {
+    pb_1.Message.setField(this, 2, value);
+  }
+  static fromObject(data: {
+        node_type?: NodeTypes;
+        is_atomic?: boolean;
+    }): AtomicNodeTypes {
+    const message = new AtomicNodeTypes({});
+    if (data.node_type != null) {
+      message.node_type = data.node_type;
+    }
+    if (data.is_atomic != null) {
+      message.is_atomic = data.is_atomic;
+    }
+    return message;
+  }
+  toObject() {
+    const data: {
+            node_type?: NodeTypes;
+            is_atomic?: boolean;
+        } = {};
+    if (this.node_type != null) {
+      data.node_type = this.node_type;
+    }
+    if (this.is_atomic != null) {
+      data.is_atomic = this.is_atomic;
+    }
+    return data;
+  }
+  serialize(): Uint8Array;
+  serialize(w: pb_1.BinaryWriter): void;
+  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.node_type != NodeTypes.PROMPT)
+      writer.writeEnum(1, this.node_type);
+    if (this.is_atomic != false)
+      writer.writeBool(2, this.is_atomic);
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): AtomicNodeTypes {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new AtomicNodeTypes();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+      case 1:
+        message.node_type = reader.readEnum();
+        break;
+      case 2:
+        message.is_atomic = reader.readBool();
+        break;
+      default: reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary(): Uint8Array {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes: Uint8Array): AtomicNodeTypes {
+    return AtomicNodeTypes.deserialize(bytes);
+  }
+}
 export class NodeContent extends pb_1.Message {
-  #one_of_decls: number[][] = [[1, 2, 3, 4, 5]];
+  #one_of_decls: number[][] = [[1, 2, 3, 4, 5, 6]];
   constructor(data?: any[] | ({} & (({
         prompt?: Prompt;
         process?: never;
         conditional?: never;
         command?: never;
         code?: never;
+        loop?: never;
     } | {
         prompt?: never;
         process?: Process;
         conditional?: never;
         command?: never;
         code?: never;
+        loop?: never;
     } | {
         prompt?: never;
         process?: never;
         conditional?: Conditional;
         command?: never;
         code?: never;
+        loop?: never;
     } | {
         prompt?: never;
         process?: never;
         conditional?: never;
         command?: Command;
         code?: never;
+        loop?: never;
     } | {
         prompt?: never;
         process?: never;
         conditional?: never;
         command?: never;
         code?: Code;
+        loop?: never;
+    } | {
+        prompt?: never;
+        process?: never;
+        conditional?: never;
+        command?: never;
+        code?: never;
+        loop?: Loop;
     })))) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -840,6 +1057,9 @@ export class NodeContent extends pb_1.Message {
       }
       if ("code" in data && data.code != undefined) {
         this.code = data.code;
+      }
+      if ("loop" in data && data.loop != undefined) {
+        this.loop = data.loop;
       }
     }
   }
@@ -888,18 +1108,28 @@ export class NodeContent extends pb_1.Message {
   get has_code() {
     return pb_1.Message.getField(this, 5) != null;
   }
+  get loop() {
+    return pb_1.Message.getWrapperField(this, Loop, 6) as Loop;
+  }
+  set loop(value: Loop) {
+    pb_1.Message.setOneofWrapperField(this, 6, this.#one_of_decls[0], value);
+  }
+  get has_loop() {
+    return pb_1.Message.getField(this, 6) != null;
+  }
   get node_content() {
     const cases: {
-            [index: number]: "none" | "prompt" | "process" | "conditional" | "command" | "code";
+            [index: number]: "none" | "prompt" | "process" | "conditional" | "command" | "code" | "loop";
         } = {
           0: "none",
           1: "prompt",
           2: "process",
           3: "conditional",
           4: "command",
-          5: "code"
+          5: "code",
+          6: "loop"
         };
-    return cases[pb_1.Message.computeOneofCase(this, [1, 2, 3, 4, 5])];
+    return cases[pb_1.Message.computeOneofCase(this, [1, 2, 3, 4, 5, 6])];
   }
   static fromObject(data: {
         prompt?: ReturnType<typeof Prompt.prototype.toObject>;
@@ -907,6 +1137,7 @@ export class NodeContent extends pb_1.Message {
         conditional?: ReturnType<typeof Conditional.prototype.toObject>;
         command?: ReturnType<typeof Command.prototype.toObject>;
         code?: ReturnType<typeof Code.prototype.toObject>;
+        loop?: ReturnType<typeof Loop.prototype.toObject>;
     }): NodeContent {
     const message = new NodeContent({});
     if (data.prompt != null) {
@@ -924,6 +1155,9 @@ export class NodeContent extends pb_1.Message {
     if (data.code != null) {
       message.code = Code.fromObject(data.code);
     }
+    if (data.loop != null) {
+      message.loop = Loop.fromObject(data.loop);
+    }
     return message;
   }
   toObject() {
@@ -933,6 +1167,7 @@ export class NodeContent extends pb_1.Message {
             conditional?: ReturnType<typeof Conditional.prototype.toObject>;
             command?: ReturnType<typeof Command.prototype.toObject>;
             code?: ReturnType<typeof Code.prototype.toObject>;
+            loop?: ReturnType<typeof Loop.prototype.toObject>;
         } = {};
     if (this.prompt != null) {
       data.prompt = this.prompt.toObject();
@@ -948,6 +1183,9 @@ export class NodeContent extends pb_1.Message {
     }
     if (this.code != null) {
       data.code = this.code.toObject();
+    }
+    if (this.loop != null) {
+      data.loop = this.loop.toObject();
     }
     return data;
   }
@@ -965,6 +1203,8 @@ export class NodeContent extends pb_1.Message {
       writer.writeMessage(4, this.command, () => this.command.serialize(writer));
     if (this.has_code)
       writer.writeMessage(5, this.code, () => this.code.serialize(writer));
+    if (this.has_loop)
+      writer.writeMessage(6, this.loop, () => this.loop.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -989,6 +1229,9 @@ export class NodeContent extends pb_1.Message {
       case 5:
         reader.readMessage(message.code, () => message.code = Code.deserialize(reader));
         break;
+      case 6:
+        reader.readMessage(message.loop, () => message.loop = Loop.deserialize(reader));
+        break;
       default: reader.skipField();
       }
     }
@@ -1006,6 +1249,7 @@ export class Code extends pb_1.Message {
   constructor(data?: any[] | {
         code?: string;
         language?: string;
+        goal?: string;
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -1015,6 +1259,9 @@ export class Code extends pb_1.Message {
       }
       if ("language" in data && data.language != undefined) {
         this.language = data.language;
+      }
+      if ("goal" in data && data.goal != undefined) {
+        this.goal = data.goal;
       }
     }
   }
@@ -1030,9 +1277,16 @@ export class Code extends pb_1.Message {
   set language(value: string) {
     pb_1.Message.setField(this, 2, value);
   }
+  get goal() {
+    return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
+  }
+  set goal(value: string) {
+    pb_1.Message.setField(this, 3, value);
+  }
   static fromObject(data: {
         code?: string;
         language?: string;
+        goal?: string;
     }): Code {
     const message = new Code({});
     if (data.code != null) {
@@ -1041,18 +1295,25 @@ export class Code extends pb_1.Message {
     if (data.language != null) {
       message.language = data.language;
     }
+    if (data.goal != null) {
+      message.goal = data.goal;
+    }
     return message;
   }
   toObject() {
     const data: {
             code?: string;
             language?: string;
+            goal?: string;
         } = {};
     if (this.code != null) {
       data.code = this.code;
     }
     if (this.language != null) {
       data.language = this.language;
+    }
+    if (this.goal != null) {
+      data.goal = this.goal;
     }
     return data;
   }
@@ -1064,6 +1325,8 @@ export class Code extends pb_1.Message {
       writer.writeString(1, this.code);
     if (this.language.length)
       writer.writeString(2, this.language);
+    if (this.goal.length)
+      writer.writeString(3, this.goal);
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1078,6 +1341,9 @@ export class Code extends pb_1.Message {
         break;
       case 2:
         message.language = reader.readString();
+        break;
+      case 3:
+        message.goal = reader.readString();
         break;
       default: reader.skipField();
       }
@@ -1536,7 +1802,7 @@ export class Execution extends pb_1.Message {
         process?: Process;
         current_variable_definitions?: Map<string, string>;
         execution_id?: string;
-        prompt_history?: AtomicExecutionLog[];
+        atomic_history?: AtomicExecutionLog[];
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [5], this.#one_of_decls);
@@ -1553,8 +1819,8 @@ export class Execution extends pb_1.Message {
       if ("execution_id" in data && data.execution_id != undefined) {
         this.execution_id = data.execution_id;
       }
-      if ("prompt_history" in data && data.prompt_history != undefined) {
-        this.prompt_history = data.prompt_history;
+      if ("atomic_history" in data && data.atomic_history != undefined) {
+        this.atomic_history = data.atomic_history;
       }
     }
     if (!this.current_variable_definitions)
@@ -1590,10 +1856,10 @@ export class Execution extends pb_1.Message {
   set execution_id(value: string) {
     pb_1.Message.setField(this, 4, value);
   }
-  get prompt_history() {
+  get atomic_history() {
     return pb_1.Message.getRepeatedWrapperField(this, AtomicExecutionLog, 5) as AtomicExecutionLog[];
   }
-  set prompt_history(value: AtomicExecutionLog[]) {
+  set atomic_history(value: AtomicExecutionLog[]) {
     pb_1.Message.setRepeatedWrapperField(this, 5, value);
   }
   static fromObject(data: {
@@ -1603,7 +1869,7 @@ export class Execution extends pb_1.Message {
             [key: string]: string;
         };
         execution_id?: string;
-        prompt_history?: ReturnType<typeof AtomicExecutionLog.prototype.toObject>[];
+        atomic_history?: ReturnType<typeof AtomicExecutionLog.prototype.toObject>[];
     }): Execution {
     const message = new Execution({});
     if (data.current_node != null) {
@@ -1618,8 +1884,8 @@ export class Execution extends pb_1.Message {
     if (data.execution_id != null) {
       message.execution_id = data.execution_id;
     }
-    if (data.prompt_history != null) {
-      message.prompt_history = data.prompt_history.map(item => AtomicExecutionLog.fromObject(item));
+    if (data.atomic_history != null) {
+      message.atomic_history = data.atomic_history.map(item => AtomicExecutionLog.fromObject(item));
     }
     return message;
   }
@@ -1631,7 +1897,7 @@ export class Execution extends pb_1.Message {
                 [key: string]: string;
             };
             execution_id?: string;
-            prompt_history?: ReturnType<typeof AtomicExecutionLog.prototype.toObject>[];
+            atomic_history?: ReturnType<typeof AtomicExecutionLog.prototype.toObject>[];
         } = {};
     if (this.current_node != null) {
       data.current_node = this.current_node.toObject();
@@ -1645,8 +1911,8 @@ export class Execution extends pb_1.Message {
     if (this.execution_id != null) {
       data.execution_id = this.execution_id;
     }
-    if (this.prompt_history != null) {
-      data.prompt_history = this.prompt_history.map((item: AtomicExecutionLog) => item.toObject());
+    if (this.atomic_history != null) {
+      data.atomic_history = this.atomic_history.map((item: AtomicExecutionLog) => item.toObject());
     }
     return data;
   }
@@ -1666,8 +1932,8 @@ export class Execution extends pb_1.Message {
     }
     if (this.execution_id.length)
       writer.writeString(4, this.execution_id);
-    if (this.prompt_history.length)
-      writer.writeRepeatedMessage(5, this.prompt_history, (item: AtomicExecutionLog) => item.serialize(writer));
+    if (this.atomic_history.length)
+      writer.writeRepeatedMessage(5, this.atomic_history, (item: AtomicExecutionLog) => item.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -1690,7 +1956,7 @@ export class Execution extends pb_1.Message {
         message.execution_id = reader.readString();
         break;
       case 5:
-        reader.readMessage(message.prompt_history, () => pb_1.Message.addToRepeatedWrapperField(message, 5, AtomicExecutionLog.deserialize(reader), AtomicExecutionLog));
+        reader.readMessage(message.atomic_history, () => pb_1.Message.addToRepeatedWrapperField(message, 5, AtomicExecutionLog.deserialize(reader), AtomicExecutionLog));
         break;
       default: reader.skipField();
       }
