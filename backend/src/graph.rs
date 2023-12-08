@@ -991,7 +991,15 @@ pub async fn handle_command(
 ) -> Result<AtomicExecutionLog, ()> {
     let mut prompt_text: String = "".to_string();
 
-    let goal = command.goal.clone();
+    let mut goal = command.goal.clone();
+
+    let mut handlebars = Handlebars::new();
+
+    let json_variable_definitions: Value = serde_json::json!(variable_definitions);
+
+    handlebars.register_template_string("goal", goal.clone()).unwrap();
+
+    goal = handlebars.render("goal", &json_variable_definitions).unwrap();
 
     // let the command_line_history string be empty OR the contents of the accumulator:
     let command_line_history: String = match accumulator {

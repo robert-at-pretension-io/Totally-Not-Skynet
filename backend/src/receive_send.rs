@@ -74,7 +74,7 @@ pub async fn start_message_sending_loop(
 ) {
     let runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
     let mut docker_containers: HashMap<String, String> = HashMap::new();
-    let docker = Docker::connect_with_local_defaults().unwrap();
+    let docker = Docker::connect_with_http_defaults().unwrap();
 
     while let Some(msg) = client_rx.recv().await {
         println!("{} {:?}", "Received a message from the client:".yellow(), msg.1.len());
@@ -89,7 +89,7 @@ pub async fn start_message_sending_loop(
                 continue;
             }
             None => {
-                const IMAGE: &str = "alpine:3";
+                const IMAGE: &str = "alpine";
 
                 let alpine_config = Config {
                     image: Some(IMAGE),
