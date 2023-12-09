@@ -17,6 +17,7 @@ use futures_util::StreamExt;
 
 use bollard::Docker;
 use bollard::exec::{ StartExecResults, CreateExecOptions };
+use bollard::container::LogOutput;
 
 use petgraph::algo::tarjan_scc;
 
@@ -1061,15 +1062,17 @@ pub async fn handle_command(
     let mut execution_response_hashmap = HashMap::new();
 
     let value: Value = serde_json::from_str(json_string.as_str()).unwrap();
+
+    println!("{}", "VARIABLES RETURNED FROM PROMPT:".green());
+
     if let Some(obj) = value.as_object() {
         for (key, value) in obj {
-            println!("{}: {}", key, value);
+            println!("{}: {}", key.green(), value);
             variable_definitions.insert(key.clone(), value.clone().to_string());
             execution_response_hashmap.insert(key.clone(), value.clone().to_string());
         }
     } else {
         println!("{}", "The JSON is not an object.".red());
-        return Err(());
     }
 
     // extract the command from the variable_definitions hashmap:
@@ -1276,45 +1279,85 @@ fn clean_response(input: &str) -> String {
         .replace("\\\"", "\"") // Replaces escaped double quotes with regular double quotes
         .replace("&quot;", "\"") // Replaces HTML entity &quot; with double quotes
 }
-
 async fn run_command(
     command: String,
     docker_id: String,
     docker_instance: &Docker
 ) -> Result<String, String> {
+    println!("Preparing to run command: {}", command);
+
     let exec_options = CreateExecOptions {
         attach_stdout: Some(true),
         cmd: Some(vec!["sh", "-c", &command]),
         ..Default::default()
     };
 
-    println!("The docker id is: {:?}", docker_id.clone());
+    println!("The docker id is: {:?}", docker_id);
 
-    let exec_created = docker_instance.create_exec(&docker_id, exec_options).await.unwrap();
+    let exec_created = match docker_instance.create_exec(&docker_id, exec_options).await {
+        Ok(exec) => {
+            println!("Exec instance created successfully.");
+            exec
+        }
+        Err(e) => {
+            println!("Failed to create exec instance: {:?}", e);
+            return Err(format!("Failed to create exec instance: {}", e));
+        }
+    };
 
-    // Start the exec instance
-    let exec_started = docker_instance.start_exec(&exec_created.id, None).await.unwrap();
+    println!("Starting the exec instance.");
+    let exec_started = match docker_instance.start_exec(&exec_created.id, None).await {
+        Ok(result) => {
+            println!("Exec instance started.");
+            result
+        }
+        Err(e) => {
+            println!("Failed to start exec instance: {:?}", e);
+            return Err(format!("Failed to start exec instance: {}", e));
+        }
+    };
 
     match exec_started {
         StartExecResults::Attached { mut output, .. } => {
-            let mut full_output = String::new(); // used to accumulate the output
+            println!("Processing output from the exec instance.");
+            let mut full_output = String::new();
 
             while let Some(item) = output.next().await {
                 match item {
                     Ok(log) => {
-                        println!("{:?}", log);
-                        let log_str = log.to_string();
-                        full_output.push_str(&log_str);
-                        full_output.push('\n'); // add a newline between each piece of output
+                        match log {
+                            LogOutput::StdOut { message } => {
+                                if let Ok(str_message) = String::from_utf8(message.to_vec()) {
+                                    println!("Received StdOut: {}", str_message);
+                                    full_output.push_str(&str_message);
+                                } else {
+                                    println!("Received non-UTF8 StdOut data");
+                                }
+                            }
+                            LogOutput::StdErr { message } => {
+                                if let Ok(str_message) = String::from_utf8(message.to_vec()) {
+                                    println!("Received StdErr: {}", str_message);
+                                    full_output.push_str(&str_message);
+                                } else {
+                                    println!("Received non-UTF8 StdErr data");
+                                }
+                            }
+                            _ => {} // Handle other types of LogOutput if necessary
+                        }
                     }
-                    Err(e) => println!("Error: {:?}", e.to_string().red()),
+                    Err(e) => {
+                        println!("Error during execution: {:?}", e);
+                        return Err(format!("Error during execution: {}", e));
+                    }
                 }
             }
-            return Ok(full_output);
+
+            println!("Command execution completed.");
+            Ok(full_output)
         }
         StartExecResults::Detached => {
-            println!("The exec instance completed execution and detached");
-            return Err("The exec instance completed execution and detached".to_string());
+            println!("The exec instance completed execution and detached.");
+            Err("The exec instance completed execution and detached".to_string())
         }
     }
 }
