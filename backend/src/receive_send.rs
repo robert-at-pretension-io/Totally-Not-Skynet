@@ -9,6 +9,8 @@ use crate::generated_types::{
     VerbTypes,
 };
 
+use bollard::container::StartContainerOptions;
+
 use crate::graph::validate_nodes_in_loop;
 
 use colored::*;
@@ -80,10 +82,12 @@ pub async fn start_message_sending_loop(
 
         let mut docker_id: String = "".to_string();
 
+        println!("Client identity: {:?}", msg.0.name);
+
         match docker_containers.get(&msg.0.name) {
             Some(id) => {
                 docker_id = id.clone();
-                continue;
+                // continue;
             }
             None => {
                 const IMAGE: &str = "alpine";
@@ -101,6 +105,8 @@ pub async fn start_message_sending_loop(
                 match docker.create_container::<&str, &str>(None, alpine_config.clone()).await {
                     Ok(container) => {
                         println!("Created container with id: {:?}", container.id);
+                        docker_id = container.id.clone();
+                        docker_containers.insert(msg.0.clone().name.to_string(), docker_id.clone());
                     }
                     Err(err) => {
                         println!(
@@ -494,6 +500,21 @@ pub async fn start_message_sending_loop(
                 Contents::ExecutionDetails(execution) => {
                     match verb {
                         VerbTypes::Execute => {
+                            // start up the server before running the execution as the recursive function is not allowed to send between async threads.
+                            match
+                                docker.start_container(
+                                    &docker_id,
+                                    None::<StartContainerOptions<String>>
+                                ).await
+                            {
+                                Ok(res) => {
+                                    println!("Container started: {:?}", res);
+                                }
+                                Err(err) => {
+                                    println!("Container not started: {:?}", err);
+                                }
+                            }
+
                             match
                                 run_execution(
                                     execution.clone(),

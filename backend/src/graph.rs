@@ -923,10 +923,10 @@ pub async fn handle_prompt(
     // Call API
     let response = client.chat().create(request).await.unwrap();
 
-    println!(
-        "{}",
-        response.choices.first().unwrap().message.content.clone().unwrap().as_str().to_string()
-    );
+    // println!(
+    //     "{}",
+    //     response.choices.first().unwrap().message.content.clone().unwrap().as_str().to_string()
+    // );
 
     let json_string = response.choices
         .first()
@@ -943,9 +943,12 @@ pub async fn handle_prompt(
     let mut execution_response_hashmap = HashMap::new();
 
     let value: Value = serde_json::from_str(json_string.as_str()).unwrap();
+
+    println!("{}", "VARIABLES RETURNED FROM PROMPT:".green());
+
     if let Some(obj) = value.as_object() {
         for (key, value) in obj {
-            println!("{}: {}", key, value);
+            println!("{}: {}", key.green(), value);
             variable_definitions.insert(key.clone(), value.clone().to_string());
             execution_response_hashmap.insert(key.clone(), value.clone().to_string());
         }
@@ -1007,7 +1010,7 @@ pub async fn handle_command(
     };
 
     prompt_text = format!(
-        "Please write a command line command (assuming a recent debian based operating system) that fulfills the following goal given the current command line log.\n Goal: {}\nCommand Line Log: {}\n (If the command line log is empty then just give a command that tries to achieve the goal.\n When coming up with a response, please make the fields of the json response be the following:\n command",
+        "Please write a command line command (assuming a recent debian based operating system) that fulfills the following goal given the current command line log.\n Goal: {}\nCommand Line Log: {}\n (If the command line log is empty then just give a command that tries to achieve the goal.\nPlease also come up with a corresponding command that can be run to verify that the first command succeeded in fulfilling the goal, it should print something out to the command line to indicate success. When coming up with a response, please make the fields of the json response be the following:\n command, verification_command",
         goal,
         command_line_history
     );
@@ -1071,6 +1074,7 @@ pub async fn handle_command(
 
     // extract the command from the variable_definitions hashmap:
     let mut run_this_command: String = "".to_string();
+    let mut verification_command: String = "".to_string();
 
     match variable_definitions.get("command") {
         Some(command) => {
@@ -1082,12 +1086,39 @@ pub async fn handle_command(
         }
     }
 
-    match run_command(run_this_command.clone(), docker_id, docker_instance).await {
+    match variable_definitions.get("verification_command") {
+        Some(command) => {
+            verification_command = command.clone();
+        }
+        None => {
+            println!("{}", "The command field was not found in the response.".red());
+            return Err(());
+        }
+    }
+
+    match run_command(run_this_command.clone(), docker_id.clone(), docker_instance).await {
         Ok(res) => {
             println!("{}\nResult: {:?}", "The command was run successfully".green(), res);
+
+            // Need to add the command to the atomic history of the execution_details
+
+            execution_response_hashmap.insert("command_response".to_string(), res.clone());
         }
         Err(_err) => {
             println!("{}", "The command was not run successfully".red());
+        }
+    }
+
+    // run the verfication command here:
+    match run_command(run_this_command.clone(), docker_id, docker_instance).await {
+        Ok(verification_res) => {
+            execution_response_hashmap.insert(
+                "verification_command_response".to_string(),
+                verification_res.clone()
+            );
+        }
+        Err(err) => {
+            println!("{}: ", "Error verifying command".red());
         }
     }
 
@@ -1256,6 +1287,8 @@ async fn run_command(
         cmd: Some(vec!["sh", "-c", &command]),
         ..Default::default()
     };
+
+    println!("The docker id is: {:?}", docker_id.clone());
 
     let exec_created = docker_instance.create_exec(&docker_id, exec_options).await.unwrap();
 

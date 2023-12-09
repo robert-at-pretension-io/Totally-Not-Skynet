@@ -9282,7 +9282,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (115:2) {#each node_options as node}
+    // (93:2) {#each node_options as node}
     function create_each_block_2(ctx) {
     	let option;
     	let t_value = /*node*/ ctx[23].node_info.name + "";
@@ -9295,7 +9295,7 @@ var app = (function () {
     			t = text(t_value);
     			option.__value = option_value_value = /*node*/ ctx[23];
     			option.value = option.__value;
-    			add_location(option, file$5, 115, 4, 5153);
+    			add_location(option, file$5, 93, 4, 4257);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -9318,14 +9318,14 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(115:2) {#each node_options as node}",
+    		source: "(93:2) {#each node_options as node}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (121:2) {#each input_variables as variable}
+    // (99:2) {#each input_variables as variable}
     function create_each_block_1(ctx) {
     	let label;
     	let t0_value = /*variable*/ ctx[20] + "";
@@ -9346,8 +9346,8 @@ var app = (function () {
     			t1 = text(":\n      ");
     			input = element$1("input");
     			attr_dev(input, "type", "text");
-    			add_location(input, file$5, 123, 6, 5347);
-    			add_location(label, file$5, 121, 4, 5315);
+    			add_location(input, file$5, 101, 6, 4451);
+    			add_location(label, file$5, 99, 4, 4419);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, label, anchor);
@@ -9375,14 +9375,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(121:2) {#each input_variables as variable}",
+    		source: "(99:2) {#each input_variables as variable}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (130:2) {#if allVariablesDefined}
+    // (108:2) {#if allVariablesDefined}
     function create_if_block_1$1(ctx) {
     	let button;
 
@@ -9391,7 +9391,7 @@ var app = (function () {
     			button = element$1("button");
     			button.textContent = "Submit";
     			attr_dev(button, "type", "submit");
-    			add_location(button, file$5, 130, 4, 5513);
+    			add_location(button, file$5, 108, 4, 4617);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -9405,14 +9405,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(130:2) {#if allVariablesDefined}",
+    		source: "(108:2) {#if allVariablesDefined}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (135:0) {#if latest_execution !== undefined}
+    // (113:0) {#if latest_execution !== undefined}
     function create_if_block$3(ctx) {
     	let div;
     	let each_value = /*prompt_history*/ ctx[5];
@@ -9432,7 +9432,7 @@ var app = (function () {
     			}
 
     			attr_dev(div, "class", "prompt-history svelte-1xv5fd8");
-    			add_location(div, file$5, 135, 2, 5607);
+    			add_location(div, file$5, 113, 2, 4711);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -9478,14 +9478,14 @@ var app = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(135:0) {#if latest_execution !== undefined}",
+    		source: "(113:0) {#if latest_execution !== undefined}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (137:4) {#each prompt_history as history}
+    // (115:4) {#each prompt_history as history}
     function create_each_block$2(ctx) {
     	let p;
     	let b;
@@ -9519,12 +9519,12 @@ var app = (function () {
     			t6 = text(t6_value);
     			t7 = space();
     			hr = element$1("hr");
-    			add_location(b, file$5, 138, 8, 5692);
-    			add_location(br0, file$5, 139, 8, 5732);
-    			add_location(br1, file$5, 142, 8, 5788);
+    			add_location(b, file$5, 116, 8, 4796);
+    			add_location(br0, file$5, 117, 8, 4836);
+    			add_location(br1, file$5, 120, 8, 4892);
     			attr_dev(p, "class", "svelte-1xv5fd8");
-    			add_location(p, file$5, 137, 6, 5680);
-    			add_location(hr, file$5, 146, 6, 5872);
+    			add_location(p, file$5, 115, 6, 4784);
+    			add_location(hr, file$5, 124, 6, 4976);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -9557,7 +9557,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(137:4) {#each prompt_history as history}",
+    		source: "(115:4) {#each prompt_history as history}",
     		ctx
     	});
 
@@ -9617,10 +9617,10 @@ var app = (function () {
     			if_block1_anchor = empty();
     			option.__value = "";
     			option.value = option.__value;
-    			add_location(option, file$5, 113, 2, 5075);
+    			add_location(option, file$5, 91, 2, 4179);
     			if (/*selected_process*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[12].call(select));
-    			add_location(select, file$5, 112, 0, 4997);
-    			add_location(form, file$5, 119, 0, 5226);
+    			add_location(select, file$5, 90, 0, 4101);
+    			add_location(form, file$5, 97, 0, 4330);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -9838,32 +9838,10 @@ var app = (function () {
     		if ($systemStateStore.execution_results !== undefined && $systemStateStore.execution_results.length > 0) {
     			let last_index = $systemStateStore.execution_results.length - 1;
     			$$invalidate(1, latest_execution = $systemStateStore.execution_results[last_index]);
-    			$$invalidate(5, prompt_history = latest_execution.prompt_history);
+    			$$invalidate(5, prompt_history = latest_execution.atomic_history);
     		} // reorder_prompt_history();
     	});
 
-    	// function reorder_prompt_history() {
-    	//   if (
-    	//     selected_process.node_content?.has_process &&
-    	//     latest_execution !== undefined
-    	//   ) {
-    	//     ordered_prompt_history = new Array<AtomicExecutionLog>();
-    	//     let process = selected_process.node_content.process;
-    	//     let topological_order = process.topological_order;
-    	//     let prompt_history = latest_execution.prompt_history;
-    	//     let new_prompt_history = new Array<AtomicExecutionLog>();
-    	//     for (let i = 0; i < topological_order.length; i++) {
-    	//       let node_id = topological_order[i];
-    	//       let prompt_and_response = prompt_history.find(
-    	//         (prompt_history) => prompt_history.node_info.id === node_id.id
-    	//       );
-    	//       if (prompt_and_response !== undefined) {
-    	//         new_prompt_history.push(prompt_and_response);
-    	//       }
-    	//     }
-    	//     ordered_prompt_history = new_prompt_history;
-    	//   }
-    	// }
     	function updateInitialVariables(key, value) {
     		initial_variables.set(key, value);
     	}
@@ -9962,7 +9940,7 @@ var app = (function () {
     				if ($systemStateStore.execution_results !== undefined && $systemStateStore.execution_results.length > 0) {
     					let last_index = $systemStateStore.execution_results.length - 1;
     					$$invalidate(1, latest_execution = $systemStateStore.execution_results[last_index]);
-    					$$invalidate(5, prompt_history = latest_execution.prompt_history);
+    					$$invalidate(5, prompt_history = latest_execution.atomic_history);
     				} // reorder_prompt_history();
     			}
     		}
