@@ -8,7 +8,7 @@
     Node,
     NodeTypes,
     Process,
-    PromptHistory,
+    AtomicExecutionLog,
     VerbTypes,
   } from "../../generated/system_types";
   import { onMount } from "svelte";
@@ -26,7 +26,7 @@
   let node_options = new Array<Node>();
   let nodes = new Array<Node>();
   let latest_execution = new Execution();
-  let ordered_prompt_history = new Array<PromptHistory>();
+  let prompt_history = new Array<AtomicExecutionLog>();
 
   onMount(() => {
     nodes = $systemStateStore.local_nodes;
@@ -44,7 +44,8 @@
     ) {
       let last_index = $systemStateStore.execution_results.length - 1;
       latest_execution = $systemStateStore.execution_results[last_index];
-      reorder_prompt_history();
+      prompt_history = latest_execution.atomic_history;
+      // reorder_prompt_history();
     }
   });
 
@@ -62,7 +63,9 @@
     ) {
       let last_index = $systemStateStore.execution_results.length - 1;
       latest_execution = $systemStateStore.execution_results[last_index];
-      reorder_prompt_history();
+      prompt_history = latest_execution.atomic_history;
+
+      // reorder_prompt_history();
     }
   }
 
@@ -72,33 +75,8 @@
   }
 
   $: allVariablesDefined = Array.from(initial_variables.values()).every(
-    (value) => value.trim() !== ""
+    (value) => value.trim() !== "",
   );
-
-  function reorder_prompt_history() {
-    if (
-      selected_process.node_content?.has_process &&
-      latest_execution !== undefined
-    ) {
-      ordered_prompt_history = new Array<PromptHistory>();
-
-      let process = selected_process.node_content.process;
-      let topological_order = process.topological_order;
-      let prompt_history = latest_execution.prompt_history;
-      let new_prompt_history = new Array<PromptHistory>();
-
-      for (let i = 0; i < topological_order.length; i++) {
-        let node_id = topological_order[i];
-        let prompt_and_response = prompt_history.find(
-          (prompt_history) => prompt_history.node_info.id === node_id.id
-        );
-        if (prompt_and_response !== undefined) {
-          new_prompt_history.push(prompt_and_response);
-        }
-      }
-      ordered_prompt_history = new_prompt_history;
-    }
-  }
 
   function updateInitialVariables(key: string, value: string) {
     initial_variables.set(key, value);
@@ -126,6 +104,13 @@
     let websocket = $websocketStore.websocket as WebSocket;
 
     sendEnvelope(websocket, [letter]);
+  }
+
+  // Additional function to render HashMap in a readable format
+  function renderHashMap(hashMap) {
+    return Object.entries(hashMap)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(", ");
   }
 
   function onDropdownChange() {
@@ -156,16 +141,39 @@
 </form>
 
 {#if latest_execution !== undefined}
-  {#each ordered_prompt_history as prompt_history}
-    <p>
-      <b>{prompt_history.node_info.name}</b>
-      <br />
-      prompt:
-      {prompt_history.prompt}
-      <br />
-      response:
-      {prompt_history.response}
-    </p>
-    <hr />
-  {/each}
+  <div class="prompt-history">
+    {#each prompt_history as history}
+      <p>
+        <b>{history.node_info.name}</b>
+        <br />
+        prompt:
+        {history.prompt}
+        <br />
+        response:
+        {renderHashMap(history.response)}
+      </p>
+      <hr />
+    {/each}
+  </div>
 {/if}
+
+<style>
+  .process-dropdown {
+    margin-bottom: 1rem;
+  }
+
+  .input-section label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .prompt-history {
+    margin-top: 1rem;
+    border-top: 1px solid #ccc;
+    padding-top: 1rem;
+  }
+
+  .prompt-history p {
+    margin-bottom: 0.5rem;
+  }
+</style>

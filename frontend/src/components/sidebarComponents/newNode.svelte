@@ -3,6 +3,8 @@
   import ConditionalComponent from "./newNodeSubComponents/ConditionalComponent.svelte";
   import ProcessComponent from "./newNodeSubComponents/ProcessComponent.svelte";
   import PromptComponent from "./newNodeSubComponents/PromptComponent.svelte";
+  import LoopComponent from "./newNodeSubComponents/LoopComponent.svelte";
+
   import {
     // NodeTypes,
     Prompt,
@@ -27,9 +29,15 @@
   // let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
 
   // This is the static key-list for the dropdown menu
-  let key_list = ["PROMPT", "PROCESS"];
+  // let key_list = ["PROMPT", "PROCESS", "LOOP", "CONDITIONAL"];
+  // the key_list will be the keys of the NodeTypes enum
+  let key_list = Object.keys(NodeTypes).filter((key) => isNaN(Number(key)));
 
   let num_array = Array.from({ length: key_list.length }, (_, i) => i);
+
+  $: {
+    console.log("Typename is now: ", typeName);
+  }
 </script>
 
 <select bind:value={typeName}>
@@ -46,12 +54,16 @@
 {#if typeName === NodeTypes.PROCESS}
   <ProcessComponent />
 {/if}
-{#if typeName === NodeTypes.CODE}
+{#if typeName === NodeTypes.LOOP}
+  <LoopComponent />
+{/if}
+<!-- {#if typeName === NodeTypes.CODE}
   <CodeComponent />
-{/if}
-<!-- {#if typeName === NodeTypes.CONDITIONAL}
-  <ConditionalComponent bind:conditional />
-{/if}
-{#if typeName === NodeTypes.COMMAND}
-  <CommandComponent bind:command />
 {/if} -->
+{#if typeName === NodeTypes.CONDITIONAL}
+  <ConditionalComponent />
+{/if}
+
+{#if typeName === NodeTypes.COMMAND}
+  <CommandComponent />
+{/if}

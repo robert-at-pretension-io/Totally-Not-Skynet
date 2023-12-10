@@ -27,7 +27,6 @@ export function setupWebsocketConnection(): WebSocket {
       ? "wss://liminalnook.com/ws/"
       : "ws://localhost:8080";
 
-  alert("Change websocket to external environment");
   let websocket = new WebSocket(websocket_url);
 
   // start the websocket connection
@@ -139,94 +138,17 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
               });
             }
           }
+
+          if (letter.verb === VerbTypes.Error) {
+            alert("Backend returned an error. Check the console log");
+            console.error("Error: ", letter.body);
+          }
         });
       } else {
         console.log("This message is not for me.");
       }
     });
 
-    //       console.log("response_object: ", response_object);
-    //       const res = response_object;
-    //       console.log("res: ", response_object.toObject());
-
-    //       if (res.me)
-
-    //         switch (res) {
-    //           case "node": {
-    //             console.log("NODE");
-    //             const add_node = response_object.node as Node;
-
-    //             if (add_node && typeof add_node.toObject === "function") {
-    //               console.log("add_node: ", add_node.toObject());
-
-    //               systemStateStore.update(
-    //                 (n: SystemState) => {
-
-    //                   n.nodes.push(add_node);
-
-    //                   return n;
-    //                 }
-    //               );
-
-    //             }
-    //             break;
-    //           }
-    //           case "authentication_message":
-    //             console.log("AUTHENTICATION_MESSAGE");
-    //             break;
-    //           case "user_settings":
-    //             console.log("USER_SETTINGS");
-    //             break;
-    //           case "validate_nodes_response": {
-    //             const graph_container = response_object.validate_nodes_response as ValidateNodesResponse;
-    //             const process = graph_container.process as Node;
-
-    //             console.log("process: ", process.toObject());
-
-    //             systemStateStore.update((n: SystemState) => {
-    //               n.nodes.push(add_node);
-
-    //               return n;
-    //             });
-    //           }
-    //             break;
-    //         }
-    //       case "authentication_message":
-    //       console.log("AUTHENTICATION_MESSAGE");
-    //       break;
-    //       case "user_settings":
-    //       console.log("USER_SETTINGS");
-    //       break;
-    //       case "validate_nodes_response":
-    //       {
-    //         const graph_container =
-    //           response_object.validate_nodes_response as ValidateNodesResponse;
-    //         const process = graph_container.process as Node;
-
-    //         console.log("process: ", process.toObject());
-
-    //         systemStateStore.update((n: SystemState) => {
-    //           n.selected_process = process;
-    //           n.nodes.push(process);
-    //           return n;
-    //         });
-    //       }
-    //       break;
-    //       case "execution_response":
-    //       console.log("EXECUTION_RESPONSE");
-    //       break;
-    //       case "none":
-    //       console.log("OBJECT_NOT_SET");
-    //       break;
-    //       default:
-    //       console.log("default");
-    //       alert(
-    //         "Fallen through response object switch statement... This is not good."
-    //       );
-    //       break;
-    //     }
-    //     });
-    // });
   });
 
   return websocket;

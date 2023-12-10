@@ -1,46 +1,29 @@
-use crate::generated_types::{ self, AuthenticationMessage, Identity, Node, NodeTypes, Prompt };
+use crate::generated_types::{ self, Identity };
 use crate::generated_types::{
     body::Contents,
-    node_content::NodeContent as NodeContentEnum,
     Body,
-    Edge,
     Envelope,
-    Graph,
     GraphNodeInfo,
     Letter,
-    Process,
     UserSettings,
     VerbTypes,
-    PromptHistory,
 };
 
-use async_openai::types::{ ChatCompletionRequestUserMessage, ChatCompletionResponseFormat };
-use async_openai::{
-    types::{
-        ChatCompletionRequestMessage,
-        ChatCompletionRequestUserMessageContent,
-        ChatCompletionResponseFormatType,
-        CreateChatCompletionRequest,
-        Role,
-    },
-    Client,
-};
-use handlebars::Handlebars;
-// use std::env;
+use bollard::container::StartContainerOptions;
 
-// use crate::graph::validate_nodes_from_process;
+use crate::graph::validate_nodes_in_loop;
 
 use colored::*;
-// use petgraph::prelude::DiGraph;
-// use petgraph::Direction;
 
 use std::sync::Arc;
 
-// use crate::utils::parse_message;
-use crate::graph::validate_nodes_in_process;
+use crate::graph::{ validate_nodes_in_process, run_execution };
 use crate::sqlite_helper_functions::{ fetch_all_nodes, insert_node, update_node };
 
 use crate::SERVER_IDENTITY;
+
+use futures_util::StreamExt;
+use bollard::image::CreateImageOptions;
 
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
@@ -50,6 +33,10 @@ use prost::Message;
 
 use prost::bytes::BytesMut;
 
+use bollard::container::Config;
+
+use bollard::Docker;
+
 // use petgraph::prelude::Bfs;
 // use petgraph::algo::toposort;
 
@@ -58,7 +45,7 @@ use prost::bytes::BytesMut;
 // use bollard::Docker;
 use bson::doc;
 use serde::{ Deserialize, Serialize };
-use serde_json::Value;
+
 use std::collections::HashMap;
 use tokio::sync::mpsc;
 // use tokio_tungstenite::tungstenite::Message;
@@ -84,14 +71,66 @@ pub async fn start_message_sending_loop(
     mut client_rx: mpsc::Receiver<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,
     pool: Arc<Pool<SqliteConnectionManager>>
 ) {
-    let runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
+    let _runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
+    let mut docker_containers: HashMap<String, String> = HashMap::new();
+    let docker = Docker::connect_with_http_defaults().unwrap();
 
     while let Some(msg) = client_rx.recv().await {
         println!("{} {:?}", "Received a message from the client:".yellow(), msg.1.len());
 
-        // let received_message: Option<CrudBundle> = parse_message(&msg.1);
+        // if docker_containers doesn't contain the message identity (msg.0) then create it and add it to the hashmap:
 
-        // println!("message data: {:?}",msg.1.into_data());
+        let mut docker_id: String = "".to_string();
+
+        println!("Client identity: {:?}", msg.0.name);
+
+        match docker_containers.get(&msg.0.name) {
+            Some(id) => {
+                docker_id = id.clone();
+                // continue;
+            }
+            None => {
+                const IMAGE: &str = "alpine";
+
+                let alpine_config = Config {
+                    image: Some(IMAGE),
+                    tty: Some(true),
+                    attach_stdin: Some(true),
+                    attach_stdout: Some(true),
+                    attach_stderr: Some(true),
+                    open_stdin: Some(true),
+                    ..Default::default()
+                };
+
+                match docker.create_container::<&str, &str>(None, alpine_config.clone()).await {
+                    Ok(container) => {
+                        println!("Created container with id: {:?}", container.id);
+                        docker_id = container.id.clone();
+                        docker_containers.insert(msg.0.clone().name.to_string(), docker_id.clone());
+                    }
+                    Err(err) => {
+                        println!(
+                            "Error creating container: {:?}. Let's try pulling the image:",
+                            err
+                        );
+                        let options = CreateImageOptions {
+                            from_image: "alpine",
+                            ..Default::default()
+                        };
+
+                        let mut stream = docker.create_image(Some(options), None, None);
+                        while let Some(output) = stream.next().await {
+                            println!("{:?}", output);
+                        }
+                    }
+                }
+
+                // docker_id = id.clone();
+
+                // println!("Created container with id: {}", id);
+                // docker_containers.insert(msg.0.clone().name.to_string(), id);
+            }
+        }
 
         let slice = msg.1.clone().into_data().as_slice().to_vec();
         let envelope: Envelope;
@@ -300,7 +339,7 @@ pub async fn start_message_sending_loop(
                         }
                     } // Closing the match verb
                 }
-                Contents::UserSettings(user_settings) => {}
+                Contents::UserSettings(_user_settings) => {}
                 Contents::NodesToProcess(nodes_to_process) => {
                     match verb {
                         VerbTypes::Validate => {
@@ -360,272 +399,169 @@ pub async fn start_message_sending_loop(
                         }
                     }
                 }
+                Contents::NodesToLoop(nodes_to_loop) => {
+                    match verb {
+                        VerbTypes::Validate => {
+                            let outer_node_info = nodes_to_loop.containing_node_info.clone();
+
+                            let nodes = nodes_to_loop.nodes.clone();
+                            match validate_nodes_in_loop(nodes, outer_node_info.unwrap()) {
+                                Ok(mutable_node) => {
+                                    println!("Nodes validated successfully");
+
+                                    match insert_node(pool.clone(), mutable_node.clone()) {
+                                        Ok(_) => {
+                                            println!("Node inserted successfully");
+
+                                            // we construct a new letter with the new mutable_node:
+
+                                            let body = Body {
+                                                contents: Some(
+                                                    Contents::Node(mutable_node.clone())
+                                                ),
+                                            };
+
+                                            let letter = generated_types::Letter {
+                                                verb: VerbTypes::Acknowledge as i32,
+                                                body: Some(body),
+                                            };
+
+                                            let response_object = Envelope {
+                                                sender: Some(receiver.clone()),
+                                                receiver: Some(sender.clone()),
+                                                letters: vec![letter],
+                                                verification_id: verification_id.clone(),
+                                            };
+
+                                            send_message(&tx, msg.0.clone(), response_object).await;
+                                        }
+                                        Err(err) => {
+                                            println!("Error inserting node: {:?}", err);
+
+                                            let body = Body {
+                                                contents: Some(
+                                                    Contents::NodesToLoop(nodes_to_loop.clone())
+                                                ),
+                                            };
+
+                                            let letter = generated_types::Letter {
+                                                verb: VerbTypes::Error as i32,
+                                                body: Some(body),
+                                            };
+
+                                            let response_object = Envelope {
+                                                sender: Some(receiver.clone()),
+                                                receiver: Some(sender.clone()),
+                                                letters: vec![letter],
+                                                verification_id: verification_id.clone(),
+                                            };
+
+                                            send_message(&tx, msg.0.clone(), response_object).await;
+                                        }
+                                    }
+
+                                    // Add process node to the database
+
+                                    // Send process back to the frontend
+                                }
+                                Err(err) => {
+                                    println!("Error validating nodes: {:?}", err);
+                                    let body = Body {
+                                        contents: Some(
+                                            Contents::NodesToLoop(nodes_to_loop.clone())
+                                        ),
+                                    };
+
+                                    let letter = generated_types::Letter {
+                                        verb: VerbTypes::Error as i32,
+                                        body: Some(body),
+                                    };
+
+                                    let response_object = Envelope {
+                                        sender: Some(receiver.clone()),
+                                        receiver: Some(sender.clone()),
+                                        letters: vec![letter],
+                                        verification_id: verification_id.clone(),
+                                    };
+
+                                    send_message(&tx, msg.0.clone(), response_object).await;
+                                }
+                            }
+                        }
+                        _ => {
+                            println!(
+                                "{} {:?}",
+                                "Verb not supported for node:".red(),
+                                letter.clone()
+                            );
+                        }
+                    }
+                }
                 Contents::ExecutionDetails(execution) => {
                     match verb {
                         VerbTypes::Execute => {
-                            // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
-
-                            let mut variable_definitions: HashMap<
-                                String,
-                                String
-                            > = execution.clone().current_variable_definitions;
-
-                            let local_nodes: Vec<Node> = execution.process
-                                .clone()
-                                .unwrap()
-                                .nodes.clone();
-
-                            // Make a map out of the vec where the key is the id of the node:
-                            let mut local_nodes_map: HashMap<String, Node> = HashMap::new();
-                            local_nodes.iter().for_each(|node: &Node| {
-                                local_nodes_map.insert(
-                                    node.node_info.clone().unwrap().id,
-                                    node.clone()
-                                );
-                            });
-
-                            let topological_order: Vec<GraphNodeInfo> = execution.process
-                                .clone()
-                                .unwrap()
-                                .topological_order.clone();
-
-                            // Loop through the topological order list and execute each node in order
-
-                            // let mut node_execution_response: HashMap<
-                            //     String,
-                            //     String
-                            // > = HashMap::new();
-
-                            let mut prompt_histories: Vec<PromptHistory> = Vec::new();
-
-                            for node_info in topological_order {
-                                let current_node = local_nodes_map
-                                    .get(&node_info.id)
-                                    .unwrap()
-                                    .clone();
-
-                                // Process the node, which ever type it is:
-
-                                // let process = NodeTypes::Process as i32;
-                                // let prompt = NodeTypes::Prompt as i32;
-
-                                match NodeTypes::try_from(current_node.node_type) {
-                                    Ok(NodeTypes::Process) => {
-                                        // Once we implement this functionality just for Prompts (and other node types), we can extract this function and call it recursively to handle this case (with a max depth?)
-                                    }
-                                    Ok(NodeTypes::Prompt) => {
-                                        // we need to replace the prompt text input_variables with their definitions
-
-                                        let prompt_text: String;
-                                        let hydrated_prompt_text: String;
-
-                                        let additional_instruction =
-                                            "When coming up with a response, please make the fields of the json response be the following: ".to_string();
-
-                                        let more_additional_instruction =
-                                            "
-                                            
-                                            You can also use the error field to report any problems when trying to come up with a response.
-                                            ".to_string();
-
-                                        // Concatenate the strings in the vector to make a comma separated string.
-
-                                        let variable_string: String =
-                                            current_node.output_variables.join(", ");
-
-                                        match
-                                            current_node.node_content.unwrap().node_content.unwrap()
-                                        {
-                                            NodeContentEnum::Prompt(prompt) => {
-                                                // hydrate the prompt text with the variable definitions
-
-                                                let mut handlebars = Handlebars::new();
-
-                                                let json_variable_definitions: Value =
-                                                    serde_json::json!(variable_definitions);
-
-                                                handlebars
-                                                    .register_template_string(
-                                                        "prompt",
-                                                        prompt.clone().prompt
-                                                    )
-                                                    .unwrap();
-
-                                                hydrated_prompt_text = handlebars
-                                                    .render("prompt", &json_variable_definitions)
-                                                    .unwrap();
-
-                                                prompt_text = format!(
-                                                    "{} {} {} {}",
-                                                    hydrated_prompt_text.clone(),
-                                                    additional_instruction,
-                                                    variable_string,
-                                                    more_additional_instruction
-                                                );
-
-                                                print!("Prompt text: {}", prompt_text.green());
-                                            }
-                                            _ => {
-                                                println!("prompt not handled");
-                                                continue;
-                                            }
-                                        }
-
-                                        // I believe this already pulls the key from the environmental variable.
-                                        let client = Client::new();
-
-                                        let user_message = ChatCompletionRequestUserMessage {
-                                            content: Some(
-                                                ChatCompletionRequestUserMessageContent::Text(
-                                                    prompt_text
-                                                )
-                                            ),
-                                            role: Role::User,
-                                        };
-
-                                        let message: ChatCompletionRequestMessage =
-                                            ChatCompletionRequestMessage::User(user_message);
-
-                                        // Create request using builder pattern
-                                        // Every request struct has companion builder struct with same name + Args suffix
-                                        let mut request = CreateChatCompletionRequest::default();
-
-                                        request.messages = vec![message];
-                                        request.response_format = Some(
-                                            ChatCompletionResponseFormat {
-                                                r#type: ChatCompletionResponseFormatType::JsonObject,
-                                            }
-                                        );
-
-                                        // Any model can be used so long as it supports response_format
-                                        request.model = "gpt-4-1106-preview".to_string();
-
-                                        // Call API
-                                        let response = client.chat().create(request).await.unwrap();
-
-                                        println!(
-                                            "{}",
-                                            response.choices
-                                                .first()
-                                                .unwrap()
-                                                .message.content.clone()
-                                                .unwrap()
-                                                .as_str()
-                                                .to_string()
-                                        );
-
-                                        let json_string = response.choices
-                                            .first()
-                                            .unwrap()
-                                            .message.content.clone()
-                                            .unwrap()
-                                            .as_str()
-                                            .to_string();
-
-                                        let prompt_history = PromptHistory {
-                                            prompt: hydrated_prompt_text.clone(),
-                                            response: json_string.clone(),
-                                            node_info: Some(node_info.clone()),
-                                        };
-
-                                        prompt_histories.push(prompt_history.clone());
-
-                                        // node_execution_response.insert(
-                                        //     node_info.clone().id,
-                                        //     json_string.clone()
-                                        // );
-
-                                        let value: Value = serde_json
-                                            ::from_str(json_string.as_str())
-                                            .unwrap();
-                                        if let Some(obj) = value.as_object() {
-                                            for (key, value) in obj {
-                                                println!("{}: {}", key, value);
-                                                variable_definitions.insert(
-                                                    key.clone(),
-                                                    value.clone().to_string()
-                                                );
-                                            }
-                                        } else {
-                                            println!("{}", "The JSON is not an object.".red());
-                                        }
-
-                                        // see if all of the output_variables of the node are in the variable definition hashmap:
-
-                                        let check_output_vars: Vec<String> =
-                                            current_node.output_variables;
-
-                                        //loop through check_output_vars and see if the key exists in the variable_definitions hashmap:
-
-                                        for output_var in check_output_vars.iter() {
-                                            if !variable_definitions.contains_key(output_var) {
-                                                println!("Missing variable: {}", output_var.red());
-                                                // Handle the missing variable case here (e.g., error handling or logging)
-
-                                                // Send back the Execution to the frontend and let the user decide what to do.
-
-                                                let mut error_response = execution.clone();
-
-                                                error_response.current_node = Some(
-                                                    node_info.clone()
-                                                );
-                                                error_response.current_variable_definitions =
-                                                    variable_definitions.clone();
-
-                                                let letter = Letter {
-                                                    body: Some(Body {
-                                                        contents: Some(
-                                                            Contents::ExecutionDetails(
-                                                                error_response
-                                                            )
-                                                        ),
-                                                    }),
-
-                                                    verb: VerbTypes::Error as i32,
-                                                };
-
-                                                let envelope = Envelope {
-                                                    letters: vec![letter],
-                                                    sender: Some(receiver.clone()),
-                                                    receiver: Some(sender.clone()),
-                                                    verification_id: verification_id.clone(),
-                                                };
-
-                                                send_message(&tx, msg.0.clone(), envelope).await;
-                                            }
-                                        }
-                                    }
-
-                                    _ => {
-                                        println!("Other types not implemented yet");
-                                        continue;
-                                    }
+                            // start up the server before running the execution as the recursive function is not allowed to send between async threads.
+                            match
+                                docker.start_container(
+                                    &docker_id,
+                                    None::<StartContainerOptions<String>>
+                                ).await
+                            {
+                                Ok(res) => {
+                                    println!("Container started: {:?}", res);
+                                }
+                                Err(err) => {
+                                    println!("Container not started: {:?}", err);
                                 }
                             }
 
-                            let mut response = execution.clone();
+                            match
+                                run_execution(
+                                    execution.clone(),
+                                    None,
+                                    Some(docker_id.clone()),
+                                    &docker
+                                ).await
+                            {
+                                Ok((execution, _accumulator)) => {
+                                    let letter = Letter {
+                                        body: Some(Body {
+                                            contents: Some(Contents::ExecutionDetails(execution)),
+                                        }),
 
-                            // Change this to use a prompt history
-                            // response.node_execution_response = node_execution_response;
-                            response.current_variable_definitions = variable_definitions.clone();
-                            response.prompt_history = prompt_histories.clone();
+                                        verb: VerbTypes::Acknowledge as i32,
+                                    };
 
-                            let letter = Letter {
-                                body: Some(Body {
-                                    contents: Some(Contents::ExecutionDetails(response)),
-                                }),
+                                    let envelope = Envelope {
+                                        letters: vec![letter],
+                                        sender: Some(receiver.clone()),
+                                        receiver: Some(sender.clone()),
+                                        verification_id: verification_id.clone(),
+                                    };
 
-                                verb: VerbTypes::Acknowledge as i32,
-                            };
+                                    send_message(&tx, msg.0.clone(), envelope).await;
+                                }
+                                Err(error_response) => {
+                                    let letter = Letter {
+                                        body: Some(Body {
+                                            contents: Some(
+                                                Contents::ExecutionDetails(error_response)
+                                            ),
+                                        }),
 
-                            let envelope = Envelope {
-                                letters: vec![letter],
-                                sender: Some(receiver.clone()),
-                                receiver: Some(sender.clone()),
-                                verification_id: verification_id.clone(),
-                            };
+                                        verb: VerbTypes::Error as i32,
+                                    };
 
-                            send_message(&tx, msg.0.clone(), envelope).await;
+                                    let envelope = Envelope {
+                                        letters: vec![letter],
+                                        sender: Some(receiver.clone()),
+                                        receiver: Some(sender.clone()),
+                                        verification_id: verification_id.clone(),
+                                    };
+
+                                    send_message(&tx, msg.0.clone(), envelope).await;
+                                }
+                            }
                         }
                         _ => {
                             println!(
@@ -640,150 +576,9 @@ pub async fn start_message_sending_loop(
                     println!("{}", "Not yet implemented".red());
                 }
             }
-
-            // match message_content.contents {
-            //     Some(Contents::CrudBundle(crud_bundle)) => {
-            //         handle_crud_bundle(
-            //             tx.clone(),
-            //             msg.clone(),
-            //             crud_bundle,
-            //             pool.clone(),
-            //             &mut runtime_settings
-            //         ).await;
-            //     }
-            //     Some(Contents::Identity(identity)) => {
-            //         println!("Identity: {:?}", identity);
-            //     }
-            //     Some(Contents::UserSettings(user_settings)) => {
-            //         println!("User Settings: {:?}", user_settings);
-            //     }
-            //     Some(Contents::ExecutionContext(execution_context)) => {
-            //         println!("Execution Context: {:?}", execution_context);
-            //     }
-            //     Some(Contents::ValidateNodesResponse(validate_nodes_response)) => {
-            //         println!("Validate Nodes Response: {:?}", validate_nodes_response);
-            //     }
-            //     None => {
-            //         println!("No contents found");
-            //     }
-            // }
         }
     }
-
-    // match message_contents.object {
-    //     Some(crud_bundle::Object::Node(node)) => {
-    //         match verb {
-    //             VerbTypeNames::Post => {
-    //
-    //             }
-    //             VerbTypeNames::Put => {
-
-    //             }
-    //             _ => {
-    //                 println!("Verb not supported for node: {:?}", verb);
-    //             }
-    //         }
-    // }
-    // Some(crud_bundle::Object::AuthenticationMessage(_authentication_message)) => {
-    //     match verb {
-    //         VerbTypeNames::Post => {
-    //             println!("Initializing project for {}", msg.0.name);
-    //             println!(
-    //                 "Found the following settings: {:?}",
-    //                 runtime_settings.get(&msg.0)
-    //             );
-
-    //             println!("Get nodes, settings, etc from db!");
-
-    //             match fetch_all_nodes(pool.clone()) {
-    //                 Ok(nodes) => {
-    //                     for node in &nodes {
-    //                         println!("Found node: {:?}", node);
-
-    //                         send_message(&tx, msg.0.clone(), ResponseObject {
-    //                             object: Some(Node(node.clone())),
-    //                         }).await;
-    //                     }
-    //                 }
-    //                 Err(err) => {
-    //                     println!(
-    //                         "Have the following errors when attempting to pull nodes from sqlite : {:?}",
-    //                         err
-    //                     );
-    //                 }
-    //             }
-    //         }
-    //         _ => {
-    //             println!("Verb not supported for initial message: {:?}", verb);
-    //         }
-    //     }
-    // }
-    // Some(crud_bundle::Object::UserSettings(_user_settings)) => {
-    //     match verb {
-    //         VerbTypeNames::Get => {
-    //             println!("Setting user settings for {}", msg.0.name);
-
-    //             // attempt to set them from environment variables
-    //             let system_settings = UserSettings::new();
-
-    //             match system_settings {
-    //                 Some(settings) => {
-    //                     println!("settings: {:?}", settings);
-
-    //                     // Check if runtime_settings already have settings for the user
-    //                     if runtime_settings.contains_key(&msg.0) {
-    //                         println!("Settings for user {} already exist", msg.0.name);
-    //                     } else {
-    //                         runtime_settings.insert(msg.0.clone(), UserSettings {
-    //                             openai_api_key: settings.openai_api_key,
-    //                             mongo_db_uri: settings.mongo_db_uri,
-    //                         });
-    //                         println!("Settings for user {} have been set", msg.0.name);
-    //                     }
-    //                 }
-    //                 None => {
-    //                     // runtime_settings.insert(msg.0.clone(), UserSettings {
-    //                     //     openai_api_key: user_settings.openai_api_key,
-    //                     //     mongo_db_uri: user_settings.mongo_db_uri,
-    //                     // });
-    //                     panic!("fug... the settings are not set.");
-    //                 }
-    //             }
-
-    //             // respond to the client
-    //             // send_message(&tx, msg.0.clone(), ResponseObject::UserSettings).await;
-
-    //             todo!("send some acknowledgement that user settings are in the system");
-    //         }
-    //         _ => {
-    //             println!(
-    //                 "\n-------------------\nVerb not supported for user settings: {:?}\n-------------------\n",
-    //                 verb
-    //             );
-    //         }
-    //     }
-    // }
-    // Some(crud_bundle::Object::ExecutionContext(_execution_context)) => {
-    //     match verb {
-    //         _ => {
-    //             todo!("Handle execution context");
-    //         }
-    //     }
-    // }
-    // Some(crud_bundle::Object::ValidateNodes(node_container)) => {
-    //     match verb {
-    //         VerbTypeNames::Post => {
-    //
-    // }
-
-    // None => {
-    //     println!("odd...");
-    //     println!(
-    //         "This probably means that the websocket connection has closed... Should remove it from the identity hash"
-    //     );
-    // }
 }
-// }
 
 pub async fn send_message(
     tx: &UnboundedSender<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,

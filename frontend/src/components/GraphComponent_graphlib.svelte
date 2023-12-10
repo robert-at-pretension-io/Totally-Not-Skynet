@@ -5,7 +5,10 @@
   import * as helper_functions from "../helper_functions/graph";
   import * as proto from "../generated/system_types";
   import dagre from "cytoscape-dagre";
+  // import { Node } from "generated/system_types_pb";
   // import { generateDynamicStyles } from "../helper_functions/graph";
+
+  import { Node } from "../generated/system_types";
 
   let current_graph: proto.Graph = new proto.Graph();
 
@@ -61,11 +64,19 @@
 
       const selectedNode = evt.target.data();
 
-      console.log("selectedNode: ", selectedNode);
+      console.log(
+        "selectedNode (this is the object stored in the graphlib graph... different node than this system): ",
+        selectedNode,
+      );
 
       $systemStateStore.local_nodes.find((node) => {
         if (node.node_info.id == selectedNode.id) {
-          $systemStateStore.selected_nodes.push(node.node_info);
+          // get the selected nodes from the systemStateStore and add the node.node_info to the selected_nodes
+
+          let selected_list = $systemStateStore.selected_nodes;
+          selected_list.push(node.node_info);
+
+          $systemStateStore.selected_nodes = selected_list;
         }
       });
     });
@@ -91,7 +102,7 @@
 
     cyInstance.on("unselect", "node", function (evt) {
       const node = evt.target;
-      console.log("deselected " + node.id());
+      console.log("deselected " + node);
 
       let selected_list = $systemStateStore.selected_nodes;
 
@@ -99,8 +110,8 @@
 
       selected_list = selected_list.filter(
         (graphNodeInfo: proto.GraphNodeInfo) => {
-          return graphNodeInfo.id == node.id();
-        }
+          return graphNodeInfo.id == node.id;
+        },
       );
 
       $systemStateStore.selected_nodes = selected_list;
@@ -110,7 +121,7 @@
     cyInstance.on("unselect", "edge", function (evt) {
       const edge = evt.target;
       console.log(
-        "deselected " + edge.data().source + " -> " + edge.data().target
+        "deselected " + edge.data().source + " -> " + edge.data().target,
       );
     });
     // if (current_graph !== undefined) {
