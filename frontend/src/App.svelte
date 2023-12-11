@@ -19,6 +19,8 @@
   let websocket_ready = false;
   let authenticated: boolean;
 
+  let expanded = false;
+
   onMount(() => {
     console.log("onMount triggered");
 
@@ -60,14 +62,14 @@
 
 {#if authenticated}
   <div class="app-container">
-    <Sidebar />
+    <Sidebar bind:expanded />
     <GraphComponentGraphlib />
   </div>
 {/if}
 
 <style>
   .app-container {
-    display: grid;
-    grid-template-columns: 25vw 1fr;
+    display: flex;
+    height: 100vh; /* 100% of the viewport height */
   }
 </style>

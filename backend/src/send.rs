@@ -337,16 +337,6 @@ pub async fn start_message_sending_loop(
                                         }
                                     }
 
-                                    // // Once we've read all the output, send it to the client
-                                    // match tx.send((
-                                    //     Identity::new(msg.0.name.to_string()),
-                                    //     Message::Text(full_output),
-                                    // )) {
-                                    //     Ok(_) => {}
-                                    //     Err(e) => {
-                                    //         println!("Error sending message to client: {:?}", e);
-                                    //     }
-                                    // }
                                     send_message(&tx, msg.0.clone(), full_output);
                                 }
                                 StartExecResults::Detached => {

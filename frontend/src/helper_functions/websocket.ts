@@ -50,6 +50,8 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
     console.log("\n------------------\n");
 
     event.data.arrayBuffer().then((buffer: any) => {
+      console.log("buffer: ", buffer);
+
       const u8Array = new Uint8Array(buffer);
       const response_envelope: Envelope = Envelope.deserializeBinary(u8Array);
 
@@ -123,7 +125,6 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
               systemStateStore.update((s) => {
                 if (letter.body.node.node_content.has_process) {
                   s.selected_process = letter.body.node;
-
                 }
                 s.local_nodes.push(letter.body.node);
                 return s;
@@ -148,7 +149,6 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
         console.log("This message is not for me.");
       }
     });
-
   });
 
   return websocket;

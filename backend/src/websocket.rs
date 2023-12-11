@@ -5,17 +5,17 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::sync::mpsc::UnboundedSender;
-use tokio::sync::{ mpsc, Mutex };
+use tokio::sync::{mpsc, Mutex};
 use tokio_tungstenite::tungstenite::Message;
 
-use futures_util::StreamExt;
 use futures_util::SinkExt;
+use futures_util::StreamExt;
 
 use colored::*;
 
 pub async fn start_websocket_server(
     rx: Arc<tokio::sync::Mutex<UnboundedReceiver<(LocalServerIdentity, Message)>>>,
-    client_tx: mpsc::Sender<(LocalServerIdentity, Message)>
+    client_tx: mpsc::Sender<(LocalServerIdentity, Message)>,
 ) {
     let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
 
@@ -31,7 +31,8 @@ pub async fn start_websocket_server(
         while let Some(outgoing_msg) = rx.lock().await.recv().await {
             //get the client's outgoing channel
             let sending_channel = thread_safe_request_dispatcher_clone_1
-                .lock().await
+                .lock()
+                .await
                 .get_mut(&outgoing_msg.0)
                 .unwrap()
                 .clone();
@@ -59,7 +60,8 @@ pub async fn start_websocket_server(
             let id = Uuid::new();
 
             thread_safe_request_dispatcher_clone_3
-                .lock().await
+                .lock()
+                .await
                 .insert(LocalServerIdentity::new(id.to_string()), local_tx);
 
             let this_client = LocalServerIdentity {
@@ -103,10 +105,10 @@ pub async fn start_websocket_server(
                         }
 
                         println!(
-                            "{} {} {}",
+                            "{} {}",
                             "Received a message from: ".yellow(),
                             addr,
-                            msg.to_string()
+                            // msg.to_string()
                         );
 
                         println!("{} : {}", "The length of the message:".yellow(), msg.len());

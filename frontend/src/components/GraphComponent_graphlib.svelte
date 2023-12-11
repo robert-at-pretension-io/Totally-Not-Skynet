@@ -66,7 +66,7 @@
 
       console.log(
         "selectedNode (this is the object stored in the graphlib graph... different node than this system): ",
-        selectedNode,
+        selectedNode
       );
 
       $systemStateStore.local_nodes.find((node) => {
@@ -111,7 +111,7 @@
       selected_list = selected_list.filter(
         (graphNodeInfo: proto.GraphNodeInfo) => {
           return graphNodeInfo.id == node.id;
-        },
+        }
       );
 
       $systemStateStore.selected_nodes = selected_list;
@@ -121,7 +121,7 @@
     cyInstance.on("unselect", "edge", function (evt) {
       const edge = evt.target;
       console.log(
-        "deselected " + edge.data().source + " -> " + edge.data().target,
+        "deselected " + edge.data().source + " -> " + edge.data().target
       );
     });
     // if (current_graph !== undefined) {
@@ -195,15 +195,16 @@
   }
 </script>
 
-<div class="graph" bind:this={refElement}>
+<div class="main-content" bind:this={refElement}>
   {#if cyInstance}
     <slot />
   {/if}
 </div>
 
 <style>
-  .graph {
-    grid-column: 2;
-    height: 100%;
+  .main-content {
+    /* transition: margin-left 0.3s ease; */
+    overflow: auto;
+    flex-grow: 1;
   }
 </style>
