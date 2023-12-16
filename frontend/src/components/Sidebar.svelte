@@ -8,6 +8,8 @@
   import systemStateStore from "stores/systemStateStore";
   import SelectedNodeInfo from "./sidebarComponents/selectedNodeInfo.svelte";
 
+  export let expanded = false;
+
   onMount(() => {
     console.log("Sidebar mounted");
   });
@@ -47,7 +49,7 @@
   }
 </script>
 
-<div class="sidebar">
+<div class="sidebar" class:expanded>
   {#each sections as section (section.header)}
     <div class="section" bind:this={section.ref}>
       <div
@@ -72,21 +74,20 @@
       {/if}
     </div>
   {/each}
+  <button on:click={() => (expanded = !expanded)}>
+    {expanded ? "Collapse" : "Expand"}
+  </button>
 </div>
 
 <style>
   /* Sidebar */
   .sidebar {
-    grid-column: 1;
-    position: sticky;
-    top: 0;
-    max-width: 200px;
-    height: 100vh;
-    background-color: #ecf0f1;
-    overflow-y: auto;
-    box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    padding: 20px;
+    width: 200px;
+    background-color: #f0f0f0;
+    transition: width 0.1s;
+  }
+  .sidebar.expanded {
+    width: 400px;
   }
 
   .section {

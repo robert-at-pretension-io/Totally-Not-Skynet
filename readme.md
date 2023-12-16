@@ -1,8 +1,15 @@
 # Project Overview
 
-This project is designed to create an intelligent system capable of accomplishing a comprehensive goal via the utilization of multiple agents possessing varied abilities. The system operates around an event loop, where agents interact with the environment and each other in order to reach the defined goal. Built with a modular approach, our project incorporates multiple agents to represent different functionalities, and a central agent that selects the most suitable action based on the current log.
+The purpose of this project is to allow a worker with no programming experience to codify their processes and workflows and let the ai figure out how to execute them.
 
-![Architecture](https://i.imgur.com/UHsnRJ8.png)
+Processes are built up using a visual interface that is shown to the user in a browser. The interface is designed to be intuitive and easy to use.
+
+It is designed to encapsulate even complex workflows by having the ability to "nest" processes. That is, a sub-process can be defined as detailed and nuanced as required for the task. Then that sub-process can be called from a higher level process. Thus, **YOUR** standards are met -- whether it's for a personal project or a large enterprise.
+
+# How this works:
+
+1. The user defines basic tasks in "plain english" with "variables" (input and output) that are defined by the user. (input/output variables are just a way of saying that these will be replaced with other values)
+   - For example, a task coule be defined as: `"Go to the website {{website}} and click on the {{button}} button."` In this example, `{{website}}` and `{{button}}` are input variables that are defined by the user when the task is _executed_ later on. When a task is defined, the user will explain what the output variables should be. These should things that the ai should be able to understand by _executing_ the task. For instance, in the example above, the output variable might be `"{{html}}"` which would be the html of the page that the user is taken to after clicking the button. The `{{html}}` variable can then be used as an input for another task for another task when the _process_ is executed.
 
 # Current Implementation
 

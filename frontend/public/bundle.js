@@ -354,6 +354,9 @@ var app = (function () {
     function add_render_callback(fn) {
         render_callbacks.push(fn);
     }
+    function add_flush_callback(fn) {
+        flush_callbacks.push(fn);
+    }
     // flush() calls callbacks in this order:
     // 1. All beforeUpdate callbacks, in order: parents before children
     // 2. All bind:this callbacks, in reverse order: children before parents.
@@ -711,6 +714,14 @@ var app = (function () {
                 throw new Error('Cannot have duplicate keys in a keyed each');
             }
             keys.add(key);
+        }
+    }
+
+    function bind(component, name, callback) {
+        const index = component.$$.props[name];
+        if (index !== undefined) {
+            component.$$.bound[index] = callback;
+            callback(component.$$.ctx[index]);
         }
     }
     function create_component(block) {
@@ -2138,7 +2149,7 @@ var app = (function () {
         }
     }
     _Conditional_one_of_decls = new WeakMap();
-    class Graph$3 extends googleProtobuf.Message {
+    class Graph extends googleProtobuf.Message {
         constructor(data) {
             super();
             _Graph_one_of_decls.set(this, []);
@@ -2165,7 +2176,7 @@ var app = (function () {
             googleProtobuf.Message.setRepeatedWrapperField(this, 2, value);
         }
         static fromObject(data) {
-            const message = new Graph$3({});
+            const message = new Graph({});
             if (data.nodes_info != null) {
                 message.nodes_info = data.nodes_info.map(item => GraphNodeInfo.fromObject(item));
             }
@@ -2194,7 +2205,7 @@ var app = (function () {
                 return writer.getResultBuffer();
         }
         static deserialize(bytes) {
-            const reader = bytes instanceof googleProtobuf.BinaryReader ? bytes : new googleProtobuf.BinaryReader(bytes), message = new Graph$3();
+            const reader = bytes instanceof googleProtobuf.BinaryReader ? bytes : new googleProtobuf.BinaryReader(bytes), message = new Graph();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
@@ -2214,7 +2225,7 @@ var app = (function () {
             return this.serialize();
         }
         static deserializeBinary(bytes) {
-            return Graph$3.deserialize(bytes);
+            return Graph.deserialize(bytes);
         }
     }
     _Graph_one_of_decls = new WeakMap();
@@ -2236,7 +2247,7 @@ var app = (function () {
             }
         }
         get graph() {
-            return googleProtobuf.Message.getWrapperField(this, Graph$3, 1);
+            return googleProtobuf.Message.getWrapperField(this, Graph, 1);
         }
         set graph(value) {
             googleProtobuf.Message.setWrapperField(this, 1, value);
@@ -2259,7 +2270,7 @@ var app = (function () {
         static fromObject(data) {
             const message = new Process({});
             if (data.graph != null) {
-                message.graph = Graph$3.fromObject(data.graph);
+                message.graph = Graph.fromObject(data.graph);
             }
             if (data.topological_order != null) {
                 message.topological_order = data.topological_order.map(item => GraphNodeInfo.fromObject(item));
@@ -2300,7 +2311,7 @@ var app = (function () {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.graph, () => message.graph = Graph$3.deserialize(reader));
+                        reader.readMessage(message.graph, () => message.graph = Graph.deserialize(reader));
                         break;
                     case 2:
                         reader.readMessage(message.topological_order, () => googleProtobuf.Message.addToRepeatedWrapperField(message, 2, GraphNodeInfo.deserialize(reader), GraphNodeInfo));
@@ -3706,7 +3717,7 @@ var app = (function () {
             googleProtobuf.Message.setField(this, 2, value);
         }
         get graph() {
-            return googleProtobuf.Message.getWrapperField(this, Graph$3, 3);
+            return googleProtobuf.Message.getWrapperField(this, Graph, 3);
         }
         set graph(value) {
             googleProtobuf.Message.setWrapperField(this, 3, value);
@@ -3792,7 +3803,7 @@ var app = (function () {
                 message.websocket_ready = data.websocket_ready;
             }
             if (data.graph != null) {
-                message.graph = Graph$3.fromObject(data.graph);
+                message.graph = Graph.fromObject(data.graph);
             }
             if (data.local_nodes != null) {
                 message.local_nodes = data.local_nodes.map(item => Node.fromObject(item));
@@ -3913,7 +3924,7 @@ var app = (function () {
                         message.websocket_ready = reader.readBool();
                         break;
                     case 3:
-                        reader.readMessage(message.graph, () => message.graph = Graph$3.deserialize(reader));
+                        reader.readMessage(message.graph, () => message.graph = Graph.deserialize(reader));
                         break;
                     case 4:
                         reader.readMessage(message.local_nodes, () => googleProtobuf.Message.addToRepeatedWrapperField(message, 4, Node.deserialize(reader), Node));
@@ -4954,7 +4965,7 @@ var app = (function () {
         Prompt: Prompt,
         Command: Command,
         Conditional: Conditional,
-        Graph: Graph$3,
+        Graph: Graph,
         Process: Process,
         Loop: Loop,
         AtomicNodeTypes: AtomicNodeTypes,
@@ -5475,7 +5486,7 @@ var app = (function () {
     }
 
     function initializeSystemState(system_state) {
-        const graph = new Graph$3();
+        const graph = new Graph();
         system_state.graph = graph;
         system_state.authenticated = false;
         system_state.websocket_ready = false;
@@ -5502,7 +5513,7 @@ var app = (function () {
 
     function setupWebsocketConnection() {
         console.log("setting up websocket connection");
-        const environment = "DEVELOPMENT";
+        const environment = "development";
         console.log("The environment is: ", environment);
         const websocket_url = environment.toUpperCase() === "PRODUCTION"
             ? "wss://liminalnook.com/ws/"
@@ -5523,6 +5534,7 @@ var app = (function () {
             // console.log("websocket message received: ", event.data);
             console.log("\n------------------\n");
             event.data.arrayBuffer().then((buffer) => {
+                console.log("buffer: ", buffer);
                 const u8Array = new Uint8Array(buffer);
                 const response_envelope = Envelope.deserializeBinary(u8Array);
                 console.log("received message: ", response_envelope.toObject());
@@ -10302,20 +10314,20 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[5] = list[i];
-    	child_ctx[6] = list;
-    	child_ctx[7] = i;
+    	child_ctx[7] = list[i];
+    	child_ctx[8] = list;
+    	child_ctx[9] = i;
     	return child_ctx;
     }
 
-    // (64:6) {#if section.open}
+    // (66:6) {#if section.open}
     function create_if_block$2(ctx) {
     	let div;
     	let switch_instance;
     	let div_intro;
     	let div_outro;
     	let current;
-    	var switch_value = /*section*/ ctx[5].component;
+    	var switch_value = /*section*/ ctx[7].component;
 
     	function switch_props(ctx) {
     		return { $$inline: true };
@@ -10329,8 +10341,8 @@ var app = (function () {
     		c: function create() {
     			div = element$1("div");
     			if (switch_instance) create_component(switch_instance.$$.fragment);
-    			attr_dev(div, "class", "section-content svelte-1m8brjp");
-    			add_location(div, file$4, 64, 8, 1674);
+    			attr_dev(div, "class", "section-content svelte-hgre51");
+    			add_location(div, file$4, 66, 8, 1721);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -10338,7 +10350,7 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*sections*/ 1 && switch_value !== (switch_value = /*section*/ ctx[5].component)) {
+    			if (dirty & /*sections*/ 2 && switch_value !== (switch_value = /*section*/ ctx[7].component)) {
     				if (switch_instance) {
     					group_outros();
     					const old_component = switch_instance;
@@ -10390,38 +10402,37 @@ var app = (function () {
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(64:6) {#if section.open}",
+    		source: "(66:6) {#if section.open}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (51:2) {#each sections as section (section.header)}
+    // (53:2) {#each sections as section (section.header)}
     function create_each_block(key_1, ctx) {
     	let div1;
     	let div0;
-    	let t0_value = /*section*/ ctx[5].header + "";
+    	let t0_value = /*section*/ ctx[7].header + "";
     	let t0;
     	let t1;
-    	let t2;
-    	let each_value = /*each_value*/ ctx[6];
-    	let section_index = /*section_index*/ ctx[7];
+    	let each_value = /*each_value*/ ctx[8];
+    	let section_index = /*section_index*/ ctx[9];
     	let current;
     	let mounted;
     	let dispose;
 
     	function keydown_handler(...args) {
-    		return /*keydown_handler*/ ctx[2](/*section*/ ctx[5], ...args);
+    		return /*keydown_handler*/ ctx[3](/*section*/ ctx[7], ...args);
     	}
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[3](/*section*/ ctx[5]);
+    		return /*click_handler*/ ctx[4](/*section*/ ctx[7]);
     	}
 
-    	let if_block = /*section*/ ctx[5].open && create_if_block$2(ctx);
-    	const assign_div1 = () => /*div1_binding*/ ctx[4](div1, each_value, section_index);
-    	const unassign_div1 = () => /*div1_binding*/ ctx[4](null, each_value, section_index);
+    	let if_block = /*section*/ ctx[7].open && create_if_block$2(ctx);
+    	const assign_div1 = () => /*div1_binding*/ ctx[5](div1, each_value, section_index);
+    	const unassign_div1 = () => /*div1_binding*/ ctx[5](null, each_value, section_index);
 
     	const block = {
     		key: key_1,
@@ -10432,11 +10443,10 @@ var app = (function () {
     			t0 = text(t0_value);
     			t1 = space();
     			if (if_block) if_block.c();
-    			t2 = space();
-    			attr_dev(div0, "class", "section-header svelte-1m8brjp");
-    			add_location(div0, file$4, 52, 6, 1380);
-    			attr_dev(div1, "class", "section svelte-1m8brjp");
-    			add_location(div1, file$4, 51, 4, 1328);
+    			attr_dev(div0, "class", "section-header svelte-hgre51");
+    			add_location(div0, file$4, 54, 6, 1427);
+    			attr_dev(div1, "class", "section svelte-hgre51");
+    			add_location(div1, file$4, 53, 4, 1375);
     			this.first = div1;
     		},
     		m: function mount(target, anchor) {
@@ -10445,7 +10455,6 @@ var app = (function () {
     			append_dev(div0, t0);
     			append_dev(div1, t1);
     			if (if_block) if_block.m(div1, null);
-    			append_dev(div1, t2);
     			assign_div1();
     			current = true;
 
@@ -10460,20 +10469,20 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if ((!current || dirty & /*sections*/ 1) && t0_value !== (t0_value = /*section*/ ctx[5].header + "")) set_data_dev(t0, t0_value);
+    			if ((!current || dirty & /*sections*/ 2) && t0_value !== (t0_value = /*section*/ ctx[7].header + "")) set_data_dev(t0, t0_value);
 
-    			if (/*section*/ ctx[5].open) {
+    			if (/*section*/ ctx[7].open) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
 
-    					if (dirty & /*sections*/ 1) {
+    					if (dirty & /*sections*/ 2) {
     						transition_in(if_block, 1);
     					}
     				} else {
     					if_block = create_if_block$2(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
-    					if_block.m(div1, t2);
+    					if_block.m(div1, null);
     				}
     			} else if (if_block) {
     				group_outros();
@@ -10485,10 +10494,10 @@ var app = (function () {
     				check_outros();
     			}
 
-    			if (each_value !== /*each_value*/ ctx[6] || section_index !== /*section_index*/ ctx[7]) {
+    			if (each_value !== /*each_value*/ ctx[8] || section_index !== /*section_index*/ ctx[9]) {
     				unassign_div1();
-    				each_value = /*each_value*/ ctx[6];
-    				section_index = /*section_index*/ ctx[7];
+    				each_value = /*each_value*/ ctx[8];
+    				section_index = /*section_index*/ ctx[9];
     				assign_div1();
     			}
     		},
@@ -10514,7 +10523,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(51:2) {#each sections as section (section.header)}",
+    		source: "(53:2) {#each sections as section (section.header)}",
     		ctx
     	});
 
@@ -10525,10 +10534,16 @@ var app = (function () {
     	let div;
     	let each_blocks = [];
     	let each_1_lookup = new Map();
+    	let t0;
+    	let button;
+    	let t1_value = (/*expanded*/ ctx[0] ? "Collapse" : "Expand") + "";
+    	let t1;
     	let current;
-    	let each_value = /*sections*/ ctx[0];
+    	let mounted;
+    	let dispose;
+    	let each_value = /*sections*/ ctx[1];
     	validate_each_argument(each_value);
-    	const get_key = ctx => /*section*/ ctx[5].header;
+    	const get_key = ctx => /*section*/ ctx[7].header;
     	validate_each_keys(ctx, each_value, get_each_context, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -10545,8 +10560,13 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			attr_dev(div, "class", "sidebar svelte-1m8brjp");
-    			add_location(div, file$4, 49, 0, 1255);
+    			t0 = space();
+    			button = element$1("button");
+    			t1 = text(t1_value);
+    			add_location(button, file$4, 76, 2, 1964);
+    			attr_dev(div, "class", "sidebar svelte-hgre51");
+    			toggle_class(div, "expanded", /*expanded*/ ctx[0]);
+    			add_location(div, file$4, 51, 0, 1287);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10560,16 +10580,30 @@ var app = (function () {
     				}
     			}
 
+    			append_dev(div, t0);
+    			append_dev(div, button);
+    			append_dev(button, t1);
     			current = true;
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", /*click_handler_1*/ ctx[6], false, false, false, false);
+    				mounted = true;
+    			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*sections, toggleSection*/ 3) {
-    				each_value = /*sections*/ ctx[0];
+    			if (dirty & /*sections, toggleSection*/ 6) {
+    				each_value = /*sections*/ ctx[1];
     				validate_each_argument(each_value);
     				group_outros();
     				validate_each_keys(ctx, each_value, get_each_context, get_key);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block, null, get_each_context);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block, t0, get_each_context);
     				check_outros();
+    			}
+
+    			if ((!current || dirty & /*expanded*/ 1) && t1_value !== (t1_value = (/*expanded*/ ctx[0] ? "Collapse" : "Expand") + "")) set_data_dev(t1, t1_value);
+
+    			if (!current || dirty & /*expanded*/ 1) {
+    				toggle_class(div, "expanded", /*expanded*/ ctx[0]);
     			}
     		},
     		i: function intro(local) {
@@ -10594,6 +10628,9 @@ var app = (function () {
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].d();
     			}
+
+    			mounted = false;
+    			dispose();
     		}
     	};
 
@@ -10611,6 +10648,7 @@ var app = (function () {
     function instance$4($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Sidebar', slots, []);
+    	let { expanded = false } = $$props;
 
     	onMount(() => {
     		console.log("Sidebar mounted");
@@ -10640,7 +10678,7 @@ var app = (function () {
     	];
 
     	function toggleSection(clickedSection) {
-    		$$invalidate(0, sections = sections.map(section => {
+    		$$invalidate(1, sections = sections.map(section => {
     			if (section === clickedSection) {
     				let open = !section.open;
     				return { ...section, open }; // just invert the `open` property of the clicked section
@@ -10650,7 +10688,7 @@ var app = (function () {
     		}));
     	}
 
-    	const writable_props = [];
+    	const writable_props = ['expanded'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$3.warn(`<Sidebar> was created with unknown prop '${key}'`);
@@ -10667,9 +10705,15 @@ var app = (function () {
     	function div1_binding($$value, each_value, section_index) {
     		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			each_value[section_index].ref = $$value;
-    			$$invalidate(0, sections);
+    			$$invalidate(1, sections);
     		});
     	}
+
+    	const click_handler_1 = () => $$invalidate(0, expanded = !expanded);
+
+    	$$self.$$set = $$props => {
+    		if ('expanded' in $$props) $$invalidate(0, expanded = $$props.expanded);
+    	};
 
     	$$self.$capture_state = () => ({
     		modifyNode: ModifyNode,
@@ -10680,25 +10724,35 @@ var app = (function () {
     		ExecuteNode,
     		systemStateStore,
     		SelectedNodeInfo,
+    		expanded,
     		sections,
     		toggleSection
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('sections' in $$props) $$invalidate(0, sections = $$props.sections);
+    		if ('expanded' in $$props) $$invalidate(0, expanded = $$props.expanded);
+    		if ('sections' in $$props) $$invalidate(1, sections = $$props.sections);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [sections, toggleSection, keydown_handler, click_handler, div1_binding];
+    	return [
+    		expanded,
+    		sections,
+    		toggleSection,
+    		keydown_handler,
+    		click_handler,
+    		div1_binding,
+    		click_handler_1
+    	];
     }
 
     class Sidebar extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {});
+    		init(this, options, instance$4, create_fragment$4, safe_not_equal, { expanded: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -10706,6 +10760,14 @@ var app = (function () {
     			options,
     			id: create_fragment$4.name
     		});
+    	}
+
+    	get expanded() {
+    		throw new Error("<Sidebar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set expanded(value) {
+    		throw new Error("<Sidebar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 
@@ -10754,11 +10816,11 @@ var app = (function () {
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$3 = freeGlobal || freeSelf || Function('return this')();
+    var root$4 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$3;
+    var _root = root$4;
 
-    var root$2 = _root;
+    var root$3 = _root;
 
     /**
      * Gets the timestamp of the number of milliseconds that have elapsed since
@@ -10777,7 +10839,7 @@ var app = (function () {
      * // => Logs the number of milliseconds it took for the deferred invocation.
      */
     var now$1 = function() {
-      return root$2.Date.now();
+      return root$3.Date.now();
     };
 
     var now_1 = now$1;
@@ -10823,10 +10885,10 @@ var app = (function () {
 
     var _baseTrim = baseTrim$1;
 
-    var root$1 = _root;
+    var root$2 = _root;
 
     /** Built-in value references. */
-    var Symbol$4 = root$1.Symbol;
+    var Symbol$4 = root$2.Symbol;
 
     var _Symbol = Symbol$4;
 
@@ -11734,10 +11796,10 @@ var app = (function () {
     	return isFunction_1;
     }
 
-    var root = _root;
+    var root$1 = _root;
 
     /** Used to detect overreaching core-js shims. */
-    var coreJsData$1 = root['__core-js_shared__'];
+    var coreJsData$1 = root$1['__core-js_shared__'];
 
     var _coreJsData = coreJsData$1;
 
@@ -11872,17 +11934,17 @@ var app = (function () {
      * @param {string} key The key of the method to get.
      * @returns {*} Returns the function if it's native, else `undefined`.
      */
-    function getNative$2(object, key) {
+    function getNative$3(object, key) {
       var value = getValue$1(object, key);
       return baseIsNative(value) ? value : undefined;
     }
 
-    var _getNative = getNative$2;
+    var _getNative = getNative$3;
 
-    var getNative$1 = _getNative;
+    var getNative$2 = _getNative;
 
     /* Built-in method references that are verified to be native. */
-    var nativeCreate$4 = getNative$1(Object, 'create');
+    var nativeCreate$4 = getNative$2(Object, 'create');
 
     var _nativeCreate = nativeCreate$4;
 
@@ -12041,20 +12103,12 @@ var app = (function () {
      * @memberOf ListCache
      */
 
-    var _listCacheClear;
-    var hasRequired_listCacheClear;
-
-    function require_listCacheClear () {
-    	if (hasRequired_listCacheClear) return _listCacheClear;
-    	hasRequired_listCacheClear = 1;
-    	function listCacheClear() {
-    	  this.__data__ = [];
-    	  this.size = 0;
-    	}
-
-    	_listCacheClear = listCacheClear;
-    	return _listCacheClear;
+    function listCacheClear$1() {
+      this.__data__ = [];
+      this.size = 0;
     }
+
+    var _listCacheClear = listCacheClear$1;
 
     /**
      * Performs a
@@ -12089,234 +12143,178 @@ var app = (function () {
      * // => true
      */
 
-    function eq$1(value, other) {
+    function eq$2(value, other) {
       return value === other || (value !== value && other !== other);
     }
 
-    var eq_1 = eq$1;
+    var eq_1 = eq$2;
 
-    var _assocIndexOf;
-    var hasRequired_assocIndexOf;
+    var eq$1 = eq_1;
 
-    function require_assocIndexOf () {
-    	if (hasRequired_assocIndexOf) return _assocIndexOf;
-    	hasRequired_assocIndexOf = 1;
-    	var eq = eq_1;
-
-    	/**
-    	 * Gets the index at which the `key` is found in `array` of key-value pairs.
-    	 *
-    	 * @private
-    	 * @param {Array} array The array to inspect.
-    	 * @param {*} key The key to search for.
-    	 * @returns {number} Returns the index of the matched value, else `-1`.
-    	 */
-    	function assocIndexOf(array, key) {
-    	  var length = array.length;
-    	  while (length--) {
-    	    if (eq(array[length][0], key)) {
-    	      return length;
-    	    }
-    	  }
-    	  return -1;
-    	}
-
-    	_assocIndexOf = assocIndexOf;
-    	return _assocIndexOf;
+    /**
+     * Gets the index at which the `key` is found in `array` of key-value pairs.
+     *
+     * @private
+     * @param {Array} array The array to inspect.
+     * @param {*} key The key to search for.
+     * @returns {number} Returns the index of the matched value, else `-1`.
+     */
+    function assocIndexOf$4(array, key) {
+      var length = array.length;
+      while (length--) {
+        if (eq$1(array[length][0], key)) {
+          return length;
+        }
+      }
+      return -1;
     }
 
-    var _listCacheDelete;
-    var hasRequired_listCacheDelete;
+    var _assocIndexOf = assocIndexOf$4;
 
-    function require_listCacheDelete () {
-    	if (hasRequired_listCacheDelete) return _listCacheDelete;
-    	hasRequired_listCacheDelete = 1;
-    	var assocIndexOf = require_assocIndexOf();
+    var assocIndexOf$3 = _assocIndexOf;
 
-    	/** Used for built-in method references. */
-    	var arrayProto = Array.prototype;
+    /** Used for built-in method references. */
+    var arrayProto = Array.prototype;
 
-    	/** Built-in value references. */
-    	var splice = arrayProto.splice;
+    /** Built-in value references. */
+    var splice = arrayProto.splice;
 
-    	/**
-    	 * Removes `key` and its value from the list cache.
-    	 *
-    	 * @private
-    	 * @name delete
-    	 * @memberOf ListCache
-    	 * @param {string} key The key of the value to remove.
-    	 * @returns {boolean} Returns `true` if the entry was removed, else `false`.
-    	 */
-    	function listCacheDelete(key) {
-    	  var data = this.__data__,
-    	      index = assocIndexOf(data, key);
+    /**
+     * Removes `key` and its value from the list cache.
+     *
+     * @private
+     * @name delete
+     * @memberOf ListCache
+     * @param {string} key The key of the value to remove.
+     * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+     */
+    function listCacheDelete$1(key) {
+      var data = this.__data__,
+          index = assocIndexOf$3(data, key);
 
-    	  if (index < 0) {
-    	    return false;
-    	  }
-    	  var lastIndex = data.length - 1;
-    	  if (index == lastIndex) {
-    	    data.pop();
-    	  } else {
-    	    splice.call(data, index, 1);
-    	  }
-    	  --this.size;
-    	  return true;
-    	}
-
-    	_listCacheDelete = listCacheDelete;
-    	return _listCacheDelete;
+      if (index < 0) {
+        return false;
+      }
+      var lastIndex = data.length - 1;
+      if (index == lastIndex) {
+        data.pop();
+      } else {
+        splice.call(data, index, 1);
+      }
+      --this.size;
+      return true;
     }
 
-    var _listCacheGet;
-    var hasRequired_listCacheGet;
+    var _listCacheDelete = listCacheDelete$1;
 
-    function require_listCacheGet () {
-    	if (hasRequired_listCacheGet) return _listCacheGet;
-    	hasRequired_listCacheGet = 1;
-    	var assocIndexOf = require_assocIndexOf();
+    var assocIndexOf$2 = _assocIndexOf;
 
-    	/**
-    	 * Gets the list cache value for `key`.
-    	 *
-    	 * @private
-    	 * @name get
-    	 * @memberOf ListCache
-    	 * @param {string} key The key of the value to get.
-    	 * @returns {*} Returns the entry value.
-    	 */
-    	function listCacheGet(key) {
-    	  var data = this.__data__,
-    	      index = assocIndexOf(data, key);
+    /**
+     * Gets the list cache value for `key`.
+     *
+     * @private
+     * @name get
+     * @memberOf ListCache
+     * @param {string} key The key of the value to get.
+     * @returns {*} Returns the entry value.
+     */
+    function listCacheGet$1(key) {
+      var data = this.__data__,
+          index = assocIndexOf$2(data, key);
 
-    	  return index < 0 ? undefined : data[index][1];
-    	}
-
-    	_listCacheGet = listCacheGet;
-    	return _listCacheGet;
+      return index < 0 ? undefined : data[index][1];
     }
 
-    var _listCacheHas;
-    var hasRequired_listCacheHas;
+    var _listCacheGet = listCacheGet$1;
 
-    function require_listCacheHas () {
-    	if (hasRequired_listCacheHas) return _listCacheHas;
-    	hasRequired_listCacheHas = 1;
-    	var assocIndexOf = require_assocIndexOf();
+    var assocIndexOf$1 = _assocIndexOf;
 
-    	/**
-    	 * Checks if a list cache value for `key` exists.
-    	 *
-    	 * @private
-    	 * @name has
-    	 * @memberOf ListCache
-    	 * @param {string} key The key of the entry to check.
-    	 * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
-    	 */
-    	function listCacheHas(key) {
-    	  return assocIndexOf(this.__data__, key) > -1;
-    	}
-
-    	_listCacheHas = listCacheHas;
-    	return _listCacheHas;
+    /**
+     * Checks if a list cache value for `key` exists.
+     *
+     * @private
+     * @name has
+     * @memberOf ListCache
+     * @param {string} key The key of the entry to check.
+     * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+     */
+    function listCacheHas$1(key) {
+      return assocIndexOf$1(this.__data__, key) > -1;
     }
 
-    var _listCacheSet;
-    var hasRequired_listCacheSet;
+    var _listCacheHas = listCacheHas$1;
 
-    function require_listCacheSet () {
-    	if (hasRequired_listCacheSet) return _listCacheSet;
-    	hasRequired_listCacheSet = 1;
-    	var assocIndexOf = require_assocIndexOf();
+    var assocIndexOf = _assocIndexOf;
 
-    	/**
-    	 * Sets the list cache `key` to `value`.
-    	 *
-    	 * @private
-    	 * @name set
-    	 * @memberOf ListCache
-    	 * @param {string} key The key of the value to set.
-    	 * @param {*} value The value to set.
-    	 * @returns {Object} Returns the list cache instance.
-    	 */
-    	function listCacheSet(key, value) {
-    	  var data = this.__data__,
-    	      index = assocIndexOf(data, key);
+    /**
+     * Sets the list cache `key` to `value`.
+     *
+     * @private
+     * @name set
+     * @memberOf ListCache
+     * @param {string} key The key of the value to set.
+     * @param {*} value The value to set.
+     * @returns {Object} Returns the list cache instance.
+     */
+    function listCacheSet$1(key, value) {
+      var data = this.__data__,
+          index = assocIndexOf(data, key);
 
-    	  if (index < 0) {
-    	    ++this.size;
-    	    data.push([key, value]);
-    	  } else {
-    	    data[index][1] = value;
-    	  }
-    	  return this;
-    	}
-
-    	_listCacheSet = listCacheSet;
-    	return _listCacheSet;
+      if (index < 0) {
+        ++this.size;
+        data.push([key, value]);
+      } else {
+        data[index][1] = value;
+      }
+      return this;
     }
 
-    var _ListCache;
-    var hasRequired_ListCache;
+    var _listCacheSet = listCacheSet$1;
 
-    function require_ListCache () {
-    	if (hasRequired_ListCache) return _ListCache;
-    	hasRequired_ListCache = 1;
-    	var listCacheClear = require_listCacheClear(),
-    	    listCacheDelete = require_listCacheDelete(),
-    	    listCacheGet = require_listCacheGet(),
-    	    listCacheHas = require_listCacheHas(),
-    	    listCacheSet = require_listCacheSet();
+    var listCacheClear = _listCacheClear,
+        listCacheDelete = _listCacheDelete,
+        listCacheGet = _listCacheGet,
+        listCacheHas = _listCacheHas,
+        listCacheSet = _listCacheSet;
 
-    	/**
-    	 * Creates an list cache object.
-    	 *
-    	 * @private
-    	 * @constructor
-    	 * @param {Array} [entries] The key-value pairs to cache.
-    	 */
-    	function ListCache(entries) {
-    	  var index = -1,
-    	      length = entries == null ? 0 : entries.length;
+    /**
+     * Creates an list cache object.
+     *
+     * @private
+     * @constructor
+     * @param {Array} [entries] The key-value pairs to cache.
+     */
+    function ListCache$1(entries) {
+      var index = -1,
+          length = entries == null ? 0 : entries.length;
 
-    	  this.clear();
-    	  while (++index < length) {
-    	    var entry = entries[index];
-    	    this.set(entry[0], entry[1]);
-    	  }
-    	}
-
-    	// Add methods to `ListCache`.
-    	ListCache.prototype.clear = listCacheClear;
-    	ListCache.prototype['delete'] = listCacheDelete;
-    	ListCache.prototype.get = listCacheGet;
-    	ListCache.prototype.has = listCacheHas;
-    	ListCache.prototype.set = listCacheSet;
-
-    	_ListCache = ListCache;
-    	return _ListCache;
+      this.clear();
+      while (++index < length) {
+        var entry = entries[index];
+        this.set(entry[0], entry[1]);
+      }
     }
 
-    var _Map;
-    var hasRequired_Map;
+    // Add methods to `ListCache`.
+    ListCache$1.prototype.clear = listCacheClear;
+    ListCache$1.prototype['delete'] = listCacheDelete;
+    ListCache$1.prototype.get = listCacheGet;
+    ListCache$1.prototype.has = listCacheHas;
+    ListCache$1.prototype.set = listCacheSet;
 
-    function require_Map () {
-    	if (hasRequired_Map) return _Map;
-    	hasRequired_Map = 1;
-    	var getNative = _getNative,
-    	    root = _root;
+    var _ListCache = ListCache$1;
 
-    	/* Built-in method references that are verified to be native. */
-    	var Map = getNative(root, 'Map');
+    var getNative$1 = _getNative,
+        root = _root;
 
-    	_Map = Map;
-    	return _Map;
-    }
+    /* Built-in method references that are verified to be native. */
+    var Map$3 = getNative$1(root, 'Map');
+
+    var _Map = Map$3;
 
     var Hash = _Hash,
-        ListCache = require_ListCache(),
-        Map$2 = require_Map();
+        ListCache = _ListCache,
+        Map$2 = _Map;
 
     /**
      * Removes all key-value entries from the map.
@@ -45013,7 +45011,7 @@ var app = (function () {
     function require_stackClear () {
     	if (hasRequired_stackClear) return _stackClear;
     	hasRequired_stackClear = 1;
-    	var ListCache = require_ListCache();
+    	var ListCache = _ListCache;
 
     	/**
     	 * Removes all key-value entries from the stack.
@@ -45113,8 +45111,8 @@ var app = (function () {
     function require_stackSet () {
     	if (hasRequired_stackSet) return _stackSet;
     	hasRequired_stackSet = 1;
-    	var ListCache = require_ListCache(),
-    	    Map = require_Map(),
+    	var ListCache = _ListCache,
+    	    Map = _Map,
     	    MapCache = _MapCache;
 
     	/** Used as the size to enable large array optimizations. */
@@ -45156,7 +45154,7 @@ var app = (function () {
     function require_Stack () {
     	if (hasRequired_Stack) return _Stack;
     	hasRequired_Stack = 1;
-    	var ListCache = require_ListCache(),
+    	var ListCache = _ListCache,
     	    stackClear = require_stackClear(),
     	    stackDelete = require_stackDelete(),
     	    stackGet = require_stackGet(),
@@ -46521,7 +46519,7 @@ var app = (function () {
     	if (hasRequired_getTag) return _getTag;
     	hasRequired_getTag = 1;
     	var DataView = require_DataView(),
-    	    Map = require_Map(),
+    	    Map = _Map,
     	    Promise = require_Promise(),
     	    Set = require_Set(),
     	    WeakMap = require_WeakMap(),
@@ -50227,1179 +50225,1332 @@ var app = (function () {
 
     /* global window */
 
-    var lodash;
+    var lodash_1$1;
+    var hasRequiredLodash$1;
 
-    if (typeof commonjsRequire === "function") {
-      try {
-        lodash = {
-          clone: requireClone(),
-          constant: requireConstant(),
-          each: requireEach(),
-          filter: requireFilter(),
-          has:  requireHas(),
-          isArray: isArray_1,
-          isEmpty: requireIsEmpty(),
-          isFunction: requireIsFunction(),
-          isUndefined: requireIsUndefined(),
-          keys: requireKeys(),
-          map: requireMap(),
-          reduce: requireReduce(),
-          size: requireSize(),
-          transform: requireTransform(),
-          union: requireUnion(),
-          values: requireValues()
-        };
-      } catch (e) {
-        // continue regardless of error
-      }
+    function requireLodash$1 () {
+    	if (hasRequiredLodash$1) return lodash_1$1;
+    	hasRequiredLodash$1 = 1;
+    	var lodash;
+
+    	if (typeof commonjsRequire === "function") {
+    	  try {
+    	    lodash = {
+    	      clone: requireClone(),
+    	      constant: requireConstant(),
+    	      each: requireEach(),
+    	      filter: requireFilter(),
+    	      has:  requireHas(),
+    	      isArray: isArray_1,
+    	      isEmpty: requireIsEmpty(),
+    	      isFunction: requireIsFunction(),
+    	      isUndefined: requireIsUndefined(),
+    	      keys: requireKeys(),
+    	      map: requireMap(),
+    	      reduce: requireReduce(),
+    	      size: requireSize(),
+    	      transform: requireTransform(),
+    	      union: requireUnion(),
+    	      values: requireValues()
+    	    };
+    	  } catch (e) {
+    	    // continue regardless of error
+    	  }
+    	}
+
+    	if (!lodash) {
+    	  lodash = window._;
+    	}
+
+    	lodash_1$1 = lodash;
+    	return lodash_1$1;
     }
 
-    if (!lodash) {
-      lodash = window._;
+    var graph;
+    var hasRequiredGraph;
+
+    function requireGraph () {
+    	if (hasRequiredGraph) return graph;
+    	hasRequiredGraph = 1;
+
+    	var _ = requireLodash$1();
+
+    	graph = Graph;
+
+    	var DEFAULT_EDGE_NAME = "\x00";
+    	var GRAPH_NODE = "\x00";
+    	var EDGE_KEY_DELIM = "\x01";
+
+    	// Implementation notes:
+    	//
+    	//  * Node id query functions should return string ids for the nodes
+    	//  * Edge id query functions should return an "edgeObj", edge object, that is
+    	//    composed of enough information to uniquely identify an edge: {v, w, name}.
+    	//  * Internally we use an "edgeId", a stringified form of the edgeObj, to
+    	//    reference edges. This is because we need a performant way to look these
+    	//    edges up and, object properties, which have string keys, are the closest
+    	//    we're going to get to a performant hashtable in JavaScript.
+
+    	function Graph(opts) {
+    	  this._isDirected = _.has(opts, "directed") ? opts.directed : true;
+    	  this._isMultigraph = _.has(opts, "multigraph") ? opts.multigraph : false;
+    	  this._isCompound = _.has(opts, "compound") ? opts.compound : false;
+
+    	  // Label for the graph itself
+    	  this._label = undefined;
+
+    	  // Defaults to be set when creating a new node
+    	  this._defaultNodeLabelFn = _.constant(undefined);
+
+    	  // Defaults to be set when creating a new edge
+    	  this._defaultEdgeLabelFn = _.constant(undefined);
+
+    	  // v -> label
+    	  this._nodes = {};
+
+    	  if (this._isCompound) {
+    	    // v -> parent
+    	    this._parent = {};
+
+    	    // v -> children
+    	    this._children = {};
+    	    this._children[GRAPH_NODE] = {};
+    	  }
+
+    	  // v -> edgeObj
+    	  this._in = {};
+
+    	  // u -> v -> Number
+    	  this._preds = {};
+
+    	  // v -> edgeObj
+    	  this._out = {};
+
+    	  // v -> w -> Number
+    	  this._sucs = {};
+
+    	  // e -> edgeObj
+    	  this._edgeObjs = {};
+
+    	  // e -> label
+    	  this._edgeLabels = {};
+    	}
+
+    	/* Number of nodes in the graph. Should only be changed by the implementation. */
+    	Graph.prototype._nodeCount = 0;
+
+    	/* Number of edges in the graph. Should only be changed by the implementation. */
+    	Graph.prototype._edgeCount = 0;
+
+
+    	/* === Graph functions ========= */
+
+    	Graph.prototype.isDirected = function() {
+    	  return this._isDirected;
+    	};
+
+    	Graph.prototype.isMultigraph = function() {
+    	  return this._isMultigraph;
+    	};
+
+    	Graph.prototype.isCompound = function() {
+    	  return this._isCompound;
+    	};
+
+    	Graph.prototype.setGraph = function(label) {
+    	  this._label = label;
+    	  return this;
+    	};
+
+    	Graph.prototype.graph = function() {
+    	  return this._label;
+    	};
+
+
+    	/* === Node functions ========== */
+
+    	Graph.prototype.setDefaultNodeLabel = function(newDefault) {
+    	  if (!_.isFunction(newDefault)) {
+    	    newDefault = _.constant(newDefault);
+    	  }
+    	  this._defaultNodeLabelFn = newDefault;
+    	  return this;
+    	};
+
+    	Graph.prototype.nodeCount = function() {
+    	  return this._nodeCount;
+    	};
+
+    	Graph.prototype.nodes = function() {
+    	  return _.keys(this._nodes);
+    	};
+
+    	Graph.prototype.sources = function() {
+    	  var self = this;
+    	  return _.filter(this.nodes(), function(v) {
+    	    return _.isEmpty(self._in[v]);
+    	  });
+    	};
+
+    	Graph.prototype.sinks = function() {
+    	  var self = this;
+    	  return _.filter(this.nodes(), function(v) {
+    	    return _.isEmpty(self._out[v]);
+    	  });
+    	};
+
+    	Graph.prototype.setNodes = function(vs, value) {
+    	  var args = arguments;
+    	  var self = this;
+    	  _.each(vs, function(v) {
+    	    if (args.length > 1) {
+    	      self.setNode(v, value);
+    	    } else {
+    	      self.setNode(v);
+    	    }
+    	  });
+    	  return this;
+    	};
+
+    	Graph.prototype.setNode = function(v, value) {
+    	  if (_.has(this._nodes, v)) {
+    	    if (arguments.length > 1) {
+    	      this._nodes[v] = value;
+    	    }
+    	    return this;
+    	  }
+
+    	  this._nodes[v] = arguments.length > 1 ? value : this._defaultNodeLabelFn(v);
+    	  if (this._isCompound) {
+    	    this._parent[v] = GRAPH_NODE;
+    	    this._children[v] = {};
+    	    this._children[GRAPH_NODE][v] = true;
+    	  }
+    	  this._in[v] = {};
+    	  this._preds[v] = {};
+    	  this._out[v] = {};
+    	  this._sucs[v] = {};
+    	  ++this._nodeCount;
+    	  return this;
+    	};
+
+    	Graph.prototype.node = function(v) {
+    	  return this._nodes[v];
+    	};
+
+    	Graph.prototype.hasNode = function(v) {
+    	  return _.has(this._nodes, v);
+    	};
+
+    	Graph.prototype.removeNode =  function(v) {
+    	  var self = this;
+    	  if (_.has(this._nodes, v)) {
+    	    var removeEdge = function(e) { self.removeEdge(self._edgeObjs[e]); };
+    	    delete this._nodes[v];
+    	    if (this._isCompound) {
+    	      this._removeFromParentsChildList(v);
+    	      delete this._parent[v];
+    	      _.each(this.children(v), function(child) {
+    	        self.setParent(child);
+    	      });
+    	      delete this._children[v];
+    	    }
+    	    _.each(_.keys(this._in[v]), removeEdge);
+    	    delete this._in[v];
+    	    delete this._preds[v];
+    	    _.each(_.keys(this._out[v]), removeEdge);
+    	    delete this._out[v];
+    	    delete this._sucs[v];
+    	    --this._nodeCount;
+    	  }
+    	  return this;
+    	};
+
+    	Graph.prototype.setParent = function(v, parent) {
+    	  if (!this._isCompound) {
+    	    throw new Error("Cannot set parent in a non-compound graph");
+    	  }
+
+    	  if (_.isUndefined(parent)) {
+    	    parent = GRAPH_NODE;
+    	  } else {
+    	    // Coerce parent to string
+    	    parent += "";
+    	    for (var ancestor = parent;
+    	      !_.isUndefined(ancestor);
+    	      ancestor = this.parent(ancestor)) {
+    	      if (ancestor === v) {
+    	        throw new Error("Setting " + parent+ " as parent of " + v +
+    	                        " would create a cycle");
+    	      }
+    	    }
+
+    	    this.setNode(parent);
+    	  }
+
+    	  this.setNode(v);
+    	  this._removeFromParentsChildList(v);
+    	  this._parent[v] = parent;
+    	  this._children[parent][v] = true;
+    	  return this;
+    	};
+
+    	Graph.prototype._removeFromParentsChildList = function(v) {
+    	  delete this._children[this._parent[v]][v];
+    	};
+
+    	Graph.prototype.parent = function(v) {
+    	  if (this._isCompound) {
+    	    var parent = this._parent[v];
+    	    if (parent !== GRAPH_NODE) {
+    	      return parent;
+    	    }
+    	  }
+    	};
+
+    	Graph.prototype.children = function(v) {
+    	  if (_.isUndefined(v)) {
+    	    v = GRAPH_NODE;
+    	  }
+
+    	  if (this._isCompound) {
+    	    var children = this._children[v];
+    	    if (children) {
+    	      return _.keys(children);
+    	    }
+    	  } else if (v === GRAPH_NODE) {
+    	    return this.nodes();
+    	  } else if (this.hasNode(v)) {
+    	    return [];
+    	  }
+    	};
+
+    	Graph.prototype.predecessors = function(v) {
+    	  var predsV = this._preds[v];
+    	  if (predsV) {
+    	    return _.keys(predsV);
+    	  }
+    	};
+
+    	Graph.prototype.successors = function(v) {
+    	  var sucsV = this._sucs[v];
+    	  if (sucsV) {
+    	    return _.keys(sucsV);
+    	  }
+    	};
+
+    	Graph.prototype.neighbors = function(v) {
+    	  var preds = this.predecessors(v);
+    	  if (preds) {
+    	    return _.union(preds, this.successors(v));
+    	  }
+    	};
+
+    	Graph.prototype.isLeaf = function (v) {
+    	  var neighbors;
+    	  if (this.isDirected()) {
+    	    neighbors = this.successors(v);
+    	  } else {
+    	    neighbors = this.neighbors(v);
+    	  }
+    	  return neighbors.length === 0;
+    	};
+
+    	Graph.prototype.filterNodes = function(filter) {
+    	  var copy = new this.constructor({
+    	    directed: this._isDirected,
+    	    multigraph: this._isMultigraph,
+    	    compound: this._isCompound
+    	  });
+
+    	  copy.setGraph(this.graph());
+
+    	  var self = this;
+    	  _.each(this._nodes, function(value, v) {
+    	    if (filter(v)) {
+    	      copy.setNode(v, value);
+    	    }
+    	  });
+
+    	  _.each(this._edgeObjs, function(e) {
+    	    if (copy.hasNode(e.v) && copy.hasNode(e.w)) {
+    	      copy.setEdge(e, self.edge(e));
+    	    }
+    	  });
+
+    	  var parents = {};
+    	  function findParent(v) {
+    	    var parent = self.parent(v);
+    	    if (parent === undefined || copy.hasNode(parent)) {
+    	      parents[v] = parent;
+    	      return parent;
+    	    } else if (parent in parents) {
+    	      return parents[parent];
+    	    } else {
+    	      return findParent(parent);
+    	    }
+    	  }
+
+    	  if (this._isCompound) {
+    	    _.each(copy.nodes(), function(v) {
+    	      copy.setParent(v, findParent(v));
+    	    });
+    	  }
+
+    	  return copy;
+    	};
+
+    	/* === Edge functions ========== */
+
+    	Graph.prototype.setDefaultEdgeLabel = function(newDefault) {
+    	  if (!_.isFunction(newDefault)) {
+    	    newDefault = _.constant(newDefault);
+    	  }
+    	  this._defaultEdgeLabelFn = newDefault;
+    	  return this;
+    	};
+
+    	Graph.prototype.edgeCount = function() {
+    	  return this._edgeCount;
+    	};
+
+    	Graph.prototype.edges = function() {
+    	  return _.values(this._edgeObjs);
+    	};
+
+    	Graph.prototype.setPath = function(vs, value) {
+    	  var self = this;
+    	  var args = arguments;
+    	  _.reduce(vs, function(v, w) {
+    	    if (args.length > 1) {
+    	      self.setEdge(v, w, value);
+    	    } else {
+    	      self.setEdge(v, w);
+    	    }
+    	    return w;
+    	  });
+    	  return this;
+    	};
+
+    	/*
+    	 * setEdge(v, w, [value, [name]])
+    	 * setEdge({ v, w, [name] }, [value])
+    	 */
+    	Graph.prototype.setEdge = function() {
+    	  var v, w, name, value;
+    	  var valueSpecified = false;
+    	  var arg0 = arguments[0];
+
+    	  if (typeof arg0 === "object" && arg0 !== null && "v" in arg0) {
+    	    v = arg0.v;
+    	    w = arg0.w;
+    	    name = arg0.name;
+    	    if (arguments.length === 2) {
+    	      value = arguments[1];
+    	      valueSpecified = true;
+    	    }
+    	  } else {
+    	    v = arg0;
+    	    w = arguments[1];
+    	    name = arguments[3];
+    	    if (arguments.length > 2) {
+    	      value = arguments[2];
+    	      valueSpecified = true;
+    	    }
+    	  }
+
+    	  v = "" + v;
+    	  w = "" + w;
+    	  if (!_.isUndefined(name)) {
+    	    name = "" + name;
+    	  }
+
+    	  var e = edgeArgsToId(this._isDirected, v, w, name);
+    	  if (_.has(this._edgeLabels, e)) {
+    	    if (valueSpecified) {
+    	      this._edgeLabels[e] = value;
+    	    }
+    	    return this;
+    	  }
+
+    	  if (!_.isUndefined(name) && !this._isMultigraph) {
+    	    throw new Error("Cannot set a named edge when isMultigraph = false");
+    	  }
+
+    	  // It didn't exist, so we need to create it.
+    	  // First ensure the nodes exist.
+    	  this.setNode(v);
+    	  this.setNode(w);
+
+    	  this._edgeLabels[e] = valueSpecified ? value : this._defaultEdgeLabelFn(v, w, name);
+
+    	  var edgeObj = edgeArgsToObj(this._isDirected, v, w, name);
+    	  // Ensure we add undirected edges in a consistent way.
+    	  v = edgeObj.v;
+    	  w = edgeObj.w;
+
+    	  Object.freeze(edgeObj);
+    	  this._edgeObjs[e] = edgeObj;
+    	  incrementOrInitEntry(this._preds[w], v);
+    	  incrementOrInitEntry(this._sucs[v], w);
+    	  this._in[w][e] = edgeObj;
+    	  this._out[v][e] = edgeObj;
+    	  this._edgeCount++;
+    	  return this;
+    	};
+
+    	Graph.prototype.edge = function(v, w, name) {
+    	  var e = (arguments.length === 1
+    	    ? edgeObjToId(this._isDirected, arguments[0])
+    	    : edgeArgsToId(this._isDirected, v, w, name));
+    	  return this._edgeLabels[e];
+    	};
+
+    	Graph.prototype.hasEdge = function(v, w, name) {
+    	  var e = (arguments.length === 1
+    	    ? edgeObjToId(this._isDirected, arguments[0])
+    	    : edgeArgsToId(this._isDirected, v, w, name));
+    	  return _.has(this._edgeLabels, e);
+    	};
+
+    	Graph.prototype.removeEdge = function(v, w, name) {
+    	  var e = (arguments.length === 1
+    	    ? edgeObjToId(this._isDirected, arguments[0])
+    	    : edgeArgsToId(this._isDirected, v, w, name));
+    	  var edge = this._edgeObjs[e];
+    	  if (edge) {
+    	    v = edge.v;
+    	    w = edge.w;
+    	    delete this._edgeLabels[e];
+    	    delete this._edgeObjs[e];
+    	    decrementOrRemoveEntry(this._preds[w], v);
+    	    decrementOrRemoveEntry(this._sucs[v], w);
+    	    delete this._in[w][e];
+    	    delete this._out[v][e];
+    	    this._edgeCount--;
+    	  }
+    	  return this;
+    	};
+
+    	Graph.prototype.inEdges = function(v, u) {
+    	  var inV = this._in[v];
+    	  if (inV) {
+    	    var edges = _.values(inV);
+    	    if (!u) {
+    	      return edges;
+    	    }
+    	    return _.filter(edges, function(edge) { return edge.v === u; });
+    	  }
+    	};
+
+    	Graph.prototype.outEdges = function(v, w) {
+    	  var outV = this._out[v];
+    	  if (outV) {
+    	    var edges = _.values(outV);
+    	    if (!w) {
+    	      return edges;
+    	    }
+    	    return _.filter(edges, function(edge) { return edge.w === w; });
+    	  }
+    	};
+
+    	Graph.prototype.nodeEdges = function(v, w) {
+    	  var inEdges = this.inEdges(v, w);
+    	  if (inEdges) {
+    	    return inEdges.concat(this.outEdges(v, w));
+    	  }
+    	};
+
+    	function incrementOrInitEntry(map, k) {
+    	  if (map[k]) {
+    	    map[k]++;
+    	  } else {
+    	    map[k] = 1;
+    	  }
+    	}
+
+    	function decrementOrRemoveEntry(map, k) {
+    	  if (!--map[k]) { delete map[k]; }
+    	}
+
+    	function edgeArgsToId(isDirected, v_, w_, name) {
+    	  var v = "" + v_;
+    	  var w = "" + w_;
+    	  if (!isDirected && v > w) {
+    	    var tmp = v;
+    	    v = w;
+    	    w = tmp;
+    	  }
+    	  return v + EDGE_KEY_DELIM + w + EDGE_KEY_DELIM +
+    	             (_.isUndefined(name) ? DEFAULT_EDGE_NAME : name);
+    	}
+
+    	function edgeArgsToObj(isDirected, v_, w_, name) {
+    	  var v = "" + v_;
+    	  var w = "" + w_;
+    	  if (!isDirected && v > w) {
+    	    var tmp = v;
+    	    v = w;
+    	    w = tmp;
+    	  }
+    	  var edgeObj =  { v: v, w: w };
+    	  if (name) {
+    	    edgeObj.name = name;
+    	  }
+    	  return edgeObj;
+    	}
+
+    	function edgeObjToId(isDirected, edgeObj) {
+    	  return edgeArgsToId(isDirected, edgeObj.v, edgeObj.w, edgeObj.name);
+    	}
+    	return graph;
     }
 
-    var lodash_1$1 = lodash;
+    var version$1;
+    var hasRequiredVersion$1;
 
-    var _$b = lodash_1$1;
-
-    var graph = Graph$2;
-
-    var DEFAULT_EDGE_NAME = "\x00";
-    var GRAPH_NODE = "\x00";
-    var EDGE_KEY_DELIM = "\x01";
-
-    // Implementation notes:
-    //
-    //  * Node id query functions should return string ids for the nodes
-    //  * Edge id query functions should return an "edgeObj", edge object, that is
-    //    composed of enough information to uniquely identify an edge: {v, w, name}.
-    //  * Internally we use an "edgeId", a stringified form of the edgeObj, to
-    //    reference edges. This is because we need a performant way to look these
-    //    edges up and, object properties, which have string keys, are the closest
-    //    we're going to get to a performant hashtable in JavaScript.
-
-    function Graph$2(opts) {
-      this._isDirected = _$b.has(opts, "directed") ? opts.directed : true;
-      this._isMultigraph = _$b.has(opts, "multigraph") ? opts.multigraph : false;
-      this._isCompound = _$b.has(opts, "compound") ? opts.compound : false;
-
-      // Label for the graph itself
-      this._label = undefined;
-
-      // Defaults to be set when creating a new node
-      this._defaultNodeLabelFn = _$b.constant(undefined);
-
-      // Defaults to be set when creating a new edge
-      this._defaultEdgeLabelFn = _$b.constant(undefined);
-
-      // v -> label
-      this._nodes = {};
-
-      if (this._isCompound) {
-        // v -> parent
-        this._parent = {};
-
-        // v -> children
-        this._children = {};
-        this._children[GRAPH_NODE] = {};
-      }
-
-      // v -> edgeObj
-      this._in = {};
-
-      // u -> v -> Number
-      this._preds = {};
-
-      // v -> edgeObj
-      this._out = {};
-
-      // v -> w -> Number
-      this._sucs = {};
-
-      // e -> edgeObj
-      this._edgeObjs = {};
-
-      // e -> label
-      this._edgeLabels = {};
+    function requireVersion$1 () {
+    	if (hasRequiredVersion$1) return version$1;
+    	hasRequiredVersion$1 = 1;
+    	version$1 = '2.1.8';
+    	return version$1;
     }
 
-    /* Number of nodes in the graph. Should only be changed by the implementation. */
-    Graph$2.prototype._nodeCount = 0;
+    var lib;
+    var hasRequiredLib;
 
-    /* Number of edges in the graph. Should only be changed by the implementation. */
-    Graph$2.prototype._edgeCount = 0;
-
-
-    /* === Graph functions ========= */
-
-    Graph$2.prototype.isDirected = function() {
-      return this._isDirected;
-    };
-
-    Graph$2.prototype.isMultigraph = function() {
-      return this._isMultigraph;
-    };
-
-    Graph$2.prototype.isCompound = function() {
-      return this._isCompound;
-    };
-
-    Graph$2.prototype.setGraph = function(label) {
-      this._label = label;
-      return this;
-    };
-
-    Graph$2.prototype.graph = function() {
-      return this._label;
-    };
-
-
-    /* === Node functions ========== */
-
-    Graph$2.prototype.setDefaultNodeLabel = function(newDefault) {
-      if (!_$b.isFunction(newDefault)) {
-        newDefault = _$b.constant(newDefault);
-      }
-      this._defaultNodeLabelFn = newDefault;
-      return this;
-    };
-
-    Graph$2.prototype.nodeCount = function() {
-      return this._nodeCount;
-    };
-
-    Graph$2.prototype.nodes = function() {
-      return _$b.keys(this._nodes);
-    };
-
-    Graph$2.prototype.sources = function() {
-      var self = this;
-      return _$b.filter(this.nodes(), function(v) {
-        return _$b.isEmpty(self._in[v]);
-      });
-    };
-
-    Graph$2.prototype.sinks = function() {
-      var self = this;
-      return _$b.filter(this.nodes(), function(v) {
-        return _$b.isEmpty(self._out[v]);
-      });
-    };
-
-    Graph$2.prototype.setNodes = function(vs, value) {
-      var args = arguments;
-      var self = this;
-      _$b.each(vs, function(v) {
-        if (args.length > 1) {
-          self.setNode(v, value);
-        } else {
-          self.setNode(v);
-        }
-      });
-      return this;
-    };
-
-    Graph$2.prototype.setNode = function(v, value) {
-      if (_$b.has(this._nodes, v)) {
-        if (arguments.length > 1) {
-          this._nodes[v] = value;
-        }
-        return this;
-      }
-
-      this._nodes[v] = arguments.length > 1 ? value : this._defaultNodeLabelFn(v);
-      if (this._isCompound) {
-        this._parent[v] = GRAPH_NODE;
-        this._children[v] = {};
-        this._children[GRAPH_NODE][v] = true;
-      }
-      this._in[v] = {};
-      this._preds[v] = {};
-      this._out[v] = {};
-      this._sucs[v] = {};
-      ++this._nodeCount;
-      return this;
-    };
-
-    Graph$2.prototype.node = function(v) {
-      return this._nodes[v];
-    };
-
-    Graph$2.prototype.hasNode = function(v) {
-      return _$b.has(this._nodes, v);
-    };
-
-    Graph$2.prototype.removeNode =  function(v) {
-      var self = this;
-      if (_$b.has(this._nodes, v)) {
-        var removeEdge = function(e) { self.removeEdge(self._edgeObjs[e]); };
-        delete this._nodes[v];
-        if (this._isCompound) {
-          this._removeFromParentsChildList(v);
-          delete this._parent[v];
-          _$b.each(this.children(v), function(child) {
-            self.setParent(child);
-          });
-          delete this._children[v];
-        }
-        _$b.each(_$b.keys(this._in[v]), removeEdge);
-        delete this._in[v];
-        delete this._preds[v];
-        _$b.each(_$b.keys(this._out[v]), removeEdge);
-        delete this._out[v];
-        delete this._sucs[v];
-        --this._nodeCount;
-      }
-      return this;
-    };
-
-    Graph$2.prototype.setParent = function(v, parent) {
-      if (!this._isCompound) {
-        throw new Error("Cannot set parent in a non-compound graph");
-      }
-
-      if (_$b.isUndefined(parent)) {
-        parent = GRAPH_NODE;
-      } else {
-        // Coerce parent to string
-        parent += "";
-        for (var ancestor = parent;
-          !_$b.isUndefined(ancestor);
-          ancestor = this.parent(ancestor)) {
-          if (ancestor === v) {
-            throw new Error("Setting " + parent+ " as parent of " + v +
-                            " would create a cycle");
-          }
-        }
-
-        this.setNode(parent);
-      }
-
-      this.setNode(v);
-      this._removeFromParentsChildList(v);
-      this._parent[v] = parent;
-      this._children[parent][v] = true;
-      return this;
-    };
-
-    Graph$2.prototype._removeFromParentsChildList = function(v) {
-      delete this._children[this._parent[v]][v];
-    };
-
-    Graph$2.prototype.parent = function(v) {
-      if (this._isCompound) {
-        var parent = this._parent[v];
-        if (parent !== GRAPH_NODE) {
-          return parent;
-        }
-      }
-    };
-
-    Graph$2.prototype.children = function(v) {
-      if (_$b.isUndefined(v)) {
-        v = GRAPH_NODE;
-      }
-
-      if (this._isCompound) {
-        var children = this._children[v];
-        if (children) {
-          return _$b.keys(children);
-        }
-      } else if (v === GRAPH_NODE) {
-        return this.nodes();
-      } else if (this.hasNode(v)) {
-        return [];
-      }
-    };
-
-    Graph$2.prototype.predecessors = function(v) {
-      var predsV = this._preds[v];
-      if (predsV) {
-        return _$b.keys(predsV);
-      }
-    };
-
-    Graph$2.prototype.successors = function(v) {
-      var sucsV = this._sucs[v];
-      if (sucsV) {
-        return _$b.keys(sucsV);
-      }
-    };
-
-    Graph$2.prototype.neighbors = function(v) {
-      var preds = this.predecessors(v);
-      if (preds) {
-        return _$b.union(preds, this.successors(v));
-      }
-    };
-
-    Graph$2.prototype.isLeaf = function (v) {
-      var neighbors;
-      if (this.isDirected()) {
-        neighbors = this.successors(v);
-      } else {
-        neighbors = this.neighbors(v);
-      }
-      return neighbors.length === 0;
-    };
-
-    Graph$2.prototype.filterNodes = function(filter) {
-      var copy = new this.constructor({
-        directed: this._isDirected,
-        multigraph: this._isMultigraph,
-        compound: this._isCompound
-      });
-
-      copy.setGraph(this.graph());
-
-      var self = this;
-      _$b.each(this._nodes, function(value, v) {
-        if (filter(v)) {
-          copy.setNode(v, value);
-        }
-      });
-
-      _$b.each(this._edgeObjs, function(e) {
-        if (copy.hasNode(e.v) && copy.hasNode(e.w)) {
-          copy.setEdge(e, self.edge(e));
-        }
-      });
-
-      var parents = {};
-      function findParent(v) {
-        var parent = self.parent(v);
-        if (parent === undefined || copy.hasNode(parent)) {
-          parents[v] = parent;
-          return parent;
-        } else if (parent in parents) {
-          return parents[parent];
-        } else {
-          return findParent(parent);
-        }
-      }
-
-      if (this._isCompound) {
-        _$b.each(copy.nodes(), function(v) {
-          copy.setParent(v, findParent(v));
-        });
-      }
-
-      return copy;
-    };
-
-    /* === Edge functions ========== */
-
-    Graph$2.prototype.setDefaultEdgeLabel = function(newDefault) {
-      if (!_$b.isFunction(newDefault)) {
-        newDefault = _$b.constant(newDefault);
-      }
-      this._defaultEdgeLabelFn = newDefault;
-      return this;
-    };
-
-    Graph$2.prototype.edgeCount = function() {
-      return this._edgeCount;
-    };
-
-    Graph$2.prototype.edges = function() {
-      return _$b.values(this._edgeObjs);
-    };
-
-    Graph$2.prototype.setPath = function(vs, value) {
-      var self = this;
-      var args = arguments;
-      _$b.reduce(vs, function(v, w) {
-        if (args.length > 1) {
-          self.setEdge(v, w, value);
-        } else {
-          self.setEdge(v, w);
-        }
-        return w;
-      });
-      return this;
-    };
-
-    /*
-     * setEdge(v, w, [value, [name]])
-     * setEdge({ v, w, [name] }, [value])
-     */
-    Graph$2.prototype.setEdge = function() {
-      var v, w, name, value;
-      var valueSpecified = false;
-      var arg0 = arguments[0];
-
-      if (typeof arg0 === "object" && arg0 !== null && "v" in arg0) {
-        v = arg0.v;
-        w = arg0.w;
-        name = arg0.name;
-        if (arguments.length === 2) {
-          value = arguments[1];
-          valueSpecified = true;
-        }
-      } else {
-        v = arg0;
-        w = arguments[1];
-        name = arguments[3];
-        if (arguments.length > 2) {
-          value = arguments[2];
-          valueSpecified = true;
-        }
-      }
-
-      v = "" + v;
-      w = "" + w;
-      if (!_$b.isUndefined(name)) {
-        name = "" + name;
-      }
-
-      var e = edgeArgsToId(this._isDirected, v, w, name);
-      if (_$b.has(this._edgeLabels, e)) {
-        if (valueSpecified) {
-          this._edgeLabels[e] = value;
-        }
-        return this;
-      }
-
-      if (!_$b.isUndefined(name) && !this._isMultigraph) {
-        throw new Error("Cannot set a named edge when isMultigraph = false");
-      }
-
-      // It didn't exist, so we need to create it.
-      // First ensure the nodes exist.
-      this.setNode(v);
-      this.setNode(w);
-
-      this._edgeLabels[e] = valueSpecified ? value : this._defaultEdgeLabelFn(v, w, name);
-
-      var edgeObj = edgeArgsToObj(this._isDirected, v, w, name);
-      // Ensure we add undirected edges in a consistent way.
-      v = edgeObj.v;
-      w = edgeObj.w;
-
-      Object.freeze(edgeObj);
-      this._edgeObjs[e] = edgeObj;
-      incrementOrInitEntry(this._preds[w], v);
-      incrementOrInitEntry(this._sucs[v], w);
-      this._in[w][e] = edgeObj;
-      this._out[v][e] = edgeObj;
-      this._edgeCount++;
-      return this;
-    };
-
-    Graph$2.prototype.edge = function(v, w, name) {
-      var e = (arguments.length === 1
-        ? edgeObjToId(this._isDirected, arguments[0])
-        : edgeArgsToId(this._isDirected, v, w, name));
-      return this._edgeLabels[e];
-    };
-
-    Graph$2.prototype.hasEdge = function(v, w, name) {
-      var e = (arguments.length === 1
-        ? edgeObjToId(this._isDirected, arguments[0])
-        : edgeArgsToId(this._isDirected, v, w, name));
-      return _$b.has(this._edgeLabels, e);
-    };
-
-    Graph$2.prototype.removeEdge = function(v, w, name) {
-      var e = (arguments.length === 1
-        ? edgeObjToId(this._isDirected, arguments[0])
-        : edgeArgsToId(this._isDirected, v, w, name));
-      var edge = this._edgeObjs[e];
-      if (edge) {
-        v = edge.v;
-        w = edge.w;
-        delete this._edgeLabels[e];
-        delete this._edgeObjs[e];
-        decrementOrRemoveEntry(this._preds[w], v);
-        decrementOrRemoveEntry(this._sucs[v], w);
-        delete this._in[w][e];
-        delete this._out[v][e];
-        this._edgeCount--;
-      }
-      return this;
-    };
-
-    Graph$2.prototype.inEdges = function(v, u) {
-      var inV = this._in[v];
-      if (inV) {
-        var edges = _$b.values(inV);
-        if (!u) {
-          return edges;
-        }
-        return _$b.filter(edges, function(edge) { return edge.v === u; });
-      }
-    };
-
-    Graph$2.prototype.outEdges = function(v, w) {
-      var outV = this._out[v];
-      if (outV) {
-        var edges = _$b.values(outV);
-        if (!w) {
-          return edges;
-        }
-        return _$b.filter(edges, function(edge) { return edge.w === w; });
-      }
-    };
-
-    Graph$2.prototype.nodeEdges = function(v, w) {
-      var inEdges = this.inEdges(v, w);
-      if (inEdges) {
-        return inEdges.concat(this.outEdges(v, w));
-      }
-    };
-
-    function incrementOrInitEntry(map, k) {
-      if (map[k]) {
-        map[k]++;
-      } else {
-        map[k] = 1;
-      }
+    function requireLib () {
+    	if (hasRequiredLib) return lib;
+    	hasRequiredLib = 1;
+    	// Includes only the "core" of graphlib
+    	lib = {
+    	  Graph: requireGraph(),
+    	  version: requireVersion$1()
+    	};
+    	return lib;
     }
 
-    function decrementOrRemoveEntry(map, k) {
-      if (!--map[k]) { delete map[k]; }
+    var json;
+    var hasRequiredJson;
+
+    function requireJson () {
+    	if (hasRequiredJson) return json;
+    	hasRequiredJson = 1;
+    	var _ = requireLodash$1();
+    	var Graph = requireGraph();
+
+    	json = {
+    	  write: write,
+    	  read: read
+    	};
+
+    	function write(g) {
+    	  var json = {
+    	    options: {
+    	      directed: g.isDirected(),
+    	      multigraph: g.isMultigraph(),
+    	      compound: g.isCompound()
+    	    },
+    	    nodes: writeNodes(g),
+    	    edges: writeEdges(g)
+    	  };
+    	  if (!_.isUndefined(g.graph())) {
+    	    json.value = _.clone(g.graph());
+    	  }
+    	  return json;
+    	}
+
+    	function writeNodes(g) {
+    	  return _.map(g.nodes(), function(v) {
+    	    var nodeValue = g.node(v);
+    	    var parent = g.parent(v);
+    	    var node = { v: v };
+    	    if (!_.isUndefined(nodeValue)) {
+    	      node.value = nodeValue;
+    	    }
+    	    if (!_.isUndefined(parent)) {
+    	      node.parent = parent;
+    	    }
+    	    return node;
+    	  });
+    	}
+
+    	function writeEdges(g) {
+    	  return _.map(g.edges(), function(e) {
+    	    var edgeValue = g.edge(e);
+    	    var edge = { v: e.v, w: e.w };
+    	    if (!_.isUndefined(e.name)) {
+    	      edge.name = e.name;
+    	    }
+    	    if (!_.isUndefined(edgeValue)) {
+    	      edge.value = edgeValue;
+    	    }
+    	    return edge;
+    	  });
+    	}
+
+    	function read(json) {
+    	  var g = new Graph(json.options).setGraph(json.value);
+    	  _.each(json.nodes, function(entry) {
+    	    g.setNode(entry.v, entry.value);
+    	    if (entry.parent) {
+    	      g.setParent(entry.v, entry.parent);
+    	    }
+    	  });
+    	  _.each(json.edges, function(entry) {
+    	    g.setEdge({ v: entry.v, w: entry.w, name: entry.name }, entry.value);
+    	  });
+    	  return g;
+    	}
+    	return json;
     }
 
-    function edgeArgsToId(isDirected, v_, w_, name) {
-      var v = "" + v_;
-      var w = "" + w_;
-      if (!isDirected && v > w) {
-        var tmp = v;
-        v = w;
-        w = tmp;
-      }
-      return v + EDGE_KEY_DELIM + w + EDGE_KEY_DELIM +
-                 (_$b.isUndefined(name) ? DEFAULT_EDGE_NAME : name);
+    var components_1;
+    var hasRequiredComponents;
+
+    function requireComponents () {
+    	if (hasRequiredComponents) return components_1;
+    	hasRequiredComponents = 1;
+    	var _ = requireLodash$1();
+
+    	components_1 = components;
+
+    	function components(g) {
+    	  var visited = {};
+    	  var cmpts = [];
+    	  var cmpt;
+
+    	  function dfs(v) {
+    	    if (_.has(visited, v)) return;
+    	    visited[v] = true;
+    	    cmpt.push(v);
+    	    _.each(g.successors(v), dfs);
+    	    _.each(g.predecessors(v), dfs);
+    	  }
+
+    	  _.each(g.nodes(), function(v) {
+    	    cmpt = [];
+    	    dfs(v);
+    	    if (cmpt.length) {
+    	      cmpts.push(cmpt);
+    	    }
+    	  });
+
+    	  return cmpts;
+    	}
+    	return components_1;
     }
 
-    function edgeArgsToObj(isDirected, v_, w_, name) {
-      var v = "" + v_;
-      var w = "" + w_;
-      if (!isDirected && v > w) {
-        var tmp = v;
-        v = w;
-        w = tmp;
-      }
-      var edgeObj =  { v: v, w: w };
-      if (name) {
-        edgeObj.name = name;
-      }
-      return edgeObj;
+    var priorityQueue;
+    var hasRequiredPriorityQueue;
+
+    function requirePriorityQueue () {
+    	if (hasRequiredPriorityQueue) return priorityQueue;
+    	hasRequiredPriorityQueue = 1;
+    	var _ = requireLodash$1();
+
+    	priorityQueue = PriorityQueue;
+
+    	/**
+    	 * A min-priority queue data structure. This algorithm is derived from Cormen,
+    	 * et al., "Introduction to Algorithms". The basic idea of a min-priority
+    	 * queue is that you can efficiently (in O(1) time) get the smallest key in
+    	 * the queue. Adding and removing elements takes O(log n) time. A key can
+    	 * have its priority decreased in O(log n) time.
+    	 */
+    	function PriorityQueue() {
+    	  this._arr = [];
+    	  this._keyIndices = {};
+    	}
+
+    	/**
+    	 * Returns the number of elements in the queue. Takes `O(1)` time.
+    	 */
+    	PriorityQueue.prototype.size = function() {
+    	  return this._arr.length;
+    	};
+
+    	/**
+    	 * Returns the keys that are in the queue. Takes `O(n)` time.
+    	 */
+    	PriorityQueue.prototype.keys = function() {
+    	  return this._arr.map(function(x) { return x.key; });
+    	};
+
+    	/**
+    	 * Returns `true` if **key** is in the queue and `false` if not.
+    	 */
+    	PriorityQueue.prototype.has = function(key) {
+    	  return _.has(this._keyIndices, key);
+    	};
+
+    	/**
+    	 * Returns the priority for **key**. If **key** is not present in the queue
+    	 * then this function returns `undefined`. Takes `O(1)` time.
+    	 *
+    	 * @param {Object} key
+    	 */
+    	PriorityQueue.prototype.priority = function(key) {
+    	  var index = this._keyIndices[key];
+    	  if (index !== undefined) {
+    	    return this._arr[index].priority;
+    	  }
+    	};
+
+    	/**
+    	 * Returns the key for the minimum element in this queue. If the queue is
+    	 * empty this function throws an Error. Takes `O(1)` time.
+    	 */
+    	PriorityQueue.prototype.min = function() {
+    	  if (this.size() === 0) {
+    	    throw new Error("Queue underflow");
+    	  }
+    	  return this._arr[0].key;
+    	};
+
+    	/**
+    	 * Inserts a new key into the priority queue. If the key already exists in
+    	 * the queue this function returns `false`; otherwise it will return `true`.
+    	 * Takes `O(n)` time.
+    	 *
+    	 * @param {Object} key the key to add
+    	 * @param {Number} priority the initial priority for the key
+    	 */
+    	PriorityQueue.prototype.add = function(key, priority) {
+    	  var keyIndices = this._keyIndices;
+    	  key = String(key);
+    	  if (!_.has(keyIndices, key)) {
+    	    var arr = this._arr;
+    	    var index = arr.length;
+    	    keyIndices[key] = index;
+    	    arr.push({key: key, priority: priority});
+    	    this._decrease(index);
+    	    return true;
+    	  }
+    	  return false;
+    	};
+
+    	/**
+    	 * Removes and returns the smallest key in the queue. Takes `O(log n)` time.
+    	 */
+    	PriorityQueue.prototype.removeMin = function() {
+    	  this._swap(0, this._arr.length - 1);
+    	  var min = this._arr.pop();
+    	  delete this._keyIndices[min.key];
+    	  this._heapify(0);
+    	  return min.key;
+    	};
+
+    	/**
+    	 * Decreases the priority for **key** to **priority**. If the new priority is
+    	 * greater than the previous priority, this function will throw an Error.
+    	 *
+    	 * @param {Object} key the key for which to raise priority
+    	 * @param {Number} priority the new priority for the key
+    	 */
+    	PriorityQueue.prototype.decrease = function(key, priority) {
+    	  var index = this._keyIndices[key];
+    	  if (priority > this._arr[index].priority) {
+    	    throw new Error("New priority is greater than current priority. " +
+    	        "Key: " + key + " Old: " + this._arr[index].priority + " New: " + priority);
+    	  }
+    	  this._arr[index].priority = priority;
+    	  this._decrease(index);
+    	};
+
+    	PriorityQueue.prototype._heapify = function(i) {
+    	  var arr = this._arr;
+    	  var l = 2 * i;
+    	  var r = l + 1;
+    	  var largest = i;
+    	  if (l < arr.length) {
+    	    largest = arr[l].priority < arr[largest].priority ? l : largest;
+    	    if (r < arr.length) {
+    	      largest = arr[r].priority < arr[largest].priority ? r : largest;
+    	    }
+    	    if (largest !== i) {
+    	      this._swap(i, largest);
+    	      this._heapify(largest);
+    	    }
+    	  }
+    	};
+
+    	PriorityQueue.prototype._decrease = function(index) {
+    	  var arr = this._arr;
+    	  var priority = arr[index].priority;
+    	  var parent;
+    	  while (index !== 0) {
+    	    parent = index >> 1;
+    	    if (arr[parent].priority < priority) {
+    	      break;
+    	    }
+    	    this._swap(index, parent);
+    	    index = parent;
+    	  }
+    	};
+
+    	PriorityQueue.prototype._swap = function(i, j) {
+    	  var arr = this._arr;
+    	  var keyIndices = this._keyIndices;
+    	  var origArrI = arr[i];
+    	  var origArrJ = arr[j];
+    	  arr[i] = origArrJ;
+    	  arr[j] = origArrI;
+    	  keyIndices[origArrJ.key] = i;
+    	  keyIndices[origArrI.key] = j;
+    	};
+    	return priorityQueue;
     }
 
-    function edgeObjToId(isDirected, edgeObj) {
-      return edgeArgsToId(isDirected, edgeObj.v, edgeObj.w, edgeObj.name);
+    var dijkstra_1;
+    var hasRequiredDijkstra;
+
+    function requireDijkstra () {
+    	if (hasRequiredDijkstra) return dijkstra_1;
+    	hasRequiredDijkstra = 1;
+    	var _ = requireLodash$1();
+    	var PriorityQueue = requirePriorityQueue();
+
+    	dijkstra_1 = dijkstra;
+
+    	var DEFAULT_WEIGHT_FUNC = _.constant(1);
+
+    	function dijkstra(g, source, weightFn, edgeFn) {
+    	  return runDijkstra(g, String(source),
+    	    weightFn || DEFAULT_WEIGHT_FUNC,
+    	    edgeFn || function(v) { return g.outEdges(v); });
+    	}
+
+    	function runDijkstra(g, source, weightFn, edgeFn) {
+    	  var results = {};
+    	  var pq = new PriorityQueue();
+    	  var v, vEntry;
+
+    	  var updateNeighbors = function(edge) {
+    	    var w = edge.v !== v ? edge.v : edge.w;
+    	    var wEntry = results[w];
+    	    var weight = weightFn(edge);
+    	    var distance = vEntry.distance + weight;
+
+    	    if (weight < 0) {
+    	      throw new Error("dijkstra does not allow negative edge weights. " +
+    	                      "Bad edge: " + edge + " Weight: " + weight);
+    	    }
+
+    	    if (distance < wEntry.distance) {
+    	      wEntry.distance = distance;
+    	      wEntry.predecessor = v;
+    	      pq.decrease(w, distance);
+    	    }
+    	  };
+
+    	  g.nodes().forEach(function(v) {
+    	    var distance = v === source ? 0 : Number.POSITIVE_INFINITY;
+    	    results[v] = { distance: distance };
+    	    pq.add(v, distance);
+    	  });
+
+    	  while (pq.size() > 0) {
+    	    v = pq.removeMin();
+    	    vEntry = results[v];
+    	    if (vEntry.distance === Number.POSITIVE_INFINITY) {
+    	      break;
+    	    }
+
+    	    edgeFn(v).forEach(updateNeighbors);
+    	  }
+
+    	  return results;
+    	}
+    	return dijkstra_1;
     }
 
-    var version$1 = '2.1.8';
+    var dijkstraAll_1;
+    var hasRequiredDijkstraAll;
 
-    // Includes only the "core" of graphlib
-    var lib$1 = {
-      Graph: graph,
-      version: version$1
-    };
+    function requireDijkstraAll () {
+    	if (hasRequiredDijkstraAll) return dijkstraAll_1;
+    	hasRequiredDijkstraAll = 1;
+    	var dijkstra = requireDijkstra();
+    	var _ = requireLodash$1();
 
-    var _$a = lodash_1$1;
-    var Graph$1 = graph;
+    	dijkstraAll_1 = dijkstraAll;
 
-    var json = {
-      write: write,
-      read: read
-    };
-
-    function write(g) {
-      var json = {
-        options: {
-          directed: g.isDirected(),
-          multigraph: g.isMultigraph(),
-          compound: g.isCompound()
-        },
-        nodes: writeNodes(g),
-        edges: writeEdges(g)
-      };
-      if (!_$a.isUndefined(g.graph())) {
-        json.value = _$a.clone(g.graph());
-      }
-      return json;
+    	function dijkstraAll(g, weightFunc, edgeFunc) {
+    	  return _.transform(g.nodes(), function(acc, v) {
+    	    acc[v] = dijkstra(g, v, weightFunc, edgeFunc);
+    	  }, {});
+    	}
+    	return dijkstraAll_1;
     }
 
-    function writeNodes(g) {
-      return _$a.map(g.nodes(), function(v) {
-        var nodeValue = g.node(v);
-        var parent = g.parent(v);
-        var node = { v: v };
-        if (!_$a.isUndefined(nodeValue)) {
-          node.value = nodeValue;
-        }
-        if (!_$a.isUndefined(parent)) {
-          node.parent = parent;
-        }
-        return node;
-      });
+    var tarjan_1;
+    var hasRequiredTarjan;
+
+    function requireTarjan () {
+    	if (hasRequiredTarjan) return tarjan_1;
+    	hasRequiredTarjan = 1;
+    	var _ = requireLodash$1();
+
+    	tarjan_1 = tarjan;
+
+    	function tarjan(g) {
+    	  var index = 0;
+    	  var stack = [];
+    	  var visited = {}; // node id -> { onStack, lowlink, index }
+    	  var results = [];
+
+    	  function dfs(v) {
+    	    var entry = visited[v] = {
+    	      onStack: true,
+    	      lowlink: index,
+    	      index: index++
+    	    };
+    	    stack.push(v);
+
+    	    g.successors(v).forEach(function(w) {
+    	      if (!_.has(visited, w)) {
+    	        dfs(w);
+    	        entry.lowlink = Math.min(entry.lowlink, visited[w].lowlink);
+    	      } else if (visited[w].onStack) {
+    	        entry.lowlink = Math.min(entry.lowlink, visited[w].index);
+    	      }
+    	    });
+
+    	    if (entry.lowlink === entry.index) {
+    	      var cmpt = [];
+    	      var w;
+    	      do {
+    	        w = stack.pop();
+    	        visited[w].onStack = false;
+    	        cmpt.push(w);
+    	      } while (v !== w);
+    	      results.push(cmpt);
+    	    }
+    	  }
+
+    	  g.nodes().forEach(function(v) {
+    	    if (!_.has(visited, v)) {
+    	      dfs(v);
+    	    }
+    	  });
+
+    	  return results;
+    	}
+    	return tarjan_1;
     }
 
-    function writeEdges(g) {
-      return _$a.map(g.edges(), function(e) {
-        var edgeValue = g.edge(e);
-        var edge = { v: e.v, w: e.w };
-        if (!_$a.isUndefined(e.name)) {
-          edge.name = e.name;
-        }
-        if (!_$a.isUndefined(edgeValue)) {
-          edge.value = edgeValue;
-        }
-        return edge;
-      });
+    var findCycles_1;
+    var hasRequiredFindCycles;
+
+    function requireFindCycles () {
+    	if (hasRequiredFindCycles) return findCycles_1;
+    	hasRequiredFindCycles = 1;
+    	var _ = requireLodash$1();
+    	var tarjan = requireTarjan();
+
+    	findCycles_1 = findCycles;
+
+    	function findCycles(g) {
+    	  return _.filter(tarjan(g), function(cmpt) {
+    	    return cmpt.length > 1 || (cmpt.length === 1 && g.hasEdge(cmpt[0], cmpt[0]));
+    	  });
+    	}
+    	return findCycles_1;
     }
 
-    function read(json) {
-      var g = new Graph$1(json.options).setGraph(json.value);
-      _$a.each(json.nodes, function(entry) {
-        g.setNode(entry.v, entry.value);
-        if (entry.parent) {
-          g.setParent(entry.v, entry.parent);
-        }
-      });
-      _$a.each(json.edges, function(entry) {
-        g.setEdge({ v: entry.v, w: entry.w, name: entry.name }, entry.value);
-      });
-      return g;
+    var floydWarshall_1;
+    var hasRequiredFloydWarshall;
+
+    function requireFloydWarshall () {
+    	if (hasRequiredFloydWarshall) return floydWarshall_1;
+    	hasRequiredFloydWarshall = 1;
+    	var _ = requireLodash$1();
+
+    	floydWarshall_1 = floydWarshall;
+
+    	var DEFAULT_WEIGHT_FUNC = _.constant(1);
+
+    	function floydWarshall(g, weightFn, edgeFn) {
+    	  return runFloydWarshall(g,
+    	    weightFn || DEFAULT_WEIGHT_FUNC,
+    	    edgeFn || function(v) { return g.outEdges(v); });
+    	}
+
+    	function runFloydWarshall(g, weightFn, edgeFn) {
+    	  var results = {};
+    	  var nodes = g.nodes();
+
+    	  nodes.forEach(function(v) {
+    	    results[v] = {};
+    	    results[v][v] = { distance: 0 };
+    	    nodes.forEach(function(w) {
+    	      if (v !== w) {
+    	        results[v][w] = { distance: Number.POSITIVE_INFINITY };
+    	      }
+    	    });
+    	    edgeFn(v).forEach(function(edge) {
+    	      var w = edge.v === v ? edge.w : edge.v;
+    	      var d = weightFn(edge);
+    	      results[v][w] = { distance: d, predecessor: v };
+    	    });
+    	  });
+
+    	  nodes.forEach(function(k) {
+    	    var rowK = results[k];
+    	    nodes.forEach(function(i) {
+    	      var rowI = results[i];
+    	      nodes.forEach(function(j) {
+    	        var ik = rowI[k];
+    	        var kj = rowK[j];
+    	        var ij = rowI[j];
+    	        var altDistance = ik.distance + kj.distance;
+    	        if (altDistance < ij.distance) {
+    	          ij.distance = altDistance;
+    	          ij.predecessor = kj.predecessor;
+    	        }
+    	      });
+    	    });
+    	  });
+
+    	  return results;
+    	}
+    	return floydWarshall_1;
     }
 
-    var _$9 = lodash_1$1;
+    var topsort_1;
+    var hasRequiredTopsort;
 
-    var components_1 = components;
+    function requireTopsort () {
+    	if (hasRequiredTopsort) return topsort_1;
+    	hasRequiredTopsort = 1;
+    	var _ = requireLodash$1();
 
-    function components(g) {
-      var visited = {};
-      var cmpts = [];
-      var cmpt;
+    	topsort_1 = topsort;
+    	topsort.CycleException = CycleException;
 
-      function dfs(v) {
-        if (_$9.has(visited, v)) return;
-        visited[v] = true;
-        cmpt.push(v);
-        _$9.each(g.successors(v), dfs);
-        _$9.each(g.predecessors(v), dfs);
-      }
+    	function topsort(g) {
+    	  var visited = {};
+    	  var stack = {};
+    	  var results = [];
 
-      _$9.each(g.nodes(), function(v) {
-        cmpt = [];
-        dfs(v);
-        if (cmpt.length) {
-          cmpts.push(cmpt);
-        }
-      });
+    	  function visit(node) {
+    	    if (_.has(stack, node)) {
+    	      throw new CycleException();
+    	    }
 
-      return cmpts;
+    	    if (!_.has(visited, node)) {
+    	      stack[node] = true;
+    	      visited[node] = true;
+    	      _.each(g.predecessors(node), visit);
+    	      delete stack[node];
+    	      results.push(node);
+    	    }
+    	  }
+
+    	  _.each(g.sinks(), visit);
+
+    	  if (_.size(visited) !== g.nodeCount()) {
+    	    throw new CycleException();
+    	  }
+
+    	  return results;
+    	}
+
+    	function CycleException() {}
+    	CycleException.prototype = new Error(); // must be an instance of Error to pass testing
+    	return topsort_1;
     }
 
-    var _$8 = lodash_1$1;
+    var isAcyclic_1;
+    var hasRequiredIsAcyclic;
 
-    var priorityQueue = PriorityQueue$2;
+    function requireIsAcyclic () {
+    	if (hasRequiredIsAcyclic) return isAcyclic_1;
+    	hasRequiredIsAcyclic = 1;
+    	var topsort = requireTopsort();
 
-    /**
-     * A min-priority queue data structure. This algorithm is derived from Cormen,
-     * et al., "Introduction to Algorithms". The basic idea of a min-priority
-     * queue is that you can efficiently (in O(1) time) get the smallest key in
-     * the queue. Adding and removing elements takes O(log n) time. A key can
-     * have its priority decreased in O(log n) time.
-     */
-    function PriorityQueue$2() {
-      this._arr = [];
-      this._keyIndices = {};
+    	isAcyclic_1 = isAcyclic;
+
+    	function isAcyclic(g) {
+    	  try {
+    	    topsort(g);
+    	  } catch (e) {
+    	    if (e instanceof topsort.CycleException) {
+    	      return false;
+    	    }
+    	    throw e;
+    	  }
+    	  return true;
+    	}
+    	return isAcyclic_1;
     }
 
-    /**
-     * Returns the number of elements in the queue. Takes `O(1)` time.
-     */
-    PriorityQueue$2.prototype.size = function() {
-      return this._arr.length;
-    };
+    var dfs_1;
+    var hasRequiredDfs;
 
-    /**
-     * Returns the keys that are in the queue. Takes `O(n)` time.
-     */
-    PriorityQueue$2.prototype.keys = function() {
-      return this._arr.map(function(x) { return x.key; });
-    };
+    function requireDfs () {
+    	if (hasRequiredDfs) return dfs_1;
+    	hasRequiredDfs = 1;
+    	var _ = requireLodash$1();
 
-    /**
-     * Returns `true` if **key** is in the queue and `false` if not.
-     */
-    PriorityQueue$2.prototype.has = function(key) {
-      return _$8.has(this._keyIndices, key);
-    };
+    	dfs_1 = dfs;
 
-    /**
-     * Returns the priority for **key**. If **key** is not present in the queue
-     * then this function returns `undefined`. Takes `O(1)` time.
-     *
-     * @param {Object} key
-     */
-    PriorityQueue$2.prototype.priority = function(key) {
-      var index = this._keyIndices[key];
-      if (index !== undefined) {
-        return this._arr[index].priority;
-      }
-    };
+    	/*
+    	 * A helper that preforms a pre- or post-order traversal on the input graph
+    	 * and returns the nodes in the order they were visited. If the graph is
+    	 * undirected then this algorithm will navigate using neighbors. If the graph
+    	 * is directed then this algorithm will navigate using successors.
+    	 *
+    	 * Order must be one of "pre" or "post".
+    	 */
+    	function dfs(g, vs, order) {
+    	  if (!_.isArray(vs)) {
+    	    vs = [vs];
+    	  }
 
-    /**
-     * Returns the key for the minimum element in this queue. If the queue is
-     * empty this function throws an Error. Takes `O(1)` time.
-     */
-    PriorityQueue$2.prototype.min = function() {
-      if (this.size() === 0) {
-        throw new Error("Queue underflow");
-      }
-      return this._arr[0].key;
-    };
+    	  var navigation = (g.isDirected() ? g.successors : g.neighbors).bind(g);
 
-    /**
-     * Inserts a new key into the priority queue. If the key already exists in
-     * the queue this function returns `false`; otherwise it will return `true`.
-     * Takes `O(n)` time.
-     *
-     * @param {Object} key the key to add
-     * @param {Number} priority the initial priority for the key
-     */
-    PriorityQueue$2.prototype.add = function(key, priority) {
-      var keyIndices = this._keyIndices;
-      key = String(key);
-      if (!_$8.has(keyIndices, key)) {
-        var arr = this._arr;
-        var index = arr.length;
-        keyIndices[key] = index;
-        arr.push({key: key, priority: priority});
-        this._decrease(index);
-        return true;
-      }
-      return false;
-    };
+    	  var acc = [];
+    	  var visited = {};
+    	  _.each(vs, function(v) {
+    	    if (!g.hasNode(v)) {
+    	      throw new Error("Graph does not have node: " + v);
+    	    }
 
-    /**
-     * Removes and returns the smallest key in the queue. Takes `O(log n)` time.
-     */
-    PriorityQueue$2.prototype.removeMin = function() {
-      this._swap(0, this._arr.length - 1);
-      var min = this._arr.pop();
-      delete this._keyIndices[min.key];
-      this._heapify(0);
-      return min.key;
-    };
+    	    doDfs(g, v, order === "post", visited, navigation, acc);
+    	  });
+    	  return acc;
+    	}
 
-    /**
-     * Decreases the priority for **key** to **priority**. If the new priority is
-     * greater than the previous priority, this function will throw an Error.
-     *
-     * @param {Object} key the key for which to raise priority
-     * @param {Number} priority the new priority for the key
-     */
-    PriorityQueue$2.prototype.decrease = function(key, priority) {
-      var index = this._keyIndices[key];
-      if (priority > this._arr[index].priority) {
-        throw new Error("New priority is greater than current priority. " +
-            "Key: " + key + " Old: " + this._arr[index].priority + " New: " + priority);
-      }
-      this._arr[index].priority = priority;
-      this._decrease(index);
-    };
+    	function doDfs(g, v, postorder, visited, navigation, acc) {
+    	  if (!_.has(visited, v)) {
+    	    visited[v] = true;
 
-    PriorityQueue$2.prototype._heapify = function(i) {
-      var arr = this._arr;
-      var l = 2 * i;
-      var r = l + 1;
-      var largest = i;
-      if (l < arr.length) {
-        largest = arr[l].priority < arr[largest].priority ? l : largest;
-        if (r < arr.length) {
-          largest = arr[r].priority < arr[largest].priority ? r : largest;
-        }
-        if (largest !== i) {
-          this._swap(i, largest);
-          this._heapify(largest);
-        }
-      }
-    };
-
-    PriorityQueue$2.prototype._decrease = function(index) {
-      var arr = this._arr;
-      var priority = arr[index].priority;
-      var parent;
-      while (index !== 0) {
-        parent = index >> 1;
-        if (arr[parent].priority < priority) {
-          break;
-        }
-        this._swap(index, parent);
-        index = parent;
-      }
-    };
-
-    PriorityQueue$2.prototype._swap = function(i, j) {
-      var arr = this._arr;
-      var keyIndices = this._keyIndices;
-      var origArrI = arr[i];
-      var origArrJ = arr[j];
-      arr[i] = origArrJ;
-      arr[j] = origArrI;
-      keyIndices[origArrJ.key] = i;
-      keyIndices[origArrI.key] = j;
-    };
-
-    var _$7 = lodash_1$1;
-    var PriorityQueue$1 = priorityQueue;
-
-    var dijkstra_1 = dijkstra$1;
-
-    var DEFAULT_WEIGHT_FUNC$1 = _$7.constant(1);
-
-    function dijkstra$1(g, source, weightFn, edgeFn) {
-      return runDijkstra(g, String(source),
-        weightFn || DEFAULT_WEIGHT_FUNC$1,
-        edgeFn || function(v) { return g.outEdges(v); });
+    	    if (!postorder) { acc.push(v); }
+    	    _.each(navigation(v), function(w) {
+    	      doDfs(g, w, postorder, visited, navigation, acc);
+    	    });
+    	    if (postorder) { acc.push(v); }
+    	  }
+    	}
+    	return dfs_1;
     }
 
-    function runDijkstra(g, source, weightFn, edgeFn) {
-      var results = {};
-      var pq = new PriorityQueue$1();
-      var v, vEntry;
+    var postorder_1;
+    var hasRequiredPostorder;
 
-      var updateNeighbors = function(edge) {
-        var w = edge.v !== v ? edge.v : edge.w;
-        var wEntry = results[w];
-        var weight = weightFn(edge);
-        var distance = vEntry.distance + weight;
+    function requirePostorder () {
+    	if (hasRequiredPostorder) return postorder_1;
+    	hasRequiredPostorder = 1;
+    	var dfs = requireDfs();
 
-        if (weight < 0) {
-          throw new Error("dijkstra does not allow negative edge weights. " +
-                          "Bad edge: " + edge + " Weight: " + weight);
-        }
+    	postorder_1 = postorder;
 
-        if (distance < wEntry.distance) {
-          wEntry.distance = distance;
-          wEntry.predecessor = v;
-          pq.decrease(w, distance);
-        }
-      };
-
-      g.nodes().forEach(function(v) {
-        var distance = v === source ? 0 : Number.POSITIVE_INFINITY;
-        results[v] = { distance: distance };
-        pq.add(v, distance);
-      });
-
-      while (pq.size() > 0) {
-        v = pq.removeMin();
-        vEntry = results[v];
-        if (vEntry.distance === Number.POSITIVE_INFINITY) {
-          break;
-        }
-
-        edgeFn(v).forEach(updateNeighbors);
-      }
-
-      return results;
+    	function postorder(g, vs) {
+    	  return dfs(g, vs, "post");
+    	}
+    	return postorder_1;
     }
 
-    var dijkstra = dijkstra_1;
-    var _$6 = lodash_1$1;
+    var preorder_1;
+    var hasRequiredPreorder;
 
-    var dijkstraAll_1 = dijkstraAll;
+    function requirePreorder () {
+    	if (hasRequiredPreorder) return preorder_1;
+    	hasRequiredPreorder = 1;
+    	var dfs = requireDfs();
 
-    function dijkstraAll(g, weightFunc, edgeFunc) {
-      return _$6.transform(g.nodes(), function(acc, v) {
-        acc[v] = dijkstra(g, v, weightFunc, edgeFunc);
-      }, {});
+    	preorder_1 = preorder;
+
+    	function preorder(g, vs) {
+    	  return dfs(g, vs, "pre");
+    	}
+    	return preorder_1;
     }
 
-    var _$5 = lodash_1$1;
+    var prim_1;
+    var hasRequiredPrim;
 
-    var tarjan_1 = tarjan$1;
+    function requirePrim () {
+    	if (hasRequiredPrim) return prim_1;
+    	hasRequiredPrim = 1;
+    	var _ = requireLodash$1();
+    	var Graph = requireGraph();
+    	var PriorityQueue = requirePriorityQueue();
 
-    function tarjan$1(g) {
-      var index = 0;
-      var stack = [];
-      var visited = {}; // node id -> { onStack, lowlink, index }
-      var results = [];
+    	prim_1 = prim;
 
-      function dfs(v) {
-        var entry = visited[v] = {
-          onStack: true,
-          lowlink: index,
-          index: index++
-        };
-        stack.push(v);
+    	function prim(g, weightFunc) {
+    	  var result = new Graph();
+    	  var parents = {};
+    	  var pq = new PriorityQueue();
+    	  var v;
 
-        g.successors(v).forEach(function(w) {
-          if (!_$5.has(visited, w)) {
-            dfs(w);
-            entry.lowlink = Math.min(entry.lowlink, visited[w].lowlink);
-          } else if (visited[w].onStack) {
-            entry.lowlink = Math.min(entry.lowlink, visited[w].index);
-          }
-        });
+    	  function updateNeighbors(edge) {
+    	    var w = edge.v === v ? edge.w : edge.v;
+    	    var pri = pq.priority(w);
+    	    if (pri !== undefined) {
+    	      var edgeWeight = weightFunc(edge);
+    	      if (edgeWeight < pri) {
+    	        parents[w] = v;
+    	        pq.decrease(w, edgeWeight);
+    	      }
+    	    }
+    	  }
 
-        if (entry.lowlink === entry.index) {
-          var cmpt = [];
-          var w;
-          do {
-            w = stack.pop();
-            visited[w].onStack = false;
-            cmpt.push(w);
-          } while (v !== w);
-          results.push(cmpt);
-        }
-      }
+    	  if (g.nodeCount() === 0) {
+    	    return result;
+    	  }
 
-      g.nodes().forEach(function(v) {
-        if (!_$5.has(visited, v)) {
-          dfs(v);
-        }
-      });
+    	  _.each(g.nodes(), function(v) {
+    	    pq.add(v, Number.POSITIVE_INFINITY);
+    	    result.setNode(v);
+    	  });
 
-      return results;
+    	  // Start from an arbitrary node
+    	  pq.decrease(g.nodes()[0], 0);
+
+    	  var init = false;
+    	  while (pq.size() > 0) {
+    	    v = pq.removeMin();
+    	    if (_.has(parents, v)) {
+    	      result.setEdge(v, parents[v]);
+    	    } else if (init) {
+    	      throw new Error("Input graph is not connected: " + g);
+    	    } else {
+    	      init = true;
+    	    }
+
+    	    g.nodeEdges(v).forEach(updateNeighbors);
+    	  }
+
+    	  return result;
+    	}
+    	return prim_1;
     }
 
-    var _$4 = lodash_1$1;
-    var tarjan = tarjan_1;
+    var alg;
+    var hasRequiredAlg;
 
-    var findCycles_1 = findCycles;
-
-    function findCycles(g) {
-      return _$4.filter(tarjan(g), function(cmpt) {
-        return cmpt.length > 1 || (cmpt.length === 1 && g.hasEdge(cmpt[0], cmpt[0]));
-      });
+    function requireAlg () {
+    	if (hasRequiredAlg) return alg;
+    	hasRequiredAlg = 1;
+    	alg = {
+    	  components: requireComponents(),
+    	  dijkstra: requireDijkstra(),
+    	  dijkstraAll: requireDijkstraAll(),
+    	  findCycles: requireFindCycles(),
+    	  floydWarshall: requireFloydWarshall(),
+    	  isAcyclic: requireIsAcyclic(),
+    	  postorder: requirePostorder(),
+    	  preorder: requirePreorder(),
+    	  prim: requirePrim(),
+    	  tarjan: requireTarjan(),
+    	  topsort: requireTopsort()
+    	};
+    	return alg;
     }
-
-    var _$3 = lodash_1$1;
-
-    var floydWarshall_1 = floydWarshall;
-
-    var DEFAULT_WEIGHT_FUNC = _$3.constant(1);
-
-    function floydWarshall(g, weightFn, edgeFn) {
-      return runFloydWarshall(g,
-        weightFn || DEFAULT_WEIGHT_FUNC,
-        edgeFn || function(v) { return g.outEdges(v); });
-    }
-
-    function runFloydWarshall(g, weightFn, edgeFn) {
-      var results = {};
-      var nodes = g.nodes();
-
-      nodes.forEach(function(v) {
-        results[v] = {};
-        results[v][v] = { distance: 0 };
-        nodes.forEach(function(w) {
-          if (v !== w) {
-            results[v][w] = { distance: Number.POSITIVE_INFINITY };
-          }
-        });
-        edgeFn(v).forEach(function(edge) {
-          var w = edge.v === v ? edge.w : edge.v;
-          var d = weightFn(edge);
-          results[v][w] = { distance: d, predecessor: v };
-        });
-      });
-
-      nodes.forEach(function(k) {
-        var rowK = results[k];
-        nodes.forEach(function(i) {
-          var rowI = results[i];
-          nodes.forEach(function(j) {
-            var ik = rowI[k];
-            var kj = rowK[j];
-            var ij = rowI[j];
-            var altDistance = ik.distance + kj.distance;
-            if (altDistance < ij.distance) {
-              ij.distance = altDistance;
-              ij.predecessor = kj.predecessor;
-            }
-          });
-        });
-      });
-
-      return results;
-    }
-
-    var _$2 = lodash_1$1;
-
-    var topsort_1 = topsort$1;
-    topsort$1.CycleException = CycleException;
-
-    function topsort$1(g) {
-      var visited = {};
-      var stack = {};
-      var results = [];
-
-      function visit(node) {
-        if (_$2.has(stack, node)) {
-          throw new CycleException();
-        }
-
-        if (!_$2.has(visited, node)) {
-          stack[node] = true;
-          visited[node] = true;
-          _$2.each(g.predecessors(node), visit);
-          delete stack[node];
-          results.push(node);
-        }
-      }
-
-      _$2.each(g.sinks(), visit);
-
-      if (_$2.size(visited) !== g.nodeCount()) {
-        throw new CycleException();
-      }
-
-      return results;
-    }
-
-    function CycleException() {}
-    CycleException.prototype = new Error(); // must be an instance of Error to pass testing
-
-    var topsort = topsort_1;
-
-    var isAcyclic_1 = isAcyclic;
-
-    function isAcyclic(g) {
-      try {
-        topsort(g);
-      } catch (e) {
-        if (e instanceof topsort.CycleException) {
-          return false;
-        }
-        throw e;
-      }
-      return true;
-    }
-
-    var _$1 = lodash_1$1;
-
-    var dfs_1 = dfs$2;
-
-    /*
-     * A helper that preforms a pre- or post-order traversal on the input graph
-     * and returns the nodes in the order they were visited. If the graph is
-     * undirected then this algorithm will navigate using neighbors. If the graph
-     * is directed then this algorithm will navigate using successors.
-     *
-     * Order must be one of "pre" or "post".
-     */
-    function dfs$2(g, vs, order) {
-      if (!_$1.isArray(vs)) {
-        vs = [vs];
-      }
-
-      var navigation = (g.isDirected() ? g.successors : g.neighbors).bind(g);
-
-      var acc = [];
-      var visited = {};
-      _$1.each(vs, function(v) {
-        if (!g.hasNode(v)) {
-          throw new Error("Graph does not have node: " + v);
-        }
-
-        doDfs(g, v, order === "post", visited, navigation, acc);
-      });
-      return acc;
-    }
-
-    function doDfs(g, v, postorder, visited, navigation, acc) {
-      if (!_$1.has(visited, v)) {
-        visited[v] = true;
-
-        if (!postorder) { acc.push(v); }
-        _$1.each(navigation(v), function(w) {
-          doDfs(g, w, postorder, visited, navigation, acc);
-        });
-        if (postorder) { acc.push(v); }
-      }
-    }
-
-    var dfs$1 = dfs_1;
-
-    var postorder_1 = postorder;
-
-    function postorder(g, vs) {
-      return dfs$1(g, vs, "post");
-    }
-
-    var dfs = dfs_1;
-
-    var preorder_1 = preorder;
-
-    function preorder(g, vs) {
-      return dfs(g, vs, "pre");
-    }
-
-    var _ = lodash_1$1;
-    var Graph = graph;
-    var PriorityQueue = priorityQueue;
-
-    var prim_1 = prim;
-
-    function prim(g, weightFunc) {
-      var result = new Graph();
-      var parents = {};
-      var pq = new PriorityQueue();
-      var v;
-
-      function updateNeighbors(edge) {
-        var w = edge.v === v ? edge.w : edge.v;
-        var pri = pq.priority(w);
-        if (pri !== undefined) {
-          var edgeWeight = weightFunc(edge);
-          if (edgeWeight < pri) {
-            parents[w] = v;
-            pq.decrease(w, edgeWeight);
-          }
-        }
-      }
-
-      if (g.nodeCount() === 0) {
-        return result;
-      }
-
-      _.each(g.nodes(), function(v) {
-        pq.add(v, Number.POSITIVE_INFINITY);
-        result.setNode(v);
-      });
-
-      // Start from an arbitrary node
-      pq.decrease(g.nodes()[0], 0);
-
-      var init = false;
-      while (pq.size() > 0) {
-        v = pq.removeMin();
-        if (_.has(parents, v)) {
-          result.setEdge(v, parents[v]);
-        } else if (init) {
-          throw new Error("Input graph is not connected: " + g);
-        } else {
-          init = true;
-        }
-
-        g.nodeEdges(v).forEach(updateNeighbors);
-      }
-
-      return result;
-    }
-
-    var alg = {
-      components: components_1,
-      dijkstra: dijkstra_1,
-      dijkstraAll: dijkstraAll_1,
-      findCycles: findCycles_1,
-      floydWarshall: floydWarshall_1,
-      isAcyclic: isAcyclic_1,
-      postorder: postorder_1,
-      preorder: preorder_1,
-      prim: prim_1,
-      tarjan: tarjan_1,
-      topsort: topsort_1
-    };
 
     /**
      * Copyright (c) 2014, Chris Pettitt
@@ -51431,14 +51582,24 @@ var app = (function () {
      * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      */
 
-    var lib = lib$1;
+    var graphlib;
+    var hasRequiredGraphlib$1;
 
-    var graphlib = {
-      Graph: lib.Graph,
-      json: json,
-      alg: alg,
-      version: lib.version
-    };
+    function requireGraphlib$1 () {
+    	if (hasRequiredGraphlib$1) return graphlib;
+    	hasRequiredGraphlib$1 = 1;
+    	var lib = requireLib();
+
+    	graphlib = {
+    	  Graph: lib.Graph,
+    	  json: requireJson(),
+    	  alg: requireAlg(),
+    	  version: lib.version
+    	};
+    	return graphlib;
+    }
+
+    var graphlibExports = requireGraphlib$1();
 
     // import { NodeTypes } from './path/to/your/enum';  // Import your NodeTypes enum
     // export const stylesMap: { [key: string]: { [styleKey: string]: string } } = {
@@ -51470,7 +51631,7 @@ var app = (function () {
     function systemGraphToGraphLib(system_state) {
         const graph = system_state.graph;
         // const graph = graph_state.graph as proto.Graph;
-        const g = new graphlib.Graph();
+        const g = new graphlibExports.Graph();
         graph.nodes_info.forEach((node) => {
             g.setNode(node.id, node.name);
         });
@@ -51591,21 +51752,21 @@ var app = (function () {
     function requireGraphlib () {
     	if (hasRequiredGraphlib) return graphlib_1;
     	hasRequiredGraphlib = 1;
-    	var graphlib$1;
+    	var graphlib;
 
     	if (typeof commonjsRequire === "function") {
     	  try {
-    	    graphlib$1 = graphlib;
+    	    graphlib = requireGraphlib$1();
     	  } catch (e) {
     	    // continue regardless of error
     	  }
     	}
 
-    	if (!graphlib$1) {
-    	  graphlib$1 = window.graphlib;
+    	if (!graphlib) {
+    	  graphlib = window.graphlib;
     	}
 
-    	graphlib_1 = graphlib$1;
+    	graphlib_1 = graphlib;
     	return graphlib_1;
     }
 
@@ -56995,7 +57156,7 @@ var app = (function () {
     		c: function create() {
     			div = element$1("div");
     			if (if_block) if_block.c();
-    			attr_dev(div, "class", "graph svelte-1e7cfxb");
+    			attr_dev(div, "class", "main-content svelte-9prq5n");
     			add_location(div, file$3, 148, 0, 5857);
     		},
     		l: function claim(nodes) {
@@ -57106,7 +57267,7 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('GraphComponent_graphlib', slots, ['default']);
     	var _a;
-    	let current_graph = new Graph$3();
+    	let current_graph = new Graph();
 
     	onMount(() => {
     		console.log("Graph Component Mounted");
@@ -57549,7 +57710,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src/App.svelte";
 
-    // (36:0) {#if !authenticated}
+    // (43:0) {#if !authenticated}
     function create_if_block_1(ctx) {
     	let current_block_type_index;
     	let if_block;
@@ -57618,14 +57779,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(36:0) {#if !authenticated}",
+    		source: "(42:0) {#if !authenticated}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (39:2) {:else}
+    // (45:2) {:else}
     function create_else_block(ctx) {
     	let loading;
     	let current;
@@ -57657,14 +57818,14 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(39:2) {:else}",
+    		source: "(45:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (37:2) {#if websocket_ready}
+    // (43:2) {#if websocket_ready}
     function create_if_block_2(ctx) {
     	let authpage;
     	let current;
@@ -57696,21 +57857,34 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(37:2) {#if websocket_ready}",
+    		source: "(43:2) {#if websocket_ready}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (44:0) {#if authenticated}
+    // (50:0) {#if authenticated}
     function create_if_block(ctx) {
     	let div;
     	let sidebar;
+    	let updating_expanded;
     	let t;
     	let graphcomponentgraphlib;
     	let current;
-    	sidebar = new Sidebar({ $$inline: true });
+
+    	function sidebar_expanded_binding(value) {
+    		/*sidebar_expanded_binding*/ ctx[4](value);
+    	}
+
+    	let sidebar_props = {};
+
+    	if (/*expanded*/ ctx[2] !== void 0) {
+    		sidebar_props.expanded = /*expanded*/ ctx[2];
+    	}
+
+    	sidebar = new Sidebar({ props: sidebar_props, $$inline: true });
+    	binding_callbacks.push(() => bind(sidebar, 'expanded', sidebar_expanded_binding));
     	graphcomponentgraphlib = new GraphComponent_graphlib({ $$inline: true });
 
     	const block = {
@@ -57720,7 +57894,7 @@ var app = (function () {
     			t = space();
     			create_component(graphcomponentgraphlib.$$.fragment);
     			attr_dev(div, "class", "app-container svelte-utzf6m");
-    			add_location(div, file, 44, 2, 1478);
+    			add_location(div, file, 50, 2, 1780);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -57728,6 +57902,17 @@ var app = (function () {
     			append_dev(div, t);
     			mount_component(graphcomponentgraphlib, div, null);
     			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const sidebar_changes = {};
+
+    			if (!updating_expanded && dirty & /*expanded*/ 4) {
+    				updating_expanded = true;
+    				sidebar_changes.expanded = /*expanded*/ ctx[2];
+    				add_flush_callback(() => updating_expanded = false);
+    			}
+
+    			sidebar.$set(sidebar_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -57751,7 +57936,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(44:0) {#if authenticated}",
+    		source: "(50:0) {#if authenticated}",
     		ctx
     	});
 
@@ -57808,6 +57993,8 @@ var app = (function () {
 
     			if (/*authenticated*/ ctx[1]) {
     				if (if_block1) {
+    					if_block1.p(ctx, dirty);
+
     					if (dirty & /*authenticated*/ 2) {
     						transition_in(if_block1, 1);
     					}
@@ -57860,7 +58047,7 @@ var app = (function () {
     function instance($$self, $$props, $$invalidate) {
     	let $systemStateStore;
     	validate_store(systemStateStore, 'systemStateStore');
-    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(2, $systemStateStore = $$value));
+    	component_subscribe($$self, systemStateStore, $$value => $$invalidate(3, $systemStateStore = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
     	console.log("Script started");
@@ -57868,6 +58055,7 @@ var app = (function () {
     	let system_state;
     	let websocket_ready = false;
     	let authenticated;
+    	let expanded = false;
 
     	onMount(() => {
     		console.log("onMount triggered");
@@ -57891,6 +58079,11 @@ var app = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
+    	function sidebar_expanded_binding(value) {
+    		expanded = value;
+    		$$invalidate(2, expanded);
+    	}
+
     	$$self.$capture_state = () => ({
     		Sidebar,
     		GraphComponentGraphlib: GraphComponent_graphlib,
@@ -57905,6 +58098,7 @@ var app = (function () {
     		system_state,
     		websocket_ready,
     		authenticated,
+    		expanded,
     		$systemStateStore
     	});
 
@@ -57913,6 +58107,7 @@ var app = (function () {
     		if ('system_state' in $$props) system_state = $$props.system_state;
     		if ('websocket_ready' in $$props) $$invalidate(0, websocket_ready = $$props.websocket_ready);
     		if ('authenticated' in $$props) $$invalidate(1, authenticated = $$props.authenticated);
+    		if ('expanded' in $$props) $$invalidate(2, expanded = $$props.expanded);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -57920,7 +58115,7 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$systemStateStore*/ 4) {
+    		if ($$self.$$.dirty & /*$systemStateStore*/ 8) {
     			{
     				console.log("auth state", $systemStateStore.authenticated);
     				$$invalidate(1, authenticated = $systemStateStore.authenticated);
@@ -57928,7 +58123,13 @@ var app = (function () {
     		}
     	};
 
-    	return [websocket_ready, authenticated, $systemStateStore];
+    	return [
+    		websocket_ready,
+    		authenticated,
+    		expanded,
+    		$systemStateStore,
+    		sidebar_expanded_binding
+    	];
     }
 
     class App extends SvelteComponentDev {

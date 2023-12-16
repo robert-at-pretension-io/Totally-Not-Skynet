@@ -8,8 +8,8 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::{ mpsc, Mutex };
 use tokio_tungstenite::tungstenite::Message;
 
-use futures_util::StreamExt;
 use futures_util::SinkExt;
+use futures_util::StreamExt;
 
 use colored::*;
 
@@ -103,10 +103,10 @@ pub async fn start_websocket_server(
                         }
 
                         println!(
-                            "{} {} {}",
+                            "{} {}",
                             "Received a message from: ".yellow(),
-                            addr,
-                            msg
+                            addr
+                            // msg.to_string()
                         );
 
                         println!("{} : {}", "The length of the message:".yellow(), msg.len());
