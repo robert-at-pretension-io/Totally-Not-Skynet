@@ -4,12 +4,6 @@ use r2d2_sqlite::SqliteConnectionManager;
 use std::env;
 use std::sync::Arc;
 use tokio::sync::{ mpsc, Mutex };
-// use warp::*;
-
-// use log::{ info, debug, warn, error };
-
-// mod domain;
-// mod check_installed_programs;
 mod env_vars_checker;
 mod graph;
 mod mongo;
@@ -34,26 +28,6 @@ use once_cell::sync::OnceCell;
 use crate::generated_types::Identity;
 
 static SERVER_IDENTITY: OnceCell<Identity> = OnceCell::new();
-
-// use bollard::container::{CreateExecOptions, StartExecResults};
-
-// use warp::Filter;
-
-// async fn start_logging_server() {
-//     // Define the route for receiving POST requests with a string body
-//     let log_route = warp
-//         ::post()
-//         .and(warp::path("log"))
-//         .and(warp::body::content_length_limit(1024 * 32))
-//         .and(warp::body::string())
-//         .map(|log_message: String| {
-//             println!("Received log: {}", log_message);
-//             warp::reply::with_status("Log received", warp::http::StatusCode::OK)
-//         });
-
-//     // Start the warp server on port 200
-//     warp::serve(log_route).run(([0, 0, 0, 0], 200)).await;
-// }
 
 #[tokio::main]
 async fn main() {
@@ -80,13 +54,6 @@ async fn main() {
             panic!("env variables not set");
         }
     }
-
-    // let logging_server_task = tokio::spawn(async {
-    //     start_logging_server().await;
-    // });
-
-    // assert check required installed programs
-    // assert!(check_installed_programs::check_all_programs().is_ok());
 
     println!("{}", "Need to re-enable check when changing environments back".red());
 
@@ -120,6 +87,16 @@ async fn main() {
         }
     };
 
+    // make auth db pool
+    sqlite_location_auth = "auth.db";
+    let manager_auth = SqliteConnectionManager::file(sqlite_location_auth);
+    let pool_auth = match Pool::new(manager_auth) {
+        Ok(p) => p,
+        Err(err) => {
+            panic!("Failed to create SQLite auth connection pool: {:?}", err);
+        }
+    };
+
     let (tx, rx) = mpsc::unbounded_channel();
     let rx = Arc::new(Mutex::new(rx));
 
@@ -131,10 +108,11 @@ async fn main() {
     });
 
     let arc_pool = Arc::new(pool.clone());
+    let auth_arc_pool = Arc::new(pool_auth.clone());
 
     // Spawn the message sender task
     let sender_task = tokio::spawn(async move {
-        start_message_sending_loop(tx, client_rx, arc_pool).await;
+        start_message_sending_loop(tx, client_rx, arc_pool, auth_arc_pool).await;
     });
 
     // Wait for both tasks to complete

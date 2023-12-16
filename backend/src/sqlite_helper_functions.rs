@@ -102,7 +102,7 @@ pub fn authorized(
     }
 }
 
-pub fn insert_pass(
+pub fn insert_user(
     pool: Arc<Pool<SqliteConnectionManager>>,
     auth_message: AuthenticationMessage
 ) -> Result<()> {
@@ -110,31 +110,69 @@ pub fn insert_pass(
     let connection = pool.get().expect("Failed to get connection from pool");
     println!("Connection obtained from pool successfully.");
 
+    if check_if_user_exists(pool.clone(), auth_message.clone())? {
+        println!("User already exists.");
+        return Err(());
+    } else {
+        match auth_message.body.unwrap().clone() {
+            Secrets(email, password) => {
+                println!("Secrets message received.");
+                // let email = auth_message.email.unwrap();
+                // let password = auth_message.password.unwrap();
+                println!("Email: {}", email);
+                println!("Password: {}", password);
+                println!("Hashing password...");
+                let hashed_pass = hash(password, DEFAULT_COST).unwrap();
+                println!("Hashed password: {}", hashed_pass);
+                println!("Inserting hashed password into the database...");
+                match
+                    connection.execute(
+                        "INSERT INTO pass (email, hashpass) VALUES (?1, ?2)",
+                        params![email, hashed_pass]
+                    )
+                {
+                    Ok(_) => {
+                        println!("Password insertion successful.");
+                        Ok(())
+                    }
+                    Err(err) => {
+                        println!("{}: {:?}", "Unable to insert password into db:".red(), err);
+                        Ok(())
+                    }
+                }
+            }
+            _ => { Err(()) }
+        }
+    }
+}
+
+pub fn check_if_user_exists(
+    pool: Arc<Pool<SqliteConnectionManager>>,
+    auth_message: AuthenticationMessage
+) -> Result<bool> {
+    println!("Checking if user exists...");
+    let connection = pool.get().expect("Failed to get connection from pool");
+    println!("Connection obtained from pool successfully.");
+
     match auth_message.body.unwrap().clone() {
-        Secrets(email, password) => {
+        Secrets(email, _) => {
             println!("Secrets message received.");
             // let email = auth_message.email.unwrap();
             // let password = auth_message.password.unwrap();
             println!("Email: {}", email);
-            println!("Password: {}", password);
-            println!("Hashing password...");
-            let hashed_pass = hash(password, DEFAULT_COST).unwrap();
-            println!("Hashed password: {}", hashed_pass);
-            println!("Inserting hashed password into the database...");
-            match
-                connection.execute(
-                    "INSERT OR REPLACE INTO pass (email, hashpass) VALUES (?1, ?2)",
-                    params![email, hashed_pass]
-                )
-            {
-                Ok(_) => {
-                    println!("Password insertion successful.");
-                    Ok(())
-                }
-                Err(err) => {
-                    println!("{}: {:?}", "Unable to insert password into db:".red(), err);
-                    Ok(())
-                }
+            // println!("Password: {}", password);
+            let mut stmt = connection.prepare("SELECT count(0) FROM pass WHERE email = ?1")?;
+
+            // if there is a row, then the user exists
+            let mut rows = stmt.query(params![email])?;
+            let row = rows.next().unwrap()?;
+            let count: i64 = row.get(0)?;
+            if count > 0 {
+                println!("User exists.");
+                Ok(true)
+            } else {
+                println!("User does not exist.");
+                Ok(false)
             }
         }
         _ => { Err(()) }
