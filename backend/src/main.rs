@@ -100,6 +100,15 @@ async fn main() {
         }
     }
 
+    match sqlite_helper_functions::setup_sqlite_db_auth("auth.db") {
+        Ok(_) => {
+            println!("sqlite working.. Tables are setup!");
+        }
+        Err(err) => {
+            panic!("Oh goodness... {:?}", err);
+        }
+    }
+
     let key = "SQLITE_FILE_LOCATION";
     let sqlite_location = env::var(key).unwrap();
 

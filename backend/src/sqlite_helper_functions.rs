@@ -1,10 +1,14 @@
-use crate::generated_types::Node;
+use crate::generated_types::{ Node, AuthenticationMessage, Secrets };
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::{ params, Connection, Result };
 use std::env;
 use std::sync::Arc;
 use prost::Message;
+
+extern crate bcrypt;
+
+use bcrypt::{ hash, DEFAULT_COST, verify };
 
 extern crate colored;
 
@@ -55,12 +59,86 @@ pub fn create_pass_table(conn: &Connection) -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS nodes (
             email TEXT PRIMARY KEY,
-            serialhash_auth BLOB
+            hashpass TEXT
         )",
         []
     )?;
     println!("Pass table created successfully.");
     Ok(())
+}
+
+pub fn authorized(
+    pool: Arc<Pool<SqliteConnectionManager>>,
+    auth_message: AuthenticationMessage
+) -> Result<()> {
+    println!("Checking if hashed password is in db...");
+    let connection = pool.get().expect("Failed to get connection from pool");
+    println!("Connection obtained from pool successfully.");
+
+    match auth_message.body.unwrap().clone() {
+        Secrets(email, password) => {
+            println!("Secrets message received.");
+            // let email = auth_message.email.unwrap();
+            // let password = auth_message.password.unwrap();
+            println!("Email: {}", email);
+            println!("Password: {}", password);
+            let mut stmt = connection.prepare("SELECT hashpass FROM pass WHERE email = ?1")?;
+            let mut rows = stmt.query(params![email])?;
+            let row = rows.next().unwrap()?;
+            let hashpass: String = row.get(0)?;
+            println!("Hashpass: {}", hashpass);
+            match verify(password, &hashpass) {
+                Ok(_) => {
+                    println!("Password verified.");
+                    Ok(())
+                }
+                Err(_) => {
+                    println!("Password not verified.");
+                    Err(())
+                }
+            }
+        }
+        _ => { Err(()) }
+    }
+}
+
+pub fn insert_pass(
+    pool: Arc<Pool<SqliteConnectionManager>>,
+    auth_message: AuthenticationMessage
+) -> Result<()> {
+    println!("Inserting a password...");
+    let connection = pool.get().expect("Failed to get connection from pool");
+    println!("Connection obtained from pool successfully.");
+
+    match auth_message.body.unwrap().clone() {
+        Secrets(email, password) => {
+            println!("Secrets message received.");
+            // let email = auth_message.email.unwrap();
+            // let password = auth_message.password.unwrap();
+            println!("Email: {}", email);
+            println!("Password: {}", password);
+            println!("Hashing password...");
+            let hashed_pass = hash(password, DEFAULT_COST).unwrap();
+            println!("Hashed password: {}", hashed_pass);
+            println!("Inserting hashed password into the database...");
+            match
+                connection.execute(
+                    "INSERT OR REPLACE INTO pass (email, hashpass) VALUES (?1, ?2)",
+                    params![email, hashed_pass]
+                )
+            {
+                Ok(_) => {
+                    println!("Password insertion successful.");
+                    Ok(())
+                }
+                Err(err) => {
+                    println!("{}: {:?}", "Unable to insert password into db:".red(), err);
+                    Ok(())
+                }
+            }
+        }
+        _ => { Err(()) }
+    }
 }
 
 pub fn create_nodes_table(conn: &Connection) -> Result<()> {

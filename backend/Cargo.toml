@@ -39,6 +39,7 @@ mustache = "0.9.0"
 handlebars = "4.5.0"
 warp = "0.3.6"
 async-recursion = "1.0.5"
+bcrypt = "0.15.0"
 
 
 [build-dependencies]
