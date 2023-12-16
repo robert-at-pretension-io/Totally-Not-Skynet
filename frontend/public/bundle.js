@@ -1658,7 +1658,7 @@ var app = (function () {
     }
     _Timestamp_one_of_decls = new WeakMap();
 
-    var _GraphNodeInfo_one_of_decls, _Edge_one_of_decls, _Prompt_one_of_decls, _Command_one_of_decls, _Conditional_one_of_decls, _Graph_one_of_decls, _Process_one_of_decls, _Loop_one_of_decls, _AtomicNodeTypes_one_of_decls, _NodeContent_one_of_decls, _Code_one_of_decls, _Node_one_of_decls, _Nodes_one_of_decls, _Log_one_of_decls, _Identity_one_of_decls, _Execution_one_of_decls, _AtomicExecutionLog_one_of_decls, _VariableDefinition_one_of_decls, _SystemState_one_of_decls, _AuthenticationMessage_one_of_decls, _UserSettings_one_of_decls, _SystemError_one_of_decls, _Letter_one_of_decls, _Body_one_of_decls, _NodesToProcess_one_of_decls, _NodesToLoop_one_of_decls, _Envelope_one_of_decls;
+    var _GraphNodeInfo_one_of_decls, _Edge_one_of_decls, _Prompt_one_of_decls, _Command_one_of_decls, _Conditional_one_of_decls, _Graph_one_of_decls, _Process_one_of_decls, _Loop_one_of_decls, _AtomicNodeTypes_one_of_decls, _NodeContent_one_of_decls, _Code_one_of_decls, _Node_one_of_decls, _Nodes_one_of_decls, _Log_one_of_decls, _Identity_one_of_decls, _Execution_one_of_decls, _AtomicExecutionLog_one_of_decls, _VariableDefinition_one_of_decls, _SystemState_one_of_decls, _AuthenticationMessage_one_of_decls, _UserSettings_one_of_decls, _SystemError_one_of_decls, _Session_one_of_decls, _Letter_one_of_decls, _Body_one_of_decls, _NodesToProcess_one_of_decls, _NodesToLoop_one_of_decls, _Envelope_one_of_decls;
     var NodeTypes;
     (function (NodeTypes) {
         NodeTypes[NodeTypes["PROMPT"] = 0] = "PROMPT";
@@ -4201,6 +4201,112 @@ var app = (function () {
         }
     }
     _SystemError_one_of_decls = new WeakMap();
+    class Session extends googleProtobuf.Message {
+        constructor(data) {
+            super();
+            _Session_one_of_decls.set(this, []);
+            googleProtobuf.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], __classPrivateFieldGet(this, _Session_one_of_decls, "f"));
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("session_id" in data && data.session_id != undefined) {
+                    this.session_id = data.session_id;
+                }
+                if ("client_identity" in data && data.client_identity != undefined) {
+                    this.client_identity = data.client_identity;
+                }
+                if ("backend_identity" in data && data.backend_identity != undefined) {
+                    this.backend_identity = data.backend_identity;
+                }
+            }
+        }
+        get session_id() {
+            return googleProtobuf.Message.getFieldWithDefault(this, 1, "");
+        }
+        set session_id(value) {
+            googleProtobuf.Message.setField(this, 1, value);
+        }
+        get client_identity() {
+            return googleProtobuf.Message.getWrapperField(this, Identity, 2);
+        }
+        set client_identity(value) {
+            googleProtobuf.Message.setWrapperField(this, 2, value);
+        }
+        get has_client_identity() {
+            return googleProtobuf.Message.getField(this, 2) != null;
+        }
+        get backend_identity() {
+            return googleProtobuf.Message.getWrapperField(this, Identity, 3);
+        }
+        set backend_identity(value) {
+            googleProtobuf.Message.setWrapperField(this, 3, value);
+        }
+        get has_backend_identity() {
+            return googleProtobuf.Message.getField(this, 3) != null;
+        }
+        static fromObject(data) {
+            const message = new Session({});
+            if (data.session_id != null) {
+                message.session_id = data.session_id;
+            }
+            if (data.client_identity != null) {
+                message.client_identity = Identity.fromObject(data.client_identity);
+            }
+            if (data.backend_identity != null) {
+                message.backend_identity = Identity.fromObject(data.backend_identity);
+            }
+            return message;
+        }
+        toObject() {
+            const data = {};
+            if (this.session_id != null) {
+                data.session_id = this.session_id;
+            }
+            if (this.client_identity != null) {
+                data.client_identity = this.client_identity.toObject();
+            }
+            if (this.backend_identity != null) {
+                data.backend_identity = this.backend_identity.toObject();
+            }
+            return data;
+        }
+        serialize(w) {
+            const writer = w || new googleProtobuf.BinaryWriter();
+            if (this.session_id.length)
+                writer.writeString(1, this.session_id);
+            if (this.has_client_identity)
+                writer.writeMessage(2, this.client_identity, () => this.client_identity.serialize(writer));
+            if (this.has_backend_identity)
+                writer.writeMessage(3, this.backend_identity, () => this.backend_identity.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes) {
+            const reader = bytes instanceof googleProtobuf.BinaryReader ? bytes : new googleProtobuf.BinaryReader(bytes), message = new Session();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.session_id = reader.readString();
+                        break;
+                    case 2:
+                        reader.readMessage(message.client_identity, () => message.client_identity = Identity.deserialize(reader));
+                        break;
+                    case 3:
+                        reader.readMessage(message.backend_identity, () => message.backend_identity = Identity.deserialize(reader));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary() {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes) {
+            return Session.deserialize(bytes);
+        }
+    }
+    _Session_one_of_decls = new WeakMap();
     class Letter extends googleProtobuf.Message {
         constructor(data) {
             super();
@@ -4706,6 +4812,9 @@ var app = (function () {
                 if ("verification_id" in data && data.verification_id != undefined) {
                     this.verification_id = data.verification_id;
                 }
+                if ("session" in data && data.session != undefined) {
+                    this.session = data.session;
+                }
             }
         }
         get letters() {
@@ -4738,6 +4847,15 @@ var app = (function () {
         set verification_id(value) {
             googleProtobuf.Message.setField(this, 4, value);
         }
+        get session() {
+            return googleProtobuf.Message.getWrapperField(this, Session, 5);
+        }
+        set session(value) {
+            googleProtobuf.Message.setWrapperField(this, 5, value);
+        }
+        get has_session() {
+            return googleProtobuf.Message.getField(this, 5) != null;
+        }
         static fromObject(data) {
             const message = new Envelope({});
             if (data.letters != null) {
@@ -4751,6 +4869,9 @@ var app = (function () {
             }
             if (data.verification_id != null) {
                 message.verification_id = data.verification_id;
+            }
+            if (data.session != null) {
+                message.session = Session.fromObject(data.session);
             }
             return message;
         }
@@ -4768,6 +4889,9 @@ var app = (function () {
             if (this.verification_id != null) {
                 data.verification_id = this.verification_id;
             }
+            if (this.session != null) {
+                data.session = this.session.toObject();
+            }
             return data;
         }
         serialize(w) {
@@ -4780,6 +4904,8 @@ var app = (function () {
                 writer.writeMessage(3, this.receiver, () => this.receiver.serialize(writer));
             if (this.verification_id.length)
                 writer.writeString(4, this.verification_id);
+            if (this.has_session)
+                writer.writeMessage(5, this.session, () => this.session.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -4800,6 +4926,9 @@ var app = (function () {
                         break;
                     case 4:
                         message.verification_id = reader.readString();
+                        break;
+                    case 5:
+                        reader.readMessage(message.session, () => message.session = Session.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -4842,6 +4971,7 @@ var app = (function () {
         AuthenticationMessage: AuthenticationMessage,
         UserSettings: UserSettings,
         SystemError: SystemError,
+        Session: Session,
         Letter: Letter,
         Body: Body,
         NodesToProcess: NodesToProcess,
@@ -57419,7 +57549,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src/App.svelte";
 
-    // (42:0) {#if !authenticated}
+    // (36:0) {#if !authenticated}
     function create_if_block_1(ctx) {
     	let current_block_type_index;
     	let if_block;
@@ -57488,14 +57618,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(42:0) {#if !authenticated}",
+    		source: "(36:0) {#if !authenticated}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (45:2) {:else}
+    // (39:2) {:else}
     function create_else_block(ctx) {
     	let loading;
     	let current;
@@ -57527,14 +57657,14 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(45:2) {:else}",
+    		source: "(39:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (43:2) {#if websocket_ready}
+    // (37:2) {#if websocket_ready}
     function create_if_block_2(ctx) {
     	let authpage;
     	let current;
@@ -57566,14 +57696,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(43:2) {#if websocket_ready}",
+    		source: "(37:2) {#if websocket_ready}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (50:0) {#if authenticated}
+    // (44:0) {#if authenticated}
     function create_if_block(ctx) {
     	let div;
     	let sidebar;
@@ -57590,7 +57720,7 @@ var app = (function () {
     			t = space();
     			create_component(graphcomponentgraphlib.$$.fragment);
     			attr_dev(div, "class", "app-container svelte-utzf6m");
-    			add_location(div, file, 50, 2, 1780);
+    			add_location(div, file, 44, 2, 1478);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -57621,7 +57751,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(50:0) {#if authenticated}",
+    		source: "(44:0) {#if authenticated}",
     		ctx
     	});
 
@@ -57734,10 +57864,7 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
     	console.log("Script started");
-
-    	// let authenticated = true;
     	let websocket;
-
     	let system_state;
     	let websocket_ready = false;
     	let authenticated;
@@ -57748,10 +57875,6 @@ var app = (function () {
     		system_state = $systemStateStore;
     		console.log("Initial system_state:", system_state);
 
-    		// let intialized_system = initializeSystemState(system_state);
-    		// console.log("Initialized system:", intialized_system);
-    		// systemStateStore.set(intialized_system);
-    		// authenticated = true;
     		if (!websocket_ready) {
     			console.log("Websocket not ready. Initializing...");
     			websocket = setupWebsocketConnection();

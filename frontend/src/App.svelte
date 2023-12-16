@@ -9,11 +9,8 @@
   import { SystemState } from "./generated/system_types";
   import Loading from "./components/Loading.svelte";
   import { initializeSystemState } from "helper_functions/misc";
-  // import { initializeSystemState } from "helper_functions/misc";
 
   console.log("Script started");
-
-  // let authenticated = true;
   let websocket: WebSocket;
   let system_state: SystemState;
   let websocket_ready = false;
@@ -26,13 +23,6 @@
 
     system_state = $systemStateStore;
     console.log("Initial system_state:", system_state);
-
-    // let intialized_system = initializeSystemState(system_state);
-    // console.log("Initialized system:", intialized_system);
-
-    // systemStateStore.set(intialized_system);
-
-    // authenticated = true;
 
     if (!websocket_ready) {
       console.log("Websocket not ready. Initializing...");

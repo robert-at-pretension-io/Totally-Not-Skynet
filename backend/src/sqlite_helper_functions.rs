@@ -26,7 +26,41 @@ pub fn setup_sqlite_db() -> Result<()> {
     create_nodes_table(&conn)?;
 
     println!("SQLite DB setup complete.");
-    return Ok(());
+    Ok(())
+}
+
+pub fn setup_sqlite_db_auth(sqlite_location: &str) -> Result<()> {
+    println!("Setting up SQLite database...");
+
+    // Get the environmental variables required:
+    // let key = "SQLITE_FILE_LOCATION";
+
+    // println!("Retrieving environmental variable for SQLite location...");
+    // let sqlite_location = env::var(key).unwrap();
+
+    // let sqlite_location = "auth.db";
+
+    println!("Opening connection to SQLite at location: {}", sqlite_location);
+    let conn = Connection::open(sqlite_location)?;
+
+    println!("Creating nodes table...");
+    create_nodes_table(&conn)?;
+
+    println!("SQLite DB setup complete.");
+    Ok(())
+}
+
+pub fn create_pass_table(conn: &Connection) -> Result<()> {
+    println!("Executing statement to create pass table if it does not exist...");
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS nodes (
+            email TEXT PRIMARY KEY,
+            serialhash_auth BLOB
+        )",
+        []
+    )?;
+    println!("Pass table created successfully.");
+    Ok(())
 }
 
 pub fn create_nodes_table(conn: &Connection) -> Result<()> {
@@ -51,7 +85,6 @@ pub fn insert_node(pool: Arc<Pool<SqliteConnectionManager>>, node: Node) -> Resu
 
     //ensure that the node has id information:
     // First check that it doesn't already have an id:
-    
 
     println!("Serializing node...");
     let mut serialized_node = vec![];
@@ -60,7 +93,7 @@ pub fn insert_node(pool: Arc<Pool<SqliteConnectionManager>>, node: Node) -> Resu
             println!("Serialization successful.");
             let id = node.node_info.clone().unwrap().id;
             let name = node.node_info.unwrap().name;
-            let node_type = node.node_type.clone();
+            let node_type = node.node_type;
             println!("Inserting serialized node into the database...");
             match
                 connection.execute(
@@ -70,17 +103,17 @@ pub fn insert_node(pool: Arc<Pool<SqliteConnectionManager>>, node: Node) -> Resu
             {
                 Ok(_) => {
                     println!("Node insertion successful.");
-                    return Ok(());
+                    Ok(())
                 }
                 Err(err) => {
                     println!("{}: {:?}", "Unable to insert node into db:".red(), err);
-                    return Ok(());
+                    Ok(())
                 }
             }
         }
         Err(err) => {
             println!("Unable to serialize node{:?}", err);
-            return Ok(());
+            Ok(())
         }
     }
 }
@@ -107,21 +140,21 @@ pub fn update_node(pool: Arc<Pool<SqliteConnectionManager>>, node: &Node) -> Res
                 Ok(count) => {
                     if count > 0 {
                         println!("Node updated successfully");
-                        return Ok(());
+                        Ok(())
                     } else {
                         println!("No node found with the given ID");
-                        return Ok(());
+                        Ok(())
                     }
                 }
                 Err(err) => {
                     println!("Unable to update node in db: {:?}", err);
-                    return Ok(());
+                    Ok(())
                 }
             }
         }
         Err(err) => {
             println!("Unable to serialize node: {:?}", err);
-            return Ok(());
+            Ok(())
         }
     }
 }

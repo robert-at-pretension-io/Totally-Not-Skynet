@@ -34,10 +34,8 @@
   "scripts": {
     "build-protos": "pwd && ./proto_build.sh",
     "build": "npm run build-protos && rollup -c ",
-    "autobuild": "npm run build-protos && rollup -c -w",
-    "dev": "run-p start:dev autobuild",
-    "start": "npm run build && sirv public --host 0.0.0.0 --port 4200",
-    "start:dev": "npm run build && sirv public --dev --host 0.0.0.0 --port 80"
+    "dev": "npm run build-protos && rollup -c -w & sirv public --host 0.0.0.0 --port 4201",
+    "start": "npm run build && sirv public --host 0.0.0.0 --port 4200"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.1.1",

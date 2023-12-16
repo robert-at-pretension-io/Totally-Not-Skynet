@@ -9,6 +9,8 @@ use crate::generated_types::{
     VerbTypes,
 };
 
+use crate::generated_types::Session;
+
 use bollard::container::StartContainerOptions;
 
 use crate::graph::validate_nodes_in_loop;
@@ -74,6 +76,7 @@ pub async fn start_message_sending_loop(
     let _runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
     let mut docker_containers: HashMap<String, String> = HashMap::new();
     let docker = Docker::connect_with_http_defaults().unwrap();
+    let mut session_ids: Vec<Session> = vec![];
 
     while let Some(msg) = client_rx.recv().await {
         println!("{} {:?}", "Received a message from the client:".yellow(), msg.1.len());
@@ -124,26 +127,18 @@ pub async fn start_message_sending_loop(
                         }
                     }
                 }
-
-                // docker_id = id.clone();
-
-                // println!("Created container with id: {}", id);
-                // docker_containers.insert(msg.0.clone().name.to_string(), id);
             }
         }
 
         let slice = msg.1.clone().into_data().as_slice().to_vec();
-        let envelope: Envelope;
 
-        match Envelope::decode(&*slice) {
-            Ok(val) => {
-                envelope = val;
-            }
+        let envelope: Envelope = match Envelope::decode(&*slice) {
+            Ok(val) => { val }
             Err(err) => {
                 println!("Error decoding message: {:?}", err);
                 continue;
             }
-        }
+        };
 
         // This is a special case where there is no receiver specified and therefore the message content can be ignored. It is assumed that the client is requesting the server identity
         if envelope.receiver.is_none() {
@@ -170,6 +165,7 @@ pub async fn start_message_sending_loop(
                     receiver: envelope.clone().sender.clone(),
                     letters: vectorized_message,
                     verification_id: envelope.verification_id.clone(),
+                    session: None,
                 };
 
                 send_message(&tx, msg.0.clone(), return_envelope).await;
@@ -187,6 +183,94 @@ pub async fn start_message_sending_loop(
 
         println!("{}", "TODO: Collection responses and send them in envelope batch.".red());
 
+        // check that the envelope has a session, and if not, then the letter is solely an authentication message
+
+        let mut session_found: bool = false;
+
+        if envelope.session.is_none() {
+            let mut letters = envelope.clone().letters;
+
+            match letters.first_mut().unwrap().body.clone().unwrap().contents.unwrap() {
+                Contents::AuthenticationMessage(auth) => {
+                    println!("{}", "Initiating authentication".green());
+
+                    // we know that the sender/receiver for the envelope is set. We will add these to the session
+
+                    // create session here and add it to session id:
+                    let new_session = Session {
+                        session_id: uuid::Uuid::new_v4().to_string(),
+                        client_identity: envelope.clone().sender,
+                        backend_identity: envelope.clone().receiver,
+                    };
+
+                    let mut response_envelope: Envelope = Envelope {
+                        sender: Some(envelope.clone().receiver.unwrap()),
+                        receiver: Some(envelope.clone().sender.unwrap()),
+                        letters: Vec::new(),
+                        verification_id: envelope.clone().verification_id,
+                        session: Some(new_session.clone()),
+                    };
+
+                    let mut response_letter: Letter = Letter {
+                        verb: VerbTypes::Acknowledge as i32,
+                        body: None,
+                    };
+
+                    let mut response_body: Body = Body {
+                        contents: None,
+                    };
+
+                    let mut response_contents: Contents = Contents::AuthenticationMessage(
+                        generated_types::AuthenticationMessage {
+                            body: Some(
+                                generated_types::authentication_message::Body::Session(
+                                    new_session.clone()
+                                )
+                            ),
+                        }
+                    );
+
+                    response_body.contents = Some(response_contents);
+
+                    response_letter.body = Some(response_body);
+
+                    response_envelope.letters.push(response_letter);
+
+                    // put the session into the session_ids vec
+                    session_ids.push(new_session.clone());
+
+                    println!(
+                        "{}: {:?}",
+                        "added the session to the session vector".green(),
+                        new_session.clone()
+                    );
+
+                    send_message(&tx, msg.0.clone(), response_envelope).await;
+                }
+                _ => {
+                    println!(
+                        "{}",
+                        "There needs to be an auth message in the case that there is not yet a session".red()
+                    );
+                }
+            }
+        } else {
+            let test_session = envelope.clone().session.unwrap();
+            // check that this session is in the session_ids vec
+            for session in session_ids.clone() {
+                if session.session_id == test_session.session_id {
+                    session_found = true;
+                    break;
+                }
+            }
+            if !session_found {
+                println!("{}", "Session not found".red());
+                continue;
+            }
+        }
+
+        // if the envelope has a session, then we need to check that the session is valid
+
         // loop through the letters and handle each one
         for letter in envelope.clone().letters {
             println!("Message content: {:?}", letter);
@@ -195,18 +279,15 @@ pub async fn start_message_sending_loop(
             let receiver: generated_types::Identity = envelope.clone().receiver.unwrap();
             let wrapped_content = letter.body.clone();
             let verification_id = envelope.clone().verification_id;
+            let session: Session = envelope.clone().session.unwrap();
 
-            let content: Contents;
-
-            match wrapped_content {
+            let content: Contents = match wrapped_content {
                 None => {
                     println!("{} {:?}", "No contents found:".red(), letter);
                     continue; // We should probably log this later... But we don't want to interrupt the message processing loop
                 }
-                Some(body) => {
-                    content = body.contents.unwrap();
-                }
-            }
+                Some(body) => { body.contents.unwrap() }
+            };
 
             match content {
                 Contents::Node(node) => {
@@ -243,6 +324,7 @@ pub async fn start_message_sending_loop(
                                         receiver: Some(sender.clone()),
                                         letters: vec![letter],
                                         verification_id: verification_id.clone(),
+                                        session: Some(session.clone()),
                                     };
 
                                     send_message(&tx, msg.0.clone(), response_object).await;
@@ -273,6 +355,7 @@ pub async fn start_message_sending_loop(
                                         receiver: Some(sender.clone()),
                                         letters: vec![letter],
                                         verification_id: verification_id.clone(),
+                                        session: Some(session.clone()),
                                     };
 
                                     send_message(&tx, msg.0.clone(), updated_envelope).await;
@@ -293,6 +376,7 @@ pub async fn start_message_sending_loop(
                                 receiver: Some(sender.clone()),
                                 letters: Vec::new(),
                                 verification_id: verification_id.clone(),
+                                session: Some(session.clone()),
                             };
 
                             match fetch_all_nodes(pool.clone()) {
@@ -331,11 +415,11 @@ pub async fn start_message_sending_loop(
                 }
                 Contents::AuthenticationMessage(_auth) => {
                     match verb {
-                        VerbTypes::Initiate => {
-                            // Closing the match fetch_all_nodes
-                        } // Closing the VerbTypes::Initiate match arm
                         _ => {
-                            println!("{}", "Authentication message not *yet* supported:".red());
+                            println!(
+                                "{}",
+                                "Authentication should only be handled when when there is no session... Might add a Halt verb that could be handled here".red()
+                            );
                         }
                     } // Closing the match verb
                 }
@@ -372,6 +456,7 @@ pub async fn start_message_sending_loop(
                                                 receiver: Some(sender.clone()),
                                                 letters: vec![letter],
                                                 verification_id: verification_id.clone(),
+                                                session: Some(session.clone()),
                                             };
 
                                             send_message(&tx, msg.0.clone(), response_object).await;
@@ -431,6 +516,7 @@ pub async fn start_message_sending_loop(
                                                 receiver: Some(sender.clone()),
                                                 letters: vec![letter],
                                                 verification_id: verification_id.clone(),
+                                                session: Some(session.clone()),
                                             };
 
                                             send_message(&tx, msg.0.clone(), response_object).await;
@@ -454,6 +540,7 @@ pub async fn start_message_sending_loop(
                                                 receiver: Some(sender.clone()),
                                                 letters: vec![letter],
                                                 verification_id: verification_id.clone(),
+                                                session: Some(session.clone()),
                                             };
 
                                             send_message(&tx, msg.0.clone(), response_object).await;
@@ -482,6 +569,7 @@ pub async fn start_message_sending_loop(
                                         receiver: Some(sender.clone()),
                                         letters: vec![letter],
                                         verification_id: verification_id.clone(),
+                                        session: Some(session.clone()),
                                     };
 
                                     send_message(&tx, msg.0.clone(), response_object).await;
@@ -537,6 +625,7 @@ pub async fn start_message_sending_loop(
                                         sender: Some(receiver.clone()),
                                         receiver: Some(sender.clone()),
                                         verification_id: verification_id.clone(),
+                                        session: Some(session.clone()),
                                     };
 
                                     send_message(&tx, msg.0.clone(), envelope).await;
@@ -557,6 +646,7 @@ pub async fn start_message_sending_loop(
                                         sender: Some(receiver.clone()),
                                         receiver: Some(sender.clone()),
                                         verification_id: verification_id.clone(),
+                                        session: Some(session.clone()),
                                     };
 
                                     send_message(&tx, msg.0.clone(), envelope).await;

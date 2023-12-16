@@ -106,7 +106,7 @@ pub async fn start_websocket_server(
                             "{} {} {}",
                             "Received a message from: ".yellow(),
                             addr,
-                            msg.to_string()
+                            msg
                         );
 
                         println!("{} : {}", "The length of the message:".yellow(), msg.len());

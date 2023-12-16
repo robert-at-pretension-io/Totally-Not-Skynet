@@ -2923,6 +2923,125 @@ export class SystemError extends pb_1.Message {
     return SystemError.deserialize(bytes);
   }
 }
+export class Session extends pb_1.Message {
+  #one_of_decls: number[][] = [];
+  constructor(data?: any[] | {
+        session_id?: string;
+        client_identity?: Identity;
+        backend_identity?: Identity;
+    }) {
+    super();
+    pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+    if (!Array.isArray(data) && typeof data == "object") {
+      if ("session_id" in data && data.session_id != undefined) {
+        this.session_id = data.session_id;
+      }
+      if ("client_identity" in data && data.client_identity != undefined) {
+        this.client_identity = data.client_identity;
+      }
+      if ("backend_identity" in data && data.backend_identity != undefined) {
+        this.backend_identity = data.backend_identity;
+      }
+    }
+  }
+  get session_id() {
+    return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+  }
+  set session_id(value: string) {
+    pb_1.Message.setField(this, 1, value);
+  }
+  get client_identity() {
+    return pb_1.Message.getWrapperField(this, Identity, 2) as Identity;
+  }
+  set client_identity(value: Identity) {
+    pb_1.Message.setWrapperField(this, 2, value);
+  }
+  get has_client_identity() {
+    return pb_1.Message.getField(this, 2) != null;
+  }
+  get backend_identity() {
+    return pb_1.Message.getWrapperField(this, Identity, 3) as Identity;
+  }
+  set backend_identity(value: Identity) {
+    pb_1.Message.setWrapperField(this, 3, value);
+  }
+  get has_backend_identity() {
+    return pb_1.Message.getField(this, 3) != null;
+  }
+  static fromObject(data: {
+        session_id?: string;
+        client_identity?: ReturnType<typeof Identity.prototype.toObject>;
+        backend_identity?: ReturnType<typeof Identity.prototype.toObject>;
+    }): Session {
+    const message = new Session({});
+    if (data.session_id != null) {
+      message.session_id = data.session_id;
+    }
+    if (data.client_identity != null) {
+      message.client_identity = Identity.fromObject(data.client_identity);
+    }
+    if (data.backend_identity != null) {
+      message.backend_identity = Identity.fromObject(data.backend_identity);
+    }
+    return message;
+  }
+  toObject() {
+    const data: {
+            session_id?: string;
+            client_identity?: ReturnType<typeof Identity.prototype.toObject>;
+            backend_identity?: ReturnType<typeof Identity.prototype.toObject>;
+        } = {};
+    if (this.session_id != null) {
+      data.session_id = this.session_id;
+    }
+    if (this.client_identity != null) {
+      data.client_identity = this.client_identity.toObject();
+    }
+    if (this.backend_identity != null) {
+      data.backend_identity = this.backend_identity.toObject();
+    }
+    return data;
+  }
+  serialize(): Uint8Array;
+  serialize(w: pb_1.BinaryWriter): void;
+  serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+    const writer = w || new pb_1.BinaryWriter();
+    if (this.session_id.length)
+      writer.writeString(1, this.session_id);
+    if (this.has_client_identity)
+      writer.writeMessage(2, this.client_identity, () => this.client_identity.serialize(writer));
+    if (this.has_backend_identity)
+      writer.writeMessage(3, this.backend_identity, () => this.backend_identity.serialize(writer));
+    if (!w)
+      return writer.getResultBuffer();
+  }
+  static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Session {
+    const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Session();
+    while (reader.nextField()) {
+      if (reader.isEndGroup())
+        break;
+      switch (reader.getFieldNumber()) {
+      case 1:
+        message.session_id = reader.readString();
+        break;
+      case 2:
+        reader.readMessage(message.client_identity, () => message.client_identity = Identity.deserialize(reader));
+        break;
+      case 3:
+        reader.readMessage(message.backend_identity, () => message.backend_identity = Identity.deserialize(reader));
+        break;
+      default: reader.skipField();
+      }
+    }
+    return message;
+  }
+  serializeBinary(): Uint8Array {
+    return this.serialize();
+  }
+  static deserializeBinary(bytes: Uint8Array): Session {
+    return Session.deserialize(bytes);
+  }
+}
 export class Letter extends pb_1.Message {
   #one_of_decls: number[][] = [];
   constructor(data?: any[] | {
@@ -3540,6 +3659,7 @@ export class Envelope extends pb_1.Message {
         sender?: Identity;
         receiver?: Identity;
         verification_id?: string;
+        session?: Session;
     }) {
     super();
     pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
@@ -3555,6 +3675,9 @@ export class Envelope extends pb_1.Message {
       }
       if ("verification_id" in data && data.verification_id != undefined) {
         this.verification_id = data.verification_id;
+      }
+      if ("session" in data && data.session != undefined) {
+        this.session = data.session;
       }
     }
   }
@@ -3588,11 +3711,21 @@ export class Envelope extends pb_1.Message {
   set verification_id(value: string) {
     pb_1.Message.setField(this, 4, value);
   }
+  get session() {
+    return pb_1.Message.getWrapperField(this, Session, 5) as Session;
+  }
+  set session(value: Session) {
+    pb_1.Message.setWrapperField(this, 5, value);
+  }
+  get has_session() {
+    return pb_1.Message.getField(this, 5) != null;
+  }
   static fromObject(data: {
         letters?: ReturnType<typeof Letter.prototype.toObject>[];
         sender?: ReturnType<typeof Identity.prototype.toObject>;
         receiver?: ReturnType<typeof Identity.prototype.toObject>;
         verification_id?: string;
+        session?: ReturnType<typeof Session.prototype.toObject>;
     }): Envelope {
     const message = new Envelope({});
     if (data.letters != null) {
@@ -3607,6 +3740,9 @@ export class Envelope extends pb_1.Message {
     if (data.verification_id != null) {
       message.verification_id = data.verification_id;
     }
+    if (data.session != null) {
+      message.session = Session.fromObject(data.session);
+    }
     return message;
   }
   toObject() {
@@ -3615,6 +3751,7 @@ export class Envelope extends pb_1.Message {
             sender?: ReturnType<typeof Identity.prototype.toObject>;
             receiver?: ReturnType<typeof Identity.prototype.toObject>;
             verification_id?: string;
+            session?: ReturnType<typeof Session.prototype.toObject>;
         } = {};
     if (this.letters != null) {
       data.letters = this.letters.map((item: Letter) => item.toObject());
@@ -3627,6 +3764,9 @@ export class Envelope extends pb_1.Message {
     }
     if (this.verification_id != null) {
       data.verification_id = this.verification_id;
+    }
+    if (this.session != null) {
+      data.session = this.session.toObject();
     }
     return data;
   }
@@ -3642,6 +3782,8 @@ export class Envelope extends pb_1.Message {
       writer.writeMessage(3, this.receiver, () => this.receiver.serialize(writer));
     if (this.verification_id.length)
       writer.writeString(4, this.verification_id);
+    if (this.has_session)
+      writer.writeMessage(5, this.session, () => this.session.serialize(writer));
     if (!w)
       return writer.getResultBuffer();
   }
@@ -3662,6 +3804,9 @@ export class Envelope extends pb_1.Message {
         break;
       case 4:
         message.verification_id = reader.readString();
+        break;
+      case 5:
+        reader.readMessage(message.session, () => message.session = Session.deserialize(reader));
         break;
       default: reader.skipField();
       }

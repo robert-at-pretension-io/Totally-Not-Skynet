@@ -17,11 +17,11 @@ pub fn docker_check() -> Result<()> {
 
     if output.status.success() {
         println!("Docker is installed: {:?}", output);
-        return Ok(());
+        Ok(())
     } else if is_ubuntu() {
         println!("Docker is not installed. Also, you're running ubuntu! Installing...");
         install_docker()?;
-        return Ok(());
+        Ok(())
     } else {
         return Err(DockerCheckError::NotUbuntu.into());
     }
@@ -99,11 +99,11 @@ pub fn sqlite_check() -> Result<()> {
 
     if output.status.success() {
         println!("SQLite3 is installed: {:?}", output);
-        return Ok(());
+        Ok(())
     } else if is_ubuntu() {
         println!("SQLite3 is not installed. Also, you're running Ubuntu! Installing...");
         install_sqlite3()?;
-        return Ok(());
+        Ok(())
     } else {
         return Err(SQLiteCheckError::NotUbuntu.into());
     }
