@@ -181,8 +181,12 @@ pub async fn start_message_sending_loop(
 
                                 // Read the allowed emails from the file
                                 let allowed_emails = std::fs
-                                    ::read_to_string("allowed_emails.txt")
+                                    ::read_to_string("./allowed_emails.txt")
                                     .expect("Failed to read allowed_emails.txt");
+
+                                let allowed_emails: Vec<&str> = allowed_emails
+                                    .split("\n")
+                                    .collect();
 
                                 match auth.clone().body.unwrap() {
                                     AuthBody::Secrets(secret) => {
@@ -190,7 +194,7 @@ pub async fn start_message_sending_loop(
                                         println!("Password: {}", secret.password);
 
                                         // Check if user's email is in the allowed list
-                                        if allowed_emails.contains(&secret.email) {
+                                        if allowed_emails.contains(&secret.email.as_str()) {
                                             // Create the user and session
                                             match insert_user(&auth_pool, auth.clone()) {
                                                 Ok(_) => {
@@ -278,6 +282,7 @@ pub async fn start_message_sending_loop(
                         "{}",
                         "There needs to be an auth message in the case that there is not yet a session".red()
                     );
+                    continue;
                 }
             }
         } else {
@@ -487,7 +492,7 @@ pub async fn start_message_sending_loop(
                         _ => {
                             println!(
                                 "{}",
-                                "Authentication should only be handled when when there is no session... Might add a Halt verb that could be handled here".red()
+                                "Session already set... Authentication should only be handled when when there is no session... Might add a Halt verb that could be handled here".red()
                             );
                         }
                     } // Closing the match verb

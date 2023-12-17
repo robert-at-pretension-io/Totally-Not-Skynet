@@ -178,6 +178,7 @@ message SystemState {
   Identity client_identity = 12;
   // This one contains both the sent and received messages. To find out which are paired,look at the verification_id field.
   repeated Envelope message_log = 13;
+  Session session = 14;
 }
 
 message Secrets {

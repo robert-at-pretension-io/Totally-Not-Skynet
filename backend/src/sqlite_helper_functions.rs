@@ -48,8 +48,8 @@ pub fn setup_sqlite_db_auth(sqlite_location: &str) -> Result<()> {
     println!("Opening connection to SQLite at location: {}", sqlite_location);
     let conn = Connection::open(sqlite_location)?;
 
-    println!("Creating nodes table...");
-    create_nodes_table(&conn)?;
+    println!("Creating pass table...");
+    create_pass_table(&conn)?;
 
     println!("SQLite DB setup complete.");
     Ok(())
@@ -58,7 +58,7 @@ pub fn setup_sqlite_db_auth(sqlite_location: &str) -> Result<()> {
 pub fn create_pass_table(conn: &Connection) -> Result<()> {
     println!("Executing statement to create pass table if it does not exist...");
     conn.execute(
-        "CREATE TABLE IF NOT EXISTS nodes (
+        "CREATE TABLE IF NOT EXISTS pass (
             email TEXT PRIMARY KEY,
             hashpass TEXT
         )",
@@ -113,21 +113,9 @@ pub fn insert_user(
     pool: &Arc<Pool<SqliteConnectionManager>>,
     auth_message: AuthenticationMessage
 ) -> Result<(), String> {
-    println!("Inserting a password...");
+    println!("Inserting a user...");
     let connection = pool.get().expect("Failed to get connection from pool");
     println!("Connection obtained from pool successfully.");
-
-    match check_if_user_exists(&pool, auth_message.clone()) {
-        Ok(true) => {
-            println!("User already exists.");
-        }
-        Ok(false) => {
-            insert_user(&pool, auth_message.clone());
-        }
-        Err(err) => {
-            println!("Error checking if user exists: {:?}", err);
-        }
-    }
 
     match auth_message.body.unwrap().clone() {
         AuthBody::Secrets(secret) => {

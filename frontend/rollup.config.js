@@ -5,15 +5,14 @@ import livereload from "rollup-plugin-livereload";
 import terser from "@rollup/plugin-terser";
 import autoPreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
-import eslint from "@rollup/plugin-eslint";
-import postcss from "rollup-plugin-postcss";
+import serve from "rollup-plugin-serve";
 import replace from "@rollup/plugin-replace";
+
 
 const production = !process.env.ROLLUP_WATCH;
 
 export default {
   input: "src/main.js",
-  external: ["fs"],
   output: {
     sourcemap: true,
     format: "iife",
@@ -27,40 +26,29 @@ export default {
       preventAssignment: true,
     }),
     svelte({
-      // enable run-time checks when not in production
       dev: !production,
       preprocess: autoPreprocess(),
-
-      // we'll extract any component CSS out into
-      // a separate file  better for performance
       css: (css) => {
         css.write("bundle.css");
       },
     }),
-    postcss({
-      extensions: [".css"],
+    resolve({
+      browser: true,
+      dedupe: ["svelte"],
     }),
-    typescript({ sourceMap: true }),
-
-    // If you have external dependencies installed from
-    // npm, you'll most likely need these plugins. In
-    // some cases you'll need additional configuration 
-    // consult the documentation for details:
-    // https://github.com/rollup/rollup-plugin-commonjs
-    resolve(),
     commonjs(),
-    eslint({
-      fix: true,
-      // include: ["src/**"], // used if we want auto fix all the time
+    typescript({ sourceMap: !production }),
+
+    // Serve your app and enable livereload in development
+    !production && serve({
+      contentBase: ['public'],
+      port: 5000,
+      open: true,
     }),
+    !production && livereload('public'),
 
-    // Watch the `public` directory and refresh the
-    // browser on changes when not in production
-    !production && livereload("public"),
-
-    // If we're building for production (npm run build
-    // instead of npm run dev), minify
-    production && terser(),
+    // Minify for production
+    production && terser()
   ],
   watch: {
     clearScreen: false,

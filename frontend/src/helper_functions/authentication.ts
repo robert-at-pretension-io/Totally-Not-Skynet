@@ -8,7 +8,8 @@ import {
   VerbTypes,
   Identity,
   Letter,
-  Body
+  Body,
+  Secrets
 } from "../generated/system_types";
 
 export function authenticate(
@@ -25,8 +26,12 @@ export function authenticate(
 
   letter.verb = VerbTypes.Initiate;
 
-  auth_content.client_email = email;
-  auth_content.client_password = password;
+  const secret = new Secrets();
+
+  secret.email = email;
+  secret.password = password;
+
+  auth_content.secrets = secret;
 
   const body = new Body();
 
@@ -38,10 +43,6 @@ export function authenticate(
 
   sendEnvelope(websocket, [letter]);
 
-  systemStateStore.update((s) => {
-    console.log("setting authenticated to true");
-    s.authenticated = true;
-    return s;
-  });
+  // Only authenticate if there is a session id
 
 }

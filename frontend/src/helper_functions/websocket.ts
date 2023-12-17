@@ -5,6 +5,7 @@ import {
   VerbTypes,
   Letter,
   Body,
+  Session,
 } from "../../src/generated/system_types";
 
 import systemStateStore from "stores/systemStateStore";
@@ -89,6 +90,7 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
           // check the type of letter
 
           if (letter.verb === VerbTypes.Initiate) {
+
             if (letter.body.has_node) {
               // if it's a node, add it to the SystemState
               const add_node = letter.body.node as Node;
@@ -119,6 +121,22 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
 
               getNodes();
             }
+
+            if (letter.body.has_authentication_message) {
+              const auth_message = letter.body.authentication_message;
+
+              if (auth_message.has_session) {
+                console.log("auth_message: ", auth_message.toObject());
+                systemStateStore.update((s) => {
+                  const session = auth_message.session;
+                  s.session = session;
+                  s.authenticated = true;
+                  console.log("The session is: ", session);
+                  return s;
+                });
+              }
+            }
+
             if (letter.body.has_node) {
               //add it to the system state local_node list:
               console.log("Added node to local system state");
@@ -130,6 +148,7 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
                 return s;
               });
             }
+
             if (letter.body.has_execution_details) {
               console.log("EXECUTION_DETAILS");
               console.log(letter.body.execution_details.toObject());
@@ -165,7 +184,8 @@ export function sendEnvelope(
   websocket: WebSocket,
   letters: Letter[],
   sender: Identity = undefined,
-  receiver: Identity = undefined
+  receiver: Identity = undefined,
+  session: Session = undefined,
 ) {
   // raise an error and alert if the sender or receiver is not set
   if (!sender) {
@@ -197,10 +217,30 @@ export function sendEnvelope(
     }
   }
 
+  if (!session) {
+    console.log("Session not set. Defaulting to the session in the system state.");
+
+    systemStateStore.subscribe((s: SystemState) => {
+      session = s.session;
+
+    });
+
+    if (session == undefined) {
+      console.log("session not defined");
+    } else {
+      console.log("Setting session: ", session.toObject());
+    }
+  }
+
   const envelope = new Envelope();
+
+  if (!session) {
+    console.warn("Session not set. This is not good -- unless this is the first authentication message being sent.");
+  }
 
   envelope.sender = sender;
   envelope.receiver = receiver;
+  envelope.session = session;
 
   // create uuid for the valididation id
   const verification_id = uuidv4();
