@@ -10965,11 +10965,11 @@ var app = (function () {
     var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
 
     /** Used as a reference to the global object. */
-    var root$4 = freeGlobal || freeSelf || Function('return this')();
+    var root$3 = freeGlobal || freeSelf || Function('return this')();
 
-    var _root = root$4;
+    var _root = root$3;
 
-    var root$3 = _root;
+    var root$2 = _root;
 
     /**
      * Gets the timestamp of the number of milliseconds that have elapsed since
@@ -10988,7 +10988,7 @@ var app = (function () {
      * // => Logs the number of milliseconds it took for the deferred invocation.
      */
     var now$1 = function() {
-      return root$3.Date.now();
+      return root$2.Date.now();
     };
 
     var now_1 = now$1;
@@ -11034,10 +11034,10 @@ var app = (function () {
 
     var _baseTrim = baseTrim$1;
 
-    var root$2 = _root;
+    var root$1 = _root;
 
     /** Built-in value references. */
-    var Symbol$4 = root$2.Symbol;
+    var Symbol$4 = root$1.Symbol;
 
     var _Symbol = Symbol$4;
 
@@ -11945,10 +11945,10 @@ var app = (function () {
     	return isFunction_1;
     }
 
-    var root$1 = _root;
+    var root = _root;
 
     /** Used to detect overreaching core-js shims. */
-    var coreJsData$1 = root$1['__core-js_shared__'];
+    var coreJsData$1 = root['__core-js_shared__'];
 
     var _coreJsData = coreJsData$1;
 
@@ -12083,17 +12083,17 @@ var app = (function () {
      * @param {string} key The key of the method to get.
      * @returns {*} Returns the function if it's native, else `undefined`.
      */
-    function getNative$3(object, key) {
+    function getNative$2(object, key) {
       var value = getValue$1(object, key);
       return baseIsNative(value) ? value : undefined;
     }
 
-    var _getNative = getNative$3;
+    var _getNative = getNative$2;
 
-    var getNative$2 = _getNative;
+    var getNative$1 = _getNative;
 
     /* Built-in method references that are verified to be native. */
-    var nativeCreate$4 = getNative$2(Object, 'create');
+    var nativeCreate$4 = getNative$1(Object, 'create');
 
     var _nativeCreate = nativeCreate$4;
 
@@ -12468,50 +12468,66 @@ var app = (function () {
     	return _listCacheSet;
     }
 
-    var listCacheClear = require_listCacheClear(),
-        listCacheDelete = require_listCacheDelete(),
-        listCacheGet = require_listCacheGet(),
-        listCacheHas = require_listCacheHas(),
-        listCacheSet = require_listCacheSet();
+    var _ListCache;
+    var hasRequired_ListCache;
 
-    /**
-     * Creates an list cache object.
-     *
-     * @private
-     * @constructor
-     * @param {Array} [entries] The key-value pairs to cache.
-     */
-    function ListCache$1(entries) {
-      var index = -1,
-          length = entries == null ? 0 : entries.length;
+    function require_ListCache () {
+    	if (hasRequired_ListCache) return _ListCache;
+    	hasRequired_ListCache = 1;
+    	var listCacheClear = require_listCacheClear(),
+    	    listCacheDelete = require_listCacheDelete(),
+    	    listCacheGet = require_listCacheGet(),
+    	    listCacheHas = require_listCacheHas(),
+    	    listCacheSet = require_listCacheSet();
 
-      this.clear();
-      while (++index < length) {
-        var entry = entries[index];
-        this.set(entry[0], entry[1]);
-      }
+    	/**
+    	 * Creates an list cache object.
+    	 *
+    	 * @private
+    	 * @constructor
+    	 * @param {Array} [entries] The key-value pairs to cache.
+    	 */
+    	function ListCache(entries) {
+    	  var index = -1,
+    	      length = entries == null ? 0 : entries.length;
+
+    	  this.clear();
+    	  while (++index < length) {
+    	    var entry = entries[index];
+    	    this.set(entry[0], entry[1]);
+    	  }
+    	}
+
+    	// Add methods to `ListCache`.
+    	ListCache.prototype.clear = listCacheClear;
+    	ListCache.prototype['delete'] = listCacheDelete;
+    	ListCache.prototype.get = listCacheGet;
+    	ListCache.prototype.has = listCacheHas;
+    	ListCache.prototype.set = listCacheSet;
+
+    	_ListCache = ListCache;
+    	return _ListCache;
     }
 
-    // Add methods to `ListCache`.
-    ListCache$1.prototype.clear = listCacheClear;
-    ListCache$1.prototype['delete'] = listCacheDelete;
-    ListCache$1.prototype.get = listCacheGet;
-    ListCache$1.prototype.has = listCacheHas;
-    ListCache$1.prototype.set = listCacheSet;
+    var _Map;
+    var hasRequired_Map;
 
-    var _ListCache = ListCache$1;
+    function require_Map () {
+    	if (hasRequired_Map) return _Map;
+    	hasRequired_Map = 1;
+    	var getNative = _getNative,
+    	    root = _root;
 
-    var getNative$1 = _getNative,
-        root = _root;
+    	/* Built-in method references that are verified to be native. */
+    	var Map = getNative(root, 'Map');
 
-    /* Built-in method references that are verified to be native. */
-    var Map$3 = getNative$1(root, 'Map');
-
-    var _Map = Map$3;
+    	_Map = Map;
+    	return _Map;
+    }
 
     var Hash = _Hash,
-        ListCache = _ListCache,
-        Map$2 = _Map;
+        ListCache = require_ListCache(),
+        Map$2 = require_Map();
 
     /**
      * Removes all key-value entries from the map.
@@ -45208,7 +45224,7 @@ var app = (function () {
     function require_stackClear () {
     	if (hasRequired_stackClear) return _stackClear;
     	hasRequired_stackClear = 1;
-    	var ListCache = _ListCache;
+    	var ListCache = require_ListCache();
 
     	/**
     	 * Removes all key-value entries from the stack.
@@ -45308,8 +45324,8 @@ var app = (function () {
     function require_stackSet () {
     	if (hasRequired_stackSet) return _stackSet;
     	hasRequired_stackSet = 1;
-    	var ListCache = _ListCache,
-    	    Map = _Map,
+    	var ListCache = require_ListCache(),
+    	    Map = require_Map(),
     	    MapCache = _MapCache;
 
     	/** Used as the size to enable large array optimizations. */
@@ -45351,7 +45367,7 @@ var app = (function () {
     function require_Stack () {
     	if (hasRequired_Stack) return _Stack;
     	hasRequired_Stack = 1;
-    	var ListCache = _ListCache,
+    	var ListCache = require_ListCache(),
     	    stackClear = require_stackClear(),
     	    stackDelete = require_stackDelete(),
     	    stackGet = require_stackGet(),
@@ -46716,7 +46732,7 @@ var app = (function () {
     	if (hasRequired_getTag) return _getTag;
     	hasRequired_getTag = 1;
     	var DataView = require_DataView(),
-    	    Map = _Map,
+    	    Map = require_Map(),
     	    Promise = require_Promise(),
     	    Set = require_Set(),
     	    WeakMap = require_WeakMap(),
@@ -50989,7 +51005,7 @@ var app = (function () {
     var version$1 = '2.1.8';
 
     // Includes only the "core" of graphlib
-    var lib = {
+    var lib$1 = {
       Graph: graph,
       version: version$1
     };
@@ -51626,24 +51642,14 @@ var app = (function () {
      * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      */
 
-    var graphlib;
-    var hasRequiredGraphlib$1;
+    var lib = lib$1;
 
-    function requireGraphlib$1 () {
-    	if (hasRequiredGraphlib$1) return graphlib;
-    	hasRequiredGraphlib$1 = 1;
-    	var lib$1 = lib;
-
-    	graphlib = {
-    	  Graph: lib$1.Graph,
-    	  json: json,
-    	  alg: alg,
-    	  version: lib$1.version
-    	};
-    	return graphlib;
-    }
-
-    var graphlibExports = requireGraphlib$1();
+    var graphlib = {
+      Graph: lib.Graph,
+      json: json,
+      alg: alg,
+      version: lib.version
+    };
 
     // import { NodeTypes } from './path/to/your/enum';  // Import your NodeTypes enum
     // export const stylesMap: { [key: string]: { [styleKey: string]: string } } = {
@@ -51675,7 +51681,7 @@ var app = (function () {
     function systemGraphToGraphLib(system_state) {
         const graph = system_state.graph;
         // const graph = graph_state.graph as proto.Graph;
-        const g = new graphlibExports.Graph();
+        const g = new graphlib.Graph();
         graph.nodes_info.forEach((node) => {
             g.setNode(node.id, node.name);
         });
@@ -51796,21 +51802,21 @@ var app = (function () {
     function requireGraphlib () {
     	if (hasRequiredGraphlib) return graphlib_1;
     	hasRequiredGraphlib = 1;
-    	var graphlib;
+    	var graphlib$1;
 
     	if (typeof commonjsRequire === "function") {
     	  try {
-    	    graphlib = requireGraphlib$1();
+    	    graphlib$1 = graphlib;
     	  } catch (e) {
     	    // continue regardless of error
     	  }
     	}
 
-    	if (!graphlib) {
-    	  graphlib = window.graphlib;
+    	if (!graphlib$1) {
+    	  graphlib$1 = window.graphlib;
     	}
 
-    	graphlib_1 = graphlib;
+    	graphlib_1 = graphlib$1;
     	return graphlib_1;
     }
 
