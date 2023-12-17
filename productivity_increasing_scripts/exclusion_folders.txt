@@ -17,3 +17,5 @@ logs
 .idea
 .DS_Store
 .vscode
+mongodump
+public
