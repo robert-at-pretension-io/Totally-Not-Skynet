@@ -191,7 +191,7 @@ pub async fn start_message_sending_loop(
                                 match auth.clone().body.unwrap() {
                                     AuthBody::Secrets(secret) => {
                                         println!("Email: {}", secret.email);
-                                        println!("Password: {}", secret.password);
+                                        println!("Password length: {}", secret.password.len());
 
                                         // Check if user's email is in the allowed list
                                         if allowed_emails.contains(&secret.email.as_str()) {

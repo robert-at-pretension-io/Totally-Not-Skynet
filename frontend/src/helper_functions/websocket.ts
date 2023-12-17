@@ -35,6 +35,7 @@ export function setupWebsocketConnection(): WebSocket {
     console.log("websocket connection opened");
     // need to prepare the handler of incoming messages before sending the first message (in case the rust server is TOO FAST 😎)
     websocket = setupWebsocketMessageHandler(websocket);
+    sendEnvelope(websocket, [new Letter()]);
   });
 
   console.log("Event listener setup:");
@@ -119,7 +120,7 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
                 return s;
               });
 
-              getNodes();
+              // getNodes();
             }
 
             if (letter.body.has_authentication_message) {
@@ -132,8 +133,13 @@ export function setupWebsocketMessageHandler(websocket: WebSocket): WebSocket {
                   s.session = session;
                   s.authenticated = true;
                   console.log("The session is: ", session);
+                  getNodes();
                   return s;
                 });
+
+
+
+
               }
             }
 

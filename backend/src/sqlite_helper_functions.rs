@@ -82,7 +82,7 @@ pub fn authorized(
             // let email = auth_message.email.unwrap();
             // let password = auth_message.password.unwrap();
             println!("Email: {}", secret.email);
-            println!("Password: {}", secret.password);
+            println!("Password len: {}", secret.password.len());
             let mut stmt = connection
                 .prepare("SELECT hashpass FROM pass WHERE email = ?1")
 
