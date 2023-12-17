@@ -1,4 +1,4 @@
-use crate::generated_types::{ self, Identity, Secrets };
+use crate::generated_types::{ self, Identity, Secrets, AuthenticationMessage };
 use crate::generated_types::{
     body::Contents,
     Body,
@@ -8,6 +8,8 @@ use crate::generated_types::{
     UserSettings,
     VerbTypes,
 };
+
+use crate::generated_types::authentication_message::Body as AuthBody;
 
 use crate::generated_types::Session;
 
@@ -26,6 +28,7 @@ use crate::sqlite_helper_functions::{
     update_node,
     check_if_user_exists,
     authorized,
+    insert_user,
 };
 
 use crate::SERVER_IDENTITY;
@@ -104,6 +107,8 @@ pub async fn start_message_sending_loop(
             }
         };
 
+        let mut session_found: bool = false;
+
         // This is a special case where there is no receiver specified and therefore the message content can be ignored. It is assumed that the client is requesting the server identity
         if envelope.receiver.is_none() {
             println!("{}", "No receiver specified.".red());
@@ -149,8 +154,6 @@ pub async fn start_message_sending_loop(
 
         // check that the envelope has a session, and if not, then the letter is solely an authentication message
 
-        let mut session_found: bool = false;
-
         if envelope.session.is_none() {
             let mut letters = envelope.clone().letters;
 
@@ -158,13 +161,13 @@ pub async fn start_message_sending_loop(
                 Contents::AuthenticationMessage(auth) => {
                     println!("{}", "Initiating authentication".green());
 
-                    match check_if_user_exists(auth_pool.clone(), auth.clone()) {
+                    match check_if_user_exists(&auth_pool, auth.clone()) {
                         Ok(user_exists) => {
                             if user_exists {
                                 println!("User exists");
-                                match authorized(auth_pool.cloned(), auth.clone()) {
+                                match authorized(&auth_pool, auth.clone()) {
                                     Ok(_) => {
-                                        println("User is authorized");
+                                        println!("User is authorized");
                                     }
                                     Err(_) => {
                                         println!("user not authorized");
@@ -175,6 +178,40 @@ pub async fn start_message_sending_loop(
                                 println!(
                                     "User does not exist. Let's create the account and session"
                                 );
+
+                                // Read the allowed emails from the file
+                                let allowed_emails = std::fs
+                                    ::read_to_string("allowed_emails.txt")
+                                    .expect("Failed to read allowed_emails.txt");
+
+                                match auth.clone().body.unwrap() {
+                                    AuthBody::Secrets(secret) => {
+                                        println!("Email: {}", secret.email);
+                                        println!("Password: {}", secret.password);
+
+                                        // Check if user's email is in the allowed list
+                                        if allowed_emails.contains(&secret.email) {
+                                            // Create the user and session
+                                            match insert_user(&auth_pool, auth.clone()) {
+                                                Ok(_) => {
+                                                    println!("User created and session started");
+                                                    // Here you might want to initiate a session or take other actions
+                                                }
+                                                Err(e) => {
+                                                    println!("Failed to create user: {:?}", e);
+                                                    continue;
+                                                }
+                                            }
+                                        } else {
+                                            println!("User email is not in the whitelist");
+                                            continue;
+                                        }
+                                    }
+                                    _ => {
+                                        println!("Secrets not found");
+                                        continue;
+                                    }
+                                }
                             }
                         }
                         Err(_) => {
@@ -234,6 +271,7 @@ pub async fn start_message_sending_loop(
                     );
 
                     send_message(&tx, msg.0.clone(), response_envelope).await;
+                    continue;
                 }
                 _ => {
                     println!(
@@ -248,7 +286,6 @@ pub async fn start_message_sending_loop(
             for session in session_ids.clone() {
                 if session.session_id == test_session.session_id {
                     session_found = true;
-                    break;
                 }
             }
             if !session_found {
@@ -256,6 +293,8 @@ pub async fn start_message_sending_loop(
                 continue;
             }
         }
+
+        // If we get to this point, we can assume that the user is verified
 
         // only create the container AFTER all of the verifications have been performed.
         match docker_containers.get(&msg.0.name) {

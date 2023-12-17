@@ -1,4 +1,5 @@
 use crate::generated_types::{ Node, AuthenticationMessage, Secrets };
+use crate::generated_types::authentication_message::Body as AuthBody;
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::{ params, Connection, Result };
@@ -68,105 +69,121 @@ pub fn create_pass_table(conn: &Connection) -> Result<()> {
 }
 
 pub fn authorized(
-    pool: Arc<Pool<SqliteConnectionManager>>,
+    pool: &Arc<Pool<SqliteConnectionManager>>,
     auth_message: AuthenticationMessage
-) -> Result<()> {
+) -> Result<(), String> {
     println!("Checking if hashed password is in db...");
     let connection = pool.get().expect("Failed to get connection from pool");
     println!("Connection obtained from pool successfully.");
 
     match auth_message.body.unwrap().clone() {
-        Secrets(email, password) => {
+        AuthBody::Secrets(secret) => {
             println!("Secrets message received.");
             // let email = auth_message.email.unwrap();
             // let password = auth_message.password.unwrap();
-            println!("Email: {}", email);
-            println!("Password: {}", password);
-            let mut stmt = connection.prepare("SELECT hashpass FROM pass WHERE email = ?1")?;
-            let mut rows = stmt.query(params![email])?;
-            let row = rows.next().unwrap()?;
-            let hashpass: String = row.get(0)?;
+            println!("Email: {}", secret.email);
+            println!("Password: {}", secret.password);
+            let mut stmt = connection
+                .prepare("SELECT hashpass FROM pass WHERE email = ?1")
+
+                .unwrap();
+            let mut rows = stmt
+                .query(params![secret.email])
+
+                .unwrap();
+            let row = rows.next().unwrap().ok_or("Error getting rows".to_string()).unwrap();
+            let hashpass: String = row.get(0).unwrap();
             println!("Hashpass: {}", hashpass);
-            match verify(password, &hashpass) {
+            match verify(secret.password, &hashpass) {
                 Ok(_) => {
                     println!("Password verified.");
                     Ok(())
                 }
                 Err(_) => {
                     println!("Password not verified.");
-                    Err(())
+                    Err("Password not verified.".to_string())
                 }
             }
         }
-        _ => { Err(()) }
+        _ => { Err("No secret included in auth message".to_string()) }
     }
 }
 
 pub fn insert_user(
-    pool: Arc<Pool<SqliteConnectionManager>>,
+    pool: &Arc<Pool<SqliteConnectionManager>>,
     auth_message: AuthenticationMessage
-) -> Result<()> {
+) -> Result<(), String> {
     println!("Inserting a password...");
     let connection = pool.get().expect("Failed to get connection from pool");
     println!("Connection obtained from pool successfully.");
 
-    if check_if_user_exists(pool.clone(), auth_message.clone())? {
-        println!("User already exists.");
-        return Err(());
-    } else {
-        match auth_message.body.unwrap().clone() {
-            Secrets(email, password) => {
-                println!("Secrets message received.");
-                // let email = auth_message.email.unwrap();
-                // let password = auth_message.password.unwrap();
-                println!("Email: {}", email);
-                println!("Password: {}", password);
-                println!("Hashing password...");
-                let hashed_pass = hash(password, DEFAULT_COST).unwrap();
-                println!("Hashed password: {}", hashed_pass);
-                println!("Inserting hashed password into the database...");
-                match
-                    connection.execute(
-                        "INSERT INTO pass (email, hashpass) VALUES (?1, ?2)",
-                        params![email, hashed_pass]
-                    )
-                {
-                    Ok(_) => {
-                        println!("Password insertion successful.");
-                        Ok(())
-                    }
-                    Err(err) => {
-                        println!("{}: {:?}", "Unable to insert password into db:".red(), err);
-                        Ok(())
-                    }
+    match check_if_user_exists(&pool, auth_message.clone()) {
+        Ok(true) => {
+            println!("User already exists.");
+        }
+        Ok(false) => {
+            insert_user(&pool, auth_message.clone());
+        }
+        Err(err) => {
+            println!("Error checking if user exists: {:?}", err);
+        }
+    }
+
+    match auth_message.body.unwrap().clone() {
+        AuthBody::Secrets(secret) => {
+            println!("Secrets message received.");
+            // let email = auth_message.email.unwrap();
+            // let password = auth_message.password.unwrap();
+            println!("Email: {}", secret.email);
+            println!("Password: {}", secret.password);
+            println!("Hashing password...");
+            let hashed_pass = hash(secret.password, DEFAULT_COST).unwrap();
+            println!("Hashed password: {}", hashed_pass);
+            println!("Inserting hashed password into the database...");
+            match
+                connection.execute(
+                    "INSERT INTO pass (email, hashpass) VALUES (?1, ?2)",
+                    params![secret.email, hashed_pass]
+                )
+            {
+                Ok(_) => {
+                    println!("Password insertion successful.");
+                    Ok(())
+                }
+                Err(err) => {
+                    println!("{}: {:?}", "Unable to insert password into db:".red(), err);
+                    Err("Unable to insert password into db.".to_string())
                 }
             }
-            _ => { Err(()) }
         }
+        _ => { Err("No secret included in message.".to_string()) }
     }
 }
 
 pub fn check_if_user_exists(
-    pool: Arc<Pool<SqliteConnectionManager>>,
+    pool: &Arc<Pool<SqliteConnectionManager>>,
     auth_message: AuthenticationMessage
-) -> Result<bool> {
+) -> Result<bool, String> {
     println!("Checking if user exists...");
     let connection = pool.get().expect("Failed to get connection from pool");
     println!("Connection obtained from pool successfully.");
 
     match auth_message.body.unwrap().clone() {
-        Secrets(email, _) => {
+        AuthBody::Secrets(secret) => {
             println!("Secrets message received.");
             // let email = auth_message.email.unwrap();
             // let password = auth_message.password.unwrap();
-            println!("Email: {}", email);
+            println!("Email: {}", secret.email);
             // println!("Password: {}", password);
-            let mut stmt = connection.prepare("SELECT count(0) FROM pass WHERE email = ?1")?;
+            let mut stmt = connection
+                .prepare("SELECT count(0) FROM pass WHERE email = ?1")
+
+                .unwrap();
 
             // if there is a row, then the user exists
-            let mut rows = stmt.query(params![email])?;
-            let row = rows.next().unwrap()?;
-            let count: i64 = row.get(0)?;
+            let mut rows = stmt.query(params![secret.email]).unwrap();
+            let row = rows.next().unwrap().ok_or("Error getting rows".to_string()).unwrap();
+            let count: i64 = row.get(0).unwrap();
             if count > 0 {
                 println!("User exists.");
                 Ok(true)
@@ -175,7 +192,10 @@ pub fn check_if_user_exists(
                 Ok(false)
             }
         }
-        _ => { Err(()) }
+        _ => {
+            // No string found
+            Err("No secret included in message.".to_string())
+        }
     }
 }
 

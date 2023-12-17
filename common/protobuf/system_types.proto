@@ -186,7 +186,6 @@ message Secrets {
 }
 
 
-
 message AuthenticationMessage {
      oneof body {
       Secrets secrets = 1;

@@ -27,6 +27,8 @@ use once_cell::sync::OnceCell;
 
 use crate::generated_types::Identity;
 
+use crate::generated_types::authentication_message::Body::Secrets;
+
 static SERVER_IDENTITY: OnceCell<Identity> = OnceCell::new();
 
 #[tokio::main]
@@ -88,7 +90,7 @@ async fn main() {
     };
 
     // make auth db pool
-    sqlite_location_auth = "auth.db";
+    let sqlite_location_auth = "auth.db";
     let manager_auth = SqliteConnectionManager::file(sqlite_location_auth);
     let pool_auth = match Pool::new(manager_auth) {
         Ok(p) => p,
