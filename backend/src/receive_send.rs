@@ -1,12 +1,6 @@
-use crate::generated_types::{ self, Identity, Secrets, AuthenticationMessage };
+use crate::generated_types::{self, AuthenticationMessage, Identity, Secrets};
 use crate::generated_types::{
-    body::Contents,
-    Body,
-    Envelope,
-    GraphNodeInfo,
-    Letter,
-    UserSettings,
-    VerbTypes,
+    body::Contents, Body, Envelope, GraphNodeInfo, Letter, UserSettings, VerbTypes,
 };
 
 use crate::generated_types::authentication_message::Body as AuthBody;
@@ -21,14 +15,9 @@ use colored::*;
 
 use std::sync::Arc;
 
-use crate::graph::{ run_execution, validate_nodes_in_process };
+use crate::graph::{run_execution, validate_nodes_in_process};
 use crate::sqlite_helper_functions::{
-    fetch_all_nodes,
-    insert_node,
-    update_node,
-    check_if_user_exists,
-    authorized,
-    insert_user,
+    authorized, check_if_user_exists, fetch_all_nodes, insert_node, insert_user, update_node,
 };
 
 use crate::SERVER_IDENTITY;
@@ -48,18 +37,11 @@ use bollard::container::Config;
 
 use bollard::Docker;
 
-// use petgraph::prelude::Bfs;
-// use petgraph::algo::toposort;
-
-// use bollard::container::Config;
-// use bollard::exec::{ CreateExecOptions, StartExecResults };
-// use bollard::Docker;
 use bson::doc;
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
 use std::collections::HashMap;
 use tokio::sync::mpsc;
-// use tokio_tungstenite::tungstenite::Message;
 
 // create a "models" type that can be used to select the model to use
 // it should be one of a couple of strings: "gpt-4", "gpt3.5-turbo", etc
@@ -81,15 +63,20 @@ pub async fn start_message_sending_loop(
     tx: UnboundedSender<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,
     mut client_rx: mpsc::Receiver<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,
     pool: Arc<Pool<SqliteConnectionManager>>,
-    auth_pool: Arc<Pool<SqliteConnectionManager>>
+    auth_pool: Arc<Pool<SqliteConnectionManager>>,
 ) {
-    let _runtime_settings: HashMap<LocalServerIdentity, UserSettings> = HashMap::new();
+    // settings will be sent with the session (with the secrets)
+    let mut runtime_settings: HashMap<LocalServerIdentity, Option<UserSettings>> = HashMap::new();
     let mut docker_containers: HashMap<String, String> = HashMap::new();
     let docker = Docker::connect_with_http_defaults().unwrap();
     let mut session_ids: Vec<Session> = vec![];
 
     while let Some(msg) = client_rx.recv().await {
-        println!("{} {:?}", "Received a message from the client:".yellow(), msg.1.len());
+        println!(
+            "{} {:?}",
+            "Received a message from the client:".yellow(),
+            msg.1.len()
+        );
 
         // if docker_containers doesn't contain the message identity (msg.0) then create it and add it to the hashmap:
 
@@ -100,7 +87,7 @@ pub async fn start_message_sending_loop(
         let slice = msg.1.clone().into_data().as_slice().to_vec();
 
         let envelope: Envelope = match Envelope::decode(&*slice) {
-            Ok(val) => { val }
+            Ok(val) => val,
             Err(err) => {
                 println!("Error decoding message: {:?}", err);
                 continue;
@@ -150,14 +137,25 @@ pub async fn start_message_sending_loop(
             println!("{}", "Forward the message to the correct receiver".red());
         }
 
-        println!("{}", "TODO: Collection responses and send them in envelope batch.".red());
+        println!(
+            "{}",
+            "TODO: Collection responses and send them in envelope batch.".red()
+        );
 
-        // check that the envelope has a session, and if not, then the letter is solely an authentication message
-
+        // check that the envelope has a session, and if not, then the letter MUST be an authentication message (this is a design decision but also like... makes sense, right?
         if envelope.session.is_none() {
             let mut letters = envelope.clone().letters;
 
-            match letters.first_mut().unwrap().body.clone().unwrap().contents.unwrap() {
+            // god save us all... I'm so sorry. I'll fix this with a super cool macro in the future, I promise 😉
+            match letters
+                .first_mut()
+                .unwrap()
+                .body
+                .clone()
+                .unwrap()
+                .contents
+                .unwrap()
+            {
                 Contents::AuthenticationMessage(auth) => {
                     println!("{}", "Initiating authentication".green());
 
@@ -166,8 +164,31 @@ pub async fn start_message_sending_loop(
                             if user_exists {
                                 println!("User exists");
                                 match authorized(&auth_pool, auth.clone()) {
-                                    Ok(_) => {
-                                        println!("User is authorized");
+                                    Ok(res) => {
+                                        if (res) {
+                                            println!(
+                                                "User is authorized... Storing their settings"
+                                            );
+
+                                            let user_settings = auth.clone().body.unwrap();
+
+                                            match user_settings {
+                                                AuthBody::Secrets(secret) => {
+                                                    println!("Adding potential user settings to runtime settings");
+                                                    runtime_settings.insert(
+                                                        msg.0.clone(),
+                                                        secret.clone().user_settings.clone(),
+                                                    );
+                                                }
+                                                _ => {
+                                                    println!("Secrets not found");
+                                                    continue;
+                                                }
+                                            }
+                                        } else {
+                                            println!("User not authorized");
+                                            continue;
+                                        }
                                     }
                                     Err(_) => {
                                         println!("user not authorized");
@@ -180,13 +201,12 @@ pub async fn start_message_sending_loop(
                                 );
 
                                 // Read the allowed emails from the file
-                                let allowed_emails = std::fs
-                                    ::read_to_string("./allowed_emails.txt")
-                                    .expect("Failed to read allowed_emails.txt");
+                                let allowed_emails =
+                                    std::fs::read_to_string("./allowed_emails.txt")
+                                        .expect("Failed to read allowed_emails.txt");
 
-                                let allowed_emails: Vec<&str> = allowed_emails
-                                    .split("\n")
-                                    .collect();
+                                let allowed_emails: Vec<&str> =
+                                    allowed_emails.split("\n").collect();
 
                                 match auth.clone().body.unwrap() {
                                     AuthBody::Secrets(secret) => {
@@ -245,19 +265,14 @@ pub async fn start_message_sending_loop(
                         body: None,
                     };
 
-                    let mut response_body: Body = Body {
-                        contents: None,
-                    };
+                    let mut response_body: Body = Body { contents: None };
 
-                    let mut response_contents: Contents = Contents::AuthenticationMessage(
-                        generated_types::AuthenticationMessage {
-                            body: Some(
-                                generated_types::authentication_message::Body::Session(
-                                    new_session.clone()
-                                )
-                            ),
-                        }
-                    );
+                    let mut response_contents: Contents =
+                        Contents::AuthenticationMessage(generated_types::AuthenticationMessage {
+                            body: Some(generated_types::authentication_message::Body::Session(
+                                new_session.clone(),
+                            )),
+                        });
 
                     response_body.contents = Some(response_contents);
 
@@ -320,7 +335,10 @@ pub async fn start_message_sending_loop(
                     ..Default::default()
                 };
 
-                match docker.create_container::<&str, &str>(None, alpine_config.clone()).await {
+                match docker
+                    .create_container::<&str, &str>(None, alpine_config.clone())
+                    .await
+                {
                     Ok(container) => {
                         println!("Created container with id: {:?}", container.id);
                         docker_id = container.id.clone();
@@ -354,13 +372,14 @@ pub async fn start_message_sending_loop(
             let wrapped_content = letter.body.clone();
             let verification_id = envelope.clone().verification_id;
             let session: Session = envelope.clone().session.unwrap();
+            let user_settings = runtime_settings.get(&msg.0.clone()).unwrap();
 
             let content: Contents = match wrapped_content {
                 None => {
                     println!("{} {:?}", "No contents found:".red(), letter);
                     continue; // We should probably log this later... But we don't want to interrupt the message processing loop
                 }
-                Some(body) => { body.contents.unwrap() }
+                Some(body) => body.contents.unwrap(),
             };
 
             match content {
@@ -515,9 +534,9 @@ pub async fn start_message_sending_loop(
                                             // we construct a new letter with the new mutable_node:
 
                                             let body = Body {
-                                                contents: Some(
-                                                    Contents::Node(mutable_node.clone())
-                                                ),
+                                                contents: Some(Contents::Node(
+                                                    mutable_node.clone(),
+                                                )),
                                             };
 
                                             let letter = generated_types::Letter {
@@ -575,9 +594,9 @@ pub async fn start_message_sending_loop(
                                             // we construct a new letter with the new mutable_node:
 
                                             let body = Body {
-                                                contents: Some(
-                                                    Contents::Node(mutable_node.clone())
-                                                ),
+                                                contents: Some(Contents::Node(
+                                                    mutable_node.clone(),
+                                                )),
                                             };
 
                                             let letter = generated_types::Letter {
@@ -599,9 +618,9 @@ pub async fn start_message_sending_loop(
                                             println!("Error inserting node: {:?}", err);
 
                                             let body = Body {
-                                                contents: Some(
-                                                    Contents::NodesToLoop(nodes_to_loop.clone())
-                                                ),
+                                                contents: Some(Contents::NodesToLoop(
+                                                    nodes_to_loop.clone(),
+                                                )),
                                             };
 
                                             let letter = generated_types::Letter {
@@ -628,9 +647,9 @@ pub async fn start_message_sending_loop(
                                 Err(err) => {
                                     println!("Error validating nodes: {:?}", err);
                                     let body = Body {
-                                        contents: Some(
-                                            Contents::NodesToLoop(nodes_to_loop.clone())
-                                        ),
+                                        contents: Some(Contents::NodesToLoop(
+                                            nodes_to_loop.clone(),
+                                        )),
                                     };
 
                                     let letter = generated_types::Letter {
@@ -663,11 +682,9 @@ pub async fn start_message_sending_loop(
                     match verb {
                         VerbTypes::Execute => {
                             // start up the server before running the execution as the recursive function is not allowed to send between async threads.
-                            match
-                                docker.start_container(
-                                    &docker_id,
-                                    None::<StartContainerOptions<String>>
-                                ).await
+                            match docker
+                                .start_container(&docker_id, None::<StartContainerOptions<String>>)
+                                .await
                             {
                                 Ok(res) => {
                                     println!("Container started: {:?}", res);
@@ -677,55 +694,69 @@ pub async fn start_message_sending_loop(
                                 }
                             }
 
-                            match
-                                run_execution(
-                                    execution.clone(),
-                                    None,
-                                    Some(docker_id.clone()),
-                                    &docker
-                                ).await
-                            {
-                                Ok((execution, _accumulator)) => {
-                                    let letter = Letter {
-                                        body: Some(Body {
-                                            contents: Some(Contents::ExecutionDetails(execution)),
-                                        }),
+                            // make sure the openai_api_key is set
+                            match user_settings {
+                                Some(settings) => {
+                                    let settings: Arc<UserSettings> = Arc::new(settings.clone());
 
-                                        verb: VerbTypes::Acknowledge as i32,
-                                    };
+                                    match run_execution(
+                                        execution.clone(),
+                                        None,
+                                        Some(docker_id.clone()),
+                                        &docker,
+                                        settings,
+                                    )
+                                    .await
+                                    {
+                                        Ok((execution, _accumulator)) => {
+                                            let letter = Letter {
+                                                body: Some(Body {
+                                                    contents: Some(Contents::ExecutionDetails(
+                                                        execution,
+                                                    )),
+                                                }),
 
-                                    let envelope = Envelope {
-                                        letters: vec![letter],
-                                        sender: Some(receiver.clone()),
-                                        receiver: Some(sender.clone()),
-                                        verification_id: verification_id.clone(),
-                                        session: Some(session.clone()),
-                                    };
+                                                verb: VerbTypes::Acknowledge as i32,
+                                            };
 
-                                    send_message(&tx, msg.0.clone(), envelope).await;
+                                            let envelope = Envelope {
+                                                letters: vec![letter],
+                                                sender: Some(receiver.clone()),
+                                                receiver: Some(sender.clone()),
+                                                verification_id: verification_id.clone(),
+                                                session: Some(session.clone()),
+                                            };
+
+                                            send_message(&tx, msg.0.clone(), envelope).await;
+                                        }
+                                        Err(error_response) => {
+                                            let letter = Letter {
+                                                body: Some(Body {
+                                                    contents: Some(Contents::ExecutionDetails(
+                                                        error_response,
+                                                    )),
+                                                }),
+
+                                                verb: VerbTypes::Error as i32,
+                                            };
+
+                                            let envelope = Envelope {
+                                                letters: vec![letter],
+                                                sender: Some(receiver.clone()),
+                                                receiver: Some(sender.clone()),
+                                                verification_id: verification_id.clone(),
+                                                session: Some(session.clone()),
+                                            };
+
+                                            send_message(&tx, msg.0.clone(), envelope).await;
+                                        }
+                                    }
                                 }
-                                Err(error_response) => {
-                                    let letter = Letter {
-                                        body: Some(Body {
-                                            contents: Some(
-                                                Contents::ExecutionDetails(error_response)
-                                            ),
-                                        }),
-
-                                        verb: VerbTypes::Error as i32,
-                                    };
-
-                                    let envelope = Envelope {
-                                        letters: vec![letter],
-                                        sender: Some(receiver.clone()),
-                                        receiver: Some(sender.clone()),
-                                        verification_id: verification_id.clone(),
-                                        session: Some(session.clone()),
-                                    };
-
-                                    send_message(&tx, msg.0.clone(), envelope).await;
+                                None => {
+                                    println!("api key not found.. request this from the user?");
+                                    continue;
                                 }
-                            }
+                            };
                         }
                         _ => {
                             println!(
@@ -747,14 +778,17 @@ pub async fn start_message_sending_loop(
 pub async fn send_message(
     tx: &UnboundedSender<(LocalServerIdentity, tokio_tungstenite::tungstenite::Message)>,
     identity: LocalServerIdentity,
-    envelope: Envelope
+    envelope: Envelope,
 ) {
     let mut buf = BytesMut::new();
     envelope.encode(&mut buf).unwrap();
 
     println!("{}: {:?}", "Sending message to client".green(), envelope);
 
-    match tx.send((identity, tokio_tungstenite::tungstenite::Message::Binary(buf.to_vec()))) {
+    match tx.send((
+        identity,
+        tokio_tungstenite::tungstenite::Message::Binary(buf.to_vec()),
+    )) {
         Ok(_) => {}
         Err(e) => {
             println!("Error sending message to client: {:?}", e);

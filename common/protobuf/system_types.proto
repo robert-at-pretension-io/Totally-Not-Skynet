@@ -147,8 +147,22 @@ message Execution {
 // The atomic execution refers to the execution of a node that is NOT a flow control node. For instance, a prompt, command, or code node.
 message AtomicExecutionLog {
   string prompt = 1;
-  map<string,string> response = 2;
+  map<string,Value> response = 2;
   GraphNodeInfo node_info = 3;
+}
+
+
+message Value {
+  oneof value_type {
+    string string_value = 1;
+    double number_value = 2;
+    StringList string_list = 3;
+  }
+}
+
+// Helper message for a list of strings
+message StringList {
+  repeated string values = 1;
 }
 
 message VariableDefinition {
@@ -184,6 +198,7 @@ message SystemState {
 message Secrets {
   string email = 1;
   string password = 2;
+  UserSettings user_settings = 3;
 }
 
 
@@ -196,7 +211,6 @@ message AuthenticationMessage {
 
 message UserSettings {
   string openai_api_key = 1;
-  string mongo_db_uri = 2;
 }
 
 

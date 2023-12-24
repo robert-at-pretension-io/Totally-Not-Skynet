@@ -1,22 +1,14 @@
-use crate::generated_types::AtomicExecutionLog;
 use crate::generated_types::{
-    node_content::NodeContent as NodeContentEnum,
-    Command,
-    Edge,
-    Execution,
-    Graph,
-    GraphNodeInfo,
-    Loop,
-    Node,
-    NodeContent,
-    NodeTypes,
-    Process,
+    node_content::NodeContent as NodeContentEnum, Command, Edge, Execution, Graph, GraphNodeInfo,
+    Loop, Node, NodeContent, NodeTypes, Process,
 };
+use crate::generated_types::{value, AtomicExecutionLog, UserSettings};
 
+use async_openai::config::OpenAIConfig;
 use futures_util::StreamExt;
 
 use bollard::container::LogOutput;
-use bollard::exec::{ CreateExecOptions, StartExecResults };
+use bollard::exec::{CreateExecOptions, StartExecResults};
 use bollard::Docker;
 
 use petgraph::algo::tarjan_scc;
@@ -26,13 +18,9 @@ use petgraph::adj::NodeIndex;
 use async_recursion::async_recursion;
 
 use async_openai::types::{
-    ChatCompletionRequestMessage,
-    ChatCompletionRequestUserMessage,
-    ChatCompletionRequestUserMessageContent,
-    ChatCompletionResponseFormat,
-    ChatCompletionResponseFormatType,
-    CreateChatCompletionRequest,
-    Role,
+    ChatCompletionRequestMessage, ChatCompletionRequestUserMessage,
+    ChatCompletionRequestUserMessageContent, ChatCompletionResponseFormat,
+    ChatCompletionResponseFormatType, CreateChatCompletionRequest, Role,
 };
 
 use handlebars::Handlebars;
@@ -40,11 +28,12 @@ use handlebars::Handlebars;
 use async_openai::Client;
 use colored::*;
 
-use petgraph::{ graph::DiGraph, Direction };
+use petgraph::{graph::DiGraph, Direction};
 
 use petgraph::algo::toposort;
 
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use petgraph::visit::EdgeRef;
 
@@ -54,7 +43,7 @@ use serde_json::Value;
 
 pub fn validate_nodes_in_process(
     nodes: Vec<Node>,
-    graph_node_info: GraphNodeInfo
+    graph_node_info: GraphNodeInfo,
 ) -> Result<Node, String> {
     //generate maximal graph from nodes (based on input_variables and output_variables)
     println!("Validating nodes");
@@ -167,13 +156,13 @@ pub fn validate_nodes_in_process(
 
     let adjacency_list = petgraph::algo::tred::dag_to_toposorted_adjacency_list::<
         _,
-        petgraph::graph::DefaultIx
+        petgraph::graph::DefaultIx,
     >(&graph, &top_sort);
 
     // The output is the pair of the transitive reduction and the transitive closure.
     let (transative_reduct, _) = petgraph::algo::tred::dag_transitive_reduction_closure::<
         _,
-        petgraph::graph::DefaultIx
+        petgraph::graph::DefaultIx,
     >(&adjacency_list.0);
 
     // The graph should have the same nodes but different edges.
@@ -192,20 +181,17 @@ pub fn validate_nodes_in_process(
     // let edge_count = rebuilt_graph.raw_edges().len();
     // println!("Total number of raw edges: {}", edge_count);
 
-    mut_pruned_graph
-        .raw_edges()
-        .iter()
-        .for_each(|edge| {
-            let source_node = graph.node_weight(edge.source()).unwrap();
-            let target_node = graph.node_weight(edge.target()).unwrap();
+    mut_pruned_graph.raw_edges().iter().for_each(|edge| {
+        let source_node = graph.node_weight(edge.source()).unwrap();
+        let target_node = graph.node_weight(edge.target()).unwrap();
 
-            let new_edge: Edge = Edge {
-                source: source_node.node_info.clone(),
-                target: target_node.node_info.clone(),
-            };
+        let new_edge: Edge = Edge {
+            source: source_node.node_info.clone(),
+            target: target_node.node_info.clone(),
+        };
 
-            new_edges.push(new_edge);
-        });
+        new_edges.push(new_edge);
+    });
 
     let new_graph = Graph {
         nodes_info: new_nodes,
@@ -252,7 +238,8 @@ pub fn validate_nodes_in_process(
     let index_vec = toposort(&mut_pruned_graph, None).unwrap();
 
     for index in index_vec {
-        let node = new_graph.nodes_info
+        let node = new_graph
+            .nodes_info
             .iter()
             .find(|node| node.id == mut_pruned_graph[index].node_info.as_mut().unwrap().id)
             .unwrap();
@@ -282,7 +269,7 @@ pub fn validate_nodes_in_process(
 
 pub fn validate_nodes_in_loop(
     nodes: Vec<Node>,
-    graph_node_info: GraphNodeInfo
+    graph_node_info: GraphNodeInfo,
 ) -> Result<Node, String> {
     //generate maximal graph from nodes (based on input_variables and output_variables)
     println!("Validating nodes");
@@ -349,7 +336,8 @@ pub fn validate_nodes_in_loop(
 
     if output_minus_input.len() == 0 {
         return Err(
-            "There must be at least one output variable that is not an input variable in a loop".to_string()
+            "There must be at least one output variable that is not an input variable in a loop"
+                .to_string(),
         );
     }
 
@@ -429,7 +417,10 @@ pub fn validate_nodes_in_loop(
 
     println!("All edges added");
 
-    println!("{}", "Remove the edges that go from the conditional back to the loop".red());
+    println!(
+        "{}",
+        "Remove the edges that go from the conditional back to the loop".red()
+    );
 
     // Find the conditional node
     let mut this_conditional_node_index: Option<NodeIndex> = None;
@@ -494,13 +485,13 @@ pub fn validate_nodes_in_loop(
 
     let adjacency_list = petgraph::algo::tred::dag_to_toposorted_adjacency_list::<
         _,
-        petgraph::graph::DefaultIx
+        petgraph::graph::DefaultIx,
     >(&graph, &top_sort);
 
     // The output is the pair of the transitive reduction and the transitive closure.
     let (transative_reduct, _) = petgraph::algo::tred::dag_transitive_reduction_closure::<
         _,
-        petgraph::graph::DefaultIx
+        petgraph::graph::DefaultIx,
     >(&adjacency_list.0);
 
     // The graph should have the same nodes but different edges.
@@ -519,20 +510,17 @@ pub fn validate_nodes_in_loop(
     // let edge_count = rebuilt_graph.raw_edges().len();
     // println!("Total number of raw edges: {}", edge_count);
 
-    mut_pruned_graph
-        .raw_edges()
-        .iter()
-        .for_each(|edge| {
-            let source_node = graph.node_weight(edge.source()).unwrap();
-            let target_node = graph.node_weight(edge.target()).unwrap();
+    mut_pruned_graph.raw_edges().iter().for_each(|edge| {
+        let source_node = graph.node_weight(edge.source()).unwrap();
+        let target_node = graph.node_weight(edge.target()).unwrap();
 
-            let new_edge: Edge = Edge {
-                source: source_node.node_info.clone(),
-                target: target_node.node_info.clone(),
-            };
+        let new_edge: Edge = Edge {
+            source: source_node.node_info.clone(),
+            target: target_node.node_info.clone(),
+        };
 
-            new_edges.push(new_edge);
-        });
+        new_edges.push(new_edge);
+    });
 
     let new_graph = Graph {
         nodes_info: new_nodes,
@@ -553,7 +541,8 @@ pub fn validate_nodes_in_loop(
     let index_vec = toposort(&mut_pruned_graph, None).unwrap();
 
     for index in index_vec {
-        let node = new_graph.nodes_info
+        let node = new_graph
+            .nodes_info
             .iter()
             .find(|node| node.id == mut_pruned_graph[index].node_info.as_mut().unwrap().id)
             .unwrap();
@@ -586,14 +575,13 @@ pub async fn run_execution(
     execution: Execution,
     accumulator: Option<String>,
     docker_id: Option<String>,
-    docker_instance: &Docker
+    docker_instance: &Docker,
+    user_settings: Arc<UserSettings>,
 ) -> Result<(Execution, Option<String>), Execution> {
     // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
 
-    let mut variable_definitions: HashMap<
-        String,
-        String
-    > = execution.clone().current_variable_definitions;
+    let mut variable_definitions: HashMap<String, String> =
+        execution.clone().current_variable_definitions;
 
     let local_nodes: Vec<Node> = execution.process.clone().unwrap().nodes.clone();
 
@@ -603,10 +591,8 @@ pub async fn run_execution(
         local_nodes_map.insert(node.node_info.clone().unwrap().id, node.clone());
     });
 
-    let topological_order: Vec<GraphNodeInfo> = execution.process
-        .clone()
-        .unwrap()
-        .topological_order.clone();
+    let topological_order: Vec<GraphNodeInfo> =
+        execution.process.clone().unwrap().topological_order.clone();
 
     let mut local_accumulator = accumulator.clone();
 
@@ -634,23 +620,23 @@ pub async fn run_execution(
                 let local_execution = process_to_execution(
                     variable_definitions.clone(),
                     process.clone(),
-                    prompt_histories.clone()
+                    prompt_histories.clone(),
                 );
 
-                match
-                    run_execution(
-                        local_execution,
-                        local_accumulator.clone(),
-                        docker_id.clone(),
-                        docker_instance
-                    ).await
+                match run_execution(
+                    local_execution,
+                    local_accumulator.clone(),
+                    docker_id.clone(),
+                    docker_instance,
+                    user_settings.clone(),
+                )
+                .await
                 {
                     Ok((progressed_execution, returned_accumulator)) => {
                         println!("{}", "Process executed successfully".green());
                         // update the variable definitions and prompt histories
-                        variable_definitions.extend(
-                            progressed_execution.current_variable_definitions.clone()
-                        );
+                        variable_definitions
+                            .extend(progressed_execution.current_variable_definitions.clone());
                         prompt_histories = progressed_execution.atomic_history.clone();
 
                         local_accumulator = returned_accumulator.clone();
@@ -665,13 +651,14 @@ pub async fn run_execution(
             }
             Ok(NodeTypes::Prompt) => {
                 // we need to replace the prompt text input_variables with their definitions
-                match
-                    handle_prompt(
-                        current_node.clone(),
-                        variable_definitions.clone(),
-                        local_accumulator.clone(),
-                        "gpt-4-1106-preview".to_string()
-                    ).await
+                match handle_prompt(
+                    current_node.clone(),
+                    variable_definitions.clone(),
+                    local_accumulator.clone(),
+                    "gpt-4-1106-preview".to_string(),
+                    user_settings.clone(),
+                )
+                .await
                 {
                     Ok((prompt_history, local_variable_definitions)) => {
                         prompt_histories.push(prompt_history);
@@ -707,23 +694,23 @@ pub async fn run_execution(
                     let local_execution = process_to_execution(
                         variable_definitions.clone(),
                         contained_loop.clone().process.unwrap().clone(),
-                        prompt_histories.clone()
+                        prompt_histories.clone(),
                     );
 
-                    match
-                        run_execution(
-                            local_execution,
-                            local_accumulator.clone(),
-                            docker_id.clone(),
-                            docker_instance
-                        ).await
+                    match run_execution(
+                        local_execution,
+                        local_accumulator.clone(),
+                        docker_id.clone(),
+                        docker_instance,
+                        user_settings.clone(),
+                    )
+                    .await
                     {
                         Ok((progressed_execution, returned_accumulator)) => {
                             println!("{}", "Process executed successfully".green());
                             // update the variable definitions and prompt histories
-                            variable_definitions.extend(
-                                progressed_execution.current_variable_definitions.clone()
-                            );
+                            variable_definitions
+                                .extend(progressed_execution.current_variable_definitions.clone());
                             prompt_histories = progressed_execution.atomic_history.clone();
 
                             local_accumulator = returned_accumulator.clone();
@@ -748,12 +735,12 @@ pub async fn run_execution(
 
                 // Check if any of the output_variables of the process containing this conditional are currently defined
 
-                match
-                    handle_conditional(
-                        current_node.clone(),
-                        variable_definitions.clone(),
-                        "gpt-4-1106-preview".to_string()
-                    ).await
+                match handle_conditional(
+                    current_node.clone(),
+                    variable_definitions.clone(),
+                    "gpt-4-1106-preview".to_string(),
+                )
+                .await
                 {
                     Ok((prompt_history, local_variable_definitions, accumulator)) => {
                         prompt_histories.push(prompt_history);
@@ -771,7 +758,13 @@ pub async fn run_execution(
             Ok(NodeTypes::Command) => {
                 let command: Command;
 
-                match current_node.clone().node_content.unwrap().node_content.unwrap() {
+                match current_node
+                    .clone()
+                    .node_content
+                    .unwrap()
+                    .node_content
+                    .unwrap()
+                {
                     NodeContentEnum::Command(c) => {
                         command = c;
                     }
@@ -781,16 +774,16 @@ pub async fn run_execution(
                     }
                 }
 
-                match
-                    handle_command(
-                        current_node.clone(),
-                        variable_definitions.clone(),
-                        local_accumulator.clone(),
-                        "gpt-4-1106-preview".to_string(),
-                        command.clone(),
-                        docker_instance,
-                        docker_id.clone().unwrap()
-                    ).await
+                match handle_command(
+                    current_node.clone(),
+                    variable_definitions.clone(),
+                    local_accumulator.clone(),
+                    "gpt-4-1106-preview".to_string(),
+                    command.clone(),
+                    docker_instance,
+                    docker_id.clone().unwrap(),
+                )
+                .await
                 {
                     Ok(atomic_log) => {
                         prompt_histories.push(atomic_log);
@@ -822,7 +815,7 @@ pub async fn run_execution(
 pub fn process_to_execution(
     current_variables: HashMap<String, String>,
     process: Process,
-    prompt_histories: Vec<AtomicExecutionLog>
+    prompt_histories: Vec<AtomicExecutionLog>,
 ) -> Execution {
     let execution: Execution = Execution {
         current_variable_definitions: current_variables,
@@ -839,19 +832,22 @@ pub async fn handle_prompt(
     current_node: Node,
     mut variable_definitions: HashMap<String, String>,
     accumulator: Option<String>,
-    language_model_version: String
+    language_model_version: String,
+    user_settings: Arc<UserSettings>,
 ) -> Result<(AtomicExecutionLog, HashMap<String, String>), ()> {
     let mut prompt_text: String = "".to_string();
     let mut hydrated_prompt_text: String = "".to_string();
 
+    let api_key = user_settings.openai_api_key.clone();
+
     let additional_instruction =
         "When coming up with a response, please make the fields of the json response be the following: ".to_string();
 
-    let more_additional_instruction =
-        "
+    let more_additional_instruction = "
     
     You can also use the error field to report any problems when trying to come up with a response.
-    ".to_string();
+    "
+    .to_string();
 
     // Concatenate the strings in the vector to make a comma separated string.
 
@@ -865,9 +861,13 @@ pub async fn handle_prompt(
 
             let json_variable_definitions: Value = serde_json::json!(variable_definitions);
 
-            handlebars.register_template_string("prompt", prompt.clone().prompt).unwrap();
+            handlebars
+                .register_template_string("prompt", prompt.clone().prompt)
+                .unwrap();
 
-            hydrated_prompt_text = handlebars.render("prompt", &json_variable_definitions).unwrap();
+            hydrated_prompt_text = handlebars
+                .render("prompt", &json_variable_definitions)
+                .unwrap();
 
             match accumulator {
                 Some(accumulator_text) => {
@@ -898,8 +898,9 @@ pub async fn handle_prompt(
         }
     }
 
-    // I believe this already pulls the key from the environmental variable.
-    let client = Client::new();
+    let config = OpenAIConfig::new().with_api_key(api_key);
+
+    let client = Client::with_config(config);
 
     let user_message = ChatCompletionRequestUserMessage {
         content: Some(ChatCompletionRequestUserMessageContent::Text(prompt_text)),
@@ -922,17 +923,21 @@ pub async fn handle_prompt(
     request.model = language_model_version.clone();
 
     // Call API
-    let response = client.chat().create(request).await.unwrap();
+    let response = match client.chat().create(request).await {
+        Ok(response) => response,
+        Err(_) => {
+            println!("{}", "Error with OpenAI API".red());
+            return Err(());
+        }
+    };
 
-    // println!(
-    //     "{}",
-    //     response.choices.first().unwrap().message.content.clone().unwrap().as_str().to_string()
-    // );
-
-    let json_string = response.choices
+    let json_string = response
+        .choices
         .first()
         .unwrap()
-        .message.content.clone()
+        .message
+        .content
+        .clone()
         .unwrap()
         .as_str()
         .to_string();
@@ -949,12 +954,50 @@ pub async fn handle_prompt(
 
     if let Some(obj) = value.as_object() {
         for (key, value) in obj {
-            println!("{}: {}", key.green(), value);
-            variable_definitions.insert(key.clone(), value.clone().to_string());
-            execution_response_hashmap.insert(key.clone(), value.clone().to_string());
+            let value_str = match value {
+                serde_json::Value::String(s) => {
+                    let return_val = crate::generated_types::Value {
+                        value_type: Some(value::ValueType::StringValue(s.clone())),
+                    };
+
+                    execution_response_hashmap.insert(key.clone(), return_val);
+                    s.clone()
+                }
+                serde_json::Value::Number(n) => {
+                    let return_num = n.as_f64().unwrap();
+
+                    let return_val = crate::generated_types::Value {
+                        value_type: Some(value::ValueType::NumberValue(return_num)),
+                    };
+
+                    execution_response_hashmap.insert(key.clone(), return_val);
+                    n.to_string()
+                }
+                serde_json::Value::Array(arr) => {
+                    let string_list = crate::generated_types::StringList {
+                        values: arr.clone().into_iter().map(|v| v.to_string()).collect(),
+                    };
+
+                    let return_val = crate::generated_types::Value {
+                        value_type: Some(value::ValueType::StringList(string_list)),
+                    };
+
+                    // Convert the array to a string representation
+                    // You can customize this part as per your requirements
+                    execution_response_hashmap.insert(key.clone(), return_val);
+
+                    serde_json::to_string(&arr).unwrap_or_else(|_| "[]".to_string())
+                }
+                // Handle other types as needed
+                _ => value.to_string(),
+            };
+
+            println!("{}: {}", key.green(), value_str);
+            variable_definitions.insert(key.clone(), value_str.clone());
         }
     } else {
         println!("{}", "The JSON is not an object.".red());
+        return Err(());
     }
 
     // see if all of the output_variables of the node are in the variable definition hashmap:
@@ -990,7 +1033,7 @@ pub async fn handle_command(
     language_model_version: String,
     command: Command,
     docker_instance: &Docker,
-    docker_id: String
+    docker_id: String,
 ) -> Result<AtomicExecutionLog, ()> {
     let mut prompt_text: String = "".to_string();
 
@@ -1000,9 +1043,13 @@ pub async fn handle_command(
 
     let json_variable_definitions: Value = serde_json::json!(variable_definitions);
 
-    handlebars.register_template_string("goal", goal.clone()).unwrap();
+    handlebars
+        .register_template_string("goal", goal.clone())
+        .unwrap();
 
-    goal = handlebars.render("goal", &json_variable_definitions).unwrap();
+    goal = handlebars
+        .render("goal", &json_variable_definitions)
+        .unwrap();
 
     // let the command_line_history string be empty OR the contents of the accumulator:
     let command_line_history: String = match accumulator {
@@ -1020,7 +1067,9 @@ pub async fn handle_command(
     let client = Client::new();
 
     let user_message = ChatCompletionRequestUserMessage {
-        content: Some(ChatCompletionRequestUserMessageContent::Text(prompt_text.clone())),
+        content: Some(ChatCompletionRequestUserMessageContent::Text(
+            prompt_text.clone(),
+        )),
         role: Role::User,
     };
 
@@ -1044,13 +1093,25 @@ pub async fn handle_command(
 
     println!(
         "{}",
-        response.choices.first().unwrap().message.content.clone().unwrap().as_str().to_string()
+        response
+            .choices
+            .first()
+            .unwrap()
+            .message
+            .content
+            .clone()
+            .unwrap()
+            .as_str()
+            .to_string()
     );
 
-    let json_string = response.choices
+    let json_string = response
+        .choices
         .first()
         .unwrap()
-        .message.content.clone()
+        .message
+        .content
+        .clone()
         .unwrap()
         .as_str()
         .to_string();
@@ -1061,18 +1122,68 @@ pub async fn handle_command(
 
     let mut execution_response_hashmap = HashMap::new();
 
-    let value: Value = serde_json::from_str(json_string.as_str()).unwrap();
+    // let value: Value = serde_json::from_str(json_string.as_str()).unwrap();
 
-    println!("{}", "VARIABLES RETURNED FROM PROMPT:".green());
+    // println!("{}", "VARIABLES RETURNED FROM PROMPT:".green());
+
+    // if let Some(obj) = value.as_object() {
+    //     for (key, value) in obj {
+    //         println!("{}: {}", key.green(), value);
+    //         variable_definitions.insert(key.clone(), value.clone().to_string());
+    //         execution_response_hashmap.insert(key.clone(), value.clone().to_string());
+    //     }
+    // } else {
+    //     println!("{}", "The JSON is not an object.".red());
+    // }
+
+    let value: Value = serde_json::from_str(json_string.as_str()).unwrap();
 
     if let Some(obj) = value.as_object() {
         for (key, value) in obj {
-            println!("{}: {}", key.green(), value);
-            variable_definitions.insert(key.clone(), value.clone().to_string());
-            execution_response_hashmap.insert(key.clone(), value.clone().to_string());
+            let value_str = match value {
+                serde_json::Value::String(s) => {
+                    let return_val = crate::generated_types::Value {
+                        value_type: Some(value::ValueType::StringValue(s.clone())),
+                    };
+
+                    execution_response_hashmap.insert(key.clone(), return_val);
+                    s.clone()
+                }
+                serde_json::Value::Number(n) => {
+                    let return_num = n.as_f64().unwrap();
+
+                    let return_val = crate::generated_types::Value {
+                        value_type: Some(value::ValueType::NumberValue(return_num)),
+                    };
+
+                    execution_response_hashmap.insert(key.clone(), return_val);
+                    n.to_string()
+                }
+                serde_json::Value::Array(arr) => {
+                    let string_list = crate::generated_types::StringList {
+                        values: arr.clone().into_iter().map(|v| v.to_string()).collect(),
+                    };
+
+                    let return_val = crate::generated_types::Value {
+                        value_type: Some(value::ValueType::StringList(string_list)),
+                    };
+
+                    // Convert the array to a string representation
+                    // You can customize this part as per your requirements
+                    execution_response_hashmap.insert(key.clone(), return_val);
+
+                    serde_json::to_string(&arr).unwrap_or_else(|_| "[]".to_string())
+                }
+                // Handle other types as needed
+                _ => value.to_string(),
+            };
+
+            println!("{}: {}", key.green(), value_str);
+            variable_definitions.insert(key.clone(), value_str.clone());
         }
     } else {
         println!("{}", "The JSON is not an object.".red());
+        return Err(());
     }
 
     // extract the command from the variable_definitions hashmap:
@@ -1084,7 +1195,10 @@ pub async fn handle_command(
             run_this_command = command.clone();
         }
         None => {
-            println!("{}", "The command field was not found in the response.".red());
+            println!(
+                "{}",
+                "The command field was not found in the response.".red()
+            );
             return Err(());
         }
     }
@@ -1094,20 +1208,34 @@ pub async fn handle_command(
             verification_command = command.clone();
         }
         None => {
-            println!("{}", "The command field was not found in the response.".red());
+            println!(
+                "{}",
+                "The command field was not found in the response.".red()
+            );
             return Err(());
         }
     }
 
-    println!("Running the following command: '{}'", run_this_command.green());
+    println!(
+        "Running the following command: '{}'",
+        run_this_command.green()
+    );
 
     match run_command(run_this_command.clone(), docker_id.clone(), docker_instance).await {
         Ok(res) => {
-            println!("{}\nResult: {:?}", "The command was run successfully".green(), res);
+            println!(
+                "{}\nResult: {:?}",
+                "The command was run successfully".green(),
+                res
+            );
+
+            let return_value = crate::generated_types::Value {
+                value_type: Some(value::ValueType::StringValue(res.clone())),
+            };
 
             // Need to add the command to the atomic history of the execution_details
 
-            execution_response_hashmap.insert("command_response".to_string(), res.clone());
+            execution_response_hashmap.insert("command_response".to_string(), return_value.clone());
         }
         Err(_err) => {
             println!("{}", "The command was not run successfully".red());
@@ -1122,9 +1250,14 @@ pub async fn handle_command(
                 "The verification command was run successfully".green(),
                 verification_res
             );
+
+            let return_value = crate::generated_types::Value {
+                value_type: Some(value::ValueType::StringValue(verification_res.clone())),
+            };
+
             execution_response_hashmap.insert(
                 "verification_command_response".to_string(),
-                verification_res.clone()
+                return_value.clone(),
             );
         }
         Err(err) => {
@@ -1146,15 +1279,15 @@ pub async fn handle_command(
 pub async fn handle_conditional(
     current_node: Node,
     mut variable_definitions: HashMap<String, String>,
-    _language_model_version: String
+    _language_model_version: String,
 ) -> Result<(AtomicExecutionLog, HashMap<String, String>, Option<String>), ()> {
     let mut prompt_text: String = "".to_string();
     let mut hydrated_prompt_text: String = "".to_string();
 
-    let additional_instruction =
-        "
+    let additional_instruction = "
 
-        When coming up with a response, please make the fields be any number of the following: ".to_string();
+        When coming up with a response, please make the fields be any number of the following: "
+        .to_string();
 
     let more_additional_instruction =
         "
@@ -1176,9 +1309,13 @@ pub async fn handle_conditional(
 
             let json_variable_definitions: Value = serde_json::json!(variable_definitions);
 
-            handlebars.register_template_string("prompt", prompt.clone().prompt).unwrap();
+            handlebars
+                .register_template_string("prompt", prompt.clone().prompt)
+                .unwrap();
 
-            hydrated_prompt_text = handlebars.render("prompt", &json_variable_definitions).unwrap();
+            hydrated_prompt_text = handlebars
+                .render("prompt", &json_variable_definitions)
+                .unwrap();
 
             prompt_text = format!(
                 "{} {} {} {}",
@@ -1222,13 +1359,25 @@ pub async fn handle_conditional(
 
     println!(
         "{}",
-        response.choices.first().unwrap().message.content.clone().unwrap().as_str().to_string()
+        response
+            .choices
+            .first()
+            .unwrap()
+            .message
+            .content
+            .clone()
+            .unwrap()
+            .as_str()
+            .to_string()
     );
 
-    let json_string = response.choices
+    let json_string = response
+        .choices
         .first()
         .unwrap()
-        .message.content.clone()
+        .message
+        .content
+        .clone()
         .unwrap()
         .as_str()
         .to_string();
@@ -1243,8 +1392,13 @@ pub async fn handle_conditional(
     if let Some(obj) = value.as_object() {
         for (key, value) in obj {
             println!("{}: {}", key, value);
+
+            let return_value = crate::generated_types::Value {
+                value_type: Some(value::ValueType::StringValue(value.clone().to_string())),
+            };
+
             variable_definitions.insert(key.clone(), value.clone().to_string());
-            execution_response_hashmap.insert(key.clone(), value.clone().to_string());
+            execution_response_hashmap.insert(key.clone(), return_value);
         }
     } else {
         println!("{}", "The JSON is not an object.".red());
@@ -1269,7 +1423,25 @@ pub async fn handle_conditional(
 
     // check to see if the execution_response contains "accumulator"
 
-    let accumulator = execution_response_hashmap.get("accumulator").unwrap().clone();
+    let mut accumulator = String::new();
+
+    match execution_response_hashmap
+        .get("accumulator")
+        .unwrap()
+        .clone()
+        .value_type
+        .unwrap()
+    {
+        value::ValueType::StringValue(value) => {
+            accumulator = value.clone();
+        }
+        _ => {
+            println!(
+                "{}",
+                "The accumulator field was not found in the response.".red()
+            );
+        }
+    }
 
     let prompt_history = AtomicExecutionLog {
         prompt: hydrated_and_cleaned_prompt_text.clone(),
@@ -1277,7 +1449,11 @@ pub async fn handle_conditional(
         node_info: Some(node_info.clone()),
     };
 
-    return Ok((prompt_history, variable_definitions, Some(accumulator.clone())));
+    return Ok((
+        prompt_history,
+        variable_definitions,
+        Some(accumulator.clone()),
+    ));
 }
 
 fn clean_response(input: &str) -> String {
@@ -1289,7 +1465,7 @@ fn clean_response(input: &str) -> String {
 async fn run_command(
     command: String,
     docker_id: String,
-    docker_instance: &Docker
+    docker_instance: &Docker,
 ) -> Result<String, String> {
     println!("Preparing to run command: {}", command);
 

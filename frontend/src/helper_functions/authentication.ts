@@ -9,15 +9,10 @@ import {
   Identity,
   Letter,
   Body,
-  Secrets
+  Secrets,
 } from "../generated/system_types";
 
-export function authenticate(
-  websocket: WebSocket,
-  email: string,
-  password: string
-) {
-
+export function authenticate(websocket: WebSocket, secret: Secrets) {
   console.log("websocket is ready... sending auth");
 
   const letter = new Letter();
@@ -25,11 +20,6 @@ export function authenticate(
   const auth_content = new AuthenticationMessage();
 
   letter.verb = VerbTypes.Initiate;
-
-  const secret = new Secrets();
-
-  secret.email = email;
-  secret.password = password;
 
   auth_content.secrets = secret;
 
@@ -44,5 +34,4 @@ export function authenticate(
   sendEnvelope(websocket, [letter]);
 
   // Only authenticate if there is a session id
-
 }

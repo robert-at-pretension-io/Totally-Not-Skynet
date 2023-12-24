@@ -114,6 +114,12 @@
     return Array.from(variables);
   }
 
+  function autoExpand(event) {
+    const element = event.target;
+    element.style.height = "auto"; // Reset the height
+    element.style.height = element.scrollHeight + "px"; // Set to scroll height
+  }
+
   function reset_component() {
     system_text = "";
     prompt_text = "";
@@ -181,22 +187,22 @@
         >
       </div>
 
-      <label for="prompt" class="required-label">Prompt</label>
-      <input
+      <label for="prompt">Prompt</label>
+      <textarea
         id="prompt"
         bind:value={prompt_text}
-        type="text"
         required
-        class="required-input"
+        class="auto-expand"
+        on:input={autoExpand}
       />
 
-      <label for="system" class="required-label">System</label>
-      <input
+      <label for="system">System</label>
+      <textarea
         id="system"
         bind:value={system_text}
-        type="text"
         required
-        class="required-input"
+        class="auto-expand"
+        on:input={autoExpand}
       />
       <button type="submit">Submit</button>
     </div>
@@ -204,12 +210,10 @@
 </form>
 
 <style>
-  .required-input:invalid {
-    border: 2px solid red;
-  }
-
-  .required-label::after {
-    content: " *";
-    color: red;
+  .auto-expand {
+    overflow-y: hidden; /* Hide vertical scrollbar */
+    resize: none; /* Disable resizing */
+    min-height: 20px; /* Set a minimum height */
+    max-height: 400px; /* Set a maximum height */
   }
 </style>

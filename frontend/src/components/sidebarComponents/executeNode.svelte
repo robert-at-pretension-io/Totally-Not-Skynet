@@ -13,6 +13,8 @@
   } from "../../generated/system_types";
   import { onMount } from "svelte";
 
+  import AtomicExecution from "./AtomicExecution.svelte";
+
   import { v4 as uuidv4 } from "uuid";
   import { sendEnvelope } from "helper_functions/websocket";
   import { websocketStore } from "stores/websocketStore";
@@ -26,7 +28,7 @@
   let node_options = new Array<Node>();
   let nodes = new Array<Node>();
   let latest_execution = new Execution();
-  let prompt_history = new Array<AtomicExecutionLog>();
+  let logs = new Array<AtomicExecutionLog>();
 
   onMount(() => {
     nodes = $systemStateStore.local_nodes;
@@ -63,7 +65,7 @@
     ) {
       let last_index = $systemStateStore.execution_results.length - 1;
       latest_execution = $systemStateStore.execution_results[last_index];
-      prompt_history = latest_execution.atomic_history;
+      logs = latest_execution.atomic_history;
 
       // reorder_prompt_history();
     }
@@ -75,7 +77,7 @@
   }
 
   $: allVariablesDefined = Array.from(initial_variables.values()).every(
-    (value) => value.trim() !== "",
+    (value) => value.trim() !== ""
   );
 
   function updateInitialVariables(key: string, value: string) {
@@ -106,13 +108,6 @@
     sendEnvelope(websocket, [letter]);
   }
 
-  // Additional function to render HashMap in a readable format
-  function renderHashMap(hashMap) {
-    return Object.entries(hashMap)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join(", ");
-  }
-
   function onDropdownChange() {
     $systemStateStore.selected_process = selected_process;
   }
@@ -140,22 +135,7 @@
   {/if}
 </form>
 
-{#if latest_execution !== undefined}
-  <div class="prompt-history">
-    {#each prompt_history as history}
-      <p>
-        <b>{history.node_info.name}</b>
-        <br />
-        prompt:
-        {history.prompt}
-        <br />
-        response:
-        {renderHashMap(history.response)}
-      </p>
-      <hr />
-    {/each}
-  </div>
-{/if}
+<AtomicExecution {logs} />
 
 <style>
   .process-dropdown {

@@ -3,7 +3,7 @@ use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use std::env;
 use std::sync::Arc;
-use tokio::sync::{ mpsc, Mutex };
+use tokio::sync::{mpsc, Mutex};
 mod env_vars_checker;
 mod graph;
 mod mongo;
@@ -35,7 +35,12 @@ static SERVER_IDENTITY: OnceCell<Identity> = OnceCell::new();
 async fn main() {
     env_logger::init();
 
-    let res = reqwest::get("http://api.ipify.org").await.unwrap().text().await.unwrap();
+    let res = reqwest::get("http://api.ipify.org")
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap();
     println!("My external IP address is: {}", res);
 
     let server_identity: Identity = Identity {
@@ -44,7 +49,7 @@ async fn main() {
     };
 
     println!("Server identity: {:?}", server_identity);
-
+    // This is pretty sick actually. We can now access the server identity from anywhere in the codebase as a constant
     SERVER_IDENTITY.set(server_identity.clone()).unwrap();
 
     // Check that the environmental variables are set:
@@ -57,7 +62,10 @@ async fn main() {
         }
     }
 
-    println!("{}", "Need to re-enable check when changing environments back".red());
+    println!(
+        "{}",
+        "Need to re-enable check when changing environments back".red()
+    );
 
     // Setup the db:
     match sqlite_helper_functions::setup_sqlite_db() {

@@ -20,21 +20,21 @@
       component: NewNode,
       open: false,
     },
-    {
-      header: "Modify Node",
-      component: modifyNode,
-      open: false,
-    },
+    // {
+    //   header: "Modify Node",
+    //   component: modifyNode,
+    //   open: false,
+    // },
     {
       header: "Execute Process",
       component: ExecuteNode,
       open: false,
     },
-    {
-      header: "Show Selected Node Info",
-      component: SelectedNodeInfo,
-      open: false,
-    },
+    // {
+    //   header: "Show Selected Node Info",
+    //   component: SelectedNodeInfo,
+    //   open: false,
+    // },
   ];
 
   function toggleSection(clickedSection) {

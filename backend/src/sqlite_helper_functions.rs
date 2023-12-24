@@ -1,15 +1,15 @@
-use crate::generated_types::{ Node, AuthenticationMessage, Secrets };
 use crate::generated_types::authentication_message::Body as AuthBody;
+use crate::generated_types::{AuthenticationMessage, Node, Secrets};
+use prost::Message;
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
-use rusqlite::{ params, Connection, Result };
+use rusqlite::{params, Connection, Result};
 use std::env;
 use std::sync::Arc;
-use prost::Message;
 
 extern crate bcrypt;
 
-use bcrypt::{ hash, DEFAULT_COST, verify };
+use bcrypt::{hash, verify, DEFAULT_COST};
 
 extern crate colored;
 
@@ -24,7 +24,10 @@ pub fn setup_sqlite_db() -> Result<()> {
     println!("Retrieving environmental variable for SQLite location...");
     let sqlite_location = env::var(key).unwrap();
 
-    println!("Opening connection to SQLite at location: {}", sqlite_location);
+    println!(
+        "Opening connection to SQLite at location: {}",
+        sqlite_location
+    );
     let conn = Connection::open(sqlite_location)?;
 
     println!("Creating nodes table...");
@@ -45,7 +48,10 @@ pub fn setup_sqlite_db_auth(sqlite_location: &str) -> Result<()> {
 
     // let sqlite_location = "auth.db";
 
-    println!("Opening connection to SQLite at location: {}", sqlite_location);
+    println!(
+        "Opening connection to SQLite at location: {}",
+        sqlite_location
+    );
     let conn = Connection::open(sqlite_location)?;
 
     println!("Creating pass table...");
@@ -62,7 +68,7 @@ pub fn create_pass_table(conn: &Connection) -> Result<()> {
             email TEXT PRIMARY KEY,
             hashpass TEXT
         )",
-        []
+        [],
     )?;
     println!("Pass table created successfully.");
     Ok(())
@@ -70,8 +76,8 @@ pub fn create_pass_table(conn: &Connection) -> Result<()> {
 
 pub fn authorized(
     pool: &Arc<Pool<SqliteConnectionManager>>,
-    auth_message: AuthenticationMessage
-) -> Result<(), String> {
+    auth_message: AuthenticationMessage,
+) -> Result<bool, String> {
     println!("Checking if hashed password is in db...");
     let connection = pool.get().expect("Failed to get connection from pool");
     println!("Connection obtained from pool successfully.");
@@ -85,33 +91,33 @@ pub fn authorized(
             println!("Password len: {}", secret.password.len());
             let mut stmt = connection
                 .prepare("SELECT hashpass FROM pass WHERE email = ?1")
-
                 .unwrap();
-            let mut rows = stmt
-                .query(params![secret.email])
-
+            let mut rows = stmt.query(params![secret.email]).unwrap();
+            let row = rows
+                .next()
+                .unwrap()
+                .ok_or("Error getting rows".to_string())
                 .unwrap();
-            let row = rows.next().unwrap().ok_or("Error getting rows".to_string()).unwrap();
             let hashpass: String = row.get(0).unwrap();
             println!("Hashpass: {}", hashpass);
             match verify(secret.password, &hashpass) {
-                Ok(_) => {
-                    println!("Password verified.");
-                    Ok(())
+                Ok(res) => {
+                    println!("Password verified. {}.", res);
+                    Ok(res)
                 }
-                Err(_) => {
+                Err(err) => {
                     println!("Password not verified.");
-                    Err("Password not verified.".to_string())
+                    Err(format!("Password not verified: {:?}", err).to_string())
                 }
             }
         }
-        _ => { Err("No secret included in auth message".to_string()) }
+        _ => Err("No secret included in auth message".to_string()),
     }
 }
 
 pub fn insert_user(
     pool: &Arc<Pool<SqliteConnectionManager>>,
-    auth_message: AuthenticationMessage
+    auth_message: AuthenticationMessage,
 ) -> Result<(), String> {
     println!("Inserting a user...");
     let connection = pool.get().expect("Failed to get connection from pool");
@@ -128,12 +134,10 @@ pub fn insert_user(
             let hashed_pass = hash(secret.password, DEFAULT_COST).unwrap();
             println!("Hashed password: {}", hashed_pass);
             println!("Inserting hashed password into the database...");
-            match
-                connection.execute(
-                    "INSERT INTO pass (email, hashpass) VALUES (?1, ?2)",
-                    params![secret.email, hashed_pass]
-                )
-            {
+            match connection.execute(
+                "INSERT INTO pass (email, hashpass) VALUES (?1, ?2)",
+                params![secret.email, hashed_pass],
+            ) {
                 Ok(_) => {
                     println!("Password insertion successful.");
                     Ok(())
@@ -144,13 +148,13 @@ pub fn insert_user(
                 }
             }
         }
-        _ => { Err("No secret included in message.".to_string()) }
+        _ => Err("No secret included in message.".to_string()),
     }
 }
 
 pub fn check_if_user_exists(
     pool: &Arc<Pool<SqliteConnectionManager>>,
-    auth_message: AuthenticationMessage
+    auth_message: AuthenticationMessage,
 ) -> Result<bool, String> {
     println!("Checking if user exists...");
     let connection = pool.get().expect("Failed to get connection from pool");
@@ -165,12 +169,15 @@ pub fn check_if_user_exists(
             // println!("Password: {}", password);
             let mut stmt = connection
                 .prepare("SELECT count(0) FROM pass WHERE email = ?1")
-
                 .unwrap();
 
             // if there is a row, then the user exists
             let mut rows = stmt.query(params![secret.email]).unwrap();
-            let row = rows.next().unwrap().ok_or("Error getting rows".to_string()).unwrap();
+            let row = rows
+                .next()
+                .unwrap()
+                .ok_or("Error getting rows".to_string())
+                .unwrap();
             let count: i64 = row.get(0).unwrap();
             if count > 0 {
                 println!("User exists.");
@@ -196,7 +203,7 @@ pub fn create_nodes_table(conn: &Connection) -> Result<()> {
             type_name TEXT,
             serialized_node BLOB
         )",
-        []
+        [],
     )?;
     println!("Nodes table created successfully.");
     Ok(())
@@ -255,12 +262,10 @@ pub fn update_node(pool: Arc<Pool<SqliteConnectionManager>>, node: &Node) -> Res
             let id = node.node_info.clone().unwrap().id;
             let name = node.node_info.clone().unwrap().name;
             println!("Updating node in the database...");
-            match
-                connection.execute(
-                    "UPDATE nodes SET name = ?1, serialized_node = ?2 WHERE id = ?3",
-                    params![name, serialized_node, id]
-                )
-            {
+            match connection.execute(
+                "UPDATE nodes SET name = ?1, serialized_node = ?2 WHERE id = ?3",
+                params![name, serialized_node, id],
+            ) {
                 Ok(count) => {
                     if count > 0 {
                         println!("Node updated successfully");
