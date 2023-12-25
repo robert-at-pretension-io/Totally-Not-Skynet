@@ -53,7 +53,6 @@
     "grpc-tools": "^1.12.4",
     "http-server": "^14.1.1",
     "postcss": "^8.4.21",
-    "protoc-gen-js": "^3.21.2",
     "protoc-gen-ts": "^0.8.6",
     "svelte-select": "^5.6.0",
     "svelte-split-pane": "^0.1.2",
