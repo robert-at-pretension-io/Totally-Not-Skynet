@@ -1,5 +1,11 @@
-import { NodeTypes } from "generated/system_types_pb";
-import { Body, Graph, Letter, SystemState, VerbTypes, Node } from "../generated/system_types";
+import {
+  Body,
+  Graph,
+  Letter,
+  SystemState,
+  VerbTypes,
+  Node,
+} from "../generated/system_types";
 import { selfIdentify, sendEnvelope } from "./websocket";
 import { websocketStore } from "stores/websocketStore";
 
@@ -32,7 +38,6 @@ export function initializeSystemState(system_state: SystemState): SystemState {
 }
 
 export function getNodes() {
-
   let websocket: WebSocket;
 
   websocketStore.subscribe((s) => {
@@ -53,5 +58,4 @@ export function getNodes() {
   letter.body = body;
 
   sendEnvelope(websocket, [letter]);
-
 }

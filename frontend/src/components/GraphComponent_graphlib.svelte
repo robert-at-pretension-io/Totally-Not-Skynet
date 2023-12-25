@@ -5,10 +5,6 @@
   import * as helper_functions from "../helper_functions/graph";
   import * as proto from "../generated/system_types";
   import dagre from "cytoscape-dagre";
-  // import { Node } from "generated/system_types_pb";
-  // import { generateDynamicStyles } from "../helper_functions/graph";
-
-  import { Node } from "../generated/system_types";
 
   let current_graph: proto.Graph = new proto.Graph();
 

@@ -2,8 +2,3 @@
 target
 node_modules
 .DS_Store
-# public
-# */public/*
-#ignore all files in any public folder
-# public/*
-```
