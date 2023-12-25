@@ -17,11 +17,10 @@ OUT_DIR="./src/generated"
 # Path to protoc-gen-ts
 PROTOC_GEN_TS="./node_modules/.bin/protoc-gen-ts"
 
-# Path to protoc-gen-js
-# PROTOC_GEN_JS="./node_modules/.bin/protoc-gen-js"
+# Delete and recreate the output directory
+rm -rf $OUT_DIR
+mkdir -p $OUT_DIR
 
-# Path to grpc_tools_node_protoc_plugin
-# GRPC_TOOLS_NODE_PROTOC_PLUGIN="./node_modules/.bin/grpc_tools_node_protoc_plugin"
 
 # Compile .proto files to TypeScript
 protoc \
