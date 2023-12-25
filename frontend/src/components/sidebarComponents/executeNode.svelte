@@ -46,7 +46,7 @@
     ) {
       let last_index = $systemStateStore.execution_results.length - 1;
       latest_execution = $systemStateStore.execution_results[last_index];
-      prompt_history = latest_execution.atomic_history;
+      logs = latest_execution.atomic_history;
       // reorder_prompt_history();
     }
   });
