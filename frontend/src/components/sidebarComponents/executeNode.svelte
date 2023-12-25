@@ -109,6 +109,10 @@
   }
 
   function onDropdownChange() {
+    if (selected_process == "") {
+      return;
+    }
+
     $systemStateStore.selected_process = selected_process;
   }
 </script>
