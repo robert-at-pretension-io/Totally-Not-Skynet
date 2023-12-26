@@ -10,6 +10,7 @@
     Process,
     AtomicExecutionLog,
     VerbTypes,
+    Value,
   } from "../../generated/system_types";
   import { onMount } from "svelte";
 
@@ -21,7 +22,7 @@
 
   let selected_process: Node | undefined = undefined;
 
-  let initial_variables = new Map<string, string>();
+  let initial_variables = new Map<string, Value>();
   let input_variables = [];
 
   let allVariablesDefined = false;
@@ -56,7 +57,7 @@
       selected_process = $systemStateStore.selected_process;
       input_variables = selected_process.input_variables;
       // This should reset the variable map each time the process changes (regardless of if the process has been selected locally or not.)
-      initial_variables = new Map<string, string>();
+      initial_variables = new Map<string, Value>();
     }
 
     if (
@@ -77,11 +78,13 @@
   }
 
   $: allVariablesDefined = Array.from(initial_variables.values()).every(
-    (value) => value.trim() !== ""
+    (value) =>
+      value.has_number_value || value.has_string_value || value.has_string_list
   );
 
   function updateInitialVariables(key: string, value: string) {
-    initial_variables.set(key, value);
+    let actual_value = new Value({ string_value: value });
+    initial_variables.set(key, actual_value);
   }
 
   async function handleSubmit() {
@@ -109,7 +112,7 @@
   }
 
   function onDropdownChange() {
-    if (selected_process == "") {
+    if (!selected_process.has_node_content) {
       return;
     }
 

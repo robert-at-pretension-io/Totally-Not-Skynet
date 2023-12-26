@@ -27,8 +27,6 @@ use once_cell::sync::OnceCell;
 
 use crate::generated_types::Identity;
 
-use crate::generated_types::authentication_message::Body::Secrets;
-
 static SERVER_IDENTITY: OnceCell<Identity> = OnceCell::new();
 
 #[tokio::main]

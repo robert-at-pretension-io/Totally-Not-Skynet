@@ -165,7 +165,7 @@ pub async fn start_message_sending_loop(
                                 println!("User exists");
                                 match authorized(&auth_pool, auth.clone()) {
                                     Ok(res) => {
-                                        if (res) {
+                                        if res {
                                             println!(
                                                 "User is authorized... Storing their settings"
                                             );
@@ -372,7 +372,17 @@ pub async fn start_message_sending_loop(
             let wrapped_content = letter.body.clone();
             let verification_id = envelope.clone().verification_id;
             let session: Session = envelope.clone().session.unwrap();
-            let user_settings = runtime_settings.get(&msg.0.clone()).unwrap();
+            let user_settings = match runtime_settings.get(&msg.0.clone()) {
+                Some(settings) => settings.clone(),
+                None => {
+                    println!(
+                        "{} {:?}",
+                        "No user settings found for user: ".red(),
+                        msg.0.clone()
+                    );
+                    continue;
+                }
+            };
 
             let content: Contents = match wrapped_content {
                 None => {

@@ -3304,7 +3304,7 @@ var app = (function () {
                 message.process = Process.fromObject(data.process);
             }
             if (typeof data.current_variable_definitions == "object") {
-                message.current_variable_definitions = new Map(Object.entries(data.current_variable_definitions));
+                message.current_variable_definitions = new Map(Object.entries(data.current_variable_definitions).map(([key, value]) => [key, Value.fromObject(value)]));
             }
             if (data.execution_id != null) {
                 message.execution_id = data.execution_id;
@@ -3323,7 +3323,7 @@ var app = (function () {
                 data.process = this.process.toObject();
             }
             if (this.current_variable_definitions != null) {
-                data.current_variable_definitions = (Object.fromEntries)(this.current_variable_definitions);
+                data.current_variable_definitions = (Object.fromEntries)((Array.from)(this.current_variable_definitions).map(([key, value]) => [key, value.toObject()]));
             }
             if (this.execution_id != null) {
                 data.execution_id = this.execution_id;
@@ -3342,7 +3342,7 @@ var app = (function () {
             for (const [key, value] of this.current_variable_definitions) {
                 writer.writeMessage(3, this.current_variable_definitions, () => {
                     writer.writeString(1, key);
-                    writer.writeString(2, value);
+                    writer.writeMessage(2, value, () => value.serialize(writer));
                 });
             }
             if (this.execution_id.length)
@@ -3365,7 +3365,11 @@ var app = (function () {
                         reader.readMessage(message.process, () => message.process = Process.deserialize(reader));
                         break;
                     case 3:
-                        reader.readMessage(message, () => googleProtobuf.Map.deserializeBinary(message.current_variable_definitions, reader, reader.readString, reader.readString));
+                        reader.readMessage(message, () => googleProtobuf.Map.deserializeBinary(message.current_variable_definitions, reader, reader.readString, () => {
+                            let value;
+                            reader.readMessage(message, () => value = Value.deserialize(reader));
+                            return value;
+                        }));
                         break;
                     case 4:
                         message.execution_id = reader.readString();
@@ -7836,7 +7840,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (102:8) {#each input_variables as _inputVar, index}
+    // (101:8) {#each input_variables as _inputVar, index}
     function create_each_block_1$2(ctx) {
     	let button;
     	let t0;
@@ -7857,7 +7861,7 @@ var app = (function () {
     			t1 = text(t1_value);
     			t2 = text("`");
     			attr_dev(button, "type", "button");
-    			add_location(button, file$9, 102, 10, 3639);
+    			add_location(button, file$9, 101, 10, 3618);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -7885,14 +7889,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1$2.name,
     		type: "each",
-    		source: "(102:8) {#each input_variables as _inputVar, index}",
+    		source: "(101:8) {#each input_variables as _inputVar, index}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (126:8) {#each output_variables as _outputVar, index}
+    // (125:8) {#each output_variables as _outputVar, index}
     function create_each_block$6(ctx) {
     	let button;
     	let t0;
@@ -7913,7 +7917,7 @@ var app = (function () {
     			t1 = text(t1_value);
     			t2 = text("`");
     			attr_dev(button, "type", "button");
-    			add_location(button, file$9, 126, 10, 4343);
+    			add_location(button, file$9, 125, 10, 4322);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -7941,7 +7945,7 @@ var app = (function () {
     		block,
     		id: create_each_block$6.name,
     		type: "each",
-    		source: "(126:8) {#each output_variables as _outputVar, index}",
+    		source: "(125:8) {#each output_variables as _outputVar, index}",
     		ctx
     	});
 
@@ -8051,38 +8055,38 @@ var app = (function () {
     			button2 = element$1("button");
     			button2.textContent = "Submit";
     			attr_dev(input0, "placeholder", "Name");
-    			add_location(input0, file$9, 95, 6, 3416);
+    			add_location(input0, file$9, 94, 6, 3395);
     			attr_dev(input1, "placeholder", "Description");
-    			add_location(input1, file$9, 97, 6, 3470);
-    			add_location(h40, file$9, 100, 8, 3552);
+    			add_location(input1, file$9, 96, 6, 3449);
+    			add_location(h40, file$9, 99, 8, 3531);
     			attr_dev(input2, "placeholder", "New Input Variable");
-    			add_location(input2, file$9, 110, 8, 3904);
+    			add_location(input2, file$9, 109, 8, 3883);
     			attr_dev(button0, "type", "button");
-    			add_location(button0, file$9, 114, 8, 4015);
-    			add_location(div0, file$9, 99, 6, 3538);
-    			add_location(h41, file$9, 124, 8, 4253);
+    			add_location(button0, file$9, 113, 8, 3994);
+    			add_location(div0, file$9, 98, 6, 3517);
+    			add_location(h41, file$9, 123, 8, 4232);
     			attr_dev(input3, "placeholder", "New Output Variable");
-    			add_location(input3, file$9, 134, 8, 4613);
+    			add_location(input3, file$9, 133, 8, 4592);
     			attr_dev(button1, "type", "button");
-    			add_location(button1, file$9, 138, 8, 4726);
-    			add_location(div1, file$9, 123, 6, 4239);
+    			add_location(button1, file$9, 137, 8, 4705);
+    			add_location(div1, file$9, 122, 6, 4218);
     			attr_dev(label0, "for", "prompt");
-    			add_location(label0, file$9, 147, 6, 4954);
+    			add_location(label0, file$9, 146, 6, 4933);
     			attr_dev(textarea0, "id", "prompt");
     			textarea0.required = true;
     			attr_dev(textarea0, "class", "auto-expand svelte-1gz89wy");
-    			add_location(textarea0, file$9, 148, 6, 4995);
+    			add_location(textarea0, file$9, 147, 6, 4974);
     			attr_dev(label1, "for", "system");
-    			add_location(label1, file$9, 156, 6, 5149);
+    			add_location(label1, file$9, 155, 6, 5128);
     			attr_dev(textarea1, "id", "system");
     			textarea1.required = true;
     			attr_dev(textarea1, "class", "auto-expand svelte-1gz89wy");
-    			add_location(textarea1, file$9, 157, 6, 5190);
+    			add_location(textarea1, file$9, 156, 6, 5169);
     			attr_dev(button2, "type", "submit");
-    			add_location(button2, file$9, 164, 6, 5343);
-    			add_location(div2, file$9, 94, 4, 3404);
-    			add_location(div3, file$9, 93, 2, 3394);
-    			add_location(form, file$9, 92, 0, 3345);
+    			add_location(button2, file$9, 163, 6, 5322);
+    			add_location(div2, file$9, 93, 4, 3383);
+    			add_location(div3, file$9, 92, 2, 3373);
+    			add_location(form, file$9, 91, 0, 3324);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10032,7 +10036,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (88:2) {#each node_options as node}
+    // (92:2) {#each node_options as node}
     function create_each_block_1(ctx) {
     	let option;
     	let t_value = /*node*/ ctx[20].node_info.name + "";
@@ -10045,7 +10049,7 @@ var app = (function () {
     			t = text(t_value);
     			option.__value = option_value_value = /*node*/ ctx[20];
     			option.value = option.__value;
-    			add_location(option, file$5, 88, 4, 4088);
+    			add_location(option, file$5, 92, 4, 4273);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -10068,14 +10072,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(88:2) {#each node_options as node}",
+    		source: "(92:2) {#each node_options as node}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (94:2) {#each input_variables as variable}
+    // (98:2) {#each input_variables as variable}
     function create_each_block$2(ctx) {
     	let label;
     	let t0_value = /*variable*/ ctx[17] + "";
@@ -10096,8 +10100,8 @@ var app = (function () {
     			t1 = text(":\n      ");
     			input = element$1("input");
     			attr_dev(input, "type", "text");
-    			add_location(input, file$5, 96, 6, 4282);
-    			add_location(label, file$5, 94, 4, 4250);
+    			add_location(input, file$5, 100, 6, 4467);
+    			add_location(label, file$5, 98, 4, 4435);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, label, anchor);
@@ -10125,14 +10129,14 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(94:2) {#each input_variables as variable}",
+    		source: "(98:2) {#each input_variables as variable}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (103:2) {#if allVariablesDefined}
+    // (107:2) {#if allVariablesDefined}
     function create_if_block$3(ctx) {
     	let button;
 
@@ -10141,7 +10145,7 @@ var app = (function () {
     			button = element$1("button");
     			button.textContent = "Submit";
     			attr_dev(button, "type", "submit");
-    			add_location(button, file$5, 103, 4, 4448);
+    			add_location(button, file$5, 107, 4, 4633);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -10155,7 +10159,7 @@ var app = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(103:2) {#if allVariablesDefined}",
+    		source: "(107:2) {#if allVariablesDefined}",
     		ctx
     	});
 
@@ -10219,10 +10223,10 @@ var app = (function () {
     			create_component(atomicexecution.$$.fragment);
     			option.__value = "";
     			option.value = option.__value;
-    			add_location(option, file$5, 86, 2, 4010);
+    			add_location(option, file$5, 90, 2, 4195);
     			if (/*selected_process*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[12].call(select));
-    			add_location(select, file$5, 85, 0, 3932);
-    			add_location(form, file$5, 92, 0, 4161);
+    			add_location(select, file$5, 89, 0, 4117);
+    			add_location(form, file$5, 96, 0, 4346);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10433,12 +10437,13 @@ var app = (function () {
     		if ($systemStateStore.execution_results !== undefined && $systemStateStore.execution_results.length > 0) {
     			let last_index = $systemStateStore.execution_results.length - 1;
     			$$invalidate(10, latest_execution = $systemStateStore.execution_results[last_index]);
-    			prompt_history = latest_execution.atomic_history;
+    			$$invalidate(4, logs = latest_execution.atomic_history);
     		} // reorder_prompt_history();
     	});
 
     	function updateInitialVariables(key, value) {
-    		initial_variables.set(key, value);
+    		let actual_value = new Value({ string_value: value });
+    		initial_variables.set(key, actual_value);
     	}
 
     	function handleSubmit() {
@@ -10459,6 +10464,10 @@ var app = (function () {
     	}
 
     	function onDropdownChange() {
+    		if (!selected_process.has_node_content) {
+    			return;
+    		}
+
     		set_store_value(systemStateStore, $systemStateStore.selected_process = selected_process, $systemStateStore);
     	}
 
@@ -10485,6 +10494,7 @@ var app = (function () {
     		Letter,
     		NodeTypes,
     		VerbTypes,
+    		Value,
     		onMount,
     		AtomicExecution,
     		uuidv4: v4,
@@ -10548,7 +10558,7 @@ var app = (function () {
     		}
 
     		if ($$self.$$.dirty & /*initial_variables*/ 256) {
-    			$$invalidate(2, allVariablesDefined = Array.from(initial_variables.values()).every(value => value.trim() !== ""));
+    			$$invalidate(2, allVariablesDefined = Array.from(initial_variables.values()).every(value => value.has_number_value || value.has_string_value || value.has_string_list));
     		}
     	};
 
@@ -57439,10 +57449,9 @@ var app = (function () {
     /* src/components/GraphComponent_graphlib.svelte generated by Svelte v3.59.1 */
 
     const { console: console_1$2 } = globals;
-
     const file$3 = "src/components/GraphComponent_graphlib.svelte";
 
-    // (150:2) {#if cyInstance}
+    // (147:2) {#if cyInstance}
     function create_if_block$1(ctx) {
     	let current;
     	const default_slot_template = /*#slots*/ ctx[6].default;
@@ -57493,7 +57502,7 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(150:2) {#if cyInstance}",
+    		source: "(147:2) {#if cyInstance}",
     		ctx
     	});
 
@@ -57510,7 +57519,7 @@ var app = (function () {
     			div = element$1("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "main-content svelte-9prq5n");
-    			add_location(div, file$3, 148, 0, 5857);
+    			add_location(div, file$3, 145, 0, 5698);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

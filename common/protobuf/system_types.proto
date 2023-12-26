@@ -138,7 +138,7 @@ message Identity {
 message Execution {
   GraphNodeInfo current_node = 1;
   Process process = 2;
-  map<string,string> current_variable_definitions = 3;
+  map<string,Value> current_variable_definitions = 3;
   // The execution_id has is unique for each execution. It is different from a verification_id of a letter because it is not used for pairing messages, but rather for identifying the execution of a process. This way, we can have multiple messages regarding a single process execution.
   string execution_id = 4;
   repeated AtomicExecutionLog atomic_history = 5;

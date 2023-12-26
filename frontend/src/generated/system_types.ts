@@ -1800,7 +1800,7 @@ export class Execution extends pb_1.Message {
     constructor(data?: any[] | {
         current_node?: GraphNodeInfo;
         process?: Process;
-        current_variable_definitions?: Map<string, string>;
+        current_variable_definitions?: Map<string, Value>;
         execution_id?: string;
         atomic_history?: AtomicExecutionLog[];
     }) {
@@ -1845,9 +1845,9 @@ export class Execution extends pb_1.Message {
         return pb_1.Message.getField(this, 2) != null;
     }
     get current_variable_definitions() {
-        return pb_1.Message.getField(this, 3) as any as Map<string, string>;
+        return pb_1.Message.getField(this, 3) as any as Map<string, Value>;
     }
-    set current_variable_definitions(value: Map<string, string>) {
+    set current_variable_definitions(value: Map<string, Value>) {
         pb_1.Message.setField(this, 3, value as any);
     }
     get execution_id() {
@@ -1866,7 +1866,7 @@ export class Execution extends pb_1.Message {
         current_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
         process?: ReturnType<typeof Process.prototype.toObject>;
         current_variable_definitions?: {
-            [key: string]: string;
+            [key: string]: ReturnType<typeof Value.prototype.toObject>;
         };
         execution_id?: string;
         atomic_history?: ReturnType<typeof AtomicExecutionLog.prototype.toObject>[];
@@ -1879,7 +1879,7 @@ export class Execution extends pb_1.Message {
             message.process = Process.fromObject(data.process);
         }
         if (typeof data.current_variable_definitions == "object") {
-            message.current_variable_definitions = new Map(Object.entries(data.current_variable_definitions));
+            message.current_variable_definitions = new Map(Object.entries(data.current_variable_definitions).map(([key, value]) => [key, Value.fromObject(value)]));
         }
         if (data.execution_id != null) {
             message.execution_id = data.execution_id;
@@ -1894,7 +1894,7 @@ export class Execution extends pb_1.Message {
             current_node?: ReturnType<typeof GraphNodeInfo.prototype.toObject>;
             process?: ReturnType<typeof Process.prototype.toObject>;
             current_variable_definitions?: {
-                [key: string]: string;
+                [key: string]: ReturnType<typeof Value.prototype.toObject>;
             };
             execution_id?: string;
             atomic_history?: ReturnType<typeof AtomicExecutionLog.prototype.toObject>[];
@@ -1906,7 +1906,7 @@ export class Execution extends pb_1.Message {
             data.process = this.process.toObject();
         }
         if (this.current_variable_definitions != null) {
-            data.current_variable_definitions = (Object.fromEntries)(this.current_variable_definitions);
+            data.current_variable_definitions = (Object.fromEntries)((Array.from)(this.current_variable_definitions).map(([key, value]) => [key, value.toObject()]));
         }
         if (this.execution_id != null) {
             data.execution_id = this.execution_id;
@@ -1927,7 +1927,7 @@ export class Execution extends pb_1.Message {
         for (const [key, value] of this.current_variable_definitions) {
             writer.writeMessage(3, this.current_variable_definitions, () => {
                 writer.writeString(1, key);
-                writer.writeString(2, value);
+                writer.writeMessage(2, value, () => value.serialize(writer));
             });
         }
         if (this.execution_id.length)
@@ -1950,7 +1950,11 @@ export class Execution extends pb_1.Message {
                     reader.readMessage(message.process, () => message.process = Process.deserialize(reader));
                     break;
                 case 3:
-                    reader.readMessage(message, () => pb_1.Map.deserializeBinary(message.current_variable_definitions as any, reader, reader.readString, reader.readString));
+                    reader.readMessage(message, () => pb_1.Map.deserializeBinary(message.current_variable_definitions as any, reader, reader.readString, () => {
+                        let value;
+                        reader.readMessage(message, () => value = Value.deserialize(reader));
+                        return value;
+                    }));
                     break;
                 case 4:
                     message.execution_id = reader.readString();

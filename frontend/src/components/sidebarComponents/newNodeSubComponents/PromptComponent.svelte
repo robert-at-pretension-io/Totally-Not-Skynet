@@ -15,8 +15,6 @@
   import { v4 as uuidv4 } from "uuid";
   import { sendEnvelope } from "helper_functions/websocket";
 
-  import Handlebars from "handlebars";
-
   let system_text = "";
   let prompt_text = "";
   let description = "";

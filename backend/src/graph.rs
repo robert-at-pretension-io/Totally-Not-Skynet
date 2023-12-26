@@ -1,8 +1,8 @@
+use crate::generated_types::{self, value, AtomicExecutionLog, UserSettings};
 use crate::generated_types::{
     node_content::NodeContent as NodeContentEnum, Command, Edge, Execution, Graph, GraphNodeInfo,
     Loop, Node, NodeContent, NodeTypes, Process,
 };
-use crate::generated_types::{value, AtomicExecutionLog, UserSettings};
 
 use async_openai::config::OpenAIConfig;
 use futures_util::StreamExt;
@@ -36,8 +36,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use petgraph::visit::EdgeRef;
-
-use serde_json::Value;
 
 // use anyhow::Error;
 
@@ -580,7 +578,7 @@ pub async fn run_execution(
 ) -> Result<(Execution, Option<String>), Execution> {
     // Keep track of the variable definitions (accumulate their values as we loop through the topological order list)
 
-    let mut variable_definitions: HashMap<String, String> =
+    let mut variable_definitions: HashMap<String, generated_types::Value> =
         execution.clone().current_variable_definitions;
 
     let local_nodes: Vec<Node> = execution.process.clone().unwrap().nodes.clone();
@@ -813,7 +811,7 @@ pub async fn run_execution(
 }
 
 pub fn process_to_execution(
-    current_variables: HashMap<String, String>,
+    current_variables: HashMap<String, generated_types::Value>,
     process: Process,
     prompt_histories: Vec<AtomicExecutionLog>,
 ) -> Execution {
@@ -830,11 +828,11 @@ pub fn process_to_execution(
 
 pub async fn handle_prompt(
     current_node: Node,
-    mut variable_definitions: HashMap<String, String>,
+    mut variable_definitions: HashMap<String, generated_types::Value>,
     accumulator: Option<String>,
     language_model_version: String,
     user_settings: Arc<UserSettings>,
-) -> Result<(AtomicExecutionLog, HashMap<String, String>), ()> {
+) -> Result<(AtomicExecutionLog, HashMap<String, generated_types::Value>), ()> {
     let mut prompt_text: String = "".to_string();
     let mut hydrated_prompt_text: String = "".to_string();
 
@@ -859,7 +857,9 @@ pub async fn handle_prompt(
 
             let mut handlebars = Handlebars::new();
 
-            let json_variable_definitions: Value = serde_json::json!(variable_definitions);
+            let string_map = convert_to_string_map(variable_definitions.clone());
+
+            let json_variable_definitions: serde_json::Value = serde_json::json!(string_map);
 
             handlebars
                 .register_template_string("prompt", prompt.clone().prompt)
@@ -948,52 +948,48 @@ pub async fn handle_prompt(
 
     let mut execution_response_hashmap = HashMap::new();
 
-    let value: Value = serde_json::from_str(json_string.as_str()).unwrap();
+    let value: serde_json::Value = serde_json::from_str(json_string.as_str()).unwrap();
 
     println!("{}", "VARIABLES RETURNED FROM PROMPT:".green());
 
     if let Some(obj) = value.as_object() {
         for (key, value) in obj {
-            let value_str = match value {
+            let mut return_val: crate::generated_types::Value = crate::generated_types::Value {
+                value_type: Some(value::ValueType::StringValue(
+                    "err: uninitialized value".to_string(),
+                )),
+            };
+            match value {
                 serde_json::Value::String(s) => {
-                    let return_val = crate::generated_types::Value {
+                    return_val = crate::generated_types::Value {
                         value_type: Some(value::ValueType::StringValue(s.clone())),
                     };
-
-                    execution_response_hashmap.insert(key.clone(), return_val);
-                    s.clone()
                 }
                 serde_json::Value::Number(n) => {
                     let return_num = n.as_f64().unwrap();
 
-                    let return_val = crate::generated_types::Value {
+                    return_val = crate::generated_types::Value {
                         value_type: Some(value::ValueType::NumberValue(return_num)),
                     };
-
-                    execution_response_hashmap.insert(key.clone(), return_val);
-                    n.to_string()
                 }
                 serde_json::Value::Array(arr) => {
                     let string_list = crate::generated_types::StringList {
                         values: arr.clone().into_iter().map(|v| v.to_string()).collect(),
                     };
 
-                    let return_val = crate::generated_types::Value {
+                    return_val = crate::generated_types::Value {
                         value_type: Some(value::ValueType::StringList(string_list)),
                     };
-
-                    // Convert the array to a string representation
-                    // You can customize this part as per your requirements
-                    execution_response_hashmap.insert(key.clone(), return_val);
-
-                    serde_json::to_string(&arr).unwrap_or_else(|_| "[]".to_string())
                 }
                 // Handle other types as needed
-                _ => value.to_string(),
+                _ => {
+                    value.to_string();
+                }
             };
 
-            println!("{}: {}", key.green(), value_str);
-            variable_definitions.insert(key.clone(), value_str.clone());
+            execution_response_hashmap.insert(key.clone(), return_val.clone());
+
+            variable_definitions.insert(key.clone(), return_val.clone());
         }
     } else {
         println!("{}", "The JSON is not an object.".red());
@@ -1026,9 +1022,33 @@ pub async fn handle_prompt(
     return Ok((prompt_history, variable_definitions));
 }
 
+fn convert_to_string_map(
+    variable_definitions: HashMap<String, generated_types::Value>,
+) -> HashMap<String, String> {
+    let mut string_map: HashMap<String, String> = HashMap::new();
+
+    for (key, value) in variable_definitions {
+        match value.value_type.unwrap() {
+            value::ValueType::StringValue(s) => {
+                string_map.insert(key, s);
+            }
+            value::ValueType::NumberValue(n) => {
+                string_map.insert(key, n.to_string());
+            }
+            value::ValueType::StringList(string_list) => {
+                let string_list_vec = string_list.values;
+                let string_list_string = string_list_vec.join(", ");
+                string_map.insert(key, string_list_string);
+            }
+        }
+    }
+
+    return string_map;
+}
+
 pub async fn handle_command(
     current_node: Node,
-    mut variable_definitions: HashMap<String, String>,
+    mut variable_definitions: HashMap<String, generated_types::Value>,
     accumulator: Option<String>,
     language_model_version: String,
     command: Command,
@@ -1041,7 +1061,9 @@ pub async fn handle_command(
 
     let mut handlebars = Handlebars::new();
 
-    let json_variable_definitions: Value = serde_json::json!(variable_definitions);
+    let string_map = convert_to_string_map(variable_definitions.clone());
+
+    let json_variable_definitions: serde_json::Value = serde_json::json!(string_map);
 
     handlebars
         .register_template_string("goal", goal.clone())
@@ -1122,75 +1144,107 @@ pub async fn handle_command(
 
     let mut execution_response_hashmap = HashMap::new();
 
-    // let value: Value = serde_json::from_str(json_string.as_str()).unwrap();
-
-    // println!("{}", "VARIABLES RETURNED FROM PROMPT:".green());
-
-    // if let Some(obj) = value.as_object() {
-    //     for (key, value) in obj {
-    //         println!("{}: {}", key.green(), value);
-    //         variable_definitions.insert(key.clone(), value.clone().to_string());
-    //         execution_response_hashmap.insert(key.clone(), value.clone().to_string());
-    //     }
-    // } else {
-    //     println!("{}", "The JSON is not an object.".red());
-    // }
-
-    let value: Value = serde_json::from_str(json_string.as_str()).unwrap();
+    let value: serde_json::Value = serde_json::from_str(json_string.as_str()).unwrap();
 
     if let Some(obj) = value.as_object() {
         for (key, value) in obj {
-            let value_str = match value {
+            let mut return_val: crate::generated_types::Value = crate::generated_types::Value {
+                value_type: Some(value::ValueType::StringValue(
+                    "err: uninitialized value".to_string(),
+                )),
+            };
+            match value {
                 serde_json::Value::String(s) => {
-                    let return_val = crate::generated_types::Value {
+                    return_val = crate::generated_types::Value {
                         value_type: Some(value::ValueType::StringValue(s.clone())),
                     };
-
-                    execution_response_hashmap.insert(key.clone(), return_val);
-                    s.clone()
                 }
                 serde_json::Value::Number(n) => {
                     let return_num = n.as_f64().unwrap();
 
-                    let return_val = crate::generated_types::Value {
+                    return_val = crate::generated_types::Value {
                         value_type: Some(value::ValueType::NumberValue(return_num)),
                     };
-
-                    execution_response_hashmap.insert(key.clone(), return_val);
-                    n.to_string()
                 }
                 serde_json::Value::Array(arr) => {
                     let string_list = crate::generated_types::StringList {
                         values: arr.clone().into_iter().map(|v| v.to_string()).collect(),
                     };
 
-                    let return_val = crate::generated_types::Value {
+                    return_val = crate::generated_types::Value {
                         value_type: Some(value::ValueType::StringList(string_list)),
                     };
-
-                    // Convert the array to a string representation
-                    // You can customize this part as per your requirements
-                    execution_response_hashmap.insert(key.clone(), return_val);
-
-                    serde_json::to_string(&arr).unwrap_or_else(|_| "[]".to_string())
                 }
                 // Handle other types as needed
-                _ => value.to_string(),
+                _ => {
+                    value.to_string();
+                }
             };
 
-            println!("{}: {}", key.green(), value_str);
-            variable_definitions.insert(key.clone(), value_str.clone());
+            execution_response_hashmap.insert(key.clone(), return_val.clone());
+
+            variable_definitions.insert(key.clone(), return_val.clone());
         }
     } else {
         println!("{}", "The JSON is not an object.".red());
         return Err(());
     }
 
+    // if let Some(obj) = value.as_object() {
+    //     for (key, value) in obj {
+    //         let value_str = match value {
+    //             serde_json::Value::String(s) => {
+    //                 let return_val = crate::generated_types::Value {
+    //                     value_type: Some(value::ValueType::StringValue(s.clone())),
+    //                 };
+
+    //                 execution_response_hashmap.insert(key.clone(), return_val);
+    //                 s.clone()
+    //             }
+    //             serde_json::Value::Number(n) => {
+    //                 let return_num = n.as_f64().unwrap();
+
+    //                 let return_val = crate::generated_types::Value {
+    //                     value_type: Some(value::ValueType::NumberValue(return_num)),
+    //                 };
+
+    //                 execution_response_hashmap.insert(key.clone(), return_val);
+    //                 n.to_string()
+    //             }
+    //             serde_json::Value::Array(arr) => {
+    //                 let string_list = crate::generated_types::StringList {
+    //                     values: arr.clone().into_iter().map(|v| v.to_string()).collect(),
+    //                 };
+
+    //                 let return_val = crate::generated_types::Value {
+    //                     value_type: Some(value::ValueType::StringList(string_list)),
+    //                 };
+
+    //                 // Convert the array to a string representation
+    //                 // You can customize this part as per your requirements
+    //                 execution_response_hashmap.insert(key.clone(), return_val);
+
+    //                 serde_json::to_string(&arr).unwrap_or_else(|_| "[]".to_string())
+    //             }
+    //             // Handle other types as needed
+    //             _ => value.to_string(),
+    //         };
+
+    //         println!("{}: {}", key.green(), value_str);
+    //         variable_definitions.insert(key.clone(), value_str.clone());
+    //     }
+    // } else {
+    //     println!("{}", "The JSON is not an object.".red());
+    //     return Err(());
+    // }
+
     // extract the command from the variable_definitions hashmap:
     let mut run_this_command: String = "".to_string();
     let mut verification_command: String = "".to_string();
 
-    match variable_definitions.get("command") {
+    let string_map = convert_to_string_map(variable_definitions.clone());
+
+    match string_map.get("command") {
         Some(command) => {
             run_this_command = command.clone();
         }
@@ -1203,7 +1257,7 @@ pub async fn handle_command(
         }
     }
 
-    match variable_definitions.get("verification_command") {
+    match string_map.get("verification_command") {
         Some(command) => {
             verification_command = command.clone();
         }
@@ -1278,9 +1332,16 @@ pub async fn handle_command(
 
 pub async fn handle_conditional(
     current_node: Node,
-    mut variable_definitions: HashMap<String, String>,
+    mut variable_definitions: HashMap<String, generated_types::Value>,
     _language_model_version: String,
-) -> Result<(AtomicExecutionLog, HashMap<String, String>, Option<String>), ()> {
+) -> Result<
+    (
+        AtomicExecutionLog,
+        HashMap<String, generated_types::Value>,
+        Option<String>,
+    ),
+    (),
+> {
     let mut prompt_text: String = "".to_string();
     let mut hydrated_prompt_text: String = "".to_string();
 
@@ -1307,7 +1368,9 @@ pub async fn handle_conditional(
 
             let mut handlebars = Handlebars::new();
 
-            let json_variable_definitions: Value = serde_json::json!(variable_definitions);
+            let string_map = convert_to_string_map(variable_definitions.clone());
+
+            let json_variable_definitions: serde_json::Value = serde_json::json!(string_map);
 
             handlebars
                 .register_template_string("prompt", prompt.clone().prompt)
@@ -1388,20 +1451,64 @@ pub async fn handle_conditional(
 
     let mut execution_response_hashmap = HashMap::new();
 
-    let value: Value = serde_json::from_str(json_string.as_str()).unwrap();
+    let value: serde_json::Value = serde_json::from_str(json_string.as_str()).unwrap();
+    // if let Some(obj) = value.as_object() {
+    //     for (key, value) in obj {
+    //         println!("{}: {}", key, value);
+
+    //         let return_value = crate::generated_types::Value {
+    //             value_type: Some(value::ValueType::StringValue(value.clone().to_string())),
+    //         };
+
+    //         variable_definitions.insert(key.clone(), value.clone().to_string());
+    //         execution_response_hashmap.insert(key.clone(), return_value);
+    //     }
+    // } else {
+    //     println!("{}", "The JSON is not an object.".red());
+    // }
+
     if let Some(obj) = value.as_object() {
         for (key, value) in obj {
-            println!("{}: {}", key, value);
+            let mut return_val: crate::generated_types::Value = crate::generated_types::Value {
+                value_type: Some(value::ValueType::StringValue(
+                    "err: uninitialized value".to_string(),
+                )),
+            };
+            match value {
+                serde_json::Value::String(s) => {
+                    return_val = crate::generated_types::Value {
+                        value_type: Some(value::ValueType::StringValue(s.clone())),
+                    };
+                }
+                serde_json::Value::Number(n) => {
+                    let return_num = n.as_f64().unwrap();
 
-            let return_value = crate::generated_types::Value {
-                value_type: Some(value::ValueType::StringValue(value.clone().to_string())),
+                    return_val = crate::generated_types::Value {
+                        value_type: Some(value::ValueType::NumberValue(return_num)),
+                    };
+                }
+                serde_json::Value::Array(arr) => {
+                    let string_list = crate::generated_types::StringList {
+                        values: arr.clone().into_iter().map(|v| v.to_string()).collect(),
+                    };
+
+                    return_val = crate::generated_types::Value {
+                        value_type: Some(value::ValueType::StringList(string_list)),
+                    };
+                }
+                // Handle other types as needed
+                _ => {
+                    value.to_string();
+                }
             };
 
-            variable_definitions.insert(key.clone(), value.clone().to_string());
-            execution_response_hashmap.insert(key.clone(), return_value);
+            execution_response_hashmap.insert(key.clone(), return_val.clone());
+
+            variable_definitions.insert(key.clone(), return_val.clone());
         }
     } else {
         println!("{}", "The JSON is not an object.".red());
+        return Err(());
     }
 
     // see if all of the output_variables of the node are in the variable definition hashmap:
