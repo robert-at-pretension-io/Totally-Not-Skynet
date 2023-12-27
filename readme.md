@@ -1,70 +1,39 @@
 # Project Overview
+The purpose of this project is to allow someone with no programming experience to compose their job's (either professional or personal) processes and workflows and let the ai figure out how to execute them.
 
-The purpose of this project is to allow a worker with no programming experience to codify their processes and workflows and let the ai figure out how to execute them.
+Processes are built up using a visual interface that is shown to the user in a browser. The interface is designed to be intuitive (and always open to constructive criticism).
 
-Processes are built up using a visual interface that is shown to the user in a browser. The interface is designed to be intuitive and easy to use.
+This project is designed to encapsulate even complex workflows by having the ability to "nest" processes. That is, a sub-process can be defined as detailed and nuanced as required for the task. Then that sub-process can be called from a higher level process. Thus, **YOUR** standards are met -- whether it's for a personal project or a large enterprise.
 
-It is designed to encapsulate even complex workflows by having the ability to "nest" processes. That is, a sub-process can be defined as detailed and nuanced as required for the task. Then that sub-process can be called from a higher level process. Thus, **YOUR** standards are met -- whether it's for a personal project or a large enterprise.
+# Recommendation
+* Do not read the text below until you watch the following youtube video demoing the system: (put the video here)
 
 # How this works:
+1. Within the browser, the user defines basic tasks in "plain english" that contain "variables". (input/output variables are just a way of saying that these will be replaced with other values that are defined when the process is executed)
+   - **For example**, a task coule be defined as: `"Go to the website {{website}} and click on the {{button}} button."` In this example, `{{website}}` and `{{button}}` are input variables that are given specific values by the user when the task is _executed_ later on. For instance, website = google, button = search.
 
-1. The user defines basic tasks in "plain english" with "variables" (input and output) that are defined by the user. (input/output variables are just a way of saying that these will be replaced with other values)
-   - For example, a task coule be defined as: `"Go to the website {{website}} and click on the {{button}} button."` In this example, `{{website}}` and `{{button}}` are input variables that are defined by the user when the task is _executed_ later on. When a task is defined, the user will explain what the output variables should be. These should things that the ai should be able to understand by _executing_ the task. For instance, in the example above, the output variable might be `"{{html}}"` which would be the html of the page that the user is taken to after clicking the button. The `{{html}}` variable can then be used as an input for another task for another task when the _process_ is executed.
+   - When a process is defined, the user will explain what the output variables should be. These should things that the ai should be able to understand by _executing_ the task. For instance, in the example above, the output variable might be `"{{html}}"` which would be the html of the page that the user is taken to after clicking the button. The `{{html}}` variable can then be used as an input variable for another task when the _process_ is executed.
 
 # Current Implementation
+- Currently, nodes can be created and processes can be executed.
 
-The current implementation of the system includes:
+## What is a process?
+- Processes are exactly what they sound like, they are a series of steps (nodes) that lead to an outcome. This sounds vague and general and that's because it is. Processes can accomplish almost anything that can be done by a human on a computer -- using plain english alone.
 
-- An overarching goal which the system endeavors to reach
-- An event loop propelling progress towards the said goal
-- A set of distinct agents with abilities, symbolized as prompts for the language model
-- A central agent responsible for choosing the most optimal action in accordance with the current log
+## What are nodes?
+- Node are the "steps" of a process. That is, they are the what make up an execution.
 
-# To-Do List:
+### Node Types 
+- **Prompt**: this is like chatting with a language model. The only difference is that you define "variables" that will change depending on initial state of the execution.
+- **Conditional**: This node creates decision points within your process. When these nodes are run, they will only end up coming up with definitions for some of the output variables. These will determine how the rest of the process is executed.
+- **Loop**: This is *like* a process except that it MUST contain a conditional node. A loop will run all of the nodes within the loop, ending with the conditional node that decides if the loop should be exited.
+- **Command**: This node controls a computer and will attempt to complete a goal provided to it. This is a powerful node because the composition of command nodes can perform arbitrary computer tasks (sending emails, setting up minecraft servers, hosting irc servers and more creative things!)
+- **Process**: As mentioned previously, processes are both made up of nodes AND nodes themselves. What does this mean? Well, let's say that you define a process that dependably sends emails from your address to a recipient email. This could be used as a step within another process that looks on the internet for the tech support for a certain company (the company could be used as a variable). 
 
-1. **Implement a memory construct:** This is fundamental for storing and retrieving information that's used throughout your system.
-
-   - Allow metaprocess to add to memory context, influencing all prompts
-   - Introduce a runtime state
-
-2. **Decide on the appropriate data structure and algorithm for storing the execution of the node-graph:** This step involves the underlying architecture of how your system will organize and process data, which is critical before other functionalities can be built.
-
-3. **Implement digital system features such as search, parse, store, execute, retrieve, order, sort, filter, etc.:** These features are core to your system's operation and should be addressed early on.
-
-4. **Introduce various node types including flow control, store data, subprocesses, memory, context, conditionals:** Different node types will enable you to build more complex and flexible functionality.
-
-5. **Create a system to describe the components of the software project so the system can recognize its components:** This will enable your system to understand its own structure, which will help with later development stages.
-
-6. **Develop a web browsing process:** This can be done once the fundamental structures and features of the system are implemented.
-
-7. **Allow the style of nodes to be altered based on node type:** This is important for visual distinction and user interaction, but can be done after the core functionality is established.
-
-8. **Enhance self-reflection capabilities to avoid issues like infinite loops:** This is a complex task that requires a functioning system to test and improve upon.
-
-   - Implement a metaprocess that maintains a list of summarized actions that have occurred in relation to the goal
-
-9. **Save execution context along with the ID of actions (with semantic versioning) to facilitate version control:** This will help with tracking changes and maintaining the stability of your system.
-
-10. **Implement separate Docker containers for each connection:** This involves containerization and can be done once the system's core features are stable.
-
-11. **Implement a global variable store to eliminate the need for variable nodes:** This optimization can improve efficiency but isn't essential in the early stages of the system.
-
-12. **Introduce semantic versioning to actions so that processes can maintain stable dependencies:** Semantic versioning is important for maintaining backward compatibility and should be done when the system has a set of stable features.
-
-13. **Develop a method to suspend and schedule processes:** This feature is important for controlling execution flow and can be developed after the main features are implemented.
-
-14. **Integrate the runtime/execution of processes with an external, real-time (human-scale) workflow engine:** This can be a later step once the system is functioning correctly and the integration will provide additional functionality.
-
-# Example Usages
-
-Currently, we're in the process of implementing these examples. They will be updated soon.
-
-We appreciate your patience and encourage you to contribute to this project in the meantime.
-
-# Contributions
-
-We welcome contributions! If you're interested in contributing, please see our [Contributing Guidelines](CONTRIBUTING.md).
-
-# License
-
-This project is licensed under the [MIT License](LICENSE).
+# Project setup (local edition)
+- Download/install node, npm, cargo, podman (or docker if you're into that 😒... I guess 💀 )
+- Setup podman or docker (god help you if this is your first time) -- this isn't  necessary if you don't need to want to use the command node.
+- Clone this git repository
+- Set the environmental variables in the backend/req_env_vars.txt text file. Please either ask chatgpt or google how to do this if you don't know how
+- Add your email address to the backend/allowed_emails.txt file (this will allow you to make a login for the application)
+   - **NOTE**: The first time you login, whatever password you put in the box will be your password... So like don't mess that up, you got this!! If you DO mess that up, find someone who knows sqlite and sql and ask them kindly to remove your username from backend/auth.db (or just delete backend/auth.db if you're the only user, like in the case of local builds).

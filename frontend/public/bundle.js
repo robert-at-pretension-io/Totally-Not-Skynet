@@ -5822,7 +5822,7 @@ var app = (function () {
 
     function setupWebsocketConnection() {
         console.log("setting up websocket connection");
-        const environment = "development";
+        const environment = "DEVELOPMENT";
         console.log("The environment is: ", environment);
         const websocket_url = environment.toUpperCase() === "PRODUCTION"
             ? "wss://liminalnook.com/ws/"
