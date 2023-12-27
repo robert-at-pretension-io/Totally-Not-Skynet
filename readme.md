@@ -30,10 +30,36 @@ This project is designed to encapsulate even complex workflows by having the abi
 - **Command**: This node controls a computer and will attempt to complete a goal provided to it. This is a powerful node because the composition of command nodes can perform arbitrary computer tasks (sending emails, setting up minecraft servers, hosting irc servers and more creative things!)
 - **Process**: As mentioned previously, processes are both made up of nodes AND nodes themselves. What does this mean? Well, let's say that you define a process that dependably sends emails from your address to a recipient email. This could be used as a step within another process that looks on the internet for the tech support for a certain company (the company could be used as a variable). 
 
-# Project setup (local edition)
-- Download/install node, npm, cargo, podman (or docker if you're into that 😒... I guess 💀 )
+# Project installation/setup guide (local edition)
+- system requirements: **no idea**. But, for reference, I developed this on an asus e210m with ubuntu installed ($210 laptop with a celeron cpu)
+- Download/install node, npm, cargo, podman ( or docker if you're into that 😒... I guess 💀 )
 - Setup podman or docker (god help you if this is your first time) -- this isn't  necessary if you don't need to want to use the command node.
 - Clone this git repository
 - Set the environmental variables in the backend/req_env_vars.txt text file. Please either ask chatgpt or google how to do this if you don't know how
+   - In particular, make sure environment is set to "DEVELOPMENT" 
 - Add your email address to the backend/allowed_emails.txt file (this will allow you to make a login for the application)
    - **NOTE**: The first time you login, whatever password you put in the box will be your password... So like don't mess that up, you got this!! If you DO mess that up, find someone who knows sqlite and sql and ask them kindly to remove your username from backend/auth.db (or just delete backend/auth.db if you're the only user, like in the case of local builds).
+- open two terminals. 
+
+- In the first terminal (the order IS important as the cargo build steps make sure the project has requirements and env variables defined), go to the backend folder and type in:
+   - `cargo run`
+   - **NOTE**: do not be afraid of the terminal. If something goes wrong, read what it says. For most problems, I have put instructive error messages. If it's not instructive, still write it down somewhere so someone can help you figure out how to solve your problem.
+
+- In the second termal, open the frontend folder and type in:
+   - `npm install`
+   ( wait until its done installing )
+   - `npm run dev`
+   ( DON'T CLOSE THIS TERMINAL )
+
+- The browser should automatically open when `npm run dev` finishes. If not, type in `127.0.0.1:5000` in your browser url.
+
+- If anything goes wrong, please send an email to robert+help@pretension.io and I'll get back to you. 
+- For faster support, send your preferred contact information and any amount of money to the venmo account `robert-at-pretension`. 
+   - **NOTE**:the amount of money you send will determine the timeframe that I get back to you.
+
+# Project setup/installation (remote guide)
+- Just shoot me some money on venmo and I'll install it myself or explain it to your tech people.
+
+# License:
+GNU General Public License (read more here: https://www.gnu.org/licenses/gpl-3.0.html )... Go wild 🍾🥂. 
+

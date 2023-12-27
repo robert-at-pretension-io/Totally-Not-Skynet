@@ -26,3 +26,32 @@ pub fn check_env_vars(file_location: &str) -> io::Result<()> {
     }
     Ok(())
 }
+
+pub fn check_env_variable_valid(env_var: &str, allowed_values: Vec<String>) -> io::Result<()> {
+    match env::var(env_var) {
+        Ok(value) => {
+            if allowed_values.contains(&value) {
+                Ok(())
+            } else {
+                println!(
+                    "Value of {} is not allowed. It must be one of the following: {:?}",
+                    env_var,
+                    allowed_values
+                );
+                Err(
+                    Error::new(
+                        ErrorKind::InvalidData,
+                        format!(
+                            "Value of {} is not allowed. It must be one of the following: {:?}",
+                            env_var,
+                            allowed_values
+                        )
+                    )
+                )
+            }
+        }
+        Err(env::VarError::NotPresent) =>
+            Err(Error::new(ErrorKind::NotFound, format!("{} is not set.", env_var))),
+        Err(e) => Err(Error::new(ErrorKind::Other, e)),
+    }
+}
