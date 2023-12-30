@@ -58,3 +58,18 @@ This project is designed to encapsulate even complex workflows by having the abi
 # License:
 GNU General Public License (read more here: https://www.gnu.org/licenses/gpl-3.0.html )... Go wild 🍾🥂. 
 
+
+# Roadmap:
+- Improve loop nodes
+- Improve conditional nodes
+- Add process scheduling / resuming
+- Add persistent memory feature for processes to write important global context as needed
+- Add teams feature (multiple people have access to the same processes/nodes)
+- Add versioning feature to protobuf schemas for easier data-structure evolution
+
+
+# Continual Initiatives:
+- Improve code readability
+- Add video resources explaining design choices of architecture
+- Improve on-boarding for new project members (haha, more people will join this project... right?)
+- Improve visual appearance of app (this requires designers with a lot more experience than me!)
