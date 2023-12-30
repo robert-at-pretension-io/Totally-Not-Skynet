@@ -9,6 +9,11 @@ use crate::generated_types::Session;
 
 use bollard::container::StartContainerOptions;
 
+
+use bollard::{API_DEFAULT_VERSION, Docker};
+
+use futures_util::future::TryFutureExt;
+
 use crate::graph::validate_nodes_in_loop;
 
 use colored::*;
@@ -35,7 +40,7 @@ use prost::bytes::BytesMut;
 
 use bollard::container::Config;
 
-use bollard::Docker;
+// use bollard::Docker;
 
 use bson::doc;
 use serde::{Deserialize, Serialize};
@@ -68,7 +73,16 @@ pub async fn start_message_sending_loop(
     // settings will be sent with the session (with the secrets)
     let mut runtime_settings: HashMap<LocalServerIdentity, Option<UserSettings>> = HashMap::new();
     let mut docker_containers: HashMap<String, String> = HashMap::new();
-    let docker = Docker::connect_with_http_defaults().unwrap();
+    // let docker = Docker::connect_with_http_defaults().unwrap();
+
+
+    let docker = Docker::connect_with_http(
+        "localhost:2375", 4, API_DEFAULT_VERSION)
+        .unwrap();
+docker.ping()
+.map_ok(|_| Ok::<_, ()>(println!("Connected!")));
+
+
     let mut session_ids: Vec<Session> = vec![];
 
     while let Some(msg) = client_rx.recv().await {
@@ -793,7 +807,10 @@ pub async fn send_message(
     let mut buf = BytesMut::new();
     envelope.encode(&mut buf).unwrap();
 
-    println!("{}: {:?}", "Sending message to client".green(), envelope);
+    // println!("{}: {:?}", "Sending message to client".green(), envelope);
+    println!("{}", "Sending message to client".green());
+
+
 
     match tx.send((
         identity,

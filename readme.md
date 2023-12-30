@@ -33,7 +33,7 @@ This project is designed to encapsulate even complex workflows by having the abi
 # Project installation/setup guide (local edition)
 - system requirements: **no idea**. But, for reference, I developed this on an asus e210m with ubuntu installed ($210 laptop with a celeron cpu)
 - Download/install node, npm, cargo, podman ( or docker if you're into that 😒... I guess 💀 )
-- Setup podman or docker (god help you if this is your first time) -- this isn't  necessary if you don't need to want to use the command node.
+- Setup podman or docker ([Follow these instructions and modify them as needed](https://chat.openai.com/share/419b50ef-ee4a-4f57-a13e-96927f1fd24e) ) -- this isn't  necessary if you don't need to want to use the command node.
 - Clone this git repository
 - Set the environmental variables in the backend/req_env_vars.txt text file. Please either ask chatgpt or google how to do this if you don't know how
    - In particular, make sure environment is set to "DEVELOPMENT" 
@@ -54,11 +54,6 @@ This project is designed to encapsulate even complex workflows by having the abi
 - The browser should automatically open when `npm run dev` finishes. If not, type in `127.0.0.1:5000` in your browser url.
 
 - If anything goes wrong, please send an email to robert+help@pretension.io and I'll get back to you. 
-- For faster support, send your preferred contact information and any amount of money to the venmo account `robert-at-pretension`. 
-   - **NOTE**:the amount of money you send will determine the timeframe that I get back to you.
-
-# Project setup/installation (remote guide)
-- Just shoot me some money on venmo and I'll install it myself or explain it to your tech people.
 
 # License:
 GNU General Public License (read more here: https://www.gnu.org/licenses/gpl-3.0.html )... Go wild 🍾🥂. 

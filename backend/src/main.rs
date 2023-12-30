@@ -109,6 +109,8 @@ async fn main() {
         }
     };
 
+    println!("{}", "Server started and ready to receive commands from the frontend".green());
+
     let (tx, rx) = mpsc::unbounded_channel();
     let rx = Arc::new(Mutex::new(rx));
 
