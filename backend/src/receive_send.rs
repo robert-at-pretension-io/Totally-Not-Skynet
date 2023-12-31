@@ -1,3 +1,4 @@
+use crate::env_vars_checker::check_env_variable_valid;
 use crate::generated_types::{self, AuthenticationMessage, Identity, Secrets};
 use crate::generated_types::{
     body::Contents, Body, Envelope, GraphNodeInfo, Letter, UserSettings, VerbTypes,
@@ -222,13 +223,15 @@ docker.ping()
                                 let allowed_emails: Vec<&str> =
                                     allowed_emails.split("\n").collect();
 
+                                let any_email = check_env_variable_valid("ALLOW_ANY_EMAIL", vec!("TRUE".to_string())).is_ok();
+
                                 match auth.clone().body.unwrap() {
                                     AuthBody::Secrets(secret) => {
                                         println!("Email: {}", secret.email);
                                         println!("Password length: {}", secret.password.len());
 
                                         // Check if user's email is in the allowed list
-                                        if allowed_emails.contains(&secret.email.as_str()) {
+                                        if allowed_emails.contains(&secret.email.as_str()) | any_email {
                                             // Create the user and session
                                             match insert_user(&auth_pool, auth.clone()) {
                                                 Ok(_) => {
