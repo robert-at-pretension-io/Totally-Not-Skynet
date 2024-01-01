@@ -6,7 +6,7 @@ Processes are built up using a visual interface that is shown to the user in a b
 This project is designed to encapsulate even complex workflows by having the ability to "nest" processes. That is, a sub-process can be defined as detailed and nuanced as required for the task. Then that sub-process can be called from a higher level process. Thus, **YOUR** standards are met -- whether it's for a personal project or a large enterprise.
 
 # Recommendation
-* Do not read the text below until you watch the following youtube video demoing the system: (put the video here)
+* Do not read the text below until you watch the following youtube video demoing the system: https://www.youtube.com/watch?v=3pwcVoCyZ7A&t=480s
 
 # How this works:
 1. Within the browser, the user defines basic tasks in "plain english" that contain "variables". (input/output variables are just a way of saying that these will be replaced with other values that are defined when the process is executed)
