@@ -32,7 +32,7 @@ This project is designed to encapsulate even complex workflows by having the abi
 
 # Project installation/setup guide (local edition)
 - system requirements: **no idea**. But, for reference, I developed this on an asus e210m with ubuntu installed ($210 laptop with a celeron cpu)
-- Download/install node, npm, cargo, podman ( or docker if you're into that 😒... I guess 💀 )
+- Download/install node, npm, cargo, podman ( or docker if you're into that 😒... I guess 💀 ), and finally, protoc (the protobuf compiler -- this is important)
 - Setup podman or docker ([Follow these instructions and modify them as needed](https://chat.openai.com/share/419b50ef-ee4a-4f57-a13e-96927f1fd24e) ) -- this isn't  necessary if you don't need to want to use the command node.
 - Clone this git repository
 - Set the environmental variables in the backend/req_env_vars.txt text file. Please either ask chatgpt or google how to do this if you don't know how
